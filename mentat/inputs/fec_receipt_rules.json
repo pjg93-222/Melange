@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "source": "https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/",
   "special_account_sources": [
     "https://www.fec.gov/updates/fec-statement-on-carey-v-fec/",
@@ -67,5 +67,7 @@
   "refund_review_pattern": "\\bIMPERMISSIBLE CONTRIBUTION\\b|\\bSEE .*\\bREFUND\\b",
   "sale_identity_pattern": "PURCHASER UNKNOWN|UNKNOWN PURCHASER",
   "sale_event_pattern": "\\bSOLD\\b|\\bSOLD VIA\\b|\\bLIQUIDATED\\b|PROCEEDS.*SALE|\\bCONVERTED BY\\b",
-  "disclosure_pattern": "PREVIOUSLY DISCLOSED|CONTRIBUTION DISCLOSED"
+  "disclosure_pattern": "(?<!NOT )(?<!NOT BEEN )(?<!NEVER )\\bPREVIOUSLY DISCLOSED|\\bCONTRIBUTION DISCLOSED|\\bDISCLOSED(ON)? ON LINE\\b|(?<!NOT )(?<!NOT BEEN )(?<!NEVER )\\bPREVIOUSLY REPORTED CONTRIBUTION\\b|\\bCONTRIBUTION PREVIOUSLY REPORTED\\b|\\bAS (PREVIOUSLY|ORIGINALLY) REPORTED\\b|\\bORIGINALLY DISCLOSED\\b",
+  "redisclosure_unitemized_pattern": "\\b(UNITEMIZED|NOT ITEMIZED|NON ITEMIZED)\\b",
+  "disclosure_rule": "v6, F13 (Paul approved 2026-09-26): a memo whose normalised receipt/memo text matches disclosure_pattern states a re-disclosure. It is counted once, via the counted parent it restates (same company, committee, contributor, nonzero amount, parent dated on or before the memo, parent not a memo): schema.R mentat_memo_redisclosure_parents and tools/pac_evidence.py memo_redisclosure_parents. With no such parent, or when the text calls the gift unitemized, it stays counted and flagged disclosure_memo_unmatched. Phrases are the ones filers use in the saved Crypto, Banking, Telecom, Credit Arms and Community Banks receipts; bare PREVIOUSLY REPORTED is left out because JFC allocation memos use it for partial allocations."
 }

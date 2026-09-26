@@ -39,24 +39,26 @@ WHAT IS EXACT AND WHAT IS APPROXIMATE
   committee_state is the committee's registered address, which is where the
   paperwork lives, not where the money was spent.
 
-CYCLE TO VINTAGE (S6_DESIGN ruling 9, and the open question under it)
+CYCLE TO VINTAGE (S6_DESIGN ruling 9, as Paul corrected it on 2026-09-17)
 
-  2026 -> the 119th map, 2024 -> the 118th, 2022 -> the 116th (= 117th; both
-  Congresses sat on the same 2011 lines). index.json is the source of truth;
-  this module never hard-codes the mapping. Two facts a caller should know:
+  2026 -> the 119th map, 2024 -> the 118th, 2022 -> the 118th. index.json is
+  the source of truth; this module never hard-codes the mapping. Two facts a
+  caller should know:
 
-  * There is no ZIP crosswalk for the 116th map. The Census only tabulated the
-    2020 ZCTAs against the 118th and 119th districts, so district_for_zip
-    returns [] for cycle 2022 rather than colouring 116th-map districts with
-    118th-map ZIP shares - keys like CA-45 exist on both maps and mean
-    different ground. ``zip_basis`` says which crosswalk answered.
-  * The 2021-2022 candidate master already numbers House seats on the NEW
-    118th map (cn22 carries NC-14, a seat the 116th map does not have),
-    because 2022 candidates ran in the redistricted seats. So candidate money
-    from the 2022 cycle belongs on the 118th map while the members sitting
-    during 2021-2022 belong on the 116th. Ruling 9 picked the 116th; if the
-    S8 map is about where the money went, cycle 2022 wants vintage 118. This
-    is Paul's call, and it is a one-line change in index.json, not here.
+  * Cycle 2022 draws the 118th map. The 2021-2022 candidate master already
+    numbers House seats on the redistricted 118th map (cn22 carries NC-14, a
+    seat the 116th map does not have), because 2022 candidates ran in the new
+    seats, and this map answers where the money went. Ruling 9 first picked
+    the 116th (= 117th; both Congresses sat on the same 2011 lines); Paul's
+    2026-09-17 correction moved 2022 to the 118th, and index.json's notes
+    record why. So a 2022 ZIP is answered from the 118th crosswalk.
+  * The 116th paths stay built and shipped (cd116.json) for reading where the
+    members who SAT during 2021-2022 sat, but no cycle points at them, and
+    there is no ZIP crosswalk for them: the Census only tabulated the 2020
+    ZCTAs against the 118th and 119th districts. A cycle an index did map to
+    the 116th would get [] from district_for_zip rather than 118th-map ZIP
+    shares - keys like CA-45 exist on both maps and mean different ground.
+    ``zip_basis`` says which crosswalk answered.
 
 MEMORY. The boundary file for one vintage parses to a couple of megabytes. A
 ZIP crosswalk is 33,791 keys and costs about 20 MB resident once loaded, and
@@ -244,6 +246,50 @@ def load_vintage(cycle):
         return _problem(payload['error'])
     _solved()
     return payload
+
+
+@lru_cache(maxsize=8)
+def _single_seat(root, vintage):
+    payload = _vintage_file(root, vintage)
+    if 'error' in payload:
+        return frozenset()
+    seats = {}
+    for key in list(payload.get('districts') or {}) + list(payload.get('undrawn') or {}):
+        state, _, seat = str(key).partition('-')
+        seats.setdefault(state, set()).add(seat)
+    return frozenset(state for state, found in seats.items() if found == {'AL'})
+
+
+def single_seat_states(cycle):
+    """The states with exactly one House seat on the map `cycle` is drawn on.
+
+    Read from that map itself, never from a list: the Census codes a lone seat
+    00 and the builder draws it as <ST>-AL, so a state whose only seat is -AL
+    has one seat in that Congress (MT on the 116th map, not on the 118th or
+    119th). Pure - it leaves `last_problem` alone - and empty when the cycle
+    has no map.
+    """
+    year = normalise_cycle(cycle)
+    if year is None:
+        return frozenset()
+    root = str(geo_dir())
+    payload = _index(root)
+    vintage = None if 'error' in payload else payload['cycles'].get(str(year))
+    return _single_seat(root, vintage) if vintage else frozenset()
+
+
+def _at_large(key, cycle):
+    """'<ST>-01' -> '<ST>-AL' when <ST> has one seat on this cycle's map (F7).
+
+    Filings number a single-seat state's seat 01 (FAIRSHAKE's Schedule E rows
+    for AK, SD and DE, 2026-09-25) while the map, like the Census, draws it as
+    at-large; without this the money lands in `unlocated` as a seat no map has.
+    A state with two or more seats keeps its 01. No cycle, no translation: the
+    seat count belongs to one Congress.
+    """
+    if cycle is None or not key or not key.endswith('-01'):
+        return key
+    return f'{key[:2]}-AL' if key[:2] in single_seat_states(cycle) else key
 
 
 def district_exists(district_key, cycle):
@@ -448,12 +494,14 @@ def _candidate_master(root):
             'warnings': warnings}
 
 
-def _candidate_key(state, office, district):
+def _candidate_key(state, office, district, cycle=None):
     """The district key for one candidate-master row, or None.
 
     House  -> '<ST>-NN', and '<ST>-AL' for the at-large '00' the FEC writes for
               a single-seat state, and for any district code in one of the six
               one-seat non-voting jurisdictions (see AT_LARGE_JURISDICTIONS).
+              With a cycle, district 01 (or 1) is at-large too when the state
+              has exactly one seat on that cycle's map (_at_large, F7).
               A blank district in a single-seat state (three rows across the
               three masters) stays None: the master simply did not say, and
               guessing is not this module's job.
@@ -477,7 +525,7 @@ def _candidate_key(state, office, district):
     if district in ('00', '0', 'AL') or state in AT_LARGE_JURISDICTIONS:
         return f'{state}-AL'
     if district.isdigit():
-        return f'{state}-{int(district):02d}'
+        return _at_large(f'{state}-{int(district):02d}', cycle)
     return None
 
 
@@ -505,7 +553,7 @@ def district_for_candidate(candidate_id, cycle=None):
         key = master['by_cycle'][year].get(identifier)
         if key:
             _solved()
-            return key
+            return _at_large(key, year)
     for other in master['cycles']:
         if other == year:
             continue
@@ -516,7 +564,7 @@ def district_for_candidate(candidate_id, cycle=None):
                          f'from the {other} master, where redistricting may have renumbered it')
             else:
                 _solved()
-            return key
+            return _at_large(key, year)
     return _problem(f'{identifier} is in no FEC candidate master '
                     f'({", ".join(str(item) for item in master["cycles"])}), so its spending '
                     f'stays unmatched')
@@ -609,7 +657,7 @@ def committee_state(committee_id, cycle=None):
 def reset_caches():
     """Drop every cached file. For tests that swap the data root mid-process."""
     global last_problem
-    for cache in (_index, _vintage_file, _crosswalk, _tract_crosswalk, _candidate_master,
-                  _committee_states):
+    for cache in (_index, _vintage_file, _single_seat, _crosswalk, _tract_crosswalk,
+                  _candidate_master, _committee_states):
         cache.cache_clear()
     last_problem = None

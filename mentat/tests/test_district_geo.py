@@ -346,5 +346,81 @@ class BuiltGeographyTests(unittest.TestCase):
         self.assertIsNone(district_geo.district_for_candidate('H0ZZ99999', 2026))
 
 
+class SingleSeatAtLarge(unittest.TestCase):
+    """F7 (Paul, 2026-09-25): a single-seat state's filed district 01 is its at-large seat.
+
+    Filings write WY's one seat as district 01; the Census, and so the map, code
+    it 00 and draw it as WY-AL. Which states have one seat comes from each
+    Congress's own map, never a list: MT sat at-large on the 116th map and has
+    two seats on the 119th, so MT 01 must stay MT-01 there.
+    """
+
+    def setUp(self):
+        self.previous = {name: os.environ.get(name) for name in ('MENTAT_GEO_DIR', 'MENTAT_INPUTS_DIR')}
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        geo, inputs = root / 'geo', root / 'inputs'
+        geo.mkdir(parents=True)
+        shape = {'path': 'M0 0L1 0L1 1Z', 'bbox': [0, 0, 1, 1], 'centroid': [0.5, 0.5], 'region': 'lower48'}
+        for vintage, seats in (('119', ('WY-AL', 'MT-01', 'MT-02', 'CA-12')), ('116', ('WY-AL', 'MT-AL', 'CA-12'))):
+            (geo / f'cd{vintage}.json').write_text(json.dumps({
+                'vintage': vintage, 'districts': {key: shape for key in seats},
+                'states': {state: shape for state in ('WY', 'MT', 'CA')},
+                'undrawn': {'GU-AL': {'stusps': 'GU'}}}), encoding='utf-8')
+        (geo / 'index.json').write_text(json.dumps({
+            'width': 975, 'height': 610, 'cycles': {'2026': '119', '2020': '116'},
+            'vintages': {'119': {'file': 'cd119.json'}, '116': {'file': 'cd116.json'}}}), encoding='utf-8')
+        for folder, lines in (('cn26', ['H6WY01000|SEAT, SOLE|REP|2026|WY|H|01|C|C|C00000011',
+                                        'H6MT01000|WEST, WANDA|REP|2026|MT|H|01|C|C|C00000012']),
+                              ('cn24', ['H4WY01000|OLD, OTTO|REP|2024|WY|H|1|C|C|C00000013'])):
+            (inputs / 'fec_beneficiary' / folder).mkdir(parents=True)
+            (inputs / 'fec_beneficiary' / folder / 'cn.txt').write_text('\n'.join(lines) + '\n',
+                                                                         encoding='utf-8')
+        os.environ['MENTAT_GEO_DIR'] = str(geo)
+        os.environ['MENTAT_INPUTS_DIR'] = str(inputs)
+        district_geo.reset_caches()
+
+    def tearDown(self):
+        for name, value in self.previous.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+        district_geo.reset_caches()
+        self.tmp.cleanup()
+
+    def test_the_candidate_master_reads_a_single_seat_01_as_at_large(self):
+        self.assertEqual(district_geo.district_for_candidate('H6WY01000', 2026), 'WY-AL')
+        self.assertTrue(district_geo.district_exists('WY-AL', 2026))
+
+    def test_01_in_a_state_with_two_seats_stays_01(self):
+        self.assertEqual(district_geo.district_for_candidate('H6MT01000', 2026), 'MT-01')
+        self.assertEqual(district_geo._candidate_key('MT', 'H', '01', 2026), 'MT-01')
+        self.assertEqual(district_geo._candidate_key('MT', 'H', '02', 2026), 'MT-02')
+        # A second WY seat does not exist; it stays visible as the unmatched WY-02.
+        self.assertEqual(district_geo._candidate_key('WY', 'H', '02', 2026), 'WY-02')
+
+    def test_the_filed_office_fields_read_the_same_way(self):
+        for code in ('01', '1', ' 01 '):
+            with self.subTest(code=code):
+                self.assertEqual(district_geo._candidate_key('WY', 'H', code, 2026), 'WY-AL')
+        self.assertEqual(district_geo.single_seat_states(2026), frozenset({'WY', 'GU'}))
+
+    def test_the_seat_count_is_that_congress_s_own(self):
+        self.assertIn('MT', district_geo.single_seat_states(2020))
+        self.assertEqual(district_geo._candidate_key('MT', 'H', '01', 2020), 'MT-AL')
+        self.assertEqual(district_geo._candidate_key('MT', 'H', '01', 2026), 'MT-01')
+
+    def test_no_congress_no_translation(self):
+        self.assertEqual(district_geo._candidate_key('WY', 'H', '01'), 'WY-01')
+        self.assertEqual(district_geo.district_for_candidate('H6WY01000'), 'WY-01')
+        self.assertEqual(district_geo.single_seat_states(None), frozenset())
+        self.assertEqual(district_geo.single_seat_states(2018), frozenset())
+
+    def test_the_translation_keeps_the_fallback_footnote(self):
+        self.assertEqual(district_geo.district_for_candidate('H4WY01000', 2026), 'WY-AL')
+        self.assertIn('2024', district_geo.last_problem)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

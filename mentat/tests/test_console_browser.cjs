@@ -309,7 +309,11 @@ const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
     await page.locator('#graph-direction').selectOption('Oppose');
     await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidates').textContent.includes('$999.00'),undefined,GRAPH_QUERY_WAIT);
     await page.locator('#graph-mode').selectOption('estimates');
-    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-candidate-note').textContent.includes('whole industry'),undefined,GRAPH_QUERY_WAIT);
+    // F4 (lane C, 2026-09-25): an unavailable candidate view gives its reason inside the panel (graph.js paintPanel ->
+    // emptyPanel), so the estimates refusal is now the sentence in #graph-candidates and the note under the panel no
+    // longer repeats it. The refusal still reaches the reader; only its place moved.
+    await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&(document.querySelector('#graph-candidates .graph-empty')?.textContent||'').includes('Saved estimates cover the whole industry'),undefined,GRAPH_QUERY_WAIT);
+    assert.doesNotMatch(await page.locator('#graph-candidate-note').textContent(),/whole industry/,'the note under the panel does not repeat the refusal');
     assert.equal(await page.locator('#graph-export').isDisabled(),true);
     await page.locator('#graph-tab-overview').click();
     await page.waitForFunction(()=>!document.querySelector('#graph-results').hidden&&document.querySelector('#graph-mode').value==='direct',undefined,GRAPH_QUERY_WAIT);

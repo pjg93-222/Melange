@@ -437,6 +437,18 @@
     return {sides: sides.map(row => row.direction), candidates, shared,
       counted: sides.reduce((sum, row) => sum + Number(row.candidates), 0), text, basis};
   }
+  /* F4 (Paul approved 2026-09-25): the drawer's line says when money is not
+     traced. `trace` is the answer's transfer_trace (graph_data.transfer_trace).
+     When none of this committee's transfers could be followed - no saved
+     network, and no Transfer Paths sheet or a stale transfer index - the line
+     stops claiming "the PACs it funds", and the server's sentence follows it.
+     A rebuild command, when the server names one, is for the tooltip. */
+  function drawerNote(trace, company) {
+    const untraced = Boolean(trace && trace.root_traced === false);
+    const said = trace && trace.note ? ' ' + String(trace.note) : '';
+    return {text: `Reported activity of this committee${untraced ? '' : ' and the PACs it funds'}, not money attributed to ${company}.` + said,
+      command: trace && trace.command ? String(trace.command) : ''};
+  }
   /* The page's Direction select (#graph-direction), r4 code review F5. It
      offered all six sides in every candidate view, so a reader could land on
      a side that cannot hold anything - Contributions or Other activity among
@@ -733,7 +745,7 @@
     COMPACT_SHARE_MIN_W: COMPACT_SHARE_MIN_W, nameForms: nameForms,
     compactYield: compactYield, COMPACT_NAME_SHARE_W: COMPACT_NAME_SHARE_W,
     drawerSides: drawerSides, DRAWER_SIDE_ORDER: DRAWER_SIDE_ORDER,
-    drawerOverlap: drawerOverlap, DRAWER_SIDE_LABEL: DRAWER_SIDE_LABEL,
+    drawerOverlap: drawerOverlap, DRAWER_SIDE_LABEL: DRAWER_SIDE_LABEL, drawerNote: drawerNote,
     directionChoices: directionChoices, DIRECTION_OPTIONS: DIRECTION_OPTIONS, changeText: changeText,
     FOLD_SECTIONS: FOLD_SECTIONS, FOLD_KEY: FOLD_KEY, sparkAccessModel: sparkAccessModel,
     graphMemoryModel: graphMemoryModel, MEMORY_ENTRIES: MEMORY_ENTRIES, MEMORY_CHARS: MEMORY_CHARS,
@@ -1364,7 +1376,11 @@
       const bar=get(name+'-bar');bar.style.width=percent.toFixed(1)+'%';
       bar.parentElement.hidden=!usable;
     }
-    serverNote=view.candidate_note||'';
+    // F4: an unavailable view says why in the panel itself (paintPanel), so
+    // the line under it does not repeat the sentence; a rebuild command, when
+    // the server names one, is that line's tooltip.
+    serverNote=view.candidate_available?(view.candidate_note||''):'';
+    serverNoteTitle=view.candidate_note_title||'';
     // Item 4: the candidate-category receipts with no unique authorized
     // candidate link are an aside about the denominator, so they became the
     // tooltip on the candidates panel's information mark instead of a second
@@ -1445,9 +1461,9 @@
     if(rep&&!dem)return 'is-rep';
     return 'is-other';
   }
-  function emptyPanel(name,message,host,footNode) {
+  function emptyPanel(name,message,host,footNode,title) {
     const container=host||get(name);container.replaceChildren();
-    const p=document.createElement('p');p.className='graph-empty';p.textContent=message;container.append(p);
+    const p=document.createElement('p');p.className='graph-empty';p.textContent=message;if(title)p.title=title;container.append(p);
     const foot=footNode===null?null:(footNode||document.getElementById('graph-foot-'+name));
     if(foot){foot.textContent='';foot.removeAttribute('title');}
     if(!host)labelValues(name,0,0);
@@ -1852,7 +1868,9 @@
     const common={data,container:place.container,foot:place.foot,animate:opts.animate,topN:opts.topN,
       caption:opts.caption,values:opts.values,byCompany:opts.byCompany,selected:opts.selected};
     if(name==='candidates'&&!data.candidate_available){
-      emptyPanel('candidates','This candidate view is unavailable for the selected scope.',place.container,place.foot);return;
+      // F4: the server's own reason ("No estimate bundle for this industry yet;
+      // rebuild the workbook", "Not traced: ...") rather than an empty panel.
+      emptyPanel('candidates',data.candidate_note||'This candidate view is unavailable for the selected scope.',place.container,place.foot,data.candidate_note_title||'');return;
     }
     if(name==='levels')drawStack(name,data.levels||[],onClick,common);
     else draw(name,data[name]||[],onClick,common);
@@ -2213,6 +2231,7 @@
         allDirections:body.candidates_by_direction||{},edges:body.downstream_edges||[],
         union:body.contribution_other_union,
         sources:body.downstream_sources||[],comparisons:body.measurement_comparisons||[],
+        trace:body.transfer_trace||null,
         note:body.candidate_note||'',loading:false,
         error:body.candidate_available?'':(body.candidate_note||'This committee has no saved downstream activity.')};
       applyDrawer();writeDrawerScope();
@@ -2368,8 +2387,12 @@
     // Measurement details behind the explorer, and in this line's tooltip.
     const scoped=drawer.scope&&compare?(compareScopes()[drawer.scope]||{}).data:view;
     const company=scoped&&scoped.filters&&scoped.filters.company?'the company':'the companies';
-    note.textContent=drawer.loading?'':drawer.error||`Reported activity of this committee and the PACs it funds, not money attributed to ${company}.`;
-    note.title=drawer.loading||drawer.error?'':drawer.note||'';
+    // F4: drawerNote keeps "and the PACs it funds" only while this committee's
+    // transfers were followed, and adds the server's not-traced sentence; a
+    // rebuild command leads the tooltip.
+    const said=drawerNote(drawer.trace,company);
+    note.textContent=drawer.loading?'':drawer.error||said.text;
+    note.title=drawer.loading?'':drawer.error?said.command:[said.command,drawer.note||''].filter(Boolean).join('\n');
     note.hidden=Boolean(drawer.loading)||(Boolean(drawer.error)&&!drawer.note);
     drawDrawerRows(true);
   }
@@ -2424,11 +2447,12 @@
   // note and the unresolved-link aside ride on the panel's information mark.
   // Any other candidate view prints the server's note on that line instead,
   // because then it is a disclosure rather than an aside.
-  let unresolvedNote='',serverNote='';
+  let unresolvedNote='',serverNote='',serverNoteTitle='';
   const SEPARATION='Direct contributions only. Downstream PAC activity, and conditional estimates are separate candidate views.';
   function candidateAside() {
     const direct=get('mode').value==='direct',note=get('candidate-note');
     note.textContent=direct?SEPARATION:serverNote;
+    note.title=direct?'':serverNoteTitle;
     note.hidden=!note.textContent;
     const text=[direct?serverNote:'',unresolvedNote].filter(Boolean).join(' ');
     const mark=get('unresolved');
@@ -3194,7 +3218,7 @@
           marks:marksFor('levels',scopes,index,rows.length,info)});
         return;
       }
-      if(name==='candidates'&&!data.candidate_available){emptyPanel('candidates','This candidate view is unavailable for this scope.',body,null);return;}
+      if(name==='candidates'&&!data.candidate_available){emptyPanel('candidates',data.candidate_note||'This candidate view is unavailable for this scope.',body,null,data.candidate_note_title||'');return;}
       const rows=aligned?aligned.map(entry=>(data[name]||[]).find(row=>row.id===entry.id)||{id:entry.id,label:entry.label,amount:null}):(data[name]||[]);
       // Company halves end in the sparkline, as G1 and G2 draw them; under
       // 380px a bar does not fit beside it, so the bar gives way (R02-m7).

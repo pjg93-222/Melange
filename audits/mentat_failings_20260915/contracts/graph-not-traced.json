@@ -1,0 +1,3669 @@
+{
+  "contract": "graph-not-traced",
+  "version": 1,
+  "owner": "lane C (F4, PAC map downstream and visuals, 2026-09-25)",
+  "route": "/api/graph?id=published-reports&industry=<industry>&mode=activity|estimates[&recipient=<C########>]",
+  "produced_by": [
+    "mentat/app/graph_data.py:_graph_view (transfer_trace: transfer_trace/trace_coverage; transfer_index: transfer_index from the audit manifest; candidate_note_title: rebuild_title)",
+    "mentat/app/server.py:Console.graph (passes the answer through)"
+  ],
+  "consumed_by": [
+    "mentat/app/graph.js:drawerNote and applyDrawer (the drawer line and tooltip)",
+    "mentat/app/graph.js:paintPanel/emptyPanel (the unavailable panel names its reason)",
+    "mentat/app/graph.js:candidateAside (the candidate note tooltip)"
+  ],
+  "asserted_by": [
+    "mentat/tests/test_graph_not_traced_contract.py (producer, examples, negative controls)",
+    "mentat/tests/test_graph_not_traced.py (behaviour, with controls)",
+    "mentat/app/tests/graph-not-traced-contract.test.js (consumer)"
+  ],
+  "description": "F4 (Paul approved 2026-09-25): Graph says when money is not traced - in the drawer, in the Estimates panel and in the notes - never as $0 or an empty panel. The examples are the contract.",
+  "rules": [
+    "A candidate view (mode activity or estimates) carries candidate_note_title (the tooltip: one \"Rebuild with: <command>\" line per distinct rebuild command, or \"\"), transfer_index and transfer_trace; a direct view carries none of the three.",
+    "transfer_index lists each cycle F2 names in the workbook's audit manifest (transfer_index_status and transfer_index_notes): {cycle, status, note, command}; note is 'Not traced: the transfer index for <cycle> is <status>' for every status but current, and '' for current. No bundle, a legacy bundle or a bundle that does not match the workbook names nothing: [].",
+    "Estimates: with no audit bundle the answer is unavailable and its note is \"No estimate bundle for this industry yet; rebuild the workbook.\" A cycle in scope whose index is not current contributes no estimate; the note says \"Not traced: ...\" for it, and when every cycle in scope is untraced the view is unavailable with that sentence as its note. An untraced cycle is never shown as $0.",
+    "transfer_trace (activity; null when the view was refused before the network was read) is {committees, root_traced, note, command}. committees lists each committee/cycle reached with no saved snapshot whose transfers could not be followed: its workbook has no Transfer Paths sheet (reason 'no saved network, and this workbook has no Transfer Paths sheet') or F2 named its cycle's index stale, missing or unresolved (reason 'no saved network, and the transfer index for <cycle> is <status>'). root_traced is false when the view's one funded committee is untraced in every cycle; then note starts 'Transfers from this committee are not traced: ...' and the drawer stops saying 'and the PACs it funds'. The candidate note carries the same sentences.",
+    "The Transfer Paths flag is server.report_quality's transfer_paths ('Transfer Paths' in the sheet names), read from the workbook index (graph_data.has_transfer_paths) because report_quality loads the whole workbook (21 s for Banking, measured 2026-09-25)."
+  ],
+  "examples": [
+    {
+      "name": "estimates with no audit bundle",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "estimates",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1585.0,
+          "direct": 90.0,
+          "organizations": 1475.0,
+          "unresolved_candidate_links": 20.0,
+          "recipients": 6,
+          "receipt_groups": 9
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 110.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 50.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "C00000002",
+            "label": "Community Finance Victory JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "C00000004",
+            "label": "Cooperative Finance Association",
+            "amount": 50.0
+          },
+          {
+            "id": "C00000005",
+            "label": "Harborlight Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 1125.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 460.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 415.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 370.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 625.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 25.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 300.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 460.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 390.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 70.0
+              }
+            ]
+          }
+        ],
+        "candidates": [],
+        "candidate_available": false,
+        "candidate_note": "No estimate bundle for this industry yet; rebuild the workbook.",
+        "candidate_note_title": "",
+        "transfer_index": [],
+        "transfer_trace": null,
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "06208d3655976f711e8382f4fbab0f51e30d1cbae7e245015eb313eeacfa8e7b"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "estimates for a cycle whose transfer index is stale",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "estimates",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1585.0,
+          "direct": 90.0,
+          "organizations": 1475.0,
+          "unresolved_candidate_links": 20.0,
+          "recipients": 6,
+          "receipt_groups": 9
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 110.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 50.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "C00000002",
+            "label": "Community Finance Victory JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "C00000004",
+            "label": "Cooperative Finance Association",
+            "amount": 50.0
+          },
+          {
+            "id": "C00000005",
+            "label": "Harborlight Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 1125.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 460.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 415.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 370.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 625.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 25.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 300.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 460.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 390.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 70.0
+              }
+            ]
+          }
+        ],
+        "candidates": [],
+        "candidate_available": false,
+        "candidate_note": "Not traced: the transfer index for 2026 is stale.",
+        "candidate_note_title": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026",
+        "transfer_index": [
+          {
+            "cycle": "2026",
+            "status": "stale",
+            "note": "Not traced: the transfer index for 2026 is stale",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+          }
+        ],
+        "transfer_trace": null,
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "estimates across two cycles, one missing its transfer index",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "estimates",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2024",
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "FEC:C00000001"
+            },
+            {
+              "id": "C00000002",
+              "label": "FEC:C00000002"
+            },
+            {
+              "id": "C00000003",
+              "label": "FEC:C00000003"
+            },
+            {
+              "id": "C00000004",
+              "label": "FEC:C00000004"
+            },
+            {
+              "id": "C00000005",
+              "label": "FEC:C00000005"
+            },
+            {
+              "id": "C00000006",
+              "label": "FEC:C00000006"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 3170.0,
+          "direct": 90.0,
+          "organizations": 2950.0,
+          "unresolved_candidate_links": 130.0,
+          "recipients": 6,
+          "receipt_groups": 18
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 2400.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 400.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 220.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 100.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 50.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "FEC:C00000003",
+            "amount": 2400.0
+          },
+          {
+            "id": "C00000002",
+            "label": "FEC:C00000002",
+            "amount": 400.0
+          },
+          {
+            "id": "C00000004",
+            "label": "FEC:C00000004",
+            "amount": 100.0
+          },
+          {
+            "id": "C00000005",
+            "label": "FEC:C00000005",
+            "amount": 50.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 2250.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 920.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 830.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 740.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 600.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 1250.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 50.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 600.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 600.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 920.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 780.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 140.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 123.0,
+            "party": ""
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Saved conditional industry estimates, not traced company dollars. Support, opposition and contribution/other activity remain separate. Not traced: the transfer index for 2024 is missing.",
+        "candidate_note_title": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2024",
+        "transfer_index": [
+          {
+            "cycle": "2024",
+            "status": "missing",
+            "note": "Not traced: the transfer index for 2024 is missing",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2024"
+          },
+          {
+            "cycle": "2026",
+            "status": "current",
+            "note": "",
+            "command": ""
+          }
+        ],
+        "transfer_trace": null,
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "",
+            "tier": "",
+            "recipient": "C00000003",
+            "cycle": "2026",
+            "amount": 123.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "1c690b682f85599892dc34c18d1eb3021992ae107a4fa1feeeac4b3e9bcfc77e"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "drawer: no saved snapshot and no Transfer Paths sheet",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "C00000003",
+          "funding": "all",
+          "mode": "activity",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1200.0,
+          "direct": 0.0,
+          "organizations": 1200.0,
+          "unresolved_candidate_links": 0.0,
+          "recipients": 1,
+          "receipt_groups": 3
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 800.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 400.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 400.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 400.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 400.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          },
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 300.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 0.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 777.0,
+            "party": "D"
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Saved observed activity across reachable committees, counted once per committee/cycle. Routes and activity are limited to saved report coverage. This is not money attributed to the selected company or employee level; company views can share the same PAC activity. Transfers from this committee are not traced: no saved network, and this workbook has no Transfer Paths sheet.",
+        "candidate_note_title": "",
+        "transfer_index": [],
+        "transfer_trace": {
+          "committees": [
+            {
+              "cycle": "2026",
+              "committee": "C00000003",
+              "root": true,
+              "status": null,
+              "reason": "no saved network, and this workbook has no Transfer Paths sheet",
+              "command": ""
+            }
+          ],
+          "root_traced": false,
+          "note": "Transfers from this committee are not traced: no saved network, and this workbook has no Transfer Paths sheet.",
+          "command": ""
+        },
+        "downstream_edges": [],
+        "pac_candidate_relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Oppose",
+            "amount": 999.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Support",
+            "amount": 777.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Contribution / Other",
+            "amount": 111.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          }
+        ],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {
+          "Contribution": [],
+          "Other": [],
+          "Support": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 777.0,
+              "party": "D"
+            }
+          ],
+          "Oppose": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 999.0,
+              "party": "D"
+            }
+          ],
+          "Contribution / Other": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 111.0,
+              "party": "D"
+            }
+          ],
+          "Unknown": []
+        },
+        "direction_totals": [
+          {
+            "direction": "Contribution",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Other",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Support",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 777.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Oppose",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 999.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Contribution / Other",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 111.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Unknown",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          }
+        ],
+        "contribution_other_union": {
+          "direction": "Contribution / Other",
+          "sides": [
+            "Contribution",
+            "Other",
+            "Contribution / Other"
+          ],
+          "candidates": 1,
+          "on_more_than_one_side": 0,
+          "amount": 111.0,
+          "unidentified_amount": 0.0
+        },
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "",
+            "tier": "",
+            "recipient": "C00000003",
+            "cycle": "2026",
+            "amount": 777.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "drawer: a Transfer Paths sheet, but a stale transfer index",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "C00000003",
+          "funding": "all",
+          "mode": "activity",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1200.0,
+          "direct": 0.0,
+          "organizations": 1200.0,
+          "unresolved_candidate_links": 0.0,
+          "recipients": 1,
+          "receipt_groups": 3
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 800.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 400.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 400.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 400.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 400.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          },
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 300.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 0.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 777.0,
+            "party": "D"
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Saved observed activity across reachable committees, counted once per committee/cycle. Routes and activity are limited to saved report coverage. This is not money attributed to the selected company or employee level; company views can share the same PAC activity. Transfers from this committee are not traced: no saved network, and the transfer index for 2026 is stale.",
+        "candidate_note_title": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026",
+        "transfer_index": [
+          {
+            "cycle": "2026",
+            "status": "stale",
+            "note": "Not traced: the transfer index for 2026 is stale",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+          }
+        ],
+        "transfer_trace": {
+          "committees": [
+            {
+              "cycle": "2026",
+              "committee": "C00000003",
+              "root": true,
+              "status": "stale",
+              "reason": "no saved network, and the transfer index for 2026 is stale",
+              "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+            }
+          ],
+          "root_traced": false,
+          "note": "Transfers from this committee are not traced: no saved network, and the transfer index for 2026 is stale.",
+          "command": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+        },
+        "downstream_edges": [],
+        "pac_candidate_relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Oppose",
+            "amount": 999.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Support",
+            "amount": 777.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Contribution / Other",
+            "amount": 111.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          }
+        ],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {
+          "Contribution": [],
+          "Other": [],
+          "Support": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 777.0,
+              "party": "D"
+            }
+          ],
+          "Oppose": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 999.0,
+              "party": "D"
+            }
+          ],
+          "Contribution / Other": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 111.0,
+              "party": "D"
+            }
+          ],
+          "Unknown": []
+        },
+        "direction_totals": [
+          {
+            "direction": "Contribution",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Other",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Support",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 777.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Oppose",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 999.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Contribution / Other",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 111.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Unknown",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          }
+        ],
+        "contribution_other_union": {
+          "direction": "Contribution / Other",
+          "sides": [
+            "Contribution",
+            "Other",
+            "Contribution / Other"
+          ],
+          "candidates": 1,
+          "on_more_than_one_side": 0,
+          "amount": 111.0,
+          "unidentified_amount": 0.0
+        },
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "",
+            "tier": "",
+            "recipient": "C00000003",
+            "cycle": "2026",
+            "amount": 777.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "0280520d47401241cb1f2baffce3a930d58a6eaf01a99d71008bb4a0da493124"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "drawer: a saved root, and one committee past it with no snapshot",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "C00000003",
+          "funding": "all",
+          "mode": "activity",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1200.0,
+          "direct": 0.0,
+          "organizations": 1200.0,
+          "unresolved_candidate_links": 0.0,
+          "recipients": 1,
+          "receipt_groups": 3
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 800.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 400.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 400.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 400.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 400.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          },
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 300.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 0.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          }
+        ],
+        "candidates": [],
+        "candidate_available": false,
+        "candidate_note": "Downstream activity is unavailable: no saved activity for the selected committee/cycles. Missing evidence is not zero spending. Transfers from 1 other committee in this network are not traced: no saved network, and this workbook has no Transfer Paths sheet.",
+        "candidate_note_title": "",
+        "transfer_index": [],
+        "transfer_trace": {
+          "committees": [
+            {
+              "cycle": "2026",
+              "committee": "C00000009",
+              "root": false,
+              "status": null,
+              "reason": "no saved network, and this workbook has no Transfer Paths sheet",
+              "command": ""
+            }
+          ],
+          "root_traced": true,
+          "note": "Transfers from 1 other committee in this network are not traced: no saved network, and this workbook has no Transfer Paths sheet.",
+          "command": ""
+        },
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "direction_totals": [],
+        "contribution_other_union": null,
+        "candidate_details": [],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "direct view: no not-traced fields",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "direct",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1585.0,
+          "direct": 90.0,
+          "organizations": 1475.0,
+          "unresolved_candidate_links": 20.0,
+          "recipients": 6,
+          "receipt_groups": 9
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 110.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 50.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "C00000002",
+            "label": "Community Finance Victory JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "C00000004",
+            "label": "Cooperative Finance Association",
+            "amount": 50.0
+          },
+          {
+            "id": "C00000005",
+            "label": "Harborlight Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 1125.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 460.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 415.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 370.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 625.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 25.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 300.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 460.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 390.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 70.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 90.0,
+            "party": "D"
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Direct contributions to uniquely linked principal or authorized candidate committees.",
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "Harborlight Credit Union",
+            "tier": "Chief",
+            "recipient": "Candidate One Committee",
+            "cycle": "2026",
+            "amount": 100.0
+          },
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "Civic Horizon Bank",
+            "tier": "Employees",
+            "recipient": "Candidate One Committee",
+            "cycle": "2026",
+            "amount": -10.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "name": "an untraced drawer committee whose note blames the committees past it",
+      "expect": "root_traced is false but the note does not say so",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "C00000003",
+          "funding": "all",
+          "mode": "activity",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1200.0,
+          "direct": 0.0,
+          "organizations": 1200.0,
+          "unresolved_candidate_links": 0.0,
+          "recipients": 1,
+          "receipt_groups": 3
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 800.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 400.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 400.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 400.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 400.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          },
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 300.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 0.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 777.0,
+            "party": "D"
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Saved observed activity across reachable committees, counted once per committee/cycle. Routes and activity are limited to saved report coverage. This is not money attributed to the selected company or employee level; company views can share the same PAC activity. Transfers from this committee are not traced: no saved network, and this workbook has no Transfer Paths sheet.",
+        "candidate_note_title": "",
+        "transfer_index": [],
+        "transfer_trace": {
+          "committees": [
+            {
+              "cycle": "2026",
+              "committee": "C00000003",
+              "root": true,
+              "status": null,
+              "reason": "no saved network, and this workbook has no Transfer Paths sheet",
+              "command": ""
+            }
+          ],
+          "root_traced": false,
+          "note": "Transfers from 1 other committee in this network are not traced: no saved network, and this workbook has no Transfer Paths sheet.",
+          "command": ""
+        },
+        "downstream_edges": [],
+        "pac_candidate_relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Oppose",
+            "amount": 999.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Support",
+            "amount": 777.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Contribution / Other",
+            "amount": 111.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          }
+        ],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {
+          "Contribution": [],
+          "Other": [],
+          "Support": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 777.0,
+              "party": "D"
+            }
+          ],
+          "Oppose": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 999.0,
+              "party": "D"
+            }
+          ],
+          "Contribution / Other": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 111.0,
+              "party": "D"
+            }
+          ],
+          "Unknown": []
+        },
+        "direction_totals": [
+          {
+            "direction": "Contribution",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Other",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Support",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 777.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Oppose",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 999.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Contribution / Other",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 111.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Unknown",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          }
+        ],
+        "contribution_other_union": {
+          "direction": "Contribution / Other",
+          "sides": [
+            "Contribution",
+            "Other",
+            "Contribution / Other"
+          ],
+          "candidates": 1,
+          "on_more_than_one_side": 0,
+          "amount": 111.0,
+          "unidentified_amount": 0.0
+        },
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "",
+            "tier": "",
+            "recipient": "C00000003",
+            "cycle": "2026",
+            "amount": 777.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "a stale index named without \"Not traced\"",
+      "expect": "is not named Not traced",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "estimates",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1585.0,
+          "direct": 90.0,
+          "organizations": 1475.0,
+          "unresolved_candidate_links": 20.0,
+          "recipients": 6,
+          "receipt_groups": 9
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 110.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 50.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "C00000002",
+            "label": "Community Finance Victory JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "C00000004",
+            "label": "Cooperative Finance Association",
+            "amount": 50.0
+          },
+          {
+            "id": "C00000005",
+            "label": "Harborlight Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 1125.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 460.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 415.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 370.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 625.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 25.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 300.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 460.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 390.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 70.0
+              }
+            ]
+          }
+        ],
+        "candidates": [],
+        "candidate_available": false,
+        "candidate_note": "Not traced: the transfer index for 2026 is stale.",
+        "candidate_note_title": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026",
+        "transfer_index": [
+          {
+            "cycle": "2026",
+            "status": "stale",
+            "note": "",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+          }
+        ],
+        "transfer_trace": null,
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "a current index given a not-traced note",
+      "expect": "a current index carries a note",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "estimates",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2024",
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "FEC:C00000001"
+            },
+            {
+              "id": "C00000002",
+              "label": "FEC:C00000002"
+            },
+            {
+              "id": "C00000003",
+              "label": "FEC:C00000003"
+            },
+            {
+              "id": "C00000004",
+              "label": "FEC:C00000004"
+            },
+            {
+              "id": "C00000005",
+              "label": "FEC:C00000005"
+            },
+            {
+              "id": "C00000006",
+              "label": "FEC:C00000006"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 3170.0,
+          "direct": 90.0,
+          "organizations": 2950.0,
+          "unresolved_candidate_links": 130.0,
+          "recipients": 6,
+          "receipt_groups": 18
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 2400.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 400.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 220.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 100.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 50.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "FEC:C00000003",
+            "amount": 2400.0
+          },
+          {
+            "id": "C00000002",
+            "label": "FEC:C00000002",
+            "amount": 400.0
+          },
+          {
+            "id": "C00000004",
+            "label": "FEC:C00000004",
+            "amount": 100.0
+          },
+          {
+            "id": "C00000005",
+            "label": "FEC:C00000005",
+            "amount": 50.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 2250.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 920.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 830.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 740.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 600.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 1250.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 50.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 600.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 600.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 920.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 780.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 140.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 123.0,
+            "party": ""
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Saved conditional industry estimates, not traced company dollars. Support, opposition and contribution/other activity remain separate. Not traced: the transfer index for 2024 is missing.",
+        "candidate_note_title": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2024",
+        "transfer_index": [
+          {
+            "cycle": "2024",
+            "status": "missing",
+            "note": "Not traced: the transfer index for 2024 is missing",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2024"
+          },
+          {
+            "cycle": "2026",
+            "status": "current",
+            "note": "Not traced: the transfer index for 2026 is current",
+            "command": ""
+          }
+        ],
+        "transfer_trace": null,
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "",
+            "tier": "",
+            "recipient": "C00000003",
+            "cycle": "2026",
+            "amount": 123.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "1c690b682f85599892dc34c18d1eb3021992ae107a4fa1feeeac4b3e9bcfc77e"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "an untraced committee with no stated reason",
+      "expect": "states no reason",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "C00000003",
+          "funding": "all",
+          "mode": "activity",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1200.0,
+          "direct": 0.0,
+          "organizations": 1200.0,
+          "unresolved_candidate_links": 0.0,
+          "recipients": 1,
+          "receipt_groups": 3
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 800.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 400.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 400.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 400.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 400.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          },
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 300.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 0.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 777.0,
+            "party": "D"
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Saved observed activity across reachable committees, counted once per committee/cycle. Routes and activity are limited to saved report coverage. This is not money attributed to the selected company or employee level; company views can share the same PAC activity. Transfers from this committee are not traced: no saved network, and the transfer index for 2026 is stale.",
+        "candidate_note_title": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026",
+        "transfer_index": [
+          {
+            "cycle": "2026",
+            "status": "stale",
+            "note": "Not traced: the transfer index for 2026 is stale",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+          }
+        ],
+        "transfer_trace": {
+          "committees": [
+            {
+              "cycle": "2026",
+              "committee": "C00000003",
+              "root": true,
+              "status": "stale",
+              "reason": "unknown",
+              "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+            }
+          ],
+          "root_traced": false,
+          "note": "Transfers from this committee are not traced: no saved network, and the transfer index for 2026 is stale.",
+          "command": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+        },
+        "downstream_edges": [],
+        "pac_candidate_relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Oppose",
+            "amount": 999.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Support",
+            "amount": 777.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Contribution / Other",
+            "amount": 111.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          }
+        ],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {
+          "Contribution": [],
+          "Other": [],
+          "Support": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 777.0,
+              "party": "D"
+            }
+          ],
+          "Oppose": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 999.0,
+              "party": "D"
+            }
+          ],
+          "Contribution / Other": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 111.0,
+              "party": "D"
+            }
+          ],
+          "Unknown": []
+        },
+        "direction_totals": [
+          {
+            "direction": "Contribution",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Other",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Support",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 777.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Oppose",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 999.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Contribution / Other",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 111.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Unknown",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          }
+        ],
+        "contribution_other_union": {
+          "direction": "Contribution / Other",
+          "sides": [
+            "Contribution",
+            "Other",
+            "Contribution / Other"
+          ],
+          "candidates": 1,
+          "on_more_than_one_side": 0,
+          "amount": 111.0,
+          "unidentified_amount": 0.0
+        },
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "",
+            "tier": "",
+            "recipient": "C00000003",
+            "cycle": "2026",
+            "amount": 777.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "0280520d47401241cb1f2baffce3a930d58a6eaf01a99d71008bb4a0da493124"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "a stale index whose rebuild command never reaches the tooltip",
+      "expect": "the tooltip does not carry",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "C00000003",
+          "funding": "all",
+          "mode": "activity",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1200.0,
+          "direct": 0.0,
+          "organizations": 1200.0,
+          "unresolved_candidate_links": 0.0,
+          "recipients": 1,
+          "receipt_groups": 3
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 800.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 400.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 400.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 400.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 400.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          },
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 300.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 0.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 0.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 777.0,
+            "party": "D"
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Saved observed activity across reachable committees, counted once per committee/cycle. Routes and activity are limited to saved report coverage. This is not money attributed to the selected company or employee level; company views can share the same PAC activity. Transfers from this committee are not traced: no saved network, and the transfer index for 2026 is stale.",
+        "candidate_note_title": "",
+        "transfer_index": [
+          {
+            "cycle": "2026",
+            "status": "stale",
+            "note": "Not traced: the transfer index for 2026 is stale",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+          }
+        ],
+        "transfer_trace": {
+          "committees": [
+            {
+              "cycle": "2026",
+              "committee": "C00000003",
+              "root": true,
+              "status": "stale",
+              "reason": "no saved network, and the transfer index for 2026 is stale",
+              "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+            }
+          ],
+          "root_traced": false,
+          "note": "Transfers from this committee are not traced: no saved network, and the transfer index for 2026 is stale.",
+          "command": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+        },
+        "downstream_edges": [],
+        "pac_candidate_relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Oppose",
+            "amount": 999.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Support",
+            "amount": 777.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00000003",
+            "committee_name": "C00000003",
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "direction": "Contribution / Other",
+            "amount": 111.0,
+            "filings": [],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00000003"
+            ],
+            "basis": "Observed spending; candidate control is not established"
+          }
+        ],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {
+          "Contribution": [],
+          "Other": [],
+          "Support": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 777.0,
+              "party": "D"
+            }
+          ],
+          "Oppose": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 999.0,
+              "party": "D"
+            }
+          ],
+          "Contribution / Other": [
+            {
+              "id": "H0CA00001",
+              "label": "Candidate One",
+              "amount": 111.0,
+              "party": "D"
+            }
+          ],
+          "Unknown": []
+        },
+        "direction_totals": [
+          {
+            "direction": "Contribution",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Other",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Support",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 777.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Oppose",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 999.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Contribution / Other",
+            "candidates": 1,
+            "unidentified_amount": 0.0,
+            "amount": 111.0,
+            "transaction_types": []
+          },
+          {
+            "direction": "Unknown",
+            "candidates": 0,
+            "unidentified_amount": 0.0,
+            "amount": 0.0,
+            "transaction_types": []
+          }
+        ],
+        "contribution_other_union": {
+          "direction": "Contribution / Other",
+          "sides": [
+            "Contribution",
+            "Other",
+            "Contribution / Other"
+          ],
+          "candidates": 1,
+          "on_more_than_one_side": 0,
+          "amount": 111.0,
+          "unidentified_amount": 0.0
+        },
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "",
+            "tier": "",
+            "recipient": "C00000003",
+            "cycle": "2026",
+            "amount": 777.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "0280520d47401241cb1f2baffce3a930d58a6eaf01a99d71008bb4a0da493124"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "the pre-F4 answer: an untraced cycle shown as an empty panel",
+      "expect": "does not say 2026 is not traced",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "estimates",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1585.0,
+          "direct": 90.0,
+          "organizations": 1475.0,
+          "unresolved_candidate_links": 20.0,
+          "recipients": 6,
+          "receipt_groups": 9
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 110.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 50.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "C00000002",
+            "label": "Community Finance Victory JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "C00000004",
+            "label": "Cooperative Finance Association",
+            "amount": 50.0
+          },
+          {
+            "id": "C00000005",
+            "label": "Harborlight Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 1125.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 460.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 415.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 370.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 625.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 25.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 300.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 460.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 390.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 70.0
+              }
+            ]
+          }
+        ],
+        "candidates": [],
+        "candidate_available": false,
+        "candidate_note": "No candidates are recorded on this side.",
+        "candidate_note_title": "Rebuild with: python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026",
+        "transfer_index": [
+          {
+            "cycle": "2026",
+            "status": "stale",
+            "note": "Not traced: the transfer index for 2026 is stale",
+            "command": "python \"C:/Mentat/tools/fec_transfer_graph.py\" --directory \"C:/Mentat/inputs\" --cycles 2026"
+          }
+        ],
+        "transfer_trace": null,
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks."
+      }
+    },
+    {
+      "name": "a direct answer carrying a candidate view field",
+      "expect": "a direct answer carries transfer_trace",
+      "payload": {
+        "filters": {
+          "company": "",
+          "tier": "",
+          "cycle": "",
+          "category": "",
+          "recipient": "",
+          "funding": "all",
+          "mode": "direct",
+          "direction": "Support"
+        },
+        "options": {
+          "companies": [
+            "Civic Horizon Bank",
+            "Harborlight Credit Union"
+          ],
+          "cycles": [
+            "2026"
+          ],
+          "categories": [
+            "Candidate",
+            "JFC",
+            "Leadership PAC",
+            "Super PAC",
+            "Trade Association"
+          ],
+          "recipients": [
+            {
+              "id": "C00000001",
+              "label": "Candidate One Committee"
+            },
+            {
+              "id": "C00000002",
+              "label": "Community Finance Victory JFC"
+            },
+            {
+              "id": "C00000004",
+              "label": "Cooperative Finance Association"
+            },
+            {
+              "id": "C00000005",
+              "label": "Harborlight Leadership PAC"
+            },
+            {
+              "id": "C00000003",
+              "label": "Members First Super PAC"
+            },
+            {
+              "id": "C00000006",
+              "label": "Unauthorized Committee"
+            }
+          ],
+          "unknown_tiers": false
+        },
+        "totals": {
+          "giving": 1585.0,
+          "direct": 90.0,
+          "organizations": 1475.0,
+          "unresolved_candidate_links": 20.0,
+          "recipients": 6,
+          "receipt_groups": 9
+        },
+        "categories": [
+          {
+            "id": "Super PAC",
+            "label": "Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "JFC",
+            "label": "JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "Candidate",
+            "label": "Candidate",
+            "amount": 110.0
+          },
+          {
+            "id": "Trade Association",
+            "label": "Trade Association",
+            "amount": 50.0
+          },
+          {
+            "id": "Leadership PAC",
+            "label": "Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "organizations": [
+          {
+            "id": "C00000003",
+            "label": "Members First Super PAC",
+            "amount": 1200.0
+          },
+          {
+            "id": "C00000002",
+            "label": "Community Finance Victory JFC",
+            "amount": 200.0
+          },
+          {
+            "id": "C00000004",
+            "label": "Cooperative Finance Association",
+            "amount": 50.0
+          },
+          {
+            "id": "C00000005",
+            "label": "Harborlight Leadership PAC",
+            "amount": 25.0
+          }
+        ],
+        "companies": [
+          {
+            "id": "Harborlight Credit Union",
+            "label": "Harborlight Credit Union",
+            "amount": 1125.0
+          },
+          {
+            "id": "Civic Horizon Bank",
+            "label": "Civic Horizon Bank",
+            "amount": 460.0
+          }
+        ],
+        "levels": [
+          {
+            "id": "Employees",
+            "label": "Employees",
+            "amount": 415.0
+          },
+          {
+            "id": "Chief",
+            "label": "Chief",
+            "amount": 370.0
+          },
+          {
+            "id": "Middle-Management",
+            "label": "Middle-Management",
+            "amount": 300.0
+          }
+        ],
+        "levels_by_company": [
+          {
+            "company": "Harborlight Credit Union",
+            "amount": 625.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 25.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 300.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 300.0
+              }
+            ]
+          },
+          {
+            "company": "Civic Horizon Bank",
+            "amount": 460.0,
+            "levels": [
+              {
+                "id": "Employees",
+                "label": "Employees",
+                "amount": 390.0
+              },
+              {
+                "id": "Middle-Management",
+                "label": "Middle-Management",
+                "amount": 0.0
+              },
+              {
+                "id": "Chief",
+                "label": "Chief",
+                "amount": 70.0
+              }
+            ]
+          }
+        ],
+        "candidates": [
+          {
+            "id": "H0CA00001",
+            "label": "Candidate One",
+            "amount": 90.0,
+            "party": "D"
+          }
+        ],
+        "candidate_available": true,
+        "candidate_note": "Direct contributions to uniquely linked principal or authorized candidate committees.",
+        "downstream_edges": [],
+        "pac_candidate_relationships": [],
+        "downstream_sources": [],
+        "measurement_comparisons": [],
+        "candidates_by_direction": {},
+        "candidate_details": [
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "Harborlight Credit Union",
+            "tier": "Chief",
+            "recipient": "Candidate One Committee",
+            "cycle": "2026",
+            "amount": 100.0
+          },
+          {
+            "candidate_id": "H0CA00001",
+            "candidate": "Candidate One",
+            "company": "Civic Horizon Bank",
+            "tier": "Employees",
+            "recipient": "Candidate One Committee",
+            "cycle": "2026",
+            "amount": -10.0
+          }
+        ],
+        "reports": [
+          {
+            "name": "Giving.xlsx",
+            "sha256": "614a09be7ad9f86a841106bfdcfa2696039a303d09d301f458fabad4c530fed4"
+          }
+        ],
+        "note": "Included net giving from saved report receipts; corporate and personal giving remain distinct. Totals may include unverified attribution or receipt roles and are not certified unique giving. Levels follow existing occupation/title rules, not a verified company hierarchy. Employees includes unrecognized titles. Amounts retain the saved report’s rules; code changes do not rewrite historical workbooks.",
+        "transfer_trace": null
+      }
+    }
+  ]
+}

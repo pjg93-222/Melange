@@ -190,5 +190,143 @@ class NetworkTests(unittest.TestCase):
         self.assertEqual(len(merged),1)
         self.assertEqual(merged[0]['amount'],5)
 
+
+def typed(destination, value, line, code, **fields):
+    return {'line_number':line, 'recipient_committee_id':destination, 'disbursement_type':code,
+            'disbursement_amount':value, 'recipient_name':destination+' PAC', **fields}
+
+
+class TransferRuleTests(unittest.TestCase):
+    """F8 (Paul, 2026-09-25): "one rule, by transaction type, everywhere" - the
+    transfer index's own 24G/24K, whatever line the row was filed on."""
+
+    def test_a_transfer_is_decided_by_its_transaction_type_not_its_line(self):
+        a = unit('A')
+        a['disbursements'] = [typed('B',3000,'21B','24K'),    # the Senate Leadership Fund case
+                              typed('C',500,'23','24Z'),      # in-kind on line 23: not a transfer
+                              typed('D',700,'22',None),       # no type: the old line rule decides
+                              typed('E',900,'29','24G')]
+        found = downstream.network([('2026','A')],{('2026','A'):a})
+        self.assertEqual(sorted((e['destination'],e['amount']) for e in found['edges']),
+                         [('B',3000),('D',700),('E',900)])
+        self.assertEqual(found['missing'],[('2026','B'),('2026','D'),('2026','E')])
+
+    def test_a_candidate_gift_by_type_is_terminal_on_any_line(self):
+        a = unit('A')
+        a['disbursements'] = [typed('PCC1',250,'21B','24K',candidate_id='H0CA00001',candidate_name='ONE'),
+                              typed('PCC2',40,'23','24C',candidate_id='H0CA00002',candidate_name='TWO')]
+        found = downstream.network([('2026','A')],{('2026','A'):a})
+        self.assertEqual(found['missing'],[])
+        self.assertEqual(sorted((e['destination'],e.get('terminal_candidate')) for e in found['edges']),
+                         [('PCC1',True),('PCC2',True)])
+        self.assertEqual(sorted((r['candidate_id'],r['amount']) for r in downstream.activity(found)),
+                         [('H0CA00001',250),('H0CA00002',40)])
+
+    def test_a_24k_on_line_21b_to_a_saved_committee_is_spent_once_by_the_recipient(self):
+        a = unit('A'); a['disbursements'] = [typed('B',3000,'21B','24K')]; a['totals'] = {'disbursements':3000}
+        units = {('2026','A'):a, ('2026','B'):unit('B',spend=3000)}
+        with patch.object(evidence_geo.district_geo,'district_for_candidate',return_value='KY-06'), \
+             patch.object(evidence_geo.district_geo,'district_exists',return_value=True):
+            buckets,missing,total = evidence_geo.network_spent(downstream.network([('2026','A')],units),{},'2026')
+        self.assertEqual(total,3000)
+        self.assertEqual(buckets['candidates'].total(),3000)
+        self.assertEqual(buckets['operating'].total()+buckets['transfers'].total()+missing.total(),0)
+
+
+class NotItemizedTransferTests(unittest.TestCase):
+    """F6 (Paul, 2026-09-25): no dollar may count twice.
+
+    FAIRSHAKE 2026 in the 8 Sep snapshot: the summary reports $65,000,000 on
+    line 22 while the saved rows itemize $51,000,000, and the saved network
+    already holds both recipients' spending. Scaled: 65 reported, 51 itemized.
+    """
+
+    def network(self, itemized):
+        a = unit('A',itemized)
+        a['totals'] = {'disbursements':65, 'transfers_to_affiliated_committee':65}
+        for row in a['disbursements']:
+            row['disbursement_type'] = '24G'
+        return {('2026','A'):a, ('2026','B'):unit('B',spend=40), ('2026','C'):unit('C',spend=25)}
+
+    def spend(self, units, **kwargs):
+        with patch.object(evidence_geo.district_geo,'district_for_candidate',return_value='KY-06'), \
+             patch.object(evidence_geo.district_geo,'district_exists',return_value=True):
+            return evidence_geo.network_spent(downstream.network([('2026','A')],units),{},'2026',**kwargs)
+
+    def test_a_transfer_the_summary_reports_but_no_row_itemizes_is_not_spending(self):
+        early = self.network([('B',30),('C',21)])            # 14 reported, not yet itemized
+        later = self.network([('B',30),('C',21),('B',9),('C',5)])
+        buckets,missing,total = self.spend(early)
+        self.assertEqual(total,65)                           # 40 + 25, not 79
+        self.assertEqual(buckets['candidates'].total(),65)
+        self.assertEqual(missing.total(),0)
+        self.assertEqual(self.spend(later)[2],total)         # the later snapshot agrees
+        notes = {}
+        self.spend(early,notes=notes)
+        self.assertEqual(notes['transfers_not_itemized'],
+                         [{'committee':'A','cycle':'2026','committee_name':'A',
+                           'reason':'transfers reported, recipient not itemized',
+                           'amount':14.0,'summary_amount':65.0,'itemized_amount':51.0}])
+        notes = {}
+        self.spend(later,notes=notes)
+        self.assertEqual(notes['transfers_not_itemized'],[])
+
+    def test_a_summary_that_states_no_transfer_line_discloses_nothing(self):
+        units = self.network([('B',30),('C',21)])
+        del units['2026','A']['totals']['transfers_to_affiliated_committee']
+        units['2026','A']['totals']['disbursements'] = 51
+        notes = {}
+        self.assertEqual(self.spend(units,notes=notes)[2],65)
+        self.assertEqual(notes['transfers_not_itemized'],[])
+        self.assertEqual(evidence_geo.transfers_not_itemized(units['2026','A']),(0,None,None))
+
+    def test_more_itemized_than_reported_is_never_a_negative_gap(self):
+        units = self.network([('B',30),('C',40)])
+        self.assertEqual(evidence_geo.transfers_not_itemized(units['2026','A'])[0],0)
+
+
+class ReloadRuleTests(unittest.TestCase):
+    """F11 (Paul, 2026-09-25): a reload differing only in SUB_ID is measured once;
+    a distinct transaction id, or a row with no transaction id, stays counted."""
+
+    def saved(self):
+        a = unit('A')
+        gift = {'line_number':'23','candidate_id':'H0CA00001','candidate_name':'ONE','recipient_committee_id':'PCC',
+                'recipient_name':'ONE FOR CONGRESS','disbursement_type':'24K','disbursement_amount':100,
+                'report_type':'M6','transaction_id':'SB23.1','file_number':'77','disbursement_date':'2026-05-01'}
+        move = {'line_number':'22','recipient_committee_id':'B','recipient_name':'B PAC','disbursement_type':'24G',
+                'disbursement_amount':30,'report_type':'M6','transaction_id':'SB22.1','file_number':'77',
+                'disbursement_date':'2026-05-02'}
+        spend = {'candidate_id':'H0KY06104','candidate_name':'BARR','expenditure_amount':40,'support_oppose_indicator':'S',
+                 'report_type':'M6','transaction_id':'SE.1','file_number':'77','expenditure_date':'2026-05-03',
+                 'payee_name':'MEDIA'}
+        a['disbursements'] = [{**gift,'sub_id':'1'},{**gift,'sub_id':'2'},{**gift,'sub_id':'3','transaction_id':'SB23.2'},
+                              {**move,'sub_id':'4'},{**move,'sub_id':'5'},
+                              {**move,'sub_id':'6','transaction_id':''},{**move,'sub_id':'7','transaction_id':''}]
+        a['expenditures'] = [{**spend,'sub_id':'8'},{**spend,'sub_id':'9'}]
+        a['totals'] = {'disbursements':330}      # 200 of gifts, 90 to B, 40 of IE
+        return {('2026','A'):a, ('2026','B'):unit('B',spend=90)}
+
+    def test_the_measurement_counts_a_reload_once(self):
+        found = downstream.network([('2026','A')],self.saved())
+        rows = {(r['candidate_id'],r['direction']):r['amount'] for r in downstream.activity(found) if r['committee']=='A'}
+        self.assertEqual(rows,{('H0CA00001','Contribution / Other'):200,('H0KY06104','Support'):40})
+        self.assertEqual(sorted((e['destination'],e['amount']) for e in found['edges'] if e['source']=='A'),
+                         [('B',90.0),('PCC',200.0)])
+
+    def test_the_map_removes_an_internal_transfer_once_and_counts_the_reload_once(self):
+        with patch.object(evidence_geo.district_geo,'district_for_candidate',return_value='KY-06'), \
+             patch.object(evidence_geo.district_geo,'district_exists',return_value=True):
+            notes = {}
+            buckets,missing,total = evidence_geo.network_spent(downstream.network([('2026','A')],self.saved()),{},
+                                                               '2026',notes=notes)
+        # A reported 330, of which 90 went to B, which spent 90. Nothing counts twice.
+        self.assertEqual(total,330)
+        self.assertEqual(buckets['candidates'].total(),200+40+90)
+        # Rows 6 and 7 name no transaction id, and B's one row neither: never reloads.
+        self.assertEqual(notes['reload_rule'],
+                         {'key':'committee|report type|transaction id|file number|counterparty|amount|date|type',
+                          'rows_without_transaction_id_or_file_number':3,'reload_rows':3,'reload_amount':170.0})
+
 if __name__ == '__main__':
     unittest.main()

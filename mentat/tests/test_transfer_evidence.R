@@ -63,7 +63,7 @@ check_transfer_evidence <- function() {
   jsonlite::write_json(list(version=3,edges_sha256=digest::digest(file=edges,algo='sha256')),
     info,auto_unbox=TRUE)
   stopifnot(fec_transfer_context(directory,roots,links,2024L)$coverage[[1L]]$status=='stale_transfer_index')
-  jsonlite::write_json(list(version=5,ambiguous_version_policy='count_all',edges_sha256=digest::digest(file=edges,algo='sha256'),
+  jsonlite::write_json(list(version=6,ambiguous_version_policy='count_all',edges_sha256=digest::digest(file=edges,algo='sha256'),
     unresolved_sources=list('C00000001'),unresolved_source_amounts=list(C00000001=90),
     unresolved_all_sources=FALSE,counts=list(unresolved_rows=2)),
     info,auto_unbox=TRUE)
@@ -77,6 +77,40 @@ check_transfer_evidence <- function() {
 }
 check_transfer_evidence()
 cat('Transfer evidence: retained identities, amendment review, cache version and coverage serialization PASS\n')
+# 2026-09-25, cycle 2020 Crypto: tools/fec_transfer_graph.py publishes
+# transfer-edges.csv with Python's csv module, which quotes the JSON `records`
+# field and doubles every quote inside it. data.table::fread returned the field
+# with the doubled quotes still in it, and enrich_downstream.py's json.loads
+# refused the payload. These are the bytes the csv module writes, CRLF included.
+check_edge_records_stay_json <- function() {
+  directory <- tempfile('mentat-edge-records-')
+  dir.create(file.path(directory, 'oth24'), recursive=TRUE)
+  on.exit(unlink(directory, recursive=TRUE))
+  edges <- file.path(directory, 'oth24', 'transfer-edges.csv')
+  publish <- function(value) {
+    field <- paste0('"', gsub('"', '""', value, fixed=TRUE), '"')
+    writeBin(charToRaw(paste0('cycle,source,destination,amount,record_count,first_date,last_date,records\r\n',
+      '2024,C00000001,C00000002,100.0,1,2024-01-02,2024-01-02,', field, '\r\n')), edges)
+    jsonlite::write_json(list(version=6, ambiguous_version_policy='count_all',
+      edges_sha256=digest::digest(file=edges, algo='sha256'), counts=list()),
+      file.path(directory, 'oth24', 'transfer-info.json'), auto_unbox=TRUE)
+  }
+  roots <- data.table::data.table(cycle=2024L, committee_id='C00000001', preliminary_crypto_funding=100)
+  links <- data.table::data.table(cycle=2024L, committee_id='C00000002', designation='P')
+  # An empty sub-ID is an empty JSON string, four quotes in the CSV.
+  evidence <- '[{"file_num":1,"transaction_id":"T1","sub_id":"","date":"2024-01-02","cents":10000,"type":"24K"}]'
+  publish(evidence)
+  read <- fec_transfer_context(directory, roots, links, 2024L)$edges
+  stopifnot(nrow(read) == 1L, identical(read$records, evidence), read$amount == 100)
+  # A reader that does undo the escape changes nothing: JSON is kept as it is.
+  stopifnot(identical(fec_transfer_edge_records(evidence, edges), evidence))
+  # A value that is still not JSON stops the export; evidence is never dropped.
+  publish('[{"file_num":1,"cents":')
+  failed <- tryCatch(fec_transfer_context(directory, roots, links, 2024L), error=identity)
+  stopifnot(inherits(failed, 'error'), grepl('not JSON', conditionMessage(failed)))
+}
+check_edge_records_stay_json()
+cat('Transfer edge records: the CSV quote escape is undone, JSON is kept, anything else stops PASS\n')
 # VERSION 4 / parser "5": inside a reused transaction-id group, identity -- the
 # candidate, the amount, the date and the transaction type -- decides which rows
 # are versions of one transaction and which are separate transactions.
@@ -189,7 +223,7 @@ check_pas2_identity_partition <- function() {
             aggregated$preliminary_included_amount == 0)
 
   # The other reading is one constant, and it invalidates its own cache.
-  stopifnot(identical(FEC_PAS2_PARSER_VERSION, '8'),
+  stopifnot(identical(FEC_PAS2_PARSER_VERSION, '9'),
             identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, 'withhold'))
   withheld_cache <- fec_pas2_cache_file(directory, 2024L)
   FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
@@ -215,11 +249,18 @@ check_retained_ambiguity <- function() {
     fields[c(1,2,3,6,14,15,16,17,18,19,22)] <- c('C00000001','N','Q1','24K','01012024',value,'C00000002','H00000001','SE.5',file,id)
     paste(fields,collapse='|')
   }
-  for (file in c('1','2')) {
-    writeLines(c(row('1'), row('2',file)),path)
-    result <- fec_build_pas2_index(directory,2024L)
-    stopifnot(all(result$include_in_total=='Yes'),all(result$unverified_version==1L),sum(result$transaction_amount)==200)
-  }
+  # Across filings the same identity is two observations: both counted, both flagged.
+  writeLines(c(row('1'), row('2','2')),path)
+  result <- fec_build_pas2_index(directory,2024L)
+  stopifnot(all(result$include_in_total=='Yes'),all(result$unverified_version==1L),sum(result$transaction_amount)==200)
+  # In one filing, differing only in the SUB_ID, it is an FEC reload (F11): counted
+  # once, the highest SUB_ID kept, nothing left to flag.
+  writeLines(c(row('1'), row('2','1')),path)
+  result <- fec_build_pas2_index(directory,2024L)
+  stopifnot(identical(result[sub_id=='2', include_in_total],'Yes'),
+            identical(result[sub_id=='1', exclusion_reason],'Repeated itemization in one filing'),
+            all(result$unverified_version==0L),
+            sum(result[include_in_total=='Yes', transaction_amount])==100)
   retained_cache <- fec_pas2_cache_file(directory,2024L)
   FEC_PAS2_AMBIGUOUS_VERSION_POLICY <<- 'count_latest'
   stopifnot(retained_cache != fec_pas2_cache_file(directory,2024L))

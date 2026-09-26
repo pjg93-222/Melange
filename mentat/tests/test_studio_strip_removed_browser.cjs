@@ -364,8 +364,10 @@ const VISIBLE_SOURCE = `node => {
 
     step('the contract records the retirement and the module still never reads the key');
     // v6 (build 02, 2026-09-22) added Graph's compare and layout keys and kept
-    // the studioPane retirement as it was.
-    assert.equal(urlScope.version, 6, 'url_scope is v6, retaining the retired studioPane contract');
+    // the studioPane retirement as it was. v7 (lane F, 2026-09-26) adds only the
+    // PAC evidence Flow view's pane keys <pane>.flow; the studioPane entry below
+    // is unchanged, so the pin follows the contract's version.
+    assert.equal(urlScope.version, 7, 'url_scope is v7, retaining the retired studioPane contract');
     assert.ok(/retired/i.test(urlScope.keys.studioPane.value),
       'the key table says studioPane is retired: ' + urlScope.keys.studioPane.value);
     assert.deepEqual(urlScope.keys.studioPane.readers, [], 'nothing reads it');

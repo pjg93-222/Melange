@@ -18,7 +18,7 @@ import time
 import sqlite3
 import csv
 
-VERSION=5
+VERSION=6
 CASH_CODES={'24G','24K'}
 COMMITTEE=re.compile(r'C[0-9]{8}')
 DESTINATION_GLOB="destination GLOB 'C[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'"
@@ -31,6 +31,8 @@ DESTINATION_GLOB="destination GLOB 'C[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'"
 # Default accounting retains every distinct observation until a preserved
 # filing relationship proves supersession. Legacy policies are sensitivity
 # scenarios, never a claim that an ambiguous earlier row was contradicted.
+# VERSION 6 (F11, Paul 2026-09-25) makes one exception: an FEC reload, the same
+# record loaded again under a second SUB_ID, counts once. See reload_key().
 AMBIGUOUS_VERSION_POLICY='count_all'
 POLICY_TAGS={'withhold':'w','count_latest':'c','count_all':'a'}
 AMENDMENT_ORDER={'T':2,'A':1}
@@ -83,6 +85,29 @@ def transfer_key(fields,row_number):
 def identity(row):
     """What a row claims to BE: who received it, how much, when, and as what."""
     return (row['destination'],row['cents'],row['date'],row['type'])
+
+
+def reload_key(row):
+    """F11: the key of an FEC reload, one record loaded twice under two SUB_IDs.
+
+    Rows that share committee, report type and transaction id (the version
+    key), the file number, the identity (counterparty id and name, amount, date,
+    type) and the memo code differ in nothing but the SUB_ID, and only they count
+    once. A row without a transaction id or a file number is never a reload.
+    Genuine repeats carry distinct transaction ids and cross-file observations
+    distinct file numbers, so neither meets here; every other ambiguity rule is
+    unchanged. R/fec_beneficiary.R's FEC_PAS2_RELOAD_KEY is the same key for PAS2.
+    """
+    if not row['transaction_id'] or not row['file_num']:return ('row',row['rowid'])
+    return (row['version_key'],row['file_num'],*identity(row),row['raw_line'].split('|')[7],row['memo'])
+
+
+def collapse_reloads(rows):
+    """(kept, reloads): one row per reload_key survives, the highest SUB_ID; input order kept."""
+    buckets=defaultdict(list)
+    for row in rows:buckets[reload_key(row)].append(row)
+    keep={max(bucket,key=lambda row:(row['sub_id'] or '',row['rowid']))['rowid'] for bucket in buckets.values()}
+    return [row for row in rows if row['rowid'] in keep],[row for row in rows if row['rowid'] not in keep]
 
 
 def distinguishable(left,right):
@@ -139,13 +164,15 @@ def resolve_group(rows,headers,policy):
     reused=1 if len(identities)>1 else 0
 
     def keep_one_per_identity(group,basis):
-        """Keep distinct observations; collapse only in legacy sensitivity modes."""
+        """Keep distinct observations; count_all collapses only FEC reloads (reload_key)."""
         decided=[];buckets=defaultdict(list)
         for row in group:buckets[identity(row)].append(row)
         for bucket in buckets.values():
             bucket.sort(key=lambda row:(AMENDMENT_ORDER.get(row['amendment'],0),row['sub_id'] or '',row['rowid']))
             if policy == 'count_all':
-                decided.extend((row,'current',basis,int(len(bucket)>1)) for row in bucket)
+                kept,reloads=collapse_reloads(bucket)
+                decided.extend((row,'duplicate','repeated_itemization',0) for row in reloads)
+                decided.extend((row,'current',basis,int(len(kept)>1)) for row in kept)
                 continue
             decided.extend((row,'duplicate','repeated_itemization',0) for row in bucket[:-1])
             decided.append((bucket[-1],'current',basis,0))
@@ -163,6 +190,9 @@ def resolve_group(rows,headers,policy):
     if policy == 'count_all':
         # Reused transaction labels, identical amounts and a larger file number
         # do not establish an amendment family or a duplicate source identity.
+        # An FEC reload does (F11): it counts once, the highest SUB_ID, and every
+        # other row here is judged exactly as before.
+        rows,reloads=collapse_reloads(rows)
         buckets=defaultdict(list)
         for row in rows:
             buckets[row['destination'],'amount',row['cents']].append(row)
@@ -171,7 +201,7 @@ def resolve_group(rows,headers,policy):
         if len({row['file_num'] for row in rows})>1 and any(not COMMITTEE.fullmatch(row['destination'] or '') for row in rows):
             uncertain.update(row['rowid'] for row in rows)
         ambiguous=[rows] if uncertain else []
-        return [(row,'current','filing_relationship_unverified' if row['rowid'] in uncertain else 'distinct_observation',
+        return [(row,'duplicate','repeated_itemization',0) for row in reloads]+[(row,'current','filing_relationship_unverified' if row['rowid'] in uncertain else 'distinct_observation',
                  int(row['rowid'] in uncertain)) for row in rows],reused,'file_number',ambiguous
     # Legacy sensitivity scenarios assume equal identities are repeat filings
     # or itemizations and prefer the largest file number. These assumptions
@@ -403,20 +433,42 @@ def transfer_index(path,cycle,filing_headers=()):
 
 
 def reachable(roots,edges,max_depth=3,stop_nodes=()):
+    return list(reachable_rows(roots,edges,max_depth,stop_nodes))
+
+
+def reachable_rows(roots,edges,max_depth=3,stop_nodes=(),starts=None):
+    """reachable() one row at a time (F14): the same rows in the same order, never all held.
+
+    Each root's breadth-first walk emits one row per edge out of every committee it
+    reaches (root x committee x edge). With max_depth=None that is millions of rows
+    for a large industry, so callers aggregate them as they stream. `starts` maps a
+    root to extra starting points [(committee, route)] - committees its previous-cycle
+    money opened (F12 carryover) - walked after the root's own start; their rows carry
+    via_carryover and the route that opened them.
+    """
     adjacency=defaultdict(list)
     for edge in edges:
         if edge['amount']>0:adjacency[edge['source']].append(edge)
-    output=[];visited=set();queue=deque((root,root,0,(root,)) for root in sorted(roots))
+    visited=set();queue=deque((root,root,0,(root,),'',False) for root in sorted(roots))
+    for root in sorted(starts or ()):
+        if root not in roots:continue
+        for committee,route in starts[root]:
+            # The route's hops are committee IDs; the opened committee carries its label.
+            hops=tuple(part.split(' [')[0] for part in route.split(' > ')) if route else (root,committee)
+            queue.append((root,committee,len(hops)-1,hops,route,True))
     while queue:
-        root,node,depth,path=queue.popleft()
+        root,node,depth,path,route,carried=queue.popleft()
         if (root,node) in visited:continue
         visited.add((root,node))
         for edge in adjacency[node]:
             destination=edge['destination']
             status='candidate_committee' if destination in stop_nodes else 'cycle' if destination in path else 'depth_limit' if max_depth is not None and depth+1>=max_depth else 'followed'
-            output.append({**{k:v for k,v in edge.items() if k!='records'},'root':root,'depth':depth+1,'path':' > '.join((*path,destination)),'status':status})
-            if status=='followed':queue.append((root,destination,depth+1,(*path,destination)))
-    return output
+            text=' > '.join((route,destination)) if route else ' > '.join((*path,destination))
+            row={**{k:v for k,v in edge.items() if k!='records'},'root':root,'depth':depth+1,'path':text,'status':status}
+            if carried:row['via_carryover']=True
+            yield row
+            if status=='followed':
+                queue.append((root,destination,depth+1,(*path,destination),text if route else '',carried))
 
 
 def record_list(value):

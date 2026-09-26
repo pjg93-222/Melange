@@ -1,0 +1,1701 @@
+{
+  "contract": "evidence-network",
+  "version": 1,
+  "owner": "lane C (F4, PAC map downstream and visuals, 2026-09-25)",
+  "route": "/api/evidence-network?id=<snapshot>&committee=<C########>&cycle=<YYYY or blank>",
+  "produced_by": [
+    "mentat/app/downstream.py:snapshot_view (committees: committees, unit_coverage, summary_reconciliation, summary_transfers)"
+  ],
+  "consumed_by": [
+    "mentat/app/evidence.js:networkDrawerHtml",
+    "mentat/app/evidence.js:networkCommitteesHtml",
+    "mentat/app/evidence.js:networkChecks (loadSnapshotPane's warnings)"
+  ],
+  "asserted_by": [
+    "mentat/tests/test_evidence_network_contract.py (producer, examples, negative controls)",
+    "mentat/app/tests/evidence-contract-v4.test.js (consumer)"
+  ],
+  "description": "F4 (Paul approved 2026-09-25): every committee in a saved network with its own coverage and its own reconciliation to its FEC summary, instead of one coverage window per network and a check of the pane's committee alone. The examples are the contract.",
+  "rules": [
+    "The answer keeps relationships, edges, sources, missing and note as before, and adds `committees`: one row per committee/cycle the network reached - every saved unit, then every committee with no saved snapshot.",
+    "A row is {cycle, committee, committee_name, saved, coverage_start, coverage_end, last_itemized: {receipts, disbursements, expenditures}, last_itemized_date, reconciliation: {independent_expenditures, transfers}}. coverage_* are the saved summary's window (YYYY-MM-DD); last_itemized is each schedule's latest non-memo itemized transaction date, and last_itemized_date the latest of them.",
+    "Each check is {status, summary, itemized, difference}: difference = itemized - summary; status is \"reconciled\" within a cent, \"differs\" otherwise, and \"no_summary\" (summary and difference null) when the saved summary states no figure - and always for a committee with no saved snapshot, which carries no dates.",
+    "independent_expenditures compares the regular Schedule E rows the network counts (one per source ID, notices and memos out, a reload once) with the summary's independent_expenditures; transfers compares the summary's lines 22-23 with the non-memo rows filed on the lines it states (downstream.summary_transfers, the comparison behind evidence_geo's transfers_not_itemized)."
+  ],
+  "examples": [
+    {
+      "name": "a FAIRSHAKE-shaped 2026 network: the root's lines 22-23 differ, a recipient's summary runs past its itemized rows and differs, one recipient reconciles, one has no snapshot",
+      "payload": {
+        "relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 37000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e1",
+                "transaction_id": "",
+                "amount": 37000.0,
+                "date": "2026-06-29",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00836221"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00836221"
+            ]
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 21000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e2",
+                "transaction_id": "",
+                "amount": 21000.0,
+                "date": "2026-06-25",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00848440"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00848440"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-06-30T00:00:00"
+          }
+        ],
+        "missing": [
+          {
+            "cycle": "2026",
+            "committee": "C00571703"
+          }
+        ],
+        "committees": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "committee_name": "C00835959",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": "2026-06-30",
+              "disbursements": "2026-06-29",
+              "expenditures": null
+            },
+            "last_itemized_date": "2026-06-30",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "differs",
+                "summary": 65000.0,
+                "itemized": 53000.0,
+                "difference": -12000.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-29"
+            },
+            "last_itemized_date": "2026-06-29",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "differs",
+                "summary": 40000.0,
+                "itemized": 37000.0,
+                "difference": -3000.0
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": 0.0,
+                "difference": null
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-06-30",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-25"
+            },
+            "last_itemized_date": "2026-06-25",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 21000.0,
+                "itemized": 21000.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00571703",
+            "committee_name": "C00571703",
+            "saved": false,
+            "coverage_start": null,
+            "coverage_end": null,
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": null
+            },
+            "last_itemized_date": null,
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              }
+            }
+          }
+        ],
+        "note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    }
+  ],
+  "negative_controls": [
+    {
+      "name": "a transfers difference that is not itemized minus summary",
+      "expect": "difference is not itemized minus summary",
+      "payload": {
+        "relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 37000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e1",
+                "transaction_id": "",
+                "amount": 37000.0,
+                "date": "2026-06-29",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00836221"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00836221"
+            ]
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 21000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e2",
+                "transaction_id": "",
+                "amount": 21000.0,
+                "date": "2026-06-25",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00848440"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00848440"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-06-30T00:00:00"
+          }
+        ],
+        "missing": [
+          {
+            "cycle": "2026",
+            "committee": "C00571703"
+          }
+        ],
+        "committees": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "committee_name": "C00835959",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": "2026-06-30",
+              "disbursements": "2026-06-29",
+              "expenditures": null
+            },
+            "last_itemized_date": "2026-06-30",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "differs",
+                "summary": 65000.0,
+                "itemized": 53000.0,
+                "difference": -11000.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-29"
+            },
+            "last_itemized_date": "2026-06-29",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "differs",
+                "summary": 40000.0,
+                "itemized": 37000.0,
+                "difference": -3000.0
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": 0.0,
+                "difference": null
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-06-30",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-25"
+            },
+            "last_itemized_date": "2026-06-25",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 21000.0,
+                "itemized": 21000.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00571703",
+            "committee_name": "C00571703",
+            "saved": false,
+            "coverage_start": null,
+            "coverage_end": null,
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": null
+            },
+            "last_itemized_date": null,
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              }
+            }
+          }
+        ],
+        "note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "a \"reconciled\" mark on a 3,000 shortfall",
+      "expect": "check says reconciled against its own amounts",
+      "payload": {
+        "relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 37000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e1",
+                "transaction_id": "",
+                "amount": 37000.0,
+                "date": "2026-06-29",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00836221"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00836221"
+            ]
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 21000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e2",
+                "transaction_id": "",
+                "amount": 21000.0,
+                "date": "2026-06-25",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00848440"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00848440"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-06-30T00:00:00"
+          }
+        ],
+        "missing": [
+          {
+            "cycle": "2026",
+            "committee": "C00571703"
+          }
+        ],
+        "committees": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "committee_name": "C00835959",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": "2026-06-30",
+              "disbursements": "2026-06-29",
+              "expenditures": null
+            },
+            "last_itemized_date": "2026-06-30",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "differs",
+                "summary": 65000.0,
+                "itemized": 53000.0,
+                "difference": -12000.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-29"
+            },
+            "last_itemized_date": "2026-06-29",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 40000.0,
+                "itemized": 37000.0,
+                "difference": -3000.0
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": 0.0,
+                "difference": null
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-06-30",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-25"
+            },
+            "last_itemized_date": "2026-06-25",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 21000.0,
+                "itemized": 21000.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00571703",
+            "committee_name": "C00571703",
+            "saved": false,
+            "coverage_start": null,
+            "coverage_end": null,
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": null
+            },
+            "last_itemized_date": null,
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              }
+            }
+          }
+        ],
+        "note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "a committee with no saved snapshot given a coverage end",
+      "expect": "a committee with no saved snapshot carries coverage or a checked summary",
+      "payload": {
+        "relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 37000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e1",
+                "transaction_id": "",
+                "amount": 37000.0,
+                "date": "2026-06-29",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00836221"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00836221"
+            ]
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 21000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e2",
+                "transaction_id": "",
+                "amount": 21000.0,
+                "date": "2026-06-25",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00848440"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00848440"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-06-30T00:00:00"
+          }
+        ],
+        "missing": [
+          {
+            "cycle": "2026",
+            "committee": "C00571703"
+          }
+        ],
+        "committees": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "committee_name": "C00835959",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": "2026-06-30",
+              "disbursements": "2026-06-29",
+              "expenditures": null
+            },
+            "last_itemized_date": "2026-06-30",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "differs",
+                "summary": 65000.0,
+                "itemized": 53000.0,
+                "difference": -12000.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-29"
+            },
+            "last_itemized_date": "2026-06-29",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "differs",
+                "summary": 40000.0,
+                "itemized": 37000.0,
+                "difference": -3000.0
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": 0.0,
+                "difference": null
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-06-30",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-25"
+            },
+            "last_itemized_date": "2026-06-25",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 21000.0,
+                "itemized": 21000.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00571703",
+            "committee_name": "C00571703",
+            "saved": false,
+            "coverage_start": null,
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": null
+            },
+            "last_itemized_date": null,
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              }
+            }
+          }
+        ],
+        "note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "the network's coverage end stamped on a committee whose itemized rows stop on 6/29",
+      "expect": "last_itemized_date is not the latest of its schedules",
+      "payload": {
+        "relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 37000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e1",
+                "transaction_id": "",
+                "amount": 37000.0,
+                "date": "2026-06-29",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00836221"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00836221"
+            ]
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 21000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e2",
+                "transaction_id": "",
+                "amount": 21000.0,
+                "date": "2026-06-25",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00848440"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00848440"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-06-30T00:00:00"
+          }
+        ],
+        "missing": [
+          {
+            "cycle": "2026",
+            "committee": "C00571703"
+          }
+        ],
+        "committees": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "committee_name": "C00835959",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": "2026-06-30",
+              "disbursements": "2026-06-29",
+              "expenditures": null
+            },
+            "last_itemized_date": "2026-06-30",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "differs",
+                "summary": 65000.0,
+                "itemized": 53000.0,
+                "difference": -12000.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-29"
+            },
+            "last_itemized_date": "2026-07-31",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "differs",
+                "summary": 40000.0,
+                "itemized": 37000.0,
+                "difference": -3000.0
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": 0.0,
+                "difference": null
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-06-30",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-25"
+            },
+            "last_itemized_date": "2026-06-25",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 21000.0,
+                "itemized": 21000.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00571703",
+            "committee_name": "C00571703",
+            "saved": false,
+            "coverage_start": null,
+            "coverage_end": null,
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": null
+            },
+            "last_itemized_date": null,
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              }
+            }
+          }
+        ],
+        "note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "the pane-only check: a committee in the network left out of committees",
+      "expect": "a missing committee is not listed as unsaved",
+      "payload": {
+        "relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 37000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e1",
+                "transaction_id": "",
+                "amount": 37000.0,
+                "date": "2026-06-29",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00836221"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00836221"
+            ]
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 21000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e2",
+                "transaction_id": "",
+                "amount": 21000.0,
+                "date": "2026-06-25",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00848440"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00848440"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-06-30T00:00:00"
+          }
+        ],
+        "missing": [
+          {
+            "cycle": "2026",
+            "committee": "C00571703"
+          }
+        ],
+        "committees": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "committee_name": "C00835959",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": "2026-06-30",
+              "disbursements": "2026-06-29",
+              "expenditures": null
+            },
+            "last_itemized_date": "2026-06-30",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "differs",
+                "summary": 65000.0,
+                "itemized": 53000.0,
+                "difference": -12000.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-29"
+            },
+            "last_itemized_date": "2026-06-29",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "differs",
+                "summary": 40000.0,
+                "itemized": 37000.0,
+                "difference": -3000.0
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": 0.0,
+                "difference": null
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-06-30",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-25"
+            },
+            "last_itemized_date": "2026-06-25",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 21000.0,
+                "itemized": 21000.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              }
+            }
+          }
+        ],
+        "note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "a check with a status outside reconciled | differs | no_summary",
+      "expect": "check states no status",
+      "payload": {
+        "relationships": [
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 37000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e1",
+                "transaction_id": "",
+                "amount": 37000.0,
+                "date": "2026-06-29",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00836221"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00836221"
+            ]
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "candidate_id": "H6CA12000",
+            "candidate": "HOUSE, HOPE",
+            "direction": "Support",
+            "amount": 21000.0,
+            "filings": [
+              {
+                "source_url": "",
+                "sub_id": "e2",
+                "transaction_id": "",
+                "amount": 21000.0,
+                "date": "2026-06-25",
+                "counterparty": "HOUSE, HOPE",
+                "city": "",
+                "state": "",
+                "zip": "",
+                "employer": "",
+                "purpose": ""
+              }
+            ],
+            "share_of_pac_direction": 1.0,
+            "route": [
+              "C00835959",
+              "C00848440"
+            ],
+            "basis": "Observed spending; candidate control is not established",
+            "route_names": [
+              "C00835959",
+              "C00848440"
+            ]
+          }
+        ],
+        "edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-07-31T00:00:00"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "fairshake-fixture/snapshots.json",
+            "sha256": "2c12e7ab0fb5872194843a1f85e03fbad60cf384b4fecd22979271b2bf356b8b",
+            "coverage_start": "2025-01-01T00:00:00",
+            "coverage_end": "2026-06-30T00:00:00"
+          }
+        ],
+        "missing": [
+          {
+            "cycle": "2026",
+            "committee": "C00571703"
+          }
+        ],
+        "committees": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "committee_name": "C00835959",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": "2026-06-30",
+              "disbursements": "2026-06-29",
+              "expenditures": null
+            },
+            "last_itemized_date": "2026-06-30",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "differs",
+                "summary": 65000.0,
+                "itemized": 53000.0,
+                "difference": -12000.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "committee_name": "C00836221",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-07-31",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-29"
+            },
+            "last_itemized_date": "2026-06-29",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "differs",
+                "summary": 40000.0,
+                "itemized": 37000.0,
+                "difference": -3000.0
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": 0.0,
+                "difference": null
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "committee_name": "C00848440",
+            "saved": true,
+            "coverage_start": "2025-01-01",
+            "coverage_end": "2026-06-30",
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": "2026-06-25"
+            },
+            "last_itemized_date": "2026-06-25",
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "reconciled",
+                "summary": 21000.0,
+                "itemized": 21000.0,
+                "difference": 0.0
+              },
+              "transfers": {
+                "status": "balanced",
+                "summary": 0.0,
+                "itemized": 0.0,
+                "difference": 0.0
+              }
+            }
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00571703",
+            "committee_name": "C00571703",
+            "saved": false,
+            "coverage_start": null,
+            "coverage_end": null,
+            "last_itemized": {
+              "receipts": null,
+              "disbursements": null,
+              "expenditures": null
+            },
+            "last_itemized_date": null,
+            "reconciliation": {
+              "independent_expenditures": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              },
+              "transfers": {
+                "status": "no_summary",
+                "summary": null,
+                "itemized": null,
+                "difference": null
+              }
+            }
+          }
+        ],
+        "note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    }
+  ]
+}

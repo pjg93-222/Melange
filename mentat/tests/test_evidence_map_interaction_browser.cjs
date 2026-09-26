@@ -228,16 +228,45 @@ const median = values => {
     assert.ok(Number(figures[1].value.replace(/,/g, '')) > 1000, JSON.stringify(figures));
     pass(JSON.stringify(figures));
 
-    step('the pane header is one segmented control: Summary | Map | Rows');
+    step('the pane header is one segmented control: Summary | Map | Flow | Rows');
     const seg = await page.locator('#evidence-panes [data-pane=a] .pane-view button').allTextContents();
-    assert.deepEqual(seg.map(text => text.trim()), ['Summary', 'Map', 'Rows'], JSON.stringify(seg));
+    // Lane F (board #44) adds Flow, the Sankey of where the money went.
+    assert.deepEqual(seg.map(text => text.trim()), ['Summary', 'Map', 'Flow', 'Rows'], JSON.stringify(seg));
     assert.equal(await page.getAttribute('#evidence-panes [data-pane=a] .pane-summary', 'aria-pressed'), 'true');
     await page.click('#evidence-panes [data-pane=a] .pane-rows');
     await page.waitForSelector('#evidence-panes [data-pane=a] .pane-drawer', {timeout: 60000});
     assert.equal(await page.getAttribute('#evidence-panes [data-pane=a] .pane-rows', 'aria-pressed'), 'true');
     await page.click('#evidence-panes [data-pane=a] .pane-summary');
     await page.waitForSelector('#evidence-panes [data-pane=a] .pane-drawer', {state: 'detached', timeout: 30000});
-    pass('Summary | Map | Rows, with aria-pressed following the view');
+    pass('Summary | Map | Flow | Rows, with aria-pressed following the view');
+
+    step('Flow opens from the pane header and returns to Map; an import says where its flow comes from');
+    const flowRequests = [];
+    const onFlowRequest = request => { if (request.url().includes('/api/flow')) flowRequests.push(request.url()); };
+    page.on('request', onFlowRequest);
+    await page.click('#evidence-panes [data-pane=a] .pane-flow');
+    await page.waitForFunction(() => document.querySelector('#view-evidence').classList.contains('flow-open')
+      && !document.getElementById('evidence-flow').hidden && !document.getElementById('evidence-flow-status').hidden,
+      null, {timeout: 30000});
+    const flowOpen = await page.evaluate(() => ({
+      pressed: [...document.querySelectorAll('#evidence-flow .flow-views [aria-pressed=true]')].map(node => node.dataset.view),
+      status: document.getElementById('evidence-flow-status').textContent.trim(),
+      panesHidden: document.getElementById('evidence-panes').hidden, url: location.search}));
+    assert.deepEqual(flowOpen.pressed, ['flow'], JSON.stringify(flowOpen));
+    assert.match(flowOpen.status, /saved FEC snapshot/, 'an import pane says its flow is read from a saved snapshot');
+    assert.equal(flowOpen.panesHidden, true, 'the Flow view takes the evidence view');
+    assert.match(flowOpen.url, /[?&]a\.flow=reported(&|$)/, 'the URL remembers the Flow view (D-039)');
+    assert.deepEqual(flowRequests, [], 'an import pane asks /api/flow nothing');
+    await page.click('#evidence-flow .flow-views [data-view="map"]');
+    await page.waitForSelector('#evidence-map svg.map-canvas', {timeout: 120000});
+    const flowClosed = await page.evaluate(() => ({flowOpen: document.querySelector('#view-evidence').classList.contains('flow-open'),
+      flowKey: /[?&]a\.flow=/.test(location.search), flowHidden: document.getElementById('evidence-flow').hidden}));
+    assert.deepEqual(flowClosed, {flowOpen: false, flowKey: false, flowHidden: true}, JSON.stringify(flowClosed));
+    page.off('request', onFlowRequest);
+    // Back to the panes: the next step opens the map from the pane header.
+    await page.click('#evidence-map-back');
+    await page.waitForSelector('#evidence-panes:not([hidden])', {timeout: 30000});
+    pass(`Flow pressed, "${flowOpen.status.slice(0, 60)}…", no /api/flow request; Map from the Flow view closed it`);
 
     step('open the map: it opens on the side that HAS data, and the empty side says why');
     const openedAt = Date.now();

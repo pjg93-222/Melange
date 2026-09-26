@@ -5,6 +5,10 @@
   'use strict';
 
   const math = (typeof module !== 'undefined' && module.exports) ? require('./chart-math.js') : root.MentatCharts;
+  // Lane P (boards #47-#55): the map layer model - a card that names a
+  // geography is a layer of a map sheet. Optional here: without it a layer
+  // card's shape is checked and its map fields are left to the server.
+  const mapModel = (typeof module !== 'undefined' && module.exports) ? require('./map-layers.js') : root.MentatMapLayers;
 
   // Paul, 2026-09-23: "Additionally, within the Chart Studio make sure everything
   // is freely flexible, that all graph types properly register and nothing is
@@ -161,6 +165,8 @@
 
   function swapShelves(state) {
     const next = clone(state);
+    // Lane F (#46): a Flow has no Rows; Swap reverses its stages.
+    if (isFlowSheet(state)) { next.columns = clone(state.columns || []).reverse(); return next; }
     next.columns = clone(state.rows || []);
     next.rows = clone(state.columns || []);
     return next;
@@ -208,6 +214,12 @@
   // unless something is already there. Only the shelves are read, so a click
   // chooses the zone a drop onto that same empty shelf would choose.
   function quickAddZone(field, state) {
+    // Lane F (#46): on a Flow a dimension joins Stages (Columns) and a measure goes to Size;
+    // past five stages, or with Size taken, the field waits on Tooltip.
+    if (isFlowSheet(state)) {
+      if (field && field.role === 'measure') return state.marks && state.marks.size != null ? 'tooltip' : 'size';
+      return shelf(state.columns).length < FLOW_MAX_STAGES ? 'columns' : 'tooltip';
+    }
     const columnsEmpty = shelf(state && state.columns).length === 0;
     const rowsEmpty = shelf(state && state.rows).length === 0;
     if (field && field.role === 'measure') return rowsEmpty ? 'rows' : 'columns';
@@ -331,11 +343,11 @@
 
   // Boards #50-#52 (approved 2026-09-25). The Marks card opens on a type strip:
   // fourteen tiles, two rows of seven, in the boards' order. Flow is drawn by
-  // the Sankey build (lane F); until then its tile is shown and disabled.
+  // the Sankey build (lane F, #46) from a report worksheet's rows (flowReason).
   const MARK_STRIP = [['automatic', 'Automatic'], ['bar', 'Bar'], ['line', 'Line'], ['area', 'Area'],
     ['square', 'Square'], ['circle', 'Circle'], ['shape', 'Shape'], ['text', 'Text'], ['map', 'Map'],
     ['pie', 'Pie'], ['gantt', 'Gantt'], ['polygon', 'Polygon'], ['density', 'Density'], ['flow', 'Flow']];
-  const FLOW_REASON = 'Flow arrives with the Sankey build';
+  const FLOW_REASON = 'Flow draws a report worksheet\u2019s rows; switch the source to Report worksheet to draw one.';
   // The marks v3 adds. Each draws points: two measures place them on two axes,
   // one measure places them along the first grouping.
   const V3_MARK_IDS = ['square', 'shape', 'polygon', 'density'];
@@ -351,10 +363,15 @@
   // chart ink, white, or one of theme.js's twelve categorical slots.
   const STYLE_COLOURS = ['automatic', 'none', 'ink', 'white', ...Array.from({length: 12}, (_, i) => 'c' + (i + 1))];
   const CARD_KEYS = ['id', 'name', 'measure', 'type', 'encodings', 'opacity', 'border', 'halo', 'visible',
-    'selectable', 'zoomExtent', 'source', 'geography'];
+    'selectable', 'zoomExtent', 'source', 'geography', 'map'];
   const CARD_TYPES = [...ALL_MARK_IDS];
   const MAX_CARDS = 12, MAX_LIST_PILLS = 24;
   const CARDS_REFUSAL = 'The saved view’s marks cards are malformed.';
+  // Lane F (#46): Flow is a stored card type with its own options (`flow`) without being a
+  // Chart-menu mark: the menu lists the marks both sources draw, and a flow is drawn from
+  // report-worksheet rows only.
+  CARD_KEYS.push('flow');
+  CARD_TYPES.push('flow');
 
   // A row appears only when the mark can use it (#51, and Tableau): Colour,
   // Size, Label, Detail and Tooltip always; Shape on Shape marks; Path on Line,
@@ -431,6 +448,12 @@
     'filled-map': 'A map keeps today\u2019s drawing; opacity, border and halo per map card arrive with map layers.',
     text: 'A text table\u2019s cells take no opacity, border or halo.'
   };
+  // Lane F (#46): what a Flow card does not draw, each with its reason.
+  GREYED.detail.flow = 'A flow splits its ribbons by its stages, so Detail does not split them. Put the field on Stages or on Colour.';
+  ROLE_GREYED.color.measure.flow = 'A flow colours its ribbons by a dimension\u2019s members, so a Colour measure does not change them.';
+  ROLE_GREYED.size = {dimension: {flow: 'A flow sizes its ribbons by a measure, so a dimension on Size does not change them.'}};
+  ROLE_GREYED.label = {dimension: {flow: 'A flow node is labelled with its member; put a measure on Label to print its total under the name.'}};
+  STYLE_REASON.flow = 'A flow sets its ribbon opacity in Flow options; its bars take no border or halo.';
   function styleSupport(type) {
     const reason = STYLE_REASON[type];
     if (reason) return {opacity: reason, border: reason, halo: reason};
@@ -441,7 +464,7 @@
     return {opacity: true, border: true, halo: true};
   }
   function encodingSupport(type, engine) {
-    const mark = ALL_MARK_IDS.includes(type) ? type : 'automatic';
+    const mark = ALL_MARK_IDS.includes(type) || type === 'flow' ? type : 'automatic';
     const out = {};
     for (const id of markRows(mark)) {
       if (mark === 'map' || mark === 'filled-map') { out[id] = MAP_REASON; continue; }
@@ -473,10 +496,10 @@
   // Every card of today's sheets: one, read from the v2 `marks` object.
   function cardFromMarks(marks) {
     const m = plainObject(marks) ? marks : {};
-    return {id: 'card-1', name: '', type: ALL_MARK_IDS.includes(m.type) ? m.type : (typeof m.type === 'string' && m.type ? m.type : 'automatic'),
+    return flowFit({id: 'card-1', name: '', type: ALL_MARK_IDS.includes(m.type) ? m.type : (typeof m.type === 'string' && m.type ? m.type : 'automatic'),
       encodings: Object.assign(blankEncodings(), {color: pillOf(m.color), size: pillOf(m.size), label: pillOf(m.label),
         detail: shelf(m.detail), tooltip: shelf(m.tooltip)}),
-      opacity: 100, border: 'automatic', halo: 'automatic', visible: true, selectable: true, zoomExtent: true};
+      opacity: 100, border: 'automatic', halo: 'automatic', visible: true, selectable: true, zoomExtent: true});
   }
   // The v2 `marks` a card is read as by a console without v3, in createSheet's
   // key order. `base` keeps a v2-only key (orientation) the card does not own.
@@ -491,10 +514,11 @@
   // the v2 shape, so a sheet that never used them saves byte-identical.
   function hasV3Fields(card) {
     const e = (card && card.encodings) || {};
+    if (card && card.flow != null) return true;      // lane F: a Flow card's options
     return !!(e.shape || e.path || e.angle || card.measure || (card.name || '') !== '' ||
       card.opacity !== 100 || card.border !== 'automatic' || card.halo !== 'automatic' ||
       card.visible === false || card.selectable === false || card.zoomExtent === false ||
-      card.source != null || card.geography != null);
+      card.source != null || card.geography != null || card.map != null);
   }
   // One card on disk, keys in the contract's order.
   function serializeCard(card) {
@@ -509,6 +533,8 @@
     out.visible = card.visible; out.selectable = card.selectable; out.zoomExtent = card.zoomExtent;
     if (card.source != null) out.source = clone(card.source);
     if (card.geography != null) out.geography = card.geography;
+    if (card.map != null) out.map = clone(card.map);
+    if (card.flow != null) out.flow = flowOptions(card.flow);
     return out;
   }
 
@@ -534,6 +560,7 @@
     if (typeof card.id !== 'string' || !card.id || card.id.length > 64) return 'a card needs an id';
     if (typeof card.name !== 'string' || card.name.length > 120) return 'a card name must be text';
     if (!CARD_TYPES.includes(card.type)) return 'a card names an unknown mark type';
+    if ('flow' in card || card.type === 'flow') { const fault = flowFault(card); if (fault) return fault; }
     if (!plainObject(card.encodings)) return 'a card needs its encodings';
     const keys = Object.keys(card.encodings);
     if (keys.length !== ENCODING_IDS.length || ENCODING_IDS.some(id => !keys.includes(id))) return 'a card must carry all eight encodings';
@@ -559,6 +586,12 @@
     if ('measure' in card) { const fault = pillFault(card.measure, 'measure'); if (fault) return fault; }
     if ('source' in card && !plainObject(card.source)) return 'source must be an object';
     if ('geography' in card && (typeof card.geography !== 'string' || !card.geography || card.geography.length > 64)) return 'geography must be a level name';
+    // Lane P: a layer's source, level and map options (map-layers.js
+    // layerFault; server.py _card_ok applies the same rules on save).
+    if (mapModel && ('source' in card || 'geography' in card || 'map' in card)) {
+      const fault = mapModel.layerFault(card);
+      if (fault) return fault;
+    } else if ('map' in card && !plainObject(card.map)) return 'map options must be an object';
     return '';
   }
   function marksCardsFault(sheet) {
@@ -569,7 +602,13 @@
     if (!Array.isArray(cards) || !cards.length || cards.length > MAX_CARDS) return 'marksCards must be a list of 1 to 12 cards';
     for (const card of cards) { const fault = cardFault(card); if (fault) return fault; }
     if (new Set(cards.map(card => card.id)).size !== cards.length) return 'two cards share an id';
-    if (cards.length >= 2) {
+    if (cards.length >= 2 && cards.some(card => card.type === 'flow')) return 'a flow draws alone; it shares no axis and no map';
+    // Lane P: a sheet whose every card names a geography is a map. Its cards
+    // are its layers, each with its own source, so the dual-axis rule below
+    // is not theirs; a card set mixing layers and axis cards is refused.
+    const layered = cards.map(card => 'geography' in card);
+    if (layered.some(Boolean) && !layered.every(Boolean)) return 'every card of a map is a layer';
+    if (cards.length >= 2 && !layered.every(Boolean)) {
       const rows = shelf(sheet.rows).map(p => p.column + '|' + p.aggregation);
       const measures = cards.map(card => card.measure ? card.measure.column + '|' + card.measure.aggregation : '');
       if (measures.some(key => !key)) return 'every card of a dual axis names its measure';
@@ -582,11 +621,13 @@
   function normalizeCard(card) {
     const e = card.encodings;
     return {id: card.id, name: card.name, ...(card.measure ? {measure: pill(card.measure)} : {}), type: card.type,
+      ...(card.flow != null ? {flow: flowOptions(card.flow)} : {}),
       encodings: {color: pillOf(e.color), size: pillOf(e.size), label: pillOf(e.label), detail: shelf(e.detail),
         tooltip: shelf(e.tooltip), shape: shapeEncoding(e.shape), path: pillOf(e.path), angle: pillOf(e.angle)},
       opacity: card.opacity, border: card.border, halo: card.halo, visible: card.visible,
       selectable: card.selectable, zoomExtent: card.zoomExtent,
-      ...(card.source != null ? {source: clone(card.source)} : {}), ...(card.geography != null ? {geography: card.geography} : {})};
+      ...(card.source != null ? {source: clone(card.source)} : {}), ...(card.geography != null ? {geography: card.geography} : {}),
+      ...(card.map != null ? {map: clone(card.map)} : {})};
   }
   // The sheet's cards, validated and copied, or null when it has none (a v2
   // sheet) or when the ones it has are malformed (dropped on open, like a board).
@@ -614,6 +655,7 @@
       const v2 = cardFromMarks(state.marks);
       cards[0].type = v2.type;
       for (const id of ['color', 'size', 'label', 'detail', 'tooltip']) cards[0].encodings[id] = v2.encodings[id];
+      flowFit(cards[0]);
     }
     return cards;
   }
@@ -650,10 +692,11 @@
     const first = cards ? cards[0] : null;
     const card = cardFromMarks(sheet.marks);
     if (first && cards.length === 1) {
-      for (const key of ['name', 'opacity', 'border', 'halo', 'visible', 'selectable', 'zoomExtent', 'source', 'geography'])
+      for (const key of ['name', 'opacity', 'border', 'halo', 'visible', 'selectable', 'zoomExtent', 'source', 'geography', 'map'])
         if (first[key] != null) card[key] = first[key];
       card.id = first.id;
       for (const id of ['shape', 'path', 'angle']) card.encodings[id] = first.encodings[id];
+      if (card.type === 'flow' && first.flow) card.flow = flowOptions(first.flow);
     }
     delete sheet.marksCards;
     return writeCards(sheet, [card]);
@@ -665,7 +708,11 @@
     return shelf(sheet && sheet.rows).filter(p => { const f = fieldAt(meta, p.column); return f && f.role === 'measure'; });
   }
   const measureKey = p => p ? p.column + '|' + p.aggregation : '';
-  const dualAxisOn = sheet => Array.isArray(sheet && sheet.marksCards) && sheet.marksCards.length >= 2;
+  // Lane P: a map sheet's cards are its layers (every card names a geography),
+  // and layers are not a dual axis.
+  const mapLayersOn = sheet => Array.isArray(sheet && sheet.marksCards) && sheet.marksCards.length >= 1
+    && sheet.marksCards.every(card => plainObject(card) && typeof card.geography === 'string');
+  const dualAxisOn = sheet => Array.isArray(sheet && sheet.marksCards) && sheet.marksCards.length >= 2 && !mapLayersOn(sheet);
   function setDualAxis(sheet, columns, on) {
     const cards = readCards(sheet);
     if (!on) {
@@ -829,6 +876,151 @@
     return Object.assign(report, {notes: notes, markType: 'cards', cards: cards});
   }
 
+  /* ------------------------------------------------------- flow (lane F) */
+
+  // Board #46 (approved 2026-09-25). Flow draws a Sankey from a report worksheet's rows:
+  // Stages are the Columns shelf (two to five dimensions, in order); Size is the measure
+  // every ribbon carries (a row count without one); Colour splits and colours the ribbons
+  // by a dimension's members; Label prints a measure under each node's name; Tooltip lists
+  // fields per ribbon. The card keeps its options as `flow` (studio_api.json v4), and
+  // studio-flow.js draws it with the PAC evidence Flow's layout (flow-layout.js).
+  const FLOW_RIBBONS = ['source', 'target', 'outcome', 'gradient'];
+  const FLOW_ORDERS = ['value', 'alphabetical'];
+  const FLOW_OPTION_KEYS = ['ribbons', 'order', 'opacity', 'groupAfter'];
+  const FLOW_DEFAULTS = {ribbons: 'source', order: 'value', opacity: 40, groupAfter: 8};
+  const FLOW_MIN_STAGES = 2, FLOW_MAX_STAGES = 5, FLOW_MIN_GROUP = 2, FLOW_MAX_GROUP = 50;
+  const FLOW_DUAL_REASON = 'Flow draws alone, so it is not offered on a dual axis; turn Dual axis off to draw a flow.';
+  // The strip's Flow tile: offered on a report worksheet, greyed with the reason elsewhere.
+  const flowReason = (engine, dual) => engine === 'verified' ? FLOW_REASON : dual ? FLOW_DUAL_REASON : '';
+  const flowGroupOk = value => isInt(value) && (value === 0 || (value >= FLOW_MIN_GROUP && value <= FLOW_MAX_GROUP));
+  // A card's options with every key present and known (anything else takes the default).
+  function flowOptions(value) {
+    const v = plainObject(value) ? value : {};
+    return {ribbons: FLOW_RIBBONS.includes(v.ribbons) ? v.ribbons : FLOW_DEFAULTS.ribbons,
+      order: FLOW_ORDERS.includes(v.order) ? v.order : FLOW_DEFAULTS.order,
+      opacity: isInt(v.opacity) && v.opacity >= 0 && v.opacity <= 100 ? v.opacity : FLOW_DEFAULTS.opacity,
+      groupAfter: flowGroupOk(v.groupAfter) ? v.groupAfter : FLOW_DEFAULTS.groupAfter};
+  }
+  // The save-time rule (server.py _card_ok applies it too): options on a Flow card only,
+  // and a Flow card always carries all four.
+  function flowFault(card) {
+    if (card.type !== 'flow') return 'flow options belong to a Flow card only';
+    const value = card.flow;
+    if (!plainObject(value)) return 'a Flow card needs its flow options';
+    const keys = Object.keys(value);
+    if (keys.length !== FLOW_OPTION_KEYS.length || FLOW_OPTION_KEYS.some(key => !keys.includes(key)))
+      return 'flow options are ribbons, order, opacity and groupAfter';
+    if (!FLOW_RIBBONS.includes(value.ribbons)) return 'flow ribbons must be source, target, outcome or gradient';
+    if (!FLOW_ORDERS.includes(value.order)) return 'flow order must be value or alphabetical';
+    if (!isInt(value.opacity) || value.opacity < 0 || value.opacity > 100) return 'flow opacity must be a whole percent';
+    if (!flowGroupOk(value.groupAfter)) return 'flow groupAfter must be 0 or a whole number from 2 to 50';
+    return '';
+  }
+  // A Flow card always has its options; any other card has none.
+  function flowFit(card) {
+    if (card.type === 'flow') card.flow = flowOptions(card.flow);
+    else delete card.flow;
+    return card;
+  }
+  // Lane P's map layers are a separate uncommitted lane: a sheet whose cards are layers is never a
+  // flow, and without that lane there are no layers (typeof keeps this block committable alone).
+  const layersOn = sheet => typeof mapLayersOn === 'function' && mapLayersOn(sheet);
+  const isFlowSheet = state => plainObject(state) && !dualAxisOn(state) && !layersOn(state)
+    && readCards(state)[0].type === 'flow';
+  function setFlowOptions(sheet, patch) {
+    const cards = readCards(sheet);
+    if (cards.length !== 1 || cards[0].type !== 'flow') return sheet;
+    cards[0].flow = flowOptions(Object.assign({}, cards[0].flow, patch));
+    return writeCards(sheet, cards);
+  }
+  // Choosing Flow (the strip, the Chart menu): the sheet's dimensions become its Stages in
+  // shelf order and its first measure goes to Size; leaving Flow puts Size's measure back
+  // on an empty Rows. One edit, undone as one. False when no Flow boundary is crossed.
+  function flowSwitch(sheet, columns, type) {
+    if (!plainObject(sheet) || dualAxisOn(sheet) || layersOn(sheet)) return false;
+    const was = readCards(sheet)[0].type === 'flow';
+    if (was === (type === 'flow')) return false;
+    const meta = classifyFields(columns, sheet.types);
+    const role = p => { const field = p && fieldAt(meta, p.column); return field ? field.role : ''; };
+    if (!plainObject(sheet.marks)) sheet.marks = {type: 'automatic', color: null, size: null, label: null, detail: [], tooltip: []};
+    const marks = sheet.marks;
+    if (type === 'flow') {
+      const placed = [...shelf(sheet.columns), ...shelf(sheet.rows)];
+      const measure = placed.find(p => role(p) === 'measure');
+      sheet.columns = placed.filter(p => role(p) === 'dimension');
+      sheet.rows = [];
+      if (measure && marks.size == null) marks.size = measure;
+      marks.type = 'flow';
+      adoptMarks(sheet);
+      writeCards(sheet, readCards(sheet));
+      return true;
+    }
+    const size = pillOf(marks.size);
+    if (!shelf(sheet.rows).length && size && role(size) === 'measure') { sheet.rows = [size]; marks.size = null; }
+    marks.type = type;
+    adoptMarks(sheet);
+    return true;
+  }
+  const aggregateName = id => (AGGREGATIONS.find(entry => entry[0] === id) || [id, id])[1];
+  // What studio-flow.js draws, or the issue that stops it (fewer than two stages). A pill
+  // the flow cannot use is named in a note, never dropped in silence.
+  function compileFlow(state, columns, card) {
+    const meta = classifyFields(columns, state && state.types);
+    const issues = [], notes = [];
+    const attach = list => shelf(list).map(p => Object.assign({}, p, {field: fieldAt(meta, p.column)})).filter(p => p.field);
+    const one = value => value == null ? null : attach([value])[0] || null;
+    const named = p => ({column: p.column, aggregation: p.aggregation, name: p.field.name, role: p.field.role,
+      unit: p.field.unit || ''});
+    const placed = attach(state.columns);
+    const dimensions = placed.filter(p => p.field.role === 'dimension');
+    for (const p of placed.filter(p => p.field.role !== 'dimension'))
+      notes.push('Stages take dimensions; ' + p.field.name + ' is not a stage. Put it on Size to size the ribbons.');
+    if (dimensions.length > FLOW_MAX_STAGES) {
+      const left = dimensions.slice(FLOW_MAX_STAGES).map(p => p.field.name);
+      notes.push('A flow draws up to five stages; ' + left.join(', ') + (left.length === 1 ? ' is' : ' are') + ' not drawn.');
+    }
+    const stages = dimensions.slice(0, FLOW_MAX_STAGES);
+    const onRows = attach(state.rows).map(p => p.field.name);
+    if (onRows.length) notes.push('A flow draws its Stages and Size; ' + onRows.join(', ') + ' on Rows '
+      + (onRows.length === 1 ? 'is' : 'are') + ' not drawn. Move ' + (onRows.length === 1 ? 'it' : 'them') + ' to Stages or Size.');
+    if (stages.length < FLOW_MIN_STAGES)
+      issues.push('A flow needs two to five dimensions on Stages, in order: where the money starts, then each place it goes.');
+    const e = card.encodings;
+    const size = one(e.size), colour = one(e.color), label = one(e.label);
+    let measure = null;
+    if (size && size.field.role === 'measure') {
+      const additive = size.aggregation === 'sum' || size.aggregation === 'count';
+      measure = Object.assign(named(size), {aggregation: additive ? size.aggregation : size.aggregation === 'countd' ? 'count' : 'sum'});
+      if (!additive) notes.push('A flow adds its ribbons together, so ' + size.field.name + ' is drawn as '
+        + (measure.aggregation === 'count' ? 'a count' : 'a sum') + '; ' + aggregateName(size.aggregation) + ' does not add up across a stage.');
+    } else if (size) notes.push('Size takes a measure; ' + size.field.name + ' does not size the ribbons.');
+    else notes.push('No measure is on Size, so each ribbon counts worksheet rows.');
+    if (colour && colour.field.role !== 'dimension')
+      notes.push('A flow colours its ribbons by a dimension; ' + colour.field.name + ' on Colour does not change them.');
+    if (label && label.field.role !== 'measure')
+      notes.push('Label prints a measure under each node\u2019s name; ' + label.field.name + ' is a dimension, so each node keeps its name only.');
+    if (e.detail.length) notes.push('Detail does not split a flow; put the field on Stages to add a stage, or on Colour to colour the ribbons by it.');
+    const filters = (state.filters || [])
+      .filter(f => f && filterActive(f) && fieldAt(meta, Number(f.column)))
+      .map(f => normalizeFilter(f));
+    if (filters.some(f => ['gte', 'lte'].includes(f.op))) notes.push('Number filters apply to rows, not totals. Filter totals in Verified contributions.');
+    const pagePill = pill(state.pages);
+    if (pagePill && fieldAt(meta, pagePill.column) && state.pageMember)
+      filters.push({column: pagePill.column, op: 'equals', value: String(state.pageMember)});
+    const analytics = state.analytics || {};
+    if (analytics.transform && analytics.transform !== 'none') notes.push('A flow draws the selected rows as one period, so period analysis is left off.');
+    const params = state.params || {};
+    const config = stages.length >= FLOW_MIN_STAGES ? {
+      type: 'flow', x: -1, y: measure ? measure.column : -1, aggregation: measure ? measure.aggregation : 'count',
+      transform: 'none', stages: stages.map(named), measure,
+      colour: colour && colour.field.role === 'dimension' ? named(colour) : null,
+      label: label && label.field.role === 'measure' ? named(label) : null,
+      tooltip: e.tooltip.map(one).filter(Boolean).map(named),
+      filters, start: positiveInteger(params.start), end: positiveInteger(params.end), limit: positiveInteger(params.limit),
+      options: flowOptions(card.flow), lenient: true} : null;
+    return {config, issues, notes, renderMode: 'chart', markType: 'flow', map: null, fields: meta};
+  }
+
   /* --------------------------------------------------------------- compile */
 
   const positiveInteger = value => {
@@ -860,8 +1052,10 @@
     // Marks v3 (#52): a dual axis compiles through compileCards; one card
     // reads its v3 encodings (Shape, Path, Angle) through readCards.
     const cardSet = readCards(state);
-    if (cardSet.length >= 2) return compileCards(state, columns, cardSet);
+    if (cardSet.length >= 2 && !mapLayersOn(state)) return compileCards(state, columns, cardSet);
     const card = cardSet[0];
+    // Lane F (#46): a Flow card compiles to its own configuration; studio-flow.js draws it.
+    if (card.type === 'flow' && cardSet.length === 1) return compileFlow(state, columns, card);
     const meta = classifyFields(columns, state && state.types);
     const issues = [], notes = [];
     const attach = list => shelf(list)
@@ -2116,8 +2310,11 @@
     CARDS_REFUSAL, DUAL_MARKS, DUAL_REASON, PATH_TYPES, ANGLE_TYPES,
     markRows, markOfEngineType, encodingSupport, roleSupport, styleSupport, shapeEncoding, cardFromMarks, marksFromCard, hasV3Fields,
     serializeCard, validateMarksCards, normalizeMarksCards, readCards, writeCards, adoptMarks, measuresOnRows,
-    dualAxisOn, setDualAxis, syncCardsToRows, cardEncodingPills, setCardEncoding, setCardType, setCardStyle,
-    allCardType, glyphFor, dualCardMark, compileCards
+    dualAxisOn, mapLayersOn, setDualAxis, syncCardsToRows, cardEncodingPills, setCardEncoding, setCardType, setCardStyle,
+    allCardType, glyphFor, dualCardMark, compileCards,
+    // Flow (lane F, board #46, studio_api.json v4).
+    FLOW_RIBBONS, FLOW_ORDERS, FLOW_DEFAULTS, FLOW_MIN_STAGES, FLOW_MAX_STAGES, FLOW_MAX_GROUP, flowReason, flowOptions,
+    flowFault, flowFit, isFlowSheet, flowSwitch, setFlowOptions, compileFlow
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatStudioCore = api;

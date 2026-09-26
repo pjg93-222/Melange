@@ -32,21 +32,15 @@ $fanout = Join-Path $toolsRoot 'api_company_cycle_fanout.py'
 if (-not $PythonPath -and $env:MENTAT_PYTHON_PATH) {
   $PythonPath = $env:MENTAT_PYTHON_PATH
 }
-if (-not $PythonPath) {
-  $pythonCommand = Get-Command python -CommandType Application `
-    -ErrorAction SilentlyContinue |
-    Select-Object -First 1
-  if ($null -ne $pythonCommand) {
-    $PythonPath = $pythonCommand.Source
-  }
-}
-if (-not $PythonPath) {
-  $cachedPython = Join-Path $env:USERPROFILE (
-    '.cache\codex-runtimes\codex-primary-runtime\dependencies\' +
-    'python\python.exe'
-  )
-  if (Test-Path -LiteralPath $cachedPython -PathType Leaf) {
-    $PythonPath = $cachedPython
+# One interpreter order for every Mentat launcher (tools\mentat_python.psm1): the
+# explicit path above, then Mentat's own venv, then the Codex app's runtime Python,
+# then python on PATH. A fallback past the venv is reported on stderr, never stdout.
+Import-Module (Join-Path $toolsRoot 'mentat_python.psm1') -Force
+$pythonChoice = Resolve-MentatPython -ExplicitPath $PythonPath
+if ($null -ne $pythonChoice) {
+  $PythonPath = $pythonChoice.Path
+  if ($pythonChoice.Warning) {
+    [Console]::Error.WriteLine('WARNING: ' + $pythonChoice.Warning)
   }
 }
 if (-not $PythonPath) {

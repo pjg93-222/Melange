@@ -30,8 +30,9 @@ def verify(directory):
                 key = (row['industry'], int(row['cycle']), row['candidate_id'])
                 if key in expected:
                     raise ValueError('Duplicate candidate across source reports')
-                expected[key] = [float(row[name]) for name in ('direct', 'estimated_non_opposition',
-                    'estimated_opposition', 'direct_plus_estimated_non_opposition')]
+                # Blank is not traced (enrich_downstream.py, transfer index status).
+                expected[key] = [None if row[name] == '' else float(row[name]) for name in ('direct',
+                    'estimated_non_opposition', 'estimated_opposition', 'direct_plus_estimated_non_opposition')]
         with (audit / 'allocation_coverage.csv').open(encoding='utf-8-sig', newline='') as stream:
             for row in csv.DictReader(stream):
                 key = (int(row['cycle']), row['root'])
@@ -49,6 +50,16 @@ def verify(directory):
             if key in seen or key not in expected:
                 raise ValueError('Duplicate or unexpected candidate in workbook')
             seen.add(key)
+            if expected[key][1] is None:
+                # Not traced: the three conditional cells stay blank. near() reads
+                # None as 0, so a blank that came back as 0 would pass it.
+                if any(value not in (None, '') for value in row[6:9]):
+                    raise ValueError('Untraced conditional estimates must stay blank in the workbook')
+                near(row[5], expected[key][0], 'Candidate workbook versus full CSV')
+                ordering.append((key[0], key[1], -row[5], key[2]))
+                continue
+            if any(value in (None, '') for value in row[6:8]):
+                raise ValueError('Traced conditional estimates are blank in the workbook')
             for actual, value in zip(row[5:9], expected[key]):
                 near(actual, value, 'Candidate workbook versus full CSV')
             near(row[8], row[5] + row[6], 'Opposition excluded from combined estimate')

@@ -263,19 +263,32 @@ try {
   if (-not $available -and -not $freePort) { throw 'No local MENTAT port is available. Close an unused local app and try again.' }
   if (-not $available) {
     if (-not $reclaimed) { $Port = $freeCandidate }
+# One interpreter order for every Mentat launcher (tools\mentat_python.psm1): an explicit
+# -PythonPath first (a D-029 restart passes the one its server runs on), then Mentat's own
+# venv (%LOCALAPPDATA%\Mentat\venv), then the Codex app's runtime Python, then python on
+# PATH. The module is loaded only when no path was given, so a copy of this launcher
+# without the tools folder still starts an explicit interpreter.
+$pythonSource = 'explicit -PythonPath'
+$pythonWarning = $null
 if (-not $PythonPath) {
-  $PythonPath = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe'
-  if (-not (Test-Path -LiteralPath $PythonPath)) {
-    $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
-    if (-not $pythonCommand) { throw 'Python 3.11 or newer is required. Install Python, then run: python -m pip install openpyxl' }
-    $PythonPath = $pythonCommand.Source
-  }
+  Import-Module (Join-Path $projectPath 'tools\mentat_python.psm1') -Force
+  $pythonChoice = Resolve-MentatPython
+  if ($null -eq $pythonChoice) { throw 'Python 3.11 or newer is required. Create the Mentat venv described in mentat\requirements-console.txt.' }
+  $PythonPath = $pythonChoice.Path
+  $pythonSource = $pythonChoice.Source
+  $pythonWarning = $pythonChoice.Warning
 }
+Write-Host ('MENTAT Python: ' + $PythonPath + ' (' + $pythonSource + ')')
+if ($pythonWarning) { Write-Warning $pythonWarning }
 # The server imports openpyxl itself. A second Python process just to check for
 # it cost a full interpreter start (2.8 s on a loaded host). The package folder
 # beside the interpreter is checked instead; the process check remains as the
 # fallback for a layout this does not recognise.
 $pythonHome = Split-Path -Parent $PythonPath
+# A venv keeps its packages one level above Scripts\python.exe, in <venv>\Lib\site-packages.
+if ($pythonHome -and (Test-Path -LiteralPath (Join-Path (Split-Path -Parent $pythonHome) 'pyvenv.cfg'))) {
+  $pythonHome = Split-Path -Parent $pythonHome
+}
 $openpyxlPresent = (Test-Path -LiteralPath (Join-Path $pythonHome 'Lib\site-packages\openpyxl')) -or
   (Test-Path -LiteralPath (Join-Path $pythonHome 'lib\site-packages\openpyxl'))
 if (-not $openpyxlPresent) {

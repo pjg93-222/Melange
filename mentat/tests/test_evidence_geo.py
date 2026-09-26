@@ -509,7 +509,9 @@ class Contract(GeoFixture):
         # negative controls still fail for their own stated reasons. The five
         # examples were regenerated from the producer at the same time, so an
         # example cannot record a shape the route no longer emits.
-        self.assertEqual(self.contract['version'], 3)
+        # v4 (lane C, 2026-09-25) documents lane B's four fields and item 7 of
+        # F4, additively; test_evidence_geo_contract_v4.py asserts it.
+        self.assertEqual(self.contract['version'], 4)
         self.assertEqual(self.contract['route'], '/api/evidence-geo')
         self.assertIn('RULING A', ' '.join(self.contract['rules']))
         self.assertIn('by_zip', ' '.join(self.contract['rules']))
@@ -725,6 +727,201 @@ class RulingA(GeoFixture):
             self.assertTrue(str(payload['cycle']).strip())
             self.assertTrue(payload['vintage'])
             self.assertEqual(evidence_geo.contract_problems(payload), [])
+
+
+class LaneBFixture(unittest.TestCase):
+    """A 119th map with single-seat states and a two-seat MT, the FAIRSHAKE-shaped
+    network (a root that transfers to two saved PACs), and its own masters."""
+
+    SEATS = ('WY-AL', 'AK-AL', 'MT-01', 'MT-02', 'CA-12')
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+        geo, inputs = self.root / 'geo', self.root / 'inputs'
+        geo.mkdir(parents=True)
+        shape = {'path': 'M0 0L1 0L1 1Z', 'centroid': [1, 1]}
+        (geo / 'index.json').write_text(json.dumps({
+            'width': 100, 'height': 60, 'cycles': {'2026': '119'},
+            'vintages': {'119': {'file': 'cd119.json', 'congress': '119th'}}}), encoding='utf-8')
+        (geo / 'cd119.json').write_text(json.dumps({
+            'width': 100, 'height': 60, 'districts': {key: shape for key in self.SEATS},
+            'states': {state: shape for state in ('WY', 'AK', 'MT', 'CA', 'VA', 'FL')}}), encoding='utf-8')
+        (inputs / 'fec_beneficiary' / 'cn26').mkdir(parents=True)
+        (inputs / 'fec_beneficiary' / 'cn26' / 'cn.txt').write_text(
+            'H6CA12000|HOUSE, HOPE|DEM|2026|CA|H|12|I|C|C00700000|||\n', encoding='utf-8')
+        (inputs / 'fec_committee_master' / 'cm26').mkdir(parents=True)
+        (inputs / 'fec_committee_master' / 'cm26' / 'cm.txt').write_text(
+            'C00848440|PROTECT PROGRESS|TRES|ST1|ST2|ST. PAUL|FL|55116|U|O|UNK|Q|||\n'
+            'C00836221|DEFEND AMERICAN JOBS|TRES|ST1|ST2|ARLINGTON|VA|22201|U|O|UNK|Q|||\n'
+            'C00571703|SENATE LEADERSHIP FUND|TRES|ST1|ST2|WASHINGTON|VA|20001|U|O|UNK|Q|||\n',
+            encoding='utf-8')
+        self.saved = {name: os.environ.get(name) for name in ('MENTAT_GEO_DIR', 'MENTAT_INPUTS_DIR')}
+        os.environ['MENTAT_GEO_DIR'] = str(geo)
+        os.environ['MENTAT_INPUTS_DIR'] = str(inputs)
+        district_geo.reset_caches()
+        self.addCleanup(self.restore)
+        self.snapshot_root = self.root / 'snapshots'
+
+    def restore(self):
+        for name, value in self.saved.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+        district_geo.reset_caches()
+        evidence_geo._views.clear()
+        self.temp.cleanup()
+
+    def write(self, identifier, units):
+        directory = self.snapshot_root / identifier
+        directory.mkdir(parents=True, exist_ok=True)
+        (directory / 'snapshots.json').write_text(json.dumps(units), encoding='utf-8')
+        (directory / 'evidence.json').write_text(json.dumps({'version': 1, 'company': 'Coinbase'}),
+                                                 encoding='utf-8')
+
+    def spend(self, identifier, committee='C00835959'):
+        return evidence_geo.geography('snapshot', identifier, committee, '2026', 'spent',
+                                      snapshot_root=self.snapshot_root)
+
+
+def recipient(committee, spend, office_state, district):
+    """A saved recipient PAC whose only spending is one Schedule E row."""
+    return {'committee_id': committee, 'cycle': 2026, 'receipts': [], 'disbursements': [],
+            'expenditures': [expenditure(spend, 'H6XX00000', 'S', candidate_office='H',
+                                         candidate_office_state=office_state,
+                                         candidate_office_district=district)],
+            'totals': {'disbursements': float(spend), 'coverage_end_date': '2026-07-31'}}
+
+
+def fairshake(itemized):
+    """The root: its summary reports 65,000 on line 22; `itemized` rows say where it went."""
+    return {'committee_id': 'C00835959', 'cycle': 2026, 'receipts': [], 'expenditures': [],
+            'disbursements': [disbursement('22', value, recipient_committee_id=committee,
+                                           recipient_name=committee, disbursement_type='24G',
+                                           sub_id=f'{committee}-{index}')
+                              for index, (committee, value) in enumerate(itemized)],
+            'totals': {'disbursements': 65000.0, 'transfers_to_affiliated_committee': 65000.0,
+                       'coverage_end_date': '2026-07-31'}}
+
+
+class NotItemizedTransfers(LaneBFixture):
+    """F6 (Paul, 2026-09-25): no dollar may count twice. A transfer the summary
+    reports but no row itemizes is its own disclosed line, outside every total."""
+
+    def test_the_early_snapshot_no_longer_counts_the_unitemized_transfers_again(self):
+        recipients = [recipient('C00836221', 40000, 'CA', '12'), recipient('C00848440', 25000, 'CA', '12')]
+        self.write('early', [fairshake([('C00836221', 30000), ('C00848440', 21000)]), *recipients])
+        self.write('later', [fairshake([('C00836221', 30000), ('C00848440', 21000),
+                                        ('C00836221', 9000), ('C00848440', 5000)])])
+        early, later = self.spend('early'), self.spend('later')
+        # 40,000 + 25,000 of recipient spending, and not the 14,000 again.
+        self.assertEqual(early['reported_total'], 65000)
+        self.assertEqual(later['reported_total'], 65000)
+        self.assertTrue(early['reconciles'])
+        self.assertEqual(early['transfers_not_itemized'],
+                         [{'committee': 'C00835959', 'cycle': '2026', 'committee_name': 'C00835959',
+                           'reason': 'transfers reported, recipient not itemized', 'amount': 14000.0,
+                           'summary_amount': 65000.0, 'itemized_amount': 51000.0}])
+        self.assertEqual(early['transfers_not_itemized_total'], 14000)
+        self.assertEqual(later['transfers_not_itemized'], [])
+        self.assertEqual(later['transfers_not_itemized_total'], 0)
+        # Never in the geography: located plus unlocated is the total without it.
+        self.assertAlmostEqual(early['located_total'] + early['unlocated_total'], 65000, places=2)
+        self.assertEqual(early['sides']['spent']['reported_total'], 65000)
+        for payload in (early, later):
+            self.assertEqual(evidence_geo.contract_problems(payload), [])
+
+    def test_the_contract_refuses_a_disclosed_line_that_does_not_add_up(self):
+        payload = {'transfers_not_itemized': [{'committee': 'C1', 'reason': 'x', 'amount': 5,
+                                               'summary_amount': 10, 'itemized_amount': 4}],
+                   'transfers_not_itemized_total': 7}
+        problems = evidence_geo.not_itemized_problems(payload)
+        self.assertTrue(any('not its summary less its itemized rows' in problem for problem in problems))
+        self.assertTrue(any('does not add up' in problem for problem in problems))
+        self.assertEqual(evidence_geo.not_itemized_problems({}), [])
+
+
+class AtLargeSeats(LaneBFixture):
+    """F7 (Paul, 2026-09-25): filings write a single-seat state's seat as 01."""
+
+    def test_a_filed_01_in_a_single_seat_state_lands_on_its_at_large_seat(self):
+        self.write('seats', [{'committee_id': 'C00835959', 'cycle': 2026, 'receipts': [],
+                              'disbursements': [],
+                              'expenditures': [
+                                  expenditure(1927706, 'H2AK01158', 'S', candidate_office='H',
+                                              candidate_office_state='AK', candidate_office_district='01'),
+                                  expenditure(500, 'H6WY00001', 'O', candidate_office='H',
+                                              candidate_office_state='WY', candidate_office_district='1'),
+                                  expenditure(700, 'H6MT01000', 'S', candidate_office='H',
+                                              candidate_office_state='MT', candidate_office_district='01')],
+                              'totals': {'disbursements': 1928906.0}}])
+        payload = self.spend('seats')
+        districts = {row['key']: row['amount'] for kind in payload['kinds'] for row in kind['districts']}
+        self.assertEqual(districts, {'AK-AL': 1927706, 'WY-AL': 500, 'MT-01': 700})
+        self.assertEqual(payload['unlocated'], [])
+        self.assertTrue(payload['reconciles'])
+
+
+class TransactionTypeOnTheMap(LaneBFixture):
+    """F8: the map reads a transfer by its transaction type, like the index."""
+
+    def test_a_24k_on_line_21b_is_a_transfer_and_a_24z_on_line_23_is_not(self):
+        self.write('types', [{'committee_id': 'C00835959', 'cycle': 2026, 'receipts': [], 'expenditures': [],
+                              'disbursements': [
+                                  disbursement('21B', 3000, recipient_committee_id='C00571703',
+                                               recipient_name='SENATE LEADERSHIP FUND',
+                                               disbursement_type='24K', sub_id='t1'),
+                                  disbursement('23', 500, recipient_committee_id='C00836221',
+                                               recipient_name='DEFEND AMERICAN JOBS',
+                                               disbursement_type='24Z', sub_id='t2'),
+                                  disbursement('22', 700, recipient_committee_id='C00848440',
+                                               recipient_name='PROTECT PROGRESS', sub_id='t3')],
+                              'totals': {'disbursements': 4200.0}}])
+        payload = self.spend('types')
+        kinds = {kind['kind']: kind for kind in payload['kinds']}
+        self.assertEqual({row['key']: row['amount'] for row in kinds['transfers']['states']},
+                         {'VA': 3000, 'FL': 700})
+        self.assertEqual(kinds['operating']['total'], 0)
+        self.assertEqual([(row['reason'], row['amount']) for row in payload['unlocated']],
+                         [('C00835959: a line 23 payment of transaction type 24Z, which is not a transfer', 500)])
+        self.assertEqual(payload['transfer_rule'],
+                         {'transaction_types': ['24G', '24K'], 'rows_without_transaction_type': 1,
+                          'legs_by_line_fallback': 1, 'amount_by_line_fallback': 700.0})
+        self.assertEqual(sorted((edge['destination'], edge['amount']) for edge in payload['downstream_edges']),
+                         [('C00571703', 3000), ('C00848440', 700)])
+
+
+class ReloadsOnTheMap(LaneBFixture):
+    """F11 (Paul, 2026-09-25): the map totals a reload - a row differing from
+    another only in SUB_ID - once, on both sides; a distinct transaction id
+    stays counted."""
+
+    def test_a_receipt_reload_is_counted_once_on_the_raised_map(self):
+        gift = receipt(1000, contributor_state='CA', report_type='M6', transaction_id='SA11AI.1',
+                       file_number='5', contribution_receipt_date='2026-01-02', sub_id='r1')
+        self.write('reloads', [{'committee_id': 'C00835959', 'cycle': 2026, 'disbursements': [], 'expenditures': [],
+                                'receipts': [gift, {**gift, 'sub_id': 'r2'},
+                                             {**gift, 'sub_id': 'r3', 'transaction_id': 'SA11AI.2'}],
+                                'totals': {'receipts': 2000.0, 'disbursements': 0.0}}])
+        payload = evidence_geo.geography('snapshot', 'reloads', 'C00835959', '2026', 'raised',
+                                         snapshot_root=self.snapshot_root)
+        self.assertEqual(payload['located_total'] + payload['unlocated_total'], 2000)
+        self.assertTrue(payload['reconciles'])
+        self.assertEqual(payload['sides']['raised']['rows'], 2)
+
+    def test_a_spend_reload_is_counted_once_and_the_payload_says_so(self):
+        spend = expenditure(500, 'H6XX00000', 'S', candidate_office='H', candidate_office_state='CA',
+                            candidate_office_district='12', report_type='M6', transaction_id='SE.1',
+                            file_number='5', expenditure_date='2026-03-01', payee_name='MEDIA', sub_id='e1')
+        self.write('reloads', [{'committee_id': 'C00835959', 'cycle': 2026, 'receipts': [], 'disbursements': [],
+                                'expenditures': [spend, {**spend, 'sub_id': 'e2'}],
+                                'totals': {'disbursements': 500.0}}])
+        payload = self.spend('reloads')
+        self.assertEqual(payload['located_total'], 500)
+        self.assertTrue(payload['reconciles'])
+        self.assertEqual((payload['reload_rule']['reload_rows'], payload['reload_rule']['reload_amount']), (1, 500))
+        self.assertEqual(payload['reload_rule']['rows_without_transaction_id_or_file_number'], 0)
 
 
 if __name__ == '__main__':

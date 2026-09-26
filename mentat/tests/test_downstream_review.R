@@ -28,7 +28,7 @@ edge_path <- file.path(root,'oth24','transfer-edges.csv')
 raw_path <- file.path(root,'oth24','itoth.txt'); writeLines('source version 1',raw_path)
 edges <- data.table::data.table(cycle=2024L,source='ROOT',destination='SPENDER',amount=50)
 data.table::fwrite(edges,edge_path)
-jsonlite::write_json(list(version=5,ambiguous_version_policy='count_all',
+jsonlite::write_json(list(version=6,ambiguous_version_policy='count_all',
   source_sha256=digest::digest(file=raw_path,algo='sha256'),
   edges_sha256=digest::digest(file=edge_path,algo='sha256'),counts=list()),
   file.path(root,'oth24','transfer-info.json'),auto_unbox=TRUE)

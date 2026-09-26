@@ -26,7 +26,9 @@
   // Console redesign build 06, fix round 1 (R06-09): `compare` is the second
   // cycle of an open two-cycle map compare (board M13), a four-digit cycle
   // like `cycle`. Absent means one map.
-  const PANE_FIELDS = ['source', 'id', 'committee', 'cycle', 'map', 'compare'];
+  // Lane F (board #44, 2026-09-25) adds `flow`: the basis of the Flow (Sankey) view open
+  // on that pane, 'reported' or 'attributed'. Absent means the pane grid is showing.
+  const PANE_FIELDS = ['source', 'id', 'committee', 'cycle', 'map', 'compare', 'flow'];
   const PANE_KEYS = [];
   for (let pane = 0; pane < PANES.length; pane += 1) {
     for (let field = 0; field < PANE_FIELDS.length; field += 1) {
@@ -37,6 +39,7 @@
   const PANE_ID = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
   const PANE_COMMITTEE = /^(unassigned|[A-Za-z0-9][A-Za-z0-9-]{0,31})$/;
   const PANE_MAP = ['raised', 'spent'];
+  const PANE_FLOW = ['reported', 'attributed'];
   // The downstream drawer (v5, 2026-09-19). `drawer` is the committee whose
   // onward funding is open beside Top organizations, `drawerDirection` the
   // side of that committee's activity being shown. They are separate from
@@ -78,6 +81,7 @@
   const PANE_ID_REASON = 'a pane id must be an import id or a saved-snapshot directory name';
   const PANE_COMMITTEE_REASON = 'a pane committee must be a committee id or "unassigned"';
   const PANE_MAP_REASON = 'a pane map must be one of ' + PANE_MAP.join(', ');
+  const PANE_FLOW_REASON = 'a pane flow must be one of ' + PANE_FLOW.join(', ');
   const MODE_REASON = 'mode must be one of ' + MODES.join(', ');
   const SAVED_REASON = 'saved must be a 32-character hexadecimal saved-view id';
   const DRAWER_REASON = 'drawer must be a committee id';
@@ -102,6 +106,7 @@
       if (field === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
       if (field === 'map' && PANE_MAP.indexOf(text) < 0) return {ok: false, value: text, reason: PANE_MAP_REASON};
       if (field === 'compare' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};
+      if (field === 'flow' && PANE_FLOW.indexOf(text) < 0) return {ok: false, value: text, reason: PANE_FLOW_REASON};
       return {ok: true, value: text};
     }
     if (key === 'cycle' && !/^\d{4}$/.test(text)) return {ok: false, value: text, reason: CYCLE_REASON};

@@ -329,12 +329,12 @@ class GraphTests(unittest.TestCase):
     def test_estimates_without_an_audit_bundle_say_so_in_words(self):
         # r4 code review (observed): estimates on a report written without
         # its audit bundle answered with the raw OS error and a local path.
+        # F4 (Paul approved 2026-09-25): the words name what is missing and
+        # what makes it (test_graph_not_traced.py has the F2 cases).
         value = self.view(mode='estimates')
         self.assertFalse(value['candidate_available'])
         self.assertEqual(value['candidates'], [])
-        self.assertEqual(value['candidate_note'],
-                         'Saved estimates are unavailable: this report has no estimate audit bundle (Giving.audit). '
-                         'Missing estimates are not zero.')
+        self.assertEqual(value['candidate_note'], 'No estimate bundle for this industry yet; rebuild the workbook.')
         self.assertNotIn('Errno', value['candidate_note'])
 
     def test_direction_totals_are_empty_when_the_downstream_sheet_is_refused(self):

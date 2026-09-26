@@ -26,12 +26,23 @@ function sheet(name,headers,rows,description){
   value.freezePanes.freezeRows(5);
   return value;
 }
+// A cycle whose transfer index was not current arrives with null conditional values
+// (enrich_downstream.py). They stay blank cells: blank is not traced, 0 would claim it was.
+const untraced=data.rows.some(r=>r.estimated_non_opposition==null);
 const estimates=sheet('Candidate Funding',
   ['Industry','Cycle','Candidate ID','Candidate','Party','Direct Observed','Conditional Non-opposition','Conditional Opposition','Direct + Non-opposition Estimate'],
-  data.rows.map(r=>[r.industry,r.cycle,r.candidate_id,r.candidate_name,r.party,r.direct,r.estimated_non_opposition,r.estimated_opposition,r.direct_plus_estimated_non_opposition]),
-  'Conditional estimates are not traced dollars or lower bounds. Opposition remains against its named target and is excluded from the combined non-opposition estimate. Sorted within each industry and cycle.');
+  data.rows.map(r=>[r.industry,r.cycle,r.candidate_id,r.candidate_name,r.party,r.direct,r.estimated_non_opposition??'',r.estimated_opposition??'',r.direct_plus_estimated_non_opposition??'']),
+  'Conditional estimates are not traced dollars or lower bounds. Opposition remains against its named target and is excluded from the combined non-opposition estimate. Sorted within each industry and cycle.'
+  +(untraced?' Blank conditional values: that industry and cycle had no current transfer index, so nothing was traced there (see Data Quality). Blank is not zero.':''));
 estimates.getRange(`F6:I${5+data.rows.length}`).format.numberFormat=money;
-estimates.getRange(`I6:I${5+data.rows.length}`).formulas=data.rows.map((_,i)=>[`=F${i+6}+G${i+6}`]);
+// Only traced rows carry the combined formula: F+G over a blank G would print Direct as if
+// the conditional estimate were 0. An all-traced book gets the one call it always got.
+for(let start=0;start<data.rows.length;){
+  const traced=data.rows[start].estimated_non_opposition!=null;let end=start;
+  while(end<data.rows.length&&(data.rows[end].estimated_non_opposition!=null)===traced)end++;
+  if(traced)estimates.getRange(`I${start+6}:I${end+5}`).formulas=data.rows.slice(start,end).map((_,i)=>[`=F${start+i+6}+G${start+i+6}`]);
+  start=end;
+}
 estimates.getRange('D:D').format.columnWidth=37;
 estimates.getRange('B:B').format.columnWidth=10;
 estimates.getRange('C:C').format.columnWidth=16;

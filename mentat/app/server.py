@@ -117,6 +117,28 @@ STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("a
                  # opens (CSP script-src 'self' allows a same-origin src), so a
                  # console that never opens a map pays nothing for it.
                  '/evidence-map.js': ('evidence-map.js', 'text/javascript'),
+                 # Lane F (boards #44-#46): the Sankey layout and renderer, the two views that
+                 # open it (PAC evidence Flow, Graph's Follow the money) and their stylesheet.
+                 '/flow-layout.js': ('flow-layout.js', 'text/javascript'),
+                 '/flow-chart.js': ('flow-chart.js', 'text/javascript'),
+                 '/evidence-flow.js': ('evidence-flow.js', 'text/javascript'),
+                 '/graph-flow.js': ('graph-flow.js', 'text/javascript'),
+                 '/studio-flow.js': ('studio-flow.js', 'text/javascript'),
+                 '/flow.css': ('flow.css', 'text/css'),
+                 # Lane P (boards #47-#55): maps whose marks cards are its layers. The
+                 # model (map-layers.js), the Albers SVG engine and Layer control
+                 # (map-engine.js), the Chart Studio wiring (map-studio.js), the
+                 # offline street renderer (map-streets.mjs, an ES module the engine
+                 # imports only when Streets is chosen) and their stylesheet. The v2
+                 # geography index is listed so a rebuilt tree moves the asset hash;
+                 # the tree itself and the street files have routes of their own.
+                 '/map-layers.js': ('map-layers.js', 'text/javascript'),
+                 '/map-engine.js': ('map-engine.js', 'text/javascript'),
+                 '/map-studio.js': ('map-studio.js', 'text/javascript'),
+                 '/map-streets.mjs': ('map-streets.mjs', 'text/javascript'),
+                 '/map-evidence.js': ('map-evidence.js', 'text/javascript'),
+                 '/map.css': ('map.css', 'text/css'),
+                 '/geo/v2/index.json': ('geo/v2/index.json', 'application/json; charset=utf-8'),
                  '/charts.js': ('charts.js', 'text/javascript'), '/chart-math.js': ('chart-math.js', 'text/javascript'),
                  '/graph.js': ('graph.js', 'text/javascript'),
                  '/graph-explorer.js': ('graph-explorer.js', 'text/javascript'),
@@ -425,6 +447,79 @@ def build_status(app, port):
 def static_asset(file_stamp):
     content = Path(file_stamp[0]).read_bytes()
     return content, 'W/"' + hashlib.sha256(content).hexdigest() + '"'
+
+
+# Lane P (boards #47-#55). Two trees the maps read that are too large for
+# STATIC_ASSETS, each behind one route that answers only the names its pattern
+# allows (a path is matched, never joined blindly, so `..` cannot leave it):
+#   /geo/v2/<form>/...   lane G's layer geography, mentat/app/geo/v2 (866 files,
+#                        205 MB: listing them would make the build-identity hash
+#                        read them all at start-up and stat them on every health
+#                        check; geo/v2/index.json, which carries every file's
+#                        sha256, is in STATIC_ASSETS instead)
+#   /basemap/...         lane E's offline street basemap, mentat/.cache/basemap:
+#                        MapLibre GL 6.11.2, pmtiles 4.5.0, the generated style,
+#                        two Noto Sans glyph stacks, the v4 light sprite, and the
+#                        tile archive, which is answered by HTTP Range
+#                        (send_ranged) because pmtiles reads it a few KB at a time.
+#
+# The console's one security policy. worker-src and connect-src are stated
+# rather than left to default-src (lane P): the street renderer runs a
+# same-origin module worker and fetches the style, glyphs and tiles. Both stay
+# 'self', and nothing else in the policy moves.
+CONSOLE_CSP = ("default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; "
+               "worker-src 'self'; connect-src 'self'; frame-ancestors 'none'")
+GEO_V2_DIR = Path(__file__).resolve().parent / 'geo' / 'v2'
+GEO_V2_ROUTE = re.compile(r'/geo/v2/((?:albers|wgs84|lookup)(?:/[A-Za-z0-9_@.-]+){1,4}\.(?:json|geojson))')
+BASEMAP_DIR = PROJECT / '.cache' / 'basemap'
+BASEMAP_FILES = {
+    '/basemap/vendor/maplibre-gl.mjs': ('vendor/maplibre-gl-6.11.2/maplibre-gl.mjs', 'text/javascript'),
+    '/basemap/vendor/maplibre-gl-worker.mjs': ('vendor/maplibre-gl-6.11.2/maplibre-gl-worker.mjs', 'text/javascript'),
+    '/basemap/vendor/maplibre-gl-shared.mjs': ('vendor/maplibre-gl-6.11.2/maplibre-gl-shared.mjs', 'text/javascript'),
+    '/basemap/vendor/maplibre-gl.css': ('vendor/maplibre-gl-6.11.2/maplibre-gl.css', 'text/css'),
+    '/basemap/vendor/pmtiles.js': ('vendor/pmtiles-4.5.0/pmtiles.js', 'text/javascript'),
+    '/basemap/style/light.json': ('style/light.json', 'application/json; charset=utf-8'),
+    '/basemap/style/dark.json': ('style/dark.json', 'application/json; charset=utf-8'),
+    '/basemap/sprites/v4/light.json': ('sprites/v4/light.json', 'application/json; charset=utf-8'),
+    '/basemap/sprites/v4/light.png': ('sprites/v4/light.png', 'image/png'),
+    '/basemap/sprites/v4/light@2x.json': ('sprites/v4/light@2x.json', 'application/json; charset=utf-8'),
+    '/basemap/sprites/v4/light@2x.png': ('sprites/v4/light@2x.png', 'image/png'),
+    '/basemap/ATTRIBUTION.txt': ('licenses/ATTRIBUTION.txt', 'text/plain; charset=utf-8'),
+}
+BASEMAP_FONT_ROUTE = re.compile(r'/basemap/fonts/(Noto Sans (?:Regular|Medium))/(\d{1,5}-\d{1,5})\.pbf')
+BASEMAP_TILES_ROUTE = re.compile(r'/basemap/tiles/([a-z0-9][a-z0-9_-]{0,63}\.pmtiles)')
+_BYTE_RANGE = re.compile(r'\s*bytes\s*=\s*(\d*)\s*-\s*(\d*)\s*')
+
+
+def byte_range(header, size):
+    """The one byte range a Range header asks of a `size`-byte file.
+
+    (first, last) inclusive for a satisfiable single range; 'unsatisfiable'
+    for a well-formed single range wholly past the end (answered 416 with
+    `Content-Range: bytes */size`, which pmtiles reads to learn the size);
+    None when there is no Range header, or one this server does not serve
+    (several ranges, another unit, a malformed or backwards range), in which
+    case the whole file is sent with 200, as RFC 9110 permits.
+    """
+    if not header:
+        return None
+    match = _BYTE_RANGE.fullmatch(str(header))
+    if not match:
+        return None
+    first, last = match.group(1), match.group(2)
+    if not first and not last:
+        return None
+    if not first:
+        suffix = int(last)
+        if suffix == 0 or size == 0:
+            return 'unsatisfiable'
+        return max(0, size - suffix), size - 1
+    start = int(first)
+    if last and int(last) < start:
+        return None
+    if start >= size:
+        return 'unsatisfiable'
+    return start, min(int(last), size - 1) if last else size - 1
 
 
 def accepts_gzip(header):
@@ -964,7 +1059,51 @@ VIEW_STYLE_COLOURS = frozenset(('automatic', 'none', 'ink', 'white') + tuple('c%
 VIEW_AGGREGATIONS = ('sum', 'mean', 'count', 'median', 'min', 'max', 'countd')
 VIEW_ENCODINGS = ('color', 'size', 'label', 'detail', 'tooltip', 'shape', 'path', 'angle')
 VIEW_CARD_KEYS = frozenset(('id', 'name', 'measure', 'type', 'encodings', 'opacity', 'border', 'halo',
-                            'visible', 'selectable', 'zoomExtent', 'source', 'geography'))
+                            'visible', 'selectable', 'zoomExtent', 'source', 'geography', 'map'))
+
+# Lane F (board #46, studio_api.json v4): Flow is a stored card type whose four options
+# travel as `flow`, on a Flow card only (chart-studio-core.js flowFault is the same rule).
+VIEW_MARK_TYPES = VIEW_MARK_TYPES | {'flow'}
+VIEW_CARD_KEYS = VIEW_CARD_KEYS | {'flow'}
+VIEW_FLOW_RIBBONS = ('source', 'target', 'outcome', 'gradient')
+VIEW_FLOW_ORDERS = ('value', 'alphabetical')
+
+
+def _flow_ok(card):
+    """A Flow card carries ribbons, order, opacity and groupAfter; no other card has them."""
+    if card.get('type') != 'flow':
+        return 'flow' not in card
+    options = card.get('flow')
+    if not isinstance(options, dict) or set(options) != {'ribbons', 'order', 'opacity', 'groupAfter'}:
+        return False
+    if options['ribbons'] not in VIEW_FLOW_RIBBONS or options['order'] not in VIEW_FLOW_ORDERS:
+        return False
+    if not _whole(options['opacity']) or not 0 <= options['opacity'] <= 100:
+        return False
+    group = options['groupAfter']
+    return _whole(group) and (group == 0 or 2 <= group <= 50)
+# Map layers (lane P, boards #47-#55; studio_api.json v3, its map examples). A
+# card that names a geography is a layer of a map sheet: its level, its own
+# source and its map options, checked by the same rules as map-layers.js
+# layerFault and chart-studio-core.js cardFault. The sheet's own `map` holds the
+# Map Layers pane (background, washout, base layers, data layer, map options).
+VIEW_MAP_LEVELS = frozenset(('state', 'county', 'cd', 'sldu', 'sldl', 'place', 'zcta', 'tract',
+                             'hex10', 'hex25', 'hex50', 'point'))
+VIEW_MAP_MARKS = frozenset(('automatic', 'filled-map', 'circle', 'shape', 'density', 'text', 'line'))
+VIEW_MAP_BASES = frozenset(('receipt', 'original_observed', 'original_supported', 'raw', 'pac_activity'))
+VIEW_MAP_RAMPS = frozenset(('teal', 'purple', 'mauve', 'gold', 'heat'))
+VIEW_MAP_BACKGROUNDS = frozenset(('boundaries', 'light', 'dark', 'streets', 'none'))
+VIEW_MAP_BASE_LAYERS = frozenset(('coastlines', 'state-borders', 'state-names', 'county-borders', 'county-names',
+                                  'cd', 'sld', 'zcta', 'cities', 'water', 'parks', 'streets'))
+VIEW_MAP_DATA_BY = frozenset(('state', 'county', 'zcta', 'tract'))
+VIEW_MAP_OPTIONS = {'scale': bool, 'units': ('us', 'metric'), 'search': bool, 'toolbar': bool,
+                    'panZoom': bool, 'layerControl': bool}
+VIEW_MAP_KEYS = frozenset(('layers', 'congress', 'background', 'washout', 'base', 'data', 'options'))
+# Lane P (2026-09-26, #55's Opposition): a PAC Spent layer may take one side of the spending
+# (`stance`: the server's per-place support or oppose sum, never the two netted), and a Filled
+# layer may draw with the hatch (`map.pattern`); map-layers.js sourceFault/layerFault, same rules.
+VIEW_MAP_STANCES = ('support', 'oppose')
+VIEW_MAP_PATTERNS = ('hatch',)
 
 
 def _whole(value):
@@ -1026,6 +1165,8 @@ def _card_ok(card):
         return False
     if card.get('type') not in VIEW_MARK_TYPES:
         return False
+    if not _flow_ok(card):
+        return False
     encodings = card.get('encodings')
     if not isinstance(encodings, dict) or set(encodings) != set(VIEW_ENCODINGS):
         return False
@@ -1051,10 +1192,94 @@ def _card_ok(card):
         return False
     if 'measure' in card and not _pill_ok(card['measure']):
         return False
-    if 'source' in card and not isinstance(card['source'], dict):
+    if 'source' in card and not _map_source_ok(card['source']):
         return False
-    if 'geography' in card and (not isinstance(card['geography'], str) or not 1 <= len(card['geography']) <= 64):
+    if 'geography' in card and (card['geography'] not in VIEW_MAP_LEVELS or card.get('type') not in VIEW_MAP_MARKS):
         return False
+    if 'map' in card and ('geography' not in card or not _card_map_ok(card['map'])):
+        return False
+    if 'map' in card and 'pattern' in card['map'] and not _card_fills(card):
+        return False  # a hatch fills shapes, so it belongs to a Filled layer
+    return True
+
+
+def _text_ok(value, most):
+    return isinstance(value, str) and 1 <= len(value.strip()) <= most
+
+
+def _map_source_ok(source):
+    """A map layer's own source: an industry snapshot, addressed by its label
+    as D-030's `industry` parameter, or one PAC evidence pane (the
+    /api/evidence-geo request: source, id, committee, cycle, direction)."""
+    if not isinstance(source, dict):
+        return False
+    kind = source.get('kind')
+    if kind == 'industry':
+        return (not set(source) - {'kind', 'industry', 'basis', 'label'} and _text_ok(source.get('industry'), 120)
+                and ('basis' not in source or source['basis'] in VIEW_MAP_BASES)
+                and ('label' not in source or _text_ok(source['label'], 120)))
+    if kind == 'pac':
+        return (not set(source) - {'kind', 'source', 'id', 'committee', 'cycle', 'direction', 'name', 'industry', 'stance'}
+                and source.get('source') in ('snapshot', 'csv')
+                and isinstance(source.get('id'), str) and re.fullmatch(r'[a-z0-9][a-z0-9_-]{0,99}', source['id']) is not None
+                and isinstance(source.get('committee'), str) and re.fullmatch(r'C\d{8}', source['committee']) is not None
+                and isinstance(source.get('cycle'), str) and re.fullmatch(r'\d{4}', source['cycle']) is not None
+                and source.get('direction') in ('raised', 'spent')
+                and all(key not in source or _text_ok(source[key], 120) for key in ('name', 'industry'))
+                and ('stance' not in source
+                     or (source['stance'] in VIEW_MAP_STANCES and source['direction'] == 'spent')))
+    return False
+
+
+def _card_map_ok(options):
+    """A layer's own map options: density radius and intensity, its ramp, and its pattern."""
+    if not isinstance(options, dict) or set(options) - {'radius', 'intensity', 'ramp', 'pattern'}:
+        return False
+    if 'pattern' in options and options['pattern'] not in VIEW_MAP_PATTERNS:
+        return False
+    if 'radius' in options and (not _whole(options['radius']) or not 2 <= options['radius'] <= 80):
+        return False
+    if 'intensity' in options and (not _whole(options['intensity']) or not 1 <= options['intensity'] <= 100):
+        return False
+    return 'ramp' not in options or options['ramp'] in VIEW_MAP_RAMPS
+
+
+def _card_fills(card):
+    """map-layers.js markOf(card) is 'filled-map': Filled, or Automatic at any level but points."""
+    return card.get('type') == 'filled-map' or (card.get('type') == 'automatic' and card.get('geography') != 'point')
+
+
+def _sheet_map_ok(settings):
+    """A sheet's `map`: today's boundary choices (layers, congress) plus the Map
+    Layers pane of a map whose cards are its layers. Nothing in it is a layer."""
+    if not isinstance(settings, dict) or set(settings) - VIEW_MAP_KEYS:
+        return False
+    if 'layers' in settings and (not isinstance(settings['layers'], list)
+                                 or not all(isinstance(item, str) for item in settings['layers'])):
+        return False
+    if 'congress' in settings and not isinstance(settings['congress'], str):
+        return False
+    if 'background' in settings and settings['background'] not in VIEW_MAP_BACKGROUNDS:
+        return False
+    if 'washout' in settings and (not _whole(settings['washout']) or not 0 <= settings['washout'] <= 100):
+        return False
+    if 'base' in settings:
+        base = settings['base']
+        if (not isinstance(base, list) or len(base) > len(VIEW_MAP_BASE_LAYERS) or len(set(map(str, base))) != len(base)
+                or not all(item in VIEW_MAP_BASE_LAYERS for item in base)):
+            return False
+    if 'data' in settings and settings['data'] is not None:
+        data = settings['data']
+        if (not isinstance(data, dict) or set(data) != {'measure', 'by', 'using'} or not _pill_ok(data['measure'])
+                or data['by'] not in VIEW_MAP_DATA_BY or data['using'] not in VIEW_MAP_RAMPS):
+            return False
+    if 'options' in settings:
+        options = settings['options']
+        if not isinstance(options, dict) or set(options) - set(VIEW_MAP_OPTIONS):
+            return False
+        for key, rule in VIEW_MAP_OPTIONS.items():
+            if key in options and not (isinstance(options[key], bool) if rule is bool else options[key] in rule):
+                return False
     return True
 
 
@@ -1066,9 +1291,16 @@ def validate_view_marks(sheets):
     more are a dual axis, where every card names a distinct measure that sits on
     the sheet's Rows (a card for a measure the shelves do not hold would draw an
     axis from nothing, so it is refused like a dangling board slot).
+
+    Lane P: a sheet whose every card names a geography is a map, and its cards
+    are its layers (draw order = card order), each with its own source, so the
+    dual-axis rule does not apply to it; a card set mixing layers and axis
+    cards is refused. A sheet's `map` settings must be well formed.
     """
     refusal = "The saved view's marks cards are malformed."
     for sheet in sheets:
+        if 'map' in sheet and not _sheet_map_ok(sheet['map']):
+            raise ValueError("The saved view's map settings are malformed.")
         if 'syncAxes' in sheet and not isinstance(sheet['syncAxes'], bool):
             raise ValueError(refusal)
         if 'marksCards' not in sheet:
@@ -1078,7 +1310,12 @@ def validate_view_marks(sheets):
             raise ValueError(refusal)
         if len({card['id'] for card in cards}) != len(cards):
             raise ValueError(refusal)
-        if len(cards) >= 2:
+        if len(cards) >= 2 and any(card['type'] == 'flow' for card in cards):
+            raise ValueError(refusal)  # lane F: a flow draws alone, sharing no axis and no map
+        layers = ['geography' in card for card in cards]
+        if any(layers) and not all(layers):
+            raise ValueError(refusal)
+        if len(cards) >= 2 and not all(layers):
             rows = sheet.get('rows') if isinstance(sheet.get('rows'), list) else []
             on_rows = {key for key in (_shelf_key(item) for item in rows) if key}
             measures = ['%d|%s' % (card['measure']['column'], card['measure']['aggregation'])
@@ -1145,6 +1382,10 @@ class Console:
             command += ['-KeysFile', self.keys_file]
         if self.rscript:
             command += ['-RScriptPath', self.rscript]
+        # The replacement keeps this process's interpreter. Without it the launcher
+        # chooses again (Mentat's venv, the Codex runtime, PATH), and a console started
+        # on a named Python could come back on another one.
+        command += ['-PythonPath', sys.executable]
         # DETACHED_PROCESS would leave powershell.exe without a console: it
         # exits 0 without running the launcher, so the restart silently fails.
         flags = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP if os.name == 'nt' else 0
@@ -2563,7 +2804,7 @@ class Handler(BaseHTTPRequestHandler):
         if etag:
             self.send_header('ETag', etag)
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'none'")
+        self.send_header("Content-Security-Policy", CONSOLE_CSP)
         self.end_headers()
         self.wfile.write(content)
 
@@ -2581,10 +2822,108 @@ class Handler(BaseHTTPRequestHandler):
         for name, value in headers:
             self.send_header(name, value)
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Content-Security-Policy", "default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' blob:; frame-ancestors 'none'")
+        self.send_header("Content-Security-Policy", CONSOLE_CSP)
         self.end_headers()
         if body:
             self.wfile.write(body)
+
+    # Lane P: the two trees behind GEO_V2_ROUTE and the BASEMAP_* routes. A file
+    # is validated by its size and modification time ("<size>-<mtime>"), so a
+    # 2 MB layer or a 112 MB archive is never hashed to answer a request.
+    @staticmethod
+    def file_tag(info):
+        return '"%x-%x"' % (info.st_size, info.st_mtime_ns)
+
+    def send_file(self, path, mime):
+        """One whitelisted file: 304 when If-None-Match names it, else the bytes."""
+        try:
+            info = path.stat()
+        except OSError:
+            return self.send({"error": "Not found."}, 404)
+        if not path.is_file():
+            return self.send({"error": "Not found."}, 404)
+        tag = self.file_tag(info)
+        if tag in [value.strip() for value in self.headers.get('If-None-Match', '').split(',')]:
+            return self.send(b'', 304, content_type=mime, cache_control='private, no-cache', etag=tag)
+        return self.send(path.read_bytes(), content_type=mime, cache_control='private, no-cache', etag=tag)
+
+    def send_ranged(self, path, mime='application/octet-stream'):
+        """HTTP byte serving (RFC 9110 section 14) for the street tile archive.
+
+        pmtiles asks for a few KB at a time with `Range: bytes=a-b` and refuses
+        a 200 whose Content-Length exceeds what it asked for, which is all a
+        plain http.server can send. A single satisfiable range is 206 with
+        Content-Range; a range past the end is 416 with `bytes */size`; no
+        Range (or one this server does not serve, or an If-Range naming another
+        version) is the whole file with 200. The body is streamed in 64 KB
+        pieces, never read whole, and never compressed.
+        """
+        try:
+            info = path.stat()
+        except OSError:
+            return self.send({"error": "Not found."}, 404)
+        if not path.is_file():
+            return self.send({"error": "Not found."}, 404)
+        size, tag = info.st_size, self.file_tag(info)
+        wanted = byte_range(self.headers.get('Range'), size)
+        if_range = self.headers.get('If-Range')
+        if wanted is not None and if_range and if_range.strip() != tag:
+            wanted = None
+        if wanted == 'unsatisfiable':
+            self._sent_bytes = 0
+            self.send_response(416)
+            self.send_header('Content-Range', 'bytes */%d' % size)
+            self.send_header('Accept-Ranges', 'bytes')
+            self.send_header('Content-Length', '0')
+            self.send_header('Cache-Control', 'no-store')
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.send_header('Content-Security-Policy', CONSOLE_CSP)
+            self.end_headers()
+            return None
+        first, last = wanted if wanted is not None else (0, size - 1)
+        length = max(0, last - first + 1)
+        self.send_response(206 if wanted is not None else 200)
+        self.send_header('Content-Type', mime)
+        self.send_header('Content-Length', str(length))
+        self.send_header('Accept-Ranges', 'bytes')
+        if wanted is not None:
+            self.send_header('Content-Range', 'bytes %d-%d/%d' % (first, last, size))
+        self.send_header('ETag', tag)
+        self.send_header('Cache-Control', 'private, no-cache')
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('Content-Security-Policy', CONSOLE_CSP)
+        self.end_headers()
+        self._sent_bytes = length
+        with open(path, 'rb') as stream:
+            stream.seek(first)
+            left = length
+            while left > 0:
+                chunk = stream.read(min(65536, left))
+                if not chunk:
+                    break
+                self.wfile.write(chunk)
+                left -= len(chunk)
+        return None
+
+    def send_map_file(self, raw_path):
+        """/geo/v2/... and /basemap/...: a whitelisted name, or 404."""
+        from urllib.parse import unquote
+        if raw_path.startswith('/geo/v2/'):
+            match = GEO_V2_ROUTE.fullmatch(raw_path)
+            if not match or '..' in match.group(1).split('/'):
+                return self.send({"error": "Not found."}, 404)
+            return self.send_file(GEO_V2_DIR / match.group(1), 'application/json; charset=utf-8')
+        if raw_path in BASEMAP_FILES:
+            relative, mime = BASEMAP_FILES[raw_path]
+            return self.send_file(BASEMAP_DIR / relative, mime)
+        font = BASEMAP_FONT_ROUTE.fullmatch(unquote(raw_path))
+        if font:
+            return self.send_file(BASEMAP_DIR / 'fonts' / font.group(1) / (font.group(2) + '.pbf'),
+                                  'application/x-protobuf')
+        tiles = BASEMAP_TILES_ROUTE.fullmatch(raw_path)
+        if tiles:
+            return self.send_ranged(BASEMAP_DIR / 'tiles' / tiles.group(1))
+        return self.send({"error": "Not found."}, 404)
 
     def discard_body(self):
         """Read and drop an unread request body before an early refusal.
@@ -2795,6 +3134,28 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(snapshot_view(query.get('id', [''])[0],
                     query.get('committee', [''])[0], query.get('cycle', [''])[0],
                     PROJECT / '.cache/pac-evidence'))
+            if parsed.path == '/api/flow':
+                # Lane F (boards #44-#46): where a committee's (or an industry's) money came
+                # from and where it went, built from the same downstream measurement as
+                # /api/evidence-network (flow_data.py). A malformed request is 400 like every
+                # route; a flow that disagrees with the evidence network, or an attributed
+                # basis without an estimate bundle, is refused 409 with its reason.
+                import flow_data
+                run = query.get('run', ['published-reports'])[0] or 'published-reports'
+
+                def workbooks(label):
+                    # The industry's workbooks, chosen exactly as /api/graph chooses them.
+                    reports = app.published_reports() if run == 'published-reports' else None
+                    chosen = next((group for group in app.graph_catalog(run, reports)['industries']
+                                   if group['name'] == label), None)
+                    if not chosen:
+                        raise ValueError('Choose an industry with completed reports.')
+                    return [app.report_path(run, index) for index in chosen['indices']]
+                try:
+                    return self.send(flow_data.flow(query, report_directory=app.report_directory,
+                                                    root=PROJECT / '.cache/pac-evidence', workbooks=workbooks))
+                except flow_data.FlowRefused as error:
+                    return self.send(error.body(), 409)
             if parsed.path == '/api/evidence-job':
                 identifier = query.get('id', [''])[0]
                 if not re.fullmatch(r'snapshot-[a-f0-9]{32}', identifier):
@@ -2893,6 +3254,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(b'' if unchanged else content, 304 if unchanged else 200,
                                  content_type='text/html; charset=utf-8',
                                  cache_control='private, no-cache', etag=etag)
+            # Lane P: map layer geography and the offline street basemap, each
+            # a whitelisted route (send_map_file); the tile archive by Range.
+            if parsed.path.startswith(('/geo/v2/', '/basemap/')) and parsed.path not in STATIC_ASSETS:
+                return self.send_map_file(parsed.path)
             assets = STATIC_ASSETS
             if parsed.path in assets:
                 filename, mime = assets[parsed.path]

@@ -201,7 +201,8 @@
     // Marks v3 (#52): a dual axis compiles through compileCards; one card reads
     // its v3 encodings (Shape, Path, Angle) from core.readCards.
     const cardSet=core.readCards(state);
-    if(cardSet.length>=2)return compileCards(state,columns,{dataset,industry,basis,offset},cardSet);
+    // Lane P: a map sheet's cards are layers, never a dual axis (map-studio.js draws them).
+    if(cardSet.length>=2&&!(core.mapLayersOn&&core.mapLayersOn(state)))return compileCards(state,columns,{dataset,industry,basis,offset},cardSet);
     const card=cardSet[0];
     const byIndex=new Map(columns.map(f=>[f.index,f])),attach=list=>core.shelf(list).map(p=>({...p,field:byIndex.get(p.column)})).filter(p=>p.field);
     const axes=attach([...(state.columns||[]),...(state.rows||[])]),dimensions=[],measures=[],allMeasures=[],notes=[],computed=new Set();

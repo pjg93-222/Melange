@@ -1,6 +1,6 @@
 {
   "name": "evidence-geo",
-  "version": 3,
+  "version": 4,
   "route": "/api/evidence-geo",
   "lane": "S8 - the congressional-district map for the PAC evidence tab + S8b (geocoding, ruling A)",
   "written": "2026-09-19",
@@ -26,7 +26,10 @@
     "`by_zip` is capped at the 3,000 largest ZIPs and states what the cap cost: sum(by_zip) + zip_truncated_amount + zip_missing.amount == reported_total, to the cent. `zip_missing` is the rows with no readable five-digit ZIP; `zip_truncated` is how many ZIPs the cap dropped. A spent map reads no contributor ZIP and carries no by_zip rows at all.",
     "Every by_state and by_region row carries its own `kinds` split, so turning a kind off on the page subtracts a number the SERVER computed rather than asking the browser to redo the geography.",
     "`sides` states what each direction would report - {reported_total, rows, reason} for both raised and spent - computed from the rows alone, with no buckets, no boundary file and no crosswalk. The page opens on the side with money and disables the other with the route’s own refusal sentence as its title. sides[direction] always agrees with this payload about its own direction.",
-    "`zip_points_file` names the shipped pre-projected ZIP centre file (geo/zcta_points.json, the same 975x610 canvas as the boundary paths). A ZIP absent from it is NOT dropped: the page lists it under \"Not placed on the map\" with its dollars."
+    "`zip_points_file` names the shipped pre-projected ZIP centre file (geo/zcta_points.json, the same 975x610 canvas as the boundary paths). A ZIP absent from it is NOT dropped: the page lists it under \"Not placed on the map\" with its dollars.",
+    "Contract v4 (2026-09-25) documents the four fields lane B's F6, F8 and F11 put in the payload. `transfers_not_itemized`: one line per committee/cycle whose Form 3X summary reports more on lines 22-23 than its saved Schedule B itemizes on those same lines - {committee, cycle, committee_name, reason, amount, summary_amount, itemized_amount}, amount = summary_amount - itemized_amount > 0. Those dollars are in NO total: not reported, located or unlocated, because a transfer with no known recipient can be neither followed nor removed as internal. `transfers_not_itemized_total` is the sum of the lines.",
+    "`transfer_rule` (F8, one rule by transaction type): on a map that read a saved network, {transaction_types: the transfer index's ['24G', '24K'], rows_without_transaction_type, legs_by_line_fallback, amount_by_line_fallback} - how many rows carried no transaction type, and the legs and dollars the old line 22/23 rule still decided for them; null on any other map. `reload_rule` (F11): {key, rows_without_transaction_id_or_file_number, reload_rows, reload_amount} - the rows a reload (same committee, report type, transaction id, file number, counterparty, amount, date and type under another SUB_ID) removed, counted once, and the rows the rule could not be applied to; null on any other map.",
+    "Contract v4 (item 7 of F4, Paul approved 2026-09-25): every `unlocated` line carries `kind` - 'unlocated' (money no basis could place), 'reversal' (a line that nets below zero: a refund or reversal, not missing money) or 'residual' (the balancing line, equal to reconciliation_residual). `reversals_total` is the sum of the reversal lines. `share_base` is {places, zips}: shares are computed on positive located spending - places is the sum of the district and state rows (every kind) that net above zero, zips (raised maps only) the sum of the by_zip rows that do plus a positive zip_truncated_amount - and each is null only when nothing placed nets above zero. A place that nets below zero keeps its signed amount and has no share (the page says Reversal). The page lists the reversal lines once, signed, as \"Refunds and reversals\" outside the shares, says the rule under the map, and never withdraws every share for a refund."
   ],
   "examples": [
     {
@@ -946,6 +949,910 @@
         },
         "geocoded_rows": 2,
         "zip_rows": 2,
+        "pending_rows": 0
+      }
+    },
+    {
+      "name": "snapshot spent across a saved network: transfers not itemized, the transfer and reload censuses (v4)",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-network",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": 63000.0,
+        "located_total": 63000.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 61000.0,
+            "rows": 2,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 61000.0,
+                "rows": 2,
+                "basis": "",
+                "share": 1.0,
+                "support": 61000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00836221",
+                    "amount": 40000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e1",
+                        "transaction_id": "SE.1",
+                        "amount": 40000.0,
+                        "date": "2026-03-01",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "H6CA12000 via C00848440",
+                    "amount": 21000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e2",
+                        "transaction_id": "",
+                        "amount": 21000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00836221, H6CA12000 via C00848440"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 2000.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": 2000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-b3",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": 0.0,
+        "share_base": {
+          "places": 63000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": 63000.0,
+            "rows": 3,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [
+          {
+            "committee": "C00835959",
+            "cycle": "2026",
+            "committee_name": "C00835959",
+            "reason": "transfers reported, recipient not itemized",
+            "amount": 12000.0,
+            "summary_amount": 65000.0,
+            "itemized_amount": 53000.0
+          }
+        ],
+        "transfers_not_itemized_total": 12000.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 1,
+          "legs_by_line_fallback": 1,
+          "amount_by_line_fallback": 2000.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 4,
+          "reload_rows": 1,
+          "reload_amount": 40000.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703.",
+        "downstream_edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "downstream_committees": [
+          "C00835959",
+          "C00836221",
+          "C00848440"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+      }
+    },
+    {
+      "name": "snapshot spent with a refund: a reversal outside the shares (v4)",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-refund",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": -6500.0,
+        "located_total": -1500.0,
+        "unlocated_total": -5000.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 1000.0,
+            "rows": 1,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 1000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 1000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00835959",
+                    "amount": 1000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-e1",
+                        "transaction_id": "",
+                        "amount": 1000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00835959"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": -2500.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": -2500.0,
+                "rows": 1,
+                "basis": "",
+                "share": null,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": -2500.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-b2",
+                        "transaction_id": "",
+                        "amount": -2500.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "C00835959: a line 23 payment of transaction type 22Z, which is not a transfer",
+            "amount": -5000.0,
+            "rows": 1,
+            "kind": "reversal"
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": -5000.0,
+        "share_base": {
+          "places": 1000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": -6500.0,
+            "rows": 2,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [],
+        "transfers_not_itemized_total": 0.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 0,
+          "legs_by_line_fallback": 0,
+          "amount_by_line_fallback": 0.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 3,
+          "reload_rows": 0,
+          "reload_amount": 0.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved.",
+        "downstream_edges": [],
+        "downstream_committees": [
+          "C00835959"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-refund/snapshots.json",
+            "sha256": "e68df542de38a7ebb469788f7d51b34c5d017c4c9e00e903642130e8404f36f6",
+            "coverage_start": null,
+            "coverage_end": null
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "snapshot raised: shares of located and ZIP-placed receipts (v4)",
+      "payload": {
+        "source": "snapshot",
+        "id": "fixture-snap",
+        "direction": "raised",
+        "cycle": "2024",
+        "committee": {
+          "id": "C00835959",
+          "name": "FAIRSHAKE"
+        },
+        "label": "Coinbase",
+        "vintage": "118",
+        "congress": "118th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd118.json",
+        "zip_basis": "land area",
+        "reported_total": 10750.0,
+        "located_total": 10500.0,
+        "unlocated_total": 250.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "contributors",
+            "label": "Contributors",
+            "total": 10500.0,
+            "rows": 4,
+            "basis": "by the contributor ZIP, then the state",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 8800.0,
+                "rows": 2,
+                "basis": "zip_split",
+                "share": 0.838095,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": true,
+                "recipients": [
+                  {
+                    "name": "COINBASE",
+                    "amount": 8000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "632970210727",
+                        "transaction_id": "",
+                        "amount": 1000.0,
+                        "date": "",
+                        "counterparty": "COINBASE",
+                        "city": "",
+                        "state": "CA",
+                        "zip": "94607",
+                        "employer": "",
+                        "purpose": ""
+                      },
+                      {
+                        "source_url": "",
+                        "sub_id": "645576772879",
+                        "transaction_id": "",
+                        "amount": 7000.0,
+                        "date": "",
+                        "counterparty": "COINBASE",
+                        "city": "",
+                        "state": "CA",
+                        "zip": "94607",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "A DONOR",
+                    "amount": 800.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "569838690679",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "A DONOR",
+                        "city": "",
+                        "state": "CA",
+                        "zip": "92625",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "COINBASE, A DONOR"
+              },
+              {
+                "key": "CA-45",
+                "amount": 1200.0,
+                "rows": 1,
+                "basis": "zip_split",
+                "share": 0.114286,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": true,
+                "recipients": [
+                  {
+                    "name": "A DONOR",
+                    "amount": 1200.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "569838690679",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "A DONOR",
+                        "city": "",
+                        "state": "CA",
+                        "zip": "92625",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "A DONOR"
+              }
+            ],
+            "states": [
+              {
+                "key": "NY",
+                "amount": 500.0,
+                "rows": 1,
+                "basis": "zip",
+                "share": 0.047619,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "A DONOR",
+                    "amount": 500.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "927507061320",
+                        "transaction_id": "",
+                        "amount": 500.0,
+                        "date": "",
+                        "counterparty": "A DONOR",
+                        "city": "",
+                        "state": "NY",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "A DONOR"
+              }
+            ]
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "a receipt could not be placed: no usable ZIP or state on the row",
+            "amount": 250.0,
+            "rows": 1,
+            "kind": "unlocated"
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": 0.0,
+        "share_base": {
+          "places": 10500.0,
+          "zips": 10000.0
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 10000.0,
+            "rows": 3,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 10000.0
+            }
+          },
+          {
+            "key": "NY",
+            "name": "NY",
+            "region": "Northeast",
+            "amount": 500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 500.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "Northeast",
+            "name": "Northeast",
+            "states": [
+              "NY"
+            ],
+            "amount": 500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "contributors": 500.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 10000.0,
+            "rows": 3,
+            "contributors": 2,
+            "kinds": {
+              "contributors": 10000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 10750.0,
+            "rows": 4,
+            "reason": ""
+          },
+          "spent": {
+            "reported_total": 36700.0,
+            "rows": 11,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+          }
+        },
+        "spend_basis": "source",
+        "transfers_not_itemized": [],
+        "transfers_not_itemized_total": 0.0,
+        "transfer_rule": null,
+        "reload_rule": null,
+        "downstream_note": "",
+        "downstream_edges": [],
+        "downstream_committees": [],
+        "downstream_sources": [],
+        "by_zip": [
+          {
+            "zip": "94607",
+            "city": "",
+            "state": "CA",
+            "amount": 8000.0,
+            "rows": 2,
+            "contributors": 1
+          },
+          {
+            "zip": "92625",
+            "city": "",
+            "state": "CA",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1
+          }
+        ],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 750.0,
+          "rows": 2
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 5,
         "pending_rows": 0
       }
     }
@@ -2540,6 +3447,2495 @@
         "zip_rows": 0,
         "pending_rows": 0
       }
+    },
+    {
+      "name": "v4: a not-itemized transfer line that is not its summary less its itemized rows",
+      "expect": "is not its summary less its itemized rows",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-network",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": 63000.0,
+        "located_total": 63000.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 61000.0,
+            "rows": 2,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 61000.0,
+                "rows": 2,
+                "basis": "",
+                "share": 1.0,
+                "support": 61000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00836221",
+                    "amount": 40000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e1",
+                        "transaction_id": "SE.1",
+                        "amount": 40000.0,
+                        "date": "2026-03-01",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "H6CA12000 via C00848440",
+                    "amount": 21000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e2",
+                        "transaction_id": "",
+                        "amount": 21000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00836221, H6CA12000 via C00848440"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 2000.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": 2000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-b3",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": 0.0,
+        "share_base": {
+          "places": 63000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": 63000.0,
+            "rows": 3,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [
+          {
+            "committee": "C00835959",
+            "cycle": "2026",
+            "committee_name": "C00835959",
+            "reason": "transfers reported, recipient not itemized",
+            "amount": 11000.0,
+            "summary_amount": 65000.0,
+            "itemized_amount": 53000.0
+          }
+        ],
+        "transfers_not_itemized_total": 11000.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 1,
+          "legs_by_line_fallback": 1,
+          "amount_by_line_fallback": 2000.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 4,
+          "reload_rows": 1,
+          "reload_amount": 40000.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703.",
+        "downstream_edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "downstream_committees": [
+          "C00835959",
+          "C00836221",
+          "C00848440"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+      }
+    },
+    {
+      "name": "v4: a not-itemized total that does not add up from its lines",
+      "expect": "transfers_not_itemized_total does not add up",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-network",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": 63000.0,
+        "located_total": 63000.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 61000.0,
+            "rows": 2,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 61000.0,
+                "rows": 2,
+                "basis": "",
+                "share": 1.0,
+                "support": 61000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00836221",
+                    "amount": 40000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e1",
+                        "transaction_id": "SE.1",
+                        "amount": 40000.0,
+                        "date": "2026-03-01",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "H6CA12000 via C00848440",
+                    "amount": 21000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e2",
+                        "transaction_id": "",
+                        "amount": 21000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00836221, H6CA12000 via C00848440"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 2000.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": 2000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-b3",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": 0.0,
+        "share_base": {
+          "places": 63000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": 63000.0,
+            "rows": 3,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [
+          {
+            "committee": "C00835959",
+            "cycle": "2026",
+            "committee_name": "C00835959",
+            "reason": "transfers reported, recipient not itemized",
+            "amount": 12000.0,
+            "summary_amount": 65000.0,
+            "itemized_amount": 53000.0
+          }
+        ],
+        "transfers_not_itemized_total": 99.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 1,
+          "legs_by_line_fallback": 1,
+          "amount_by_line_fallback": 2000.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 4,
+          "reload_rows": 1,
+          "reload_amount": 40000.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703.",
+        "downstream_edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "downstream_committees": [
+          "C00835959",
+          "C00836221",
+          "C00848440"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+      }
+    },
+    {
+      "name": "v4: a transfer-rule census with a negative row count",
+      "expect": "is not a row count",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-network",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": 63000.0,
+        "located_total": 63000.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 61000.0,
+            "rows": 2,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 61000.0,
+                "rows": 2,
+                "basis": "",
+                "share": 1.0,
+                "support": 61000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00836221",
+                    "amount": 40000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e1",
+                        "transaction_id": "SE.1",
+                        "amount": 40000.0,
+                        "date": "2026-03-01",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "H6CA12000 via C00848440",
+                    "amount": 21000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e2",
+                        "transaction_id": "",
+                        "amount": 21000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00836221, H6CA12000 via C00848440"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 2000.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": 2000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-b3",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": 0.0,
+        "share_base": {
+          "places": 63000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": 63000.0,
+            "rows": 3,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [
+          {
+            "committee": "C00835959",
+            "cycle": "2026",
+            "committee_name": "C00835959",
+            "reason": "transfers reported, recipient not itemized",
+            "amount": 12000.0,
+            "summary_amount": 65000.0,
+            "itemized_amount": 53000.0
+          }
+        ],
+        "transfers_not_itemized_total": 12000.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": -1,
+          "legs_by_line_fallback": 1,
+          "amount_by_line_fallback": 2000.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 4,
+          "reload_rows": 1,
+          "reload_amount": 40000.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703.",
+        "downstream_edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "downstream_committees": [
+          "C00835959",
+          "C00836221",
+          "C00848440"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+      }
+    },
+    {
+      "name": "v4: a transfer-rule census naming types the transfer index does not count",
+      "expect": "names transaction types other than the transfer index's",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-network",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": 63000.0,
+        "located_total": 63000.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 61000.0,
+            "rows": 2,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 61000.0,
+                "rows": 2,
+                "basis": "",
+                "share": 1.0,
+                "support": 61000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00836221",
+                    "amount": 40000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e1",
+                        "transaction_id": "SE.1",
+                        "amount": 40000.0,
+                        "date": "2026-03-01",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "H6CA12000 via C00848440",
+                    "amount": 21000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e2",
+                        "transaction_id": "",
+                        "amount": 21000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00836221, H6CA12000 via C00848440"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 2000.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": 2000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-b3",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": 0.0,
+        "share_base": {
+          "places": 63000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": 63000.0,
+            "rows": 3,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [
+          {
+            "committee": "C00835959",
+            "cycle": "2026",
+            "committee_name": "C00835959",
+            "reason": "transfers reported, recipient not itemized",
+            "amount": 12000.0,
+            "summary_amount": 65000.0,
+            "itemized_amount": 53000.0
+          }
+        ],
+        "transfers_not_itemized_total": 12000.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K",
+            "24Z"
+          ],
+          "rows_without_transaction_type": 1,
+          "legs_by_line_fallback": 1,
+          "amount_by_line_fallback": 2000.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 4,
+          "reload_rows": 1,
+          "reload_amount": 40000.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703.",
+        "downstream_edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "downstream_committees": [
+          "C00835959",
+          "C00836221",
+          "C00848440"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+      }
+    },
+    {
+      "name": "v4: a reload census with reload dollars and no reload rows",
+      "expect": "reload dollars with no reload rows",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-network",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": 63000.0,
+        "located_total": 63000.0,
+        "unlocated_total": 0.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 61000.0,
+            "rows": 2,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 61000.0,
+                "rows": 2,
+                "basis": "",
+                "share": 1.0,
+                "support": 61000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00836221",
+                    "amount": 40000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e1",
+                        "transaction_id": "SE.1",
+                        "amount": 40000.0,
+                        "date": "2026-03-01",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  },
+                  {
+                    "name": "H6CA12000 via C00848440",
+                    "amount": 21000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-e2",
+                        "transaction_id": "",
+                        "amount": 21000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00836221, H6CA12000 via C00848440"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": 2000.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": 2000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": 2000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "n-b3",
+                        "transaction_id": "",
+                        "amount": 2000.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": 0.0,
+        "share_base": {
+          "places": 63000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": 2000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": 2000.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 61000.0,
+            "rows": 2,
+            "contributors": 2,
+            "kinds": {
+              "candidates": 61000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": 63000.0,
+            "rows": 3,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [
+          {
+            "committee": "C00835959",
+            "cycle": "2026",
+            "committee_name": "C00835959",
+            "reason": "transfers reported, recipient not itemized",
+            "amount": 12000.0,
+            "summary_amount": 65000.0,
+            "itemized_amount": 53000.0
+          }
+        ],
+        "transfers_not_itemized_total": 12000.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 1,
+          "legs_by_line_fallback": 1,
+          "amount_by_line_fallback": 2000.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 4,
+          "reload_rows": 0,
+          "reload_amount": 40000.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703.",
+        "downstream_edges": [
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00836221",
+            "amount": 30000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00848440",
+            "amount": 21000.0
+          },
+          {
+            "cycle": "2026",
+            "source": "C00835959",
+            "destination": "C00571703",
+            "amount": 2000.0
+          }
+        ],
+        "downstream_committees": [
+          "C00835959",
+          "C00836221",
+          "C00848440"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00836221",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          },
+          {
+            "cycle": "2026",
+            "committee": "C00848440",
+            "source": "snapshots/v4-network/snapshots.json",
+            "sha256": "1e6faee374db7ab49d67e7996b3e5d8d347ff2b3da6fb5aca0d9205410ab6f4e",
+            "coverage_start": null,
+            "coverage_end": "2026-07-31"
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved. Missing destination snapshots: C00571703."
+      }
+    },
+    {
+      "name": "v4: a refund left among the unlocated money instead of marked a reversal",
+      "expect": "nets below zero and is not marked a reversal",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-refund",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": -6500.0,
+        "located_total": -1500.0,
+        "unlocated_total": -5000.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 1000.0,
+            "rows": 1,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 1000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 1000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00835959",
+                    "amount": 1000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-e1",
+                        "transaction_id": "",
+                        "amount": 1000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00835959"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": -2500.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": -2500.0,
+                "rows": 1,
+                "basis": "",
+                "share": null,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": -2500.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-b2",
+                        "transaction_id": "",
+                        "amount": -2500.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "C00835959: a line 23 payment of transaction type 22Z, which is not a transfer",
+            "amount": -5000.0,
+            "rows": 1,
+            "kind": "unlocated"
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": -5000.0,
+        "share_base": {
+          "places": 1000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": -6500.0,
+            "rows": 2,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [],
+        "transfers_not_itemized_total": 0.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 0,
+          "legs_by_line_fallback": 0,
+          "amount_by_line_fallback": 0.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 3,
+          "reload_rows": 0,
+          "reload_amount": 0.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved.",
+        "downstream_edges": [],
+        "downstream_committees": [
+          "C00835959"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-refund/snapshots.json",
+            "sha256": "e68df542de38a7ebb469788f7d51b34c5d017c4c9e00e903642130e8404f36f6",
+            "coverage_start": null,
+            "coverage_end": null
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "v4: a share base that is not the positive located total",
+      "expect": "share_base.places is not the positive located total",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-refund",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": -6500.0,
+        "located_total": -1500.0,
+        "unlocated_total": -5000.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 1000.0,
+            "rows": 1,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 1000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 1000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00835959",
+                    "amount": 1000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-e1",
+                        "transaction_id": "",
+                        "amount": 1000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00835959"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": -2500.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": -2500.0,
+                "rows": 1,
+                "basis": "",
+                "share": null,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": -2500.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-b2",
+                        "transaction_id": "",
+                        "amount": -2500.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "C00835959: a line 23 payment of transaction type 22Z, which is not a transfer",
+            "amount": -5000.0,
+            "rows": 1,
+            "kind": "reversal"
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": -5000.0,
+        "share_base": {
+          "places": 999.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": -6500.0,
+            "rows": 2,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [],
+        "transfers_not_itemized_total": 0.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 0,
+          "legs_by_line_fallback": 0,
+          "amount_by_line_fallback": 0.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 3,
+          "reload_rows": 0,
+          "reload_amount": 0.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved.",
+        "downstream_edges": [],
+        "downstream_committees": [
+          "C00835959"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-refund/snapshots.json",
+            "sha256": "e68df542de38a7ebb469788f7d51b34c5d017c4c9e00e903642130e8404f36f6",
+            "coverage_start": null,
+            "coverage_end": null
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
+    },
+    {
+      "name": "v4: a reversals total that does not add up from the reversal lines",
+      "expect": "reversals_total does not add up",
+      "payload": {
+        "source": "snapshot",
+        "id": "v4-refund",
+        "direction": "spent",
+        "cycle": "2026",
+        "committee": {
+          "id": "C00835959",
+          "name": "C00835959"
+        },
+        "label": "Coinbase",
+        "vintage": "119",
+        "congress": "119th",
+        "canvas": {
+          "width": 100,
+          "height": 60
+        },
+        "boundary_file": "cd119.json",
+        "zip_basis": "",
+        "reported_total": -6500.0,
+        "located_total": -1500.0,
+        "unlocated_total": -5000.0,
+        "reconciles": true,
+        "reconciliation_residual": 0.0,
+        "kinds": [
+          {
+            "kind": "candidates",
+            "label": "Candidates",
+            "total": 1000.0,
+            "rows": 1,
+            "basis": "by the candidate's district",
+            "default_on": true,
+            "districts": [
+              {
+                "key": "CA-12",
+                "amount": 1000.0,
+                "rows": 1,
+                "basis": "",
+                "share": 1.0,
+                "support": 1000.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "H6CA12000 via C00835959",
+                    "amount": 1000.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-e1",
+                        "transaction_id": "",
+                        "amount": 1000.0,
+                        "date": "",
+                        "counterparty": "H6CA12000",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "H6CA12000 via C00835959"
+              }
+            ],
+            "states": []
+          },
+          {
+            "kind": "transfers",
+            "label": "Transfers to committees",
+            "total": -2500.0,
+            "rows": 1,
+            "basis": "by the committee's registered state",
+            "default_on": true,
+            "districts": [],
+            "states": [
+              {
+                "key": "VA",
+                "amount": -2500.0,
+                "rows": 1,
+                "basis": "",
+                "share": null,
+                "support": 0.0,
+                "oppose": 0.0,
+                "split": false,
+                "recipients": [
+                  {
+                    "name": "SENATE LEADERSHIP FUND via C00835959",
+                    "amount": -2500.0,
+                    "filings": [
+                      {
+                        "source_url": "",
+                        "sub_id": "r-b2",
+                        "transaction_id": "",
+                        "amount": -2500.0,
+                        "date": "",
+                        "counterparty": "SENATE LEADERSHIP FUND",
+                        "city": "",
+                        "state": "",
+                        "zip": "",
+                        "employer": "",
+                        "purpose": ""
+                      }
+                    ]
+                  }
+                ],
+                "who": "SENATE LEADERSHIP FUND via C00835959"
+              }
+            ]
+          },
+          {
+            "kind": "operating",
+            "label": "Operating",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "by the payee's state",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          },
+          {
+            "kind": "conversions",
+            "label": "Asset conversions",
+            "total": 0.0,
+            "rows": 0,
+            "basis": "in-kind assets liquidated back to the contributor",
+            "default_on": true,
+            "districts": [],
+            "states": []
+          }
+        ],
+        "unlocated": [
+          {
+            "reason": "C00835959: a line 23 payment of transaction type 22Z, which is not a transfer",
+            "amount": -5000.0,
+            "rows": 1,
+            "kind": "reversal"
+          }
+        ],
+        "stops": [
+          1000,
+          10000,
+          100000,
+          1000000,
+          10000000
+        ],
+        "reversals_total": -1.0,
+        "share_base": {
+          "places": 1000.0,
+          "zips": null
+        },
+        "tract_basis": "",
+        "by_state": [
+          {
+            "key": "CA",
+            "name": "CA",
+            "region": "West",
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          },
+          {
+            "key": "VA",
+            "name": "VA",
+            "region": "South",
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          }
+        ],
+        "by_region": [
+          {
+            "key": "South",
+            "name": "South",
+            "states": [
+              "VA"
+            ],
+            "amount": -2500.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "transfers": -2500.0
+            }
+          },
+          {
+            "key": "West",
+            "name": "West",
+            "states": [
+              "CA"
+            ],
+            "amount": 1000.0,
+            "rows": 1,
+            "contributors": 1,
+            "kinds": {
+              "candidates": 1000.0
+            }
+          }
+        ],
+        "region_order": [
+          "Northeast",
+          "Midwest",
+          "South",
+          "West",
+          "Territories",
+          "Unplaced"
+        ],
+        "zip_points_file": "zcta_points.json",
+        "sides": {
+          "raised": {
+            "reported_total": 0.0,
+            "rows": 0,
+            "reason": "Missing or invalid amount in saved downstream evidence; no zero is inferred."
+          },
+          "spent": {
+            "reported_total": -6500.0,
+            "rows": 2,
+            "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+          }
+        },
+        "spend_basis": "consolidated_saved_network",
+        "transfers_not_itemized": [],
+        "transfers_not_itemized_total": 0.0,
+        "transfer_rule": {
+          "transaction_types": [
+            "24G",
+            "24K"
+          ],
+          "rows_without_transaction_type": 0,
+          "legs_by_line_fallback": 0,
+          "amount_by_line_fallback": 0.0
+        },
+        "reload_rule": {
+          "key": "committee|report type|transaction id|file number|counterparty|amount|date|type",
+          "rows_without_transaction_id_or_file_number": 3,
+          "reload_rows": 0,
+          "reload_amount": 0.0
+        },
+        "downstream_note": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved.",
+        "downstream_edges": [],
+        "downstream_committees": [
+          "C00835959"
+        ],
+        "downstream_sources": [
+          {
+            "cycle": "2026",
+            "committee": "C00835959",
+            "source": "snapshots/v4-refund/snapshots.json",
+            "sha256": "e68df542de38a7ebb469788f7d51b34c5d017c4c9e00e903642130e8404f36f6",
+            "coverage_start": null,
+            "coverage_end": null
+          }
+        ],
+        "by_zip": [],
+        "zip_truncated": 0,
+        "zip_truncated_amount": 0.0,
+        "zip_missing": {
+          "amount": 0.0,
+          "rows": 0
+        },
+        "geocoded_rows": 0,
+        "zip_rows": 0,
+        "pending_rows": 0,
+        "reason": "Saved downstream committee network, counted once per committee/cycle. Includes spending by recipient PACs, not dollars attributed to the starting PAC or its donors. Coverage is limited to saved evidence; committee coverage windows may differ, and missing destination snapshots remain unresolved."
+      }
     }
-  ]
+  ],
+  "amended": "2026-09-25 (lane C: v4 - lane B fields documented; item 7 of F4)"
 }

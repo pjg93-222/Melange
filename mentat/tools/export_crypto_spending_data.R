@@ -61,6 +61,16 @@ for (module in c(
   source(file.path(MENTAT_PROJECT_ROOT, "R", module), local = .GlobalEnv)
 }
 
+# A memo the memo plan removed as its counted parent's duplicate (duplicate_memo 1;
+# F13's memo_redisclosure_of_counted_parent, or an FEC back reference) was matched:
+# it carries the match as its reason, never "disclosure_memo_unmatched".
+# tests/test_export_memo_reason.R reads this definition from this file.
+export_memo_duplicate_reason <- function(reason, duplicate_memo, duplicate_reason) {
+  matched <- !is.na(duplicate_memo) & duplicate_memo == 1L & reason %in% "disclosure_memo_unmatched"
+  reason[matched] <- ifelse(is.na(duplicate_reason[matched]), "", as.character(duplicate_reason[matched]))
+  reason
+}
+
 require_package("data.table")
 require_package("DBI")
 require_package("RSQLite")
@@ -510,6 +520,7 @@ raw_export[fec_receipt_role_excluded(receipt_role),
 # filter on it (2026-09-17 ruling: contradictions, not ambiguity).
 raw_export[, receipt_role_unverified := fec_receipt_role_unverified(receipt_role)]
 raw_export[, receipt_role_reason := fec_receipt_role_reason(receipt_role)]
+raw_export[, receipt_role_reason := export_memo_duplicate_reason(receipt_role_reason, duplicate_memo, duplicate_reason)]
 raw_export[, company_attribution_reason := ifelse(company_attribution_status == "accepted", "",
   paste0(company_attribution_status, "; original matcher: ", company_match_reason))]
 raw_export[include_in_analysis == "Yes" & company_attribution_status != "accepted",
@@ -642,7 +653,9 @@ positive_company_roots <- raw_export[include_in_analysis == "Yes" & nzchar(commi
   .(net = sum(amount)), by = .(cycle, company, committee_id)][net > 0]
 downstream_universe[, traversal_seed := paste(cycle, committee_id, sep = "|") %in%
   paste(positive_company_roots$cycle, positive_company_roots$committee_id, sep = "|")]
-transfer_context <- fec_transfer_context(beneficiary_dir, downstream_universe, candidate_links, supported_cycles)
+# F15 (Paul approved 2026-09-26): each company view is dated from its own roots.
+transfer_context <- fec_transfer_context(beneficiary_dir, downstream_universe, candidate_links, supported_cycles,
+  views = positive_company_roots[, .(cycle, view = "Company", company, committee_id)])
 downstream_activity <- fec_read_downstream_activity(
   beneficiary_dir,
   transfer_context$universe,
@@ -663,7 +676,9 @@ beneficiary_tables <- fec_build_beneficiary_tables(
   raw_export,
   downstream_activity,
   transfer_context$edges,
-  candidate_links
+  candidate_links,
+  networks = transfer_context$networks,
+  industry_universe = transfer_context$universe
 )
 export_phase("beneficiary_bridge_built", nrow(beneficiary_tables$bridge))
 downstream_activity_export <- fec_aggregate_downstream_activity(
@@ -877,6 +892,10 @@ payload <- list(
   metadata = list(
     destination_schema = 1L,
     transfer_coverage = transfer_context$coverage,
+    # F12: what the date rule removed from, or flagged in, downstream activity.
+    downstream_date_rule = attr(downstream_activity, "date_rule"),
+    # F15: each view's own walk - its roots, carryover status and the committees it dated.
+    view_date_rule = transfer_context$networks$census,
     industry = MENTAT_INDUSTRY,
     database_path = database_path,
     database_bytes = file.info(database_path)$size,
@@ -988,7 +1007,8 @@ payload <- list(
       sha256 = vapply(paths, function(path) if (file.exists(path))
         digest::digest(file = path, algo = "sha256") else "", character(1)),
       status = ifelse(file.exists(paths), "saved source; complete filing coverage not established", "missing source; not zero activity"),
-      policy = paste0("PAS2 parser ", FEC_PAS2_PARSER_VERSION, "; ", FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "; OTH v5 count_all"))
+      policy = paste0("PAS2 parser ", FEC_PAS2_PARSER_VERSION, "; ", FEC_PAS2_AMBIGUOUS_VERSION_POLICY,
+        "; OTH v6 count_all; earliest arrival (F12), carryover onward; company views dated from their own roots (F15)"))
   })),
   beneficiary_bridge = beneficiary_tables$bridge,
   beneficiary_summary = beneficiary_tables$summary

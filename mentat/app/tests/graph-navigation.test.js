@@ -148,8 +148,8 @@ test('[graph-nav] the drawer keys are scope keys, and the contract is v6', () =>
   const contract = JSON.parse(fs.readFileSync(path.resolve(__dirname, '..', '..', '..',
     'audits', 'mentat_failings_20260915', 'contracts', 'url_scope.json'), 'utf8'));
   // v6 (build 02, 2026-09-22) added Graph's compare and layout keys; the
-  // drawer keys below are unchanged.
-  assert.equal(contract.version, 6);
+  // drawer keys below are unchanged. v7 (lane F) adds only the pane key <pane>.flow.
+  assert.equal(contract.version, 7);
   assert.ok(scope.KEYS.includes('drawer') && scope.KEYS.includes('drawerDirection'));
   assert.ok(contract.keys.drawer && contract.keys.drawerDirection,
     'the key table names both, or the table is prose');

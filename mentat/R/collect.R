@@ -130,9 +130,12 @@ fec_receipt_row_eligible <- function(rows) {
   keep
 }
 
-# "Previously disclosed" is a claim of a repeat, not proof of one.
-# Explicit, same-filing back references are resolved by
-# mentat_memo_duplicate_plan(). Equal committee/cycle/amount is not proof.
+# "Previously disclosed" is a claim of a repeat, not proof of one on its own.
+# mentat_memo_duplicate_plan() (schema.R) removes a disclosure memo with an
+# explicit, same-filing FEC back reference, or (F13, 2026-09-26) when a counted
+# parent matches the statement: same company, committee, contributor and
+# amount, dated on or before the memo. Equal committee/cycle/amount without
+# the memo's own statement is not proof.
 
 fec_receipt_role <- function(rows) {
   column <- function(name) {

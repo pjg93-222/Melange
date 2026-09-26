@@ -913,6 +913,95 @@ mentat_filing_version_plan <- function(rows, table) {
   )
 }
 
+# F13, the memo re-disclosure rule (Paul approved 2026-09-26, "Approve F13").
+# D-040(a) removes "a proven duplicate of a counted parent"; D-043 lets a row's
+# own text decide. A memo whose own text states that it re-discloses a gift
+# already itemized - collect.R's unverified_disclosure_memo role, i.e. a memo
+# row matching fec_receipt_rules.json's disclosure_pattern - duplicates the
+# counted parent it restates: same company, same recipient committee, same
+# contributor (FEC contributor_id when both rows carry one, else the normalised
+# name), the same nonzero amount to the cent, dated on or before the memo, and
+# not itself a memo. The money then counts once, via the parent; with several
+# such parents the latest-dated one is recorded (then the lowest sub_id). A
+# memo that calls the gift unitemized (redisclosure_unitemized_pattern)
+# restates no itemized parent. Missing or ambiguous information never excludes
+# (D-040): with no such parent the memo stays counted and keeps its
+# disclosure_memo_unmatched flag, and equal amounts without the statement stay
+# a clue, never proof (the 2026-09-20 contradictions-only pass). A counted
+# parent is an eligible row (company match accepted or blank, no
+# excluded_reason, a giving role) whose attribution, when the rows carry it,
+# is not contradicted. Returns each row's parent sub_id ("" for none).
+# tools/pac_evidence.py memo_redisclosure_parents() is the Python twin, and
+# tests/fixtures/memo_redisclosure_cases.json pins both.
+mentat_memo_redisclosure_parents <- function(rows, roles, eligible) {
+  rows <- as.data.frame(rows, stringsAsFactors = FALSE)
+  count <- nrow(rows)
+  parent <- rep("", count)
+  if (!count || is.null(roles) || !exists("fec_receipt_rules", mode = "function")) return(parent)
+  unitemized <- fec_receipt_rules()$redisclosure_unitemized_pattern
+  if (!is.character(unitemized) || length(unitemized) != 1L || !nzchar(unitemized)) {
+    stop("fec_receipt_rules.json lacks redisclosure_unitemized_pattern; the F13 memo rule cannot run.", call. = FALSE)
+  }
+  # Work on row subsets: the global plan runs over every row of both tables
+  # (about 850k for Banking) and only a handful are re-disclosure memos.
+  column <- function(name, index, default = "") {
+    if (name %in% names(rows)) rows[[name]][index] else rep(default, length(index))
+  }
+  text <- function(name, index) mentat_version_text(column(name, index))
+  words <- function(x) gsub("^ +| +$", "", gsub("[^A-Z0-9]+", " ", x, perl = TRUE), perl = TRUE)
+  eligible <- as.logical(eligible)
+  eligible[is.na(eligible)] <- FALSE
+  # Facts about the rows in `index`: memo flag, counted, amount key, day.
+  describe <- function(index) {
+    memo <- text("memo_code", index) == "X" | text("memoed_subtotal", index) %in% c("1", "TRUE") |
+      text("is_memo_leg", index) %in% c("1", "TRUE")
+    counted <- eligible[index]
+    if ("company_attribution_status" %in% names(rows)) {
+      counted <- counted & !text("company_attribution_status", index) %in%
+        c("CONTRADICTED_BY_REPORTED_ORGANIZATION", "EXPLICIT_SOURCE_EXCLUSION")
+    }
+    amount <- mentat_filing_identity_amount(column("contribution_receipt_amount", index, NA_real_))
+    money <- nzchar(amount) & suppressWarnings(as.numeric(amount)) != 0
+    money[is.na(money)] <- FALSE
+    day <- mentat_filing_identity_date(column("contribution_receipt_date", index))
+    dated <- grepl("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", day)
+    day_number <- rep(NA_integer_, length(index))
+    day_number[dated] <- as.integer(gsub("-", "", day[dated], fixed = TRUE))
+    committee <- text("committee_id", index)
+    sub_id <- as.character(column("sub_id", index))
+    sub_id[is.na(sub_id)] <- ""
+    data.frame(row = index, memo = memo, counted = counted & money & dated, committee = committee,
+               key = paste(text("company", index), committee, amount, sep = "\034"),
+               day_number = day_number, sub_id = sub_id,
+               entity = text("contributor_id", index), name = words(text("contributor_name", index)),
+               stringsAsFactors = FALSE)
+  }
+  memos <- describe(which(roles %in% "unverified_disclosure_memo" & eligible))
+  memos <- memos[memos$memo & memos$counted & nzchar(memos$committee), , drop = FALSE]
+  if (nrow(memos)) {
+    statement <- words(paste(text("receipt_type_full", memos$row), text("memo_text", memos$row)))
+    memos <- memos[!grepl(unitemized, statement, perl = TRUE), , drop = FALSE]
+  }
+  if (!nrow(memos)) return(parent)
+  pool <- describe(which(eligible & mentat_version_text(column("committee_id", seq_len(count))) %in% memos$committee))
+  pool <- pool[!pool$memo & pool$counted & nzchar(trimws(pool$sub_id)) & pool$key %in% memos$key, , drop = FALSE]
+  if (!nrow(pool)) return(parent)
+  for (m in seq_len(nrow(memos))) {
+    candidates <- pool[pool$key == memos$key[[m]] & pool$day_number <= memos$day_number[[m]], , drop = FALSE]
+    same <- if (nzchar(memos$entity[[m]])) {
+      ifelse(nzchar(candidates$entity), candidates$entity == memos$entity[[m]],
+             nzchar(memos$name[[m]]) & candidates$name == memos$name[[m]])
+    } else {
+      nzchar(memos$name[[m]]) & candidates$name == memos$name[[m]]
+    }
+    candidates <- candidates[same, , drop = FALSE]
+    if (!nrow(candidates)) next
+    best <- order(-candidates$day_number, candidates$sub_id, method = "radix")[[1L]]
+    parent[[memos$row[[m]]]] <- candidates$sub_id[[best]]
+  }
+  parent
+}
+
 mentat_memo_duplicate_plan <- function(rows) {
   rows <- as.data.frame(rows, stringsAsFactors = FALSE)
   column <- function(name, default = "") {
@@ -930,6 +1019,7 @@ mentat_memo_duplicate_plan <- function(rows) {
   is_memo[is.na(is_memo)] <- FALSE
   eligible <- text("company_match_status") %in% c("", "ACCEPTED") & !nzchar(text("excluded_reason"))
   verified_parent <- rep(TRUE, count)
+  receipt_roles <- NULL
   if (exists("fec_receipt_role", mode = "function")) {
     receipt_roles <- fec_receipt_role(rows)
     eligible <- eligible & !fec_receipt_role_excluded(receipt_roles)
@@ -990,6 +1080,13 @@ mentat_memo_duplicate_plan <- function(rows) {
       reason[i] <- basis
     }
   }
+  # F13: the memo's own re-disclosure statement plus a matching counted parent
+  # (mentat_memo_redisclosure_parents). An FEC back reference resolved above
+  # keeps precedence.
+  restated <- mentat_memo_redisclosure_parents(rows, receipt_roles, eligible)
+  restated[nzchar(duplicate_of)] <- ""
+  duplicate_of[nzchar(restated)] <- restated[nzchar(restated)]
+  reason[nzchar(restated)] <- "memo_redisclosure_of_counted_parent"
   # Conduit legs remain visible and count to their named recipients (R5/R8).
   # Only same-recipient memos with a retained, eligible counterpart are removed.
   data.frame(sub_id = as.character(column("sub_id")), memo_key = memo_key,
@@ -1006,15 +1103,16 @@ apply_amendment_versioning <- function(connection, print_summary = FALSE) {
     DBI::dbListTables(connection)
   )
   # transaction_id / receipt_type_full / memo_text feed the parent back-reference
-  # rule in mentat_memo_duplicate_plan(). Older corporate snapshots lack these
-  # fields, so each frame is padded before combining both source tables.
+  # rule in mentat_memo_duplicate_plan(), and contributor_id F13's parent match.
+  # Older corporate snapshots lack these fields, so each frame is padded before
+  # combining both source tables.
   memo_plan_columns <- c(
     "sub_id", "company", "committee_id", "contribution_receipt_date",
     "contribution_receipt_amount", "contributor_name", "is_memo_leg",
     "transaction_id", "receipt_type_full", "memo_text", "back_reference_transaction_id",
     "back_reference_schedule_name", "file_num", "report_year", "report_type",
     "filing_form", "line_number", "memo_code", "memoed_subtotal",
-    "company_match_status", "excluded_reason"
+    "company_match_status", "excluded_reason", "contributor_id"
   )
   DBI::dbWithTransaction(connection, {
     global_memo_rows <- do.call(rbind, lapply(tables, function(table) {

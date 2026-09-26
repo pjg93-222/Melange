@@ -165,7 +165,7 @@ stopifnot(all(fec_receipt_role(conflicting_income) == "unverified_contradicted_r
 # --- 2026-09-17 ruling ------------------------------------------------------
 # A cross-verification step may remove or zero a row only when the evidence
 # CONTRADICTS it. Missing or ambiguous information is counted and flagged.
-stopifnot(fec_receipt_rules()$version == 5)
+stopifnot(fec_receipt_rules()$version == 6)
 # True exact non-giving descriptions are still excluded.
 stopifnot(all(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
   receipt_type_full=c("NON-CONTRIBUTION", "INTEREST", "SERVICE FEE"))) == "other_receipt"))

@@ -153,6 +153,9 @@ def estimate_snapshots(snapshots, company, aliases):
     is unknown here; run_pool accepts an explicitly reconciled opening ledger.
     """
     from pac_evidence import name_key, receipt_role, source_link
+    # F8 and F11 (Paul, 2026-09-25): the collector, the network and the map name
+    # a transfer and count a reload through tools/transfer_rule.py; so does this.
+    from transfer_rule import count_reloads_once, schedule_b_leg
     aliases = {name_key(value) for value in [company, *aliases] if name_key(value)}
     cycles = []
     for cycle in sorted({s['cycle'] for s in snapshots}):
@@ -175,10 +178,15 @@ def estimate_snapshots(snapshots, company, aliases):
                 if abs(first + reported_in - reported_out - last) > Decimal('.01'):
                     issue(committee, 'summary_balance', 'Opening cash + receipts − disbursements does not match closing cash.')
                 actual_in, actual_out = Decimal(0), Decimal(0)
+                # F11: a reload - a row sharing committee, report type, transaction
+                # id, file number, counterparty, amount, date and type with an
+                # earlier row under another SUB_ID - counts once.
+                schedules = {name: list(count_reloads_once(snapshot[name], name, committee))
+                             for name in ('receipts', 'disbursements', 'expenditures')}
                 for category, field, date_field in [('receipts', 'contribution_receipt_amount', 'contribution_receipt_date'),
                                                    ('disbursements', 'disbursement_amount', 'disbursement_date'),
                                                    ('expenditures', 'expenditure_amount', 'disbursement_dt')]:
-                    for row in snapshot[category]:
+                    for row in schedules[category]:
                         if row.get('memoed_subtotal') or row.get('memo_code') == 'X':
                             continue
                         value = amount(row.get(field))
@@ -224,7 +232,12 @@ def estimate_snapshots(snapshots, company, aliases):
                             if line in ('28A', '28B', '28C'):
                                 issue(committee, 'refund_links', 'Contribution refunds require an identified original funding source.')
                             destination = row.get('recipient_committee_id')
-                            if line in ('22', '23') and destination:
+                            # F8: "one rule, by transaction type, everywhere". A row
+                            # moves money to another committee when transfer_rule
+                            # names it a leg - by its type (the index's 24G/24K),
+                            # by the old line 22/23 rule only when it records none.
+                            leg, _basis = schedule_b_leg(row)
+                            if leg and destination:
                                 if destination in known:
                                     transfers.append((row, {**event, 'kind': 'transfer', 'destination': destination}))
                                 else:
@@ -237,7 +250,7 @@ def estimate_snapshots(snapshots, company, aliases):
                     difference = reported - actual
                     if abs(difference) > Decimal('.01'):
                         issue(committee, label + '_gap', f'Reported {label} differ from dated nonmemo records by ${difference:,.2f}; collect/reconcile the missing cash entries.')
-                actual_ie = sum((amount(r.get('expenditure_amount')) for r in snapshot['expenditures']
+                actual_ie = sum((amount(r.get('expenditure_amount')) for r in schedules['expenditures']
                                  if not r.get('memoed_subtotal') and r.get('memo_code') != 'X'), Decimal(0))
                 if abs(actual_ie - amount(total.get('independent_expenditures'))) > Decimal('.01'):
                     issue(committee, 'independent_expenditures_gap', 'Regular-report candidate spending does not reconcile to the independent-expenditure summary.')

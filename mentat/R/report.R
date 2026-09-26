@@ -2025,7 +2025,8 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
     optional_projection(table, c(
       "receipt_type_full", "filing_form", "receipt_type", "line_number", "line_number_label",
       "file_num", "report_year", "report_type",
-      "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name"))
+      "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name",
+      "contributor_id"))
   }
   # contributor_street_1/2 arrived with the street-column migration. Snapshots
   # taken before it do not carry the columns, and SELECTing them

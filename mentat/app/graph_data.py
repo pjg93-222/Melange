@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import posixpath
 import re
+import sqlite3
 import threading
 import time
 import xml.etree.ElementTree as ET
@@ -199,6 +200,10 @@ def _report_transfers(version):
     result = []
     required = {'cycle','source_committee','destination_committee','reported_net_transfer','traversal_status'}
     count = 0
+    # F14 (2026-09-26): the sheet lists each transfer once per cycle (earlier books
+    # repeated it once per funded root; both shapes carry these five columns). A
+    # transfer seen twice must agree on its amount, as in the full-source read below.
+    seen = {}
     for row in activity_xml_rows(file_stamp[0], metadata, 'Transfer Paths', required, optional=True):
         if not row.get('source_committee'):
             continue
@@ -206,9 +211,16 @@ def _report_transfers(version):
         # Candidate gifts are already in activity. Never expand a terminal gift.
         if row.get('traversal_status') == 'candidate_committee':
             continue
-        result.append({'cycle':cycle(row['cycle']), 'source':str(row['source_committee']),
-                       'destination':str(row['destination_committee']),
-                       'amount':amount(row['reported_net_transfer'])})
+        edge = {'cycle':cycle(row['cycle']), 'source':str(row['source_committee']),
+                'destination':str(row['destination_committee']),
+                'amount':amount(row['reported_net_transfer'])}
+        identity = (edge['cycle'], edge['source'], edge['destination'])
+        if identity in seen:
+            if seen[identity] != edge['amount']:
+                raise ValueError('Transfer Paths rows disagree on one transfer amount.')
+            continue
+        seen[identity] = edge['amount']
+        result.append(edge)
     note = str(metadata.get('note') or '')
     expected = re.search(r'([\d,]+)\s+records;', note)
     if 'first ' in note.lower() or (expected and int(expected[1].replace(',','')) != count):
@@ -265,18 +277,95 @@ def transfer_source(path):
             folder / f'manifest-{fingerprint[:16]}.json')
 
 
+# F14 (Paul approved option (a), 2026-09-26): the Transfer Paths sheet lists each
+# transfer once per cycle. The full expansion - every funded root x committee it
+# reaches x transfer out of it - is the transfer_path_detail table of the tidy
+# staging store the same build pinned (its manifest's stage_sha256), never a sheet.
+TRANSFER_PATH_DETAIL_COLUMNS = ('cycle_label', 'cycle', 'funded_committee', 'source_committee',
+                                'destination_committee', 'reported_net_transfer', 'depth',
+                                'representative_path', 'traversal_status', 'via_carryover')
+
+
+def transfer_detail_source(path):
+    """(tidy staging store, manifest) pinned to this workbook, or (None, None)."""
+    payload, manifest = transfer_source(path)
+    if payload is None:
+        return None, None
+    return payload.with_name('tidy-' + payload.name.removeprefix('industry_data-').removesuffix('.json') + '.sqlite'), manifest
+
+
+@lru_cache(maxsize=8)
+def _pinned_detail_store(store_stamp, manifest_stamp):
+    proof = json.loads(Path(manifest_stamp[0]).read_text(encoding='utf-8-sig'))
+    if not proof.get('stage_sha256') or digest(Path(store_stamp[0])) != proof['stage_sha256']:
+        raise ValueError('The transfer path detail store does not match the published report fingerprint.')
+    return store_stamp
+
+
+def transfer_path_detail(path, year, root=None, source=None, destination=None, limit=1000):
+    """Routes from the full root x committee x transfer expansion for one workbook and cycle.
+
+    Filter by funded root, or by transfer (source and/or destination). Read-only,
+    from the store the workbook's build pinned; a store that does not match that
+    fingerprint, or a build older than F14, is refused rather than read.
+    """
+    store, manifest = transfer_detail_source(path)
+    if store is None or manifest is None or not store.is_file() or not manifest.is_file():
+        raise ValueError('This workbook has no pinned transfer path detail store.')
+    version = _pinned_detail_store(stamp(store), stamp(manifest))
+    clauses, values = ['"cycle" = ?'], [int(cycle(year) or 0)]
+    for column, value in (('funded_committee', root), ('source_committee', source),
+                          ('destination_committee', destination)):
+        if value:
+            clauses.append(f'"{column}" = ?')
+            values.append(str(value))
+    fields = ', '.join(f'"{name}"' for name in TRANSFER_PATH_DETAIL_COLUMNS)
+    connection = sqlite3.connect(Path(version[0]).resolve().as_uri() + '?mode=ro', uri=True)
+    try:
+        connection.execute('PRAGMA query_only=ON')
+        tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if 'transfer_path_detail' not in tables:
+            raise ValueError('This build predates the transfer path detail table (F14).')
+        rows = connection.execute(
+            f'SELECT {fields} FROM "transfer_path_detail" WHERE {" AND ".join(clauses)} '
+            f'ORDER BY "funded_committee", "depth", "source_committee", "destination_committee" LIMIT ?',
+            (*values, int(limit))).fetchall()
+    finally:
+        connection.close()
+    return [dict(zip(TRANSFER_PATH_DETAIL_COLUMNS, row)) for row in rows]
+
+
 @lru_cache(maxsize=32)
-def graph_schema(file_stamp):
+def workbook_sheets(file_stamp):
+    """Every sheet name, in workbook order, from the workbook's own index."""
     try:
         # Workbook metadata is sufficient. Loading openpyxl here materialized the
         # shared-string table for every report just to list its sheet names.
         with zipfile.ZipFile(file_stamp[0]) as archive:
             tree = ET.fromstring(archive.read('xl/workbook.xml'))
             ns = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
-            return [s.get('name') for s in tree.iter(ns+'sheet')
-                    if re.fullmatch(r'\d{4}[-–]\d{4}', s.get('name', ''))]
+            return tuple(s.get('name', '') for s in tree.iter(ns+'sheet'))
     except ET.ParseError as error:
         raise ValueError('Workbook sheet metadata is malformed.') from error
+
+
+@lru_cache(maxsize=32)
+def graph_schema(file_stamp):
+    return [name for name in workbook_sheets(file_stamp) if re.fullmatch(r'\d{4}[-–]\d{4}', name)]
+
+
+TRANSFER_PATHS = 'Transfer Paths'
+
+
+def has_transfer_paths(file_stamp):
+    """server.report_quality's `transfer_paths` flag: 'Transfer Paths' in the sheet names.
+
+    report_quality answers it by loading the workbook in openpyxl (measured
+    2026-09-25: 21 s for the 40 MB Banking book, 1.7 s for Crypto), too slow for
+    a drawer, so Graph reads the same fact from the sheet index. The Graph tests
+    hold the two to the same answer.
+    """
+    return TRANSFER_PATHS in workbook_sheets(file_stamp)
 
 
 def committee_id(value):
@@ -540,20 +629,93 @@ report_activity.cache_clear = _report_activity.cache_clear
 report_activity.cache_info = _report_activity.cache_info
 
 
+# F4 (Paul approved 2026-09-25): a surface says when money is not traced. No
+# industry had an estimate bundle when this was written, and the Estimates view
+# answered with an empty panel; it now says what is missing and what makes it.
+# Lane F's attributed Flow answers 409 with the same sentence.
+NO_ESTIMATE_BUNDLE = 'No estimate bundle for this industry yet; rebuild the workbook.'
+
+
+def audit_manifest_path(path):
+    path = Path(path)
+    return path.with_suffix('.audit') / 'audit-manifest.json'
+
+
+def audit_manifest(path):
+    """The workbook's audit-bundle manifest, bound to this workbook; None when it has no bundle."""
+    path = Path(path)
+    try:
+        manifest = json.loads(audit_manifest_path(path).read_text(encoding='utf-8-sig'))
+    except FileNotFoundError:
+        return None
+    if (not isinstance(manifest, dict) or manifest.get('workbook_name') != path.name
+            or manifest.get('workbook_sha256') != digest(path)):
+        raise ValueError('The estimate audit bundle does not match this workbook.')
+    return manifest
+
+
+def not_traced(year, status, recorded=''):
+    """('Not traced: the transfer index for <cycle> is <status>', its rebuild command).
+
+    F2 (lane A, tools/enrich_downstream.py not_traced_note) records one note per
+    cycle that is not current: 'Not traced: the transfer index for 2024 is
+    stale; rebuild with python ... --cycles 2024'. The words are shown; the
+    command goes in a tooltip. A current index has neither.
+    """
+    if status == 'current':
+        return '', ''
+    text = f'Not traced: the transfer index for {year} is {status}'
+    recorded = str(recorded or '')
+    command = recorded.split('; rebuild with ', 1)[1].strip() if '; rebuild with ' in recorded else ''
+    return text, command
+
+
+def transfer_index(path):
+    """{cycle: {cycle, status, note, command}} as the workbook's audit bundle names them (F2).
+
+    enrich_downstream.py writes transfer_index_status ({"2024": "stale", ...};
+    current | stale | missing | unresolved) and transfer_index_notes into the
+    audit manifest. Any status but current published no transfer-derived number
+    for that cycle. A workbook with no bundle, a bundle written before the
+    status existed, or one that does not match the workbook names nothing here,
+    so nothing is claimed either way.
+    """
+    try:
+        manifest = audit_manifest(path)
+    except (OSError, ValueError):
+        return {}
+    if not manifest:
+        return {}
+    statuses = manifest.get('transfer_index_status') or {}
+    notes = manifest.get('transfer_index_notes') or {}
+    if not isinstance(statuses, dict) or not isinstance(notes, dict):
+        return {}
+    result = {}
+    for year, status in statuses.items():
+        key_ = cycle(year)
+        if not key_ or not isinstance(status, str) or not status:
+            continue
+        text, command = not_traced(key_, status, notes.get(str(year)))
+        result[key_] = {'cycle': key_, 'status': status, 'note': text, 'command': command}
+    return result
+
+
+def rebuild_title(rows):
+    """The tooltip for not-traced rows: each distinct rebuild command, on its own line."""
+    commands = sorted({row['command'] for row in rows if row.get('command')})
+    return '\n'.join('Rebuild with: ' + command for command in commands)
+
+
 def estimate_receipt(path):
     """Require the full hash-bound CSV, never the 10,000-row worksheet preview."""
     path = Path(path)
-    manifest_path = path.with_suffix('.audit') / 'audit-manifest.json'
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
-    except FileNotFoundError:
-        # The reader-facing note, not the OS error with a local path in it
-        # (r4 code review: estimates on a report written without its audit
-        # bundle answered "[Errno 2] No such file or directory: ...").
-        raise ValueError(f'Saved estimates are unavailable: this report has no estimate audit bundle ({manifest_path.parent.name}). '
-                         'Missing estimates are not zero.') from None
-    if manifest.get('workbook_name') != path.name or manifest.get('workbook_sha256') != digest(path):
-        raise ValueError('The estimate audit bundle does not match this workbook.')
+    manifest_path = audit_manifest_path(path)
+    # The reader-facing note, not the OS error with a local path in it (r4 code
+    # review: estimates on a report written without its audit bundle answered
+    # "[Errno 2] No such file or directory: ...").
+    manifest = audit_manifest(path)
+    if manifest is None:
+        raise ValueError(NO_ESTIMATE_BUNDLE)
     receipt = local_reference('allocation_estimates.csv', manifest_path.parent)
     if manifest.get('csv_sha256', {}).get(receipt.name) != digest(receipt):
         raise ValueError('The estimate receipt is missing or changed.')
@@ -611,6 +773,133 @@ def levels_by_company(rows):
     return sorted(result, key=lambda item:(-item['amount'], item['company']))
 
 
+# F4 (Paul approved 2026-09-25). A committee with no saved snapshot is followed
+# only through its workbook's Transfer Paths sheet (downstream.network's
+# report_edges). With no such sheet - or with F2's stale or missing transfer
+# index, which publishes none of that cycle's paths - nothing past that
+# committee is traced, and Graph says so in words instead of a generic note.
+NO_TRANSFER_PATHS = 'no saved network, and this workbook has no Transfer Paths sheet'
+
+
+def trace_coverage(stamps, reports, index):
+    """{cycle: (the covering workbook has Transfer Paths, F2's row for the cycle or None)}."""
+    covered = {}
+    for version, report in zip(stamps, reports):
+        sheet = has_transfer_paths(version)
+        for year in report['cycles']:
+            covered[year] = (sheet, index.get(year))
+    return covered
+
+
+def transfer_trace(network, roots, covered):
+    """Which committees' transfers this view could not follow, and the words for it.
+
+    roots are the view's funded committee/cycles; network['missing'] the ones
+    reached without a saved snapshot. Returns {'committees': [...],
+    'root_traced': False when every root is untraced, 'note': the sentences,
+    'command': the rebuild commands for a tooltip}.
+    """
+    rows = []
+    for year, committee in network['missing']:
+        if year not in covered:
+            continue
+        sheet, index = covered[year]
+        if not sheet:
+            reason, status, command = NO_TRANSFER_PATHS, None, ''
+        elif index and index['status'] != 'current':
+            reason = f"no saved network, and the transfer index for {year} is {index['status']}"
+            status, command = index['status'], index['command']
+        else:
+            continue
+        rows.append({'cycle': year, 'committee': committee, 'root': (year, committee) in roots,
+                     'status': status, 'reason': reason, 'command': command})
+    committees = sorted({committee for _, committee in roots})
+    single = len(committees) == 1
+    sentences = []
+    at_root = defaultdict(list)
+    for row in rows:
+        if row['root']:
+            at_root[row['reason']].append(row)
+    for reason, group in sorted(at_root.items()):
+        if single:
+            untraced = sorted({row['cycle'] for row in group})
+            scope = '' if untraced == sorted({year for year, _ in roots}) else ' for ' + ' and '.join(untraced)
+            sentences.append(f'Transfers from this committee are not traced{scope}: {reason}.')
+        else:
+            count = len({row['committee'] for row in group})
+            sentences.append(f'Transfers from {count:,} of the {len(committees):,} funded committees '
+                             f'are not traced: {reason}.')
+    further = defaultdict(set)
+    for row in rows:
+        if not row['root']:
+            further[row['reason']].add(row['committee'])
+    for reason, group in sorted(further.items()):
+        count = len(group)
+        sentences.append(f"Transfers from {count:,} other {'committee' if count == 1 else 'committees'} "
+                         f"in this network are not traced: {reason}.")
+    untraced_roots = {(row['cycle'], row['committee']) for row in rows if row['root']}
+    return {'committees': rows,
+            'root_traced': not (single and bool(roots) and set(roots) <= untraced_roots),
+            'note': ' '.join(sentences), 'command': rebuild_title(rows)}
+
+
+def not_traced_problems(payload):
+    """Every way a Graph answer breaks contracts/graph-not-traced.json, as plain
+    sentences; [] when it holds. Applies to candidate views (activity, estimates);
+    a direct answer carries none of the fields and has nothing to check."""
+    problems = []
+    if not isinstance(payload, dict):
+        return ['the answer is not an object']
+    mode = (payload.get('filters') or {}).get('mode')
+    if mode == 'direct':
+        return [f'a direct answer carries {field}' for field in ('transfer_trace', 'transfer_index',
+                                                                  'candidate_note_title') if field in payload]
+    for field in ('transfer_trace', 'transfer_index', 'candidate_note_title'):
+        if field not in payload:
+            problems.append(f'the answer has no {field}')
+    title = payload.get('candidate_note_title') or ''
+    note = payload.get('candidate_note') or ''
+    rows = payload.get('transfer_index') or []
+    for row in rows:
+        if not isinstance(row, dict) or not cycle(row.get('cycle')) or not row.get('status'):
+            problems.append('a transfer_index row states no cycle and status')
+            continue
+        expected = not_traced(row['cycle'], row['status'])[0]
+        if row['status'] == 'current' and (row.get('note') or row.get('command')):
+            problems.append(f"a current index carries a note for {row['cycle']}")
+        elif row['status'] != 'current' and row.get('note') != expected:
+            problems.append(f"the {row['status']} index for {row['cycle']} is not named Not traced")
+    if mode == 'estimates':
+        selected = (payload.get('filters') or {}).get('cycle') or ''
+        scope = [selected] if selected else list((payload.get('options') or {}).get('cycles') or [])
+        for row in rows:
+            if isinstance(row, dict) and row.get('status') != 'current' and row.get('cycle') in scope:
+                if row.get('note') and row['note'] not in note:
+                    problems.append(f"the answer does not say {row['cycle']} is not traced")
+                if row.get('command') and row['command'] not in title:
+                    problems.append(f"the tooltip does not carry the rebuild command for {row['cycle']}")
+    trace = payload.get('transfer_trace')
+    if mode == 'activity' and trace is not None:
+        if not isinstance(trace, dict) or not isinstance(trace.get('committees'), list):
+            return problems + ['transfer_trace must list its committees']
+        for row in trace['committees']:
+            reason = str(row.get('reason') or '') if isinstance(row, dict) else ''
+            if reason != NO_TRANSFER_PATHS and not re.fullmatch(
+                    r'no saved network, and the transfer index for \d{4} is \w+', reason):
+                problems.append(f"the untraced committee {row.get('committee') if isinstance(row, dict) else row} "
+                                f"states no reason")
+            elif row.get('command') and row['command'] not in title:
+                problems.append(f"the tooltip does not carry the rebuild command for {row.get('committee')}")
+        said = str(trace.get('note') or '')
+        if bool(trace['committees']) != ('not traced' in said):
+            problems.append('transfer_trace.note does not say what the committees list holds')
+        if trace.get('root_traced') is False and not said.startswith('Transfers from this committee are not traced'):
+            problems.append('root_traced is false but the note does not say so')
+        if said and said not in note:
+            problems.append('the candidate note does not carry the trace sentence')
+    return problems
+
+
 _views = ViewCache()
 
 
@@ -623,7 +912,8 @@ def graph_view(paths, filters):
     def dependencies():
         snapshots = list(downstream.ROOT.glob('*/snapshots.json')) if filters.get('mode') == 'activity' else []
         full_sources = [p for path in paths for p in transfer_source(path) if p is not None] if filters.get('mode') == 'activity' else []
-        return file_signature([*paths, *snapshots, *full_sources])
+        bundles = [audit_manifest_path(path) for path in paths] if filters.get('mode') == 'activity' else []
+        return file_signature([*paths, *snapshots, *full_sources, *bundles])
     before = dependencies()
     selection = tuple((k,str(filters.get(k) or '')) for k in
                       ('company','tier','cycle','category','recipient','latest','funding','mode','direction'))
@@ -678,6 +968,7 @@ def _graph_view(paths, filters):
     buckets = None
     available, note = True, 'Direct contributions to uniquely linked principal or authorized candidate committees.'
     ties = []
+    trace, index_rows, note_title = None, [], ''
     if mode != 'direct':
         candidate_rows = []
         try:
@@ -704,8 +995,29 @@ def _graph_view(paths, filters):
                 recorded_rows = activity_rows
                 activity_rows = activity_sides(activity_rows)
                 network_keys = network['keys']
-            rows = (activity_rows if mode == 'activity' else
-                    [r for path in paths for r in estimate_rows(estimate_receipt(path))])
+            index = {}
+            if mode == 'activity':
+                for path in paths:
+                    index.update(transfer_index(path))
+                index_rows = sorted(index.values(), key=lambda row: row['cycle'])
+                trace = transfer_trace(network, eligible, trace_coverage(stamps, reports, index))
+                note_title = trace['command']
+                rows = activity_rows
+            else:
+                rows = [r for path in paths for r in estimate_rows(estimate_receipt(path))]
+                for path in paths:
+                    index.update(transfer_index(path))
+                index_rows = sorted(index.values(), key=lambda row: row['cycle'])
+                # F2: a cycle whose transfer index was not current published no
+                # estimates. Say so; its absence is never shown as $0.
+                scope_cycles = [selected['cycle']] if selected['cycle'] else sorted(set(years))
+                untraced = [index[year] for year in scope_cycles if year in index and index[year]['status'] != 'current']
+                note_title = rebuild_title(untraced)
+                if untraced:
+                    gone = {row['cycle'] for row in untraced}
+                    rows = [r for r in rows if r['cycle'] not in gone]
+                    if gone >= set(scope_cycles):
+                        raise ValueError(' '.join(row['note'] + '.' for row in untraced))
             for r in rows:
                 if (r['cycle'],r['committee']) in network_keys and r['amount'] != 0 and r['direction'] in buckets:
                     buckets[r['direction']].append(r)
@@ -716,8 +1028,15 @@ def _graph_view(paths, filters):
                 note = downstream.NOTE + f" {len(network['units'])} saved committee/cycles; {len(network['missing'])} without a saved snapshot. Snapshots supply whole schedule partitions; workbook activity is used only for committees without snapshots."
                 if network.get('measurement_comparisons'):
                     note += ' Snapshot and workbook measurements differ; their amounts are shown separately below and are not reconciled.'
+            if mode == 'activity' and trace['note']:
+                note += ' ' + trace['note']
+            if mode == 'estimates':
+                partial = [index[year] for year in scope_cycles if year in index and index[year]['status'] != 'current']
+                if partial:
+                    note += ' ' + ' '.join(row['note'] + '.' for row in partial)
             if mode == 'activity' and not activity_rows and network['missing']:
-                raise ValueError('Downstream activity is unavailable: no saved activity for the selected committee/cycles. Missing evidence is not zero spending.')
+                raise ValueError('Downstream activity is unavailable: no saved activity for the selected committee/cycles. Missing evidence is not zero spending.'
+                                 + (' ' + trace['note'] if trace['note'] else ''))
             if mode == 'activity':
                 ties = downstream.relationships(activity_rows, eligible, network)
                 # Each observation once: summed over the recorded rows, not the
@@ -759,6 +1078,10 @@ def _graph_view(paths, filters):
             'levels':grouped(employee_rows,'level'),
             'levels_by_company':levels_by_company(employee_rows),
             'candidates':chart_candidates, 'candidate_available':available, 'candidate_note':note,
+            # F4: the not-traced facts behind the notes, and the tooltip that
+            # holds a rebuild command. Candidate views only.
+            **({'candidate_note_title':note_title, 'transfer_index':index_rows,
+                'transfer_trace':trace} if mode != 'direct' else {}),
             'downstream_edges':network['edges'] if mode == 'activity' and available else [],
             'pac_candidate_relationships':ties,
             'downstream_sources':downstream.sources(network) if mode == 'activity' and available else [],

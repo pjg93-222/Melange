@@ -1078,6 +1078,9 @@
       menu.onclick = event => { event.stopPropagation(); sendMenu(node, field, settings); };
       node.append(menu);
       node.oncontextmenu = event => { event.preventDefault(); sendMenu(node, field, settings); };
+    } else {
+      // Lane P: a Data-pane field's menu on right-click ("Add to new layer").
+      node.oncontextmenu = event => { event.preventDefault(); sendMenu(node, field, settings); };
     }
     node.addEventListener('dragstart', event => {
       dragging = settings.zone
@@ -1291,6 +1294,9 @@
           {disabled: !preset.available, reason: preset.reason}]))]);
     }
     items.push(...typeMenuItems(anchor, field, settings));
+    // Lane P: a place field starts a map layer (Tableau's "Add to New Layer").
+    if (!settings.zone && verified() && globalThis.MentatMapStudio && MentatMapStudio.geographyOfField(field))
+      items.push(['Map', null, {group: true}], ['Add to new layer', () => MentatMapStudio.addLayerFromField(field)]);
     items.push(['Place', null, {group: true}]);
     items.push(...ZONES.filter(([zone]) => !CARD_ZONES.includes(zone) || !(el(zone) && el(zone).closest('.studio-prop') && el(zone).closest('.studio-prop').hidden)).map(([zone, label]) => ['Send to ' + label, () => commit(() => {
       if (settings.zone) removeFrom(settings.zone, settings.position);
@@ -1802,9 +1808,16 @@
     fill(el('aggregation'),calculated?[['sum','Source statistic']]:field?core.aggregationsFor(field,engine()):core.AGGREGATIONS);
     el('aggregation').value=primary?.aggregation||'sum';el('aggregation').disabled=!primary||calculated;
     el('aggregation').title=field?field.name+(calculated?' is already computed from source observations.':' · each other measure also has its own pill menu.'):'Add a measure to Rows or Columns.';
+    // Lane F (#46): a Flow's Columns are its Stages, and Rows is put away while it is drawn.
+    if (window.MentatStudioFlow) window.MentatStudioFlow.decorate({flow: !verified() && core.isFlowSheet(state),
+      columns: el('columns'), rows: el('rows'), columnsName: el('columns-name'), mark: el('mark'),
+      aggregation: el('aggregation'), fields: meta.fields});
     renderMarksCard();
     renderPager();
     renderShelfStrip();
+    // Lane P: the pieces of the studio a map sheet changes (left pane switch,
+    // Geography row), and their undoing on any other sheet.
+    if (globalThis.MentatMapStudio) MentatMapStudio.sync();
   }
 
   /* ------------------------------------------------------ marks card (v3) */
@@ -1817,7 +1830,10 @@
   const CARD_ZONES = ['color', 'size', 'label', 'detail', 'tooltip', 'shape', 'path', 'angle'];
   const V3_ZONES = ['shape', 'path', 'angle'];
   let expandedCard = 0;
-  const cardMode = state => core.dualAxisOn(state || sheet());
+  // Lane P (boards #47-#55): a map sheet's cards are its layers, edited one
+  // open card at a time (map-studio.js lists them).
+  const mapLayers = () => !!(globalThis.MentatMapStudio && globalThis.MentatMapStudio.handles(sheet()));
+  const cardMode = state => core.dualAxisOn(state || sheet()) || (!!core.mapLayersOn && core.mapLayersOn(state || sheet()));
   function cardTarget() {
     if (!cardMode()) return 0;
     if (expandedCard === 'all') return 'all';
@@ -1852,6 +1868,7 @@
   // Automatic shows the rows of the mark it resolves to (Tableau's rule).
   function resolvedType() {
     const type = currentType(), target = cardTarget();
+    if (mapLayers()) return type;
     if (cardMode()) return type === 'mixed' ? 'bar' : core.dualCardMark(type, target === 'all' ? 0 : target, false);
     if (type !== 'automatic') return type;
     try {
@@ -1877,6 +1894,8 @@
         core.writeCards(sheet(), cards);
         return;
       }
+      // Lane F (#46): Flow takes the sheet's dimensions as its Stages and its measure on Size.
+      if (core.flowSwitch(sheet(), columns(), type) && type === 'flow') return;
       sheet().marks.type = type;
       if (verified() && type === 'histogram' && columns().some(f => f.id === 'amount_bin')) {
         sheet().columns = [{column: columns().find(f => f.id === 'amount_bin').index, aggregation: 'sum'}];
@@ -1928,6 +1947,9 @@
   function renderMarkStrip() {
     const strip = el('mark-strip');
     if (!strip) return;
+    // Lane P: a map layer takes its type from its card's Mark type menu.
+    strip.hidden = mapLayers();
+    if (strip.hidden) return;
     const current = currentType(), dual = cardMode();
     const inStrip = core.MARK_STRIP.some(m => m[0] === current);
     strip.replaceChildren(...core.MARK_STRIP.map(([id, label]) => {
@@ -1939,7 +1961,7 @@
       const on = id === current;
       button.setAttribute('aria-checked', String(on));
       button.tabIndex = on || (!inStrip && id === 'automatic') ? 0 : -1;
-      const reason = id === 'flow' ? core.FLOW_REASON : dual && !core.DUAL_MARKS.includes(id) ? core.DUAL_REASON : '';
+      const reason = id === 'flow' ? core.flowReason(engine(), dual) : dual && !core.DUAL_MARKS.includes(id) ? core.DUAL_REASON : '';
       if (reason) { button.setAttribute('aria-disabled', 'true'); button.classList.add('is-unavailable'); }
       button.title = label + (reason ? ': ' + reason : '');
       button.setAttribute('aria-label', button.title);
@@ -1970,7 +1992,10 @@
   const ROW_NOTE = {shape: ['Shape', 'Shape'], path: ['Path', 'Line, Area and Polygon'], angle: ['Angle', 'Pie']};
   const SIZE_MEANS = {gantt: 'Size sets each bar’s length.', density: 'Size sets each mark’s radius.', text: 'Size sets each value’s type size.'};
   function renderMarkRows() {
-    const type = resolvedType(), rows = core.markRows(type), support = core.encodingSupport(type, engine());
+    // Lane P: a map layer's rows and reasons are the map engine's (map-layers.js).
+    const layered = mapLayers(), type = resolvedType();
+    const rows = layered ? MentatMapStudio.markRows(currentCard()) : core.markRows(type);
+    const support = layered ? MentatMapStudio.encodingSupport(currentCard()) : core.encodingSupport(type, engine());
     for (const zone of CARD_ZONES) {
       const drop = el(zone), prop = drop && drop.closest('.studio-prop');
       if (!prop) continue;
@@ -1991,7 +2016,7 @@
     el('mark-rows-note').textContent = hidden.length === 2 && hidden.includes('shape') && hidden.includes('angle')
       ? 'Shape and Angle appear for Shape and Pie marks.'
       : hidden.map(zone => ROW_NOTE[zone][0] + ' appears for ' + ROW_NOTE[zone][1] + ' marks').join('; ') + (hidden.length ? '.' : '');
-    const styles = core.styleSupport(type), colourButton = el('color-options');
+    const styles = layered ? MentatMapStudio.styleSupport(currentCard()) : core.styleSupport(type), colourButton = el('color-options');
     if (colourButton) {
       const none = ['opacity', 'border', 'halo'].every(key => styles[key] !== true);
       colourButton.classList.toggle('is-unavailable', none);
@@ -2001,6 +2026,8 @@
   function renderMarkCards() {
     const host = el('mark-cards'), body = el('mark-card-body'), sync = el('mark-sync');
     if (!host || !body) return;
+    // Lane P: a map sheet lists its cards as layers (map-studio.js).
+    if (mapLayers()) { MentatMapStudio.renderLayerCards(); return; }
     if (!cardMode()) {
       host.hidden = true;
       if (body.parentElement !== host.parentElement) host.after(body);
@@ -2059,6 +2086,15 @@
     renderMarkCards();
     renderMarkStrip();
     renderMarkRows();
+    // Lane F (#46): Flow options (ribbon colour, node order, opacity, the top N) while a flow is drawn.
+    if (window.MentatStudioFlow) {
+      const flowCard = !verified() && core.isFlowSheet(sheet()) ? core.readCards(sheet())[0] : null;
+      const colour = flowCard && flowCard.encodings.color
+        ? core.fieldAt(core.classifyFields(columns(), sheet().types), flowCard.encodings.color.column) : null;
+      window.MentatStudioFlow.options({host: el('mark-card-body'), flow: !!flowCard, options: flowCard && flowCard.flow,
+        colourName: colour && colour.role === 'dimension' ? colour.name : '',
+        update: patch => commit(() => core.setFlowOptions(sheet(), patch))});
+    }
   }
   // The Dual axis chip on Rows (#52): two or more measures there can share one
   // pane, each with its own marks card.
@@ -2142,7 +2178,7 @@
   }
   function openColourPopover(anchor) {
     if (!anchor) return;
-    const type = resolvedType(), styles = core.styleSupport(type), card = currentCard();
+    const type = resolvedType(), styles = mapLayers() ? MentatMapStudio.styleSupport(currentCard()) : core.styleSupport(type), card = currentCard();
     const pop = popover(anchor, 'Colour effects' + (cardMode() && cardTarget() === 'all' ? ' · every card' : ''));
     const reasonOf = key => styles[key] === true ? '' : styles[key];
     const opacityRow = document.createElement('label');
@@ -3276,6 +3312,8 @@
   function renderView(view) {
     view = view || mainSurface();
     const node = view.el, state = view.state;
+    // Lane P: a map whose marks cards are its layers draws through map-studio.js.
+    if (verified() && globalThis.MentatMapStudio && MentatMapStudio.handles(state)) { MentatMapStudio.renderView(view); return; }
     if(verified()){renderContributionView(view);return;}
     if (view.primary) { lastResult = null; lastConfig = null; }
     node('reconcile').hidden = true;
@@ -3292,6 +3330,15 @@
       return;
     }
     const report = core.compileReport(state, columns());
+    // Lane F (#46): a Flow card is drawn by studio-flow.js with the PAC evidence Flow's layout.
+    if (report.markType === 'flow' && window.MentatStudioFlow) {
+      node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
+      const drawn = window.MentatStudioFlow.render(view, report, data, {notes: worksheetNotes(state),
+        subtitle: scopeSubtitle(state), fit: pieFit(node('canvas'), state), showLabels: !!state.showLabels,
+        committee: core.committeeActivitySheet(data.sheet), source: state.source});
+      if (view.primary) { lastResult = drawn.result; lastConfig = report.config; }
+      return;
+    }
     const markName = report.markType === 'cards' ? 'Dual axis' : core.markLabel(report.markType);
     // Provisional only: measureLabel reads the built result to tell an
     // aggregated view from one that plots individual values, so a box,
@@ -3669,7 +3716,8 @@
     if (format === 'csv') {
       const quote = v => '"' + String(typeof v === 'string' && /^[=+\-@\t\r]/.test(v) ? "'" + v : v).replaceAll('"', '""') + '"';
       const rows = [['Chart', view.title], ['Scope', view.scope], ['Note', view.el('note').textContent],
-        ...paint.tableRows(lastResult, lastConfig, data)];
+        ...(lastConfig && lastConfig.type === 'flow' && window.MentatStudioFlow
+          ? window.MentatStudioFlow.tableRows(lastResult) : paint.tableRows(lastResult, lastConfig, data))];
       MentatExport.download('\uFEFF' + rows.map(r => r.map(quote).join(',')).join('\r\n'),
         'text/csv;charset=utf-8', 'mentat-chart-studio.csv');
       return;
@@ -3701,7 +3749,8 @@
       svg: view.el('canvas').querySelector('svg'),
       title: view.title || view.el('title').textContent || 'Chart Studio',
       scope: view.scope || scopeText() || '',
-      chip: scopeText(),
+      // Lane P: a map sheet's caption names its layers' sources, as its chip does.
+      chip: ((verified() && globalThis.MentatMapStudio && MentatMapStudio.scopeChip && MentatMapStudio.scopeChip(state)) || {}).text || scopeText(),
       note: view.el('note').textContent || '',
       basis: basisLabel,
       sheetId: state.id,
@@ -4845,7 +4894,11 @@
     // picker must never depend on there being a scope to describe.
     const host = el('scope-chip');
     host.replaceChildren();
-    for (const part of scopeText().split(' · ').filter(Boolean)) {
+    // Lane P: a map sheet's layers read their own sources, so the chip names them
+    // (map-studio.js scopeChip); any other sheet, or a map of the builder's own
+    // industry and basis, keeps today's scope exactly.
+    const mapScope = verified() && globalThis.MentatMapStudio && MentatMapStudio.scopeChip ? MentatMapStudio.scopeChip(sheet()) : null;
+    for (const part of (mapScope ? mapScope.text : scopeText()).split(' · ').filter(Boolean)) {
       const chip = document.createElement('span');
       chip.textContent = part;
       host.append(chip);
@@ -4855,8 +4908,13 @@
     const notes = (appliedScope && appliedScope.notCarried) || [];
     el('scope-note').textContent = notes.join(' · ');
     el('scope-note').hidden = !notes.length;
-    const basisLabel = verified() ? ((contributions.BASIS[basis()] || [])[0] || '') : (data ? 'Worksheet values' : '');
+    const basisLabel = mapScope ? mapScope.basis : verified() ? ((contributions.BASIS[basis()] || [])[0] || '') : (data ? 'Worksheet values' : '');
     el('scope-basis').textContent = host.children.length ? basisLabel : 'Choose data';
+    // Lane P: the button's title lists a map's sources in full, each with its basis (the chip
+    // may be cut short); the title the template gave it comes back for any other sheet.
+    const change = el('scope-change');
+    if (mapScope) { if (change.__sourceTitle == null) change.__sourceTitle = change.title; change.title = mapScope.title; }
+    else if (change.__sourceTitle != null) { change.title = change.__sourceTitle; change.__sourceTitle = null; }
   }
 
   // Canvas only hides the builder surfaces; the control that does it never
@@ -5566,6 +5624,21 @@
   if(new URLSearchParams(location.search).has('worksheet'))el('source-mode').value='worksheet';
   // What the rest of the console may ask this studio about its chart. The
   // filter reader is also what a browser test reads the carried pills from.
+  // Lane P: what map-studio.js reads and edits through; every edit is this
+  // studio's own commit(), so it undoes and saves like any other.
+  if (globalThis.MentatMapStudio) MentatMapStudio.init({
+    sheet: () => sheet(), columns: () => columns(), commit: change => commit(change), renderAll: () => renderAll(),
+    status: message => status(message), failure: message => failure(message), verified: () => verified(),
+    ready: () => loadedSources && verified() && !!data && !!dataset(),
+    dataset: () => dataset(), datasets: () => (contributionCatalog && contributionCatalog.datasets) || [],
+    basis: () => basis(), query: (query, claim) => queryCached(query, {flight: claim}),
+    expanded: () => expandedCard, setExpanded: value => { expandedCard = value; },
+    addSheet: fresh => commit(() => {
+      sheets.push(fresh);
+      if (board) { const at = board.slots.indexOf(active); board.slots[at >= 0 ? at : 0] = sheets.length - 1; }
+      active = sheets.length - 1;
+      dataSourceTab = false;
+    })});
   window.MentatStudioPane = {
     filters() { return (sheet().filters || []).map(f=>({...f,field:columns()[f.column]?.id || columns()[f.column]?.name})); },
     // The briefing drawer and the share dialog live in chart-briefing.js and

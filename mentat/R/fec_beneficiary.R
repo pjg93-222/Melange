@@ -361,7 +361,18 @@ fec_downstream_direction <- function(values) {
 #   6 = count_all default; conflicting sub-IDs and missing amounts refuse
 #   7 = cycle IDs participate in the cache signature
 #   8 = preserve image numbers and original FEC filing links per observation
-FEC_PAS2_PARSER_VERSION <- "8"
+#   9 = an FEC reload (FEC_PAS2_RELOAD_KEY equal; only the SUB_ID differs) counts once
+FEC_PAS2_PARSER_VERSION <- "9"
+
+# F11 (Paul, 2026-09-25): the key of an FEC reload, one record loaded twice under
+# two SUB_IDs - same committee, report type and transaction id (version_key),
+# same file number, same identity (candidate and committee counterparty, amount,
+# date, type), same payee name and same memo code. Only rows equal on all of it
+# count once, and a row without a transaction id or a file number never does.
+# Genuine repeats carry distinct transaction ids and cross-file observations
+# distinct file numbers, so neither meets here. tools/fec_transfer_graph.py's
+# reload_key() is the same key for OTH transfers.
+FEC_PAS2_RELOAD_KEY <- c("version_key", "file_num_sort", "identity_key", "recipient_name", "memo_code")
 
 # Mirror the Python default: distinct observations remain provisional until
 # supersession is established. PAS2 has no preserved filing-family headers,
@@ -498,9 +509,15 @@ fec_build_pas2_index <- function(directory, cycles) {
     rows[live == TRUE,
          repeated_itemization := as.integer(duplicated(.SD)),
          .SDcols = c("version_key", "identity_key")]
-    # Identical attributes under a reused line label are not a duplicate ID.
+    # Identical attributes under a reused line label are not a duplicate ID. An
+    # FEC reload is (F11): one record loaded again under a second SUB_ID. It
+    # counts once - the highest SUB_ID, first in this order - and cross-file rows
+    # and genuine repeats under distinct transaction ids stay counted and flagged.
     if (identical(FEC_PAS2_AMBIGUOUS_VERSION_POLICY, "count_all")) {
       rows[, repeated_itemization := 0L]
+      rows[live == TRUE & nzchar(transaction_id) & !is.na(file_num),
+           repeated_itemization := as.integer(duplicated(.SD)),
+           .SDcols = FEC_PAS2_RELOAD_KEY]
     }
     rows[, live := live & repeated_itemization == 0L]
     # What remains in question: two surviving identities in DIFFERENT filings
@@ -646,6 +663,32 @@ fec_read_downstream_activity <- function(directory, recipient_universe, candidat
   index <- fec_read_pas2_index(directory, cycles)
   activity <- index[paste(cycle, committee_id, sep = "|") %in% relevant_keys]
   if (!nrow(activity)) return(activity)
+  # F12 (Paul approved 2026-09-25): a committee the roots' money reached only
+  # by transfer counts from its gate on - the day that money could first have
+  # arrived (a carried-over committee: this cycle's first day). A row with no
+  # date cannot be ordered, so it counts, flagged date_unverified (D-040). The
+  # roots and every recipient the industry funded directly count in full.
+  activity[, date_unverified := 0L]
+  date_rule <- NULL
+  if (all(c("arrival_gate", "gate_source") %in% names(recipient_universe))) {
+    gated <- unique(recipient_universe[gate_source %in% c("carryover", "in-cycle") & !is.na(arrival_gate),
+                                       .(cycle, committee_id, arrival_gate)])
+    activity[, gate := NA_character_]
+    activity[gated, on = .(cycle, committee_id), gate := i.arrival_gate]
+    day <- function(value) suppressWarnings(as.integer(gsub("-", "", value, fixed = TRUE)))
+    dated <- !is.na(activity$transaction_date) & nzchar(activity$transaction_date)
+    before <- !is.na(activity$gate) & dated & day(activity$transaction_date) < day(activity$gate)
+    undated <- !is.na(activity$gate) & !dated
+    included <- activity$include_in_total == "Yes"
+    date_rule <- list(rule = "earliest_arrival", gated_committees = nrow(gated),
+      rows_before_gate = sum(before), amount_before_gate = sum(activity$transaction_amount[before & included]),
+      rows_date_unverified = sum(undated),
+      amount_date_unverified = sum(activity$transaction_amount[undated & included]))
+    activity[, date_unverified := as.integer(undated)]
+    activity <- activity[!before]
+    activity[, gate := NULL]
+    if (!nrow(activity)) return(structure(activity, date_rule = date_rule))
+  }
   candidate_columns <- candidate_master[, .(
     cycle, candidate_id, candidate_name, candidate_party, office, office_label,
     office_state, district, candidate_source_url = source_url
@@ -669,6 +712,7 @@ fec_read_downstream_activity <- function(directory, recipient_universe, candidat
   for (column in c("office", "office_label", "office_state", "district", "candidate_source_url")) {
     data.table::set(activity, which(is.na(activity[[column]])), column, "")
   }
+  if (!is.null(date_rule)) attr(activity, "date_rule") <- date_rule
   activity
 }
 
@@ -813,6 +857,7 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
   )
   rows[is.na(source_committee), source_committee := ""]
   rows[is.na(source_recipient_category), source_recipient_category := ""]
+  if (!"date_unverified" %in% names(rows)) rows[, date_unverified := 0L]
   result <- rows[, .(
     reported_amount = sum(transaction_amount, na.rm = TRUE),
     excluded_amount = sum(transaction_amount[include_in_total != "Yes"], na.rm = TRUE),
@@ -829,6 +874,7 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
     # outflow denominator, not on a blacklist that voids its clean activity.
     unresolved_version_amount = sum(unresolved_version_amount, na.rm = TRUE),
     unverified_version_rows = sum(unverified_version == 1L),
+    date_unverified_rows = sum(date_unverified == 1L),
     transfer_records = as.character(jsonlite::toJSON(data.table::data.table(
       destination = destination_committee_id, file_num = file_num,
       transaction_id = transaction_id, sub_id = sub_id, date = transaction_date,
@@ -868,14 +914,18 @@ fec_aggregate_downstream_activity <- function(downstream_activity, recipient_uni
   result
 }
 
-fec_beneficiary_reach <- function(funding, transfer_edges, candidate_links = NULL) {
+fec_beneficiary_reach <- function(funding, transfer_edges, candidate_links = NULL, networks = NULL) {
   # Multi-source breadth-first traversal: one spending committee per view, even
   # when two funded roots or a diamond reach it. Routes explain association;
   # they never multiply candidate activity or allocate the funding to it.
+  # With `networks` (fec_transfer_context, F15) each view follows ITS OWN walk's
+  # counted transfers, and a committee its roots' previous-cycle money opened
+  # (carryover) is reached too, with that route; each row carries its gate.
   result <- list()
   if (!nrow(funding)) return(data.table::data.table(cycle = integer(), view = character(),
     company = character(), source_committee_id = character(), representative_root = character(),
     representative_path = character()))
+  by_view <- !is.null(networks) && NROW(networks$gates) > 0L
   scopes <- unique(funding[, .(cycle, view, company)])
   for (i in seq_len(nrow(scopes))) {
     scope <- scopes[i]
@@ -888,21 +938,37 @@ fec_beneficiary_reach <- function(funding, transfer_edges, candidate_links = NUL
     routes <- stats::setNames(visited, visited)
     stops <- if (is.null(candidate_links)) character() else
       candidate_links[cycle == scope$cycle & designation %in% c("P", "A"), committee_id]
-    edges <- if (is.null(transfer_edges) || !nrow(transfer_edges)) data.table::data.table() else
+    in_scope <- function(table) table[cycle == scope$cycle & view == scope$view & company == scope$company]
+    edges <- if (by_view) {
+      if (NROW(networks$pairs)) in_scope(networks$pairs)[order(source, destination)] else data.table::data.table()
+    } else if (is.null(transfer_edges) || !nrow(transfer_edges)) data.table::data.table() else
       transfer_edges[cycle == scope$cycle & amount > 0][order(source, destination)]
-    while (length(frontier) && nrow(edges)) {
-      outgoing <- edges[source %in% setdiff(frontier, stops)]
-      next_frontier <- character()
-      for (j in seq_len(nrow(outgoing))) {
-        destination <- outgoing$destination[j]
-        if (destination %in% c(visited, stops)) next
-        origin <- outgoing$source[j]
-        visited <- c(visited, destination)
-        roots[destination] <- roots[origin]
-        routes[destination] <- paste(routes[origin], destination, sep = " > ")
-        next_frontier <- c(next_frontier, destination)
+    carried <- if (by_view && NROW(networks$carryover)) in_scope(networks$carryover)[order(committee_id)] else NULL
+    repeat {
+      while (length(frontier) && nrow(edges)) {
+        outgoing <- edges[source %in% setdiff(frontier, stops)]
+        next_frontier <- character()
+        for (j in seq_len(nrow(outgoing))) {
+          destination <- outgoing$destination[j]
+          if (destination %in% c(visited, stops)) next
+          origin <- outgoing$source[j]
+          visited <- c(visited, destination)
+          roots[destination] <- roots[origin]
+          routes[destination] <- paste(routes[origin], destination, sep = " > ")
+          next_frontier <- c(next_frontier, destination)
+        }
+        frontier <- next_frontier
       }
-      frontier <- next_frontier
+      # Then the committees opened by the previous cycle's transfers, which no
+      # in-cycle route reaches, and everything their counted transfers reach.
+      if (is.null(carried)) break
+      opened <- carried[!committee_id %in% c(visited, stops)]
+      carried <- NULL
+      if (!nrow(opened)) break
+      visited <- c(visited, opened$committee_id)
+      roots[opened$committee_id] <- opened$representative_root
+      routes[opened$committee_id] <- opened$representative_path
+      frontier <- opened$committee_id
     }
     for (id in setdiff(seeds$source_committee_id, visited)) {
       visited <- c(visited, id); roots[id] <- id; routes[id] <- id
@@ -910,12 +976,71 @@ fec_beneficiary_reach <- function(funding, transfer_edges, candidate_links = NUL
     result[[i]] <- data.table::data.table(cycle = scope$cycle, view = scope$view,
       company = scope$company, source_committee_id = visited,
       representative_root = unname(roots[visited]), representative_path = unname(routes[visited]))
+    if (by_view) {
+      gates <- in_scope(networks$gates)
+      result[[i]][gates, on = .(source_committee_id = committee_id),
+                  `:=`(arrival_gate = i.arrival_gate, gate_source = i.gate_source)]
+      if (!"gate_source" %in% names(result[[i]])) result[[i]][, `:=`(arrival_gate = NA_character_, gate_source = NA_character_)]
+      result[[i]][is.na(gate_source), gate_source := "recipient"]
+    }
   }
-  data.table::rbindlist(result)
+  data.table::rbindlist(result, fill = TRUE)
+}
+
+# F15 (Paul approved 2026-09-26): a company view dates each committee its money
+# reached by transfer from THAT company's own arrival - its own walk's gate - never
+# from another company's earlier money. downstream_activity is already dated from
+# the industry-wide gate, which is never later than any company's (a company's
+# roots are among the industry's), so a company whose gate is later drops the rows
+# before it; an undated row still counts (D-040). A committee the company funded
+# directly counts in full, as a funded recipient does for the industry. Returns
+# (cycle, view, company, source_committee_id, view_gate) for the rows to re-date.
+fec_company_view_gates <- function(networks, funded, industry_universe = NULL) {
+  empty <- data.table::data.table(cycle = integer(), view = character(), company = character(),
+                                  source_committee_id = character(), view_gate = character())
+  if (is.null(networks) || !NROW(networks$gates)) return(empty)
+  gated <- networks$gates[view == "Company" & gate_source %in% c("carryover", "in-cycle") & !is.na(arrival_gate),
+    .(cycle = as.integer(cycle), view, company, source_committee_id = committee_id, view_gate = arrival_gate)]
+  direct <- unique(funded[, .(cycle = as.integer(cycle), company, source_committee_id)])
+  gated <- gated[!direct, on = .(cycle, company, source_committee_id)]
+  industry <- networks$gates[view == "Industry" & gate_source %in% c("carryover", "in-cycle") & !is.na(arrival_gate),
+    .(cycle = as.integer(cycle), source_committee_id = committee_id, industry_gate = arrival_gate)]
+  # The industry dates a committee it funded directly (a recipient) in full.
+  if (!is.null(industry_universe) && "gate_source" %in% names(industry_universe)) {
+    recipients <- industry_universe[gate_source %in% c("root", "recipient"),
+      .(cycle = as.integer(cycle), source_committee_id = committee_id)]
+    industry <- industry[!recipients, on = .(cycle, source_committee_id)]
+  }
+  gated[industry, on = .(cycle, source_committee_id), industry_gate := i.industry_gate]
+  if (!"industry_gate" %in% names(gated)) gated[, industry_gate := NA_character_]
+  gated <- gated[is.na(industry_gate) | fec_day(view_gate) > fec_day(industry_gate)]
+  if (!nrow(gated)) return(empty)
+  gated[, industry_gate := NULL]
+  gated[]
+}
+
+# fec_aggregate_beneficiary_downstream over each (cycle, committee, gate) the company
+# views need: rows dated on or after the gate, and undated rows, per gate.
+fec_gated_beneficiary_downstream <- function(downstream_activity, view_gates) {
+  combos <- unique(view_gates[, .(cycle, committee_id = source_committee_id, view_gate)])
+  if (!nrow(combos) || !nrow(downstream_activity)) return(data.table::data.table())
+  rows <- downstream_activity[committee_id %in% combos$committee_id]
+  rows[, cycle_key := as.integer(cycle)]
+  rows <- combos[, .(cycle_key = cycle, committee_id, view_gate)][rows, on = .(cycle_key, committee_id),
+    nomatch = NULL, allow.cartesian = TRUE]
+  dated <- !is.na(rows$transaction_date) & nzchar(rows$transaction_date)
+  rows <- rows[!dated | fec_day(transaction_date) >= fec_day(view_gate)]
+  if (!nrow(rows)) return(data.table::data.table())
+  rows[, committee_id := paste(committee_id, view_gate, sep = "|")]
+  result <- fec_aggregate_beneficiary_downstream(rows)
+  if (!nrow(result)) return(result)
+  parts <- data.table::tstrsplit(result$source_committee_id, "|", fixed = TRUE)
+  result[, `:=`(source_committee_id = parts[[1L]], view_gate = parts[[2L]])]
+  result[]
 }
 
 fec_build_beneficiary_tables <- function(raw_export, downstream_activity, transfer_edges = NULL,
-                                        candidate_links = NULL) {
+                                        candidate_links = NULL, networks = NULL, industry_universe = NULL) {
   downstream <- fec_aggregate_beneficiary_downstream(downstream_activity)
   funded <- raw_export[
     include_in_analysis == "Yes" & nzchar(committee_id),
@@ -934,7 +1059,7 @@ fec_build_beneficiary_tables <- function(raw_export, downstream_activity, transf
   company <- data.table::copy(funded)
   company[, `:=`(view = "Company", traversal_seed = preliminary_crypto_funding > 0)]
   funding <- data.table::rbindlist(list(industry, company), use.names = TRUE, fill = TRUE)
-  reach <- fec_beneficiary_reach(funding, transfer_edges, candidate_links)
+  reach <- fec_beneficiary_reach(funding, transfer_edges, candidate_links, networks)
   if (!nrow(downstream)) return(list(bridge = data.table::data.table(), bridge_all = data.table::data.table(),
     summary = data.table::data.table(), reach = reach, measurement_ledger = data.table::data.table()))
   old_bridge <- merge(funding, downstream, by = c("cycle", "source_committee_id"),
@@ -945,17 +1070,33 @@ fec_build_beneficiary_tables <- function(raw_export, downstream_activity, transf
     # Preserve legacy row ordering, including ties, when there is no route input.
     funding[, `:=`(representative_root = source_committee_id, representative_path = source_committee_id)]
   } else {
-    funding <- merge(reach, funding, by = c("cycle", "view", "company", "source_committee_id"),
+    funding <- merge(reach[, .(cycle, view, company, source_committee_id, representative_root, representative_path)],
+                     funding, by = c("cycle", "view", "company", "source_committee_id"),
                      all.x = TRUE, sort = FALSE)
   }
   funding[is.na(preliminary_crypto_funding), preliminary_crypto_funding := 0]
   funding[is.na(source_committee) | !nzchar(source_committee), source_committee := source_committee_id]
-  bridge <- merge(
-    funding, downstream,
-    by = c("cycle", "source_committee_id"),
-    allow.cartesian = TRUE,
-    sort = FALSE
-  )
+  view_gates <- fec_company_view_gates(networks, funded, industry_universe)
+  if (!nrow(view_gates)) {
+    bridge <- merge(
+      funding, downstream,
+      by = c("cycle", "source_committee_id"),
+      allow.cartesian = TRUE,
+      sort = FALSE
+    )
+  } else {
+    funding[, cycle_key := as.integer(cycle)]
+    funding[view_gates[, .(cycle_key = cycle, view, company, source_committee_id, view_gate)],
+            on = .(cycle_key, view, company, source_committee_id), view_gate := i.view_gate]
+    funding[, cycle_key := NULL]
+    later <- fec_gated_beneficiary_downstream(downstream_activity, view_gates)
+    bridge <- data.table::rbindlist(list(
+      merge(funding[is.na(view_gate)][, view_gate := NULL], downstream,
+            by = c("cycle", "source_committee_id"), allow.cartesian = TRUE, sort = FALSE),
+      if (nrow(later)) merge(funding[!is.na(view_gate)], later, by = c("cycle", "source_committee_id", "view_gate"),
+            allow.cartesian = TRUE, sort = FALSE)[, view_gate := NULL]), use.names = TRUE, fill = TRUE)
+    funding[, view_gate := NULL]
+  }
   bridge[, candidate_key := ifelse(
     nzchar(candidate_id), paste0("CAND:", candidate_id), paste0("NAME:", normalize_variant_key(candidate_name))
   )]

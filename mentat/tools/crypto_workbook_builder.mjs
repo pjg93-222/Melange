@@ -2640,9 +2640,19 @@ buildAuditTable("Accounting Basis", [
 buildAuditTable("Funding Cohorts", payload.funding_cohorts ?? [],
   [["cycle","Cycle"],["company","Company"],["funding_type","Funding Type"],["funding_source_type","Source of Money"],["funding_direction","Direction"],["committee_id","Recipient Committee"],["receipt_role","Receipt Role"],["amount","Included Net Receipts"],["receipt_count","Receipt Count"],["first_date","First Receipt"],["last_date","Last Receipt"]],
   "FEC individual, organization, PAC/committee and unknown entity evidence is shown separately. Organization receipts do not by themselves establish corporate treasury ownership. Into company PAC means funding received by that PAC; outgoing spending remains separate.");
-buildAuditTable("Transfer Paths", payload.transfer_paths ?? [],
-  [["cycle","Cycle"],["root","Funded Committee"],["source","Source Committee"],["destination","Destination Committee"],["amount","Reported Net Transfer"],["depth","Depth"],["path","Representative Path"],["status","Traversal Status"]],
-  "Observed outgoing 24G/24K cash transfers. Amounts are committee activity, not traced company dollars. A representative shortest path is shown; repeated roots can share the same transfer.", true);
+// enrich_downstream.py names each cycle's transfer index status. A cycle that is not
+// current publishes no transfer-derived rows, so these three sheets carry its note
+// ("Not traced: the transfer index for <cycle> is <status>; rebuild with ...") instead
+// of looking like a traced network that found nothing.
+const transferIndexNotes = payload.cycles
+  .map((cycle) => (payload.metadata.transfer_index_notes ?? {})[String(cycle.cycle)])
+  .filter(Boolean);
+const withTransferIndexNotes = (text) => transferIndexNotes.length ? `${text} ${transferIndexNotes.join(" ")}` : text;
+// F14 (Paul approved option (a), 2026-09-26): each transfer once per cycle. The
+// root-by-transfer detail lives only in the tidy staging store (transfer_path_detail).
+const transferPathFields = [["cycle","Cycle"],["source","Source Committee"],["destination","Destination Committee"],["amount","Reported Net Transfer"],["record_count","Record Count"],["first_date","First Transfer"],["last_date","Last Transfer"],["status","Traversal Status"],["roots_reaching","Funded Roots Reaching"],["min_depth","Shortest Depth"],["top_roots","Top Funded Roots"],["roots_via_carryover","Roots via Carryover"],["date_rule","Date Rule"],["source_gate","Source Gate"],["source_gate_source","Source Gate From"],["excluded_before_gate_records","Records Before Gate"],["excluded_before_gate_amount","Excluded Before Gate Amount"],["source_carryover_route","Carryover Route"],["carryover_status","Carryover Status"]];
+buildAuditTable("Transfer Paths", payload.transfer_paths ?? [], transferPathFields,
+  withTransferIndexNotes("Each observed 24G/24K cash transfer once per cycle, with how many funded roots' routes reach it and the largest of them. Amounts are committee activity, not traced company dollars; money that moves through several committees appears at every transfer, so the column does not sum to a total. Counted from the source's gate (the date rule); the full root-by-transfer detail is in the Data workbook's store."), true);
 buildAuditTable("Downstream Reach", payload.downstream_reach ?? [],
   [["cycle","Cycle"],["view","View"],["company","Company"],["source_committee_id","Spending Committee"],["representative_root","Representative Funded Root"],["representative_path","Representative Path"]],
   "One spending committee per view, regardless of shared routes or cycles. A route establishes observed association, not a donor dollar allocation. Company and Industry views overlap.", true);
@@ -2654,10 +2664,15 @@ buildAuditTable("Downstream Sources", payload.downstream_sources ?? [],
   "Preserved source fingerprints for the downstream measurement ledger. Missing evidence is not zero spending; a saved file does not prove complete filing coverage.");
 buildAuditTable("Allocation Estimates", payload.allocation_estimates ?? [],
   [["cycle","Cycle"],["root","Funded Committee"],["candidate_id","Candidate ID"],["candidate_name","Candidate"],["direction","Direction"],["estimated_amount","Conditional Estimate"]],
-  payload.metadata.allocation_method ?? "No allocation model supplied.");
+  withTransferIndexNotes(payload.metadata.allocation_method ?? "No allocation model supplied."));
 buildAuditTable("Allocation Coverage", payload.allocation_coverage ?? [],
   [["cycle","Cycle"],["root","Funded Committee"],["input_net_funding","Net Input Funding"],["model_funding","Nonnegative Model Funding"],["estimated_candidate_activity","Estimated Candidate Activity"],["unresolved","Unresolved"],["negative_net_funding_excluded","Negative Net Funding"],["unresolved_reasons","Unresolved Reasons"]],
-  "Each root's model funding equals estimated candidate activity plus unresolved funding. This checks arithmetic, not causal attribution or complete reporting.");
+  withTransferIndexNotes("Each root's model funding equals estimated candidate activity plus unresolved funding. This checks arithmetic, not causal attribution or complete reporting."));
+if (transferIndexNotes.length) {
+  for (const [name, lastColumn] of [["Transfer Paths", excelColumn(transferPathFields.length)], ["Allocation Estimates", "F"], ["Allocation Coverage", "H"]]) {
+    workbook.worksheets.getItem(name).getRange(`A2:${lastColumn}2`).format.rowHeight = 28 + 30 * transferIndexNotes.length;
+  }
+}
 buildAuditTable("Source Freshness", payload.source_freshness ?? [],
   [["cycle","Cycle"],["source","FEC Dataset"],["checked_at","Checked At"],["last_modified","Server Last Modified"],["sha256","SHA-256"],["url","Source URL"]],
   "Snapshot retrieval and server dates are not transaction coverage end dates. See collection receipts separately for the roster search grid.");

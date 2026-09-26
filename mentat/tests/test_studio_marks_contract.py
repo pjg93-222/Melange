@@ -32,8 +32,10 @@ spec.loader.exec_module(app)
 
 
 def v3_controls():
+    # Lane P's map-layer controls (lane: 'P') are asserted by test_map_layers_server.py.
     return [control for control in STUDIO_API["negative_controls"]
-            if isinstance(control["payload"], dict) and isinstance(control["payload"].get("sheets"), list)
+            if control.get("lane") != "P"
+            and isinstance(control["payload"], dict) and isinstance(control["payload"].get("sheets"), list)
             and any("marksCards" in sheet or "syncAxes" in sheet for sheet in control["payload"]["sheets"])]
 
 
@@ -90,7 +92,8 @@ class StudioMarksContractTests(unittest.TestCase):
         for name in ("marks_card", "views_save_marks_dual", "views_get_marks_dual", "views_save_marks_shape",
                      "marks_v2_sheet", "marks_v2_cards", "marks_v2_written"):
             self.assertIn(name, EXAMPLES)
-        self.assertEqual(len(v3_controls()), 14)
+        # Lane M's fourteen and lane F's nine Flow-card controls; lane P's map controls are its own.
+        self.assertEqual(len(v3_controls()), 23)
 
     def test_a_dual_axis_and_a_shape_card_save_and_read_back_byte_intact(self):
         for name in ("views_save_marks_dual", "views_save_marks_shape"):

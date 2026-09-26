@@ -335,6 +335,36 @@ def profile_columns(headers, rows):
     return columns
 
 
+# F2 and F4 (Paul, 2026-09-25). A cycle whose transfer index was not current
+# published no transfer-derived rows or values, and three sheets fell back to
+# directly funded committees only - an undercount, not a zero. A worksheet view
+# of any of them says so in its note, which Chart Studio shows with the data.
+TRANSFER_DERIVED_SHEETS = frozenset({'Transfer Paths', 'Allocation Estimates', 'Allocation Coverage',
+                                     'Candidate Funding'})
+DIRECT_ONLY_SHEETS = frozenset({'Beneficiary Summary', 'Downstream Reach', 'Downstream Measurement'})
+
+
+def untraced_sheet_notes(path, sheet_name):
+    """The not-traced sentences for one worksheet, from its workbook's audit bundle (F2).
+
+    A companion Data workbook shares its Overview's bundle (one build writes
+    both). No bundle, a legacy bundle or a current index says nothing.
+    """
+    base = re.sub(r'\s+\d{4}-\d{4}$', '', str(sheet_name or '')).strip()
+    if base not in TRANSFER_DERIVED_SHEETS | DIRECT_ONLY_SHEETS:
+        return []
+    import graph_data  # graph_data imports this module, so it is read on use
+    path = Path(path)
+    overview = path.with_name(re.sub(r' Industry Spending Data\.xlsx$', ' Industry Spending Overview.xlsx', path.name))
+    rows = [row for row in graph_data.transfer_index(overview if overview.is_file() else path).values()
+            if row['status'] != 'current']
+    if base in DIRECT_ONLY_SHEETS:
+        return [f"Direct only; transfers not traced for {row['cycle']}: the transfer index for {row['cycle']} "
+                f"is {row['status']}." for row in rows]
+    return [f"{row['note']}: {row['cycle']} has no transfer-derived rows or values here; blank is not zero."
+            for row in rows]
+
+
 def worksheet_accounting(sheet_name, headers, rows, row_numbers):
     """Expose all worksheet rows with explicit overlap guards, never a hidden filter."""
     notes = []
@@ -361,8 +391,12 @@ def worksheet_accounting(sheet_name, headers, rows, row_numbers):
     # is not stripped (nothing is left to match, and graph_data.py parses those
     # separately).
     base_sheet_name = re.sub(r'\s+\d{4}-\d{4}$', '', sheet_name).strip() or sheet_name
-    if base_sheet_name in ('Beneficiary Bridge', 'Beneficiary Summary', 'Transfer Paths', 'Funding Cohorts', 'Allocation Estimates'):
+    if base_sheet_name in ('Beneficiary Bridge', 'Beneficiary Summary', 'Funding Cohorts', 'Allocation Estimates'):
         accounting.update(safe_to_sum=False, reason='This sheet repeats funding or committee activity across association paths. Use the contribution dataset and a named accounting basis.')
+    elif base_sheet_name == 'Transfer Paths':
+        # F14 (2026-09-26): one row per transfer and cycle, no longer one per funded
+        # root; still not a total, because money moving A -> B -> C is in two rows.
+        accounting.update(safe_to_sum=False, reason='Each row is one committee-to-committee transfer on the funded roots\' association paths; money that moves through several committees appears at every transfer, so a sum is not a total. Use the contribution dataset and a named accounting basis.')
     columns = profile_columns(headers, rows)
     for column in columns:
         name = column['name']
@@ -425,6 +459,7 @@ def worksheet_data(file_stamp, sheet_name='', header=0):
                 rows.append(values)
                 row_numbers.append(number)
         rows,row_numbers,columns,accounting,notes=worksheet_accounting(sheet_name,headers,rows,row_numbers)
+        notes = notes + untraced_sheet_notes(file_stamp[0], sheet_name)
         return {'sheet': sheet_name, 'header_row': start, 'columns': columns,
                 'rows': rows, 'row_numbers': row_numbers, 'row_count': len(rows), 'sha256': digest_stamp(file_stamp),
                 'accounting': accounting,

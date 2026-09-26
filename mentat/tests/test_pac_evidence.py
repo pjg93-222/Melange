@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from pac_evidence import Client, receipt_role, summarize, temporal_routes
+from pac_evidence import Client, collect_network, receipt_role, summarize, temporal_routes
 
 
 class EvidenceTests(unittest.TestCase):
@@ -237,6 +237,81 @@ class EvidenceTests(unittest.TestCase):
         self.assertIsNone(temporal_routes(evidence)[0]['company_attributed_amount'])
         receipt['role'] = 'in_kind_contribution'
         self.assertEqual(temporal_routes(evidence)[0]['status'], 'asset_liquidation_link_required')
+
+
+def disbursement(sub, line, amount, code=None, recipient='', **fields):
+    return {'sub_id': sub, 'line_number': line, 'disbursement_type': code,
+            'recipient_committee_id': recipient, 'disbursement_amount': amount,
+            'disbursement_date': '2024-05-0' + sub[-1], **fields}
+
+
+class TransferRuleTests(unittest.TestCase):
+    """F8 (Paul, 2026-09-25): "one rule, by transaction type, everywhere"."""
+
+    ROWS = {'C00000001': [
+        disbursement('1', '21B', 3000, '24K', 'C00000002'),   # a 24K filed on line 21B
+        disbursement('2', '23', 500, '24Z', 'C00000003'),     # in-kind on line 23: no transfer
+        disbursement('3', '22', 700, None, 'C00000004'),      # no type: the old line rule decides
+        disbursement('4', '21B', 80, None, '', recipient_name='VENDOR'),
+        disbursement('5', '23', 40, '24C', 'C00000005', candidate_id='H0CA00001', candidate_name='ONE')]}
+
+    def test_the_collector_follows_transfers_by_transaction_type(self):
+        rows = self.ROWS
+
+        class Client:
+            def rows(self, endpoint, params):
+                return list(rows.get(params['committee_id'], [])) if 'schedule_b' in endpoint else []
+
+            def page(self, endpoint, params):
+                return {'results': [{'disbursements': 0}]}
+
+        snapshots, missing = collect_network(Client(), [('C00000001', 2024)], max_units=10)
+        self.assertEqual(sorted(unit['committee_id'] for unit in snapshots),
+                         ['C00000001', 'C00000002', 'C00000004'])
+        self.assertEqual(missing, [])
+
+    def test_each_leg_is_named_by_type_and_the_fallback_is_counted(self):
+        snapshot = {'committee_id': 'C00000001', 'cycle': 2024, 'totals': {}, 'receipts': [],
+                    'expenditures': [], 'disbursements': self.ROWS['C00000001']}
+        result = summarize([snapshot], 'Acme', [])
+        legs = {leg['destination']: leg.get('transfer_basis') for leg in result['transfers']}
+        self.assertEqual(legs, {'C00000002': 'transaction_type', 'C00000004': 'line_fallback',
+                                'C00000005': 'transaction_type'})
+        self.assertEqual([row['candidate_id_as_filed'] for row in result['candidate_activity']], ['H0CA00001'])
+        rule = result['transfer_rule']
+        self.assertEqual(rule['transaction_types'], ['24G', '24K'])
+        self.assertEqual(rule['rows_without_transaction_type'], 2)
+        self.assertEqual(rule['legs_by_line_fallback'], 1)
+        self.assertEqual(rule['amount_by_line_fallback'], 700)
+        self.assertEqual(rule['by_committee'], [{'committee_id': 'C00000001', 'cycle': 2024,
+                                                 'rows_without_transaction_type': 2,
+                                                 'legs_by_line_fallback': 1, 'amount_by_line_fallback': 700.0}])
+
+
+class ReloadRuleTests(unittest.TestCase):
+    """F11 (Paul, 2026-09-25): a reload differing only in SUB_ID counts once."""
+
+    def snapshot(self):
+        row = disbursement('1', '22', 700, '24G', 'C00000004', report_type='M6', transaction_id='SB22.1',
+                           file_number='9')
+        gift = {'sub_id': 'e1', 'expenditure_amount': 50, 'candidate_id': 'H00000001', 'candidate_name': 'DOE, JANE',
+                'support_oppose_indicator': 'S', 'expenditure_date': '2024-10-01', 'report_type': 'M10',
+                'transaction_id': 'SE.1', 'file_number': '9', 'payee_name': 'MEDIA', 'is_notice': False}
+        return {'committee_id': 'C00000001', 'cycle': 2024, 'totals': {'independent_expenditures': 50},
+                'receipts': [],
+                'expenditures': [gift, {**gift, 'sub_id': 'e2'}],
+                'disbursements': [row, {**row, 'sub_id': '2'}, {**row, 'sub_id': '3', 'transaction_id': 'SB22.2'},
+                                  {**row, 'sub_id': '4', 'transaction_id': ''}, {**row, 'sub_id': '5', 'transaction_id': ''}]}
+
+    def test_the_collector_counts_a_reload_once_and_a_distinct_transaction_twice(self):
+        result = summarize([self.snapshot()], 'Acme', [])
+        self.assertEqual(sorted(leg['sub_id'] for leg in result['transfers']), ['1', '3', '4', '5'])
+        self.assertEqual([row['committee_spending'] for row in result['candidate_activity']], [50])
+        self.assertTrue(result['committee_finances'][0]['regular_ie_reconciles'])
+        reload = result['reload_rule']
+        self.assertEqual(reload['key'], 'committee|report type|transaction id|file number|counterparty|amount|date|type')
+        self.assertEqual((reload['reload_rows'], reload['reload_amount'],
+                          reload['rows_without_transaction_id_or_file_number']), (2, 750.0, 2))
 
 
 if __name__ == '__main__':

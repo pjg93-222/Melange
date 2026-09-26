@@ -22,6 +22,8 @@ from urllib.request import Request, urlopen
 
 from fec_key_store import load_keys
 from fec_transfer_graph import atomic_json
+from transfer_rule import (CANDIDATE, FALLBACK_BASIS, RELOAD_KEY, TRANSFER, TRANSFER_TYPES, count_reloads_once,
+                           new_reload_census, schedule_b_leg, transaction_type)
 
 
 def money(value):
@@ -114,6 +116,101 @@ def receipt_role(row):
     if role == 'contribution' and re.search(r'IN KIND|NOT LIQUIDATED',description):
         return 'in_kind_contribution'
     return role
+
+
+REDISCLOSURE_REASON = 'memo_redisclosure_of_counted_parent'
+
+
+def _identity_text(value):
+    return str(value if value is not None else '').strip().upper()
+
+
+def _identity_day(value):
+    text = str(value if value is not None else '').strip()[:10]
+    return text if re.fullmatch(r'\d{4}-\d{2}-\d{2}', text) else ''
+
+
+def _identity_cents(value):
+    """The amount to the cent, as schema.R's mentat_filing_identity_amount keys it; None when unreadable."""
+    try:
+        amount = Decimal(str(value))
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+    return amount.quantize(Decimal('0.01')) if amount.is_finite() else None
+
+
+def memo_redisclosure_parents(rows, counted=None, role=None):
+    """F13, the memo re-disclosure rule (Paul approved 2026-09-26, "Approve F13").
+
+    Twin of schema.R mentat_memo_redisclosure_parents(); the cases in
+    tests/fixtures/memo_redisclosure_cases.json pin both. A memo whose own text
+    states that it re-discloses a gift already itemized (receipt role
+    unverified_disclosure_memo: a memo row matching fec_receipt_rules.json's
+    disclosure_pattern) duplicates the counted parent it restates: same company,
+    same recipient committee, same contributor (FEC contributor_id when both
+    rows carry one, else the normalised name), the same nonzero amount to the
+    cent, dated on or before the memo, and not itself a memo. The money counts
+    once, via the parent; with several such parents the latest-dated one is
+    recorded (then the lowest sub_id). A memo that calls the gift unitemized
+    restates no itemized parent. Missing or ambiguous information never excludes
+    (D-040): with no parent the memo stays counted, flagged
+    disclosure_memo_unmatched, and equal amounts without the statement stay a
+    clue, never proof.
+
+    A row takes part when its company match (if it has one) is accepted, it
+    carries no excluded_reason, its role is giving, and counted(row) - the
+    caller's own exclusions - allows it. role(row) may supply a receipt role the
+    caller has already computed. Returns {memo sub_id: parent sub_id}.
+    """
+    unitemized = receipt_rules()['redisclosure_unitemized_pattern']
+    role_of = role or receipt_role
+    rows = list(rows)
+
+    def eligible(row, row_role):
+        return (row_role not in ('other_receipt', 'asset_liquidation')
+                and _identity_text(row.get('company_match_status')) in ('', 'ACCEPTED')
+                and not _identity_text(row.get('excluded_reason'))
+                and (counted is None or bool(counted(row))))
+
+    def key(row):
+        return (_identity_text(row.get('company')), _identity_text(row.get('committee_id')),
+                _identity_cents(row.get('contribution_receipt_amount')))
+
+    memos = []
+    for row in rows:
+        if not is_memo(row):
+            continue
+        row_role = role_of(row)
+        if row_role != 'unverified_disclosure_memo' or not eligible(row, row_role):
+            continue
+        memo_key, day = key(row), _identity_day(row.get('contribution_receipt_date'))
+        statement = (name_key(row.get('receipt_type_full')) + ' ' + name_key(row.get('memo_text'))).strip()
+        if memo_key[1] and memo_key[2] and day and not re.search(unitemized, statement):
+            memos.append((row, memo_key, day))
+    if not memos:
+        return {}
+    wanted = {memo_key for _, memo_key, _ in memos}
+    pool = defaultdict(list)
+    for row in rows:
+        if is_memo(row):
+            continue
+        parent_key = key(row)
+        if parent_key not in wanted:
+            continue
+        sub_id, day = str(row.get('sub_id') or '').strip(), _identity_day(row.get('contribution_receipt_date'))
+        if sub_id and day and eligible(row, role_of(row)):
+            pool[parent_key].append((sub_id, day, _identity_text(row.get('contributor_id')),
+                                     name_key(row.get('contributor_name'))))
+    parents = {}
+    for row, memo_key, day in memos:
+        entity, name = _identity_text(row.get('contributor_id')), name_key(row.get('contributor_name'))
+        found = [(sub_id, when) for sub_id, when, parent_entity, parent_name in pool.get(memo_key, [])
+                 if when <= day and (parent_entity == entity if entity and parent_entity
+                                     else bool(name) and parent_name == name)]
+        if found:
+            parents[str(row.get('sub_id') or '').strip()] = min(
+                found, key=lambda item: (-int(item[1].replace('-', '')), item[0]))[0]
+    return parents
 
 
 def source_link(row):
@@ -267,10 +364,12 @@ def collect_network(client, roots, max_units=30):
             continue
         snapshots.append(unit)
         destinations = defaultdict(Decimal)
-        for row in unit['disbursements']:
+        # F11: a reload of a transfer is one transfer, not two.
+        for row in count_reloads_once(unit['disbursements'], 'disbursements', committee):
+            # F8: a committee is followed when transfer_rule calls the row a
+            # transfer - by its transaction type, the transfer index's set.
             destination = str(row.get('recipient_committee_id') or '')
-            if (destination and not row.get('candidate_id') and not is_memo(row)
-                    and str(row.get('line_number')) in ('22', '23')):
+            if destination and schedule_b_leg(row)[0] == TRANSFER:
                 destinations[destination] += money(row.get('disbursement_amount'))
         pending.extend((destination, cycle) for destination, value in sorted(destinations.items())
                        if value > 0 and (destination, cycle) not in visited)
@@ -283,13 +382,29 @@ def summarize(snapshots, company, aliases):
     if not name_key(company):
         raise ValueError('Provide a nonempty canonical company name.')
     receipts, transfers, activity, finances = [], [], [], []
+    receipt_rows = []  # the filed rows behind receipts, for F13 below
+    # F8: how many rows carried no transaction type, so the old line rule
+    # decided them - counted, never silently folded into a total.
+    rule = {'transaction_types': sorted(TRANSFER_TYPES), 'rows_without_transaction_type': 0,
+            'legs_by_line_fallback': 0, 'amount_by_line_fallback': Decimal(0), 'by_committee': []}
+    # F11: a reload - same committee, report type, transaction id, file number,
+    # counterparty, amount, date and type under another SUB_ID - counts once.
+    reload = {'key': RELOAD_KEY, **new_reload_census(), 'by_committee': []}
     for snapshot in snapshots:
         committee, cycle = snapshot['committee_id'], snapshot['cycle']
+        census = new_reload_census()
+        schedules = {schedule: list(count_reloads_once(snapshot[schedule], schedule, committee, census))
+                     for schedule in ('receipts', 'disbursements', 'expenditures')}
+        for name in ('rows_without_transaction_id_or_file_number', 'reload_rows', 'reload_amount'):
+            reload[name] += census[name]
+        if census['rows_without_transaction_id_or_file_number'] or census['reload_rows']:
+            reload['by_committee'].append({'committee_id': committee, 'cycle': cycle,
+                                           **census, 'reload_amount': float(census['reload_amount'])})
         total = snapshot['totals']
-        actual_ie = sum((money(r.get('expenditure_amount')) for r in snapshot['expenditures']
+        actual_ie = sum((money(r.get('expenditure_amount')) for r in schedules['expenditures']
                          if not is_memo(r)), Decimal(0))
         finances.append({'committee_id': committee, 'cycle': cycle,
-                         'committee_name': next(((r.get('committee') or {}).get('name') for r in snapshot['receipts'] if (r.get('committee') or {}).get('name')), committee),
+                         'committee_name': next(((r.get('committee') or {}).get('name') for r in schedules['receipts'] if (r.get('committee') or {}).get('name')), committee),
                          'receipts_as_reported': total.get('receipts'), 'disbursements_as_reported': total.get('disbursements'),
                          'ending_cash_as_reported': total.get('last_cash_on_hand_end_period'),
                          'coverage_start': str(total.get('coverage_start_date') or '')[:10],
@@ -299,7 +414,7 @@ def summarize(snapshots, company, aliases):
                          'regular_ie_reconciles': (abs(actual_ie - money(total['independent_expenditures'])) <= Decimal('.01'))
                              if total.get('independent_expenditures') not in (None, '') else None,
                          'url': f'https://www.fec.gov/data/committee/{committee}/?cycle={cycle}'})
-        for row in snapshot['receipts']:
+        for row in schedules['receipts']:
             if name_key(row.get('contributor_name')) not in alias_keys:
                 continue
             role = receipt_role(row)
@@ -310,23 +425,42 @@ def summarize(snapshots, company, aliases):
                              'receipt_role_unverified': role not in ('contribution','in_kind_contribution') or is_memo(row),
                              'description': row.get('receipt_type_full'), 'line_number': row.get('line_number'),
                              'transaction_id': row.get('transaction_id'), 'source_url': source_link(row)})
+            receipt_rows.append({**row, 'company': company, 'committee_id': committee})
         candidate_payments = defaultdict(list)
-        for row in snapshot['disbursements']:
+        untyped, fallback_legs, fallback_amount = 0, 0, Decimal(0)
+        for row in schedules['disbursements']:
             destination = row.get('recipient_committee_id')
             if is_memo(row):
                 continue
-            # A committee ID can also identify a vendor/refund recipient. Admit
-            # contribution/transfer Schedule B lines, never all committee payees.
-            if str(row.get('line_number')) not in ('22', '23'):
+            # A committee ID can also identify a vendor/refund recipient, so a
+            # committee payee alone is never a transfer. transfer_rule decides
+            # by the row's transaction type (the transfer index's 24G/24K),
+            # and by the old line 22/23 rule only when the row records no type.
+            leg, basis = schedule_b_leg(row)
+            if not transaction_type(row):
+                untyped += 1
+            if not leg:
                 continue
+            if basis == FALLBACK_BASIS:
+                fallback_legs += 1
+                fallback_amount += money(row.get('disbursement_amount'))
             if destination:
                 transfers.append({'cycle': cycle, 'source': committee, 'destination': destination,
                               'candidate_id': row.get('candidate_id') or '',
                               'destination_name': row.get('recipient_name'), 'date': row.get('disbursement_date'),
-                              'amount': float(money(row.get('disbursement_amount'))), 'sub_id': row['sub_id'], 'source_url': source_link(row)})
-            if row.get('candidate_id'):
+                              'amount': float(money(row.get('disbursement_amount'))), 'sub_id': row['sub_id'], 'source_url': source_link(row),
+                              'transfer_basis': basis})
+            if leg == CANDIDATE:
                 candidate_payments[(row['candidate_id'],
                                     row.get('candidate_name') or row['candidate_id'])].append(row)
+        rule['rows_without_transaction_type'] += untyped
+        rule['legs_by_line_fallback'] += fallback_legs
+        rule['amount_by_line_fallback'] += fallback_amount
+        if untyped:
+            rule['by_committee'].append({'committee_id': committee, 'cycle': cycle,
+                                         'rows_without_transaction_type': untyped,
+                                         'legs_by_line_fallback': fallback_legs,
+                                         'amount_by_line_fallback': float(fallback_amount)})
         for (candidate, reported_name), rows in candidate_payments.items():
             dates = sorted(str(row.get('disbursement_date') or '')[:10] for row in rows)
             filings = sorted((filing_record(row, amount_field='disbursement_amount',
@@ -344,7 +478,7 @@ def summarize(snapshots, company, aliases):
                 'filings':filings, 'company_attributed_amount':None,
                 'evidence':'Reported committee activity; donor allocation unidentifiable'})
         grouped = defaultdict(list)
-        for row in snapshot['expenditures']:
+        for row in schedules['expenditures']:
             if is_memo(row):
                 continue
             grouped[row.get('candidate_id') or '', row.get('candidate_name') or '', row.get('support_oppose_indicator') or ''].append(row)
@@ -362,10 +496,23 @@ def summarize(snapshots, company, aliases):
                              'source_urls': sorted({source_link(row) for row in rows}),
                              'filings': filings,
                              'company_attributed_amount': None, 'evidence': 'Reported committee activity; donor allocation unidentifiable'})
+    # F13 (Paul approved 2026-09-26): a memo whose own text re-discloses a gift
+    # already itemized counts once, via the counted parent it restates; without
+    # one it stays included and says why (memo_redisclosure_parents).
+    restated = memo_redisclosure_parents(receipt_rows)
+    for receipt, row in zip(receipts, receipt_rows):
+        parent = restated.get(str(row.get('sub_id') or '').strip())
+        if parent:
+            receipt.update(included_company_contribution=False, duplicate_of_sub_id=parent,
+                           duplicate_reason=REDISCLOSURE_REASON)
+        elif receipt['role'] == 'unverified_disclosure_memo':
+            receipt['receipt_role_reason'] = 'disclosure_memo_unmatched'
     return {'version': 1, 'company': company, 'aliases': sorted(alias_keys),
             'method': 'Observed receipt, transfer and regular-report expenditure legs. Pooled funds do not establish donor-to-candidate attribution. No pro-rata dollar estimate is published.',
             'scope': 'Itemized Schedule A/B and regular Schedule E; 24/48-hour notices are excluded to avoid double counting. Financial summary includes unitemized and other activity.',
-            'receipts': receipts, 'transfers': transfers, 'candidate_activity': activity, 'committee_finances': finances}
+            'receipts': receipts, 'transfers': transfers, 'candidate_activity': activity, 'committee_finances': finances,
+            'transfer_rule': {**rule, 'amount_by_line_fallback': float(rule['amount_by_line_fallback'])},
+            'reload_rule': {**reload, 'reload_amount': float(reload['reload_amount'])}}
 
 
 def temporal_routes(evidence, max_hops=3):

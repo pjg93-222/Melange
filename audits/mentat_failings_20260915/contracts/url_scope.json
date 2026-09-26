@@ -1,6 +1,6 @@
 {
   "contract": "url_scope",
-  "version": 6,
+  "version": 7,
   "owner": "S5; pane keys S6",
   "produced_by": [
     "mentat/app/scope.js:write",
@@ -226,6 +226,16 @@
         "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
       ]
     },
+    "a.flow": {
+      "value": "Pane A. Lane F (board #44): the basis of the Flow (Sankey) view open on this pane, 'reported' or 'attributed'; absent when the pane grid is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the Flow view, switch Reported/Attributed, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openFlow on that basis)"
+      ]
+    },
     "b.source": {
       "value": "Pane B. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
       "writers": [
@@ -284,6 +294,16 @@
       "readers": [
         "mentat/app/scope.js:read",
         "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
+      ]
+    },
+    "b.flow": {
+      "value": "Pane B. Lane F (board #44): the basis of the Flow (Sankey) view open on this pane, 'reported' or 'attributed'; absent when the pane grid is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the Flow view, switch Reported/Attributed, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openFlow on that basis)"
       ]
     },
     "c.source": {
@@ -346,6 +366,16 @@
         "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
       ]
     },
+    "c.flow": {
+      "value": "Pane C. Lane F (board #44): the basis of the Flow (Sankey) view open on this pane, 'reported' or 'attributed'; absent when the pane grid is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the Flow view, switch Reported/Attributed, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openFlow on that basis)"
+      ]
+    },
     "d.source": {
       "value": "Pane D. Which kind of source this pane reads: 'csv' for an imported file, 'snapshot' for a saved FEC snapshot. Nothing else is read; a pane with no source is a pane that is not open.",
       "writers": [
@@ -404,6 +434,16 @@
       "readers": [
         "mentat/app/scope.js:read",
         "mentat/app/evidence.js:restorePanes (only a cycle the pane's source records, then openMap and loadCompare)"
+      ]
+    },
+    "d.flow": {
+      "value": "Pane D. Lane F (board #44): the basis of the Flow (Sankey) view open on this pane, 'reported' or 'attributed'; absent when the pane grid is showing.",
+      "writers": [
+        "mentat/app/scope.js:write, called only from mentat/app/evidence.js:writeScope (open the Flow view, switch Reported/Attributed, Back to panes)"
+      ],
+      "readers": [
+        "mentat/app/scope.js:read",
+        "mentat/app/evidence.js:restorePanes (after the pane itself is restored, then openFlow on that basis)"
       ]
     }
   },
@@ -673,6 +713,19 @@
         "a.committee": "C00835959",
         "a.cycle": "2024",
         "a.map": "spent"
+      }
+    },
+    {
+      "name": "evidence_flow_permalink_reported",
+      "why": "v7, lane F (board #44). A Flow permalink reopens the Flow view it was cut from: the pane is restored first from a.source/a.id/a.committee/a.cycle, then a.flow reopens the Flow (Sankey) view on that pane on the named basis.",
+      "url": "/?a.source=snapshot&a.id=snapshot-b26761887a1f44d58cc38fdb8b720a78&a.committee=C00835959&a.cycle=2024&a.flow=reported#evidence",
+      "view": "evidence",
+      "scope": {
+        "a.source": "snapshot",
+        "a.id": "snapshot-b26761887a1f44d58cc38fdb8b720a78",
+        "a.committee": "C00835959",
+        "a.cycle": "2024",
+        "a.flow": "reported"
       }
     }
   ],
@@ -957,6 +1010,26 @@
             "key": "a.map",
             "value": "sideways",
             "reason": "a pane map must be one of raised, spent"
+          }
+        ]
+      }
+    },
+    {
+      "why": "v7. a.flow=traced is no basis the Flow view offers (pooled money is never traced). A bad permalink must still open the tab and its pane, so the key is dropped and reported rather than thrown.",
+      "url": "/?a.source=snapshot&a.id=snapshot-b26761887a1f44d58cc38fdb8b720a78&a.committee=C00835959&a.cycle=2024&a.flow=traced#evidence",
+      "view": "evidence",
+      "expected": {
+        "scope": {
+          "a.source": "snapshot",
+          "a.id": "snapshot-b26761887a1f44d58cc38fdb8b720a78",
+          "a.committee": "C00835959",
+          "a.cycle": "2024"
+        },
+        "invalid": [
+          {
+            "key": "a.flow",
+            "value": "traced",
+            "reason": "a pane flow must be one of reported, attributed"
           }
         ]
       }

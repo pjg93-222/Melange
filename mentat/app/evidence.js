@@ -719,6 +719,10 @@
     } catch (error) {
       pane.networkProblem = error.message;
     }
+    // F4 (Paul approved 2026-09-25): every committee in the network against its
+    // own FEC summary, not only this pane's committee (networkChecks, below).
+    if (pane.network && (pane.network.committees || []).length)
+      pane.warnings.splice(0, 1, ...networkChecks(pane.network.committees));
   }
 
   /* ------------------------------------------------------------- rendering  */
@@ -810,6 +814,7 @@
             <button type="button" class="pane-summary${pane.rowsOpen ? '' : ' on'}"
               aria-pressed="${!pane.rowsOpen}">Summary</button>
             <button type="button" class="pane-map" aria-pressed="false">Map</button>
+            <button type="button" class="pane-flow" aria-pressed="false">Flow</button>
             <button type="button" class="pane-rows${pane.rowsOpen ? ' on' : ''}"
               aria-pressed="${pane.rowsOpen}" aria-expanded="${pane.rowsOpen}">${pane.source === 'snapshot' ? 'PAC routes & candidates' : 'Rows'}</button>
           </div>
@@ -920,26 +925,91 @@
       <details><summary>What is needed for a donor allocation?</summary><p>Reconcile all receipts and disbursements, opening and retained cash, asset conversions and refunds. Enforce donation → transfer → expenditure dates, including transfers between cycles. Document any earmark before calling a dollar amount traced. Otherwise, show assumptions and uncertainty with the estimate.</p></details></div>`;
   }
 
+  /* F4 (Paul approved 2026-09-25). The network showed one coverage window per
+     committee - its summary's, which runs past its itemized rows (Defend
+     American Jobs 2026: summary to 7/31, itemized spending to June) - and
+     checked only the pane's own committee against its FEC summary. The server
+     now measures each committee (downstream.snapshot_view `committees`): the
+     last itemized transaction and the summary's coverage end, and its itemized
+     independent expenditures and lines 22-23 transfers against its own summary,
+     as itemized minus summary. These only put them in words. */
+  const checkMark = check => {
+    if (!check || check.status === 'no_summary')
+      return '<span class="recon-mark recon-none">No summary saved</span>';
+    const detail = `Itemized ${currency(check.itemized)} · summary ${currency(check.summary)} · itemized − summary ${currency(check.difference)}`;
+    return check.status === 'reconciled'
+      ? `<span class="recon-mark recon-ok" title="${escapeHtml(detail)}">Reconciled</span>`
+      : `<span class="recon-mark recon-differs" title="${escapeHtml(detail)}">Differs ${escapeHtml(currency(check.difference))}</span>`;
+  };
+  const checkWords = check => !check || check.status === 'no_summary' ? 'no summary saved'
+    : check.status === 'reconciled' ? 'reconciled to its summary'
+    : `differ from its summary by ${currency(check.difference)} (itemized ${currency(check.itemized)}, summary ${currency(check.summary)})`;
+  const committeeWho = row => (row.committee_name && row.committee_name !== row.committee ? row.committee_name + ' ' : '')
+    + `(${row.committee}, ${cycleLabel(row.cycle)})`;
+  const itemizedTitle = row => row.saved
+    ? `Last itemized: receipts ${(row.last_itemized || {}).receipts || 'none'} · disbursements ${(row.last_itemized || {}).disbursements || 'none'} · independent expenditures ${(row.last_itemized || {}).expenditures || 'none'} · summary ${row.coverage_start || 'unknown'} to ${row.coverage_end || 'unknown'}`
+    : 'No saved snapshot for this committee and cycle';
+  const coverageWords = row => !row ? '' : row.saved
+    ? `itemized to ${row.last_itemized_date || 'no dated row'} · summary to ${row.coverage_end || 'unknown'}`
+    : 'no saved snapshot';
+  // Up to UNSAVED_ROWS committees with no saved snapshot get a row and a
+  // sentence each; past that they share one, still "No summary saved", and the
+  // missing-evidence line above names every one of them.
+  const UNSAVED_ROWS = 8;
+  const groupUnsaved = committees => committees.filter(row => !row.saved).length > UNSAVED_ROWS;
+  function networkChecks(committees) {
+    const unsaved = committees.filter(row => !row.saved);
+    const lines = (groupUnsaved(committees) ? committees.filter(row => row.saved) : committees)
+      .map(row => `${committeeWho(row)}: independent expenditures ${checkWords((row.reconciliation || {}).independent_expenditures)}; `
+        + `transfers on lines 22-23 ${checkWords((row.reconciliation || {}).transfers)}; ${coverageWords(row)}.`);
+    if (groupUnsaved(committees))
+      lines.push(`No summary saved for the ${number(unsaved.length)} committees in this network with no saved snapshot: `
+        + unsaved.slice(0, 10).map(row => `${row.committee} (${cycleLabel(row.cycle)})`).join(', ')
+        + (unsaved.length > 10 ? ` and ${number(unsaved.length - 10)} more.` : '.'));
+    return lines;
+  }
+  function networkCommitteesHtml(committees) {
+    if (!committees.length) return '';
+    const grouped = groupUnsaved(committees);
+    const unsaved = committees.filter(row => !row.saved);
+    return `<h4 class="network-committees-title">Committees in this network</h4>
+      <p class="muted">Each committee's own coverage, and its own itemized rows against its FEC summary (itemized − summary).</p>
+      <div class="table-scroll"><table class="network-committees"><thead><tr><th scope="col">Committee</th><th scope="col">Itemized to</th>
+        <th scope="col">Summary to</th><th scope="col">Independent expenditures</th><th scope="col">Transfers, lines 22–23</th></tr></thead><tbody>
+      ${(grouped ? committees.filter(row => row.saved) : committees).map(row => `<tr data-committee="${escapeHtml(row.committee)}" data-cycle="${escapeHtml(row.cycle)}">
+        <td>${escapeHtml(row.committee_name || row.committee)}<small>${escapeHtml(row.committee)} · ${escapeHtml(cycleLabel(row.cycle))}</small></td>
+        <td title="${escapeHtml(itemizedTitle(row))}">${escapeHtml(row.saved ? (row.last_itemized_date || 'No dated row') : 'No saved snapshot')}</td>
+        <td>${escapeHtml(row.saved ? (row.coverage_end || 'Unknown') : '—')}</td>
+        <td>${checkMark((row.reconciliation || {}).independent_expenditures)}</td>
+        <td>${checkMark((row.reconciliation || {}).transfers)}</td></tr>`).join('')}
+      ${grouped ? `<tr class="network-unsaved" data-committee="unsaved"><td>${number(unsaved.length)} committees with no saved snapshot<small>each named under Missing recipient PAC evidence above</small></td>
+        <td>No saved snapshot</td><td>—</td><td>${checkMark(null)}</td><td>${checkMark(null)}</td></tr>` : ''}
+      </tbody></table></div>`;
+  }
+
   function networkDrawerHtml(pane) {
     const network = pane.network;
     if (!network) return `<h3 class="evidence-subheading">Candidate spending across PAC network</h3>
       <p role="status">Downstream evidence unavailable: ${escapeHtml(pane.networkProblem || 'not loaded')}. Missing evidence is not zero spending.</p>`;
+    const committees = network.committees || [];
+    const own = new Map(committees.map(row => [`${row.cycle}|${row.committee}`, row]));
     return `<section class="evidence-network"><h3 class="evidence-subheading">${escapeHtml(pane.name)}-backed candidate spending</h3>
       <p class="muted">Backing is assumed from recorded PAC transfers. Each spending PAC is counted once per cycle.</p>
       ${(network.missing || []).length ? `<p role="status">Missing recipient PAC evidence: ${network.missing.map(row => `${escapeHtml(row.committee)} (${escapeHtml(row.cycle)})`).join(', ')}. Missing evidence is not zero spending.</p>` : ''}
+      ${networkCommitteesHtml(committees)}
       <label>Find candidate or PAC<input type="search" class="network-search" placeholder="Name or FEC ID" value="${escapeHtml(pane.networkQuery || '')}"></label>
-      <div class="table-scroll"><table><thead><tr><th>Candidate</th><th>Observed PAC route / spender</th><th>Cycle</th><th>Direction</th><th class="num">PAC spending</th></tr></thead><tbody>
+      <div class="table-scroll"><table class="network-routes"><thead><tr><th>Candidate</th><th>Observed PAC route / spender</th><th>Cycle</th><th>Direction</th><th class="num">PAC spending</th></tr></thead><tbody>
       ${(network.relationships || []).map(row => `<tr><td>${sourceAnchor('https://www.fec.gov/data/candidate/' + row.candidate_id + '/', row.candidate)}<small>${escapeHtml(row.candidate_id)}</small></td>
-        <td>${escapeHtml((row.route_names || row.route).join(' → '))}<small>${escapeHtml(row.route.join(' → '))}</small></td>
+        <td>${escapeHtml((row.route_names || row.route).join(' → '))}<small>${escapeHtml(row.route.join(' → '))}</small>${own.has(`${row.cycle}|${row.committee}`) ? `<small class="network-coverage">Spender ${escapeHtml(coverageWords(own.get(`${row.cycle}|${row.committee}`)))}</small>` : ''}</td>
         <td>${escapeHtml(cycleLabel(row.cycle))}</td><td>${escapeHtml(row.direction)}</td><td class="num">${currency(row.amount)}${filingLedger(row)}</td></tr>`).join('')
         || '<tr><td colspan="5">No candidate activity recorded in the available network evidence.</td></tr>'}
       </tbody></table></div>
-      <details><summary>Network source coverage and hashes</summary><p>${escapeHtml(network.note)} Transfer amounts are not added to candidate spending.</p>${(network.sources || []).map(row => `<p>${escapeHtml(row.committee)} · ${escapeHtml(cycleLabel(row.cycle))} · ${escapeHtml(row.coverage_start || 'Unknown start')} to ${escapeHtml(row.coverage_end || 'Unknown end')}<small>${escapeHtml(row.source)}<br>SHA-256 ${escapeHtml(row.sha256)}</small></p>`).join('')}</details></section>`;
+      <details><summary>Network source coverage and hashes</summary><p>${escapeHtml(network.note)} Transfer amounts are not added to candidate spending.</p>${(network.sources || []).map(row => `<p>${escapeHtml(own.has(`${row.cycle}|${row.committee}`) ? committeeWho(own.get(`${row.cycle}|${row.committee}`)) : row.committee)} · ${escapeHtml(cycleLabel(row.cycle))} · summary ${escapeHtml(String(row.coverage_start || 'Unknown start').slice(0, 10))} to ${escapeHtml(String(row.coverage_end || 'Unknown end').slice(0, 10))} · last itemized transaction ${escapeHtml((own.get(`${row.cycle}|${row.committee}`) || {}).last_itemized_date || 'not dated')}<small>${escapeHtml(row.source)}<br>SHA-256 ${escapeHtml(row.sha256)}</small></p>`).join('')}</details></section>`;
   }
 
   function filterNetworkRows(root, query) {
     const terms = String(query || '').toLowerCase().split(/\s+/).filter(Boolean);
-    for (const row of root.querySelectorAll('.evidence-network tbody tr'))
+    for (const row of root.querySelectorAll('.evidence-network .network-routes tbody tr'))
       row.hidden = !terms.every(term => row.textContent.toLowerCase().includes(term));
   }
 
@@ -957,8 +1027,8 @@
       const root = host.querySelector(`[data-pane="${pane.key}"]`);
       if (root) filterNetworkRows(root, pane.networkQuery);
     }
-    host.hidden = Boolean(mapPane);
-    $('evidence-empty').hidden = open.length > 0 || Boolean(mapPane);
+    host.hidden = Boolean(mapPane || flowPane);
+    $('evidence-empty').hidden = open.length > 0 || Boolean(mapPane || flowPane);
   }
 
   /* The pane thumbnail, drawn straight into the card. One <svg> of the shipped
@@ -1056,7 +1126,7 @@
   function renderCompare() {
     const open = PANE_KEYS.filter(key => panes.has(key)).map(key => panes.get(key));
     const host = $('evidence-compare');
-    host.hidden = open.length < 2 || Boolean(mapPane);
+    host.hidden = open.length < 2 || Boolean(mapPane || flowPane);
     if (open.length < 2) { render(host, ''); return; }
     const heads = open.map(pane => `<th title="${escapeHtml(pane.name)}">${escapeHtml(shortName(pane.name))}`
       + `<br><span class="th-sub">${escapeHtml(pane.industry || 'Imported file')} · ${escapeHtml(pane.category)}</span></th>`).join('');
@@ -1118,6 +1188,9 @@
       // drops a key it does not list, so this reaches the URL once `compare`
       // is one of its PANE_FIELDS (requested of scope.js's owner).
       partial[key + '.compare'] = (pane && mapPane === key && mapStateFor(key).compare) || '';
+      // Lane F: `<pane>.flow` is the basis of the Flow view open on the pane, absent otherwise.
+      const flowState = pane && flowPane === key && window.MentatEvidenceFlow && window.MentatEvidenceFlow.state();
+      partial[key + '.flow'] = flowState ? flowState.basis : '';
     }
     partial.category = $('evidence-type').value || '';
     api.write(partial);
@@ -1165,6 +1238,10 @@
     // The permalink NAMES the side, so restoring one is the reader's choice
     // and the map must not second-guess it by opening on the other.
     if (wantsMap) await openMap(wantsMap, current[wantsMap + '.map'], true);
+    else {
+      const wantsFlow = PANE_KEYS.find(key => panes.has(key) && current[key + '.flow']);
+      if (wantsFlow) openFlow(wantsFlow, current[wantsFlow + '.flow']);
+    }
   }
 
   const api2Evidence = id => api('/api/evidence?id=' + encodeURIComponent(id));
@@ -1374,6 +1451,7 @@
   const MAP_RAMP = ['#f1e9e3', '#d6c8e2', '#8b6984', '#57447b', '#342649'];
   const MAP_OUTLINE = '#bcaea1';
   let mapPane = '';                    // the pane key whose map is open, or ''
+  let flowPane = '';                   // lane F: the pane key whose Flow is open, or ''
   let mapRenderTicket = 0;
   const mapStates = new Map();         // pane key -> map view state
   const vintages = new Map();          // '118' -> the parsed boundary file
@@ -1564,11 +1642,102 @@
       + `<g class="map-outlines">${outline.join('')}</g></svg>`;
   }
 
+  /* F6 (Paul, 2026-09-25): no dollar may count twice. A transfer a committee's
+     summary reports on lines 22-23 but its saved Schedule B does not itemize has
+     no known recipient, so the server keeps it out of every total - reported,
+     located and unlocated alike - and the page lists it on its own line. */
+  function notItemizedText(item) {
+    // F12: a server that reads the saved network by date names its F6 figures' basis, and
+    // the line says so (the caller hands the basis over on the item).
+    const full = item.basis === 'full_period';
+    return `Transfers reported, recipient not itemized · ${item.committee_name || item.committee}`
+      + ` (${item.committee}, ${cycleLabel(item.cycle)}): ${money(item.summary_amount)} on the ${full ? 'full-period ' : ''}summary,`
+      + ` ${money(item.itemized_amount)} itemized${full ? ' over the same period' : ''}. Not counted as spending.`;
+  }
+
+  /* F12 (Paul approved 2026-09-25): the Spent map of a saved network counts each reached
+     committee from the date the network's money reached it. The server says so in
+     date_rule (total_basis 'from_gates'; its source gap is on the full-period summary,
+     residual_basis 'full_period'), and these three are the page's whole wording of it.
+     A payload without date_rule (the raised side, an older server) keeps the old words. */
+  function spentBasis(body) {
+    return body.date_rule && body.date_rule.total_basis === 'from_gates'
+      ? "saved network disbursements from the date the network's money reached each committee, excluding internal transfers"
+      : 'saved network disbursements, excluding internal transfers';
+  }
+
+  function dateClauses(body) {
+    const rule = body.date_rule;
+    if (!rule) return '';
+    return (Number(rule.amount_before_gate) ? ` · ${money(rule.amount_before_gate)} dated earlier is not counted` : '')
+      + (Number(rule.amount_date_unverified) ? ` · ${money(rule.amount_date_unverified)} undated, counted and flagged` : '')
+      + carryClause(rule, body.cycle);
+  }
+
+  /* Carryover (option (b), landed 2026-09-26), in the payload's own words: how many reached
+     committees the previous cycle's transfers opened (date_rule.carryover.opened[].label says
+     which transfers) and the status when the previous cycle is not, or not wholly, saved. */
+  function carryClause(rule, cycle) {
+    const carried = rule.carryover;
+    if (!carried || typeof carried !== 'object') return '';
+    const opened = (carried.opened || []).filter(entry => !cycle || String(entry.cycle) === String(cycle));
+    return (opened.length ? ` · ${opened.length} counted from the cycle’s first day (${opened[0].label})` : '')
+      + (carried.status === 'unknown' ? ' · carryover unknown: the previous cycle is not saved'
+        : carried.status === 'partial' ? ' · carryover partial: some previous-cycle snapshots are not saved' : '');
+  }
+
+  function gapClause(body) {
+    const full = body.date_rule && body.date_rule.residual_basis === 'full_period';
+    return ` — unresolved source gap${full ? ' (full-period summary vs itemized rows)' : ''}: `
+      + `${money(body.reconciliation_residual)}. The balancing residual is not verification.`;
+  }
+
+  /* Item 7 of F4 (Paul approved 2026-09-25). Shares are computed on positive
+     located spending: the server names each base (share_base.places, or
+     share_base.zips for a raised map's ZIP and state-district layers), and
+     there is none while a placed row nets below zero. An unlocated line that
+     nets below zero is a refund or reversal, not missing data (kind
+     'reversal'): it is listed once, signed, as "Refunds and reversals",
+     outside the shares, and no longer withdraws every share. A payload from a
+     console before the server named its base keeps the old rule. */
+  function shareBase(body, family) {
+    body = body || {};
+    if (body.share_base) {
+      const base = body.share_base[family === 'zips' ? 'zips' : 'places'];
+      return base == null ? null : Number(base);
+    }
+    const reversed = (body.kinds || []).some(kind => [...(kind.districts || []), ...(kind.states || [])].some(row => row.amount < 0))
+      || (body.by_zip || []).some(row => row.amount < 0) || (body.unlocated || []).some(row => row.amount < 0);
+    return body.reported_total > 0 && !reversed ? body.reported_total : null;
+  }
+  const isReversal = item => item.kind === 'reversal';
+  function reversalLine(body) {
+    const items = ((body || {}).unlocated || []).filter(isReversal);
+    if (!items.length) return null;
+    return {total: body.reversals_total != null ? Number(body.reversals_total) : items.reduce((sum, item) => sum + item.amount, 0),
+      rows: items.reduce((sum, item) => sum + (item.rows || 0), 0),
+      text: items.map(item => `${item.reason} (${money(item.amount)})`).join('; ')};
+  }
+  function shareRuleText(body, layer) {
+    // A payload from a console not yet restarted onto evidence_geo v4 names no
+    // base; its shares are of the reported total, so no v4 rule is stated for it.
+    if (!body || !body.share_base) return '';
+    const zips = layer === 'zip' || layer === 'sld';
+    const base = shareBase(body, zips ? 'zips' : 'places');
+    const reversal = reversalLine(body);
+    const outside = reversal ? `Unlocated money and ${money(reversal.total)} of refunds and reversals are listed with the places, outside the shares.`
+      : 'Unlocated money is listed with the places, outside the shares.';
+    if (base == null) return `Shares are unavailable: nothing placed on this map nets above zero. ${outside}`;
+    return `Shares are of the ${money(base)} of positive located ${body.direction === 'raised' ? 'receipts' : 'spending'}`
+      + `${zips ? ' placed by ZIP' : ' on this map'}; a place that nets below zero is marked Reversal and has no share. ${outside}`;
+  }
+
   function mapListHtml(body, off) {
+    const base = shareBase(body, 'places');
     const groups = (body.kinds || []).map(kind => {
       const rows = [...(kind.districts || []), ...(kind.states || [])]
         .sort((first, second) => second.amount - first.amount);
-      const share = body.reported_total ? kind.total / body.reported_total * 100 : 0;
+      const share = base && kind.total >= 0 ? kind.total / base * 100 : null;
       const lines = rows.map(row => {
         const tone = row.oppose > 0 && !(row.support > 0) ? 'oppose' : (row.support > 0 ? 'support' : '');
         const label = isSenateKey(row.key) ? `${row.key.slice(0, 2)} · Senate` : row.key;
@@ -1577,18 +1746,24 @@
           + `<td>${escapeHtml(row.who || '—')}</td>`
           + `<td class="${tone}">${escapeHtml(tone || kind.kind)}</td>`
           + `<td class="num">${money(row.amount)}</td>`
-          + `<td class="num">${row.share == null ? 'Unavailable' : (row.share * 100).toFixed(1) + '%'}</td></tr>`;
+          + `<td class="num">${row.share == null ? (row.amount < 0 ? 'Reversal' : 'Unavailable') : (row.share * 100).toFixed(1) + '%'}</td></tr>`;
       }).join('');
       return `<tr class="group"><td colspan="3">${escapeHtml(kind.label)} · ${money(kind.total)} · `
         + `${escapeHtml(kind.basis)}${off.has(kind.kind) ? ' · off the heat' : ''}</td>`
-        + `<td class="num">${money(kind.total)}</td><td class="num">${share.toFixed(1)}%</td></tr>${lines}`;
+        + `<td class="num">${money(kind.total)}</td><td class="num">${share == null ? (kind.total < 0 ? 'Reversal' : 'Unavailable') : share.toFixed(1) + '%'}</td></tr>${lines}`;
     }).join('');
-    const unlocated = (body.unlocated || []).map(item =>
+    const unlocated = (body.unlocated || []).filter(item => !isReversal(item)).map(item =>
       `<tr class="map-unlocated"><td><strong>Unlocated</strong></td><td colspan="2">${escapeHtml(item.reason)}</td>`
       + `<td class="num">${money(item.amount)}</td><td class="num">${number(item.rows)} rows</td></tr>`).join('');
+    const reversal = reversalLine(body);
+    const reversals = reversal ? `<tr class="map-reversal"><td><strong>Refunds and reversals</strong></td><td colspan="2">outside the shares · ${escapeHtml(reversal.text)}</td>`
+      + `<td class="num">${money(reversal.total)}</td><td class="num">${number(reversal.rows)} rows</td></tr>` : '';
+    const notItemized = (body.transfers_not_itemized || []).map(item =>
+      `<tr class="map-not-itemized"><td><strong>Not counted</strong></td><td colspan="2">${escapeHtml(notItemizedText({...item, basis: body.transfers_not_itemized_basis}))}</td>`
+      + `<td class="num">${money(item.amount)}</td><td class="num">outside the total</td></tr>`).join('');
     return `<div class="table-scroll map-list"><table>
       <thead><tr><th>Where</th><th>To</th><th>Kind</th><th class="num">Amount</th><th class="num">Share</th></tr></thead>
-      <tbody>${groups}${unlocated || ''}</tbody></table></div>`;
+      <tbody>${groups}${unlocated || ''}${reversals}${notItemized}</tbody></table></div>`;
   }
 
   /* The map view is a SKELETON built once per open, then updated region by
@@ -1607,6 +1782,7 @@
           <div class="map-compare-card map-compare-card--b" hidden><span class="scope-pill scope-pill--2 map-cycle-pill"></span><div class="map-canvas-host map-canvas-host--b"></div></div>
         </div>
         <div class="map-compare-legend" hidden></div>
+        <p class="muted map-share-rule" hidden></p>
         <details class="map-source-details"><summary class="map-source-summary">Sources &amp; geographic estimates</summary><p class="muted map-provenance" aria-live="polite"></p><p class="muted">Map controls: drag to pan; use + / − or Ctrl / ⌘ + scroll to zoom. Search for a state, district or ZIP and press Enter.</p></details>
         <p class="muted map-unplaced" hidden></p>
       </section>
@@ -1675,6 +1851,7 @@
         <div class="map-overline">${escapeHtml(overline)}</div>
         <h2 title="${escapeHtml(pane.name)} · ${escapeHtml(pane.committee)}">${escapeHtml(title)}</h2>
       </div>
+      ${window.MentatMapEvidence && window.MentatMapStudio ? '<button type="button" class="secondary map-open-studio" id="evidence-map-open-studio" title="Hand these map layers to Chart Studio as marks cards">Open in Chart Studio</button>' : ''}
       <button type="button" class="secondary" id="evidence-map-back">Back to panes</button>`;
   }
 
@@ -1742,6 +1919,7 @@
         ${Object.keys(sldIndex?.chambers?.upper?.states || {}).sort().map(code => `<option value="${code}"${state.sldState===code?' selected':''}>${code}</option>`).join('')}
         </select></label>
       </div>` : ''}</div>
+      ${window.MentatMapEvidence ? `<button type="button" class="map-layers-button" id="evidence-map-layers" aria-haspopup="dialog" aria-expanded="false" aria-controls="evidence-map-control" title="Layer control: show, hide and add map layers"><svg viewBox="0 0 16 16" aria-hidden="true" class="map-layers-glyph"><path d="M8 2 1.5 5.5 8 9l6.5-3.5z"></path><path d="M1.5 8.2 8 11.7l6.5-3.5M1.5 10.9 8 14.4l6.5-3.5"></path></svg>Layers</button>` : ''}
       <div class="map-navigation-controls">
       <div class="map-search-controls"><label class="map-search" for="evidence-map-search"><span class="sr-only">Find a state, district or ZIP</span>
         <svg viewBox="0 0 16 16" aria-hidden="true" class="map-search-glyph"><circle cx="7" cy="7" r="5"></circle><line x1="10.6" y1="10.6" x2="15" y2="15"></line></svg>
@@ -1810,10 +1988,14 @@
           for ${escapeHtml(cycleLabel(state.cycle))}…</p>`;
     }
     const raised = state.direction === 'raised';
-    const reconciliation = `${money(body.located_total)} located + ${money(body.unlocated_total)} unlocated = `
+    const reversal = reversalLine(body);
+    const reconciliation = `${money(body.located_total)} located + ${money(reversal ? body.unlocated_total - reversal.total : body.unlocated_total)} unlocated`
+      + (reversal ? ` - ${money(Math.abs(reversal.total))} refunds and reversals` : '') + ' = '
       + `${money(body.reported_total)} ${raised ? 'reported receipts' : body.spend_basis === 'consolidated_saved_network'
-        ? 'saved network disbursements, excluding internal transfers' : 'reported disbursements'}`
-      + (body.reconciles ? '' : ` — unresolved source gap: ${money(body.reconciliation_residual)}. The balancing residual is not verification.`);
+        ? spentBasis(body) : 'reported disbursements'}`
+      + (raised ? '' : dateClauses(body))
+      + (body.reconciles ? '' : gapClause(body))
+      + (body.transfers_not_itemized_total ? ` · ${money(body.transfers_not_itemized_total)} of transfers reported with no itemized recipient is outside this total.` : '');
     if (state.focus) return mapFocusHtml(pane, state, reconciliation);
     const allRows = rankedRows(state);
     // Fix r2 (TC-14): board 6 lists the states with no pager and the list
@@ -1835,11 +2017,17 @@
           <td><button type="button" class="link-button">${escapeHtml(row.name)}</button>${row.split ? ' <span class="badge">split</span>' : ''}
             ${bar(row.amount, peak, true)}</td>
           <td class="num">${money(row.amount)}</td>
-          <td class="num">${row.share == null ? 'Unavailable' : (row.share * 100).toFixed(1) + '%'}</td></tr>`).join('')
+          <td class="num">${row.share == null ? (row.amount < 0 ? 'Reversal' : 'Unavailable') : (row.share * 100).toFixed(1) + '%'}</td></tr>`).join('')
           || '<tr><td colspan="4" class="muted">Nothing on this layer carries money.</td></tr>'}
-        ${(body.unlocated || []).map(item => `<tr class="map-unlocated"><td></td>
+        ${(body.unlocated || []).filter(item => !isReversal(item)).map(item => `<tr class="map-unlocated"><td></td>
           <td><strong>Unlocated</strong> <span class="muted">${escapeHtml(item.reason)}</span></td>
           <td class="num">${money(item.amount)}</td><td class="num">${number(item.rows)} rows</td></tr>`).join('')}
+        ${reversal ? `<tr class="map-reversal"><td></td>
+          <td><strong>Refunds and reversals</strong> <span class="muted">outside the shares · ${escapeHtml(reversal.text)}</span></td>
+          <td class="num">${money(reversal.total)}</td><td class="num">${number(reversal.rows)} rows</td></tr>` : ''}
+        ${(body.transfers_not_itemized || []).map(item => `<tr class="map-not-itemized"><td></td>
+          <td><strong>Not counted</strong> <span class="muted">${escapeHtml(notItemizedText({...item, basis: body.transfers_not_itemized_basis}))}</span></td>
+          <td class="num">${money(item.amount)}</td><td class="num">outside the total</td></tr>`).join('')}
         </tbody></table></div>
       ${mapPager(page,state,pageSize)}
       ${['zip','sld'].includes(state.layer)&&body.zip_truncated ? `<p class="muted">Source payload contains the largest ${number((body.by_zip||[]).length)} ZIPs. ${number(body.zip_truncated)} more ZIPs (${money(body.zip_truncated_amount)}) remain in totals, outside this list.</p>` : ''}
@@ -1853,8 +2041,10 @@
      reconciliation, with the reported total, is on the line's title and in
      screen-reader text; an unresolved source gap stays on screen. */
   function reconcileFoot(body, reconciliation) {
-    return `<span class="map-reconcile-figures" aria-hidden="true">located ${money(body.located_total)} · unlocated ${money(body.unlocated_total)}${
-      body.reconciles ? '' : ` — unresolved source gap: ${money(body.reconciliation_residual)}. The balancing residual is not verification.`}</span>`
+    const reversal = reversalLine(body);
+    return `<span class="map-reconcile-figures" aria-hidden="true">located ${money(body.located_total)} · unlocated ${money(reversal ? body.unlocated_total - reversal.total : body.unlocated_total)}${
+      reversal ? ` · refunds and reversals ${money(reversal.total)}` : ''}${
+      body.reconciles ? '' : gapClause(body)}</span>`
       + `<span class="sr-only map-reconcile-sentence">${escapeHtml(reconciliation)}</span>`;
   }
 
@@ -1916,10 +2106,11 @@
       for (const [kind, value] of Object.entries(row.kinds || {})) if (!off.has(kind)) total += value;
       return total;
     };
-    const total = body.reported_total || 0;
-    const hasReversals = (body.kinds || []).some(kind => [...(kind.districts || []), ...(kind.states || [])].some(row => row.amount < 0))
-      || (body.by_zip||[]).some(row=>row.amount<0) || (body.unlocated||[]).some(row=>row.amount<0);
-    const share = amount => total > 0 && !hasReversals && amount>=0 && amount<=total ? amount / total : null;
+    // Item 7 of F4: on positive located spending (shareBase, above); a refund
+    // among the unlocated lines, or a place that nets below zero, no longer
+    // withdraws the shares - the place just has none (the list says Reversal).
+    const base = shareBase(body, ['zip', 'sld'].includes(state.layer) ? 'zips' : 'places');
+    const share = amount => base > 0 && amount >= 0 && amount <= base ? amount / base : null;
     if (state.layer === 'sld') return (state.sldRows || []).map(row => ({...row, share: share(row.amount)}));
     if (state.layer === 'region') {
       return (body.by_region || []).map(row => ({kind: 'region', key: row.key, name: row.name || row.key,
@@ -2058,7 +2249,7 @@
     const reconciliation = body
       ? `${money(body.located_total)} located + ${money(body.unlocated_total)} unlocated = `
         + `${money(body.reported_total)} ${raised ? 'reported receipts' : body.spend_basis === 'consolidated_saved_network' ? 'saved network net outflow' : 'reported disbursements'}`
-        + (body.reconciles ? '' : ` — unresolved source gap: ${money(body.reconciliation_residual)}. The balancing residual is not verification.`)
+        + (body.reconciles ? '' : gapClause(body))
       : '';
     return `<div class="map-head">
       <div class="pane-title">
@@ -2444,6 +2635,8 @@
         if (viewB) drawing.mirror(hostB, view);
       }};
     const result = drawing.render(canvas, viewA);
+    // Lane P (#48, #55): the map's layers - heat, hatch, added data, the Layer control.
+    if (window.MentatMapEvidence) window.MentatMapEvidence.decorate(canvas, pane, state, drawing);
     if (fresh) {
       if (state.view) drawing.restore(canvas, state.view); else drawing.reset(canvas);
     }
@@ -2465,6 +2658,8 @@
       state.sldNavigate = false;
       drawing.flyToKey(canvas, state.sldState);
     }
+    const rule = host.querySelector('.map-share-rule');
+    if (rule) { rule.textContent = state.compare ? '' : shareRuleText(state.body, state.layer); rule.hidden = !rule.textContent; }
     const unplaced = host.querySelector('.map-unplaced');
     const missing = pointsError ? [] : (result && result.unplaced) || [];
     unplaced.hidden = !missing.length;
@@ -2599,6 +2794,7 @@
   }
 
   function closeMap() {
+    if (flowPane) closeFlow();
     const pane = panes.get(mapPane);
     if (mapPane) clearTimeout(mapStateFor(mapPane).geocodeTimer);
     mapPane = '';
@@ -2610,6 +2806,44 @@
     // also opens the pane drawer, which must fetch its own scoped source rows.
     if (pane && pane.rowsOpen && !pane.rows && !pane.rowsLoading) loadPaneRows(pane);
     writeScope();
+  }
+
+  /* Lane F (board #44): Flow, the pane's third view beside Summary, Map and Rows.
+     evidence-flow.js draws it from GET /api/flow; this module hands it one pane and
+     takes the reader back for Summary, Map or Rows (a candidate opens Rows filtered to it). */
+  function openFlow(key, basis) {
+    const pane = panes.get(key);
+    if (!pane || !window.MentatEvidenceFlow) return;
+    if (mapPane) closeMap();
+    flowPane = key;
+    $('view-evidence').classList.add('flow-open');
+    $('evidence-panes').hidden = true;
+    $('evidence-compare').hidden = true;
+    $('evidence-empty').hidden = true;
+    window.MentatEvidenceFlow.open({
+      pane: {key, source: pane.source, id: pane.id, committee: pane.committee, cycle: pane.cycle,
+        cycles: pane.cycles, name: pane.name, industry: pane.industry, category: pane.category},
+      basis, onChange: writeScope,
+      onBack: closeFlow,
+      onView: (view, detail) => {
+        closeFlow();
+        if (!panes.has(key)) return;
+        if (view === 'map') { openMap(key, mapStateFor(key).direction); return; }
+        pane.rowsOpen = view === 'rows';
+        if (detail && detail.query) pane.networkQuery = detail.query;
+        if (pane.rowsOpen && !pane.rows && !pane.rowsLoading) loadPaneRows(pane); else renderPanes();
+        document.querySelector(`[data-pane="${CSS.escape(key)}"]`)?.scrollIntoView({block: 'nearest'});
+      }});
+    writeScope();
+  }
+
+  function closeFlow() {
+    if (!flowPane) return;
+    flowPane = '';
+    $('view-evidence').classList.remove('flow-open');
+    if (window.MentatEvidenceFlow) window.MentatEvidenceFlow.close();
+    $('evidence-panes').hidden = false;
+    renderPanes(); renderRail(); renderCompare(); writeScope();
   }
 
   /* Board 6's "Collapse" (r5, audit men-b F2): the enlarged map folds back into
@@ -2802,6 +3036,7 @@
     if (!root) return;
     const pane = panes.get(root.dataset.pane);
     if (!pane) return;
+    if (event.target.closest('.pane-flow')) { openFlow(pane.key); return; }
     if (event.target.closest('.pane-map')) { openMap(pane.key, mapStateFor(pane.key).direction); return; }
     if (event.target.closest('.pane-summary')) {
       pane.rowsOpen = false; renderPanes(); return;
@@ -2881,6 +3116,8 @@
       else state.message='This place has no measured amount on the selected layer; nothing was pinned.';
       renderMap();return;
     }
+    if (event.target.closest('#evidence-map-layers') && window.MentatMapEvidence) { window.MentatMapEvidence.toggleControl(mapCanvas(), panes.get(mapPane), state); return; }
+    if (event.target.closest('#evidence-map-open-studio') && window.MentatMapEvidence) { window.MentatMapEvidence.openInStudio(panes.get(mapPane), state); return; }
     if (event.target.closest('#evidence-map-back')) { closeMap(); return; }
     if (event.target.closest('#evidence-map-collapse')) { collapseMap(); return; }
     if (event.target.closest('#evidence-map-geocode-start')) { startGeocode(); return; }

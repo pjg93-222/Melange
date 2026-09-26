@@ -43,7 +43,14 @@ if (-not (Test-Path -LiteralPath $heapPlanner -PathType Leaf)) {
 Import-Module $heapPlanner -Force
 $templateContract = 'mentat-industry-overview-v1'
 $Industry = $Industry.Trim()
-if (-not $PythonPath) { $PythonPath = Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' }
+# One interpreter order for every Mentat launcher (mentat_python.psm1): -PythonPath, then
+# Mentat's own venv, then the Codex app's runtime Python, then python on PATH.
+Import-Module (Join-Path $scriptRoot 'mentat_python.psm1') -Force
+$pythonChoice = Resolve-MentatPython -ExplicitPath $PythonPath
+if ($null -eq $pythonChoice) { throw 'No Python runtime was found. Pass -PythonPath or create the Mentat venv (mentat\requirements-console.txt).' }
+$PythonPath = $pythonChoice.Path
+Write-Host ('Python runtime: ' + $PythonPath + ' (' + $pythonChoice.Source + ')')
+if ($pythonChoice.Warning) { Write-Warning $pythonChoice.Warning }
 if (-not $Industry) { throw 'Industry cannot be empty.' }
 
 $reportBaseName = if ($CycleLabel) {
@@ -1087,6 +1094,18 @@ $underPerformanceBudget = (
   $overallWatch.Elapsed.TotalMinutes -lt $PerformanceBudgetMinutes
 )
 
+# enrich_downstream.py names each published cycle's transfer index status in the
+# audit manifest (current | stale | missing | unresolved; absent for a payload
+# enriched before the status existed). The receipt carries it so a stale index is
+# a named per-cycle fact rather than a `warn` nobody reads.
+$transferIndexStatus = $null
+$auditManifestPath = Join-Path (Join-Path $OutputDirectory ($reportBaseName + '.audit')) 'audit-manifest.json'
+if (Test-Path -LiteralPath $auditManifestPath -PathType Leaf) {
+  $transferIndexStatus = (
+    Get-Content -Raw -Encoding UTF8 -LiteralPath $auditManifestPath | ConvertFrom-Json
+  ).transfer_index_status
+}
+
 [pscustomobject]@{
   industry = $Industry
   workbook = $targetWorkbook
@@ -1108,6 +1127,7 @@ $underPerformanceBudget = (
   data_manifest = $manifestPath
   export_guard_receipt = 'embedded:metadata.export_guards'
   cross_reference_mode = $crossReferenceMode
+  transfer_index_status = $transferIndexStatus
   template_contract = $templateContract
   cache_hit = $cacheHit
   data_cache_hit = $cacheHit

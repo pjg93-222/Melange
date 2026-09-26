@@ -29,9 +29,16 @@ def main():
         industry=next((row['industry'] for row in entries),directory.stem)
         for row in entries:
             row['cycle']=int(row['cycle'])
-            for key in ('direct','estimated_non_opposition','estimated_opposition','direct_plus_estimated_non_opposition'):
-                row[key]=float(row[key])
-            if abs(row['direct']+row['estimated_non_opposition']-row['direct_plus_estimated_non_opposition'])>.005:
+            row['direct']=float(row['direct'])
+            # A cycle whose transfer index was not current publishes its three
+            # conditional values BLANK (enrich_downstream.py): blank is not traced
+            # and must reach the workbook blank, never as 0.
+            estimates=('estimated_non_opposition','estimated_opposition','direct_plus_estimated_non_opposition')
+            blank=[key for key in estimates if row[key]=='']
+            if blank and len(blank)!=len(estimates):
+                raise ValueError('Candidate summary mixes traced and untraced estimates')
+            for key in estimates:row[key]=None if blank else float(row[key])
+            if not blank and abs(row['direct']+row['estimated_non_opposition']-row['direct_plus_estimated_non_opposition'])>.005:
                 raise ValueError('Candidate summary arithmetic does not reconcile')
             rows.append(row)
         for name,target in [('allocation_coverage',coverage),('quality_checks',warnings)]:
@@ -50,7 +57,7 @@ def main():
     if not rows:raise ValueError('No rebuilt attribution summaries found')
     keys=[(row['industry'],row['cycle'],row['candidate_id']) for row in rows]
     if len(keys)!=len(set(keys)):raise ValueError('Overlapping report cycles would double count candidates')
-    rows.sort(key=lambda row:(row['industry'],row['cycle'],-row['direct_plus_estimated_non_opposition'],row['candidate_id']))
+    rows.sort(key=lambda row:(row['industry'],row['cycle'],-(row['direct'] if row['direct_plus_estimated_non_opposition'] is None else row['direct_plus_estimated_non_opposition']),row['candidate_id']))
     path=args.report_directory/'attribution-build.json'
     path.write_text(json.dumps({'rows':rows,'coverage':coverage,'sources':sources,'warnings':warnings}),encoding='utf-8')
     subprocess.run([str(args.node),str(Path(__file__).with_name('attribution_workbook_builder.mjs')),str(path),str(args.report_directory/'Attributed Industry Spending.xlsx')],check=True)

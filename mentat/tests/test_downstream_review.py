@@ -64,7 +64,8 @@ class DownstreamReviewTests(unittest.TestCase):
                 downstream.inventory(directory)
 
     def test_company_refunds_do_not_erase_another_companys_route_evidence(self):
-        payload=dict(metadata=dict(industry='Fixture',transfer_coverage=[]),cycles=[dict(cycle=2024)],
+        # A current index: a cycle with no transfer coverage publishes nothing transfer-derived (F2).
+        payload=dict(metadata=dict(industry='Fixture',transfer_coverage=[dict(cycle=2024,status='indexed',counts={})]),cycles=[dict(cycle=2024)],
             raw_rows=[dict(cycle=2024,company=company,committee_id='ROOT',amount=value,include_in_analysis='Yes')
                       for company,value in [('Positive',100),('Refund',-200)]],committee_map=[],downstream_activity=[],
             transfer_edges=[dict(cycle=2024,source='ROOT',destination='CHILD',amount=50)])

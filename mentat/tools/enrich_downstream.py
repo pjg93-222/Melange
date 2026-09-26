@@ -6,7 +6,7 @@ import csv
 import hashlib
 from pathlib import Path
 import sqlite3
-from fec_transfer_graph import allocate,reachable,atomic_json
+from fec_transfer_graph import allocate,reachable_rows,atomic_json
 
 
 # --- tidy staging store (schema_version "tidy-1") ---------------------------
@@ -69,16 +69,30 @@ def _flag(value):
 
 
 STAGING_TABLES={
+    # F14 (Paul approved option (a), 2026-09-26): one row per transfer edge and cycle.
+    # The root x committee x edge detail is transfer_path_detail, written while the
+    # expansion streams (TransferPathDetail) and never held in the payload.
     'transfer_paths':(
         (('cycle_label','TEXT'),lambda r:_cycle_label(r.get('cycle'))),
         (('cycle','INTEGER'),lambda r:_count(r.get('cycle'))),
-        (('funded_committee','TEXT'),lambda r:_text(r.get('root'))),
         (('source_committee','TEXT'),lambda r:_text(r.get('source'))),
         (('destination_committee','TEXT'),lambda r:_text(r.get('destination'))),
         (('reported_net_transfer','REAL'),lambda r:_number(r.get('amount'))),
-        (('depth','INTEGER'),lambda r:_count(r.get('depth'))),
-        (('representative_path','TEXT'),lambda r:_text(r.get('path'))),
+        (('record_count','INTEGER'),lambda r:_count(r.get('record_count'))),
+        (('first_transfer_date','TEXT'),lambda r:_text(r.get('first_date'))),
+        (('last_transfer_date','TEXT'),lambda r:_text(r.get('last_date'))),
         (('traversal_status','TEXT'),lambda r:_text(r.get('status'))),
+        (('funded_roots_reaching','INTEGER'),lambda r:_count(r.get('roots_reaching'))),
+        (('shortest_depth','INTEGER'),lambda r:_count(r.get('min_depth'))),
+        (('top_funded_roots','TEXT'),lambda r:_text(r.get('top_roots'))),
+        (('roots_via_carryover','INTEGER'),lambda r:_count(r.get('roots_via_carryover'))),
+        (('date_rule','TEXT'),lambda r:_text(r.get('date_rule'))),
+        (('source_gate','TEXT'),lambda r:_text(r.get('source_gate'))),
+        (('source_gate_source','TEXT'),lambda r:_text(r.get('source_gate_source'))),
+        (('excluded_before_gate_records','INTEGER'),lambda r:_count(r.get('excluded_before_gate_records'))),
+        (('excluded_before_gate_amount','REAL'),lambda r:_number(r.get('excluded_before_gate_amount'))),
+        (('source_carryover_route','TEXT'),lambda r:_text(r.get('source_carryover_route'))),
+        (('carryover_status','TEXT'),lambda r:_text(r.get('carryover_status'))),
     ),
     'funding_cohorts':(
         (('cycle_label','TEXT'),lambda r:_cycle_label(r.get('cycle'))),
@@ -155,6 +169,122 @@ for _table, _fields in {
     ) for name, kind in _fields)
 
 
+# --- transfer paths (F14) -------------------------------------------------------
+#
+# Paul approved option (a), 2026-09-26. The per-root expansion (every funded root x
+# committee it reaches x edge out of it) ran to 8.9M rows for Crypto, past Excel's
+# 1,048,576-row sheet and the Node string limit. The payload and both workbooks now
+# carry one row per transfer edge and cycle with the number of roots that reach it
+# and the largest of them; the full expansion goes only to the tidy staging store's
+# transfer_path_detail table, written while it streams.
+TRANSFER_PATH_TOP_ROOTS=5
+TRANSFER_PATH_DETAIL='transfer_path_detail'
+TRANSFER_PATH_DETAIL_COLUMNS=(('cycle_label','TEXT'),('cycle','INTEGER'),('funded_committee','TEXT'),
+    ('source_committee','TEXT'),('destination_committee','TEXT'),('reported_net_transfer','REAL'),
+    ('depth','INTEGER'),('representative_path','TEXT'),('traversal_status','TEXT'),('via_carryover','INTEGER'))
+TRANSFER_PATH_DETAIL_INDEXES=(('transfer_path_detail_root',('cycle','funded_committee')),
+    ('transfer_path_detail_edge',('cycle','source_committee','destination_committee')))
+
+
+class TransferPathDetail:
+    """The root x committee x edge rows, appended to the tidy staging store in batches.
+
+    The store must already hold the R-side tables (as stage() requires); the table is
+    replaced whole. Indexes are built once the rows are in, for the console's lookups
+    by root and by edge.
+    """
+
+    def __init__(self,path,batch=50000):
+        path=Path(path)
+        if not path.is_file():
+            raise ValueError(f'Tidy staging store does not exist: {path}')
+        self.database=sqlite3.connect(str(path))
+        tables={row[0] for row in self.database.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        if 'contributions' not in tables:
+            self.database.close()
+            raise ValueError(f'Tidy staging store holds no contributions table: {path}')
+        self.database.execute(f'DROP TABLE IF EXISTS "{TRANSFER_PATH_DETAIL}"')
+        self.database.execute('CREATE TABLE "{}" ({})'.format(TRANSFER_PATH_DETAIL,
+            ','.join(f'"{name}" {kind}' for name,kind in TRANSFER_PATH_DETAIL_COLUMNS)))
+        self.insert='INSERT INTO "{}" VALUES ({})'.format(TRANSFER_PATH_DETAIL,
+            ','.join('?' for _ in TRANSFER_PATH_DETAIL_COLUMNS))
+        self.batch,self.pending,self.rows=batch,[],0
+
+    def write(self,cycle,row):
+        self.pending.append((_cycle_label(cycle),_count(cycle),_text(row.get('root')),_text(row.get('source')),
+            _text(row.get('destination')),_number(row.get('amount')),_count(row.get('depth')),
+            _text(row.get('path')),_text(row.get('status')),1 if row.get('via_carryover') else 0))
+        if len(self.pending)>=self.batch:self.flush()
+
+    def flush(self):
+        if self.pending:
+            self.database.executemany(self.insert,self.pending)
+            self.rows+=len(self.pending);self.pending=[]
+
+    def close(self):
+        self.flush()
+        for name,columns in TRANSFER_PATH_DETAIL_INDEXES:
+            self.database.execute('CREATE INDEX "{}" ON "{}" ({})'.format(
+                name,TRANSFER_PATH_DETAIL,','.join(f'"{column}"' for column in columns)))
+        self.database.commit();self.database.close()
+        return self.rows
+
+
+def carryover_starts(edges,roots):
+    """{root: [(committee, route)]}: each committee whose gate a root's previous-cycle
+    money opened (F12 carryover), from the route the export wrote on its edges."""
+    starts=defaultdict(dict)
+    for edge in edges:
+        route=edge.get('source_carryover_route') or ''
+        if edge.get('source_gate_source')!='carryover' or not route:continue
+        root=route.split(' > ')[0]
+        if root in roots:starts[root].setdefault(edge['source'],route)
+    return {root:sorted(found.items()) for root,found in starts.items()}
+
+
+def transfer_path_edges(cycle,roots,edges,stop_nodes,root_funding,rule=None,detail=None):
+    """One row per transfer edge that a funded root reaches, from the streamed expansion.
+
+    roots_reaching counts the roots whose breadth-first routes reach the edge (each
+    root reaches an edge at most once); top_roots names the largest of them by their
+    funding; status is candidate_committee (terminal), followed, or cycle (the edge
+    only ever returns to a committee already on the route).
+    """
+    by_key={(edge['source'],edge['destination']):edge for edge in edges if edge['amount']>0}
+    seen={}
+    starts=carryover_starts(edges,roots)
+    for row in reachable_rows(roots,edges,max_depth=None,stop_nodes=stop_nodes,starts=starts):
+        key=(row['source'],row['destination'])
+        entry=seen.get(key)
+        if entry is None:
+            entry=seen[key]={'roots':0,'depth':row['depth'],'statuses':set(),'top':[],'carried':0}
+        entry['roots']+=1
+        entry['depth']=min(entry['depth'],row['depth'])
+        entry['statuses'].add(row['status'])
+        if row.get('via_carryover'):entry['carried']+=1
+        rank=(-float(root_funding.get(row['root'],0.0)),row['root'])
+        top=entry['top']
+        if len(top)<TRANSFER_PATH_TOP_ROOTS or rank<top[-1]:
+            top.append(rank);top.sort();del top[TRANSFER_PATH_TOP_ROOTS:]
+        if detail is not None:detail.write(cycle,row)
+    rule=rule or {}
+    output=[]
+    for key in sorted(seen):
+        edge,entry=by_key[key],seen[key]
+        status='candidate_committee' if key[1] in stop_nodes else 'followed' if 'followed' in entry['statuses'] else 'cycle'
+        output.append({'cycle':cycle,'source':key[0],'destination':key[1],'amount':edge['amount'],
+            'record_count':edge.get('record_count'),'first_date':edge.get('first_date'),'last_date':edge.get('last_date'),
+            'status':status,'roots_reaching':entry['roots'],'min_depth':entry['depth'],
+            'top_roots':'; '.join(root for _,root in entry['top']),'roots_via_carryover':entry['carried'],
+            'date_rule':rule.get('rule',''),'source_gate':edge.get('source_gate'),
+            'source_gate_source':edge.get('source_gate_source'),
+            'excluded_before_gate_records':edge.get('excluded_before_gate_records'),
+            'excluded_before_gate_amount':edge.get('excluded_before_gate_amount'),
+            'source_carryover_route':edge.get('source_carryover_route') or '',
+            'carryover_status':rule.get('carryover_status','')})
+    return output
+
+
 def stage(payload,path):
     """Append the Python-side tables to an existing tidy staging store.
 
@@ -200,8 +330,65 @@ def stage(payload,path):
     return written
 
 
-def enrich(payload,directory):
+# --- transfer index status ----------------------------------------------------
+#
+# Paul's ruling (2026-09-25, F2): a cycle whose transfer index is stale, missing
+# or cannot place its source publishes NO transfer-derived numbers. Transfer
+# Paths and Allocation Estimates carry no rows for it, and its conditional
+# estimates are blank (None), never 0.00: a zero claims the network was traced
+# and found nothing, a blank says it was not traced. Direct candidate funding
+# does not depend on the index and publishes as before. The status is named per
+# cycle in metadata.transfer_index_status ({"2024": "stale", ...}), in a
+# transfer_index_<cycle> quality check and in the audit manifest.
+TRANSFER_INDEX_STATUSES=('current','stale','missing','unresolved')
+
+
+def transfer_index_status(source_coverage):
+    """current | stale | missing | unresolved for one cycle's transfer_coverage rows.
+
+    R/fec_transfer_graph.R writes one row per cycle: 'indexed', 'stale_transfer_index'
+    (another index version or policy, or a raw OTH file that changed since the
+    build) or 'missing_transfer_source'. No row at all is missing. An indexed
+    source that cannot place malformed rows (unresolved_all_sources), or a status
+    this module does not know, is unresolved: neither can be traced.
+    """
+    if not source_coverage:return 'missing'
+    found=set()
+    for row in source_coverage:
+        status=row.get('status')
+        if status=='stale_transfer_index':found.add('stale')
+        elif status=='missing_transfer_source':found.add('missing')
+        elif status!='indexed' or row.get('unresolved_all_sources'):found.add('unresolved')
+        else:found.add('current')
+    return next(name for name in ('stale','missing','unresolved','current') if name in found)
+
+
+def transfer_rebuild_command(directory,cycle):
+    """The command that writes the index version R/fec_transfer_graph.R requires."""
+    tools=Path(__file__).resolve().parent
+    script=tools/'fec_transfer_graph.py'
+    headers=tools.parent/'state'/'cross-reference'/'filing-headers'
+    command=f'python "{script}" --directory "{Path(directory).resolve()}" --cycles {cycle}'
+    if headers.is_dir():command+=f' --filing-header-directory "{headers}"'
+    return command
+
+
+def not_traced_note(cycle,status,directory):
+    return f'Not traced: the transfer index for {cycle} is {status}; rebuild with {transfer_rebuild_command(directory,cycle)}'
+
+
+def audit_transfer_index(payload):
+    """The named status of the cycles an audit bundle publishes; {} for a payload enriched before it existed."""
+    metadata=payload.get('metadata') or {}
+    if 'transfer_index_status' not in metadata:return {}
+    cycles={str(row.get('cycle')) for row in payload.get('cycles') or []}
+    return {'transfer_index_status':{k:v for k,v in metadata['transfer_index_status'].items() if k in cycles},
+            'transfer_index_notes':{k:v for k,v in (metadata.get('transfer_index_notes') or {}).items() if k in cycles}}
+
+
+def enrich(payload,directory,detail=None):
     paths=[];estimates=[];coverage=[];source_dates=[];review=[]
+    index_status={};index_notes={};untraced=set()
     masters={(r['cycle'],r['candidate_id']):r for r in payload.get('candidate_master',[])}
     links=defaultdict(set)
     for row in payload.get('candidate_committee_links',[]):
@@ -234,6 +421,14 @@ def enrich(payload,directory):
                     'model_funding':max(0,amount),'estimated_candidate_activity':0,
                     'unresolved':max(0,amount),'negative_net_funding_excluded':min(0,amount),
                     'unresolved_reasons':{'ambiguous_authorized_candidate':max(0,amount)}})
+        # Named before anything transfer-derived is computed: a cycle that is
+        # not current keeps its direct candidate funding (above) and nothing else.
+        status=transfer_index_status([r for r in payload['metadata'].get('transfer_coverage',[]) if r['cycle']==cycle])
+        index_status[str(cycle)]=status
+        if status!='current':
+            index_notes[str(cycle)]=not_traced_note(cycle,status,directory)
+            untraced.add(cycle)
+            continue
         edges=[row for row in payload.get('transfer_edges',[]) if row['cycle']==cycle]
         activity=[{'source':row['source_committee_id'],'candidate':row['candidate_id'],
                    'direction':row['support_oppose'],'amount':row['preliminary_included_amount'],
@@ -263,8 +458,11 @@ def enrich(payload,directory):
                 company_funding[row.get('company',''),row['committee_id']]+=row['amount']
         route_roots={committee for (_,committee),value in company_funding.items()
                      if value>0 and committee and committee not in direct_ids}
-        cycle_paths=reachable(route_roots,edges,max_depth=None,stop_nodes=direct_ids)
-        paths.extend(cycle_paths)
+        root_funding=defaultdict(float)
+        for (_,committee),value in company_funding.items():
+            if value>0:root_funding[committee]+=value
+        rule=next((r.get('date_rule') for r in source_coverage if isinstance(r.get('date_rule'),dict)),None)
+        paths.extend(transfer_path_edges(cycle,route_roots,edges,direct_ids,root_funding,rule,detail))
         assigned,unresolved=allocate(funding,edges,activity,stop_nodes=direct_ids,
             candidate_links={committee:links[cycle,committee] for committee in direct_ids},
             unresolved_nodes=unresolved_nodes,unresolved_amounts=withheld)
@@ -277,9 +475,12 @@ def enrich(payload,directory):
     summary=[]
     for (cycle,candidate_id),values in totals.items():
         candidate=masters.get((cycle,candidate_id),{})
+        if cycle in untraced:
+            # Not traced is blank, never 0.00; the direct funding stands.
+            values=dict(values,estimated_non_opposition=None,estimated_opposition=None)
         summary.append({'industry':payload['metadata']['industry'],'cycle':cycle,'candidate_id':candidate_id,
             'candidate_name':candidate.get('candidate_name',candidate_id),'party':candidate.get('candidate_party',''),
-            **values,'direct_plus_estimated_non_opposition':values['direct']+values['estimated_non_opposition']})
+            **values,'direct_plus_estimated_non_opposition':None if cycle in untraced else values['direct']+values['estimated_non_opposition']})
     for file in [*directory.glob('*/source-receipt.json'), *(directory.parent/'fec_committee_master').glob('*/source-receipt.json')]:
         source=json.loads(file.read_text(encoding='utf-8'))
         source_dates.append({'source':source['family'],'cycle':source['cycle'],'checked_at':source['checked_at'],
@@ -290,21 +491,31 @@ def enrich(payload,directory):
     payload.update(transfer_paths=paths,allocation_estimates=estimates,allocation_coverage=coverage,
                    funding_cohorts=[dict(cycle=k[0],company=k[1],funding_type=k[2],committee_id=k[3],receipt_role=k[4],funding_source_type=k[5],funding_direction=k[6],**v)
                                     for k,v in sorted(cohorts.items())],
-                   attribution_summary=sorted(summary,key=lambda r:(r['cycle'],-r['direct_plus_estimated_non_opposition'],r['candidate_id'])),
+                   attribution_summary=sorted(summary,key=lambda r:(r['cycle'],-(r['direct'] if r['direct_plus_estimated_non_opposition'] is None else r['direct_plus_estimated_non_opposition']),r['candidate_id'])),
                    source_freshness=source_dates,classification_review=review)
     payload['metadata']['allocation_method']='Conditional industry-level activity allocation across observed candidate activity and 24G/24K transfers, maximum 3 transfers. Not traced dollars, company attribution or a lower bound. Pools corporate and personal funding. Donation timing, in-kind liquidation, all-donor funding, retained cash and operating expenses are not modelled. Opposition stays against its named target; negative activity is excluded from weights. Use funding cohorts and dated PAC evidence for donor-specific review.'
     payload['metadata']['company_cash_attribution_available']=False
     payload['metadata']['allocation_conservation_verified']=True
+    payload['metadata']['transfer_index_status']=index_status
+    payload['metadata']['transfer_index_notes']=index_notes
     payload['quality_checks']=[*payload['metadata'].get('export_guards',[])]
     unverified=[row for row in payload['raw_rows'] if row.get('include_in_analysis')=='Yes'
                 and row.get('receipt_role','unverified_receipt_role').startswith('unverified_')]
     payload['quality_checks'].append({'id':'receipt_role_metadata','severity':'warn','passed':not unverified,
         'detail':f'{len(unverified)} included rows lack sufficient filing-form/line metadata to verify their receipt role. Name matching alone does not verify a contribution; refresh legacy source rows before donor-specific cash attribution.'})
     for source in payload['metadata'].get('transfer_coverage',[]):
+        # A cycle that is not current is reported once, by its named status below.
+        if index_status.get(str(source['cycle']),'current')!='current':continue
         invalid=sum(source.get('counts',{}).get(key,0) for key in
             ('malformed_rows','invalid_transfer_dates','invalid_transfer_amounts','invalid_transfer_destinations','unresolved_rows'))
         payload['quality_checks'].append({'id':f"transfer_source_{source['cycle']}",
             'severity':'warn','passed':source['status']=='indexed' and invalid==0,'detail':json.dumps(source)})
+    for cycle,status in index_status.items():
+        evidence=[r for r in payload['metadata'].get('transfer_coverage',[]) if str(r.get('cycle'))==cycle]
+        payload['quality_checks'].append({'id':f'transfer_index_{cycle}','severity':'info' if status=='current' else 'warn',
+            'passed':status=='current','status':status,'cycle':int(cycle),
+            'detail':f'Traced: the transfer index for {cycle} is current.' if status=='current'
+                else index_notes[cycle]+' Evidence: '+json.dumps(evidence)})
     pending=[row for row in coverage if row['unresolved']>.005]
     payload['quality_checks'].append({'id':'allocation_coverage','severity':'warn','passed':not pending,
         'detail':f'{len(pending)} funding roots have unresolved allocation; consult allocation_coverage for amounts and reasons.'})
@@ -325,7 +536,10 @@ def main():
                         help='Tidy staging SQLite written by R/tidy_stage.R; the Python-side tables are appended to it.')
     args=parser.parse_args()
     value=json.loads(args.payload.read_text(encoding='utf-8-sig'))
-    if not args.audit_only:value=enrich(value,args.directory)
+    # F14: the per-root transfer path expansion streams into the staging store.
+    detail=TransferPathDetail(args.staging) if args.staging and not args.audit_only else None
+    if not args.audit_only:value=enrich(value,args.directory,detail)
+    detail_rows=detail.close() if detail is not None else None
     if args.audit_directory:
         args.audit_directory.mkdir(parents=True,exist_ok=True)
         for name in ('transfer_paths','allocation_estimates','allocation_coverage','attribution_summary','funding_cohorts','source_freshness','classification_review','quality_checks','downstream_reach','downstream_measurement_ledger','downstream_sources'):
@@ -346,13 +560,17 @@ def main():
         if args.workbook:
             def signature(path):
                 with path.open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
-            atomic_json(args.audit_directory/'audit-manifest.json',{
+            manifest={
                 'version':1,'workbook_name':args.workbook.name,'workbook_sha256':signature(args.workbook),
                 'payload_path':str(args.payload.resolve()),'payload_sha256':signature(args.payload),
-                'csv_sha256':{path.name:signature(path) for path in args.audit_directory.glob('*.csv')}})
+                'csv_sha256':{path.name:signature(path) for path in args.audit_directory.glob('*.csv')}}
+            # Additive: absent for a payload enriched before the status existed.
+            manifest.update(audit_transfer_index(value))
+            atomic_json(args.audit_directory/'audit-manifest.json',manifest)
     if not args.audit_only:atomic_json(args.payload,value)
     if args.staging and not args.audit_only:
         staged=stage(value,args.staging)
+        staged[TRANSFER_PATH_DETAIL]=detail_rows
         print('Tidy staging:',json.dumps(staged,sort_keys=True),flush=True)
     print('Transfer paths:',len(value['transfer_paths']),'Allocation records:',len(value['allocation_estimates']),flush=True)
 

@@ -338,6 +338,17 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .pane-drawer .evidence-network th:nth-child(4),.pane-drawer .evidence-network td:nth-child(4){width:14%;min-width:0}
 .pane-drawer .evidence-network th:last-child,.pane-drawer .evidence-network td:last-child{width:18%;text-align:right;white-space:nowrap}
 .evidence-network>details{margin-top:10px;overflow-wrap:anywhere}
+/* F4 (2026-09-25): each committee in the network with its own coverage and its
+   own reconciled / differs mark against its FEC summary. */
+.network-committees-title{font-size:13px;margin:14px 0 2px}
+.pane-drawer .evidence-network table.network-committees{table-layout:auto;min-width:640px}
+.pane-drawer .evidence-network .network-committees th,.pane-drawer .evidence-network .network-committees td{width:auto;text-align:left;white-space:normal}
+.pane-drawer .evidence-network .network-committees td:nth-child(2),.pane-drawer .evidence-network .network-committees td:nth-child(3){white-space:nowrap}
+.recon-mark{display:inline-block;padding:1px 8px;border:1px solid var(--line);border-radius:999px;font-size:11px;line-height:1.5;white-space:nowrap}
+.recon-ok{color:var(--acu-teal);border-color:var(--acu-teal)}
+.recon-differs{color:var(--chart-negative);border-color:var(--chart-negative)}
+.recon-none{color:var(--muted)}
+.pane-drawer .evidence-network td small.network-coverage{margin-top:2px}
 .fec-citation{display:inline-flex;margin-top:6px;font-size:12px;font-weight:600}
 .filing-ledger{margin-top:6px;min-width:150px}
 .filing-ledger>summary{display:inline-flex;align-items:center;gap:7px;min-height:30px;padding:4px 9px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--acu-plum);font-size:12px;font-weight:600;cursor:pointer;list-style:none}
@@ -562,6 +573,9 @@ footer{background:transparent;border-top:1px solid var(--line);letter-spacing:.4
 .map-list .support { color: #327a7a; font-weight: 600; }
 .map-list .oppose { color: #bf3f36; font-weight: 600; }
 .map-list .map-unlocated td { background: #f7ede4; }
+/* Item 7 of F4: refunds and reversals, signed, outside the shares. */
+.map-list .map-reversal td { background: var(--ev-band, #f0eaf1); }
+#evidence-map .map-share-rule { font-size: 12px; margin: 8px 0 0; }
 .map-reconcile, .map-message { margin: 0; }
 .pane-district-filter { margin: 0 0 6px; font-size: 13px; }
 @media (max-width: 1100px) { .map-grid { grid-template-columns: minmax(0, 1fr); } }

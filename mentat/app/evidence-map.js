@@ -181,7 +181,31 @@
       .toString(16).padStart(2, '0')).join('');
   }
 
-  const PURE = {clampScale: clampScale, donorRadius: donorRadius, flyToTransform: flyToTransform,
+  /* Item 7 of F4 (Paul approved 2026-09-25): a tooltip's share is of positive
+     located money, the base the server names (share_base.places, or
+     share_base.zips on the ZIP and state-district layers); a place that nets
+     below zero is a reversal with no share, and a refund among the unlocated
+     lines does not withdraw the others. A payload from before the server named
+     its base (a console not yet restarted onto v4) keeps the old rule and the
+     old words (shareOf). evidence.js's shareBase reads the same field. */
+  function shareBaseFor(view) {
+    const body = (view && view.body) || {};
+    const zips = Boolean(view) && (view.layer === 'zip' || view.layer === 'sld');
+    if (body.share_base) {
+      const base = body.share_base[zips ? 'zips' : 'places'];
+      return base == null ? 0 : (Number(base) || 0);
+    }
+    const reversed = (body.kinds || []).some(kind => [...(kind.districts || []), ...(kind.states || [])].some(row => row.amount < 0))
+      || (body.by_zip || []).some(row => row.amount < 0) || (body.unlocated || []).some(row => row.amount < 0);
+    return body.reported_total > 0 && !reversed ? body.reported_total : 0;
+  }
+
+  function shareOf(body, raised) {
+    return body && body.share_base ? '% of positive located ' + (raised ? 'receipts' : 'spending')
+      : '% of ' + (raised ? 'receipts' : 'spend');
+  }
+
+  const PURE = {clampScale: clampScale, donorRadius: donorRadius, flyToTransform: flyToTransform, shareBaseFor: shareBaseFor, shareOf: shareOf,
                 mergeCircles: mergeCircles, indexPoints, pointsInBox, parseSearch: parseSearch, heatColour: heatColour,
                 heatDomain: heatDomain, amountsFor: amountsFor, domainFor: domainFor, legislativeRows,
                 unionDomain: unionDomain, rangeFor: rangeFor,
@@ -495,6 +519,8 @@
     const legend = state.plot.querySelector('.map-legend-card');
     if (legend) legend.replaceWith(legendCard(view, state.domain, scope));
     if (typeof view.onLegend === 'function') view.onLegend(state.plot.querySelector('.map-legend-card'));
+    // Lane P: the layer overlays (map-evidence.js) redraw when the view settles.
+    if (state.decor && typeof state.decor.onSettle === 'function') { try { state.decor.onSettle(); } catch (error) { /* overlays are optional */ } }
   }
 
   /* Build 06, two-cycle compare (board M13). Two maps side by side must share
@@ -954,7 +980,7 @@
     const view = state.view || {};
     const body = view.body || {};
     const raised = view.direction === 'raised';
-    const total = body.reported_total || 0;
+    const total = state.shareBase || 0;
     const kind = shape.getAttribute('data-kind');
     const key = shape.getAttribute('data-key');
     let name = key, amount = 0, donors = 0;
@@ -988,10 +1014,10 @@
         amount = amountsFor(view).districts.get(key) || 0;
       }
       lines.push(money(amount) + (donors ? ' · ' + number(donors) + ' donors' : ''));
-      if (state.shareValid && amount>=0 && amount<=total) {
-        lines.push((amount / total * 100).toFixed(1) + '% of ' + (raised ? 'receipts' : 'spend'));
+      if (total > 0 && amount>=0 && amount<=total) {
+        lines.push((amount / total * 100).toFixed(1) + shareOf(body, raised));
       } else {
-        lines.push('Net share unavailable');
+        lines.push(amount < 0 ? 'Reversal: nets below zero, no share' : 'Net share unavailable');
       }
     }
     const tooltip = state.tooltip;
@@ -1018,6 +1044,19 @@
   /* -------------------------------------------------------------- the entry */
 
   const api = {
+    /* Lane P (boards #48, #55): what map-evidence.js draws its layers into -
+       the svg, the zoomed viewport and its groups, the card - and the ZIP
+       points already placed, read after each render. Nothing here draws. */
+    internals: function (host) {
+      const state = views.get(host);
+      if (!state || !state.svg) return null;
+      if (!state.decor) state.decor = {svg: state.svg, viewport: state.viewport, layers: state.layers, plot: state.plot,
+        width: state.width, height: state.height, scale: () => state.scale, visibleBox: () => viewportBox(state)};
+      state.decor.shapes = (state.view && state.view.shapes) || {};
+      state.decor.points = state.points || [];
+      return state.decor;
+    },
+
     /* Build once, update in place afterwards. `shapesKey` is the only thing
        that forces a rebuild: a different boundary file, or the card changing
        size, is a different picture. A layer change, a kind toggle, a selection
@@ -1041,10 +1080,7 @@
       state.view = view;
       state.domain = rangeFor(view, viewportBox(state));
       if (changed) {
-        state.shareValid = view.body.reported_total > 0 && !(view.body.kinds||[]).some(kind =>
-          [...(kind.districts||[]),...(kind.states||[])].some(row=>row.amount<0))
-          && !(view.body.by_zip||[]).some(row=>row.amount<0)
-          && !(view.body.unlocated||[]).some(row=>row.amount<0);
+        state.shareBase = shareBaseFor(view);
         const found = circlePoints(view);
         state.points = found.placed;
         state.pointIndex = indexPoints(state.points);

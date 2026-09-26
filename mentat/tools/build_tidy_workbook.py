@@ -294,14 +294,27 @@ BENEFICIARY_BRIDGE = (
     ("associated_funding", "Associated Funding", "R"),
 )
 
+# F14 (Paul approved option (a), 2026-09-26): one row per transfer edge and cycle.
+# The root x committee x edge rows are the store's transfer_path_detail table, which
+# is not a sheet (8.9M rows for Crypto): it stays in the store for the console.
 TRANSFER_PATHS = (
     ("cycle_label", "Election Cycle", "T"), ("cycle", "Cycle End Year", "I"),
-    ("funded_committee", "Funded Committee", "ID"),
     ("source_committee", "Source Committee", "ID"),
     ("destination_committee", "Destination Committee", "ID"),
-    ("reported_net_transfer", "Reported Net Transfer", "R"), ("depth", "Depth", "I"),
-    ("representative_path", "Representative Path", "T"),
+    ("reported_net_transfer", "Reported Net Transfer", "R"),
+    ("record_count", "Record Count", "I"),
+    ("first_transfer_date", "First Transfer", "D"), ("last_transfer_date", "Last Transfer", "D"),
     ("traversal_status", "Traversal Status", "T"),
+    ("funded_roots_reaching", "Funded Roots Reaching", "I"),
+    ("shortest_depth", "Shortest Depth", "I"),
+    ("top_funded_roots", "Top Funded Roots", "T"),
+    ("roots_via_carryover", "Roots via Carryover", "I"),
+    ("date_rule", "Date Rule", "T"),
+    ("source_gate", "Source Gate", "D"), ("source_gate_source", "Source Gate From", "T"),
+    ("excluded_before_gate_records", "Records Before Gate", "I"),
+    ("excluded_before_gate_amount", "Excluded Before Gate Amount", "R"),
+    ("source_carryover_route", "Carryover Route", "T"),
+    ("carryover_status", "Carryover Status", "T"),
 )
 
 FUNDING_COHORTS = (
@@ -393,8 +406,7 @@ SHEETS = (
     Sheet("beneficiary_activity", "Network Candidate Activity", BENEFICIARY_BRIDGE,
           ("cycle_label", "source_committee_id", "candidate_id"), dynamic=True),
     Sheet("transfer_paths", "Transfer Paths", TRANSFER_PATHS,
-          ("cycle_label", "funded_committee", "source_committee",
-           "destination_committee")),
+          ("cycle_label", "source_committee", "destination_committee")),
     Sheet("funding_cohorts", "Funding Cohorts", FUNDING_COHORTS,
           ("cycle_label", "company", "funding_type", "recipient_committee",
            "receipt_role")),

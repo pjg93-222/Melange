@@ -9,7 +9,9 @@ from enrich_downstream import enrich
 
 class EnrichmentTests(unittest.TestCase):
     def payload(self):
-        return {'metadata':{'industry':'Fixture','transfer_coverage':[{'cycle':2024,'status':'missing_transfer_source'}]},
+        # A CURRENT index by default: these tests exercise the allocation itself, which
+        # a cycle without a current index no longer publishes (transfer index status, F2).
+        return {'metadata':{'industry':'Fixture','transfer_coverage':[{'cycle':2024,'status':'indexed','counts':{}}]},
             'cycles':[{'cycle':2024}],'raw_rows':[],'committee_map':[],
             'downstream_activity':[],'candidate_committee_links':[]}
 
@@ -26,8 +28,10 @@ class EnrichmentTests(unittest.TestCase):
         self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='allocation_coverage')['passed'])
 
     def test_a_stale_or_malformed_source_still_blocks_the_whole_cycle(self):
-        for source in (dict(status='stale_transfer_index'),
-                       dict(status='indexed',counts={'malformed_rows':2},unresolved_all_sources=True)):
+        # Blocked now means NOTHING transfer-derived is published for the cycle, not
+        # an unresolved share and 0.00 estimates (Paul's ruling 2026-09-25, F2).
+        for source,status in ((dict(status='stale_transfer_index'),'stale'),
+                              (dict(status='indexed',counts={'malformed_rows':2},unresolved_all_sources=True),'unresolved')):
             with self.subTest(source=source):
                 payload=self.payload()
                 payload['metadata']['transfer_coverage']=[dict(source,cycle=2024)]
@@ -35,8 +39,12 @@ class EnrichmentTests(unittest.TestCase):
                 payload['downstream_activity']=[dict(cycle=2024,source_committee_id='PAC',candidate_id='H1',support_oppose='Oppose',preliminary_included_amount=10)]
                 with tempfile.TemporaryDirectory() as directory:result=enrich(payload,Path(directory))
                 self.assertEqual(result['allocation_estimates'],[])
-                self.assertEqual(result['allocation_coverage'][0]['unresolved'],100)
-                self.assertFalse(next(r for r in result['quality_checks'] if r['id']=='transfer_source_2024')['passed'])
+                self.assertEqual(result['allocation_coverage'],[])
+                self.assertEqual(result['transfer_paths'],[])
+                self.assertEqual(result['metadata']['transfer_index_status'],{'2024':status})
+                check=next(r for r in result['quality_checks'] if r['id']=='transfer_index_2024')
+                self.assertEqual((check['status'],check['passed']),(status,False))
+                self.assertFalse(any(r['id']=='transfer_source_2024' for r in result['quality_checks']))
 
     def test_withheld_transfer_rows_take_a_share_and_leave_clean_activity_counted(self):
         # One ambiguous group no longer costs the committee its clean edges.

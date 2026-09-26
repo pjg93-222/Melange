@@ -50,7 +50,7 @@ from decimal import Decimal, InvalidOperation
 import json
 import re
 
-from pac_evidence import is_memo, name_key, receipt_role
+from pac_evidence import REDISCLOSURE_REASON, is_memo, memo_redisclosure_parents, name_key, receipt_role
 from attribution_policy import explicit_rejection, names_organization, source_exclusion
 
 # Adjacent-position markers (ruling D3, 2026-09-17). An advisor or similar
@@ -550,6 +550,20 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         else:
             reason(sid, "complete_latest_filing_inventory", [latest_file, f["source_url"]])
 
+    # F13 (Paul approved 2026-09-26): a memo whose own text states that it
+    # re-discloses a gift already itemized duplicates the counted parent it
+    # restates (pac_evidence.memo_redisclosure_parents, schema.R's twin). Rows
+    # this pass has already excluded or found conflicting take no part. An
+    # explicit same-filing reference, below, keeps precedence.
+    def still_counted(row):
+        sid = str(row.get("sub_id") or "")
+        d = decisions[sid]
+        return (sid not in conflicted and d["status"] != "excluded_with_evidence"
+                and bool(d["counted_cents"] or d["pac_activity_cents"]))
+
+    restated = memo_redisclosure_parents(merged.values(), counted=still_counted,
+                                         role=lambda row: decisions[str(row.get("sub_id") or "")]["receipt_role"])
+
     # Explicit local memo references, with donor/date/sign and amount coverage.
     parent_index = defaultdict(list)
     for sid, row in merged.items():
@@ -581,6 +595,8 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         if len(candidates) == 1:
             parent = next(iter(candidates))
             exclude(sid, "explicit_same_filing_memo_reference", parent, [sid, parent], "memo")
+        elif sid in restated:
+            exclude(sid, REDISCLOSURE_REASON, restated[sid], [sid, restated[sid]], "memo")
         else:
             review("memo_parent_ambiguous" if candidates else "memo_parent_not_established", [sid, *candidates],
                    "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",

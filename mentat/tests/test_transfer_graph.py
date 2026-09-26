@@ -191,12 +191,58 @@ class Transfers(unittest.TestCase):
             self.assertEqual(enriched['allocation_coverage'][0]['unresolved'],0)
             self.assertTrue(all(r['passed'] for r in enriched['quality_checks']))
 
+    @unittest.skipUnless(Path('C:/Program Files/R/R-4.6.0/bin/Rscript.exe').is_file(),'R integration requires installed R')
+    def test_published_edge_records_survive_the_r_reader_into_allocate(self):
+        # 2026-09-25, cycle 2020 Crypto: publish_index() writes transfer-edges.csv
+        # with the csv module, which doubles every quote inside the JSON `records`
+        # field; data.table::fread handed the field back with the doubled quotes
+        # still in it, the exporter wrote that into transfer_edges, and
+        # record_list() below died on json.loads. The test above builds its edges
+        # in Python and never crossed the CSV. Here the real R reader reads a real
+        # published index, the exporter's JSON options write it, and allocate()
+        # runs the one path that parses edge records: a candidate-committee stop.
+        project=Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);oth=root/'oth24';oth.mkdir()
+            # T2 has no sub-ID, so its evidence holds an empty JSON string ("").
+            (oth/'itoth.txt').write_text(transfer_row(sub='1',transaction='T1')+'\n'
+                +transfer_row(sub='',transaction='T2',amount='50'),encoding='utf-8')
+            index=transfer_index(oth/'itoth.txt',2024)
+            fec_transfer_graph.publish_index(oth,index)
+            self.assertIn('""""',(oth/'transfer-edges.csv').read_text(encoding='utf-8'))
+            script=root/'read_edges.R';exported=root/'edges.json'
+            script.write_text('\n'.join([
+                'args <- commandArgs(TRUE)',
+                "source(file.path(args[[1L]], 'R', 'fec_transfer_graph.R'))",
+                "roots <- data.table::data.table(cycle=2024L, committee_id='C00000001', preliminary_crypto_funding=100)",
+                "links <- data.table::data.table(cycle=2024L, committee_id='C00000002', designation='P')",
+                'context <- fec_transfer_context(args[[2L]], roots, links, 2024L)',
+                'writeLines(as.character(jsonlite::toJSON(list(transfer_edges=context$edges),',
+                "  dataframe='rows', auto_unbox=TRUE, digits=NA, na='null', pretty=FALSE)), args[[3L]], useBytes=TRUE)",
+            ]),encoding='utf-8')
+            result=subprocess.run(['C:/Program Files/R/R-4.6.0/bin/Rscript.exe',str(script),
+                str(project),str(root),str(exported)],capture_output=True,text=True,timeout=120)
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+            edges=json.loads(exported.read_text(encoding='utf-8'))['transfer_edges']
+            self.assertEqual(len(edges),1)
+            evidence=json.loads(index['edges'][0]['records'])
+            self.assertEqual(fec_transfer_graph.record_list(edges[0]['records']),evidence)
+            self.assertIn('',[record['sub_id'] for record in evidence])
+            activity=[dict(source='C00000001',candidate='H00000001',direction='Contribution / Other',amount=150,
+                transfer_records=[dict(record,destination='C00000002') for record in evidence])]
+            rows,coverage=allocate({'C00000001':25},edges,activity,stop_nodes={'C00000002'},
+                                   candidate_links={'C00000002':{'H00000001'}})
+            # Both records match the candidate's own receipt of the transfer, so
+            # the edge is not counted a second time and nothing is unresolved.
+            self.assertEqual([(r['candidate_id'],r['estimated_amount']) for r in rows],[('H00000001',25)])
+            self.assertEqual(coverage[0]['unresolved'],0)
+
 
 STATUSES={'observed','current','superseded','duplicate','unresolved_version','unresolved_record'}
 
 
 class VersionIdentity(unittest.TestCase):
-    """VERSION 5: a transaction label or attribute equality is not source identity.
+    """VERSION 6: a transaction label or attribute equality is not source identity.
 
     One test per class of the rule. `committee|report_type|transaction_id` is
     still the group; inside it, rows are partitioned by the counterparty, the
@@ -261,14 +307,14 @@ class VersionIdentity(unittest.TestCase):
                          {1:('superseded','header'),2:('current','header')})
         self.assertEqual([edge['amount'] for edge in index['edges']],[100])
 
-    def test_distinct_sub_ids_with_identical_attributes_are_retained_and_flagged(self):
-        # Distinct sub-IDs with equal attributes do not prove a duplicate,
-        # even when the filer reused one transaction label.
+    def test_an_fec_reload_differing_only_in_sub_id_counts_once(self):
+        # F11 (Paul 2026-09-25): same transaction id, file, identity and memo code,
+        # only the SUB_ID differs - one record loaded twice. The highest SUB_ID stays.
         index,ledger=self.build([transfer_row(sub='1',file='1'),transfer_row(sub='2',file='1')])
         self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
-                         {'1':('current','filing_relationship_unverified'),'2':('current','filing_relationship_unverified')})
-        self.assertEqual(index['edges'][0]['amount'],200)
-        self.assertEqual(index['edges'][0]['record_count'],2)
+                         {'1':('duplicate','repeated_itemization'),'2':('current','distinct_observation')})
+        self.assertEqual(index['edges'][0]['amount'],100)
+        self.assertEqual(index['edges'][0]['record_count'],1)
 
     def test_two_genuine_equal_gifts_on_one_day_are_both_counted(self):
         index,ledger=self.build([transfer_row(sub='1',file='1',transaction='SB23.1'),
@@ -285,9 +331,9 @@ class VersionIdentity(unittest.TestCase):
                                  transfer_row(sub='3',file='2',amend='A')],
                                 [header(1),header(2,1)])
         self.assertEqual({row['sub_id']:(row['status'],row['version_basis']) for row in ledger},
-                         {'1':('superseded','header'),'2':('current','header'),
+                         {'1':('superseded','header'),'2':('duplicate','repeated_itemization'),
                           '3':('current','header')})
-        self.assertEqual([edge['amount'] for edge in index['edges']],[200])
+        self.assertEqual([edge['amount'] for edge in index['edges']],[100])
 
     def test_class_d_one_filing_reusing_a_line_label_keeps_both_transactions(self):
         index,ledger=self.build([transfer_row(dest='C00000002',amount='100',sub='1',file='1',transaction='SE.5'),
