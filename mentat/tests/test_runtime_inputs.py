@@ -2,16 +2,52 @@
 import itertools
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT / 'tools'))
+import runtime_inputs
 from runtime_inputs import copy_fec_sources
+
+# The cycles a run may select. 2020 is on disk too (F16: the carryover source of 2022), never selected.
+SELECTABLE = (2022, 2024, 2026)
+CARRYOVER_PATHS = ('fec_beneficiary/ccl', 'fec_beneficiary/oth')
+
+
+def staged(relative, cycle, cycles):
+    """Whether a runtime staged for `cycles` holds this fixture file of `cycle`: every file of a
+    selected cycle, and the ccl and oth files of a selected cycle's previous cycle (F16)."""
+    return cycle in cycles or (cycle + 2 in cycles and relative.startswith(CARRYOVER_PATHS))
+
+
+def legacy_source_ignore(source_folder, cycles):
+    """runtime_inputs.source_ignore before F16, verbatim: bulk folders of 2022/2024/2026 only (any other
+    cycle's folders were copied into every run as if shared), and no C-1 carryover inputs."""
+    source_folder = Path(source_folder)
+    selected = {int(cycle) for cycle in cycles}
+    if not selected or not selected <= {2022, 2024, 2026}:
+        raise ValueError('Select supported election cycles before copying FEC inputs.')
+    transient = shutil.ignore_patterns('*.sqlite', '*.pending*', 'transfer-index-*', 'cache')
+
+    def ignore(directory, names):
+        excluded = set(transient(directory, names))
+        if Path(directory) == source_folder:
+            for name in names:
+                bulk = re.fullmatch(r'(?:cm|cn|ccl|oth|pas2)(22|24|26)(?:\.zip)?', name, re.I)
+                leadership = re.fullmatch(r'leadership(2022|2024|2026)\.csv', name, re.I)
+                cycle = 2000 + int(bulk[1]) if bulk else int(leadership[1]) if leadership else None
+                if cycle is not None and cycle not in selected:
+                    excluded.add(name)
+        return excluded
+
+    return ignore
 
 
 class RuntimeInputTests(unittest.TestCase):
@@ -21,7 +57,7 @@ class RuntimeInputTests(unittest.TestCase):
         self.root = Path(temporary.name)
         self.source = self.root / 'source'
         self.required = {}
-        for cycle in (2022, 2024, 2026):
+        for cycle in (2020, *SELECTABLE):
             suffix = str(cycle)[2:]
             paths = [f'fec_committee_master/cm{suffix}/cm.txt']
             paths += [f'fec_beneficiary/{prefix}{suffix}/{name}' for prefix, name in
@@ -38,17 +74,23 @@ class RuntimeInputTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(relative, encoding='utf-8')
 
+    def misplaced(self, destination, cycles):
+        """Every fixture file whose presence in `destination` breaks the staging rule, as (found, path)."""
+        return [('present' if (destination / relative).exists() else 'missing', relative)
+                for cycle, paths in self.required.items() for relative in paths
+                if (destination / relative).exists() != staged(relative, cycle, cycles)]
+
     def test_every_cycle_selection_preserves_evidence_and_copy_isolation(self):
         for count in (1, 2, 3):
-            for cycles in itertools.combinations(self.required, count):
+            for cycles in itertools.combinations(SELECTABLE, count):
                 with self.subTest(cycles=cycles):
                     destination = self.root / '-'.join(map(str, cycles))
                     copy_fec_sources(self.source, destination, cycles)
                     for cycle, paths in self.required.items():
                         for relative in paths:
                             target = destination / relative
-                            self.assertEqual(target.exists(), cycle in cycles, relative)
-                            if cycle in cycles:
+                            self.assertEqual(target.exists(), staged(relative, cycle, cycles), relative)
+                            if target.exists():
                                 self.assertEqual(target.read_bytes(), (self.source / relative).read_bytes())
                     self.assertTrue((destination / 'fec_beneficiary/shared.json').is_file())
                     self.assertFalse((destination / 'fec_beneficiary/cache').exists())
@@ -56,6 +98,56 @@ class RuntimeInputTests(unittest.TestCase):
                     relative = self.required[cycles[0]][0]
                     (destination / relative).write_text('private edit')
                     self.assertEqual((self.source / relative).read_text(), relative)
+
+    def test_previous_cycle_stages_only_its_carryover_inputs(self):
+        # F16: a 2024 run no longer carries 2020's 1.45 GB OTH file; it carries 2022's transfer index
+        # and candidate committees, which its carryover reads, and nothing else of 2022.
+        cases = {(2024,): ('22', ('20',)), (2022,): ('20', ()), (2026,): ('24', ('20', '22')),
+                 (2022, 2026): ('24', ())}
+        for cycles, (previous, absent) in cases.items():
+            with self.subTest(cycles=cycles):
+                destination = self.root / ('carry-' + '-'.join(map(str, cycles)))
+                copy_fec_sources(self.source, destination, cycles)
+                self.assertEqual(self.misplaced(destination, cycles), [])
+                for relative in (f'ccl{previous}/ccl.txt', f'oth{previous}/itoth.txt',
+                                 f'oth{previous}/source-receipt.json', f'oth{previous}/published/transfer-edges.csv'):
+                    self.assertTrue((destination / 'fec_beneficiary' / relative).is_file(), relative)
+                if int('20' + previous) not in cycles:
+                    for relative in (f'fec_beneficiary/cn{previous}', f'fec_beneficiary/pas2{previous}',
+                                     f'fec_beneficiary/leadership20{previous}.csv', f'fec_committee_master/cm{previous}'):
+                        self.assertFalse((destination / relative).exists(), relative)
+                for suffix in absent:
+                    for relative in (f'fec_beneficiary/oth{suffix}', f'fec_beneficiary/ccl{suffix}',
+                                     f'fec_beneficiary/cn{suffix}', f'fec_beneficiary/pas2{suffix}',
+                                     f'fec_beneficiary/leadership20{suffix}.csv', f'fec_committee_master/cm{suffix}'):
+                        self.assertFalse((destination / relative).exists(), relative)
+
+    def test_negative_control_each_wrong_staging_is_caught(self):
+        # The rule check must flag the pre-F16 copy and three plausible wrong fixes.
+        variants = {
+            'before F16': (mock.patch.object(runtime_inputs, 'source_ignore', legacy_source_ignore), (2024,),
+                           [('present', 'fec_beneficiary/oth20/itoth.txt'), ('present', 'fec_beneficiary/ccl20/ccl.txt'),
+                            ('missing', 'fec_beneficiary/oth22/itoth.txt'), ('missing', 'fec_beneficiary/ccl22/ccl.txt')]),
+            'every family of C-1': (mock.patch.object(runtime_inputs, 'CARRYOVER_FAMILIES', ('ccl', 'cm', 'cn', 'oth', 'pas2')),
+                                    (2024,), [('present', 'fec_beneficiary/cn22/cn.txt'),
+                                              ('present', 'fec_committee_master/cm22/cm.txt')]),
+            'the earliest C-1 only': (mock.patch.object(runtime_inputs, 'carryover_cycles', lambda s: {min(s) - 2} - set(s)),
+                                      (2022, 2026), [('missing', 'fec_beneficiary/oth24/itoth.txt')]),
+            'no carryover': (mock.patch.object(runtime_inputs, 'carryover_cycles', lambda s: set()), (2022,),
+                             [('missing', 'fec_beneficiary/oth20/itoth.txt'), ('missing', 'fec_beneficiary/ccl20/ccl.txt')]),
+        }
+        for label, (patcher, cycles, flagged) in variants.items():
+            with self.subTest(label), patcher:
+                destination = self.root / ('control-' + re.sub(r'\W+', '-', label))
+                runtime_inputs.copy_fec_sources(self.source, destination, cycles)
+                wrong = self.misplaced(destination, cycles)
+                for item in flagged:
+                    self.assertIn(item, wrong)
+        # And the fix itself passes the same check.
+        for cycles in ((2024,), (2022, 2026), (2022,)):
+            destination = self.root / ('fixed-' + '-'.join(map(str, cycles)))
+            runtime_inputs.copy_fec_sources(self.source, destination, cycles)
+            self.assertEqual(self.misplaced(destination, cycles), [])
 
     def test_invalid_selection_fails_before_copying(self):
         for cycles in ([], [2028], [2026, 2028]):

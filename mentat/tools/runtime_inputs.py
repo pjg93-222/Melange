@@ -4,22 +4,38 @@ import re
 import shutil
 
 
+# F16 (Paul approved 2026-09-26): carryover into a selected cycle C - the F12 walk - reads the
+# previous cycle's (C-1's) transfer index (oth) and its principal and authorized candidate
+# committees (ccl), where the walk stops. Those two families of an unselected C-1 are staged
+# beside the selection; no other family of that cycle is.
+CARRYOVER_FAMILIES = ('ccl', 'oth')
+
+
+def carryover_cycles(selected):
+    """C-1 of every selected cycle that is not itself selected. For consecutive cycles that is
+    the earliest one's C-1 alone; a 2022 + 2026 run also needs 2024, the C-1 of 2026."""
+    return {cycle - 2 for cycle in selected} - set(selected)
+
+
 def source_ignore(source_folder, cycles):
-    """Keep shared metadata and all selected-cycle evidence, excluding caches."""
+    """Keep shared metadata, all selected-cycle evidence and the selected cycles' C-1 carryover
+    inputs, excluding caches. Every cycle's bulk folders are cycle evidence, never shared."""
     source_folder = Path(source_folder)
     selected = {int(cycle) for cycle in cycles}
     if not selected or not selected <= {2022, 2024, 2026}:
         raise ValueError('Select supported election cycles before copying FEC inputs.')
     transient = shutil.ignore_patterns('*.sqlite', '*.pending*', 'transfer-index-*', 'cache')
+    carryover = carryover_cycles(selected)
 
     def ignore(directory, names):
         excluded = set(transient(directory, names))
         if Path(directory) == source_folder:
             for name in names:
-                bulk = re.fullmatch(r'(?:cm|cn|ccl|oth|pas2)(22|24|26)(?:\.zip)?', name, re.I)
-                leadership = re.fullmatch(r'leadership(2022|2024|2026)\.csv', name, re.I)
+                bulk = re.fullmatch(r'(?:cm|cn|ccl|oth|pas2)(\d\d)(?:\.zip)?', name, re.I)
+                leadership = re.fullmatch(r'leadership(\d{4})\.csv', name, re.I)
                 cycle = 2000 + int(bulk[1]) if bulk else int(leadership[1]) if leadership else None
-                if cycle is not None and cycle not in selected:
+                if cycle is not None and cycle not in selected and not (
+                        bulk and cycle in carryover and name.lower().startswith(CARRYOVER_FAMILIES)):
                     excluded.add(name)
         return excluded
 
