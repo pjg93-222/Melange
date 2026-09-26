@@ -71,6 +71,17 @@ export_memo_duplicate_reason <- function(reason, duplicate_memo, duplicate_reaso
   reason
 }
 
+# Paul's money rule (2026-09-26, lane J2): a memo the memo plan links to a parent it
+# cannot prove it restates - an FEC back reference to a larger parent, when the memo
+# states no redesignation - is not removed. It counts, and its receipt-role reason
+# says why it is doubtful and names that parent.
+# tests/test_export_memo_reason.R reads this definition from this file.
+export_memo_unproven_reason <- function(reason, link_of, link_reason) {
+  unproven <- !is.na(link_of) & nzchar(link_of)
+  reason[unproven] <- paste0("memo_link_unproven: ", link_reason[unproven], "; parent ", link_of[unproven])
+  reason
+}
+
 require_package("data.table")
 require_package("DBI")
 require_package("RSQLite")
@@ -521,6 +532,9 @@ raw_export[fec_receipt_role_excluded(receipt_role),
 raw_export[, receipt_role_unverified := fec_receipt_role_unverified(receipt_role)]
 raw_export[, receipt_role_reason := fec_receipt_role_reason(receipt_role)]
 raw_export[, receipt_role_reason := export_memo_duplicate_reason(receipt_role_reason, duplicate_memo, duplicate_reason)]
+raw_export[, receipt_role_reason := export_memo_unproven_reason(receipt_role_reason, memo_link_unproven_of,
+  memo_link_unproven_reason)]
+raw_export[!is.na(memo_link_unproven_of) & nzchar(memo_link_unproven_of), receipt_role_unverified := 1L]
 raw_export[, company_attribution_reason := ifelse(company_attribution_status == "accepted", "",
   paste0(company_attribution_status, "; original matcher: ", company_match_reason))]
 raw_export[include_in_analysis == "Yes" & company_attribution_status != "accepted",

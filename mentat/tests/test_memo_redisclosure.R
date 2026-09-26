@@ -61,17 +61,26 @@ problems <- unlist(lapply(fixture$cases, check_case))
 if (length(problems)) stop(paste(c("F13 fixture cases failed:", problems), collapse = "\n  "), call. = FALSE)
 cat(sprintf("fixture cases: %d passed\n", length(fixture$cases)))
 
-# Negative control on the harness itself: a wrong expectation must be caught.
-first <- fixture$cases[[1L]]
+# Negative control on the harness itself: a wrong expectation must be caught. The
+# control flips the removed $24,999,995 re-disclosure to counted, and the $15.5M memo
+# to lane J2's verdict (counted and flagged), which lane J3 reverted.
+named <- function(name) fixture$cases[[which(vapply(fixture$cases, function(case) case$name, "") == name)]]
+still <- named("fairshake_usdc_previously_disclosed")
+wrong <- still$expect
+wrong[["4081220242011729506"]]$counted <- TRUE
+wrong[["4081220242011729506"]]$duplicate_of <- ""
+stopifnot(length(check_case(still, wrong)) >= 2L)
+first <- named("fairshake_15_5m_disclosedon_typo")
 wrong <- first$expect
 wrong[["4021420241824800143"]]$counted <- TRUE
 wrong[["4021420241824800143"]]$duplicate_of <- ""
+wrong[["4021420241824800143"]]$flagged <- TRUE
 stopifnot(length(check_case(first, wrong)) >= 2L)
 
 # The shared statements: disclosure_pattern and the unitemized guard, on the
 # text normalised exactly as fec_receipt_role() normalises it.
 rules <- fec_receipt_rules()
-stopifnot(rules$version == 6)
+stopifnot(rules$version == 7)
 words <- function(x) trim_text(gsub("[^A-Z0-9]+", " ", toupper(trim_text(x))))
 statement_problems <- character()
 for (s in fixture$statements) {
@@ -109,6 +118,15 @@ stopifnot(plan$duplicate_of_sub_id[[3L]] == "parent",
 # Negative control: the same rows without the statement stay untouched.
 precedence$receipt_type_full[[3L]] <- ""
 stopifnot(!any(mentat_memo_duplicate_plan(precedence)$duplicate_memo == 1L))
+# Lane J3 (the approved F13 rule): the memo's own statement is the proof, so a
+# same-donor, same-amount parent dated before the memo is its parent; of two such
+# parents the latest-dated one is recorded, and no unproven link is left.
+precedence$receipt_type_full[[3L]] <- "CONTRIBUTION PREVIOUSLY DISCLOSED"
+precedence$contribution_receipt_date[[1L]] <- "2023-12-15"
+plan <- mentat_memo_duplicate_plan(precedence)
+stopifnot(plan$duplicate_memo[[3L]] == 1L, plan$duplicate_of_sub_id[[3L]] == "parent",
+          plan$duplicate_reason[[3L]] == "memo_redisclosure_of_counted_parent",
+          all(plan$memo_link_unproven_of == ""), all(plan$memo_link_unproven_reason == ""))
 
 # The database path: apply_amendment_versioning() persists duplicate_memo from
 # the global plan across both tables (the Coinbase -> FAIRSHAKE rows).

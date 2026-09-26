@@ -135,6 +135,37 @@ def chargeback_units():
     return units
 
 
+def earlier_gift_units():
+    """Lane J2 (Paul's money rule, 2026-09-26): ROOT FUND also sells $30,000 of ether that no gift in this
+    window booked (it was given before the window). The proceeds are the only record of that money here:
+    they count as received from ETHER DESK, named as filed and flagged sold_asset. The summary carries them:
+    receipts and cash on hand are $30,000 higher than the base scenario's; everything else is unchanged."""
+    units = fixture_units()
+    root = units[0]
+    root['receipts'].append(receipt('r14', 'ETHER DESK', 30000.0, '2023-10-01', line='17',
+                                    text='10 ETH SOLD VIA ETHER DESK - PURCHASER UNKNOWN'))
+    root['totals']['receipts'] += 30000.0
+    root['totals']['last_cash_on_hand_end_period'] += 30000.0
+    return units
+
+
+def early_refund_units(after=False):
+    """Lane J2 (Paul's money rule, 2026-09-26): ED EARLY's -$2,000 charge-back is dated before the $3,000 he
+    gave in this window, so it cannot return that gift: the gift counts as given ($3,000 drawn) and the
+    charge-back leaves ROOT FUND as a refund to donors. With after=True it follows the gift and nets against
+    it as before ($1,000 drawn). The summary carries both rows: receipts and cash on hand are $1,000 higher
+    than the base scenario's."""
+    units = fixture_units()
+    root = units[0]
+    back = receipt('r15', 'EARLY, ED', -2000.0, '2023-06-15' if after else '2023-01-10', entity='IND',
+                   text='CONTRIBUTION')
+    back['memo_text'] = 'CHARGED BACK'
+    root['receipts'] += [back, receipt('r16', 'EARLY, ED', 3000.0, '2023-05-01', entity='IND', text='CONTRIBUTION')]
+    root['totals']['receipts'] += 1000.0
+    root['totals']['last_cash_on_hand_end_period'] += 1000.0
+    return units
+
+
 def write_fixture(directory, units=None, identifier='flow-fixture'):
     folder = Path(directory) / identifier
     folder.mkdir(parents=True, exist_ok=True)
@@ -547,6 +578,140 @@ def carry_problems(body, rule):
             if cash is not None and cash.get('carryover') != label:
                 problems.append(f'{ident}: its starting cash does not say it was carried over')
     return problems
+
+
+class ProceedsOfAnEarlierGift(unittest.TestCase):
+    """Lane J2 (Paul's money rule, 2026-09-26): a sale of a donated asset with no gift of that asset booked
+    in the window counts as received, named as filed and flagged; a sale that pairs with a gift booked in
+    the window (the base scenario's USD coin) still leaves the inflow."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        write_fixture(cls.temp.name, units=earlier_gift_units())
+        cls.body = produce(cls.temp.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+
+    def test_the_proceeds_count_named_as_filed_and_flagged(self):
+        nodes, totals = by_id(self.body), self.body['totals']
+        self.assertEqual(flow_data.contract_problems(self.body), [])
+        self.assertEqual(nodes['donor:ETHER DESK']['sold_asset'], {'amount': 30000.0, 'kinds': ['ether']})
+        self.assertEqual(link(self.body, 'donor:ETHER DESK', 'committee:' + ROOT_ID)['value'], 30000.0)
+        self.assertEqual((totals['in'], totals['counted_in']), (2181000.0, 2081000.0))
+        self.assertEqual(totals['in_kind'], {'booked': 700000.0, 'proceeds': 200000.0, 'held': 500000.0,
+                                             'excess_proceeds': 0.0, 'proceeds_counted': 30000.0})
+        self.assertNotIn('donor:COIN EXCHANGE', nodes)     # the USD coin sale still pairs with its gift
+        self.assertIn('sold_asset', [note['key'] for note in self.body['notes']])
+
+    def test_negative_control_nothing_else_moves_and_no_hole_opens(self):
+        # The ledger before lane J2 subtracted the ether too: ETHER DESK was not drawn and the root's
+        # operating remainder fell from $50,000 to $20,000 to carry the extra cash on hand.
+        nodes = by_id(self.body)
+        self.assertEqual(self.body['totals']['operating_net'], 50000.0)
+        self.assertEqual(link(self.body, 'committee:' + ROOT_ID, 'balance:unspent:2')['value'], 781000.0)
+        self.assertFalse([node for node in self.body['nodes'] if node.get('balance') == 'unreconciled'])
+        self.assertEqual(nodes['committee:' + ROOT_ID]['value_in'], nodes['committee:' + ROOT_ID]['value_out'])
+
+
+class RefundsDatedBeforeTheGifts(unittest.TestCase):
+    """Lane J2 (Paul's money rule, 2026-09-26): a negative entry nets only against the same contributor's
+    receipts dated on or before it. One dated before them returns money given before the window: the later
+    receipts count as given and the entry is refunded to donors, listed apart in the sink's details."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        write_fixture(cls.temp.name, units=early_refund_units())
+        cls.body = produce(cls.temp.name, top=0)
+        write_fixture(cls.temp.name, units=early_refund_units(after=True), identifier='flow-after')
+        cls.after = produce(cls.temp.name, identifier='flow-after', top=0)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+
+    def test_the_gift_counts_and_the_earlier_charge_back_leaves_as_a_refund(self):
+        body, nodes, totals = self.body, by_id(self.body), self.body['totals']
+        self.assertEqual(flow_data.contract_problems(body), [])
+        self.assertTrue(all(item['value'] > 0 for item in body['links']))
+        self.assertEqual(link(body, 'donor:EARLY ED', 'committee:' + ROOT_ID)['value'], 3000.0)
+        # counted in 2,052,000 (the summary nets the charge-back) + 2,000 refunded + 100,000 prior cash.
+        self.assertEqual((totals['counted_in'], totals['refunds_to_donors'], totals['in']), (2052000.0, 2000.0, 2154000.0))
+        root = nodes['committee:' + ROOT_ID]
+        self.assertEqual((root['value_in'], root['value_out']), (2154000.0, 2154000.0))
+        self.assertEqual((totals['operating_net'], totals['unitemized']), (50000.0, 1000.0))
+        refunded = nodes['balance:refunded:2']
+        self.assertEqual((refunded['value_in'], refunded['details']),
+                         (2000.0, ['$2,000.00 in negative receipts from 1 contributor dated before their receipts in '
+                                   'this window, which count as given: Ed Early $2,000.00 (line 11AI)']))
+        self.assertIn('Refunds to donors $2,000.00: 1 contributor with negative entries dated before their receipts '
+                      'in this window (those receipts count as given)', [note['text'] for note in body['notes']])
+
+    def test_negative_control_a_charge_back_after_the_gift_still_nets(self):
+        # Teeth: the same two rows with the charge-back dated after the gift net as before lane J2 ($1,000
+        # drawn, nothing refunded), so the date is what decides.
+        body, totals = self.after, self.after['totals']
+        self.assertEqual(flow_data.contract_problems(body), [])
+        self.assertEqual(link(body, 'donor:EARLY ED', 'committee:' + ROOT_ID)['value'], 1000.0)
+        self.assertEqual((totals['counted_in'], totals['refunds_to_donors'], totals['in']), (2052000.0, 0.0, 2152000.0))
+        self.assertNotIn('balance:refunded:2', by_id(body))
+
+
+@unittest.skipUnless((SAVED / FAIRSHAKE / 'snapshots.json').exists(), 'the saved FAIRSHAKE snapshot is not on this machine')
+class DemocratsServe2024(unittest.TestCase):
+    """Lane J2: Tomorrow's Jobs (C00824607) gave Democrats Serve $7,500 and $2,800 in 2024. Its two negative
+    line-16 entries (-$5,000 and -$3,500, "REFUND - NONCONTRIBUTION ACCOUNT") are dated 2023-09-11, before
+    those receipts, so they cannot return them. Before lane J2 the flow netted them: "back from Tomorrow's
+    Jobs" $1,800. Now the $10,300 counts as received and the $8,500 leaves as a refund; nothing else moves."""
+
+    def test_the_2024_receipts_count_and_the_2023_entries_are_refunds(self):
+        body = flow_data.committee_payload('C00774463', '2024', identifier=FAIRSHAKE, top=0)
+        self.assertEqual(flow_data.contract_problems(body), [])
+        self.assertTrue(body['reconciliation']['equal'])
+        nodes, totals = by_id(body), body['totals']
+        back = link(body, 'stub:return_in:committee:C00774463:C00824607', 'committee:C00774463')
+        self.assertEqual(back['value'], 10300.0)
+        self.assertEqual((totals['counted_in'], totals['refunds_to_donors'], totals['from_network'], totals['in']),
+                         (240894.53, 8500.0, 10300.0, 264701.86))
+        self.assertEqual(totals['operating_net'], 75190.78)          # unchanged by lane J2
+        root = nodes['committee:C00774463']
+        self.assertEqual((root['value_in'], root['value_out']), (264701.86, 264701.86))
+        self.assertEqual(nodes['balance:refunded:2']['details'],
+                         ["$8,500.00 in negative receipts from 1 contributor dated before their receipts in this "
+                          "window, which count as given: Tomorrow's Jobs $8,500.00 (line 16)"])
+
+
+@unittest.skipUnless((SAVED / FAIRSHAKE / 'snapshots.json').exists(), 'the saved FAIRSHAKE snapshot is not on this machine')
+class FairshakeBitcoinSoldIn2025(unittest.TestCase):
+    """Lane J2: the 236.2 bitcoin Coinbase gave FAIRSHAKE on 2024-12-20 (the 2023-2024 window's "Not yet
+    spent") were sold in 2025 for $27,501,738.87 through Coinbase Commerce (Exchange). No bitcoin gift is
+    booked in the 2025-2026 window, so the proceeds count there, named as filed: the two rows Paul ruled
+    giving (H3) as receipts, the other three flagged sold_asset. Before lane J2 they left the inflow and the
+    root drew a $17,143,167.18 "Not in the summary" stub with $0 of operating spending."""
+
+    def test_the_sold_bitcoin_counts_under_coinbase_commerce(self):
+        body = flow_data.committee_payload('C00835959', '2026', identifier=FAIRSHAKE, top=0)
+        self.assertEqual(flow_data.contract_problems(body), [])
+        self.assertTrue(body['reconciliation']['equal'])
+        nodes = by_id(body)
+        coinbase = nodes['donor:COINBASE COMMERCE EXCHANGE']
+        self.assertEqual(link(body, coinbase['id'], 'committee:C00835959')['value'], 27501738.87)
+        self.assertEqual(coinbase['sold_asset'], {'amount': 16326738.87, 'kinds': ['bitcoin']})
+        totals = body['totals']
+        self.assertEqual(totals['in_kind']['proceeds_counted'], 16326738.87)
+        self.assertEqual(totals['counted_in'], 137704817.3)
+        self.assertEqual(totals['operating_net'], 10358571.69)
+        self.assertFalse([item for item in body['links'] if item['target'] == 'committee:C00835959'
+                          and nodes[item['source']].get('balance') == 'unreconciled'])
+
+    def test_2023_2024_is_unchanged(self):
+        # Its bitcoin, USD coin and Giving Block sales all pair with gifts booked in the window.
+        body = flow_data.committee_payload('C00835959', '2024', identifier=FAIRSHAKE)
+        self.assertEqual(body['totals']['in'], 217423880.52)
+        self.assertNotIn('proceeds_counted', body['totals']['in_kind'])
 
 
 @unittest.skipUnless((SAVED / SLF / 'snapshots.json').exists() and (SAVED / FAIRSHAKE / 'snapshots.json').exists(),

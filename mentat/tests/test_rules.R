@@ -291,7 +291,9 @@ stopifnot(
 )
 
 # Explicit FEC back-references can establish a memo parent. Identical amount,
-# date and donor alone cannot. The linked memo may describe part of a parent.
+# date and donor alone cannot. A linked memo that describes part of a parent is
+# removed only when it states a redesignation (lane J2, Paul's money rule of
+# 2026-09-26: proof is the same donor, amount and date); otherwise it counts.
 # Cross-committee earmark legs must stay countable (R8 recipient-as-shown).
 memo_rows <- data.frame(
   sub_id = c("PARENT", "MEMO_DRIFT", "MEMO_EXACT", "EARMARK_OTHER_CMTE"),
@@ -317,12 +319,22 @@ memo_plan <- mentat_memo_duplicate_plan(memo_rows)
 memo_flag <- setNames(memo_plan$duplicate_memo, memo_plan$sub_id)
 stopifnot(
   memo_flag[["PARENT"]] == 0L,
-  # caught by the back-reference despite the amount drift
-  memo_flag[["MEMO_DRIFT"]] == 1L,
+  # a $10 drift with no redesignation statement is not proof (lane J2): it counts,
+  # with the parent named as its unproven link
+  memo_flag[["MEMO_DRIFT"]] == 0L,
+  memo_plan$memo_link_unproven_of[memo_plan$sub_id == "MEMO_DRIFT"] == "PARENT",
   # Matching all five financial fields is a review clue, not a relationship.
   memo_flag[["MEMO_EXACT"]] == 0L,
   # different committee: a real earmark leg, counts (R8)
   memo_flag[["EARMARK_OTHER_CMTE"]] == 0L
 )
+
+# The same drift stating a redesignation on a contribution line is the filer re-describing part
+# of the parent: removed. (On line 17 the redesignation text alone already makes the row an
+# other_receipt - a non-giving role - so it is out of the total before the memo plan runs.)
+redesignated <- memo_rows[memo_rows$sub_id %in% c("PARENT", "MEMO_DRIFT"), ]
+redesignated$receipt_type_full[redesignated$sub_id == "MEMO_DRIFT"] <- "REDESIGNATION TO GENERAL [SA11AI:7772]"
+redesignated$line_number[redesignated$sub_id == "MEMO_DRIFT"] <- "11AI"
+stopifnot(mentat_memo_duplicate_plan(redesignated)$duplicate_memo[redesignated$sub_id == "MEMO_DRIFT"] == 1L)
 
 cat("test_rules: PASS\n")

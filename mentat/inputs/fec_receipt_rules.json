@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "source": "https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/",
   "special_account_sources": [
     "https://www.fec.gov/updates/fec-statement-on-carey-v-fec/",
@@ -48,8 +48,7 @@
     "NTEREST INCOME",
     "UNREALIZEZD INVESTMENT LOSSES",
     "ANNUAL SERVICE CHARGE",
-    "BANK CHARGE",
-    "NON CONTRIBUTION"
+    "BANK CHARGE"
   ],
   "forms": {
     "F3": {"contribution": ["11A", "11AI", "11B", "11C", "11D"], "transfer_receipt": ["12"], "other_receipt": ["13A", "13B", "14"], "unverified_other_receipt": ["15"]},
@@ -69,5 +68,12 @@
   "sale_event_pattern": "\\bSOLD\\b|\\bSOLD VIA\\b|\\bLIQUIDATED\\b|PROCEEDS.*SALE|\\bCONVERTED BY\\b",
   "disclosure_pattern": "(?<!NOT )(?<!NOT BEEN )(?<!NEVER )\\bPREVIOUSLY DISCLOSED|\\bCONTRIBUTION DISCLOSED|\\bDISCLOSED(ON)? ON LINE\\b|(?<!NOT )(?<!NOT BEEN )(?<!NEVER )\\bPREVIOUSLY REPORTED CONTRIBUTION\\b|\\bCONTRIBUTION PREVIOUSLY REPORTED\\b|\\bAS (PREVIOUSLY|ORIGINALLY) REPORTED\\b|\\bORIGINALLY DISCLOSED\\b",
   "redisclosure_unitemized_pattern": "\\b(UNITEMIZED|NOT ITEMIZED|NON ITEMIZED)\\b",
-  "disclosure_rule": "v6, F13 (Paul approved 2026-09-26): a memo whose normalised receipt/memo text matches disclosure_pattern states a re-disclosure. It is counted once, via the counted parent it restates (same company, committee, contributor, nonzero amount, parent dated on or before the memo, parent not a memo): schema.R mentat_memo_redisclosure_parents and tools/pac_evidence.py memo_redisclosure_parents. With no such parent, or when the text calls the gift unitemized, it stays counted and flagged disclosure_memo_unmatched. Phrases are the ones filers use in the saved Crypto, Banking, Telecom, Credit Arms and Community Banks receipts; bare PREVIOUSLY REPORTED is left out because JFC allocation memos use it for partial allocations."
+  "giving_rulings": {
+    "rule": "Paul's per-row rulings that a receipt is giving whatever its text says. H3 (2026-09-26): FAIRSHAKE's two receipts ruled giving under D-040(c) while their line and description were blank stay giving after the filer amended them to BITCOINS SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN. A ruled row is matched on committee, FEC transaction id and amount to the cent (collect.R fec_receipt_ruled_giving, tools/pac_evidence.py ruled_giving); the sale rule passes it by, so it keeps its form/line role and counts, flagged.",
+    "rows": [
+      {"committee_id": "C00835959", "transaction_id": "876629BF651C491EAF3B", "amount": 5175000.0, "date": "2025-07-10", "ruling": "H3 2026-09-26 (D-040(c))"},
+      {"committee_id": "C00835959", "transaction_id": "370D8DC9123B47ABA632", "amount": 6000000.0, "date": "2025-07-13", "ruling": "H3 2026-09-26 (D-040(c))"}
+    ]
+  },
+  "disclosure_rule": "v7, F13 (Paul approved 2026-09-26): a memo whose normalised receipt/memo text matches disclosure_pattern states a re-disclosure. It is counted once, via the counted parent it restates (same company, committee, contributor, nonzero amount, parent dated on or before the memo, parent not a memo): schema.R mentat_memo_redisclosure_parents and tools/pac_evidence.py memo_redisclosure_parents. The filer's own statement is the proof, so a parent dated before the memo is its parent (lane J3 restored this after lane J2 had required the same day). With no such parent, or when the text calls the gift unitemized, it stays counted and flagged disclosure_memo_unmatched. Under Paul's money rule of 2026-09-26 (lane J2) an FEC back reference removes a memo only at the parent's amount, or when the memo states the redesignation of part of a larger parent (redesignation_event_pattern); otherwise the memo counts, flagged memo_link_unproven (back_reference_amount_differs). Phrases are the ones filers use in the saved Crypto, Banking, Telecom, Credit Arms and Community Banks receipts; bare PREVIOUSLY REPORTED is left out because JFC allocation memos use it for partial allocations."
 }

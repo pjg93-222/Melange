@@ -27,7 +27,9 @@ class EvidenceTests(unittest.TestCase):
             'NON-CONTRIBUTION ACCOUNT':'contribution',
             'HEADQUARTERS ACCOUNT CONTRIBUTION':'contribution',
             'LEGAL PROCEEDINGS ACCOUNT':'contribution',
-            'NON-CONTRIBUTION':'other_receipt',
+            # A bare filer label: a non-contribution-account donation (giving) or a receipt that is not a
+            # contribution. Ambiguous, so it counts, flagged (lane J3, Paul's money rule of 2026-09-26).
+            'NON-CONTRIBUTION':'unverified_other_receipt',
             'OTHER FEDERAL RECEIPTS (DIVIDENDS, INTEREST, ETC.)':'unverified_other_receipt',
             'INTEREST':'other_receipt',
             'RETURN OF ERRONEOUS DEBIT MADE BY PROCESSOR':'other_receipt',
@@ -121,9 +123,13 @@ class EvidenceTests(unittest.TestCase):
         """2026-09-17 ruling, mirrored from mentat/R/collect.R."""
         role = receipt_role
         # exact non-giving captions stay excluded
-        for description in ('NON-CONTRIBUTION', 'INTEREST', 'SERVICE FEE'):
+        for description in ('INTEREST', 'SERVICE FEE'):
             self.assertEqual(role({'filing_form':'F3X','line_number':'17',
                 'receipt_type_full':description}), 'other_receipt')
+        # the bare filer label NON-CONTRIBUTION is not one (lane J3, Paul's money rule of 2026-09-26): it may be
+        # a non-contribution-account donation, which is giving, so it counts, flagged
+        self.assertEqual(role({'filing_form':'F3X','line_number':'17',
+            'receipt_type_full':'NON-CONTRIBUTION'}), 'unverified_other_receipt')
         # redesignations, bank artifacts and fair-market-value sales
         for description in ('CONTRIBUTION REDESIGNATION FROM GENERAL',
                 'REDESIGNATION TO RECOUNT', 'NON CONFORMING IMAGE CHECK REDEPOSIT',
@@ -312,6 +318,85 @@ class ReloadRuleTests(unittest.TestCase):
         self.assertEqual(reload['key'], 'committee|report type|transaction id|file number|counterparty|amount|date|type')
         self.assertEqual((reload['reload_rows'], reload['reload_amount'],
                           reload['rows_without_transaction_id_or_file_number']), (2, 750.0, 2))
+
+
+class RuledGiving(unittest.TestCase):
+    """H3 (Paul, 2026-09-26; lane J2): FAIRSHAKE's two receipts ruled giving under D-040(c) stay giving after
+    the filer amended them to bitcoin sale text; a sibling sale row with no ruling stays a sale."""
+
+    def row(self, sub_id, transaction_id, amount, text, day):
+        return {'sub_id': sub_id, 'committee_id': 'C00835959', 'transaction_id': transaction_id,
+                'contributor_name': 'COINBASE COMMERCE (EXCHANGE)', 'entity_type': 'ORG', 'filing_form': 'F3X',
+                'line_number': '17', 'receipt_type_full': text, 'contribution_receipt_amount': amount,
+                'contribution_receipt_date': day + 'T00:00:00', 'memo_code': None, 'memoed_subtotal': False}
+
+    def rows(self):
+        return [self.row('4090820261595851245', '876629BF651C491EAF3B', 5175000.0,
+                         '45.0 BITCOINS (BTC) SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN', '2025-07-10'),
+                self.row('4090820261595851247', '370D8DC9123B47ABA632', 6000000.0,
+                         '50.0 BITCOINS (BTC) SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN', '2025-07-13'),
+                self.row('4081520251218411850', 'F966CDC333F34AC38328', 4400000.0,
+                         '40.0  BITCOINS (BTC) SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN', '2025-05-21')]
+
+    def test_the_two_ruled_rows_count_and_the_unruled_sale_does_not(self):
+        ruled, ruled_too, sale = self.rows()
+        self.assertEqual(receipt_role(ruled), 'unverified_other_receipt')
+        self.assertEqual(receipt_role(ruled_too), 'unverified_other_receipt')
+        self.assertEqual(receipt_role(sale), 'asset_liquidation')
+        snapshot = {'committee_id': 'C00835959', 'cycle': 2026, 'totals': {}, 'receipts': self.rows(),
+                    'disbursements': [], 'expenditures': []}
+        receipts = {r['sub_id']: r for r in summarize([snapshot], 'Coinbase', ['COINBASE COMMERCE (EXCHANGE)'])['receipts']}
+        for sub_id in ('4090820261595851245', '4090820261595851247'):
+            self.assertTrue(receipts[sub_id]['included_company_contribution'])
+            self.assertTrue(receipts[sub_id]['receipt_role_unverified'])      # counted, flagged
+        self.assertFalse(receipts['4081520251218411850']['included_company_contribution'])
+
+    def test_negative_control_another_amount_committee_or_no_transaction_id_borrows_no_ruling(self):
+        ruled = self.rows()[0]
+        self.assertEqual(receipt_role({**ruled, 'contribution_receipt_amount': 5175000.01}), 'asset_liquidation')
+        self.assertEqual(receipt_role({**ruled, 'committee_id': 'C00000001'}), 'asset_liquidation')
+        self.assertEqual(receipt_role({**ruled, 'transaction_id': ''}), 'asset_liquidation')
+
+
+class NonContributionLabel(unittest.TestCase):
+    """Lane J3 (Paul's money rule, 2026-09-26): a line-17 receipt whose text is exactly "NON-CONTRIBUTION" may be a
+    non-contribution-account donation (giving) or a receipt that is not a contribution. Ambiguous, so it counts as
+    the named donor's giving, flagged. Real rows: Foris DAX's four receipts at MAGA Inc. (four transaction ids and
+    dates; no other copy of that money in the Crypto database)."""
+
+    def rows(self):
+        return [{'sub_id': sub_id, 'committee_id': 'C00892471', 'contributor_name': 'FORIS DAX, INC.',
+                 'entity_type': 'ORG', 'filing_form': 'F3X', 'line_number': '17', 'receipt_type': '10',
+                 'receipt_type_full': 'NON-CONTRIBUTION', 'transaction_id': transaction,
+                 'contribution_receipt_amount': amount, 'contribution_receipt_date': day + 'T00:00:00',
+                 'memo_code': None, 'memoed_subtotal': False}
+                for sub_id, transaction, amount, day in (
+                    ('4081920251218730884', 'SA17.4519', 10000000.0, '2025-02-14'),
+                    ('4012020261302797780', 'SA17.4920', 10000000.0, '2025-09-12'),
+                    ('4012020261302797781', 'SA17.4959', 10000000.0, '2025-10-22'),
+                    ('4031620261423644172', 'SA17.5207', 5000000.0, '2026-01-23'))]
+
+    def test_the_label_counts_as_the_named_donors_giving_flagged(self):
+        for row in self.rows():
+            self.assertEqual(receipt_role(row), 'unverified_other_receipt')
+        snapshot = {'committee_id': 'C00892471', 'cycle': 2026, 'totals': {}, 'receipts': self.rows(),
+                    'disbursements': [], 'expenditures': []}
+        receipts = summarize([snapshot], 'Foris Dax Inc', ['FORIS DAX, INC.'])['receipts']
+        self.assertEqual(len(receipts), 4)
+        for receipt in receipts:
+            self.assertTrue(receipt['included_company_contribution'])
+            self.assertTrue(receipt['receipt_role_unverified'])          # counted, flagged
+        self.assertEqual(sum(r['amount'] for r in receipts if r['included_company_contribution']), 35000000.0)
+
+    def test_negative_control_explicit_text_beside_the_label_still_decides(self):
+        row = self.rows()[0]
+        for text, expected in (('NON-CONTRIBUTION: INTEREST', 'other_receipt'),
+                               ('NON-CONTRIBUTION AMOUNT', 'other_receipt'),
+                               ('NON-CONTRIBUTION 1,500,000 USDC COINS LIQUIDATED VIA GEMINI TRUST - PURCHASER UNKNOWN',
+                                'asset_liquidation'),
+                               ('NON-CONTRIBUTION ACCOUNT', 'contribution')):
+            with self.subTest(text=text):
+                self.assertEqual(receipt_role({**row, 'receipt_type_full': text}), expected)
 
 
 if __name__ == '__main__':

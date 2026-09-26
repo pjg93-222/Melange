@@ -132,10 +132,38 @@ fec_receipt_row_eligible <- function(rows) {
 
 # "Previously disclosed" is a claim of a repeat, not proof of one on its own.
 # mentat_memo_duplicate_plan() (schema.R) removes a disclosure memo with an
-# explicit, same-filing FEC back reference, or (F13, 2026-09-26) when a counted
-# parent matches the statement: same company, committee, contributor and
-# amount, dated on or before the memo. Equal committee/cycle/amount without
-# the memo's own statement is not proof.
+# explicit, same-filing FEC back reference to a parent of the same amount (or a
+# larger parent whose part the memo states it redesignates), or (F13,
+# 2026-09-26) when a counted parent matches the statement: same company,
+# committee, contributor and amount, dated on or before the memo. Equal
+# committee/cycle/amount without the memo's own statement is not proof.
+
+# Paul's per-row rulings that a receipt is giving whatever its text says
+# (fec_receipt_rules.json giving_rulings; H3, 2026-09-26: FAIRSHAKE's two rows
+# ruled giving under D-040(c), later amended to "BITCOINS SOLD VIA COINBASE
+# EXCHANGE - PURCHASER UNKNOWN"). Committee, FEC transaction id and amount to
+# the cent must all match, so a reused transaction id (DE-033) never borrows a
+# ruling. tools/pac_evidence.py ruled_giving() is the Python twin.
+fec_receipt_ruled_giving <- function(rows, rules = fec_receipt_rules()) {
+  count <- nrow(rows)
+  rulings <- rules$giving_rulings$rows
+  if (!count || !length(rulings)) return(rep(FALSE, count))
+  text <- function(name) {
+    if (!name %in% names(rows)) return(rep("", count))
+    value <- toupper(trim_text(as.character(rows[[name]])))
+    value[is.na(value)] <- ""
+    value
+  }
+  cents <- function(x) {
+    value <- suppressWarnings(as.numeric(x))
+    ifelse(is.na(value), "", sprintf("%.0f", round(value * 100)))
+  }
+  amounts <- if ("contribution_receipt_amount" %in% names(rows)) rows$contribution_receipt_amount else rep(NA, count)
+  keys <- paste(text("committee_id"), text("transaction_id"), cents(amounts), sep = "\034")
+  ruled <- vapply(rulings, function(ruling) paste(toupper(trim_text(ruling$committee_id)),
+    toupper(trim_text(ruling$transaction_id)), cents(ruling$amount), sep = "\034"), character(1L))
+  nzchar(text("transaction_id")) & keys %in% ruled
+}
 
 fec_receipt_role <- function(rows) {
   column <- function(name) {
@@ -159,7 +187,11 @@ fec_receipt_role <- function(rows) {
     role[form == f & line %in% unlist(rules$forms[[f]][[r]])] <- r
   }
   # "Other federal receipts" includes genuine hybrid-PAC and party-account
-  # contributions. The line label alone cannot establish economic meaning.
+  # contributions. The line label alone cannot establish economic meaning, and
+  # neither can a bare filer label such as NON-CONTRIBUTION, which may name a
+  # non-contribution-account donation: it is not an exact non-giving
+  # description, so it counts, flagged (lane J3, Paul's money rule of
+  # 2026-09-26; tools/pac_evidence.py receipt_role() is the twin).
   special <- form == "F3X" & line == "17" & grepl(rules$special_account_pattern, description, perl = TRUE)
   exact_descriptions <- normalized(toupper(unlist(rules$non_giving_exact_descriptions)))
   receipt_exact <- grepl(rules$non_giving_exact_pattern, receipt_description, perl = TRUE) |
@@ -203,6 +235,8 @@ fec_receipt_role <- function(rows) {
   # Names identify parties, never the economic role of an unknown receipt.
   sale <- grepl(rules$sale_identity_pattern, description, perl = TRUE) &
     grepl(rules$sale_event_pattern, description, perl = TRUE)
+  # A row Paul ruled giving keeps its form/line role, counted and flagged (H3).
+  sale <- sale & !fec_receipt_ruled_giving(rows, rules)
   role[sale] <- "asset_liquidation"
   memo <- column("memo_code") == "X" | column("memoed_subtotal") %in% c("1", "TRUE") |
     column("is_memo_leg") %in% c("1", "TRUE")

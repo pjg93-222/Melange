@@ -16,6 +16,20 @@ roles <- fec_receipt_role(rows)
 stopifnot(identical(roles, c("contribution", "asset_liquidation", "unverified_disclosure_memo", "unverified_receipt_role", "contribution")))
 stopifnot(identical(fec_receipt_role_excluded(roles), c(FALSE, TRUE, FALSE, FALSE, FALSE)))
 stopifnot(isTRUE(fec_assert_receipt_evidence(rows)))
+# H3 (Paul, 2026-09-26; lane J2): FAIRSHAKE's two receipts ruled giving under D-040(c)
+# stay giving after their amendment to bitcoin sale text; a sibling sale with no ruling
+# stays an asset liquidation, and another amount or another committee borrows no ruling
+# (negative controls).
+ruled <- data.table(committee_id = "C00835959", filing_form = "F3X", line_number = "17",
+  contributor_name = "COINBASE COMMERCE (EXCHANGE)",
+  transaction_id = c("876629BF651C491EAF3B", "370D8DC9123B47ABA632", "F966CDC333F34AC38328",
+                     "876629BF651C491EAF3B", "876629BF651C491EAF3B"),
+  contribution_receipt_amount = c(5175000, 6000000, 4400000, 5175000.01, 5175000),
+  receipt_type_full = "45.0 BITCOINS (BTC) SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN")
+ruled$committee_id[5] <- "C00000001"
+stopifnot(identical(fec_receipt_role(ruled), c("unverified_other_receipt", "unverified_other_receipt",
+  "asset_liquidation", "asset_liquidation", "asset_liquidation")),
+  identical(fec_receipt_countable(ruled), c(TRUE, TRUE, FALSE, FALSE, FALSE)))
 unlinked <- data.table(filing_form="F3X", line_number="11AI", memo_code="X",
                       memo_text="CONTRIBUTION PREVIOUSLY DISCLOSED")
 # An unproven "previously disclosed" claim is counted and flagged, not refused.
@@ -53,7 +67,7 @@ stopifnot(nrow(stored) == 1L, stored$is_memo_leg == 1L, stored$memoed_subtotal =
 DBI::dbDisconnect(connection)
 memos <- data.frame(sub_id=c("parent", "memo"), company="Acme", committee_id="C1",
   contributor_name="PERSON, ONE", contribution_receipt_date=c("2022-01-01","2024-01-01"),
-  contribution_receipt_amount=c(100,90), is_memo_leg=c(0L,1L),
+  contribution_receipt_amount=c(100,100), is_memo_leg=c(0L,1L),
   transaction_id=c("SA11AI.42","MEMO1"), receipt_type_full=c("","[SA11AI:42]"),
   file_num=c(1,2), report_year=c(2022,2024), report_type="Q1", company_match_status="accepted",
   filing_form="F3X", line_number="11AI")
@@ -64,15 +78,25 @@ memos$file_num <- 2; memos$report_year <- 2024
 memos$contribution_receipt_date <- "2024-01-01"
 plan <- mentat_memo_duplicate_plan(memos)
 stopifnot(plan$duplicate_memo[2] == 1L, plan$duplicate_of_sub_id[2] == "parent")
+# Lane J2 (Paul's money rule, 2026-09-26): proof is the same donor, amount and date. A 90
+# memo referencing a 100 parent states no redesignation: it counts, with the parent named
+# as its unproven link. The same memo stating a redesignation is removed.
+partial <- memos; partial$contribution_receipt_amount[2] <- 90
+plan <- mentat_memo_duplicate_plan(partial)
+stopifnot(plan$duplicate_memo[2] == 0L, plan$memo_link_unproven_of[2] == "parent",
+          plan$memo_link_unproven_reason[2] == "back_reference_amount_differs")
+partial$receipt_type_full[2] <- "REDESIGNATION TO GENERAL [SA11AI:42]"
+plan <- mentat_memo_duplicate_plan(partial)
+stopifnot(plan$duplicate_memo[2] == 1L, plan$duplicate_of_sub_id[2] == "parent", plan$memo_link_unproven_of[2] == "")
 memos$receipt_type_full <- ""
 memos$back_reference_transaction_id <- c("", "SA11AI.42")
 plan <- mentat_memo_duplicate_plan(memos)
 stopifnot(plan$duplicate_memo[2] == 1L, plan$duplicate_reason[2] == "fec_structured_back_reference")
 memos$contribution_receipt_amount[2] <- 150
 stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
-memos$contribution_receipt_amount[2] <- -90
+memos$contribution_receipt_amount[2] <- -100
 stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
-memos$contribution_receipt_amount[2] <- 90
+memos$contribution_receipt_amount[2] <- 100
 memos$contributor_name[2] <- "PERSON, DIFFERENT"
 stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
 memos$contributor_name[2] <- "PERSON, ONE"
@@ -95,10 +119,11 @@ specials <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
   "NON-CONTRIBUTION ACCOUNT; 1500000 USDC LIQUIDATED VIA EXCHANGE - PURCHASER UNKNOWN",
   "NON-CONTRIBUTION ACCOUNT; REFUND FOR PROCESSING FEES", "LEGAL PROCEEDINGS ACCOUNT CONTRIBUTION"),
   memo_text=c(rep("",8),"IMPERMISSIBLE CONTRIBUTION; SEE JUNE MONTHLY REPORT FOR REFUND"))
+# The bare label NON-CONTRIBUTION (4th) counts, flagged (lane J3, Paul's money rule of 2026-09-26).
 stopifnot(identical(fec_receipt_role(specials), c(rep("contribution",3),
-  "other_receipt","unverified_other_receipt","other_receipt","asset_liquidation",
+  "unverified_other_receipt","unverified_other_receipt","other_receipt","asset_liquidation",
   "unverified_other_receipt","unverified_refund_adjustment")))
-stopifnot(identical(fec_receipt_countable(specials), c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,TRUE,TRUE)))
+stopifnot(identical(fec_receipt_countable(specials), c(TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE)))
 stopifnot(identical(fec_receipt_countable(specials,verified_only=TRUE), c(TRUE,TRUE,TRUE,rep(FALSE,6))))
 explicit_income <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
   "NON-CONTRIBUTION: INTEREST", "NONCONTRIBUTION ACCOUNT - INTEREST", "HEADQUARTERS INTEREST INCOME",
@@ -165,10 +190,40 @@ stopifnot(all(fec_receipt_role(conflicting_income) == "unverified_contradicted_r
 # --- 2026-09-17 ruling ------------------------------------------------------
 # A cross-verification step may remove or zero a row only when the evidence
 # CONTRADICTS it. Missing or ambiguous information is counted and flagged.
-stopifnot(fec_receipt_rules()$version == 6)
+stopifnot(fec_receipt_rules()$version == 7)
 # True exact non-giving descriptions are still excluded.
 stopifnot(all(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
-  receipt_type_full=c("NON-CONTRIBUTION", "INTEREST", "SERVICE FEE"))) == "other_receipt"))
+  receipt_type_full=c("INTEREST", "SERVICE FEE"))) == "other_receipt"))
+# The bare filer label NON-CONTRIBUTION is not one of them (lane J3, Paul's money rule of
+# 2026-09-26): on line 17 it may be a non-contribution-account donation, which is giving,
+# so it counts as the named donor's giving, flagged. Real rows: Foris DAX's four receipts at
+# MAGA Inc. ($35,000,000; four transaction ids and dates; no other copy of that money in the
+# Crypto database). Explicit non-giving text beside the label still decides (negative
+# controls): interest, the NON-CONTRIBUTION AMOUNT caption and a sale to an unknown purchaser.
+foris <- data.table(committee_id = "C00892471", filing_form = "F3X", line_number = "17",
+  contributor_name = "FORIS DAX, INC.", entity_type = "ORG", company = "Foris Dax Inc",
+  company_match_status = "accepted", receipt_type_full = "NON-CONTRIBUTION",
+  transaction_id = c("SA17.4519", "SA17.4920", "SA17.4959", "SA17.5207"),
+  contribution_receipt_date = c("2025-02-14", "2025-09-12", "2025-10-22", "2026-01-23"),
+  contribution_receipt_amount = c(10000000, 10000000, 10000000, 5000000))
+foris_roles <- fec_receipt_role(foris)
+stopifnot(all(foris_roles == "unverified_other_receipt"), all(fec_receipt_countable(foris)),
+          sum(foris$contribution_receipt_amount[fec_receipt_countable(foris)]) == 35000000,
+          all(fec_receipt_role_unverified(foris_roles) == 1L),
+          all(fec_receipt_role_reason(foris_roles) == "unverified_other_receipt"))
+still_non_giving <- data.table(filing_form = "F3X", line_number = "17", receipt_type_full = c(
+  "NON-CONTRIBUTION: INTEREST", "NON-CONTRIBUTION AMOUNT",
+  "NON-CONTRIBUTION 1,500,000 USDC COINS LIQUIDATED VIA GEMINI TRUST - PURCHASER UNKNOWN"))
+stopifnot(identical(fec_receipt_role(still_non_giving), c("other_receipt", "other_receipt", "asset_liquidation")),
+          !any(fec_receipt_countable(still_non_giving)))
+# The Serbian American PAC's $45,000 row carries the same label but is not Gemini's money: its
+# donor's employer is GEMINI TRANSPORT and the collector's persistent override rejected the
+# match, so it stays out as an explicit source exclusion (D-040), whatever its label says.
+petkovich <- data.table(committee_id = "C00895003", filing_form = "", line_number = "17",
+  contributor_name = "PETKOVICH, GORAN M", contributor_employer = "GEMINI TRANSPORT", entity_type = "IND",
+  company = "Gemini", company_match_status = "rejected", company_match_reason = "persistent_override:reject",
+  receipt_type_full = "NON-CONTRIBUTION", transaction_id = "SA17.152400897", contribution_receipt_amount = 45000)
+stopifnot(fec_attribution_status(petkovich) == "explicit_source_exclusion", !fec_receipt_countable(petkovich))
 # Redesignations, bank artifacts and fair-market-value sales: the filer's own
 # words say the money is not new giving.
 non_giving_v5 <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(

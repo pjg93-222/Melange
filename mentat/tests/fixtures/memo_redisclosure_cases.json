@@ -1,7 +1,7 @@
 {
  "name": "memo_redisclosure_cases",
- "version": 1,
- "rule": "F13 memo re-disclosure (Paul approved 2026-09-26, \"Approve F13\"). A memo row whose own text states that it re-discloses a gift already itemized (receipt role unverified_disclosure_memo: a memo matching fec_receipt_rules.json disclosure_pattern) is a duplicate of the counted parent it restates - same company, same recipient committee, same contributor (contributor_id when both rows carry one, else the normalised name), the same nonzero amount to the cent, dated on or before the memo, not itself a memo - and counts once, via the parent (reason memo_redisclosure_of_counted_parent, parent sub_id recorded). Several parents: the latest-dated, then the lowest sub_id. A memo that calls the gift unitemized restates no itemized parent. With no parent the memo stays counted and flagged disclosure_memo_unmatched (D-040). A memo without the statement is untouched. A counted parent: company match accepted or blank, no excluded_reason, a giving role.",
+ "version": 3,
+ "rule": "F13 memo re-disclosure (Paul approved 2026-09-26, \"Approve F13\"). A memo row whose own text states that it re-discloses a gift already itemized (receipt role unverified_disclosure_memo: a memo matching fec_receipt_rules.json disclosure_pattern) is a duplicate of the counted parent it restates - same company, same recipient committee, same contributor (contributor_id when both rows carry one, else the normalised name), the same nonzero amount to the cent, dated on or before the memo, not itself a memo - and counts once, via the parent (reason memo_redisclosure_of_counted_parent, parent sub_id recorded). Several parents: the latest-dated, then the lowest sub_id. The filer's own statement is the proof (lane J3, 2026-09-26, restoring the approved rule after lane J2 had required the same day). A memo that calls the gift unitemized restates no itemized parent. With no parent the memo stays counted and flagged disclosure_memo_unmatched (D-040). A memo without the statement is untouched. A counted parent: company match accepted or blank, no excluded_reason, a giving role.",
  "format": {
   "defaults": "merged under every row",
   "rows": "receipt rows as the Mentat tables hold them (memo_code X / is_memo_leg 1 marks a memo)",
@@ -216,7 +216,7 @@
  "cases": [
   {
    "name": "fairshake_15_5m_disclosedon_typo",
-   "about": "Real FAIRSHAKE rows. The memo states \"CONTRIBUTION DISCLOSEDON ON LINE 11(A)\" (the filer's typo); its FEC back reference points at the sale (an asset liquidation, never a parent), so F13 finds the counted line 11AI gift.",
+   "about": "Real FAIRSHAKE rows. The memo states \"CONTRIBUTION DISCLOSEDON ON LINE 11(A)\" (the filer's typo); its FEC back reference points at the sale (an asset liquidation, never a parent), so F13 finds the counted line 11AI gift, dated 2023-12-20, the day before the memo. The filer's own statement is the proof: the memo is that gift's duplicate (lane J3 restored this; lane J2 had kept the memo counted).",
    "rows": [
     {
      "sub_id": "4021420241824800115",
@@ -1455,6 +1455,159 @@
      "counted": true,
      "duplicate_of": "",
      "flagged": true
+    }
+   }
+  },
+  {
+   "name": "d040c_row_restated_the_same_day",
+   "about": "A D-040(c) row is a counted parent: a synthetic memo restating it on the same day is the duplicate, and the D-040(c) row itself is never touched.",
+   "rows": [
+    {
+     "sub_id": "4030420261386079642",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2025-10-07",
+     "contribution_receipt_amount": 8092475,
+     "line_number": "",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "transaction_id": "E966384FC6024738878E"
+    },
+    {
+     "sub_id": "F13-M26",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2025-10-07",
+     "contribution_receipt_amount": 8092475,
+     "line_number": "17",
+     "receipt_type_full": "8,092,475 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "4030420261386079642": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M26": {
+     "counted": false,
+     "duplicate_of": "4030420261386079642",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "several_same_day_parents_lowest_sub_id",
+   "about": "Several parents match; the latest-dated two share the memo's own day, so the lower sub_id of those two is recorded, and the earlier parent is not.",
+   "rows": [
+    {
+     "sub_id": "F13-P27a",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 100,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-P27c",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 100,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-P27b",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 100,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M27",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 100,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P27a": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-P27b": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-P27c": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M27": {
+     "counted": false,
+     "duplicate_of": "F13-P27b",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "parent_dated_the_day_before_is_its_parent",
+   "about": "Same donor, same amount, the parent dated one day before the memo: the memo's own statement is the proof, so it is that parent's duplicate (lane J3; lane J2 had kept it counted and flagged).",
+   "rows": [
+    {
+     "sub_id": "F13-P28",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-06-01",
+     "contribution_receipt_amount": 1000,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M28",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-06-02",
+     "contribution_receipt_amount": 1000,
+     "line_number": "17",
+     "receipt_type_full": "1,000 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P28": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M28": {
+     "counted": false,
+     "duplicate_of": "F13-P28",
+     "flagged": false
     }
    }
   }

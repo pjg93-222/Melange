@@ -1,6 +1,6 @@
 {
  "contract": "flow",
- "version": 4,
+ "version": 5,
  "owner": "lane F (boards #44-#46), 2026-09-25",
  "produced_by": [
   "mentat/app/flow_data.py:committee_payload",
@@ -28,7 +28,7 @@
  "rules": [
   "Every node with inflows and outflows balances to the cent; value_in and value_out are the sums of its links.",
   "A committee node balances against its own FEC summary: receipts counted once + cash from before the window = transfers + candidate spending + operating (the remainder) + cash on hand at the end + donated assets not yet sold.",
-  "Donated assets count once, at their value when given; sale proceeds of donated assets are never a donor; what is unsold stays in \"Not yet spent\" (first in, first out per kind of asset).",
+  "Donated assets count once, at their value when given; the sale proceeds of a donated asset net against a gift of the same asset booked in the same window and are then never a donor; what is unsold stays in \"Not yet spent\" (first in, first out per kind of asset). Proceeds of an asset with no gift booked in the window (given before it) are the only record of that money there: they count as received, named as filed, and the donor node carries sold_asset {amount, kinds} (lane J2, Paul's money rule of 2026-09-26: remove or net money only on proof that it is the same money counted twice).",
   "Money from outside the network enters a downstream committee as an external_in stub beside it, never as a column node.",
   "A transfer back to a committee already drawn is a \"returned to\" stub at the sender and a \"back from\" stub at the receiver; money from a committee in the network is never also a donor.",
   "Links between column nodes run forward (to a later stage); stubs stay beside the node they attach to.",
@@ -38,7 +38,7 @@
   "Top N: a column keeps its N largest groupable nodes of at least 1% of the column, after its fixed nodes and one Other node; the rest (two or more) become Other. flow-layout.js applies the same rule.",
   "Carryover (option (b), landed 2026-09-26): every committee node carries its gate_source from the measurement (root, in-cycle or carryover). A carried-over committee carries the measurement's own words for it (carryover.label, e.g. \"gate opened by 2023-2024 transfers\", and who opened it), and so does its \"Cash from before this window\" stub; no other node does. The answer's carryover block states the rule, the status (known, partial, unknown or off) and counts, and the notes say it in the measurement's words.",
   "A \"Not in the summary\" stub (balance unreconciled) is spending the FEC summary cannot carry, disclosed as an inflow so its node balances; the root-inflow rule sets it aside, and any other extra inflow at the root is money counted twice.",
-  "Refunds (lane I, 2026-09-26): a donor's charge-backs and refunds net against its gifts in the window; a donor that nets to zero or below is never drawn and never a negative link. What it nets below zero left the committee as a refund: the committee's intake counts it gross (totals.in = counted_in + refunds_to_donors + cash before the window) and it is spending - the root's \"Refunded to donors\" sink (with the refunds filed on its summary, each part in the sink's details), elsewhere the kept remainder. Vendor refunds still net against operating; refunds from committees still count as receipts. In the industry flow each company-recipient pair nets on its own the same way: a pair at or below zero is not drawn, a bucket passes on exactly what it drew, and pairs below zero are disclosed (\"Refunds from candidates $X\").",
+  "Refunds (lane I, 2026-09-26): a donor's charge-backs and refunds net against its gifts in the window dated on or before them (lane J2, Paul's money rule of 2026-09-26: an entry dated before a contributor's receipts in the window cannot return them, so those receipts count as given and the entry leaves as a refund, listed apart in the sink's details as dated before their receipts); a donor that nets to zero or below is never drawn and never a negative link. What it nets below zero left the committee as a refund: the committee's intake counts it gross (totals.in = counted_in + refunds_to_donors + cash before the window) and it is spending - the root's \"Refunded to donors\" sink (with the refunds filed on its summary, each part in the sink's details), elsewhere the kept remainder. Vendor refunds still net against operating; refunds from committees still count as receipts. In the industry flow each company-recipient pair nets on its own the same way: a pair at or below zero is not drawn, a bucket passes on exactly what it drew, and pairs below zero are disclosed (\"Refunds from candidates $X\").",
   "Every amount is dollars with whole cents."
  ],
  "examples": [
@@ -6132,11 +6132,10 @@
        "booked_in_kind": 999987.89,
        "refunded_to_donors": 0.0,
        "refunds_to_donors": 0.0,
-       "net_operating": -17143167.18
+       "net_operating": 10358571.69
       },
-      "operating_short": 17143167.18,
-      "value_in": 191590443.55,
-      "value_out": 191590443.55
+      "value_in": 201949015.24,
+      "value_out": 201949015.24
      },
      {
       "id": "donor:AMALGAMATED BANK",
@@ -6170,6 +6169,23 @@
       "contribution": true,
       "value_in": 0.0,
       "value_out": 48000000.0
+     },
+     {
+      "id": "donor:COINBASE COMMERCE EXCHANGE",
+      "stage": 0,
+      "label": "Coinbase Commerce (exchange)",
+      "kind": "donor",
+      "name_as_filed": "COINBASE COMMERCE (EXCHANGE)",
+      "entity": "ORG",
+      "contribution": false,
+      "sold_asset": {
+       "amount": 16326738.87,
+       "kinds": [
+        "bitcoin"
+       ]
+      },
+      "value_in": 0.0,
+      "value_out": 27501738.87
      },
      {
       "id": "donor:COINBASE",
@@ -6307,17 +6323,13 @@
       "value_out": 0.0
      },
      {
-      "id": "stub:external:committee:C00835959:C00835959",
-      "stage": 1,
-      "label": "Not in the summary",
+      "id": "balance:operating:2",
+      "stage": 2,
+      "label": "Operating, net of refunds",
       "kind": "balance",
-      "stub": "external",
-      "attach": "committee:C00835959",
-      "committee_id": "C00835959",
-      "fec_url": "https://www.fec.gov/data/committee/C00835959/?cycle=2026",
-      "balance": "unreconciled",
-      "value_in": 0.0,
-      "value_out": 17143167.18
+      "balance": "operating",
+      "value_in": 10358571.69,
+      "value_out": 0.0
      },
      {
       "id": "balance:unspent:2",
@@ -7211,6 +7223,50 @@
       ]
      },
      {
+      "source": "donor:COINBASE COMMERCE EXCHANGE",
+      "target": "committee:C00835959",
+      "value": 27501738.87,
+      "kind": "receipt",
+      "rows": 5,
+      "evidence": [
+       {
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209899725956",
+        "sub_id": "4090820261595851249",
+        "date": "2025-10-05",
+        "amount": 8125000.0,
+        "counterparty": "COINBASE COMMERCE (EXCHANGE)"
+       },
+       {
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209899725956",
+        "sub_id": "4090820261595851247",
+        "date": "2025-07-13",
+        "amount": 6000000.0,
+        "counterparty": "COINBASE COMMERCE (EXCHANGE)"
+       },
+       {
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209899725955",
+        "sub_id": "4090820261595851245",
+        "date": "2025-07-10",
+        "amount": 5175000.0,
+        "counterparty": "COINBASE COMMERCE (EXCHANGE)"
+       },
+       {
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319779651213",
+        "sub_id": "4081520251218411850",
+        "date": "2025-05-21",
+        "amount": 4400000.0,
+        "counterparty": "COINBASE COMMERCE (EXCHANGE)"
+       },
+       {
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319779651213",
+        "sub_id": "4081520251218411848",
+        "date": "2025-05-12",
+        "amount": 3801738.87,
+        "counterparty": "COINBASE COMMERCE (EXCHANGE)"
+       }
+      ]
+     },
+     {
       "source": "donor:COINBASE",
       "target": "committee:C00835959",
       "value": 25000000.0,
@@ -7585,11 +7641,12 @@
       "committee": "C00835959"
      },
      {
-      "source": "stub:external:committee:C00835959:C00835959",
-      "target": "committee:C00835959",
-      "value": 17143167.18,
-      "kind": "external_in",
-      "rows": 0
+      "source": "committee:C00835959",
+      "target": "balance:operating:2",
+      "value": 10358571.69,
+      "kind": "operating",
+      "rows": 0,
+      "evidence_url": "https://www.fec.gov/data/committee/C00835959/?cycle=2026"
      },
      {
       "source": "committee:C00835959",
@@ -8709,16 +8766,16 @@
      }
     ],
     "totals": {
-     "in": 174447276.37,
-     "counted_in": 110203078.43,
+     "in": 201949015.24,
+     "counted_in": 137704817.3,
      "refunds_to_donors": 0.0,
-     "donors": 110203078.43,
+     "donors": 137704817.3,
      "unitemized": 587.76,
      "from_network": 0.0,
      "cash_before": 64244197.94,
      "transfers_out": 70000000.0,
      "own_candidates": 13296611.79,
-     "operating_net": 0.0,
+     "operating_net": 10358571.69,
      "refunded_to_donors": 0.0,
      "not_yet_spent": {
       "cash": 108293831.76,
@@ -8728,15 +8785,16 @@
      },
      "in_kind": {
       "booked": 999987.89,
-      "proceeds": 27501738.87,
+      "proceeds": 0.0,
       "held": 0.0,
-      "excess_proceeds": 27501738.87
+      "excess_proceeds": 0.0,
+      "proceeds_counted": 16326738.87
      },
      "refunds_netted": 218398.39,
      "receipts_as_reported": 137923215.69,
      "disbursements_as_reported": 93873581.87,
      "network_candidates": 73461462.83,
-     "external_in": 17868168.75,
+     "external_in": 725001.57,
      "before_gate": 0.0,
      "date_unverified": 0.0,
      "unreached_count": 5
@@ -8878,6 +8936,10 @@
      {
       "key": "in_kind",
       "text": "Donated assets counted once, at its value when given (FAIRSHAKE booked $1.0M in and out again)"
+     },
+     {
+      "key": "sold_asset",
+      "text": "Donated crypto given before this window and sold in it: $16.3M counted as received, named as filed (flagged on the donor)"
      },
      {
       "key": "pooled",

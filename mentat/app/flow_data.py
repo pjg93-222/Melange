@@ -19,6 +19,10 @@ Money semantics (packet section 4, binding):
 - Donated assets count once, at their value when given: an in-kind gift booked back out
   to its donor is the gift; the sale proceeds of donated assets are not new money; what
   is not sold yet stays in "Not yet spent" (first in, first out, per kind of asset).
+  Paul's money rule (2026-09-26, lane J2): proceeds leave the inflow only as the pair of
+  a gift of the same asset booked in the window. Proceeds of an asset with no gift booked
+  in the window (given before it) are the only record of that money there: they count,
+  named as filed and flagged sold_asset.
 - Money reaching a downstream committee from outside the network is an external_in stub
   ("Other donors"), drawn beside that committee, never a column node.
 - Pooled money is not traced money: basis=reported draws each committee's own spending;
@@ -371,6 +375,23 @@ def ledger(key, unit, network_committees):
     internal = defaultdict(lambda: {'amount': ZERO, 'rows': []})
     sales, gifts = [], []
     vendor_refunds = ZERO
+
+    def donor_of(row, value, source, line):
+        """The row's donor group (the name as filed), with the row's money added to it."""
+        entity = str(row.get('entity_type') or '').upper()
+        name = str(row.get('contributor_name') or '').strip() or 'Name not reported'
+        group = name_key(name) or 'NAME NOT REPORTED'
+        if group not in donors:
+            donors[group] = {'key': group, 'names': defaultdict(Decimal), 'amount': ZERO, 'rows': [],
+                             'entity': entity, 'committee': source, 'contribution': True, 'held': ZERO,
+                             'held_kinds': set(), 'sold_asset': ZERO, 'sold_asset_kinds': set()}
+        donor = donors[group]
+        donor['amount'] += value
+        donor['names'][name] += value
+        donor['rows'].append(row)
+        donor['contribution'] = donor['contribution'] and line in CONTRIBUTION_LINES
+        return donor, group
+
     for row in downstream.observations(unit, 'receipts'):
         if downstream.memo(row):
             continue
@@ -385,25 +406,14 @@ def ledger(key, unit, network_committees):
             vendor_refunds += value                # a vendor's refund offsets operating, like line 15
             continue
         if role == 'asset_liquidation':
-            sales.append({'row': row, 'amount': value, 'asset': _asset_kind(text),
+            sales.append({'row': row, 'amount': value, 'asset': _asset_kind(text), 'line': line, 'source': source,
                           'date': str(row.get('contribution_receipt_date') or '')[:10]})
             continue
         if source and source != own and source in network_committees:
             internal[source]['amount'] += value
             internal[source]['rows'].append(row)
             continue
-        entity = str(row.get('entity_type') or '').upper()
-        name = str(row.get('contributor_name') or '').strip() or 'Name not reported'
-        group = name_key(name) or 'NAME NOT REPORTED'
-        if group not in donors:
-            donors[group] = {'key': group, 'names': defaultdict(Decimal), 'amount': ZERO, 'rows': [],
-                             'entity': entity, 'committee': source, 'contribution': True, 'held': ZERO,
-                             'held_kinds': set()}
-        donor = donors[group]
-        donor['amount'] += value
-        donor['names'][name] += value
-        donor['rows'].append(row)
-        donor['contribution'] = donor['contribution'] and line in CONTRIBUTION_LINES
+        _donor, group = donor_of(row, value, source, line)
         if role == 'in_kind_contribution' and line in CONTRIBUTION_LINES:
             gifts.append({'row': row, 'donor': group, 'amount': value, 'asset': _asset_kind(text),
                           'date': str(row.get('contribution_receipt_date') or '')[:10],
@@ -421,6 +431,25 @@ def ledger(key, unit, network_committees):
         if pair:
             pair.pop(0)
             booked.append(gift)
+    # Paul's money rule (2026-09-26, lane J2): sale proceeds leave the inflow only as the pair of a gift of
+    # the same asset booked in this window - the gift names its donor, the sale only the exchange. An asset
+    # with no gift booked here was given before this window (FAIRSHAKE's 2024 bitcoin, sold in 2025): its
+    # proceeds are the only record of that money in the window, so they count as received, named as filed
+    # and flagged sold_asset, instead of leaving a "Not in the summary" hole.
+    booked_kinds = {gift['asset'] for gift in booked if gift['asset']}
+    unpaired = [sale for sale in sales if (sale['asset'] not in booked_kinds if sale['asset'] else not booked_kinds)]
+    if unpaired:
+        counted = {id(sale) for sale in unpaired}
+        sales = [sale for sale in sales if id(sale) not in counted]
+        for sale in unpaired:
+            if sale['source'] and sale['source'] != own and sale['source'] in network_committees:
+                internal[sale['source']]['amount'] += sale['amount']
+                internal[sale['source']]['rows'].append(sale['row'])
+                continue
+            donor, _group = donor_of(sale['row'], sale['amount'], sale['source'], sale['line'])
+            donor['sold_asset'] += sale['amount']
+            if sale['asset']:
+                donor['sold_asset_kinds'].add(sale['asset'])
     # Sold first in, first out, per kind of asset; what is left is still held.
     booked.sort(key=lambda gift: (gift['date'], gift['sub_id']))
     remaining = {id(gift): gift['amount'] for gift in booked if gift['asset']}
@@ -450,6 +479,42 @@ def ledger(key, unit, network_committees):
             held += left
             donors[gift['donor']]['held'] += left
             donors[gift['donor']]['held_kinds'].add(gift['asset'])
+    # Paul's money rule (2026-09-26, lane J2): a negative entry nets only against receipts from the same
+    # contributor dated on or before it - a charge-back or refund can return only money already given.
+    # What an entry dated before those receipts cannot net returns money given before this window
+    # (Democrats Serve 2024: Tomorrow's Jobs' -$8,500 of 2023-09-11 against its $10,300 of 2024): the
+    # later receipts count as given, and that part leaves the committee as a refund, as filed. A
+    # contributor whose entries net to zero or below in date order is handled as before.
+    def unbacked(rows):
+        balance, left, early = ZERO, ZERO, []
+        dated = sorted(((str(row.get('contribution_receipt_date') or '')[:10], dec(row.get('contribution_receipt_amount')),
+                         index, row) for index, row in enumerate(rows)), key=lambda item: (item[0], item[1] < 0, item[2]))
+        for _day, value, _index, row in dated:
+            if value > 0:
+                balance += value
+            elif value < 0:
+                covered = min(balance, -value)
+                balance -= covered
+                if covered < -value:
+                    left += -value - covered
+                    early.append(row)
+        return left, early
+
+    early_refunds = []
+    for group, donor in donors.items():
+        left, rows = unbacked(donor['rows'])
+        if left > 0 and donor['amount'] + left > 0:
+            donor['amount'] += left
+            filed = max(donor['names'].items(), key=lambda item: (abs(item[1]), item[0]))[0]
+            early_refunds.append({'key': group, 'name': filed, 'amount': left, 'rows': rows, 'entity': donor['entity'],
+                                  'committee': donor['committee'], 'line': _negative_line(rows, collector),
+                                  'before_receipts': True})
+    for source, item in internal.items():
+        left, rows = unbacked(item['rows'])
+        if left > 0 and item['amount'] + left > 0:
+            item['amount'] += left
+            early_refunds.append({'key': source, 'name': source, 'amount': left, 'rows': rows, 'entity': 'COM',
+                                  'committee': source, 'line': _negative_line(rows, collector), 'before_receipts': True})
     # A donor's charge-backs and refunds net against that donor's gifts in this window. One that nets
     # to zero or below gave before the window: it is never drawn as a donor (never a negative link),
     # and what it nets below zero left this committee as a refund (lane I, SLF 2022: Robert Weirman's
@@ -469,6 +534,7 @@ def ledger(key, unit, network_committees):
             refunded_donors.append({'key': source, 'name': source, 'amount': -item['amount'], 'rows': item['rows'],
                                     'entity': 'COM', 'committee': source,
                                     'line': _negative_line(item['rows'], collector)})
+    refunded_donors.extend(early_refunds)
     refunded_donors.sort(key=lambda entry: (-entry['amount'], entry['key']))
     refunds_to_donors = sum((entry['amount'] for entry in refunded_donors), ZERO)
     sold = sum((sale['amount'] for sale in sales), ZERO)
@@ -484,6 +550,8 @@ def ledger(key, unit, network_committees):
             'held_kinds': sorted({kind for donor in donors.values() for kind in donor['held_kinds']}),
             'excess_proceeds': sum((value for kind, value in proceeds.items() if kind is not None and value > 0), ZERO)
                                + max(unclassified, ZERO),
+            'proceeds_counted': sum((sale['amount'] for sale in unpaired), ZERO),
+            'proceeds_counted_kinds': sorted({sale['asset'] for sale in unpaired if sale['asset']}),
             'counted_in': counted_in, 'donors': donors, 'internal': dict(internal), 'internal_total': internal_total,
             # Intake is gross of what donors were refunded beyond their gifts in this window.
             'refunds_to_donors': refunds_to_donors, 'refunded_donors': refunded_donors, 'netted_donors': netted_donors,
@@ -688,6 +756,9 @@ def committee_flow(committee, cycle, *, identifier='', depth=DEFAULT_DEPTH, root
                           kind='donor', name_as_filed=filed, entity=donor['entity'], contribution=donor['contribution'])
         if donor['held'] > 0:
             node['held'], node['held_kinds'] = cents(donor['held']), sorted(donor['held_kinds'])
+        if donor.get('sold_asset', ZERO) > 0:
+            # Lane J2: proceeds of a donated asset whose gift was booked before this window, counted here.
+            node['sold_asset'] = {'amount': cents(donor['sold_asset']), 'kinds': sorted(donor['sold_asset_kinds'])}
         graph.link(node['id'], root_node['id'], donor['amount'], 'receipt', donor['rows'], _records(donor['rows']))
     if root_ledger['unitemized'] > 0:
         node = graph.node('donor:unitemized', stage=0, label='Unitemized contributions', kind='donor',
@@ -1243,6 +1314,12 @@ def notes_of(built, totals):
         noun = 'crypto' if kinds and kinds <= CRYPTO else 'stock' if kinds == {'stock'} else 'assets'
         notes.append({'key': 'in_kind', 'text': f'Donated {noun} counted once, at its value when given '
                                                 f'({name} booked {short_money(root["booked"])} in and out again)'})
+    if root.get('proceeds_counted', ZERO) > 0:
+        kinds = set(root.get('proceeds_counted_kinds') or ())
+        noun = 'crypto' if kinds and kinds <= CRYPTO else 'stock' if kinds == {'stock'} else 'assets'
+        notes.append({'key': 'sold_asset', 'text': f'Donated {noun} given before this window and sold in it: '
+                                                   f'{short_money(root["proceeds_counted"])} counted as received, '
+                                                   'named as filed (flagged on the donor)'})
     pooled = [built['label'](ident) for ident in sorted(built['drawn'], key=lambda value: (built['hop'][value], value))
               if ident != built['committee'] and built['ledgers'].get(ident)]
     if pooled:
@@ -1332,13 +1409,19 @@ def refund_details(item, name):
     lines = []
     if item['donor_refunds'] > 0:
         lines.append(f"{exact_money(item['donor_refunds'])} refunds filed on the committee's summary")
-    refunded = item['refunded_donors']
-    if refunded:
+    # Lane J2: entries dated before the contributor's receipts in this window are listed apart; those
+    # receipts count as given.
+    for early, words in ((False, 'beyond their receipts in this window'),
+                         (True, 'dated before their receipts in this window, which count as given')):
+        refunded = [entry for entry in item['refunded_donors'] if bool(entry.get('before_receipts')) == early]
+        if not refunded:
+            continue
         count = len(refunded)
+        total = sum((entry['amount'] for entry in refunded), ZERO)
         names = ', '.join(f"{_contributor(entry, name)} {exact_money(entry['amount'])} (line {entry['line']})"
                           for entry in refunded[:3])
-        lines.append(f"{exact_money(item['refunds_to_donors'])} in negative receipts from {count} contributor"
-                     f"{'s' if count != 1 else ''} beyond their receipts in this window: {names}"
+        lines.append(f"{exact_money(total)} in negative receipts from {count} contributor"
+                     f"{'s' if count != 1 else ''} {words}: {names}"
                      f"{f', and {count - 3} more' if count > 3 else ''}")
     if item['netted_donors']:
         count = item['netted_donors']
@@ -1353,15 +1436,21 @@ def refund_notes(ledgers, root, name, drawn):
     for ident, item in sorted(ledgers.items()):
         if ident not in drawn or item is None or (item['refunds_to_donors'] <= 0 and not item['netted_donors']):
             continue
-        count, zero = len(item['refunded_donors']), item['netted_donors']
+        early = sum(1 for entry in item['refunded_donors'] if entry.get('before_receipts'))
+        count, zero = len(item['refunded_donors']) - early, item['netted_donors']
         where = '' if ident == root else f' by {name(ident)}'
         parts = [f"{count} contributor{'s' if count != 1 else ''} whose receipts in this window net below zero "
                  '(negative entries as filed)'] if count else []
         if zero:
             parts.append(f"{zero} netted to zero")
+        words = '; '.join(parts) + ('; not drawn as donors' if parts else '')
+        if early:
+            # Lane J2: their negative entries are dated before their receipts here, which count as given.
+            words += ('; ' if parts else '') + (f"{early} contributor{'s' if early != 1 else ''} with negative "
+                                                'entries dated before their receipts in this window (those receipts '
+                                                'count as given)')
         notes.append({'key': 'refunds_to_donors',
-                      'text': f"Refunds to donors {exact_money(item['refunds_to_donors'])}{where}: "
-                              + '; '.join(parts) + '; not drawn as donors'})
+                      'text': f"Refunds to donors {exact_money(item['refunds_to_donors'])}{where}: " + words})
     return notes
 
 
@@ -1449,7 +1538,8 @@ def committee_payload(committee, cycle, *, identifier='', basis='reported', top=
         'not_yet_spent': {'cash': cents(item['cash_end']), 'held': cents(item['held']),
                           'total': cents(item['cash_end'] + item['held']), 'held_kinds': item['held_kinds']},
         'in_kind': {'booked': cents(item['booked']), 'proceeds': cents(item['sold']), 'held': cents(item['held']),
-                    'excess_proceeds': cents(item['excess_proceeds'])},
+                    'excess_proceeds': cents(item['excess_proceeds']),
+                    **({'proceeds_counted': cents(item['proceeds_counted'])} if item['proceeds_counted'] else {})},
         'refunds_netted': cents(item['refunds']),
         'receipts_as_reported': cents(item['receipts']),
         'disbursements_as_reported': cents(item['disbursements']),

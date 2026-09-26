@@ -37,3 +37,22 @@ unchanged <- function(reason, duplicate_memo, duplicate_reason) reason
 stopifnot(!identical(labels(unchanged), expected),
           identical(labels(unchanged)[1:2], rep('disclosure_memo_unmatched', 2L)))
 cat('Negative control: the unfixed export labels removed memos unmatched PASS\n')
+
+# Lane J2 (Paul's money rule, 2026-09-26): a counted memo with an unproven link to a parent
+# carries that doubt in its receipt-role reason, and the exporter applies it (and sets
+# receipt_role_unverified) right after the duplicate relabel.
+definition <- Filter(function(expression) is_definition(expression, 'export_memo_unproven_reason'), as.list(expressions))
+stopifnot(length(definition) == 1L)
+eval(definition[[1L]])
+third <- grep('`:=`(receipt_role_reason,export_memo_unproven_reason(receipt_role_reason,memo_link_unproven_of,memo_link_unproven_reason))',
+              calls, fixed = TRUE)
+fourth <- grep('`:=`(receipt_role_unverified,1L)', calls, fixed = TRUE)
+stopifnot(length(third) == 1L, third == second + 1L, length(fourth) == 1L, fourth == third + 1L)
+link_of <- c('4012320251134471027', '', NA, 'P1')
+link_reason <- c('back_reference_amount_differs', '', NA, 'back_reference_amount_differs')
+reasons <- export_memo_unproven_reason(c('disclosure_memo_unmatched', 'disclosure_memo_unmatched', '', ''),
+                                       link_of, link_reason)
+stopifnot(identical(reasons, c('memo_link_unproven: back_reference_amount_differs; parent 4012320251134471027',
+                               'disclosure_memo_unmatched', '',
+                               'memo_link_unproven: back_reference_amount_differs; parent P1')))
+cat('Memo reason: a counted memo with an unproven parent link says so PASS\n')

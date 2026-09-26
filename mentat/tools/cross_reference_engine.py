@@ -50,7 +50,7 @@ from decimal import Decimal, InvalidOperation
 import json
 import re
 
-from pac_evidence import REDISCLOSURE_REASON, is_memo, memo_redisclosure_parents, name_key, receipt_role
+from pac_evidence import REDISCLOSURE_REASON, is_memo, memo_redisclosure_parents, name_key, receipt_role, receipt_rules
 from attribution_policy import explicit_rejection, names_organization, source_exclusion
 
 # Adjacent-position markers (ruling D3, 2026-09-17). An advisor or similar
@@ -565,6 +565,11 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                                          role=lambda row: decisions[str(row.get("sub_id") or "")]["receipt_role"])
 
     # Explicit local memo references, with donor/date/sign and amount coverage.
+    # Paul's money rule (2026-09-26, lane J2): the referenced parent proves the memo a
+    # duplicate at the same amount, or when the memo states the redesignation of part of
+    # a larger parent (schema.R mentat_memo_duplicate_plan's twin); any other smaller
+    # memo stays counted and goes to review.
+    redesignation_pattern = receipt_rules()['redesignation_event_pattern']
     parent_index = defaultdict(list)
     for sid, row in merged.items():
         d = decisions[sid]
@@ -581,6 +586,8 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
         if not refs:
             refs = {f"{a}.{b}" for a, b in re.findall(r"\[([A-Z0-9]+):([A-Z0-9.]+)\]",
                     _text(str(row.get("receipt_type_full") or "") + " " + str(row.get("memo_text") or "")))}
+        redesignated = bool(re.search(redesignation_pattern, name_key(
+            str(row.get("receipt_type_full") or "") + " " + str(row.get("memo_text") or ""))))
         candidates = set()
         for ref in refs:
             for parent in parent_index[(str(row.get("committee_id") or ""), _file(row), ref)]:
@@ -590,7 +597,8 @@ def analyze(rows, evidence=None, headers=None, affiliations=None, filing_manifes
                         and _text(p.get("contributor_name")) == _text(row.get("contributor_name"))
                         and _day(row.get("contribution_receipt_date"))
                         and _day(p.get("contribution_receipt_date")) == _day(row.get("contribution_receipt_date"))
-                        and amount * pa > 0 and abs(pa) >= abs(amount)):
+                        and amount * pa > 0
+                        and (abs(pa) == abs(amount) or (redesignated and abs(pa) >= abs(amount)))):
                     candidates.add(parent)
         if len(candidates) == 1:
             parent = next(iter(candidates))
