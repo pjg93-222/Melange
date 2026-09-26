@@ -57,3 +57,18 @@ test('Changed interface files ask for a restart, and a current build shows no ba
   await page.close();
  }
 });
+// Finding 11 (2026-09-25): a read-only console cannot restart itself, and its own origin is the same stale
+// process, so its banner says a restart of that process brings the current build, offers no Restart and names no URL.
+test('A read-only console on an older build says a restart of its process brings the current one, with no Restart and no URL',{timeout:120000},async t=>{
+ const browser=await chromium.launch({headless:true,channel:process.env.MENTAT_BROWSER_CHANNEL||'chrome'});t.after(()=>browser.close());const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const html=fs.readFileSync(path.join(app,'index.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/<link\b[^>]*>/gi,'');await page.route('http://app.fixture/**',route=>route.fulfill({contentType:'text/html',body:html}));await page.goto('http://app.fixture/#chart-studio');
+ await page.evaluate(()=>{window.calls=[];const build={git_sha:'2906980d1',code_sha256:'a'.repeat(64),assets_sha256:'b'.repeat(64),on_disk_code_sha256_now:'c'.repeat(64),on_disk_assets_sha256_now:'b'.repeat(64),started_at:1757809380,port:8812,pid:79412,busy:false};window.fetch=async url=>{calls.push(String(url));let body;if(String(url).startsWith('/api/session?light=1'))body={token:'token',read_only:true,evidence_collection_available:true,api_version:2,build,...build};else if(url==='/api/evidence')body={snapshots:[]};else throw Error('Unexpected background request '+url);return {ok:true,json:async()=>body};};});
+ for(const file of ['ui-state.js','coverage-view.js','app.js'])await page.addScriptTag({path:path.join(app,file)});
+ await page.waitForFunction(()=>document.querySelector('#stale-banner')&&document.querySelector('#stale-banner').hidden===false);
+ const message=await page.locator('#stale-banner-message').textContent();
+ assert.equal(message,'This read-only console runs an older build. It shows the current build once its process is restarted.');
+ assert.doesNotMatch(message,/app\.fixture|Close this tab/,'its own origin is the same stale process');
+ assert.equal(await page.locator('#stale-restart').isVisible(),false,'a read-only console cannot restart itself');
+ assert.deepEqual(await page.evaluate(()=>calls),['/api/session?light=1']);
+ assert.deepEqual(errors,[]);
+});

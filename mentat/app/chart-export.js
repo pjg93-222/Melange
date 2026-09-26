@@ -13,12 +13,17 @@
   function compose(source, title, context, options) {
     const settings = options || {};
     if (!source) throw new Error('Create a chart before exporting.');
-    const ns = 'http://www.w3.org/2000/svg', box = source.viewBox.baseVal;
+    // A drawing fitted to the screen (a Chart Studio pie, 2026-09-24) leaves
+    // the console as it always has: its __mentatExport draws today's picture,
+    // title, subtitle and geometry included. The on-screen node still answers
+    // for the background colour, as before.
+    const drawing = typeof source.__mentatExport === 'function' ? source.__mentatExport() : source;
+    const ns = 'http://www.w3.org/2000/svg', box = drawing.viewBox.baseVal;
     if (![box.x,box.y,box.width,box.height].every(Number.isFinite) || box.width <= 0 || box.height <= 0) throw new Error('Nothing to export.');
     // A map's viewBox moves and shrinks while zooming. Keep that viewBox on a
     // nested, clipped viewport, and add the caption outside it. Resetting x/y to
     // zero without moving the marks exports a different geographic area.
-    const absoluteWidth = /^\d+(?:\.\d+)?$/.test(source.getAttribute('width') || '') ? Number(source.getAttribute('width')) : 1000;
+    const absoluteWidth = /^\d+(?:\.\d+)?$/.test(drawing.getAttribute('width') || '') ? Number(drawing.getAttribute('width')) : 1000;
     const width = Math.max(320, absoluteWidth), height = width * box.height / box.width;
     const wrap = (value, size) => String(value ?? '').split(/\r?\n/).flatMap(line => line.match(new RegExp('.{1,' + size + '}(?:\\s|$)|.{1,' + size + '}', 'g')) || ['']);
     const lineWidth = Math.max(20, Math.floor((width - 32) / 7));
@@ -28,7 +33,7 @@
     const caption = settings.caption !== false;
     const titles = caption ? wrap(title, lineWidth) : [], lines = caption ? wrap(context, lineWidth) : [];
     const fullHeight = caption ? Math.ceil(height + 35 + (titles.length + lines.length) * 17) : Math.ceil(height);
-    const svg = document.createElementNS(ns,'svg'), viewport = source.cloneNode(true);
+    const svg = document.createElementNS(ns,'svg'), viewport = drawing.cloneNode(true);
     for (const [key,value] of Object.entries({xmlns:ns,viewBox:`0 0 ${width} ${fullHeight}`,width,height:fullHeight})) svg.setAttribute(key,value);
     viewport.removeAttribute('class'); viewport.removeAttribute('style');
     for (const [key,value] of Object.entries({x:0,y:0,width,height,overflow:'hidden',viewBox:`${box.x} ${box.y} ${box.width} ${box.height}`})) viewport.setAttribute(key,value);

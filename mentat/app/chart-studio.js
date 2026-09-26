@@ -896,12 +896,13 @@
         await renderContributionMap(ticket,compiled,null,view,notes);return;
       }
       dropMapsIn(node('canvas'));
-      node('canvas').hidden=false;node('table').hidden=true;node('canvas').className=view.canvasClass+'studio-canvas fit-'+state.fit;
+      node('canvas').hidden=false;node('table').hidden=true;node('canvas').className=view.canvasClass+'studio-canvas fit-'+state.fit;delete node('canvas').dataset.pieFit;
       const options=chartOptions(state),pick=row=>{if(view.primary)inspectContributions(row);};
       try{
         if(temporal){
           const measure=temporal.column.name+(temporal.column.unit==='cents'?' (USD)':'');
-          const drawn=paint.chartSVG(temporal.model,measure,{type:temporal.model.type||spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Period'},{name:measure}]},view.title,view.scope,options);node('canvas').replaceChildren(drawn.svg);
+          // A pie is fitted to its chart box on screen (screenOptions).
+          const drawn=paint.chartSVG(temporal.model,measure,{type:temporal.model.type||spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Period'},{name:measure}]},view.title,view.scope,screenOptions(view,options,temporal.model.type||spec.type));node('canvas').replaceChildren(drawn.svg);placeFitted(drawn.svg);
           const lines=core.referenceValues(temporal.model,state.analytics);if(lines.length&&drawn.plot)overlayReference(drawn.svg,drawn.plot,lines);
         }else if(CANVAS_TYPES.includes(spec.type)){
           const ids=spec.measures,id=ids[0],currency=contributions.MONEY.has(id),nameOf=m=>result.columns.find(c=>c.id===m)?.name||m;
@@ -910,7 +911,7 @@
           // Shares and a radar need nonnegative values: negative groups are left
           // out and counted, never allowed to stop the drawing (census B-E07).
           if(SHARE_TYPES.includes(spec.type)){const negative=groups.filter(g=>g.value<0).length;if(negative){groups=groups.filter(g=>g.value>=0);notes.push(fmt(negative)+' group'+(negative===1?' has':'s have')+' a negative '+nameOf(id)+' and '+(negative===1?'is':'are')+' left out of the '+markTypeName(spec.type).toLowerCase()+'; bars show signed amounts.');}}
-          const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0,warnings:[]},nameOf(id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Group'},{name:id}]},view.title,view.scope,options);node('canvas').replaceChildren(drawn.svg);
+          const drawn=paint.chartSVG({type:spec.type,groups,selected:result.totals.records,excluded:0,warnings:[]},nameOf(id)+(currency?' (USD)':''),{type:spec.type,aggregation:'sum',x:0,y:1},{sheet:sheetName(),columns:[{name:'Group'},{name:id}]},view.title,view.scope,screenOptions(view,options,spec.type));node('canvas').replaceChildren(drawn.svg);placeFitted(drawn.svg);
           const lines=core.referenceValues({type:spec.type,groups},state.analytics);if(lines.length&&drawn.plot)overlayReference(drawn.svg,drawn.plot,lines);
         }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(node('canvas'),rows,spec,pick);
         else contributionPlot.render(node('canvas'),rows,spec,pick);
@@ -2509,6 +2510,56 @@
   function roomFit(canvas) {
     return canvas === el('canvas') && chartRoomy() ? {fitHeight: canvas.clientHeight, barPitchMax: ROOM_PITCH} : {};
   }
+  // Paul, 2026-09-24: a pie or doughnut on screen fits the chart box it is
+  // drawn in - the whole pie, no scrolling, nothing clipped, and no title,
+  // subtitle or caption of its own (the header and the figures above already
+  // say them). The box is the canvas's content box, measured without the
+  // scrollbar a drawing being replaced may have left behind. The main canvas
+  // on the desktop grid has a height of its own; a board tile, or the canvas
+  // on a narrow page, grows with its chart, so only its width is given.
+  // Everything that takes the chart out of the page (downloads, Copy image,
+  // the briefing and its slides) draws today's picture: chart-export.js calls
+  // the drawing's __mentatExport.
+  const PIE_MARKS = ['pie', 'doughnut'];
+  function fitBox(canvas) {
+    if (!canvas || !canvas.isConnected || typeof getComputedStyle !== 'function') return null;
+    const style = getComputedStyle(canvas);
+    if (style.display === 'none') return null;
+    const px = name => parseFloat(style[name]) || 0;
+    const width = (style.overflowY === 'scroll' ? canvas.clientWidth : canvas.offsetWidth - px('borderLeftWidth') - px('borderRightWidth'))
+      - px('paddingLeft') - px('paddingRight');
+    const height = (style.overflowX === 'scroll' ? canvas.clientHeight : canvas.offsetHeight - px('borderTopWidth') - px('borderBottomWidth'))
+      - px('paddingTop') - px('paddingBottom');
+    return width > 0 && height > 0 ? {width: Math.floor(width), height: Math.floor(height)} : null;
+  }
+  function pieFit(canvas, state) {
+    const box = fitBox(canvas);
+    if (!box) return null;
+    const bounded = canvas === el('canvas') && !(window.matchMedia && window.matchMedia('(max-width: 1099px)').matches);
+    // Entire view caps the drawing at the window less the chrome (chart-studio.css).
+    const height = bounded ? ((state && state.fit) === 'entire' ? Math.min(box.height, window.innerHeight - 430) : box.height) : null;
+    return {width: box.width, height: height != null && height >= 120 ? height : null};
+  }
+  // The renderer's options for this surface: a pie is fitted to its box, every
+  // other mark is drawn as before. No overlay reaches a pie (it has no value
+  // axis, it draws its own labels, and core.totalNote refuses its grand total),
+  // so its export needs nothing added to today's picture.
+  function screenOptions(view, options, type) {
+    const canvas = view.el('canvas'), mainCanvas = canvas === el('canvas');
+    if (!PIE_MARKS.includes(type)) { if (mainCanvas) delete canvas.dataset.pieFit; return options; }
+    const fit = pieFit(canvas, view.state);
+    // Drawn while the canvas could not be measured (a hidden panel): the
+    // resize observer below redraws it once the canvas has a size.
+    if (mainCanvas) { if (fit) delete canvas.dataset.pieFit; else canvas.dataset.pieFit = 'wanted'; }
+    return fit ? Object.assign({}, options, {fit}) : options;
+  }
+  // A bounded pie is held at the box's height (the stylesheet gives it the
+  // width that goes with it); one whose box grows with it scales with its width.
+  // Set through the style object: the console's CSP refuses a style attribute.
+  function placeFitted(svg) {
+    const fit = svg && svg.__fit;
+    if (fit && fit.height) svg.style.height = Math.floor(fit.height) + 'px';
+  }
   // theme.js can fail to load (the console restarting mid-page); the ink and
   // face then fall back to chart-export.js's own instead of a ReferenceError.
   const studioTheme = () => globalThis.MentatTheme || {ink: '#202522', sans: 'Arial, sans-serif'};
@@ -2712,6 +2763,7 @@
     if (view.primary) { lastResult = null; lastConfig = null; }
     node('reconcile').hidden = true;
     node('canvas').replaceChildren();
+    delete node('canvas').dataset.pieFit;
     // A worksheet map still loading its geometry must not draw over this view.
     node('canvas').dataset.mapTicket = '';
     node('table').replaceChildren();
@@ -2818,9 +2870,12 @@
       const source = placed ? placed.data : data;
       node('canvas').hidden = false;
       node('table').hidden = true;
+      // The canvas wears this view's fit class before a pie measures it.
+      node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
       // The seventh argument (engine contract W8) asks the renderer itself for
-      // a value label on every mark of every type.
-      const options = chartOptions(state);
+      // a value label on every mark of every type; a pie is also fitted to its
+      // chart box (screenOptions).
+      const options = screenOptions(view, chartOptions(state), result.type);
       let drawn;
       try { drawn = paint.chartSVG(result, measure, config, source, view.title, view.scope, options); }
       catch (error) {
@@ -2844,6 +2899,7 @@
       }
       node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
       node('canvas').replaceChildren(drawn.svg);
+      placeFitted(drawn.svg);
     }
     node('note').textContent = notes.concat(result.note ? [result.note] : []).join(' ') ||
       source.reportName + ' / ' + data.sheet + ' · ' + fmt(result.selected) + ' rows selected';
@@ -3941,6 +3997,7 @@
     node('inspect-all').title = kind === 'industry' ? 'Choose a bar: each industry is its own report' : '';
     node('canvas').hidden = false; node('table').hidden = true;
     node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
+    delete node('canvas').dataset.pieFit;
     // Compared scopes multiply the bars (groups x scopes). On the desktop grid
     // the main canvas is a fixed region, so the pitch shrinks from S1's 28px
     // toward 14px until the bars, the axis and the legend fit it; a board tile
@@ -3970,8 +4027,9 @@
         // Each compared scope (and Colour member) is its own series over the periods.
         const temporal = periodModel(rows, Object.assign({}, spec, {dimensions: [...plotted, 'scope']}), compiled, state, notes);
         const measure = temporal.column.name + (temporal.column.unit === 'cents' ? ' (USD)' : '');
-        const drawn = paint.chartSVG(temporal.model, measure, {type: temporal.model.type || type, aggregation: 'sum', x: 0, y: 1}, {sheet: sheetName(), columns: [{name: 'Period'}, {name: measure}]}, title, view.scope, options);
+        const drawn = paint.chartSVG(temporal.model, measure, {type: temporal.model.type || type, aggregation: 'sum', x: 0, y: 1}, {sheet: sheetName(), columns: [{name: 'Period'}, {name: measure}]}, title, view.scope, screenOptions(view, options, temporal.model.type || type));
         node('canvas').replaceChildren(drawn.svg);
+        placeFitted(drawn.svg);
         const lines = core.referenceValues(temporal.model, state.analytics);
         if (lines.length && drawn.plot) overlayReference(drawn.svg, drawn.plot, lines);
       } else if (type === 'map') {
@@ -3985,8 +4043,9 @@
         let groups = rows.map(row => ({label: [...plotted.map(d => row[d] == null || row[d] === '' ? 'Unknown' : String(row[d])), row.scope].join(' / '), value: row[id] / (currency ? 100 : 1), n: 1,
           seriesIndex: scopeNames.indexOf(row.scope), extra: Object.fromEntries(ids.slice(1).map(m => [nameOf(m), row[m] == null ? null : row[m] / (contributions.MONEY.has(m) ? 100 : 1)]))}));
         if (SHARE_TYPES.includes(type)) { const negative = groups.filter(g => g.value < 0).length; if (negative) { groups = groups.filter(g => g.value >= 0); notes.push(fmt(negative) + ' group' + (negative === 1 ? ' has' : 's have') + ' a negative ' + nameOf(id) + ' and ' + (negative === 1 ? 'is' : 'are') + ' left out of the ' + markTypeName(type).toLowerCase() + '; bars show signed amounts.'); } }
-        const drawn = paint.chartSVG({type, groups, selected: results.reduce((n, r) => n + r.totals.records, 0), excluded: 0, warnings: []}, nameOf(id) + (currency ? ' (USD)' : ''), {type, aggregation: 'sum', x: 0, y: 1}, {sheet: sheetName(), columns: [{name: 'Group'}, {name: id}]}, title, view.scope, options);
+        const drawn = paint.chartSVG({type, groups, selected: results.reduce((n, r) => n + r.totals.records, 0), excluded: 0, warnings: []}, nameOf(id) + (currency ? ' (USD)' : ''), {type, aggregation: 'sum', x: 0, y: 1}, {sheet: sheetName(), columns: [{name: 'Group'}, {name: id}]}, title, view.scope, screenOptions(view, options, type));
         node('canvas').replaceChildren(drawn.svg);
+        placeFitted(drawn.svg);
         const lines = core.referenceValues({type, groups}, state.analytics);
         if (lines.length && drawn.plot) overlayReference(drawn.svg, drawn.plot, lines);
       } else if (MentatContributionCharts.TYPES.includes(type)) {
@@ -4809,6 +4868,29 @@
         renderView();
       }, 150);
     }).observe(el('canvas'));
+    // A pie fitted to its chart box is drawn again, from the answer already
+    // held, once the box has changed by a few px and the resize has settled:
+    // the window, the Data panel, the shelves, the Inspector, Expand chart.
+    // A pie drawn while the canvas could not be measured (a hidden panel) is
+    // drawn again as soon as it can be.
+    let refitTimer = 0;
+    const refit = () => {
+      const canvas = el('canvas');
+      if (overviewMode || dataSourceTab || boardTiles() > 1 || canvas.hidden) return;
+      const svg = canvas.querySelector(':scope > svg[data-fit]'), drawn = svg && svg.__fit;
+      if (!drawn && canvas.dataset.pieFit !== 'wanted') return;
+      const fit = pieFit(canvas, sheet());
+      if (!fit) return;
+      // (2026-09-25) A pie whose box grows with it (height null) already scales
+      // with that box's width through CSS, so it is drawn again only for a
+      // change wider than a classic 15-17px scrollbar: a page scrollbar that
+      // comes and goes with the pie's own height no longer redraws it every
+      // 150ms. A bounded pie keeps the 4px step.
+      if (drawn && Math.abs(fit.width - drawn.box.width) < (fit.height == null ? 24 : 4) && (fit.height == null) === (drawn.box.height == null) &&
+        (fit.height == null || Math.abs(fit.height - drawn.box.height) < 4)) return;
+      renderView();
+    };
+    new ResizeObserver(() => { clearTimeout(refitTimer); refitTimer = setTimeout(refit, 150); }).observe(el('canvas'));
   }
   // Cancelling aborts the request that is preparing and leaves the last good
   // view exactly where it was: renderContributionView ignores AbortError.

@@ -81,8 +81,33 @@
     return ids.length?{...query,dimensions:['reported_file_num'],aggregate_filters:[],
       filters:[...(query.filters||[]),{field:'source_id',op:'in',value:ids}],limit:ids.length,offset:0}:null;
   }
+  /* P6, batch 2 (2026-09-25). While the console builds a query view or a records sidecar, the two
+     routes answer at once, HTTP 200, {status:'building', phase, message, processed_records,
+     total_records (an int, or null), elapsed_ms, retry_after_ms, ...}; the index build's older
+     {status:'preparing', ...} means the same. Only those two are pending here: 'queued' belongs to
+     snapshot jobs. Code review finding 7 (2026-09-25): the contract lives in one place, Chart
+     Studio's pollPending (chart-studio-contributions.js, loaded before this file), so this page and
+     Chart Studio stop at the same time for the same answers. These names adapt it for this page:
+     retry_after_ms held between 250 ms and 5 s, else 0.5, 1, 2, then 4 s; after about 15 minutes of
+     polling the page stops and offers Retry, which sends retry:true once. */
+  const shared=(typeof module!=='undefined'&&module.exports?require('./chart-studio-contributions.js'):root.MentatStudioContributions)||null;
+  const {PENDING,PENDING_CEILING_MS,pendingDelay}=shared||{};
+  const isPending=answer=>Boolean(shared.pendingStatus(answer));
+  const pendingText=(answer,path='query')=>shared.pendingText(shared.pendingProgress(answer,{path}));
+  const pendingCeiling=(path,ceilingMs)=>shared.pendingCeiling(path,ceilingMs,undefined,'this page');
+  // ask(body) sends one request; onProgress hears pendingText() and the progress of each pending
+  // answer. retry:true goes on the first request only. current() false stops at once (AbortError);
+  // an error, a 'failed' answer and the ceiling are marked retryable. Finding 7 repair (2026-09-25):
+  // if chart-studio-contributions.js did not load, the page still boots and takes a ready answer
+  // (status 'ready', or none); it does not poll, and any other answer stops with a reload message.
+  async function pollReady(ask,{path='query',body={},current=null,retry=false,onProgress=null,sleep,now,ceilingMs}={}){
+    if(!shared){const answer=await ask(retry===true?{...body,retry:true}:body);if(answer&&typeof answer==='object'&&answer.status!=null&&answer.status!=='ready')throw new Error('This page could not load chart-studio-contributions.js, so it cannot wait while the server prepares this view. Reload the page.');return answer;}
+    return shared.pollPending(ask,{path,body,current,retry,sleep,now,ceilingMs,surface:'this page',
+      onProgress:onProgress&&(progress=>onProgress(shared.pendingText(progress),progress))});
+  }
   const api={defaults,buildQuery,filterValue,csv,csvCell,calendarNotice,basisLabel,basisFields,sameExportSource,markFilters,
-    FEC_CONDUITS,filingLink,reportNumberQuery,isConduitRecord};
+    FEC_CONDUITS,filingLink,reportNumberQuery,isConduitRecord,
+    PENDING,PENDING_CEILING_MS,isPending,pendingDelay,pendingText,pendingCeiling,pollReady};
   if(typeof module!=='undefined'&&module.exports){module.exports=api;return;}
   root.MentatContributionStudio=api;
   const $=id=>document.getElementById(id), plot=root.MentatContributionPlot;
@@ -97,21 +122,14 @@
   function status(message,busy=false){const notice=!busy&&result&&renderedRequest?calendarNotice(renderedRequest,result.rows):'';text('status',[message,notice].filter(Boolean).join(' '));$('status').classList.toggle('busy',busy);$('visualization').setAttribute('aria-busy',String(busy));}
   function option(select,value,label){const o=node('option',label);o.value=value;select.append(o);return o;}
   function options(id,values,selected,empty){const select=$(id);select.replaceChildren();if(empty)option(select,'',empty);values.forEach(v=>option(select,typeof v==='object'?v.id:v,typeof v==='object'?(v.label||v.name):v));select.value=selected;}
-  function failure(error){if(error?.name==='AbortError')return;showError(error?.message||String(error));status('View unavailable. Adjust the selection or retry.');}
+  function offerRetry(container,action){const button=node('button','Retry','retry');button.type='button';button.onclick=()=>{button.disabled=true;action();};container.append(' ',button);}
+  function failure(error,retry){if(error?.name==='AbortError')return;showError(error?.message||String(error));if(retry&&error?.retryable)offerRetry($('error'),retry);status('View unavailable. Adjust the selection or retry.');}
   async function request(path,data){
     const response=await fetch('/api/contributions/'+path,data?{method:'POST',headers:{'Content-Type':'application/json','X-Mentat-Token':token},body:JSON.stringify(data)}:{});
     const body=await response.json();if(!response.ok||body.error)throw new Error(body.error||'Contribution service unavailable.');return body;
   }
-  async function ready(path,query,current,onProgress){
-    for(;;){
-      const data=await request(path,query);
-      if(current&&!current())throw new DOMException('View changed','AbortError');
-      if(data.status==='failed')throw new Error(data.message||'The source index could not be verified.');
-      if(data.status!=='preparing'&&data.status!=='building'&&data.status!=='queued')return data;
-      onProgress?.(data.message||'Verifying source records and building the contribution index…');
-      await new Promise(resolve=>setTimeout(resolve,Math.min(5000,Math.max(500,data.retry_after_ms||1500))));
-      if(current&&!current())throw new DOMException('View changed','AbortError');
-    }
+  function ready(path,query,current,onProgress,retry=false){
+    return pollReady(body=>request(path,body),{path,body:query,current,retry,onProgress});
   }
   function remember(){history.push(clone(view));if(history.length>40)history.shift();$('undo').disabled=false;}
   function change(action,{query=true}={}){remember();action();if(query)view.offset=0;sync();if(query)run();else render();}
@@ -188,23 +206,23 @@
     text('result-count','');text('receipt-basis','Awaiting verified result');$('receipt-values').replaceChildren();text('receipt-scope','');$('reconciliation').replaceChildren();
     for(const id of ['export-csv','export-svg','export-png','inspect-all','previous-page','next-page'])$(id).disabled=true;
   }
-  async function run(){
+  async function run(options={}){
     const current=++revision;clearResult();showError('');status('Reading verified contribution records…',true);
     try{
       if(!dataset()?.available)throw new Error(dataset()?.message||'Select an available source.');
       const query=buildQuery(view);
       if(!query.measures.length)throw new Error('Add at least one measure to create a view.');
       if(view.type==='map'&&(query.dimensions.length!==2||!query.dimensions.includes('zip5')||!query.dimensions.includes('state')||query.measures.length!==1||query.measures[0]!=='amount'))throw new Error('The ZIP map uses Contributor ZIP, recorded state and the selected amount. Select the map preset to restore those fields.');
-      const data=await ready('query',query,()=>current===revision,message=>status(message,true));
+      const data=await ready('query',query,()=>current===revision,message=>status(message,true),options.retry===true);
       if(current!==revision)return;
       result=data;renderedRequest=query;receipt();render();
       if(facetDataset!==view.dataset)loadFacets(view.dataset,current);
-    }catch(e){if(current===revision)failure(e);}
+    }catch(e){if(current===revision)failure(e,()=>run({retry:true}));}
   }
   async function loadFacets(source,current){
     try{
       const base={dataset:source,basis:'raw',measures:['records'],limit:100000,offset:0};
-      const values=await Promise.all(['cycle','company'].map(field=>request('query',{...base,dimensions:[field],sort:[{field,direction:'asc'}]})));
+      const values=await Promise.all(['cycle','company'].map(field=>ready('query',{...base,dimensions:[field],sort:[{field,direction:'asc'}]},()=>current===revision&&source===view.dataset)));
       if(current!==revision||source!==view.dataset)return;
       ['cycle','company'].forEach((field,i)=>options(field,values[i].rows.map(r=>r[field]).filter(Boolean),view[field],field==='cycle'?'All available cycles':'All tracked companies'));
       facetDataset=source;
@@ -259,14 +277,14 @@
   async function fillReportLinks(query,data,cells,current){
     let numbers=null;
     try{
-      const reply=await request('records',reportNumberQuery(query,data.rows));
+      const reply=await ready('records',reportNumberQuery(query,data.rows),current);
       if(!current())return;
       if(reply.status==='ready'&&['workbook_sha256','database_sha256','index_token'].every(key=>reply.provenance?.[key]&&reply.provenance[key]===data.provenance?.[key]))
         numbers=new Map((reply.rows||[]).map(row=>[String(row.source_id),row.reported_file_num]));
     }catch(error){if(!current())return;}
     for(const[td,row]of cells)drawFiling(td,filingLink(row,numbers?(numbers.get(String(row.source_id))??null):null));
   }
-  async function inspect(selection=null,next=false){
+  async function inspect(selection=null,next=false,again=false){
     if(!result)return;
     if(!next){recordSelection=selection;recordOffset=0;}
     const seq=++recordRevision,current=revision;
@@ -276,7 +294,7 @@
     text('inspection-title',title);text('inspection-scope',basisLabel(view.basis,result.basis_label||view.basis)+(recordSelection?' · Selected mark':' · Before grouped filters')+' · Amounts use the same accounting basis as the chart.');
     try{
       const query={...renderedRequest,filters,aggregate_filters:[],limit:100,offset:recordOffset};
-      const data=await ready('records',query,()=>seq===recordRevision&&current===revision);
+      const data=await ready('records',query,()=>seq===recordRevision&&current===revision,message=>{if(seq===recordRevision)$('record-table').replaceChildren(node('p',message));},again);
       if(seq!==recordRevision||current!==revision)return;
       if(!['workbook_sha256','database_sha256','index_token'].every(key=>data.provenance?.[key]&&data.provenance[key]===result.provenance?.[key]))throw new Error('Source changed before record inspection. Refresh the chart before inspecting its records.');
       const columns=[['date','Date'],['contributor','Contributor'],['company','Company'],['recipient','Recipient'],['amount_cents','Selected amount'],['raw_cents','Raw observation'],['zip5','ZIP'],['state','State'],['decision_status','Accounting status'],['receipt_role','Receipt role'],['reasons','Reasons'],['source_id','Source ID'],['source_url','FEC evidence']];
@@ -286,7 +304,7 @@
       if(conduitCells.length)fillReportLinks(query,data,conduitCells,()=>seq===recordRevision&&current===revision);
       text('record-count',`${data.total_records?recordOffset+1:0}–${recordOffset+data.rows.length} of ${data.total_records.toLocaleString()} included observations`);$('more-records').disabled=!data.has_more;
       $('inspection').scrollIntoView({behavior:'smooth',block:'nearest'});
-    }catch(e){if(seq===recordRevision){$('record-table').replaceChildren(node('p',e.message));}}
+    }catch(e){if(e?.name==='AbortError')return;if(seq===recordRevision){const note=node('p',e.message);if(e?.retryable)offerRetry(note,()=>inspect(recordSelection,true,true));$('record-table').replaceChildren(note);}}
   }
   function saved(){try{const value=JSON.parse(localStorage.getItem(storageKey)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}}
   function refreshSaved(){options('saved-view',Object.keys(saved()).map(id=>({id,label:id})), '','Open a saved view…');}

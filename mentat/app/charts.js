@@ -5,6 +5,10 @@
   const esc = escapeHtml, math = globalThis.MentatCharts;
   let data = null, suggestions = [], revision = 0, chart = null, chartConfig = null, redrawTimer, graphContext = null;
   const palette = MentatTheme.palette;
+  // Paul, 2026-09-24: groups take the theme's twelve categorical colours, tinted
+  // past twelve (theme.js categoryColour). A theme without them (the parity
+  // corpus's stand-in) cycles the palette exactly as before.
+  const categoryColour = typeof MentatTheme.categoryColour === 'function' ? MentatTheme.categoryColour : i => palette[i % palette.length];
   const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits:3});
   function numericAxis(low,high,integer=false) {
     if(low===high){const padding=Math.abs(low)*.1||1;low-=padding;high+=padding;}
@@ -232,6 +236,116 @@
     empty.append(svgNode('title',{},titleText),svgNode('desc',{},scopeText),svgNode('rect',{width:960,height:200,fill:'#fff'}),svgNode('text',{x:20,y:100,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':14},container.textContent||'Nothing to draw for this selection.'));
     return {svg:empty,plot:null};
   }
+  /* Pie and doughnut (Paul, 2026-09-24).
+     - On screen (options.fit = {width, height} of the chart box in CSS px;
+       height null where the box grows with its chart) a pie is drawn at the
+       box's shape: the whole pie, no title, subtitle or caption of its own (the
+       Studio's header and figures above say them), and a legend centred beside
+       it that tightens its rows, takes a second column and then ends "+N more".
+       Every text is sized in CSS px, so none is under 11px on screen.
+     - Anything that leaves the page draws today's picture instead:
+       svg.__mentatExport re-draws it without options.fit (chart-export.js).
+     - Names live in the legend only. With Labels on, a slice of 4% or more
+       carries its percentage inside it, in white or plum, whichever reads
+       better on that slice; nothing is drawn outside the pie. */
+  const PIE = {labelShare: .04, legendPx: 13, notePx: 12, labelPx: 12, labelMinPx: 11, marginPx: 12, gapPx: 22,
+    safetyPx: 4, legendMinPx: 170, columnMinPx: 120, minBoxPx: 240, hMin: 360, hMax: 670, hFree: 540};
+  const PLUM = '#342649';
+  // The drawing, in viewBox units, that fills a chart box of `box` CSS px: 960
+  // wide, as tall as the box's shape (within 360-670), and never taller than
+  // the box less a few px, so the canvas never needs a scrollbar for it.
+  function pieFrame(box) {
+    const width = box ? Number(box.width) : NaN, height = box && box.height != null ? Number(box.height) : null;
+    if (!(width >= PIE.minBoxPx)) return null;
+    const bounded = height != null && height > 0;
+    let hPx = bounded ? Math.max(1, Math.min(height - PIE.safetyPx, width * PIE.hMax / 960)) : width * PIE.hFree / 960;
+    const H = Math.round(100 * (bounded ? Math.max(PIE.hMin, Math.min(PIE.hMax, 960 * hPx / width)) : PIE.hFree)) / 100;
+    const wPx = hPx * 960 / H;
+    return {H, hPx, wPx, s: wPx / 960, bounded, box: {width, height: bounded ? height : null}};
+  }
+  // Text widths from the theme's measured canvas when it has one; otherwise the
+  // same per-character estimate theme.js falls back to, so node tests agree.
+  function textWidth(text, size) {
+    if (typeof MentatTheme.measureText === 'function') return MentatTheme.measureText(text, size, MentatTheme.sans);
+    let em = 0;
+    for (const c of String(text)) em += c === ' ' ? .278 : c >= '0' && c <= '9' ? .556 : c >= 'A' && c <= 'Z' ? .68 : c >= 'a' && c <= 'z' ? .5 : .3;
+    return em * size;
+  }
+  function fitLabel(text, max, size, suffix) {
+    if (typeof MentatTheme.fitText === 'function') return MentatTheme.fitText(text, max, size, MentatTheme.sans, suffix);
+    const value = String(text), tail = suffix || '';
+    if (textWidth(value + tail, size) <= max) return value + tail;
+    const chars = Array.from(value);
+    let n = chars.length;
+    while (n > 0 && textWidth(chars.slice(0, n).join('') + '…' + tail, size) > max) n--;
+    return (n ? chars.slice(0, n).join('').replace(/[\s,·]+$/, '') : '') + '…' + tail;
+  }
+  // White or plum, whichever contrasts more with the slice as it is drawn
+  // (a colour-measure fill is laid over white at its opacity).
+  function rgbOf(colour) {
+    const text = String(colour || '').trim();
+    let m = /^#([0-9a-f]{3})$/i.exec(text);
+    if (m) return [...m[1]].map(c => parseInt(c + c, 16));
+    m = /^#([0-9a-f]{6})$/i.exec(text);
+    if (m) return [0, 2, 4].map(at => parseInt(m[1].slice(at, at + 2), 16));
+    m = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i.exec(text);
+    return m ? [m[1], m[2], m[3]].map(Number) : null;
+  }
+  const luminance = rgb => { const [r, g, b] = rgb.map(v => { v /= 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * r + .7152 * g + .0722 * b; };
+  const contrastOf = (a, b) => { const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x); return (hi + .05) / (lo + .05); };
+  function inkOn(fill) {
+    const rgb = rgbOf(fill && fill.fill), opacity = fill && fill['fill-opacity'] != null ? Number(fill['fill-opacity']) : 1;
+    if (!rgb) return '#ffffff';
+    const seen = rgb.map(v => v * opacity + 255 * (1 - opacity)), plum = rgbOf(PLUM);
+    return contrastOf(seen, [255, 255, 255]) >= contrastOf(seen, plum) ? '#ffffff' : PLUM;
+  }
+  // Where each slice's percentage goes. Largest slices first, each at its
+  // slice's centroid (a doughnut: mid-ring), stepping along its radius if it
+  // must. A label stays inside the pie (outside a doughnut's hole) and clear of
+  // every other label. The first plan that places every label wins: inside its
+  // own slice with one decimal, then as a whole percent, then at the 11px
+  // floor, then anywhere inside the pie; a label that fits nowhere is left to
+  // the legend, which lists every share.
+  function pieLabelPlan(slices, geo, font, minFont) {
+    const eligible = slices.filter(s => s.share >= PIE.labelShare).sort((a, b) => b.share - a.share || a.index - b.index);
+    for (const [size, digits, strict] of [[font, 1, true], [font, 0, true], [minFont, 0, true], [minFont, 0, false]]) {
+      const placed = placePieLabels(eligible, geo, size, digits, strict, false);
+      if (placed.length === eligible.length) return placed;
+    }
+    return placePieLabels(eligible, geo, minFont, 0, false, true);
+  }
+  function placePieLabels(eligible, geo, size, digits, strict, greedy) {
+    const placed = [], pad = size * .15, {cx, cy, r, inner} = geo;
+    const inRing = box => [[box.x0, box.y0], [box.x1, box.y0], [box.x0, box.y1], [box.x1, box.y1]].every(([x, y]) => Math.hypot(x - cx, y - cy) <= r - pad)
+      && (!inner || Math.hypot(Math.min(Math.max(cx, box.x0), box.x1) - cx, Math.min(Math.max(cy, box.y0), box.y1) - cy) >= inner + pad);
+    const inWedge = (box, s) => [[box.x0, box.y0], [box.x1, box.y0], [box.x0, box.y1], [box.x1, box.y1]].every(([x, y]) => {
+      let a = Math.atan2(y - cy, x - cx);
+      while (a < s.a0) a += 2 * Math.PI;
+      while (a >= s.a0 + 2 * Math.PI) a -= 2 * Math.PI;
+      return a <= s.a1;
+    });
+    for (const s of eligible) {
+      const text = (100 * s.share).toFixed(digits) + '%', w = textWidth(text, size) * 1.08 + 2 * pad, h = size * 1.2 + 2 * pad;
+      const span = s.a1 - s.a0, whole = span >= 2 * Math.PI - 1e-9, angle = whole && inner ? -Math.PI / 2 : s.a0 + span / 2;
+      // A slice over half the pie has its centroid near the hub, where every
+      // other slice's edge meets; its label goes out along the same middle ray
+      // to 40% of the radius, still well inside it.
+      const centroid = 2 * r * Math.sin(span / 2) / (3 * span / 2);
+      const base = inner ? (r + inner) / 2 : whole ? 0 : span > Math.PI ? Math.max(centroid, .4 * r) : centroid, step = r * .06;
+      let spot = null;
+      for (const rho of [base, base + step, base - step, base + 2 * step, base - 2 * step, base + 3 * step, base - 3 * step, base + 4 * step]) {
+        if (rho < 0) continue;
+        const x = cx + rho * Math.cos(angle), y = cy + rho * Math.sin(angle), box = {x0: x - w / 2, y0: y - h / 2, x1: x + w / 2, y1: y + h / 2};
+        if (!inRing(box) || (strict && !whole && !inWedge(box, s))) continue;
+        if (placed.some(p => box.x0 < p.box.x1 && p.box.x0 < box.x1 && box.y0 < p.box.y1 && p.box.y0 < box.y1)) continue;
+        spot = {x, y, box};
+        break;
+      }
+      if (!spot) { if (greedy) continue; return placed; }
+      placed.push({slice: s, text, size, x: spot.x, y: spot.y, box: spot.box});
+    }
+    return placed;
+  }
   // Shared renderer. The classic dialog and Chart Studio both draw through this
   // one function; `plot` reports the value-axis geometry (pixel positions of the
   // axis minimum and maximum) so a caller can overlay reference lines exactly.
@@ -258,8 +372,10 @@
     // Pie legends list 16 members unless options.legend asks for more (W8).
     const legendCap=opts.legend==='all'?Infinity:Number.isInteger(opts.legend)&&opts.legend>0?opts.legend:16;
     const pieLegend=['pie','doughnut'].includes(result.type)?Math.min(result.groups.length,legendCap):0;
-    const canvasHeight=result.type==='horizontal'?Math.max(620,result.groups.length*36+190):['pie','doughnut'].includes(result.type)?(pieLegend>16?90+pieLegend*32+80:670):620;
-    const svg = svgNode('svg',{xmlns:'http://www.w3.org/2000/svg',viewBox:`0 0 960 ${canvasHeight}`,role:'img','aria-label':titleText});
+    // On screen a pie takes the shape of its chart box (options.fit, above).
+    const fit=['pie','doughnut'].includes(result.type)?pieFrame(opts.fit):null;
+    const canvasHeight=fit?fit.H:result.type==='horizontal'?Math.max(620,result.groups.length*36+190):['pie','doughnut'].includes(result.type)?(pieLegend>16?90+pieLegend*32+80:670):620;
+    const svg = svgNode('svg',{xmlns:'http://www.w3.org/2000/svg',viewBox:`0 0 960 ${canvasHeight}`,role:'img','aria-label':titleText,...(fit?{'data-fit':'pie'}:{})});
     const add = (tag,attrs,text) => { const n = svgNode(tag,attrs,text); svg.append(n); return n; };
     add('title',{},titleText); add('desc',{},scopeText);
     add('rect',{width:960,height:canvasHeight,fill:'#fff'});
@@ -274,8 +390,12 @@
       const node=label(x,y,'',attrs);shown.forEach((part,i)=>node.append(svgNode('tspan',{x,dy:i?'1.25em':0},part)));tooltip(node,source);return node;
     };
     const tick=n=>n!==0&&Math.abs(n)<.001?Number(n.toPrecision(3)).toExponential():Math.abs(n)>=1e6?Number(n).toLocaleString('en-US',{notation:'compact',maximumFractionDigits:2}):Number(n).toLocaleString('en-US',{maximumSignificantDigits:8});
+    // A pie fitted to the screen draws no title or subtitle: the page's header
+    // and figures above the chart already say them.
+    if(!fit){
     wrapped(20,28,titleText,83,2,{'font-size':19,'font-weight':400,'font-family':MentatTheme.serif});
     label(20,70,`${source.sheet} · ${fmt(result.selected-result.excluded)} ${result.points?'plotted':'source'} rows${result.points?.length>2000?' · all points, no sampling':''}`);
+    }
     // r3 encodings (W7, W11): tooltip lines, a sequential fill for a Colour
     // measure, a per-member colour for Colour joined to the grouping, and value
     // labels. A result without those fields draws exactly as before.
@@ -285,7 +405,7 @@
       (result.labelLabel&&g.labelValue!=null?`\n${result.labelLabel}: ${typeof g.labelValue==='number'?fmt(g.labelValue):g.labelValue}`:'');
     const range=Array.isArray(result.colorRange)?result.colorRange:null;
     const paint=(g,color)=>range&&typeof g.colorValue==='number'?{fill:palette[0],'fill-opacity':.25+.75*(range[1]>range[0]?(g.colorValue-range[0])/(range[1]-range[0]):1)}:{fill:color};
-    const colourOf=(g,i)=>palette[(Number.isInteger(g.seriesIndex)?g.seriesIndex:i)%palette.length];
+    const colourOf=(g,i)=>categoryColour(Number.isInteger(g.seriesIndex)?g.seriesIndex:i);
     const labelText=(g,value)=>g.labelValue!=null?(typeof g.labelValue==='number'?fmt(g.labelValue):readable(String(g.labelValue))):fmt(value);
     const markText=(x,y,text,attrs={})=>{if(opts.labels)label(x,y,text,{'font-size':11,'text-anchor':'middle','data-mark-label':'true',...attrs});};
     const clip=(text,n=28)=>String(text).length>n?String(text).slice(0,n-1)+'…':String(text);
@@ -293,26 +413,99 @@
     const sized=(result.groups||result.points||[]).map(g=>Math.abs(Number(g.size))).filter(Number.isFinite),maxSize=sized.length?Math.max(...sized)||1:0;
     const sizeShare=g=>maxSize&&g&&g.size!=null&&Number.isFinite(Number(g.size))?Math.abs(Number(g.size))/maxSize:null;
     const sizeFactor=g=>{const s=sizeShare(g);return s===null?1:.35+.65*Math.sqrt(s);};
-    if(range){const x0=760;add('rect',{x:x0,y:52,width:12,height:12,fill:palette[0],'fill-opacity':.25,'data-legend':'colour'});label(x0+16,62,fmt(range[0]));
+    if(range&&!fit){const x0=760;add('rect',{x:x0,y:52,width:12,height:12,fill:palette[0],'fill-opacity':.25,'data-legend':'colour'});label(x0+16,62,fmt(range[0]));
       add('rect',{x:x0+90,y:52,width:12,height:12,fill:palette[0],'fill-opacity':1,'data-legend':'colour'});label(x0+106,62,fmt(range[1]));label(x0-6,62,result.colorLabel||'Colour',{'text-anchor':'end'});}
     // A Colour legend for marks that carry a series member (box, scatter).
-    const seriesLegend=names=>{names.slice(0,12).forEach((name,k)=>{const x=100+(k%6)*140,y=538+Math.floor(k/6)*16;add('rect',{x,y:y-9,width:10,height:10,fill:palette[k%palette.length],'data-legend':'series'});label(x+14,y,clip(name,18),{'font-size':11});});if(names.length>12)label(100,570,`+${names.length-12} more colours; see the table.`,{'font-size':11});};
+    const seriesLegend=names=>{names.slice(0,12).forEach((name,k)=>{const x=100+(k%6)*140,y=538+Math.floor(k/6)*16;add('rect',{x,y:y-9,width:10,height:10,fill:categoryColour(k),'data-legend':'series'});label(x+14,y,clip(name,18),{'font-size':11});});if(names.length>12)label(100,570,`+${names.length-12} more colours; see the table.`,{'font-size':11});};
     if (['pie','doughnut'].includes(result.type)) {
       const total = result.groups.reduce((n,g) => n+g.value,0); let angle = -Math.PI/2;
+      const share = g => (100*g.value/total).toFixed(1), slices = [];
+      // Fitted: every length is set in CSS px and converted to drawing units.
+      const u = fit ? px => px / fit.s : px => px;
+      let cx = 285, cy = 290, r = 175, legend = null;
+      if (fit) {
+        // The pie is as tall as the box allows; the legend, centred beside it,
+        // tightens its rows to a floor, then takes a second column, then ends
+        // with "+N more". Pie and legend are centred across the box together.
+        const fL = u(PIE.legendPx), fN = u(PIE.notePx), mX = u(14), mY = u(PIE.marginPx), gap = u(PIE.gapPx), colGap = u(16);
+        const sw = .8*fL, textAt = sw + .55*fL, pref = 1.85*fL, tight = 1.4*fL, n = result.groups.length, listed = Math.min(n, legendCap);
+        const header = range ? 3 : 0, availH = fit.H - 2*mY;
+        // The legend's natural width: its widest row, and the Colour scale's lines.
+        const need = Math.max(textAt + Math.max(0, ...result.groups.slice(0, listed).map(g => textWidth(`${g.label} · ${share(g)}%`, fL))),
+          range ? Math.max(textWidth(result.colorLabel||'Colour', fN), textAt + Math.max(...range.map(v => textWidth(fmt(v), fN)))) : 0);
+        r = Math.max(u(36), Math.min(availH/2, (960 - 2*mX - gap - Math.min(need, u(PIE.legendMinPx)))/2));
+        const room = Math.max(0, 960 - 2*mX - gap - 2*r), canTwo = (room - colGap)/2 >= u(PIE.columnMinPx);
+        let plan = null;
+        for (const cols of canTwo ? [1, 2] : [1]) {
+          const per = Math.ceil((listed + (n > listed ? 1 : 0))/cols), pitch = Math.min(pref, availH/(header + per));
+          if (pitch >= tight - 1e-9) { plan = {cols, pitch, shown: listed}; break; }
+        }
+        if (!plan) {
+          const cols = canTwo ? 2 : 1, per = Math.max(1, Math.floor(availH/tight + 1e-9) - header);
+          plan = {cols, pitch: tight, shown: Math.max(0, Math.min(listed, cols*per - 1))};
+        }
+        const more = n - plan.shown, per = Math.max(1, Math.ceil((plan.shown + (more > 0 ? 1 : 0))/plan.cols));
+        const colW = Math.min(need, plan.cols === 1 ? room : (room - colGap)/2), width = plan.cols*colW + (plan.cols - 1)*colGap;
+        const x0 = Math.max(mX, (960 - (2*r + gap + width))/2);
+        cx = x0 + r; cy = fit.H/2;
+        legend = {...plan, per, more, colW, width, header, fL, fN, sw, textAt, colGap, x: x0 + 2*r + gap, top: (fit.H - (header + per)*plan.pitch)/2};
+      }
       result.groups.forEach((g,i) => {
-        const next = angle + 2*Math.PI*g.value/total, color = colourOf(g,i), cx=285,cy=290,r=175;
+        const next = angle + 2*Math.PI*g.value/total, color = colourOf(g,i);
         if (g.value > 0) {
           const node = g.value === total ? add('circle',{cx,cy,r,...paint(g,color)}) : add('path',{
-            d:`M ${cx} ${cy} L ${cx+r*Math.cos(angle)} ${cy+r*Math.sin(angle)} A ${r} ${r} 0 ${next-angle > Math.PI ? 1:0} 1 ${cx+r*Math.cos(next)} ${cy+r*Math.sin(next)} Z`,...paint(g,color),stroke:'#fff','stroke-width':2});
-          tooltip(node,`${g.label}: ${fmt(g.value)} (${(100*g.value/total).toFixed(1)}%)`+more(g));
-          if(opts.labels){const mid=(angle+next)/2,right=Math.cos(mid)>=0;markText(cx+(r+14)*Math.cos(mid),cy+(r+14)*Math.sin(mid)+4,`${clip(readable(g.label),22)} · ${(100*g.value/total).toFixed(1)}%`,{'text-anchor':right?'start':'end'});}
+            d:`M ${cx} ${cy} L ${cx+r*Math.cos(angle)} ${cy+r*Math.sin(angle)} A ${r} ${r} 0 ${next-angle > Math.PI ? 1:0} 1 ${cx+r*Math.cos(next)} ${cy+r*Math.sin(next)} Z`,...paint(g,color),stroke:'#fff','stroke-width':fit?u(1.5):2});
+          tooltip(node,`${g.label}: ${fmt(g.value)} (${share(g)}%)`+more(g));
+          slices.push({index:i,a0:angle,a1:next,share:g.value/total,fill:paint(g,color)});
         }
-        if (i < legendCap) { add('rect',{x:510,y:90+i*32,width:12,height:12,...paint(g,color)}); wrapped(533,100+i*32,`${g.label} · ${(100*g.value/total).toFixed(1)}%`,51,2); }
+        if (!fit && i < legendCap) { add('rect',{x:510,y:90+i*32,width:12,height:12,...paint(g,color)}); wrapped(533,100+i*32,`${g.label} · ${share(g)}%`,51,2); }
         angle = next;
       });
-      if(result.type==='doughnut')add('circle',{cx:285,cy:290,r:95,fill:'#fff'});
-      label(20,canvasHeight-50,`${grouping} · share of ${measure}`);
-      if (result.groups.length > legendCap) label(510,canvasHeight-30,'All slices shown. Full labels are in the table and CSV.');
+      const inner = result.type==='doughnut' ? (fit ? r*95/175 : 95) : 0;
+      if(result.type==='doughnut')add('circle',{cx,cy,r:inner,fill:'#fff'});
+      // Labels on: each slice of 4% or more shows its share inside it, and
+      // nothing is drawn outside the pie. The group is there, even empty, so
+      // a caller can tell the pie answered the Labels switch itself.
+      // A fitted text's size is set through the element's style object: the
+      // Studio's stylesheet sets every chart text to 18px, and the console's
+      // Content-Security-Policy (style-src 'self') refuses a style attribute.
+      const fontSized = (node, size) => { if (fit) node.style.fontSize = size + 'px'; return node; };
+      if (opts.labels) {
+        const layer = add('g',{'data-mark-label':'slices'});
+        for (const p of pieLabelPlan(slices, {cx, cy, r, inner}, fit ? u(PIE.labelPx) : 12, fit ? u(PIE.labelMinPx) : 11))
+          layer.append(fontSized(svgNode('text',{x:p.x,y:p.y+.35*p.size,'text-anchor':'middle',fill:inkOn(p.slice.fill),'font-family':MentatTheme.sans,'font-size':p.size,'font-weight':600,
+            'data-mark-label':'true','pointer-events':'none'},p.text), p.size));
+      }
+      if (legend) {
+        const L = legend, rowTop = k => L.top + k*L.pitch, baseline = (k, size) => rowTop(k) + L.pitch/2 + .35*size;
+        const text = (x, y, value, size, attrs = {}) => fontSized(add('text',{x,y,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':size,...attrs},value), size);
+        let k = 0;
+        if (range) {
+          // The Colour measure's scale: its name, then its lightest and its
+          // darkest shade, one line each so a long figure never runs out.
+          text(L.x, baseline(k, L.fN), fitLabel(result.colorLabel||'Colour', L.width, L.fN), L.fN, {'data-legend':'colour-title'}); k++;
+          for (const [opacity, value] of [[.25, range[0]], [1, range[1]]]) {
+            add('rect',{x:L.x,y:rowTop(k) + (L.pitch - L.sw)/2,width:L.sw,height:L.sw,fill:palette[0],'fill-opacity':opacity,'data-legend':'colour'});
+            text(L.x + L.textAt, baseline(k, L.fN), fitLabel(fmt(value), L.width - L.textAt, L.fN), L.fN); k++;
+          }
+        }
+        const slot = i => ({x: L.x + Math.floor(i/L.per)*(L.colW + L.colGap), row: L.header + i%L.per});
+        result.groups.slice(0, L.shown).forEach((g,i) => {
+          const {x, row} = slot(i);
+          add('rect',{x,y:rowTop(row) + (L.pitch - L.sw)/2,width:L.sw,height:L.sw,...paint(g,colourOf(g,i)),'data-legend':'pie'});
+          tooltip(text(x + L.textAt, baseline(row, L.fL), fitLabel(g.label, L.colW - L.textAt, L.fL, ` · ${share(g)}%`), L.fL, {'data-legend-row':i}), `${g.label} · ${share(g)}%`);
+        });
+        if (L.more > 0) {
+          const {x, row} = slot(L.shown);
+          tooltip(text(x, baseline(row, L.fN), `+${fmt(L.more)} more`, L.fN, {fill:MentatTheme.muted||'#62596e','data-legend-more':L.more}), 'Every slice is drawn. The table and the CSV list every group.');
+        }
+        svg.__fit = {box: fit.box, width: fit.wPx, height: fit.bounded ? fit.hPx : null, viewHeight: fit.H, scale: fit.s};
+        // Exports draw today's picture: title, subtitle, caption and geometry.
+        svg.__mentatExport = () => chartSVG(result, measure, config, source, titleText, scopeText, {...opts, fit: null}).svg;
+      } else {
+        label(20,canvasHeight-50,`${grouping} · share of ${measure}`);
+        if (result.groups.length > legendCap) label(510,canvasHeight-30,'All slices shown. Full labels are in the table and CSV.');
+      }
     } else if (result.type==='horizontal') {
       const groups=result.groups,axis=numericAxis(Math.min(0,...groups.map(g=>g.value)),Math.max(0,...groups.map(g=>g.value)),config.aggregation==='count');
       const scale=v=>280+(v-axis.min)/(axis.max-axis.min)*610;
@@ -355,7 +548,7 @@
         // Several measures (W2): measures[0] is the horizontal axis.
         const listed=Array.isArray(config.measures)&&config.measures.length>=2,xCol=listed?Number(config.measures[0].column):config.x;
         const seriesNames=Array.isArray(result.series)?result.series:null;
-        const pointPaint=p=>range&&typeof p.colorValue==='number'?paint(p,palette[0]):{fill:seriesNames&&p.series!=null?palette[Math.max(0,seriesNames.indexOf(p.series))%palette.length]:palette[0],'fill-opacity':.65};
+        const pointPaint=p=>range&&typeof p.colorValue==='number'?paint(p,palette[0]):{fill:seriesNames&&p.series!=null?categoryColour(Math.max(0,seriesNames.indexOf(p.series))):palette[0],'fill-opacity':.65};
         const xs=result.points.length?result.points.map(p=>p.x):[0,1],xAxis=numericAxis(Math.min(...xs),Math.max(...xs));
         const x=v=>100+(v-xAxis.min)/(xAxis.max-xAxis.min)*820;
         svg.setAttribute('data-total-points',result.points.length);
@@ -365,7 +558,7 @@
         else (seriesNames?seriesNames.map(name=>result.points.filter(p=>p.series===name)):[result.points]).forEach((list,k)=>{for(let start=0;start<list.length;start+=1000){
           const points=list.slice(start,start+1000);
           const path=points.map(p=>`M${x(p.x).toFixed(3)},${y(p.y).toFixed(3)}h.01`).join(' ');
-          add('path',{d:path,fill:'none',stroke:seriesNames?palette[k%palette.length]:palette[0],'stroke-width':4,'stroke-linecap':'round','stroke-opacity':.6,'data-point-count':points.length});
+          add('path',{d:path,fill:'none',stroke:seriesNames?categoryColour(k):palette[0],'stroke-width':4,'stroke-linecap':'round','stroke-opacity':.6,'data-point-count':points.length});
         }});
         for(const value of xAxis.ticks)label(x(value),453,tick(value),{'text-anchor':'middle','data-axis-tick':'x'});
         wrapped(510,510,listed||result.grain==='group'?columnLabel(xCol,source):xTitle,85,2,{'text-anchor':'middle','data-axis-title':'x'});

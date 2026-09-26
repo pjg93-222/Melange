@@ -2,6 +2,10 @@
 (function(root){
  'use strict';
  const NS='http://www.w3.org/2000/svg',palette=root.MentatTheme?.palette||['#276749','#477f9b','#aa7942','#805f87','#69783e','#ac6263','#527c77','#6f7499'];
+ // Paul, 2026-09-24: Colour members, series and measures take the theme's twelve categorical colours,
+ // tinted past twelve (theme.js categoryColour), as a pie's groups and a grouped chart's series do, so
+ // group i is the same colour in all three. A colorMap still wins. Without theme.js the palette cycles.
+ const categoryColour=typeof root.MentatTheme?.categoryColour==='function'?root.MentatTheme.categoryColour:i=>palette[i%palette.length];
  const moneyKeys=new Set(['amount','gross_amount','refunds','average_amount','median_amount','min_amount','max_amount','q1_amount','q3_amount','stddev_amount']);
  const isMoney=(id,columns=[])=>moneyKeys.has(id)||columns.some(c=>(c.id===id||c.name===id)&&['cents','currency','usd_cents'].includes(c.unit));
  function format(value,id,columns=[],compact=false){if(columns.some(c=>c.id===id&&c.unit==="date"))return value||"—";if(value==null||!Number.isFinite(Number(value)))return '—';return new Intl.NumberFormat('en-US',isMoney(id,columns)?{style:'currency',currency:'USD',maximumFractionDigits:compact?1:2,...(compact?{notation:'compact'}:{})}:{maximumFractionDigits:2,...(compact?{notation:'compact'}:{})}).format(isMoney(id,columns)?Number(value)/100:Number(value));}
@@ -186,7 +190,7 @@
   const mapped=spec.color&&spec.colorMap?Object.keys(spec.colorMap):null;
   const seen=[...new Set(plotted.map(r=>spec.color?String(r[spec.color]??'Unknown'):'Giving'))];
   const colorValues=mapped?[...mapped.filter(v=>seen.includes(v)),...seen.filter(v=>!mapped.includes(v)).sort((a,b)=>a.localeCompare(b))]:seen.sort((a,b)=>a.localeCompare(b));
-  const colorOf=value=>(mapped&&spec.colorMap[value])||palette[Math.max(0,colorValues.indexOf(value))%palette.length];
+  const colorOf=value=>(mapped&&spec.colorMap[value])||categoryColour(Math.max(0,colorValues.indexOf(value)));
   const color=row=>colorOf(spec.color?String(row[spec.color]??'Unknown'):'Giving');
   const encodedFields=[...new Set([...measures,...(spec.tooltip||[]),...(spec.labelFields||[]),...(sizeId?[sizeId]:[]),...(spec.colorMeasure?[spec.colorMeasure]:[])])];
   const valueText=(row,id)=>dims.includes(id)||columns.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'||c.type==='date'))?String(row[id]??'Unknown'):format(row[id],id,columns);
@@ -272,8 +276,8 @@
     const [la,lb]=extent(rows.map(r=>r[measures[0]])),[ra,rb]=extent(rows.flatMap(r=>rightIds.map(id=>r[id])));
     const ly=v=>bottom-(v-la)/(lb-la)*(bottom-top),ry=v=>bottom-(v-ra)/(rb-ra)*(bottom-top);
     for(let i=0;i<=5;i++){const v=la+(lb-la)*i/5,w=ra+(rb-ra)*i/5;node('line',{x1:left,x2:right,y1:ly(v),y2:ly(v),stroke:'#e8ebe6'},null,g);
-     fittedText({x:left-10,y:ly(v)+4,'text-anchor':'end',fill:palette[0],'font-size':14,'data-axis':'left'},format(v,measures[0],columns,true),96,g);
-     fittedText({x:right+10,y:ry(w)+4,'text-anchor':'start',fill:palette[1%palette.length],'font-size':14,'data-axis':'right'},format(w,rightIds[0],columns,true),96,g);}
+     fittedText({x:left-10,y:ly(v)+4,'text-anchor':'end',fill:categoryColour(0),'font-size':14,'data-axis':'left'},format(v,measures[0],columns,true),96,g);
+     fittedText({x:right+10,y:ry(w)+4,'text-anchor':'start',fill:categoryColour(1),'font-size':14,'data-axis':'right'},format(w,rightIds[0],columns,true),96,g);}
     node('line',{x1:right,x2:right,y1:top,y2:bottom,stroke:'#8a8690'},null,g);
     const every=Math.max(1,Math.ceil(n/Math.max(1,Math.min(12,Math.floor((right-left)/90)))));
     const turnCats=spec.axisLabels==='all'&&every>1;
@@ -285,9 +289,9 @@
     const drawLine=(id,scaleY,strokeOf,dashed)=>{for(const member of members){const points=rows.filter(r=>memberOf(r)===member&&r[id]!=null).map(r=>({r,i:catOf.get(label(r,catDims))})).sort((a,b)=>a.i-b.i);if(!points.length)continue;const stroke=strokeOf(points[0].r);
       node('path',{d:points.map((q,k)=>(k?'L':'M')+cx(q.i)+','+scaleY(q.r[id])).join(' '),fill:'none',stroke,'stroke-width':2.5,...(dashed?{'stroke-dasharray':'6 4'}:{})},null,g);
       points.forEach(q=>{mark('circle',{cx:cx(q.i),cy:scaleY(q.r[id]),r:4.5,fill:stroke,stroke:'white','stroke-width':1.5},q.r,g,true);if(spec.labels)fittedText({x:cx(q.i),y:scaleY(q.r[id])-10,'text-anchor':'middle',fill:stroke,'font-size':12,'data-label':'value'},labelText(q.r,format(q.r[id],id,columns,true)),90,g);});}};
-    const leftColour=r=>spec.color?color(r):palette[0];
+    const leftColour=r=>spec.color?color(r):categoryColour(0);
     if(spec.type==='bar')drawBars(measures[0],ly,leftColour);else drawLine(measures[0],ly,leftColour,false);
-    rightIds.forEach((id,k)=>{const colour=r=>spec.color?color(r):palette[(k+1)%palette.length];if(dualMark==='bar')drawBars(id,ry,colour);else drawLine(id,ry,colour,!!spec.color);});
+    rightIds.forEach((id,k)=>{const colour=r=>spec.color?color(r):categoryColour(k+1);if(dualMark==='bar')drawBars(id,ry,colour);else drawLine(id,ry,colour,!!spec.color);});
     node('text',{x:left,y:bottom+50,fill:'#59645c','font-size':13},`${name(measures[0],columns)}: left axis. ${rightIds.map(id=>name(id,columns)).join(', ')}: right axis${spec.color?' (dashed lines)':''}. Independent, labelled scales.`,g);
     axes[p]={values:rows.map(r=>r[measures[0]]),lo:la,hi:lb,at:ly,x1:left,x2:right,bar:false};
    }else if(spec.type==='scatter'){
@@ -303,7 +307,7 @@
     xs.forEach(([at,text],i)=>{if(turnTicks)fittedText({x:x(at),y:bottom+16,'text-anchor':'end',fill:'#68706b','font-size':12,transform:`rotate(-35 ${x(at)} ${bottom+16})`,'data-axis-label':'all'},text,110,g);else if(allTicks||i%Math.max(1,Math.ceil(xs.length/tickCount))===0)node('text',{x:x(at),y:bottom+25,'text-anchor':'middle',fill:'#68706b','font-size':15},text,g);});
     // Colour on the time axis itself colours each point by its period.
     const perPoint=spec.color&&spec.color===dims[0];
-    for(const [seriesIndex,s] of prepared.series.entries()){const stroke=perPoint?'#8a8690':spec.color?color(s.rows[0].row):palette[seriesIndex%palette.length];
+    for(const [seriesIndex,s] of prepared.series.entries()){const stroke=perPoint?'#8a8690':spec.color?color(s.rows[0].row):categoryColour(seriesIndex);
      for(const segment of s.segments){const d=segment.map((item,i)=>(i?'L':'M')+x(item.at)+','+y(item.row[m])).join(' ');
       if(spec.type==='area'){const path=`M${x(segment[0].at)},${y(0)} `+segment.map(item=>`L${x(item.at)},${y(item.row[m])}`).join(' ')+` L${x(segment.at(-1).at)},${y(0)} Z`;node('path',{d:path,fill:perPoint?palette[0]:stroke,'fill-opacity':.1,stroke:'none'},null,g);}
       if(sizeId)segment.slice(1).forEach((item,k)=>{const prev=segment[k],share=v=>typeof v==='number'?Math.abs(v)/maxSize:0;node('path',{d:`M${x(prev.at)},${y(prev.row[m])} L${x(item.at)},${y(item.row[m])}`,fill:'none',stroke,'stroke-width':1.5+4.5*(share(prev.row[sizeId])+share(item.row[sizeId]))/2,'stroke-linecap':'round'},null,g);});
@@ -330,7 +334,7 @@
   if(legends.length){
    const legend=node('g',{'data-legend':'series','aria-label':'Series legend'}),plan=legendPlan(legends),base=panelH*panels;
    for(const {i,value,lines,x,y}of plan.items){
-    node('rect',{x,y:base+y-11,width:11,height:11,rx:2,fill:mapped?colorOf(value):palette[i%palette.length]},null,legend);
+    node('rect',{x,y:base+y-11,width:11,height:11,rx:2,fill:mapped?colorOf(value):categoryColour(i)},null,legend);
     lines.forEach((line,j)=>node('text',{x:x+18,y:base+y+j*20,fill:'#59645c','font-size':15},line,legend));
    }
    const height=base+plan.height;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);

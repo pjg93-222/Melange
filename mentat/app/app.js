@@ -1186,9 +1186,11 @@ function renderBuild(response) {
   action.disabled = false;
   if (buildBannerMode === 'code') {
     // The launcher rebinds this same port, so this origin is where the
-    // current build answers once the restart finishes.
+    // current build answers once the restart finishes. A read-only console
+    // cannot restart itself and this origin is the same stale process, so its
+    // reader is told what brings the current build instead (2026-09-25).
     $('stale-banner-message').textContent = readOnly
-      ? `This preview runs an older build. Close this tab and open ${location.origin}.`
+      ? `This read-only console runs an older build. It shows the current build once its process is restarted.`
       : `This console runs an older build. Press Restart, or close this tab and open ${location.origin}.`;
     action.textContent = 'Restart';
     action.hidden = readOnly;

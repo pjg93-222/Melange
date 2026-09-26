@@ -1612,7 +1612,8 @@
     const amounts=shown.filter(has).map(r=>r.amount);
     const positive=Math.max(0,...amounts),negative=Math.min(0,...amounts);
     const scale=barMax/(positive-negative||1),zero=BAR_LEFT-negative*scale;
-    const colors=MentatTheme.palette;
+    // Group i takes the theme's categoryColour(i), as Chart Studio's groups do (2026-09-25); a theme without it cycles the palette.
+    const colors=MentatTheme.palette,colourOf=typeof MentatTheme.categoryColour==='function'?MentatTheme.categoryColour:i=>colors[i%colors.length];
     let covered=0;
     shown.forEach((row,i)=>{
       const top=ROW_TOP+i*pitch;
@@ -1668,7 +1669,7 @@
         group.append(svgNode('text',{x:at+tagWidth/2,y:y-1,'text-anchor':'middle','font-family':MentatTheme.sans,'font-size':NEW_TAG_SIZE,'font-weight':600,class:'graph-new-text'},'new'));
       }
       if(has(row)&&box.barMax>0){
-        const fill=typeof opts.colorFor==='function'?opts.colorFor(row,i):row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)];
+        const fill=typeof opts.colorFor==='function'?opts.colorFor(row,i):row.amount<0?MentatTheme.negative:colourOf(i);
         const bar=svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:barBase-barRise,width:Math.max(1,Math.abs(row.amount*scale)),height:barH,rx:2,fill,class:'graph-mark'});
         if(opts.animate)bar.style.setProperty('--i',String(Math.min(i,MOTION_STEPS)));
         group.append(bar);
@@ -1778,13 +1779,14 @@
     const svg=svgNode('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':titleFor[name],class:'graph-bars graph-stack'+(opts.animate?' graph-enter':'')});
     svg.append(svgNode('title',{},titleFor[name]),svgNode('desc',{},`${opts.caption??get('scope').textContent}. ${shown.length} of ${rows.length} levels. Values in USD.`));
     const span=shown.reduce((sum,row)=>sum+Math.max(0,row.amount||0),0)||1;
-    const colors=MentatTheme.palette,legend=document.createElement('div'),levels=[];
+    // Level i takes categoryColour(i), as a group does in draw() (2026-09-25).
+    const colors=MentatTheme.palette,colourOf=typeof MentatTheme.categoryColour==='function'?MentatTheme.categoryColour:i=>colors[i%colors.length],legend=document.createElement('div'),levels=[];
     legend.className='graph-legend';
     let x=0,covered=0;
     shown.forEach((row,i)=>{
       const percent=percentages&&has(row)?100*row.amount/total:null;
       if(percent!==null)covered+=percent;
-      const fill=has(row)&&row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)];
+      const fill=has(row)&&row.amount<0?MentatTheme.negative:colourOf(i);
       levels.push({id:row.id,label:row.label,fill});
       const select=()=>onClick(row.id);
       if(has(row)){

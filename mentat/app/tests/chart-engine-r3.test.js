@@ -263,8 +263,15 @@ test('W8 labels: every mark type carries data-mark-label text', () => {
   }
   const labelled = L({type: 'bar', x: 2, y: 5, aggregation: 'sum', label: {column: 3, aggregation: 'first'}});
   assert.deepEqual(labelsIn(draw(labelled, {x: 2, y: 5, aggregation: 'sum'}, {labels: true}).svg).map(n => n.textContent), ['R', 'D', 'R']);
+  // Paul, 2026-09-24: a pie names its groups in the legend only; each slice of 4% or more carries
+  // its share inside the pie (this fixture's slices all do). The label used to read "A · 38.3%",
+  // drawn outside the pie, where such labels ran off the drawing's left edge and into the legend.
   const pie = labelsIn(draw(L({type: 'pie', x: 2, y: 6, aggregation: 'sum'}), {x: 2, y: 6, aggregation: 'sum'}, {labels: true}).svg);
-  assert.match(pie[0].textContent, /^A · \d+\.\d%$/);
+  assert.ok(pie.length > 0);
+  for (const node of pie) {
+    assert.match(node.textContent, /^\d+(\.\d)?%$/);
+    assert.ok(Math.hypot(Number(attr(node, 'x')) - 285, Number(attr(node, 'y')) - 290) < 175, 'inside the pie');
+  }
 });
 
 test('W8 axis labels and pie legend options', () => {

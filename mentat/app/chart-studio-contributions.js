@@ -308,7 +308,8 @@
      snapshot jobs and is not a pending answer here. The server never gives up; the client
      stops after about 15 minutes of polling (the Insights ceiling) and says so. Every
      Chart Studio call to the two endpoints goes through pollPending(); graph.js
-     sparkReady() polls the same answers. */
+     sparkReady() polls the same answers. The standalone /contribution-studio page loads
+     this file and polls through pollPending() too (code review finding 7, 2026-09-25). */
   const PENDING=new Set(['building','preparing']),PENDING_CEILING_MS=15*60*1000,PENDING_MIN_MS=250,PENDING_MAX_MS=5000;
   const pendingStatus=answer=>answer&&typeof answer==='object'&&PENDING.has(answer.status)?answer.status:'';
   // The server's retry_after_ms held between 250 ms and 5 s (it sends 300 ms, then 750 ms,
@@ -350,9 +351,10 @@
       if(signal)signal.addEventListener('abort',stop,{once:true});
     });
   }
-  function pendingCeiling(path,ceilingMs,progress){
+  // `surface` names who stopped checking; the standalone page passes 'this page' (finding 7, 2026-09-25).
+  function pendingCeiling(path,ceilingMs,progress,surface='Chart Studio'){
     const minutes=Math.round(ceilingMs/60000),span=minutes>=1?minutes+' minute'+(minutes===1?'':'s'):Math.max(1,Math.round(ceilingMs/1000))+' seconds';
-    const error=new Error('The server is still preparing '+(path==='records'?'these source records':'this query view')+' after about '+span+', so Chart Studio stopped checking. It may still finish there; Retry checks again.');
+    const error=new Error('The server is still preparing '+(path==='records'?'these source records':'this query view')+' after about '+span+', so '+surface+' stopped checking. It may still finish there; Retry checks again.');
     error.name='PendingCeiling';error.retryable=true;error.progress=progress;return error;
   }
   // ask(body) sends one request and resolves to the server's answer. A pending answer is
@@ -361,7 +363,7 @@
   // between polls without that wait counting toward the ceiling, and sends retry:true on
   // its first request only. An error from ask() is marked retryable; an AbortError is not.
   async function pollPending(ask,{body,path='query',signal=null,current=null,retry=false,onProgress=null,gate=null,
-      sleep=pendingSleep,now=Date.now,ceilingMs=PENDING_CEILING_MS}={}){
+      sleep=pendingSleep,now=Date.now,ceilingMs=PENDING_CEILING_MS,surface='Chart Studio'}={}){
     const live=()=>{if((signal&&signal.aborted)||(current&&!current()))throw abortError();};
     const started=now();let paused=0,attempt=0,again=retry===true;
     for(;;){
@@ -375,7 +377,7 @@
       if(!pendingStatus(answer))return answer;
       const waited=now()-started-paused,delay=pendingDelay(answer,attempt);
       const progress=pendingProgress(answer,{path,attempt,waitedMs:waited,delayMs:delay});
-      if(waited>=ceilingMs)throw pendingCeiling(path,ceilingMs,progress);
+      if(waited>=ceilingMs)throw pendingCeiling(path,ceilingMs,progress,surface);
       if(onProgress)try{onProgress(progress);}catch(error){if(typeof console!=='undefined')console.error(error);}
       await sleep(delay,signal);
       if(gate){const held=now();try{await gate(signal);}finally{paused+=now()-held;}}
@@ -383,5 +385,5 @@
     }
   }
   const api={fields,PANE_FIELDS,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,querySort,orderedAxis,naturalOrder,naturalRows,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS,CHRONOLOGICAL,TIMELINE,
-    pollPending,pendingStatus,pendingDelay,pendingProgress,pendingDetail,pendingText,PENDING,PENDING_CEILING_MS,PENDING_MIN_MS,PENDING_MAX_MS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
+    pollPending,pendingStatus,pendingDelay,pendingProgress,pendingDetail,pendingText,pendingCeiling,PENDING,PENDING_CEILING_MS,PENDING_MIN_MS,PENDING_MAX_MS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
 })(globalThis);

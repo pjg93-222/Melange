@@ -44,6 +44,7 @@ test('Studio map sends geography only, preserves viewport, and rejects stale rel
   });
   for(const script of ['contribution-plot.js','contribution-map.js'])await page.addScriptTag({path:path.join(app,script)});
   await page.evaluate(()=>{const original=MentatContributionMap.render;MentatContributionMap.render=(container,options)=>{window.lastMapOptions=options;window.lastMap=original(container,options);return window.lastMap;};});
+  await page.addScriptTag({path:path.join(app,'chart-studio-contributions.js')});
   await page.addScriptTag({path:path.join(app,'contribution-studio.js')});
   await page.waitForFunction(()=>document.querySelector('#visualization svg'));
   await page.locator('[data-preset="zip"]').click();

@@ -95,10 +95,63 @@
     if(line)lines.push(line);
     return lines.length?lines:[''];
   }
+
+  // Twelve categorical colours for colouring groups (Paul, 2026-09-24). Slots
+  // 1-4 are the brand's own teal, purple, mauve and gold - palette[0..3] - so a
+  // chart of four groups or fewer is drawn exactly as before. Slots 5-12 (rose,
+  // brown, sea green, wine, olive, lilac, terracotta, blue) replace the pale
+  // aqua, lilac and taupe, whose aqua beside lilac measured 2.2 colour-blind and
+  // 8.1 normal-vision difference. Measured with the dataviz validator (OKLab
+  // x100): each new slot clears its neighbours and slot 1 - a pie closes its
+  // last slice onto its first - by >= 10.6 colour-blind (protan/deutan) and
+  // >= 15.1 normal-vision; each takes white or plum text at >= 4.5:1; none
+  // sits within 11.9 of the party colours (--party-dem, --party-rep). The one
+  // pair under the validator's normal-vision floor is the brand's own purple
+  // beside mauve (14.3), which slots 1-4 keep as they were. Slots 5-12 are
+  // literal values: the checks were run on these exact hexes. Slots 1-4 are
+  // read from the same four tokens palette reads (2026-09-25), so a brand
+  // change moves categoryColour(0..3) with palette[0..3]; the four literals
+  // are only the fallback when a token cannot be read (node:test has no
+  // stylesheet), and theme-palette.test.js holds them equal to acu-theme.css.
+  // A token as #rrggbb, the one form mixHex reads: '#abc', '#aabbcc', rgb()
+  // and rgba() (alpha dropped). Anything else is null, so the fallback is used.
+  function hexOf(value) {
+    const text = String(value || '').trim().toLowerCase();
+    if (/^#[0-9a-f]{6}$/.test(text)) return text;
+    if (/^#[0-9a-f]{3}$/.test(text)) return '#' + Array.from(text.slice(1), c => c + c).join('');
+    const rgb = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)\s*(?:[,/]\s*[\d.]+%?\s*)?\)$/.exec(text);
+    const channels = rgb ? rgb.slice(1, 4).map(Number) : [];
+    if (!rgb || !channels.every(n => n >= 0 && n <= 255)) return null;
+    return '#' + channels.map(n => Math.round(n).toString(16).padStart(2, '0')).join('');
+  }
+  const BRAND_FALLBACK = ['#327a7a', '#57447b', '#8b6984', '#eca91c'];
+  const CATEGORICAL = Object.freeze(['--acu-teal', '--acu-purple', '--acu-mauve', '--acu-gold']
+    .map((name, at) => hexOf(token(name)) || BRAND_FALLBACK[at]).concat(
+      ['#de8aab', '#7d4b00', '#3cb0a3', '#83333e', '#99973f', '#a09eea', '#d88766', '#509ecd']));
+  // Mix a #rrggbb colour toward another by a weight in 0-1, channel by channel.
+  function mixHex(hex, toward, weight) {
+    const channel = (value, at) => parseInt(value.slice(1 + at, 3 + at), 16);
+    return '#' + [0, 2, 4].map(at => {
+      const from = channel(hex, at);
+      return Math.round(from + (channel(toward, at) - from) * weight).toString(16).padStart(2, '0');
+    }).join('');
+  }
+  // The colour of group `index` (0-based). Past slot 12 a group takes slot
+  // (index mod 12) mixed 45% toward white (groups 13-24) or 30% toward black
+  // (25 on): the same colour for the same position every time, never generated
+  // at random. The first 36 groups never share a colour; from group 37 the
+  // shades repeat (hover text, the table and the CSV still name every group).
+  function categoryColour(index) {
+    const at = Number.isFinite(index) && index > 0 ? Math.floor(index) : 0;
+    const base = CATEGORICAL[at % CATEGORICAL.length];
+    if (at < CATEGORICAL.length) return base;
+    return at < 2 * CATEGORICAL.length ? mixHex(base, '#ffffff', 0.45) : mixHex(base, '#000000', 0.30);
+  }
   const theme = Object.freeze({
     sans:token('--font-sans'),serif:token('--font-serif'),
     ink:token('--chart-ink'),muted:token('--muted'),grid:token('--chart-grid'),negative:token('--chart-negative'),
     palette:['--acu-teal','--acu-purple','--acu-mauve','--acu-gold','--acu-aqua','--acu-lilac','--acu-taupe'].map(token),
+    categorical: CATEGORICAL, categoryColour: categoryColour,
     measureText: measureText, fitText: fitText, wrapText: wrapText
   });
 

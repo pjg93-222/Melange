@@ -39,7 +39,7 @@ test('Studio keeps saved page scope, exact filters and source-checked complete C
     };
     window.MentatExport={download:(content,type,name)=>downloads.push({content,type,name}),image:async(source,format,title,context)=>images.push({format,title,context})};
   });
-  for(const script of ['contribution-plot.js','contribution-studio.js'])await page.addScriptTag({path:path.join(app,script)});
+  for(const script of ['contribution-plot.js','chart-studio-contributions.js','contribution-studio.js'])await page.addScriptTag({path:path.join(app,script)});
   await page.waitForFunction(()=>document.querySelector('#visualization svg'));
   await page.locator('#next-page').click();await page.waitForFunction(()=>document.querySelector('#result-count').textContent.startsWith('51–60'));
   const count=await page.evaluate(()=>queries.length);

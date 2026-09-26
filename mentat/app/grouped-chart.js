@@ -10,6 +10,14 @@ globalThis.MentatGroupedSVG = (result,title,note='',options) => {
   const stack=['stacked','percent'].includes(result.stack)?result.stack:null, percent=stack==='percent';
   const dual=result.dual&&Array.isArray(result.dual.right)&&result.dual.right.length?result.dual:null;
   const ns='http://www.w3.org/2000/svg', horizontal=result.type==='groupedhorizontal'&&!dual, colors=MentatTheme.palette;
+  // Paul, 2026-09-24: series take the theme's twelve categorical colours, tinted
+  // past twelve (theme.js categoryColour), as a pie's groups do, so series i is
+  // the same colour in both. Lines past the plain slots (the tints) are dashed,
+  // as lines past a repeated colour were. A theme without the categorical slots
+  // cycles the palette exactly as before.
+  const categorical=typeof MentatTheme.categoryColour==='function'&&Array.isArray(MentatTheme.categorical);
+  const colorOf=j=>categorical?MentatTheme.categoryColour(j):colors[j%colors.length];
+  const dashedFrom=categorical?MentatTheme.categorical.length:colors.length;
   const lineLike=['multiline','multiarea','multidot'].includes(result.type);
   const count=result.groups.length, series=result.series.length;
   const plotHeight=horizontal?Math.max(280,count*(stack?52:24*series+28)):340;
@@ -77,14 +85,14 @@ globalThis.MentatGroupedSVG = (result,title,note='',options) => {
     else wrapped(150+step*(i+.5),90+plotHeight,g.label,24,{'text-anchor':'end','data-group-label':'true',transform:`rotate(-30 ${150+step*(i+.5)} ${90+plotHeight})`});
     g.values.forEach((v,j)=>{
       if(v.value===null)return;
-      const color=colors[j%colors.length],text=`${g.label} · ${v.series}: ${v.value.toLocaleString('en-US',{maximumFractionDigits:3})}`+detail(v);
+      const color=colorOf(j),text=`${g.label} · ${v.series}: ${v.value.toLocaleString('en-US',{maximumFractionDigits:3})}`+detail(v);
       const onRight=right.has(j),yScale=onRight?rightScale:scale,segment=stacks&&!onRight?stacks[i][j]:null;
       const at=segment?segment[1]:onRight?v.value:shown(v);
       const asLine=onRight?dual.mark==='line':lineLike;
       if(result.type==='multiline'&&!dual&&!stack){
         const x=150+step*(i+.5),y=scale(v.value),previous=result.groups[i-1]?.values[j],share=sizeShare(v),prevShare=sizeShare(previous);
         const stroke=share===null?{}:{'stroke-width':1.5+4.5*((share+(prevShare??share))/2)};
-        if(previous?.value!=null)add('line',{x1:x-step,x2:x,y1:scale(previous.value),y2:y,stroke:color,'stroke-width':2,'stroke-dasharray':j>=colors.length?'5 3':'none',...stroke});
+        if(previous?.value!=null)add('line',{x1:x-step,x2:x,y1:scale(previous.value),y2:y,stroke:color,'stroke-width':2,'stroke-dasharray':j>=dashedFrom?'5 3':'none',...stroke});
         tip(add('circle',{cx:x,cy:y,r:4,fill:v.forecast?'#fff':color,...(v.forecast?{stroke:color}:{})}),text);markLabel(x,y-8,v);
       }else if(asLine){
         // Lines, areas and dots against their own axis; stacked ends when stacked.
@@ -93,7 +101,7 @@ globalThis.MentatGroupedSVG = (result,title,note='',options) => {
         const share=sizeShare(v),prevShare=sizeShare(pv);
         if(areaPoints&&!onRight)areaPoints[j].push({i,x,top:y,base:yScale(segment?segment[0]:0)});
         if(result.type!=='multidot'||onRight){
-          if(pAt!=null)add('line',{x1:x-step,x2:x,y1:yScale(pAt),y2:y,stroke:color,'stroke-width':share===null?2:1.5+4.5*((share+(prevShare??share))/2),'stroke-dasharray':j>=colors.length?'5 3':'none'});
+          if(pAt!=null)add('line',{x1:x-step,x2:x,y1:yScale(pAt),y2:y,stroke:color,'stroke-width':share===null?2:1.5+4.5*((share+(prevShare??share))/2),'stroke-dasharray':j>=dashedFrom?'5 3':'none'});
         }
         const r=result.type==='multidot'&&share!==null?3+12*Math.sqrt(share):result.type==='multidot'?6:4;
         tip(add('circle',{cx:x,cy:y,r,fill:v.forecast?'#fff':color,...(v.forecast?{stroke:color}:{}),...(result.type==='multidot'?{'fill-opacity':.85}:{})}),text);markLabel(x,y-r-4,v);
@@ -117,11 +125,11 @@ globalThis.MentatGroupedSVG = (result,title,note='',options) => {
   // Areas (W6): one filled band per unbroken run of a series.
   if(areaPoints)areaPoints.forEach((points,j)=>{
     let run=[];const flush=()=>{if(run.length){const band=document.createElementNS(ns,'polygon');
-      for(const [k,v] of Object.entries({points:[...run.map(p=>`${p.x},${p.top}`),...run.slice().reverse().map(p=>`${p.x},${p.base}`)].join(' '),fill:colors[j%colors.length],'fill-opacity':stack?.55:.18,stroke:'none','data-series':result.series[j]}))band.setAttribute(k,v);
+      for(const [k,v] of Object.entries({points:[...run.map(p=>`${p.x},${p.top}`),...run.slice().reverse().map(p=>`${p.x},${p.base}`)].join(' '),fill:colorOf(j),'fill-opacity':stack?.55:.18,stroke:'none','data-series':result.series[j]}))band.setAttribute(k,v);
       // Under the lines and dots, which were drawn first.
       svg.insertBefore(band,svg.querySelector('circle'));}run=[];};
     points.forEach((p,k)=>{if(k&&p.i!==points[k-1].i+1)flush();run.push(p);});flush();
   });
-  result.series.forEach((name,i)=>{add('rect',{x:20,y:plotHeight+160+i*24,width:12,height:12,fill:colors[i%colors.length]});label(42,plotHeight+171+i*24,name+(right.has(i)?' (right axis)':''));});
+  result.series.forEach((name,i)=>{add('rect',{x:20,y:plotHeight+160+i*24,width:12,height:12,fill:colorOf(i)});label(42,plotHeight+171+i*24,name+(right.has(i)?' (right axis)':''));});
   return svg;
 };

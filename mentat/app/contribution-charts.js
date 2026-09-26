@@ -5,6 +5,10 @@
  const base=typeof module!=='undefined'&&module.exports?require('./contribution-plot.js'):root.MentatContributionPlot;
  const TYPES=['heatmap','highlight','stacked','dot','series-dot','treemap','bubbles','histogram','box','gantt','bullet','combination','dual-line'];
  const palette=root.MentatTheme?.palette||['#57447b','#327a7a','#c68a18','#96628d','#466d9b','#80512d'];
+ // Paul, 2026-09-24: members, series and stacks take the theme's twelve categorical colours, tinted
+ // past twelve (theme.js categoryColour), so a legend repeats no colour in its first 36 members.
+ // Without theme.js the palette cycles as before.
+ const categoryColour=typeof root.MentatTheme?.categoryColour==='function'?root.MentatTheme.categoryColour:i=>palette[i%palette.length];
  const BOX=['min_amount','q1_amount','median_amount','q3_amount','max_amount'];
  // Paul, 2026-09-23: "within the Chart Studio make sure everything is freely flexible, that all graph
  // types properly register and nothing is logically constrained, it needs to be utterly maluable".
@@ -37,7 +41,7 @@
   // V08: Colour (spec.color) separates every type by member; the legend is drawn inside the SVG.
   const colorId=spec.color&&rows.some(r=>r[spec.color]!==undefined)?spec.color:'';
   const member=r=>String(r[colorId]??'Unknown'),members=colorId?[...new Set(rows.map(member))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})):[];
-  const fillOf=name=>spec.colorMap&&spec.colorMap[name]||palette[Math.max(0,members.indexOf(name))%palette.length];
+  const fillOf=name=>spec.colorMap&&spec.colorMap[name]||categoryColour(Math.max(0,members.indexOf(name)));
   const memberFill=r=>fillOf(member(r));
   // V05: Label and Tooltip fields reach every mark's hover text, and Label replaces the drawn value.
   const isDim=id=>dims.includes(id)||cols.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'));
@@ -72,7 +76,7 @@
    const top=grow(30+line*20),g=node('g',{'data-legend':'series','aria-label':'Series legend'});
    for(const it of items){const y=top+18+it.line*20;node('rect',{x:it.x,y:y-10,width:11,height:11,rx:2,fill:fills[it.i]},null,g);if(dashed[it.i])node('line',{x1:it.x,x2:it.x+11,y1:y+3,y2:y+3,stroke:fills[it.i],'stroke-dasharray':'3 2'},null,g);text(it.x+17,y,it.s,{'font-size':12,fill:'#59645c'},g);}
   };
-  const seriesFills=list=>list.map((name,i)=>spec.colorMap&&spec.colorMap[name]||palette[i%palette.length]);
+  const seriesFills=list=>list.map((name,i)=>spec.colorMap&&spec.colorMap[name]||categoryColour(i));
   if(['heatmap','highlight'].includes(spec.type)){
    // V07: one dimension gives one column (or one column per measure); three or more key the rows by
    // the tuple of dims[1..] with dims[0] across; no dimension is one row. V09: Colour measure shades.
@@ -98,7 +102,7 @@
    const groups=[...new Set(segs.map(s=>s.g))],series=colorId?members:[...new Set(segs.map(s=>s.s))];
    if(ms.length>stackIds.length)notes.push(ms.filter(id=>!stackIds.includes(id)).map(name).join(', ')+' '+(ms.length-stackIds.length===1?'is':'are')+' in each segment’s hover detail.');
    const spans=groups.map(g=>{const ss=segs.filter(s=>s.g===g);return [ss.reduce((a,s)=>a+Math.min(0,s.v),0),ss.reduce((a,s)=>a+Math.max(0,s.v),0)];});const x=axis(spans.flat());note('Positive and negative amounts stack separately from zero.');const totals=[];
-   groups.forEach((g,i)=>{let pos=0,neg=0;const y=80+i*34;text(247,y+18,cut(g),{'text-anchor':'end'});for(const s of segs.filter(s=>s.g===g)){const v=s.v,start=v<0?neg:pos,end=start+v;if(v<0)neg=end;else pos=end;mark('rect',{x:Math.min(x(start),x(end)),y,width:Math.max(1,Math.abs(x(end)-x(start))),height:24,fill:colorId?fillOf(s.s):palette[Math.max(0,series.indexOf(s.s))%palette.length]},s.r);}totals.push(pos+neg);if(spec.labels)text(Math.max(x(pos),x(neg))+7,y+18,base.format(pos+neg,m,cols,true),{'data-label':'value','pointer-events':'none'});});
+   groups.forEach((g,i)=>{let pos=0,neg=0;const y=80+i*34;text(247,y+18,cut(g),{'text-anchor':'end'});for(const s of segs.filter(s=>s.g===g)){const v=s.v,start=v<0?neg:pos,end=start+v;if(v<0)neg=end;else pos=end;mark('rect',{x:Math.min(x(start),x(end)),y,width:Math.max(1,Math.abs(x(end)-x(start))),height:24,fill:colorId?fillOf(s.s):categoryColour(Math.max(0,series.indexOf(s.s)))},s.r);}totals.push(pos+neg);if(spec.labels)text(Math.max(x(pos),x(neg))+7,y+18,base.format(pos+neg,m,cols,true),{'data-label':'value','pointer-events':'none'});});
    reference(totals,x);legendItems=[series,seriesFills(series)];
   }else if(spec.type==='dot'||spec.type==='series-dot'){
    // V04/V08: Size scales the circle and Colour fills it by member; several measures in one unit are
@@ -106,7 +110,7 @@
    const ids=colorId?[m]:ms.filter(id=>unit(id)===unit(m)),sizeId=spec.size&&rows.some(r=>typeof r[spec.size]==='number')?spec.size:'',maxSize=Math.max(...rows.map(r=>Math.abs(Number(r[sizeId])||0)),1e-9);
    const radius=r=>sizeId&&typeof r[sizeId]==='number'?4+10*Math.sqrt(Math.abs(r[sizeId])/maxSize):7;
    const x=axis(rows.flatMap(r=>ids.map(id=>r[id])));note('One circle per selected group on a numeric axis; circles are not joined by lines.');
-   rows.forEach((r,i)=>{const y=85+i*34;text(248,y+5,cut(label(r)),{'text-anchor':'end'});ids.forEach((id,j)=>{if(r[id]==null)return;const fill=colorId?memberFill(r):ids.length>1?palette[j%palette.length]:palette[spec.type==='series-dot'?i%palette.length:0];mark('circle',{cx:x(r[id]),cy:y,r:radius(r),fill},r);if(spec.labels)text(Math.min(930,x(r[id])+12),y-10,labelText(r,base.format(r[id],id,cols,true)));});});
+   rows.forEach((r,i)=>{const y=85+i*34;text(248,y+5,cut(label(r)),{'text-anchor':'end'});ids.forEach((id,j)=>{if(r[id]==null)return;const fill=colorId?memberFill(r):ids.length>1?categoryColour(j):spec.type==='series-dot'?categoryColour(i):palette[0];mark('circle',{cx:x(r[id]),cy:y,r:radius(r),fill},r);if(spec.labels)text(Math.min(930,x(r[id])+12),y-10,labelText(r,base.format(r[id],id,cols,true)));});});
    if(ms.length>ids.length)notes.push(ms.filter(id=>!ids.includes(id)).map(name).join(', ')+' '+(ms.length-ids.length===1?'is':'are')+' in each circle’s hover detail.');
    if(sizeId)notes.push('Circle size follows the absolute magnitude of '+name(sizeId)+'.');
    reference(rows.map(r=>r[m]),x);
@@ -133,7 +137,7 @@
    const lo=Number(ordered[0].amount_bin),hi=Number(ordered.at(-1).amount_bin)+width,max=Math.max(...binTotal.values(),1),x=v=>90+(v-lo)/(hi-lo)*850,y=v=>490-v/max*390;
    for(let i=0;i<=5;i++){text(78,y(max*i/5)+4,String(Math.round(max*i/5)),{'text-anchor':'end'});node('line',{x1:90,x2:945,y1:y(max*i/5),y2:y(max*i/5),stroke:'#ece8ef'});text(90+i*170,520,base.format(lo+(hi-lo)*i/5,'amount',cols,true),{'text-anchor':'middle'});}
    const below=new Map();
-   for(const r of (stacked?ordered.slice().sort((a,b)=>Number(a.amount_bin)-Number(b.amount_bin)||keys.indexOf(stackOf(a))-keys.indexOf(stackOf(b))):ordered)){const start=Number(r.amount_bin),under=below.get(start)||0,top=under+(r.records||0);below.set(start,top);mark('rect',{x:x(start),y:y(top),width:Math.max(.5,x(start+width)-x(start)-1),height:y(under)-y(top),fill:stacked?(colorId?fillOf(stackOf(r)):palette[keys.indexOf(stackOf(r))%palette.length]):'#57447b'},r,`${fmt(start,'amount')} to less than ${fmt(start+width,'amount')}; ${r.records} observations; net ${fmt(r.amount,'amount')}`+(stacked?'; '+stackOf(r):''));}
+   for(const r of (stacked?ordered.slice().sort((a,b)=>Number(a.amount_bin)-Number(b.amount_bin)||keys.indexOf(stackOf(a))-keys.indexOf(stackOf(b))):ordered)){const start=Number(r.amount_bin),under=below.get(start)||0,top=under+(r.records||0);below.set(start,top);mark('rect',{x:x(start),y:y(top),width:Math.max(.5,x(start+width)-x(start)-1),height:y(under)-y(top),fill:stacked?(colorId?fillOf(stackOf(r)):categoryColour(keys.indexOf(stackOf(r)))):'#57447b'},r,`${fmt(start,'amount')} to less than ${fmt(start+width,'amount')}; ${r.records} observations; net ${fmt(r.amount,'amount')}`+(stacked?'; '+stackOf(r):''));}
    if(spec.labels)for(const[start,total]of binTotal)text((x(start)+x(start+width))/2,y(total)-5,String(total),{'text-anchor':'middle','font-size':11,'data-label':'value','pointer-events':'none'});
    text(480,548,'Individual observation amount (USD)',{'text-anchor':'middle'});
    reference([...binTotal.values()],y,true,'records',[90,945]);
@@ -175,7 +179,7 @@
    const lo=ordered[0].t,hi=ordered.at(-1).t,x=t=>100+(hi===lo?.5:(t-lo)/(hi-lo))*800,series=[...new Set(ordered.map(o=>o.s))],multi=series.length>1,ticks=[...new Map(ordered.map(o=>[o.t,categorical?places[o.t]:o.r[d]])).entries()];
    const slot=Math.min(32,660/ticks.length),sub=slot/series.length;
    ids.forEach((id,j)=>{const[a,b]=base.extent(rows.map(r=>r[id])),y=v=>470-(v-a)/(b-a)*370;for(let i=0;i<=5;i++)text(j?925:85,y(a+(b-a)*i/5)+4,base.format(a+(b-a)*i/5,id,cols,true),{'text-anchor':j?'start':'end',fill:multi?'#342649':palette[j]});
-    series.forEach((s,k)=>{const ink=multi?palette[k%palette.length]:palette[j];let previous=null;for(const o of ordered){if(o.s!==s)continue;const v=o.r[id];if(v==null){previous=null;continue;}
+    series.forEach((s,k)=>{const ink=multi?categoryColour(k):palette[j];let previous=null;for(const o of ordered){if(o.s!==s)continue;const v=o.r[id];if(v==null){previous=null;continue;}
      if(spec.type==='combination'&&!j)mark('rect',{x:x(o.t)-slot/2+k*sub,y:Math.min(y(0),y(v)),width:sub,height:Math.max(1,Math.abs(y(v)-y(0))),fill:ink},o.r);
      else {if(previous&&o.t===previous.t+1)node('line',{x1:x(previous.t),x2:x(o.t),y1:y(previous.r[id]),y2:y(v),stroke:ink,'stroke-width':2,...(multi&&j?{'stroke-dasharray':'6 4'}:{})});mark('circle',{cx:x(o.t),cy:y(v),r:4.5,fill:ink},o.r);}
      if(spec.labels)text(x(o.t),y(v)-8,labelText(o.r,base.format(v,id,cols,true)),{'text-anchor':'middle','font-size':11,'data-label':'value','pointer-events':'none'});previous=o;}});});

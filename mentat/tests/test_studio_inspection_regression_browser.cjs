@@ -20,7 +20,7 @@ const app=path.resolve(__dirname,'../app');
     throw new Error(url);
    };
   });
-  for(const script of ['contribution-plot.js','contribution-studio.js'])await page.addScriptTag({path:path.join(app,script)});
+  for(const script of ['contribution-plot.js','chart-studio-contributions.js','contribution-studio.js'])await page.addScriptTag({path:path.join(app,script)});
   await page.waitForFunction(()=>document.querySelector('#visualization svg'));
   await page.locator('#inspect-all').click();
   await page.waitForFunction(()=>document.querySelector('#record-table').textContent.includes('ORIGINAL DONOR'));
