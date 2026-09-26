@@ -6,7 +6,9 @@
   const BASIS={receipt:['Published included receipts','Matches the workbook’s included receipts. Economic uniqueness remains unresolved; intermediary stages may overlap.'],original_observed:['Observed original giving (provisional)','Evidence-aware original giving. Ambiguous observations remain provisional.'],original_supported:['Supported original giving (gross subset)','Positive amounts supported by the current evidence rules. Refunds are excluded; this is a partial gross subset.'],raw:['Raw source observations','Includes excluded and repeated source representations. This is not a giving total.'],pac_activity:['PAC activity on recipient receipts','Recipient-reported activity is separate from original giving and is not a complete spending ledger.']};
   const AGG={sum:'amount',mean:'average_amount',count:'records',median:'median_amount',min:'min_amount',max:'max_amount'};
   const EXTRA_MARKS=[['heatmap','Heat map'],['highlight','Highlight table'],['stacked','Stacked bars'],['dot','Circle view'],['series-dot','Side-by-side circles'],['treemap','Treemap'],['bubbles','Packed bubbles'],['gantt','Observed date span'],['bullet','Bullet comparison'],['combination','Dual combination'],['dual-line','Dual lines'],['filled-map','Filled state map']];
-  const types=new Set(['automatic','bar','line','area','circle','text','map','pie','doughnut','waterfall','pareto','radar','histogram','box',...EXTRA_MARKS.map(m=>m[0])]);
+  const types=new Set(['automatic','bar','line','area','circle','text','map','pie','doughnut','waterfall','pareto','radar','histogram','box',...EXTRA_MARKS.map(m=>m[0]),
+    // Marks v3 (lane M, boards #50-#52).
+    'square','shape','polygon','density']);
   const TIME=['date','year','cycle','quarter','month'];
   // Board S1's Data pane, by catalog id and in the board's order: Industry, Election cycle,
   // Contribution year, Company, Contribution date, Recipient, Recipient category, Party, State, ZIP;
@@ -33,7 +35,10 @@
   }
   // A tile changes the mark and keeps every pill, filter, aggregate, encoding and analysis (census
   // B-S28). Empty shelves are seeded from the fields in use, then from the source.
-  function showMeApply(tileId,state,columns,selected){
+  // Show Me draws a view of its own: one card keeps its v3 fields and a dual axis
+  // collapses to the mark the tile chose (core.adoptMarks).
+  function showMeApply(tileId,state,columns,selected){return core.adoptMarks(showMeApplyV2(tileId,state,columns,selected));}
+  function showMeApplyV2(tileId,state,columns,selected){
     if(['symbol-map','filled-map'].includes(tileId)){
       const next=structuredClone(state);next.marks={...next.marks,type:tileId==='filled-map'?'filled-map':'map'};return next;
     }
@@ -129,7 +134,9 @@
     heatmap:true,dot:true,'series-dot':true,stacked:true,histogram:true,bubbles:true,
     highlight:true,treemap:true,box:true,gantt:true,bullet:true,combination:true,'dual-line':true,
     pie:true,doughnut:true,waterfall:true,pareto:true,radar:true,map:true,'filled-map':true,
-    text:true,table:true
+    text:true,table:true,
+    // Marks v3: Density draws concentration, not single marks.
+    square:true,shape:true,polygon:true,density:'Density draws how concentrated the marks are, so it has no mark labels; Circle, Square and Shape label each mark.'
   };
   // Period analysis keeps its labels too (contract W8: charts.js draws them).
   const LABELLED_TRANSFORMS=['none','annual','yoy','change','forecast'];
@@ -146,7 +153,56 @@
   // mark id no menu offers); every other refusal became a note, and the query asks for what the
   // server can answer (engine contract, section G-V).
   const TIMELINE=['line','area','combination','dual-line'];
+  // Marks v3 (lane M): the Colour measure, Size, Label and Tooltip of a verified
+  // pie, doughnut, waterfall, Pareto or radar reach its drawing. Each group
+  // carries its own labels (charts.js liftEncodings lends them to the result).
+  // `format` is contribution-plot.js format; money stays in cents until here.
+  function canvasEncodings(group,row,spec,nameOf,format){
+    const value=id=>typeof row[id]!=='number'?row[id]??null:row[id]/(MONEY.has(id)?100:1);
+    if(spec.colorMeasure&&typeof row[spec.colorMeasure]==='number'){group.colorValue=value(spec.colorMeasure);group.colorLabel=nameOf(spec.colorMeasure);}
+    if(spec.size&&typeof row[spec.size]==='number'){group.size=value(spec.size);group.sizeLabel=nameOf(spec.size);}
+    if(spec.labelFields&&spec.labelFields.length){group.labelValue=spec.labelFields.map(id=>typeof row[id]==='number'&&format?format(row[id],id):String(row[id]??'')).join(' / ');group.labelLabel=spec.labelFields.map(nameOf).join(' / ');}
+    for(const id of spec.tooltip||[])if(row[id]!==undefined){group.extra=group.extra||{};group.extra[nameOf(id)]=value(id);}
+    return group;
+  }
+  // Marks v3, a dual axis (#52). The shelves compile once through the one-card
+  // path - bars grouped by the axis and every card's dimensions, with every other
+  // card's measure and every measure a card encodes asked for too - and the spec
+  // then names each card's measure and mark (spec.type 'cards').
+  function compileCards(state,columns,options,cards){
+    const byIndex=new Map(columns.map(f=>[f.index,f])),role=p=>(p&&byIndex.get(p.column)||{}).role||'';
+    const proxy=JSON.parse(JSON.stringify(state));delete proxy.marksCards;delete proxy.syncAxes;
+    const measures=cards.map(c=>c.measure).filter(Boolean),dims=[],carried=[];
+    const keep=(list,p)=>{if(p&&!list.some(q=>q.column===p.column&&q.aggregation===p.aggregation))list.push({column:p.column,aggregation:p.aggregation});};
+    for(const c of cards){const e=c.encodings,shape=e.shape&&e.shape.column!=null?{column:e.shape.column,aggregation:e.shape.aggregation}:null;
+      for(const p of [e.color,e.size,e.label,e.path,shape,...e.detail,...e.tooltip])if(p&&role(p))keep(role(p)==='dimension'?dims:carried,p);}
+    proxy.rows=[...core.shelf(state.rows).filter(p=>role(p)!=='measure'),...measures.slice(0,1)];
+    proxy.marks={type:'bar',color:null,size:null,label:null,detail:dims,tooltip:[...measures.slice(1),...carried]};
+    proxy.analytics={...(proxy.analytics||{}),transform:'none'};
+    const compiled=compile(proxy,columns,options);
+    const idOf=p=>{const f=p&&byIndex.get(p.column);if(!f)return '';return f.role==='measure'?(f.id==='amount'?(AGG[p.aggregation]||'amount'):f.id):f.id;};
+    const timeAxis=TIME.includes(compiled.spec.dimensions[0]);
+    const notes=compiled.notes.filter(note=>!/^Detail, Label and Tooltip dimensions/.test(note));
+    if(state.analytics&&state.analytics.transform&&state.analytics.transform!=='none')notes.push('A dual axis draws each measure with its own mark, so period analysis is left off.');
+    if(dims.length)notes.push('The cards share one level of detail: '+[...new Set(dims.map(p=>(byIndex.get(p.column)||{}).name))].join(' / ')+' splits every card’s marks.');
+    const spec=compiled.spec;
+    for(const key of ['dual','dualMark','stack','categorical','naturalOrder'])delete spec[key];
+    spec.type='cards';spec.measures=[...new Set(measures.map(idOf))];spec.synchronize=state.syncAxes===true;
+    spec.cards=cards.map((c,i)=>{const e=c.encodings,dimId=p=>p&&role(p)==='dimension'?idOf(p):'',measId=p=>p&&role(p)==='measure'?idOf(p):'';
+      if(!core.DUAL_MARKS.includes(c.type))notes.push(core.markLabel(c.type)+' cannot share a dual axis, so '+((byIndex.get(c.measure.column)||{}).name||'its measure')+' is drawn as '+(i===0?'bars':'a line')+'.');
+      const shapeField=e.shape&&e.shape.column!=null?byIndex.get(e.shape.column):null;
+      return {id:c.id,measure:idOf(c.measure),type:core.dualCardMark(c.type,i,timeAxis),glyph:c.type==='square'?'square':(e.shape&&e.shape.glyph)||'',
+        shape:shapeField&&shapeField.role==='dimension'?shapeField.id:'',shapeMap:e.shape&&e.shape.glyphs?{...e.shape.glyphs}:null,
+        color:dimId(e.color),colorMeasure:measId(e.color),size:measId(e.size),labelFields:e.label?[idOf(e.label)].filter(Boolean):[],
+        tooltip:e.tooltip.map(idOf).filter(Boolean),path:e.path?idOf(e.path):'',opacity:c.opacity,border:c.border,halo:c.halo,visible:c.visible!==false};});
+    return {...compiled,spec,notes};
+  }
   function compile(state,columns,{dataset,industry,basis='receipt',offset=0}={}){
+    // Marks v3 (#52): a dual axis compiles through compileCards; one card reads
+    // its v3 encodings (Shape, Path, Angle) from core.readCards.
+    const cardSet=core.readCards(state);
+    if(cardSet.length>=2)return compileCards(state,columns,{dataset,industry,basis,offset},cardSet);
+    const card=cardSet[0];
     const byIndex=new Map(columns.map(f=>[f.index,f])),attach=list=>core.shelf(list).map(p=>({...p,field:byIndex.get(p.column)})).filter(p=>p.field);
     const axes=attach([...(state.columns||[]),...(state.rows||[])]),dimensions=[],measures=[],allMeasures=[],notes=[],computed=new Set();
     const addDim=f=>{if(!dimensions.includes(f.id))dimensions.push(f.id);};
@@ -159,14 +215,22 @@
     axes.filter(p=>p.field.role==='dimension').forEach(p=>addDim(p.field));
     axes.filter(p=>p.field.role==='measure').forEach(p=>addTo(measures,measure(p)));
     for(const p of [...(color?[color]:[]),...detail,...labels,...tooltip,...(size?[size]:[])])if(p.field.role==='dimension')addDim(p.field);
+    // Marks v3 (#50-#52): Shape on Shape marks, Path on Line, Area and Polygon,
+    // Angle on Pie; a dimension on any of them joins each mark's grouping.
+    const v3Type=mark.type||'automatic',enc=card.encodings,v3Pill=value=>value&&value.column!=null?attach([{column:value.column,aggregation:value.aggregation}])[0]||null:null;
+    const shapePill=v3Type==='shape'?v3Pill(enc.shape):null,pathPill=core.PATH_TYPES.includes(v3Type)?v3Pill(enc.path):null,anglePill=core.ANGLE_TYPES.includes(v3Type)?v3Pill(enc.angle):null;
+    for(const p of [shapePill,pathPill,anglePill])if(p&&p.field.role==='dimension')addDim(p.field);
+    if(shapePill&&shapePill.field.role==='measure')notes.push('Shape takes a dimension; '+shapePill.field.name+' is in each mark’s tooltip.');
+    if(anglePill&&anglePill.field.role==='dimension')notes.push('Angle takes a measure; '+anglePill.field.name+' joins the grouping instead.');
     const count=columns.some(f=>f.id==='records')?'records':'amount';
+    if(anglePill&&anglePill.field.role==='measure'){const id=measure(anglePill),at=measures.indexOf(id);if(at>=0)measures.splice(at,1);measures.unshift(id);}
     if(!measures.length){measures.push(count);notes.push('No measure is placed, so each mark counts '+(count==='records'?'source observations':'the selected amount')+'.');}
     allMeasures.push(...measures);
     const encoded=p=>p.field.role==='measure'?measure(p):p.field.id;
     const colorMeasure=color&&color.field.role==='measure'?encoded(color):'';
     const sizeMeasure=size&&size.field.role==='measure'?encoded(size):'';
     if(size&&!sizeMeasure)notes.push('Size follows a measure; '+size.field.name+' joins the grouping instead.');
-    const tipMeasures=[...tooltip,...detail].filter(p=>p.field.role==='measure').map(encoded);
+    const tipMeasures=[...tooltip,...detail,...[shapePill,pathPill].filter(Boolean)].filter(p=>p.field.role==='measure').map(encoded);
     const encodingIds=[...labels.filter(p=>p.field.role==='measure').map(encoded),...tipMeasures,sizeMeasure,colorMeasure].filter(Boolean);
     for(const id of encodingIds)addTo(allMeasures,id);
     // A histogram, box or date span asks the server for its own statistics; the
@@ -178,11 +242,14 @@
     // Circle with two or more measures is a scatter ([0] x, [1] y, the rest in the tooltip); with one
     // it is one circle per group at its value.
     if(type==='circle')type=measures.length>=2?'scatter':'dot';
+    // Square and Shape are Circle's two layouts drawn with a shape.
+    const glyphType=type==='square'||type==='shape';
+    if(glyphType)type=measures.length>=2?'scatter':'dot';
     if(type==='text')type='table';
     const filled=type==='filled-map';if(filled)type='map';
     let transform=state.analytics?.transform||'none';
     // Distributions, spans, maps and scatters have no period axis: the analysis is left off and said so.
-    if(transform!=='none'&&['histogram','box','gantt','map','scatter'].includes(type)){notes.push('Period analysis draws marks along a time axis, so this '+(type==='scatter'?'circle':type==='map'?'map':type)+' view is drawn without it.');transform='none';}
+    if(transform!=='none'&&(['histogram','box','gantt','map','scatter','polygon','density'].includes(type)||glyphType)){notes.push('Period analysis draws marks along a time axis, so this '+(glyphType?v3Type:type==='scatter'?'circle':type==='map'?'map':type)+' view is drawn without it.');transform='none';}
     if(transform!=='none'){
       const time=dimensions.findIndex(d=>['date','year','cycle'].includes(d));
       if(time<0){notes.push('Period analysis needs Contribution date, Year or Election cycle on a shelf, so the chart is drawn without it.');transform='none';}
@@ -195,7 +262,7 @@
     }
     let categorical=false;
     if(TIMELINE.includes(type)&&transform==='none'){
-      const time=dimensions.findIndex(d=>TIME.includes(d));
+      const time=dimensions.findIndex(d=>TIME.includes(d)&&!(pathPill&&d===pathPill.field.id));
       if(time>0){dimensions.unshift(dimensions.splice(time,1)[0]);notes.push(nameOf(dimensions[0])+' leads the axis, so every other group is its own line.');}
       else if(time<0)categorical=true;
     }
@@ -248,6 +315,13 @@
     if(dual){spec.dual=true;spec.dualMark='line';}
     if(naturalOrder(state,queryDimensions)&&transform==='none'&&type!=='map')spec.naturalOrder=true;
     if(type==='stacked'&&spec.color)spec.stack='stacked';
+    // Marks v3: the shape each point takes (Square, Shape), the layout of Polygon
+    // and Density, and the Path order of a line, area or polygon.
+    if(glyphType){spec.glyph=v3Type==='square'?'square':(enc.shape&&enc.shape.glyph)||(shapePill&&shapePill.field.role==='dimension'?'':'circle');
+      if(shapePill&&shapePill.field.role==='dimension'){spec.shape=shapePill.field.id;if(enc.shape.glyphs)spec.shapeMap={...enc.shape.glyphs};}}
+    if(shapePill&&shapePill.field.role==='measure')spec.tooltip.push(encoded(shapePill));
+    if(type==='polygon'||type==='density')spec.layout=measures.length>=2?'scatter':'axis';
+    if(pathPill&&['line','area','polygon'].includes(type))spec.path=encoded(pathPill);
     // Census B-E21 / B-E22: Parameters ask for every axis label and every legend member.
     if(state.params?.axisLabels==='all')spec.axisLabels='all';
     if(state.params?.legend==='all')spec.legend='all';
@@ -384,6 +458,6 @@
       attempt+=1;
     }
   }
-  const api={fields,PANE_FIELDS,compile,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,querySort,orderedAxis,naturalOrder,naturalRows,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS,CHRONOLOGICAL,TIMELINE,
+  const api={fields,PANE_FIELDS,compile,compileCards,canvasEncodings,clauses,filterValue,showMeEligibility,showMeApply,markFilters,mapSelection,sameSource,csv,reconcile,effectiveSort,querySort,orderedAxis,naturalOrder,naturalRows,sortLock,labelLock,BASIS,MONEY,EXTRA_MARKS,RECONCILE_REASONS,LABEL_SUPPORT,MARK_TYPES:types,SORT_LOCK_TIME,SORT_LOCK_BINS,LABEL_LOCK_TRANSFORM,LABELLED_TRANSFORMS,CHRONOLOGICAL,TIMELINE,
     pollPending,pendingStatus,pendingDelay,pendingProgress,pendingDetail,pendingText,pendingCeiling,PENDING,PENDING_CEILING_MS,PENDING_MIN_MS,PENDING_MAX_MS};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatStudioContributions=api;
 })(globalThis);

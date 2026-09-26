@@ -244,7 +244,8 @@ test('[snapshot_registry] parseSnapshotRegistry rejects every negative control, 
 // control below goes through it rather than through the rule written out again.
 
 test('[studio_api] the contract is v2 and carries the board examples and controls', () => {
-  assert.strictEqual(studioApi.version, 2);
+  // v3 (lane M) adds marks cards; every v2 board example and control is kept.
+  assert.strictEqual(studioApi.version, 3);
   for (const name of ['views_save_board', 'views_get_board', 'views_save_board_four']) {
     assert.ok(studioApi.examples[name], 'the contract must carry example ' + name);
   }

@@ -948,6 +948,146 @@ def validate_view_board(data, sheets):
     return {'tiles': tiles, 'slots': list(slots)}
 
 
+# Marks cards (studio_api.json v3, lane M, boards #50-#52). The same rules as
+# chart-studio-core.js cardFault / marksCardsFault: a card set that opens in
+# the browser is one that saves, and a malformed one is refused before it can
+# be stored, the way a malformed board is.
+VIEW_MARK_TYPES = frozenset((
+    'automatic', 'bar', 'line', 'area', 'square', 'circle', 'shape', 'pie', 'doughnut', 'text', 'box',
+    'histogram', 'waterfall', 'pareto', 'radar', 'polygon', 'density', 'map', 'heatmap', 'highlight',
+    'stacked', 'dot', 'series-dot', 'treemap', 'bubbles', 'gantt', 'bullet', 'combination', 'dual-line',
+    'filled-map'))
+_GLYPH_BASES = ('circle', 'square', 'plus', 'times', 'asterisk', 'diamond', 'triangle-up', 'triangle-down',
+                'triangle-left', 'triangle-right', 'star')
+VIEW_GLYPHS = frozenset(_GLYPH_BASES + tuple(glyph + '-open' for glyph in _GLYPH_BASES))
+VIEW_STYLE_COLOURS = frozenset(('automatic', 'none', 'ink', 'white') + tuple('c%d' % n for n in range(1, 13)))
+VIEW_AGGREGATIONS = ('sum', 'mean', 'count', 'median', 'min', 'max', 'countd')
+VIEW_ENCODINGS = ('color', 'size', 'label', 'detail', 'tooltip', 'shape', 'path', 'angle')
+VIEW_CARD_KEYS = frozenset(('id', 'name', 'measure', 'type', 'encodings', 'opacity', 'border', 'halo',
+                            'visible', 'selectable', 'zoomExtent', 'source', 'geography'))
+
+
+def _whole(value):
+    """A JSON number JavaScript's Number.isInteger accepts (85 and 85.0 alike)."""
+    if isinstance(value, bool):
+        return False
+    return isinstance(value, int) or (isinstance(value, float) and value.is_integer())
+
+
+def _pill_ok(value, glyphs=False):
+    if not isinstance(value, dict):
+        return False
+    if set(value) - ({'column', 'aggregation', 'glyphs'} if glyphs else {'column', 'aggregation'}):
+        return False
+    if not _whole(value.get('column')) or value['column'] < 0 or value.get('aggregation') not in VIEW_AGGREGATIONS:
+        return False
+    if glyphs and value.get('glyphs') is not None:
+        chosen = value['glyphs']
+        if not isinstance(chosen, dict) or len(chosen) > 64:
+            return False
+        if any(len(member) > 200 or glyph not in VIEW_GLYPHS for member, glyph in chosen.items()):
+            return False
+    return True
+
+
+def _shelf_key(value):
+    """chart-studio-core.js pill() read as column|aggregation, or None."""
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, float):
+        return '%d|sum' % value if value.is_integer() else None
+    if isinstance(value, int):
+        return '%d|sum' % value
+    if isinstance(value, str):
+        return value + '|sum' if re.fullmatch(r'-?\d+', value) else None
+    if not isinstance(value, dict):
+        return None
+    column = value.get('column')
+    if 'column' in value and column is None:
+        column = 0  # Number(null) is 0 in pill()
+    if isinstance(column, bool):
+        column = int(column)
+    elif isinstance(column, float) and column.is_integer():
+        column = int(column)
+    elif isinstance(column, str) and re.fullmatch(r'-?\d+', column):
+        column = int(column)
+    if not isinstance(column, int):
+        return None
+    aggregation = value.get('aggregation') if value.get('aggregation') in VIEW_AGGREGATIONS else 'sum'
+    return '%d|%s' % (column, aggregation)
+
+
+def _card_ok(card):
+    if not isinstance(card, dict) or set(card) - VIEW_CARD_KEYS:
+        return False
+    if not isinstance(card.get('id'), str) or not 1 <= len(card['id']) <= 64:
+        return False
+    if not isinstance(card.get('name'), str) or len(card['name']) > 120:
+        return False
+    if card.get('type') not in VIEW_MARK_TYPES:
+        return False
+    encodings = card.get('encodings')
+    if not isinstance(encodings, dict) or set(encodings) != set(VIEW_ENCODINGS):
+        return False
+    for key in ('color', 'size', 'label', 'path', 'angle'):
+        if encodings[key] is not None and not _pill_ok(encodings[key]):
+            return False
+    for key in ('detail', 'tooltip'):
+        items = encodings[key]
+        if not isinstance(items, list) or len(items) > 24 or not all(_pill_ok(item) for item in items):
+            return False
+    shape = encodings['shape']
+    if shape is not None:
+        if isinstance(shape, dict) and 'glyph' in shape:
+            if set(shape) != {'glyph'} or shape['glyph'] not in VIEW_GLYPHS:
+                return False
+        elif not _pill_ok(shape, glyphs=True):
+            return False
+    if not _whole(card.get('opacity')) or not 0 <= card['opacity'] <= 100:
+        return False
+    if card.get('border') not in VIEW_STYLE_COLOURS or card.get('halo') not in VIEW_STYLE_COLOURS:
+        return False
+    if any(not isinstance(card.get(key), bool) for key in ('visible', 'selectable', 'zoomExtent')):
+        return False
+    if 'measure' in card and not _pill_ok(card['measure']):
+        return False
+    if 'source' in card and not isinstance(card['source'], dict):
+        return False
+    if 'geography' in card and (not isinstance(card['geography'], str) or not 1 <= len(card['geography']) <= 64):
+        return False
+    return True
+
+
+def validate_view_marks(sheets):
+    """The marks cards a saved sheet MAY carry (studio_api.json v3).
+
+    Absent is v2: the sheet's `marks` is its one card, stored as it always was.
+    Present, `marksCards` is 1 to 12 well-formed cards with unique ids; two or
+    more are a dual axis, where every card names a distinct measure that sits on
+    the sheet's Rows (a card for a measure the shelves do not hold would draw an
+    axis from nothing, so it is refused like a dangling board slot).
+    """
+    refusal = "The saved view's marks cards are malformed."
+    for sheet in sheets:
+        if 'syncAxes' in sheet and not isinstance(sheet['syncAxes'], bool):
+            raise ValueError(refusal)
+        if 'marksCards' not in sheet:
+            continue
+        cards = sheet['marksCards']
+        if not isinstance(cards, list) or not 1 <= len(cards) <= 12 or not all(_card_ok(card) for card in cards):
+            raise ValueError(refusal)
+        if len({card['id'] for card in cards}) != len(cards):
+            raise ValueError(refusal)
+        if len(cards) >= 2:
+            rows = sheet.get('rows') if isinstance(sheet.get('rows'), list) else []
+            on_rows = {key for key in (_shelf_key(item) for item in rows) if key}
+            measures = ['%d|%s' % (card['measure']['column'], card['measure']['aggregation'])
+                        if 'measure' in card else '' for card in cards]
+            if not all(measures) or len(set(measures)) != len(measures) or not set(measures) <= on_rows:
+                raise ValueError(refusal)
+    return sheets
+
+
 class Conflict(Exception):
     """A well-formed request the current state cannot accept yet."""
 
@@ -1534,6 +1674,7 @@ class Console:
             raise ValueError('Active sheet must be a sheet number.')
         validate_view_industries(data, source, sheets)
         board = validate_view_board(data, sheets)
+        validate_view_marks(sheets)
         identifier = uuid.uuid4().hex
         value = {'id': identifier, 'name': name, 'saved_at': time.time(), 'sourceKey': source_key,
                  'source': source, 'sheets': sheets, 'active': active}

@@ -16,7 +16,8 @@
     : Number(n).toLocaleString('en-US', {maximumFractionDigits: 2});
   const STORE = 'mentat-chart-studio-v1';
   const ZONES = [['columns', 'Columns'], ['rows', 'Rows'], ['color', 'Colour'], ['size', 'Size'],
-    ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'], ['filters', 'Filters'], ['pages', 'Pages']];
+    ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'], ['shape', 'Shape'], ['path', 'Path'], ['angle', 'Angle'],
+    ['filters', 'Filters'], ['pages', 'Pages']];
   const AGG_LABEL = {sum: 'SUM', mean: 'AVG', count: 'COUNT', median: 'MEDIAN', min: 'MIN', max: 'MAX', countd: 'COUNTD'};
   // Every gesture a Data-pane field answers to, in the order a reader meets
   // them. The pill says this before the click, so nobody has to discover it.
@@ -185,6 +186,7 @@
     future = [];
     const memory = focusMemory();
     change();
+    syncMarks();
     viewEdited();
     persist();
     renderAll();
@@ -841,6 +843,20 @@
       return single([...totals].map(([t, v]) => ({[time]: t, [ids[0]]: v})));
     }
   }
+  // Marks v3 (lane M): the Colour measure, Size, Label and Tooltip of a verified
+  // pie, doughnut, waterfall, Pareto or radar reach its drawing. Each group
+  // carries its own labels and charts.js lends them to the result.
+  const canvasEncodings=(group,row,spec,nameOf)=>contributions.canvasEncodings(group,row,spec,nameOf,contributionPlot.format);
+  // Marks v3: one card's Opacity, Border and Halo (the Colour popover) laid over
+  // whatever drew it. A map and a text table take none; their rows say why.
+  function applyCardStyle(target,state,type){
+    if(!target||!contributionPlot||typeof contributionPlot.styleMarks!=='function')return;
+    const cards=core.readCards(state);if(cards.length!==1)return;
+    const card=cards[0];if(card.opacity===100&&card.border==='automatic'&&card.halo==='automatic')return;
+    if(['map','filled-map','text'].includes(card.type)||type==='table'||type==='map')return;
+    const svg=String(target.tagName||'').toLowerCase()==='svg'?target:target.querySelector&&target.querySelector('svg');
+    if(svg)contributionPlot.styleMarks(svg,card);
+  }
   async function renderContributionView(view, again=null) {
     view=view||mainSurface();const node=view.el,state=view.state;
     if(!data||!dataset()){node('reconcile').hidden=true;node('canvas').replaceChildren();node('table').replaceChildren();node('verified-summary').textContent='Reading verified source fields…';node('result-controls').hidden=true;node('title').textContent='';node('subtitle').textContent='';node('note').textContent='Choose a verified report in the Data panel to begin.';if(view.primary)lastResult=null;return;}
@@ -907,7 +923,7 @@
         }else if(CANVAS_TYPES.includes(spec.type)){
           const ids=spec.measures,id=ids[0],currency=contributions.MONEY.has(id),nameOf=m=>result.columns.find(c=>c.id===m)?.name||m;
           if(ids.length>1)notes.push(markTypeName(spec.type)+' draws one measure; '+ids.slice(1).map(nameOf).join(', ')+(ids.length===2?' is':' are')+' in each mark’s hover detail.');
-          let groups=rows.map(row=>({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1,extra:Object.fromEntries(ids.slice(1).map(m=>[nameOf(m),row[m]==null?null:row[m]/(contributions.MONEY.has(m)?100:1)]))}));
+          let groups=rows.map(row=>canvasEncodings({label:contributionPlot.label(row,spec.dimensions),value:row[id]/(currency?100:1),n:1,extra:Object.fromEntries(ids.slice(1).map(m=>[nameOf(m),row[m]==null?null:row[m]/(contributions.MONEY.has(m)?100:1)]))},row,spec,nameOf));
           // Shares and a radar need nonnegative values: negative groups are left
           // out and counted, never allowed to stop the drawing (census B-E07).
           if(SHARE_TYPES.includes(spec.type)){const negative=groups.filter(g=>g.value<0).length;if(negative){groups=groups.filter(g=>g.value>=0);notes.push(fmt(negative)+' group'+(negative===1?' has':'s have')+' a negative '+nameOf(id)+' and '+(negative===1?'is':'are')+' left out of the '+markTypeName(spec.type).toLowerCase()+'; bars show signed amounts.');}}
@@ -916,6 +932,7 @@
         }else if(MentatContributionCharts.TYPES.includes(spec.type))MentatContributionCharts.render(node('canvas'),rows,spec,pick);
         else contributionPlot.render(node('canvas'),rows,spec,pick);
       }catch(error){drawFallback(node,rows,spec,error.message,notes,pick);}
+      applyCardStyle(node('canvas'),state,spec.type);
       if(state.analytics.totals)notes.push('Selected source total: '+money(result.totals.amount)+'. This total excludes projections and covers every matching group before grouped filters.');
       // Say plainly when a requested reference line was not drawn, instead
       // of describing one the reader cannot see.
@@ -1275,7 +1292,7 @@
     }
     items.push(...typeMenuItems(anchor, field, settings));
     items.push(['Place', null, {group: true}]);
-    items.push(...ZONES.map(([zone, label]) => ['Send to ' + label, () => commit(() => {
+    items.push(...ZONES.filter(([zone]) => !CARD_ZONES.includes(zone) || !(el(zone) && el(zone).closest('.studio-prop') && el(zone).closest('.studio-prop').hidden)).map(([zone, label]) => ['Send to ' + label, () => commit(() => {
       if (settings.zone) removeFrom(settings.zone, settings.position);
       place(zone, field.index, null, settings.aggregation);
     })]));
@@ -1291,6 +1308,7 @@
   // The pills a shelf or mark property holds, as a list, and the way back.
   const MARK_LISTS = ['detail', 'tooltip'], MARK_ONE = ['color', 'size', 'label'];
   function zonePills(zone) {
+    if (viaCards(zone)) return cardZonePills(zone);
     const state = sheet();
     if (zone === 'columns' || zone === 'rows') return core.shelf(state[zone]);
     if (MARK_LISTS.includes(zone)) return core.shelf(state.marks[zone]);
@@ -1299,6 +1317,7 @@
     return [];
   }
   function setZonePills(zone, list) {
+    if (viaCards(zone)) { setCardZonePills(zone, list); return; }
     const state = sheet();
     if (zone === 'columns' || zone === 'rows') state[zone] = list;
     else if (MARK_LISTS.includes(zone)) state.marks[zone] = list;
@@ -1310,6 +1329,7 @@
   /* ----------------------------------------------------------- shelf edits */
 
   function removeFrom(zone, position) {
+    if (viaCards(zone)) { setCardZonePills(zone, cardZonePills(zone).filter((_, i) => i !== position)); return; }
     const state = sheet();
     if (zone === 'columns' || zone === 'rows') state[zone] = core.shelf(state[zone]).filter((_, i) => i !== position);
     else if (zone === 'filters') state.filters = state.filters.filter((_, i) => i !== position);
@@ -1323,6 +1343,14 @@
   function place(zone, column, position, aggregation) {
     const state = sheet();
     const entry = {column, aggregation: aggregation || 'sum'};
+    // Marks v3: Shape, Path and Angle, and every encoding of a dual axis, live on the cards.
+    if (viaCards(zone)) {
+      const list = ['detail', 'tooltip'].includes(zone) ? cardZonePills(zone) : [];
+      list.splice(position == null || position > list.length ? list.length : position, 0, entry);
+      setCardZonePills(zone, list);
+      if (zone === 'label') state.showLabels = true;
+      return true;
+    }
     if (zone === 'columns' || zone === 'rows' || zone === 'detail' || zone === 'tooltip') {
       const list = zone === 'columns' || zone === 'rows' ? core.shelf(state[zone]) : core.shelf(state.marks[zone]);
       const at = position == null || position > list.length ? list.length : position;
@@ -1577,26 +1605,30 @@
       row.dataset.foldHost = 'shelf-' + zone;
       el(zone).dataset.foldDrop = 'shelf-' + zone;
     }
-    const props = document.querySelector('#studio-pane-marks .studio-mark-props');
+    // Marks v3 (#51): the section opens on the type strip, so it folds as
+    // "Mark type" and takes the strip, the rows and any dual-axis cards with it.
+    const props = el('marks-block') || document.querySelector('#studio-pane-marks .studio-mark-props');
     if (props && !el('marks-head')) {
       const head = document.createElement('h3');
       head.id = 'studio-marks-head';
       head.className = 'studio-section-head';
       props.before(head);
-      foldHeader(head, 'marks', 'Marks', 'studio-mark-props');
       props.id = props.id || 'studio-mark-props';
+      foldHeader(head, 'marks', 'Mark type', props.id);
       props.dataset.foldBody = 'marks';
       FOLD_SUMMARY.set('marks', () => {
-        const used = ENCODINGS.filter(([zone]) => el(zone).querySelector('.studio-pill')).map(([, label]) => label);
-        return used.length ? used.join(', ') : 'no fields';
+        const used = ENCODINGS.filter(([zone]) => el(zone) && el(zone).querySelector('.studio-pill')).map(([, label]) => label);
+        return [stripLabel(currentType() === 'mixed' ? 'automatic' : currentType()), used.length ? used.join(', ') : 'no fields'].join(' \u00b7 ');
       });
     }
     for (const [zone, label] of ENCODINGS) {
       const drop = el(zone), prop = drop && drop.closest('.studio-prop'), header = prop && prop.querySelector(':scope > span');
       if (!header || header.querySelector('button.studio-fold')) continue;
       const button = foldButton('enc-' + zone, label, 'studio-' + zone);
-      button.querySelector('.studio-fold-label').before(...[...header.childNodes].filter(node => node.nodeType === 1));
-      header.replaceChildren(button);
+      // A row's options button (Colour, Shape) stays its own control beside the fold.
+      const options = [...header.children].filter(node => node.classList.contains('studio-prop-options'));
+      button.querySelector('.studio-fold-label').before(...[...header.childNodes].filter(node => node.nodeType === 1 && !options.includes(node)));
+      header.replaceChildren(...options, button);
       header.classList.add('studio-fold-head');
       prop.dataset.foldHost = 'enc-' + zone;
       drop.dataset.foldDrop = 'enc-' + zone;
@@ -1623,7 +1655,8 @@
     rememberDisclosure(el('pages-details'), 'pages');
     rememberDisclosure(el('params-details'), 'params');
   }
-  const ENCODINGS = [['color', 'Colour'], ['size', 'Size'], ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip']];
+  const ENCODINGS = [['color', 'Colour'], ['size', 'Size'], ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'],
+    ['shape', 'Shape'], ['path', 'Path'], ['angle', 'Angle']];
 
   // "More fields" is a section of its bucket too: folded as S1 draws it until
   // the reader opens it, and remembered from then on.
@@ -1746,11 +1779,9 @@
     };
     shelfInto(el('columns'), 'columns', state.columns, 'Drop a field here');
     shelfInto(el('rows'), 'rows', state.rows, 'Drop a field here');
-    shelfInto(el('detail'), 'detail', state.marks.detail, 'Drop a field here');
-    shelfInto(el('tooltip'), 'tooltip', state.marks.tooltip, 'Drop a field here');
-    for (const zone of ['color', 'size', 'label']) {
-      shelfInto(el(zone), zone, state.marks[zone] == null ? [] : [state.marks[zone]], 'Drop a field here');
-    }
+    renderDualAxisChip();
+    // Marks v3: every row reads the open card (one card: `marks`, as before).
+    for (const zone of CARD_ZONES) if (el(zone)) shelfInto(el(zone), zone, zonePills(zone), 'Drop a field here');
     shelfInto(el('pages'), 'pages', state.pages == null ? [] : [state.pages], 'One dimension');
     const filterPills = state.filters.map((filter, position) => {
       const field = core.fieldAt(meta, Number(filter.column));
@@ -1771,8 +1802,494 @@
     fill(el('aggregation'),calculated?[['sum','Source statistic']]:field?core.aggregationsFor(field,engine()):core.AGGREGATIONS);
     el('aggregation').value=primary?.aggregation||'sum';el('aggregation').disabled=!primary||calculated;
     el('aggregation').title=field?field.name+(calculated?' is already computed from source observations.':' · each other measure also has its own pill menu.'):'Add a measure to Rows or Columns.';
+    renderMarksCard();
     renderPager();
     renderShelfStrip();
+  }
+
+  /* ------------------------------------------------------ marks card (v3) */
+
+  // Boards #50-#52 (approved 2026-09-25). The Marks tab: the type strip, the
+  // rows the chosen mark can use (greyed with the reason where its renderer
+  // cannot draw one, never hidden), the Colour and Shape popovers, and on a
+  // dual axis an All card plus one card per measure. One card without v3
+  // fields is still edited in `marks`, in place, so a v2 sheet keeps its bytes.
+  const CARD_ZONES = ['color', 'size', 'label', 'detail', 'tooltip', 'shape', 'path', 'angle'];
+  const V3_ZONES = ['shape', 'path', 'angle'];
+  let expandedCard = 0;
+  const cardMode = state => core.dualAxisOn(state || sheet());
+  function cardTarget() {
+    if (!cardMode()) return 0;
+    if (expandedCard === 'all') return 'all';
+    const count = core.readCards(sheet()).length;
+    return Math.min(Math.max(0, Number(expandedCard) || 0), count - 1);
+  }
+  const viaCards = zone => CARD_ZONES.includes(zone) && (cardMode() || V3_ZONES.includes(zone));
+  function cardZonePills(zone) {
+    return core.cardEncodingPills(core.readCards(sheet()), cardTarget(), zone)
+      .filter(p => p && p.column != null).map(p => ({column: Number(p.column), aggregation: p.aggregation}));
+  }
+  function setCardZonePills(zone, list) {
+    const cards = core.readCards(sheet());
+    const current = zone === 'shape' ? core.cardEncodingPills(cards, cardTarget(), 'shape')[0] : null;
+    const next = core.shelf(list).map(p => zone === 'shape' && current && current.glyphs && current.column === p.column
+      ? Object.assign({}, p, {glyphs: current.glyphs}) : p);
+    core.setCardEncoding(cards, cardTarget(), zone, next);
+    core.writeCards(sheet(), cards);
+  }
+  // Every commit leaves the cards true to the sheet: a dual axis follows Rows,
+  // and one card's v3 record takes the v2 fields `marks` holds.
+  function syncMarks() {
+    const state = sheet();
+    if (!state) return;
+    if (core.dualAxisOn(state)) core.syncCardsToRows(state, columns());
+    else if ('marksCards' in state) core.writeCards(state, core.readCards(state));
+  }
+  function currentType() {
+    const cards = core.readCards(sheet()), target = cardTarget();
+    return target === 'all' ? core.allCardType(cards) : (cards[target] || cards[0]).type;
+  }
+  // Automatic shows the rows of the mark it resolves to (Tableau's rule).
+  function resolvedType() {
+    const type = currentType(), target = cardTarget();
+    if (cardMode()) return type === 'mixed' ? 'bar' : core.dualCardMark(type, target === 'all' ? 0 : target, false);
+    if (type !== 'automatic') return type;
+    try {
+      if (verified()) {
+        const chosen = dataset();
+        return chosen ? core.markOfEngineType(contributions.compile(sheet(), columns(), {dataset: chosen.id}).spec.type) : 'bar';
+      }
+      const report = core.compileReport(sheet(), columns());
+      return report.config ? core.markOfEngineType(report.config.type) : 'bar';
+    } catch { return 'bar'; }
+  }
+  function currentCard() {
+    const cards = core.readCards(sheet()), target = cardTarget();
+    return target === 'all' ? cards[0] : cards[target] || cards[0];
+  }
+  // A mark type from the strip, a card's menu or the Chart menu: on a dual axis
+  // it is the open card's (All: every card's); otherwise today's gesture.
+  function setMarkType(type) {
+    commit(() => {
+      if (cardMode()) {
+        const cards = core.readCards(sheet());
+        core.setCardType(cards, cardTarget(), type);
+        core.writeCards(sheet(), cards);
+        return;
+      }
+      sheet().marks.type = type;
+      if (verified() && type === 'histogram' && columns().some(f => f.id === 'amount_bin')) {
+        sheet().columns = [{column: columns().find(f => f.id === 'amount_bin').index, aggregation: 'sum'}];
+        sheet().rows = [{column: columns().find(f => f.id === 'records').index, aggregation: 'sum'}];
+        sheet().marks = {type, color: null, size: null, label: null, detail: [], tooltip: []};
+        sheet().analytics.transform = 'none';
+      }
+      if (verified() && ['map', 'filled-map'].includes(type) && (type === 'filled-map' || !core.shelf([...sheet().columns, ...sheet().rows]).some(p => ['zip5', 'state'].includes(columns()[p.column]?.id)))) {
+        sheet().columns = [{column: columns().find(f => f.id === (type === 'filled-map' ? 'state' : 'zip5')).index, aggregation: 'sum'}];
+        sheet().rows = [{column: columns().find(f => f.id === 'amount').index, aggregation: 'sum'}];
+        sheet().marks = {type, color: null, size: null, label: null, detail: [], tooltip: []};
+        sheet().map = {...sheet().map, layers: [...new Set([...(sheet().map?.layers || ['districts']), 'states'])]};
+        sheet().analytics.transform = 'none';
+      }
+      core.adoptMarks(sheet());
+    });
+  }
+  // Tile icons (#51), drawn in the stroke style of every other studio icon.
+  const MARK_ICONS = {
+    automatic: [['path', {d: 'M8 2v3M8 11v3M2 8h3M11 8h3M3.8 3.8l2.1 2.1M10.1 10.1l2.1 2.1M12.2 3.8l-2.1 2.1M5.9 10.1l-2.1 2.1'}]],
+    bar: [['path', {d: 'M3.5 13.5v-5M8 13.5v-11M12.5 13.5v-7.5'}]],
+    line: [['path', {d: 'M2 12.5 6 7l3 3 5-6.5'}]],
+    area: [['path', {d: 'M2 13.5V10l4-4.5 3 3 5-5v10z', fill: 'currentColor', 'fill-opacity': '.22'}]],
+    square: [['rect', {x: 3.5, y: 3.5, width: 9, height: 9, rx: .8}]],
+    circle: [['circle', {cx: 8, cy: 8, r: 5}]],
+    shape: [['path', {d: 'M4.6 2.5 7 6.8H2.2z'}], ['circle', {cx: 11.5, cy: 4.6, r: 2.1}], ['rect', {x: 2.5, y: 9.5, width: 4.5, height: 4.5}], ['path', {d: 'M11.5 9v5M9 11.5h5'}]],
+    text: [['path', {d: 'M3 3.5h10M8 3.5v10'}]],
+    map: [['circle', {cx: 8, cy: 8, r: 5.5}], ['path', {d: 'M2.5 8h11M8 2.5c-2.4 2.6-2.4 8.4 0 11M8 2.5c2.4 2.6 2.4 8.4 0 11'}]],
+    pie: [['circle', {cx: 8, cy: 8, r: 5.5}], ['path', {d: 'M8 8V2.5M8 8l4.8 2.7'}]],
+    gantt: [['path', {d: 'M2.5 4h6.5M5 8h8.5M3.5 12h6', 'stroke-width': 2.2}]],
+    polygon: [['path', {d: 'M3 5.5 8.2 2.5l5 3.5-1.8 7-7.6-1z'}]],
+    density: [['circle', {cx: 8, cy: 8, r: 1.8, fill: 'currentColor'}], ['circle', {cx: 8, cy: 8, r: 4}], ['circle', {cx: 8, cy: 8, r: 6.2, 'stroke-dasharray': '1.6 1.6'}]],
+    flow: [['path', {d: 'M2 4.5c5 0 6.5 7 12 7M2 11.5c5 0 6.5-7 12-7M2 8h12', 'stroke-width': 1.2}]]
+  };
+  function markIcon(type) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'studio-icon');
+    svg.setAttribute('viewBox', '0 0 16 16');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    for (const [tag, attributes] of MARK_ICONS[type] || MARK_ICONS.automatic) {
+      const node = document.createElementNS(NS, tag);
+      for (const name of Object.keys(attributes)) node.setAttribute(name, String(attributes[name]));
+      svg.append(node);
+    }
+    return svg;
+  }
+  const stripLabel = id => (core.MARK_STRIP.find(m => m[0] === id) || [id, core.markLabel(id)])[1];
+  function renderMarkStrip() {
+    const strip = el('mark-strip');
+    if (!strip) return;
+    const current = currentType(), dual = cardMode();
+    const inStrip = core.MARK_STRIP.some(m => m[0] === current);
+    strip.replaceChildren(...core.MARK_STRIP.map(([id, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'studio-mark-tile';
+      button.dataset.mark = id;
+      button.setAttribute('role', 'radio');
+      const on = id === current;
+      button.setAttribute('aria-checked', String(on));
+      button.tabIndex = on || (!inStrip && id === 'automatic') ? 0 : -1;
+      const reason = id === 'flow' ? core.FLOW_REASON : dual && !core.DUAL_MARKS.includes(id) ? core.DUAL_REASON : '';
+      if (reason) { button.setAttribute('aria-disabled', 'true'); button.classList.add('is-unavailable'); }
+      button.title = label + (reason ? ': ' + reason : '');
+      button.setAttribute('aria-label', button.title);
+      const caption = document.createElement('span');
+      caption.textContent = id === 'automatic' ? 'Auto' : label;
+      button.append(markIcon(id), caption);
+      button.onclick = () => {
+        if (reason) { status(reason.replace(/\.?$/, '.')); return; }
+        if (!on) setMarkType(id);
+      };
+      return button;
+    }));
+    // A mark the Chart menu or Show Me chose that has no tile says what it is.
+    strip.dataset.current = inStrip ? '' : current === 'mixed' ? 'Mixed' : core.markLabel(current);
+    strip.title = inStrip ? '' : current === 'mixed' ? 'The cards draw different marks; a tile sets every card.' : core.markLabel(current) + ' is chosen in the Chart menu; a tile replaces it.';
+  }
+  // Arrow keys move through the strip, as through any radio group.
+  document.addEventListener('keydown', event => {
+    const tile = event.target instanceof Element ? event.target.closest('#studio-mark-strip .studio-mark-tile') : null;
+    if (!tile || !['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    const tiles = [...tile.parentElement.children], at = tiles.indexOf(tile);
+    const step = {ArrowRight: 1, ArrowLeft: -1, ArrowDown: 7, ArrowUp: -7}[event.key];
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? tiles.length - 1 : Math.min(tiles.length - 1, Math.max(0, at + step));
+    event.preventDefault();
+    tiles.forEach((node, i) => { node.tabIndex = i === next ? 0 : -1; });
+    tiles[next].focus();
+  });
+  const ROW_NOTE = {shape: ['Shape', 'Shape'], path: ['Path', 'Line, Area and Polygon'], angle: ['Angle', 'Pie']};
+  const SIZE_MEANS = {gantt: 'Size sets each bar’s length.', density: 'Size sets each mark’s radius.', text: 'Size sets each value’s type size.'};
+  function renderMarkRows() {
+    const type = resolvedType(), rows = core.markRows(type), support = core.encodingSupport(type, engine());
+    for (const zone of CARD_ZONES) {
+      const drop = el(zone), prop = drop && drop.closest('.studio-prop');
+      if (!prop) continue;
+      prop.hidden = !rows.includes(zone);
+      const reason = support[zone] === true || support[zone] == null ? '' : support[zone];
+      prop.classList.toggle('is-unavailable', !!reason);
+      if (reason) { prop.setAttribute('aria-disabled', 'true'); prop.title = reason; drop.dataset.reasonShort = 'Not drawn for ' + stripLabel(type); }
+      else { prop.removeAttribute('aria-disabled'); prop.title = zone === 'size' && SIZE_MEANS[type] ? SIZE_MEANS[type] : ''; delete drop.dataset.reasonShort; }
+      for (const node of drop.querySelectorAll(':scope > .studio-pill')) {
+        const field = fieldOf(node.dataset.column);
+        const roleOk = field ? core.roleSupport(type, engine(), zone, field.role) : true;
+        const why = reason || (roleOk === true ? '' : roleOk);
+        node.classList.toggle('is-inert', !!why);
+        if (why) { node.title = why + ' · ' + node.title; node.setAttribute('aria-label', node.getAttribute('aria-label') + ' ' + why); }
+      }
+    }
+    const hidden = ['shape', 'path', 'angle'].filter(zone => !rows.includes(zone));
+    el('mark-rows-note').textContent = hidden.length === 2 && hidden.includes('shape') && hidden.includes('angle')
+      ? 'Shape and Angle appear for Shape and Pie marks.'
+      : hidden.map(zone => ROW_NOTE[zone][0] + ' appears for ' + ROW_NOTE[zone][1] + ' marks').join('; ') + (hidden.length ? '.' : '');
+    const styles = core.styleSupport(type), colourButton = el('color-options');
+    if (colourButton) {
+      const none = ['opacity', 'border', 'halo'].every(key => styles[key] !== true);
+      colourButton.classList.toggle('is-unavailable', none);
+      colourButton.title = none ? styles.opacity : 'Colour effects: opacity, border and halo';
+    }
+  }
+  function renderMarkCards() {
+    const host = el('mark-cards'), body = el('mark-card-body'), sync = el('mark-sync');
+    if (!host || !body) return;
+    if (!cardMode()) {
+      host.hidden = true;
+      if (body.parentElement !== host.parentElement) host.after(body);
+      host.replaceChildren();
+      if (sync) sync.hidden = true;
+      return;
+    }
+    const cards = core.readCards(sheet()), meta = core.classifyFields(columns(), sheet().types), target = cardTarget();
+    const entries = [['all', 'All', core.allCardType(cards)],
+      ...cards.map((card, i) => { const field = core.fieldAt(meta, card.measure.column); return [i, field ? fieldLabel(field, card.measure.aggregation) : 'Measure ' + (i + 1), card.type]; })];
+    host.hidden = false;
+    host.replaceChildren(...entries.map(([key, name, type]) => {
+      const open = key === target, item = document.createElement('div'), head = document.createElement('div');
+      item.className = 'studio-mark-card' + (open ? ' is-open' : '');
+      item.setAttribute('role', 'listitem');
+      item.dataset.card = String(key);
+      head.className = 'studio-mark-card-head';
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'studio-mark-card-toggle';
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-controls', 'studio-mark-card-body');
+      const label = document.createElement('span');
+      label.textContent = name;
+      toggle.append(label);
+      toggle.onclick = () => { if (open) return; expandedCard = key; renderShelves(); applyFolds(); };
+      head.append(toggle);
+      const typeText = type === 'mixed' ? 'Mixed' : stripLabel(type);
+      if (open) {
+        const tag = document.createElement('span');
+        tag.className = 'studio-mark-card-type';
+        tag.append(markIcon(type === 'mixed' ? 'automatic' : type), document.createTextNode(typeText));
+        head.append(tag);
+      } else {
+        // A folded card reads its own type, and can change it without opening (#52).
+        const select = document.createElement('select');
+        select.className = 'studio-mark-card-select';
+        select.setAttribute('aria-label', 'Mark type of ' + name);
+        const options = core.DUAL_MARKS.map(id => [id, stripLabel(id)]);
+        if (type === 'mixed') options.unshift(['mixed', 'Mixed']);
+        fill(select, options);
+        if (type === 'mixed') select.options[0].disabled = true;
+        select.value = type;
+        select.onchange = () => {
+          commit(() => { const next = core.readCards(sheet()); core.setCardType(next, key, select.value); core.writeCards(sheet(), next); });
+        };
+        head.append(select);
+      }
+      item.append(head);
+      if (open) item.append(body);
+      return item;
+    }));
+    if (sync) { sync.hidden = false; el('sync-axes').checked = sheet().syncAxes === true; }
+  }
+  function renderMarksCard() {
+    renderMarkCards();
+    renderMarkStrip();
+    renderMarkRows();
+  }
+  // The Dual axis chip on Rows (#52): two or more measures there can share one
+  // pane, each with its own marks card.
+  function renderDualAxisChip() {
+    const rows = el('rows');
+    if (!rows) return;
+    rows.querySelector(':scope > .studio-dual-axis')?.remove();
+    if (core.measuresOnRows(sheet(), columns()).length < 2) return;
+    const on = cardMode(), chip = document.createElement('button');
+    chip.type = 'button';
+    chip.id = 'studio-dual-axis';
+    chip.className = 'studio-dual-axis';
+    chip.textContent = 'Dual axis';
+    chip.setAttribute('aria-pressed', String(on));
+    chip.title = on ? 'Turn the dual axis off: the measures go back to one marks card.'
+      : 'Draw every measure on Rows in one pane, each with its own marks card.';
+    chip.onclick = event => {
+      event.stopPropagation();
+      expandedCard = 0;
+      commit(() => core.setDualAxis(sheet(), columns(), !cardMode()));
+      status(cardMode() ? 'Dual axis on: each measure has its own marks card.' : 'Dual axis off: one marks card draws every measure.');
+    };
+    const pills = [...rows.querySelectorAll(':scope > .studio-pill')];
+    const first = pills.find(node => (fieldOf(node.dataset.column) || {}).role === 'measure');
+    if (first) first.after(chip); else rows.append(chip);
+  }
+
+  // The Colour popover (Tableau's, #50): Opacity, Border and Halo of the open
+  // card (All: every card), each greyed with its reason where the mark
+  // cannot take it. The Shape palette: one shape for every mark, or a shape
+  // per member of the field on Shape.
+  function closePopovers() {
+    document.querySelectorAll('.studio-popover').forEach(node => node.remove());
+    for (const id of ['color-options', 'shape-options']) el(id)?.setAttribute('aria-expanded', 'false');
+  }
+  function popover(anchor, label) {
+    closePopovers();
+    const pop = document.createElement('div');
+    pop.className = 'studio-popover';
+    pop.setAttribute('role', 'dialog');
+    pop.setAttribute('aria-label', label);
+    const heading = document.createElement('h4');
+    heading.textContent = label;
+    pop.append(heading);
+    anchor.setAttribute('aria-expanded', 'true');
+    const box = anchor.getBoundingClientRect();
+    document.body.append(pop);
+    const width = pop.getBoundingClientRect().width || 292;
+    pop.style.left = Math.max(8, Math.min(window.innerWidth - width - 8, Math.round(box.left + window.scrollX - width + box.width))) + 'px';
+    pop.style.top = Math.round(box.bottom + window.scrollY + 6) + 'px';
+    const outside = event => { if (!pop.contains(event.target) && event.target !== anchor && !anchor.contains(event.target)) dismiss(); };
+    const escape = event => { if (event.key === 'Escape') { dismiss(); anchor.focus(); } };
+    const dismiss = () => { pop.remove(); anchor.setAttribute('aria-expanded', 'false'); document.removeEventListener('mousedown', outside); document.removeEventListener('keydown', escape); };
+    document.addEventListener('mousedown', outside);
+    document.addEventListener('keydown', escape);
+    pop.dismiss = dismiss;
+    return pop;
+  }
+  // Places a popover under its anchor again once its contents are drawn.
+  function placePopover(pop, anchor) {
+    const box = anchor.getBoundingClientRect(), rect = pop.getBoundingClientRect();
+    pop.style.left = Math.max(8, Math.min(window.innerWidth - rect.width - 8, Math.round(box.left + window.scrollX))) + 'px';
+    const below = window.innerHeight - box.bottom;
+    pop.style.top = (rect.height > below - 12 && box.top > below ? Math.max(8, Math.round(box.top + window.scrollY - rect.height - 6)) : Math.round(box.bottom + window.scrollY + 6)) + 'px';
+    pop.querySelector('input:not(:disabled), button:not(:disabled)')?.focus();
+  }
+  const STYLE_NAMES = {automatic: 'Auto', none: 'None', ink: 'Ink', white: 'White'};
+  function styleSwatch(value) {
+    if (value === 'ink') return getComputedStyle(document.documentElement).getPropertyValue('--chart-ink').trim() || '#202522';
+    if (value === 'white') return '#ffffff';
+    const slot = /^c(\d+)$/.exec(value);
+    return slot && globalThis.MentatTheme?.categoryColour ? globalThis.MentatTheme.categoryColour(Number(slot[1]) - 1) : '';
+  }
+  function applyCardStyleChoice(style, reopen) {
+    commit(() => {
+      const cards = core.readCards(sheet());
+      core.setCardStyle(cards, cardTarget(), style);
+      core.writeCards(sheet(), cards);
+    });
+    if (reopen) openColourPopover(el('color-options'));
+  }
+  function openColourPopover(anchor) {
+    if (!anchor) return;
+    const type = resolvedType(), styles = core.styleSupport(type), card = currentCard();
+    const pop = popover(anchor, 'Colour effects' + (cardMode() && cardTarget() === 'all' ? ' · every card' : ''));
+    const reasonOf = key => styles[key] === true ? '' : styles[key];
+    const opacityRow = document.createElement('label');
+    opacityRow.className = 'studio-pop-row';
+    opacityRow.append(document.createTextNode('Opacity'));
+    const range = document.createElement('input');
+    range.type = 'range'; range.min = '0'; range.max = '100'; range.step = '5';
+    range.id = 'studio-colour-opacity';
+    range.value = String(card.opacity);
+    range.setAttribute('aria-label', 'Opacity');
+    const out = document.createElement('output');
+    out.setAttribute('for', 'studio-colour-opacity');
+    out.textContent = card.opacity + '%';
+    range.oninput = () => { out.textContent = range.value + '%'; };
+    range.onchange = () => applyCardStyleChoice({opacity: Number(range.value)}, true);
+    if (reasonOf('opacity')) { range.disabled = true; range.title = reasonOf('opacity'); }
+    opacityRow.append(range, out);
+    pop.append(opacityRow);
+    for (const [key, label] of [['border', 'Border'], ['halo', 'Halo']]) {
+      const caption = document.createElement('p');
+      caption.className = 'studio-pop-label';
+      caption.textContent = label;
+      const row = document.createElement('div');
+      row.className = 'studio-swatches';
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', label);
+      for (const value of core.STYLE_COLOURS) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        const name = STYLE_NAMES[value] || 'Theme colour ' + value.slice(1);
+        if (STYLE_NAMES[value]) button.textContent = name;
+        else { button.classList.add('is-swatch'); button.style.backgroundColor = styleSwatch(value); }
+        if (value === 'white') button.style.backgroundColor = '#ffffff';
+        button.setAttribute('aria-label', label + ': ' + name);
+        button.title = label + ': ' + name;
+        button.setAttribute('aria-pressed', String(card[key] === value));
+        button.dataset.value = value;
+        if (reasonOf(key)) { button.disabled = true; button.title = reasonOf(key); }
+        button.onclick = () => applyCardStyleChoice({[key]: value}, true);
+        row.append(button);
+      }
+      pop.append(caption, row);
+      if (reasonOf(key)) {
+        const why = document.createElement('p');
+        why.className = 'studio-pop-reason';
+        why.textContent = reasonOf(key);
+        pop.append(why);
+      }
+    }
+    if (reasonOf('opacity')) {
+      const why = document.createElement('p');
+      why.className = 'studio-pop-reason';
+      why.textContent = reasonOf('opacity');
+      pop.insertBefore(why, opacityRow);
+    }
+    placePopover(pop, anchor);
+  }
+  const glyphName = id => {
+    const base = id.replace(/-open$/, '').replace('-', ' ');
+    return base.charAt(0).toUpperCase() + base.slice(1) + (id.endsWith('-open') ? ', outline' : ', filled');
+  };
+  function glyphIcon(id) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 16 16');
+    svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', contributionPlot.glyphD(id, 8, 8, 5));
+    path.setAttribute('fill', id.endsWith('-open') ? 'none' : 'currentColor');
+    path.setAttribute('stroke', 'currentColor');
+    path.setAttribute('stroke-width', id.endsWith('-open') ? '1.4' : '0.6');
+    svg.append(path);
+    return svg;
+  }
+  function applyShape(value, reopenWith) {
+    commit(() => {
+      const cards = core.readCards(sheet());
+      core.setCardEncoding(cards, cardTarget(), 'shape', value ? [value] : []);
+      core.writeCards(sheet(), cards);
+    });
+    openShapePalette(el('shape-options'), reopenWith);
+  }
+  function openShapePalette(anchor, chosenMember) {
+    if (!anchor || !contributionPlot || typeof contributionPlot.glyphD !== 'function') return;
+    const card = currentCard(), shape = card.encodings.shape;
+    const field = shape && shape.column != null ? fieldOf(shape.column) : null;
+    const pop = popover(anchor, 'Shape palette');
+    let member = chosenMember || null;
+    // The members the chart draws (the verified answer on screen), else the
+    // field's member list; sorted as the renderer sorts its shape legend.
+    const drawn = field && verified() && contributionResult ? [...new Set((contributionResult.rows || []).map(row => row[field.id])
+      .filter(value => value != null && value !== '').map(String))].sort((a, b) => a.localeCompare(b)) : [];
+    const memberList = field ? (drawn.length ? drawn : members(field.index)).slice(0, 20) : [];
+    const glyphOf = (value, index) => core.glyphFor(shape, value, index);
+    if (field) {
+      const caption = document.createElement('p');
+      caption.className = 'studio-pop-label';
+      caption.textContent = memberList.length ? 'Choose a member of ' + field.name + ', then its shape.' : 'The members of ' + field.name + ' are loading.';
+      const list = document.createElement('div');
+      list.className = 'studio-glyph-members';
+      list.setAttribute('role', 'group');
+      list.setAttribute('aria-label', field.name + ' members');
+      memberList.forEach((value, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('aria-pressed', String(value === member));
+        button.append(glyphIcon(glyphOf(value, index)), document.createTextNode(value));
+        button.onclick = () => { member = value; for (const node of list.children) node.setAttribute('aria-pressed', String(node === button)); };
+        list.append(button);
+      });
+      pop.append(caption, list);
+    }
+    const grid = document.createElement('div');
+    grid.className = 'studio-glyphs';
+    grid.setAttribute('role', 'group');
+    grid.setAttribute('aria-label', 'Shapes');
+    const current = shape && shape.glyph ? shape.glyph : '';
+    for (const id of core.GLYPHS) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.glyph = id;
+      button.setAttribute('aria-label', glyphName(id));
+      button.title = glyphName(id);
+      button.setAttribute('aria-pressed', String(!field && id === current));
+      button.append(glyphIcon(id));
+      button.onclick = () => {
+        if (!field) { applyShape({glyph: id}); return; }
+        if (!member) { status('Choose a member of ' + field.name + ' first, then its shape.'); return; }
+        const glyphs = Object.assign({}, shape.glyphs || {}, {[member]: id});
+        applyShape({column: shape.column, aggregation: shape.aggregation, glyphs}, member);
+      };
+      grid.append(button);
+    }
+    pop.append(grid);
+    const actions = document.createElement('div');
+    actions.className = 'studio-pop-actions';
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.textContent = field ? 'Palette order' : 'Automatic';
+    reset.title = field ? 'Every member takes the palette in order' : 'Every mark takes the first shape, a filled circle';
+    reset.onclick = () => applyShape(field ? {column: shape.column, aggregation: shape.aggregation} : null);
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.textContent = 'Done';
+    close.onclick = () => pop.dismiss();
+    actions.append(reset, close);
+    pop.append(actions);
+    placePopover(pop, anchor);
   }
 
   function renderPager() {
@@ -1907,7 +2424,7 @@
       button.addEventListener('focus', describe);
       button.onclick = () => commit(() => {
         if(verified()&&['symbol-map','filled-map'].includes(tile.id)&&!sheet().columns.length&&!sheet().rows.length){
-          const filled=tile.id==='filled-map';sheet().columns=[{column:columns().find(f=>f.id===(filled?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type:filled?'filled-map':'map',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';return;
+          const filled=tile.id==='filled-map';sheet().columns=[{column:columns().find(f=>f.id===(filled?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type:filled?'filled-map':'map',color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';core.adoptMarks(sheet());return;
         }
         const next = (verified()?contributions:core).showMeApply(tile.id, sheet(), columns(), []);
         sheets[active] = next;
@@ -2775,7 +3292,7 @@
       return;
     }
     const report = core.compileReport(state, columns());
-    const markName = core.markLabel(report.markType);
+    const markName = report.markType === 'cards' ? 'Dual axis' : core.markLabel(report.markType);
     // Provisional only: measureLabel reads the built result to tell an
     // aggregated view from one that plots individual values, so a box,
     // histogram or scatter title would read "· Sum" without it. The real title
@@ -2898,6 +3415,7 @@
         }
       }
       node('canvas').className = view.canvasClass + 'studio-canvas fit-' + state.fit;
+      applyCardStyle(drawn.svg, state, result.type);
       node('canvas').replaceChildren(drawn.svg);
       placeFitted(drawn.svg);
     }
@@ -3409,7 +3927,9 @@
     } finally { holdingSavedId = false; }
     rememberSavedView(full.id);
     status('Opened view "' + full.name + '".'
-      + (full.board && !board ? ' Its board did not match its sheets, so it opened as one sheet.' : ''));
+      + (full.board && !board ? ' Its board did not match its sheets, so it opened as one sheet.' : '')
+      + (full.sheets.some(s => s && typeof s === 'object' && 'marksCards' in s && !core.normalizeMarksCards(s))
+        ? ' A sheet\u2019s marks cards did not match it, so it opened as its first card.' : ''));
   }
 
   // The views that lived in this browser before the server had a place for
@@ -3725,6 +4245,11 @@
     const marks = state.marks || {};
     for (const zone of ['color', 'size', 'label']) if (marks[zone] != null) add([marks[zone]]);
     add(marks.detail || []); add(marks.tooltip || []);
+    // Marks v3: every card's encodings (Shape, Path and Angle included) and measures.
+    for (const card of core.readCards(state)) {
+      for (const zone of CARD_ZONES) { const value = card.encodings[zone]; add(Array.isArray(value) ? value : value && value.column != null ? [value] : []); }
+      if (card.measure) add([card.measure]);
+    }
     if (state.pages != null) add([state.pages]);
     for (const filter of state.filters || []) used.add(Number(filter.column));
     return used;
@@ -4521,7 +5046,11 @@
     dialog.showModal();
     dialog.dispatchEvent(new Event('mentat:open'));
   };
-  el('mark').onchange = () => commit(() => { const type=el('mark').value;sheet().marks.type=type;if(verified()&&type==='histogram'&&columns().some(f=>f.id==='amount_bin')){sheet().columns=[{column:columns().find(f=>f.id==='amount_bin').index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='records').index,aggregation:'sum'}];sheet().marks={type,color:null,size:null,label:null,detail:[],tooltip:[]};sheet().analytics.transform='none';}if(verified()&&['map','filled-map'].includes(type)&&(type==='filled-map'||!core.shelf([...sheet().columns,...sheet().rows]).some(p=>['zip5','state'].includes(columns()[p.column]?.id)))){sheet().columns=[{column:columns().find(f=>f.id===(type==='filled-map'?'state':'zip5')).index,aggregation:'sum'}];sheet().rows=[{column:columns().find(f=>f.id==='amount').index,aggregation:'sum'}];sheet().marks={type,color:null,size:null,label:null,detail:[],tooltip:[]};sheet().map={...sheet().map,layers:[...new Set([...(sheet().map?.layers||['districts']),'states'])]};sheet().analytics.transform='none';} });
+  el('mark').onchange = () => setMarkType(el('mark').value);
+  // Marks v3: Synchronize axes, and the Colour and Shape popovers.
+  el('sync-axes').onchange = () => commit(() => { if (el('sync-axes').checked) sheet().syncAxes = true; else delete sheet().syncAxes; });
+  el('color-options').onclick = () => openColourPopover(el('color-options'));
+  el('shape-options').onclick = () => openShapePalette(el('shape-options'));
   el('aggregation').onchange=()=>{const value=el('aggregation').value;commit(()=>{const meta=core.classifyFields(columns(),sheet().types);for(const zone of ['rows','columns']){const pills=core.shelf(sheet()[zone]),at=pills.findIndex(p=>core.fieldAt(meta,p.column)?.role==='measure');if(at>=0){pills[at].aggregation=value;sheet()[zone]=pills;break;}}});};
   buildFromMenu();
   el('search').oninput = renderFields;

@@ -618,8 +618,8 @@ const VISIBLE_SOURCE = `node => {
     });
 
     /* -------------------------------------------------------------- 10 */
-    await step('the contract the board saves against is v2 and names the board producers', async () => {
-      assert.equal(studioApi.version, 2, 'contracts/studio_api.json is at v2');
+    await step('the contract the board saves against is v3 and names the board producers', async () => {
+      assert.equal(studioApi.version, 3, 'contracts/studio_api.json is at v3');
       for (const name of ['views_save_board', 'views_get_board', 'views_save_board_four']) {
         assert.ok(studioApi.examples[name], `the contract carries ${name}`);
       }

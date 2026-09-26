@@ -96,7 +96,7 @@ test('every section folds on its own header, opens as S1 draws it, and is rememb
   const {page,errors}=await boot(context);
   const folds=await page.evaluate(()=>[...document.querySelectorAll('#view-chart-studio button.studio-fold[data-fold]')].map(b=>[b.dataset.fold,b.getAttribute('aria-expanded')]));
   assert.deepEqual(folds.map(f=>f[0]),['dimensions','measures','shelf-columns','shelf-rows','shelf-filters','marks','enc-color','enc-size','enc-label',
-    'enc-detail','enc-tooltip','analytics-period','analytics-summarize','transform-params','filters-active'],'every section has its own fold');
+    'enc-detail','enc-tooltip','enc-shape','enc-path','enc-angle','analytics-period','analytics-summarize','transform-params','filters-active'],'every section has its own fold');
   assert.ok(folds.every(f=>f[1]==='true'),'every section opens unfolded, as S1 draws it');
   // The Inspector's own disclosures keep S1's folded start and are remembered too.
   assert.deepEqual(await page.evaluate(()=>['showme-details','pages-details','params-details'].map(id=>document.getElementById('studio-'+id).open)),[false,false,false]);
@@ -183,7 +183,7 @@ test('every Show Me tile and every mark draws, pills go anywhere, and nothing is
   }
   // Every mark in the menu draws from the same shelves.
   const marks=await page.evaluate(()=>[...document.querySelectorAll('#studio-mark option')].map(o=>({value:o.value,disabled:o.disabled})));
-  assert.equal(marks.length,26);
+  assert.equal(marks.length,30);
   assert.deepEqual(marks.filter(m=>m.disabled),[]);
   for(const {value} of marks){
     await reset();
@@ -276,7 +276,7 @@ test('a report worksheet lists its identifier fields and draws every mark and en
   await page.waitForFunction(()=>document.querySelector('#studio-canvas svg'));
   // Every mark the shared menu offers draws on a worksheet, each with no error line.
   const marks=await page.evaluate(()=>[...document.querySelectorAll('#studio-mark option')].map(o=>o.value));
-  assert.equal(marks.length,26,'the worksheet offers the same marks as Verified contributions');
+  assert.equal(marks.length,30,'the worksheet offers the same marks as Verified contributions');
   for(const value of marks){
     await page.locator('#studio-mark').selectOption(value);
     await page.waitForFunction(()=>document.querySelector('#studio-canvas svg, #studio-table:not([hidden]) table'));

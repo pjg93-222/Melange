@@ -56,7 +56,20 @@
   node('rect',{width:W,height:H,fill:'#fff'});node('title',{},spec.title||spec.type);text(22,25,spec.title||name(m),{'font-size':17});
   const note=s=>text(22,48,s,{'font-size':12,fill:'#645d6d'});
   const color=(v,max)=>v<0?`rgba(181,91,40,${.18+.8*Math.min(1,Math.abs(v)/(max||1))})`:`rgba(87,68,123,${.18+.8*Math.min(1,Math.abs(v)/(max||1))})`;
-  const mark=(tag,attrs,row,detail)=>{const extra=extraText(row),n=node(tag,{...attrs,tabindex:0,role:'button',class:'plot-mark','aria-label':label(row)+'; '+(detail||ms.map(id=>name(id)+': '+fmt(row[id],id)).join('; '))+(extra?'; '+extra:'')});node('title',{},n.getAttribute('aria-label'),n);n.onclick=()=>onSelect?.(row);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}};return n;};
+  // Marks v3 (Square, Shape): a circle view's circles are drawn as shapes from
+  // the palette, one per member of a Shape field.
+  const shapeMembers=spec.shape?[...new Set(rows.map(r=>String(r[spec.shape]??'Unknown')))].sort((a,b)=>a.localeCompare(b)):[];
+  const glyphing=['dot','series-dot'].includes(spec.type)&&(!!spec.glyph||!!spec.shape)&&typeof base.glyphD==='function';
+  const asGlyph=(tag,attrs,row)=>{if(!glyphing||tag!=='circle')return [tag,attrs];const id=spec.shape?base.glyphFor(spec,String(row[spec.shape]??'Unknown'),shapeMembers):spec.glyph;
+   const {cx,cy,r,fill,...rest}=attrs;return ['path',{d:base.glyphD(id,Number(cx),Number(cy),Number(r)),...rest,...(base.glyphOpen(id)?{fill:'none',stroke:fill,'stroke-width':1.8}:{fill}),'data-glyph':id}];};
+  // Marks v3: a Colour measure shades every analytical mark (one hue, its opacity
+  // rising with the value, as contribution-plot shades bars and circles); the
+  // heat map and highlight table already shade their cells by it.
+  const shadeValues=spec.colorMeasure&&!['heatmap','highlight'].includes(spec.type)?rows.map(r=>r[spec.colorMeasure]).filter(v=>typeof v==='number'&&Number.isFinite(v)):[];
+  const shadeRange=shadeValues.length?[Math.min(...shadeValues),Math.max(...shadeValues)]:null;
+  const shadeMark=(attrs,row)=>{if(!shadeRange||!row||typeof row[spec.colorMeasure]!=='number'||attrs.fill==='none'||Number(attrs['fill-opacity'])<.05)return attrs;
+   const t=shadeRange[1]>shadeRange[0]?(row[spec.colorMeasure]-shadeRange[0])/(shadeRange[1]-shadeRange[0]):1;return {...attrs,fill:palette[0],'fill-opacity':Number((.25+.75*t).toFixed(3))};};
+  const mark=(tag0,attrs0,row,detail)=>{const [tag,attrs]=asGlyph(tag0,shadeMark(attrs0,row),row);const extra=extraText(row),n=node(tag,{...attrs,tabindex:0,role:'button',class:'plot-mark','aria-label':label(row)+'; '+(detail||ms.map(id=>name(id)+': '+fmt(row[id],id)).join('; '))+(extra?'; '+extra:'')});node('title',{},n.getAttribute('aria-label'),n);n.onclick=()=>onSelect?.(row);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}};return n;};
   const axis=(values,left=265,right=940,y=H-34)=>{const[lo,hi]=base.extent(values),scale=v=>left+(v-lo)/(hi-lo)*(right-left);for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5;node('line',{x1:scale(v),x2:scale(v),y1:70,y2:y-18,stroke:'#ece8ef'});text(scale(v),y,base.format(v,m,cols,true),{'text-anchor':'middle'});}return scale;};
   // The SVG grows downward for a legend or a note, so nothing is clipped from an export.
   const grow=h=>{const box=svg.getAttribute('viewBox').split(' ').map(Number),top=box[3];box[3]+=h;svg.setAttribute('viewBox',box.join(' '));svg.setAttribute('height',box[3]);svg.firstChild.setAttribute('height',box[3]);return top;};
@@ -154,7 +167,10 @@
   }else if(spec.type==='gantt'){
    note('Observed first-to-last receipt dates; the bar is a date span, not continuous giving or a project duration.');const ordinal=s=>Date.parse(s+'T00:00:00Z')/86400000,values=rows.flatMap(r=>[ordinal(r.first_date),ordinal(r.last_date)]).filter(Number.isFinite),lo=values.length?Math.min(...values):0,hi=Math.max(...values,lo+1),x=v=>265+(v-lo)/(hi-lo)*675;
    for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4;text(x(v),H-25,new Date(v*86400000).toISOString().slice(0,10),{'text-anchor':'middle'});}
-   rows.forEach((r,i)=>{const y=80+i*34;text(248,y+18,cut(label(r)),{'text-anchor':'end'});if(!r.first_date||!r.last_date)return;const x0=x(ordinal(r.first_date)),x1=x(ordinal(r.last_date));mark('rect',{x:x0,y,width:Math.max(3,x1-x0),height:23,fill:colorId?memberFill(r):'#327a7a'},r,`${r.first_date} to ${r.last_date}; observed span ${r.span_days} days`);if(spec.labels)text(Math.min(945,Math.max(x0+3,x1)+6),y+17,labelText(r,(r.span_days??'—')+' days'),{'font-size':12,'data-label':'value','pointer-events':'none'});});
+   // Marks v3 (#51): Size is a Gantt bar's length, scaled so the largest Size equals the longest observed span.
+   const ganttSize=spec.size&&rows.some(r=>typeof r[spec.size]==='number')?spec.size:'',longest=Math.max(3,...rows.filter(r=>r.first_date&&r.last_date).map(r=>x(ordinal(r.last_date))-x(ordinal(r.first_date)))),ganttMax=Math.max(1e-9,...rows.map(r=>Math.abs(Number(r[ganttSize])||0)));
+   if(ganttSize)notes.push('Bar length follows '+name(ganttSize)+', scaled so the largest equals the longest observed span; each bar starts at its first observed date and its span stays in its hover detail.');
+   rows.forEach((r,i)=>{const y=80+i*34;text(248,y+18,cut(label(r)),{'text-anchor':'end'});if(!r.first_date||!r.last_date)return;const x0=x(ordinal(r.first_date)),x1=ganttSize&&typeof r[ganttSize]==='number'?x0+Math.max(3,longest*Math.abs(r[ganttSize])/ganttMax):x(ordinal(r.last_date));mark('rect',{x:x0,y,width:Math.max(3,x1-x0),height:23,fill:colorId?memberFill(r):'#327a7a'},r,`${r.first_date} to ${r.last_date}; observed span ${r.span_days} days`);if(spec.labels)text(Math.min(945,Math.max(x0+3,x1)+6),y+17,labelText(r,(r.span_days??'—')+' days'),{'font-size':12,'data-label':'value','pointer-events':'none'});});
    if(colorId)legendItems=[members,seriesFills(members)];
   }else if(spec.type==='bullet'){
    // B-E33/V07: a second measure in the same unit is the marker; one measure draws the bars alone;
@@ -191,6 +207,12 @@
    if(multi){legendItems=[series,seriesFills(series)];if(ids.length===2)notes.push('Solid marks read on the left axis; dashed lines on the right axis.');}
   }
   if(legendItems)legend(...legendItems);
+  // Marks v3: which shape each member of a Shape field takes.
+  if(shadeRange){const top=grow(34),g=node('g',{'data-legend':'colour','aria-label':'Colour legend'});text(22,top+20,name(spec.colorMeasure),{'font-size':12,fill:'#59645c'},g);
+   node('rect',{x:200,y:top+9,width:12,height:12,fill:palette[0],'fill-opacity':.25},null,g);text(218,top+20,base.format(shadeRange[0],spec.colorMeasure,cols,true),{'font-size':12,fill:'#59645c'},g);
+   node('rect',{x:330,y:top+9,width:12,height:12,fill:palette[0],'fill-opacity':1},null,g);text(348,top+20,base.format(shadeRange[1],spec.colorMeasure,cols,true),{'font-size':12,fill:'#59645c'},g);}
+  if(glyphing&&spec.shape&&shapeMembers.length){const top=grow(30+Math.ceil(shapeMembers.length/5)*22),g=node('g',{'data-legend':'shape','aria-label':'Shape legend'});text(22,top+14,name(spec.shape),{'font-size':12,fill:'#59645c'},g);
+   shapeMembers.forEach((m,i)=>{const x=22+(i%5)*180,y=top+34+Math.floor(i/5)*22,id=base.glyphFor(spec,m,shapeMembers);node('path',{d:base.glyphD(id,x+6,y-4,6),...(base.glyphOpen(id)?{fill:'none',stroke:'#59645c','stroke-width':1.5}:{fill:'#59645c'})},null,g);text(x+17,y,cut(m,20),{'font-size':12,fill:'#59645c'},g);});}
   for(const s of notes){const top=grow(20);text(22,top+14,s,{'font-size':12,fill:'#645d6d','data-note':'chart'});}
   container.append(svg);return svg;
  }

@@ -17,9 +17,9 @@
   // Marks card. Doughnut is not a Tableau mark; it is here so that every chart
   // the classic dialog could draw stays reachable from the shelves.
   const MARK_TYPES = [
-    ['automatic','Automatic'],['bar','Bar'],['line','Line'],['area','Area'],['circle','Circle'],
+    ['automatic','Automatic'],['bar','Bar'],['line','Line'],['area','Area'],['square','Square'],['circle','Circle'],['shape','Shape'],
     ['pie','Pie'],['doughnut','Doughnut'],['text','Text'],['box','Box'],['histogram','Histogram'],
-    ['waterfall','Waterfall'],['pareto','Pareto'],['radar','Radar']
+    ['waterfall','Waterfall'],['pareto','Pareto'],['radar','Radar'],['polygon','Polygon'],['density','Density']
   ];
   const MARK_IDS = MARK_TYPES.map(m => m[0]);
   // One mark list for both sources (census A-W06): every chart the Verified
@@ -193,6 +193,13 @@
         label: typeof entry.label === 'string' ? entry.label : ''
       }))
       .filter(entry => entry.industry);
+    // Marks v3 (studio_api.json v3): malformed cards are dropped on open and
+    // the sheet opens as its v2 marks, as a malformed board is dropped; a dual
+    // axis gets `marks` mirroring its first card.
+    if ('marksCards' in next || 'syncAxes' in next) {
+      if (!normalizeMarksCards(next)) { delete next.marksCards; delete next.syncAxes; }
+      else { const cards = readCards(next); writeCards(next, cards, {syncAxes: cards.length >= 2 ? next.syncAxes === true : null}); }
+    }
     return next;
   }
 
@@ -320,6 +327,508 @@
     return {data: data, overview: overview};
   }
 
+  /* --------------------------------------------------- marks cards (v3) */
+
+  // Boards #50-#52 (approved 2026-09-25). The Marks card opens on a type strip:
+  // fourteen tiles, two rows of seven, in the boards' order. Flow is drawn by
+  // the Sankey build (lane F); until then its tile is shown and disabled.
+  const MARK_STRIP = [['automatic', 'Automatic'], ['bar', 'Bar'], ['line', 'Line'], ['area', 'Area'],
+    ['square', 'Square'], ['circle', 'Circle'], ['shape', 'Shape'], ['text', 'Text'], ['map', 'Map'],
+    ['pie', 'Pie'], ['gantt', 'Gantt'], ['polygon', 'Polygon'], ['density', 'Density'], ['flow', 'Flow']];
+  const FLOW_REASON = 'Flow arrives with the Sankey build';
+  // The marks v3 adds. Each draws points: two measures place them on two axes,
+  // one measure places them along the first grouping.
+  const V3_MARK_IDS = ['square', 'shape', 'polygon', 'density'];
+  const ENCODING_IDS = ['color', 'size', 'label', 'detail', 'tooltip', 'shape', 'path', 'angle'];
+  const ENCODING_LABELS = {color: 'Colour', size: 'Size', label: 'Label', detail: 'Detail', tooltip: 'Tooltip',
+    shape: 'Shape', path: 'Path', angle: 'Angle'};
+  const LIST_ENCODINGS = ['detail', 'tooltip'];
+  // Paul's Tableau reference (#50): eleven shapes, each filled and outline.
+  const GLYPH_BASES = ['circle', 'square', 'plus', 'times', 'asterisk', 'diamond', 'triangle-up', 'triangle-down',
+    'triangle-left', 'triangle-right', 'star'];
+  const GLYPHS = [...GLYPH_BASES, ...GLYPH_BASES.map(g => g + '-open')];
+  // Border and halo take Automatic (the renderer's own drawing), None, the
+  // chart ink, white, or one of theme.js's twelve categorical slots.
+  const STYLE_COLOURS = ['automatic', 'none', 'ink', 'white', ...Array.from({length: 12}, (_, i) => 'c' + (i + 1))];
+  const CARD_KEYS = ['id', 'name', 'measure', 'type', 'encodings', 'opacity', 'border', 'halo', 'visible',
+    'selectable', 'zoomExtent', 'source', 'geography'];
+  const CARD_TYPES = [...ALL_MARK_IDS];
+  const MAX_CARDS = 12, MAX_LIST_PILLS = 24;
+  const CARDS_REFUSAL = 'The saved view’s marks cards are malformed.';
+
+  // A row appears only when the mark can use it (#51, and Tableau): Colour,
+  // Size, Label, Detail and Tooltip always; Shape on Shape marks; Path on Line,
+  // Area and Polygon; Angle on Pie. Automatic shows the rows of the mark it
+  // resolves to.
+  const PATH_TYPES = ['line', 'area', 'polygon'];
+  const ANGLE_TYPES = ['pie', 'doughnut'];
+  function markRows(type) {
+    return ['color', 'size', 'label', 'detail', 'tooltip',
+      ...(type === 'shape' ? ['shape'] : []), ...(PATH_TYPES.includes(type) ? ['path'] : []),
+      ...(ANGLE_TYPES.includes(type) ? ['angle'] : [])];
+  }
+  // The mark a compiled engine type draws, for Automatic's rows and label.
+  const ENGINE_MARK = {bar: 'bar', horizontal: 'bar', grouped: 'bar', groupedhorizontal: 'bar', line: 'line',
+    multiline: 'line', area: 'area', multiarea: 'area', scatter: 'circle', dot: 'circle', multidot: 'circle',
+    table: 'text'};
+  const markOfEngineType = type => ENGINE_MARK[type] || type || 'bar';
+
+  // Paul, 2026-09-19: nothing is silently inert. Each renderer declares what it
+  // draws; a row it cannot draw is greyed with the reason (never hidden), and
+  // app/tests/marks-v3-encodings.test.js draws every declared encoding and
+  // fails if the drawing does not change. `engine` is 'verified' or 'worksheet'.
+  const MAP_REASON = 'A map keeps today’s drawing: each place is shaded and sized by its measure. Colour, Size, Label, Detail and Tooltip on a map card arrive with map layers.';
+  const GREYED = {
+    size: {
+      polygon: 'A polygon takes its area from its vertices, so Size does not apply.',
+      pie: 'A pie fills its chart box, so Size does not apply.',
+      doughnut: 'A doughnut fills its chart box, so Size does not apply.',
+      box: 'A box plot keeps one box width, so Size does not apply.',
+      histogram: 'Histogram bins keep their width, so Size does not apply.',
+      waterfall: 'Waterfall steps keep one width, so Size does not apply.',
+      radar: 'A radar draws one outline, so Size does not apply.',
+      heatmap: 'Heat-map cells keep one size, so Size does not apply.',
+      highlight: 'Highlight-table cells keep one size, so Size does not apply.',
+      stacked: {verified: 'Stacked segments keep one thickness, so Size does not apply.'},
+      bullet: 'Bullet bars keep one thickness, so Size does not apply.',
+      combination: 'Dual-combination marks keep one thickness, so Size does not apply.',
+      'dual-line': 'Dual lines keep one width, so Size does not apply.'
+    },
+    label: {
+      density: 'Density draws how concentrated the marks are, not single marks, so Label does not apply. Circle, Square and Shape label each mark.',
+      histogram: {verified: 'A histogram labels each bin with its observation count; Labels in the toolbar turns the counts on.',
+        worksheet: 'A worksheet histogram labels each bin with its row count; a Label field is not computed per bin.'},
+      stacked: {verified: 'A stacked bar labels its total; Labels in the toolbar turns the totals on.'},
+      // The pie's slice labels belong to another lane's uncommitted drawing
+      // (charts.js placePieLabels), so a Label field stays in the hover detail.
+      pie: 'A pie prints each slice\u2019s share when Labels is on; a Label field is listed in each slice\u2019s hover detail, not printed on it.',
+      doughnut: 'A doughnut prints each slice\u2019s share when Labels is on; a Label field is listed in each slice\u2019s hover detail, not printed on it.'
+    },
+    detail: {
+      histogram: {verified: 'Bins count individual observations, so Detail does not split them. Put a field on Colour to stack the bins by it.'}
+    },
+    tooltip: {
+      histogram: {worksheet: 'A worksheet histogram\u2019s bins carry their range and row count; a Tooltip field is not computed per bin.'}
+    }
+  };
+  // A row that draws one kind of field and not the other: the Inspector keeps
+  // the row and marks a placed pill of the other kind with the reason.
+  const ROLE_GREYED = {
+    color: {measure: {
+      histogram: {worksheet: 'A worksheet histogram colours its bins by a Colour dimension; a Colour measure is not computed per bin.'},
+      stacked: {worksheet: 'Stacked segments take their breakdown\u2019s colours, so a Colour measure does not change them; put a dimension on Colour to choose the breakdown.'},
+      'series-dot': {worksheet: 'Side-by-side circles take their breakdown\u2019s colours, so a Colour measure does not change them; put a dimension on Colour to choose the breakdown.'}
+    }}
+  };
+  function roleSupport(type, engine, encoding, role) {
+    const entry = ((ROLE_GREYED[encoding] || {})[role] || {})[type];
+    const reason = typeof entry === 'string' ? entry : entry && typeof entry === 'object' ? entry[engine] : null;
+    return reason || true;
+  }
+  // The Colour popover's Opacity, Border and Halo (a card's style) per mark.
+  const STYLE_REASON = {
+    map: 'A map keeps today\u2019s drawing; opacity, border and halo per map card arrive with map layers.',
+    'filled-map': 'A map keeps today\u2019s drawing; opacity, border and halo per map card arrive with map layers.',
+    text: 'A text table\u2019s cells take no opacity, border or halo.'
+  };
+  function styleSupport(type) {
+    const reason = STYLE_REASON[type];
+    if (reason) return {opacity: reason, border: reason, halo: reason};
+    if (type === 'density') {
+      const why = 'Density draws a heat, not outlined marks, so it takes Opacity only.';
+      return {opacity: true, border: why, halo: why};
+    }
+    return {opacity: true, border: true, halo: true};
+  }
+  function encodingSupport(type, engine) {
+    const mark = ALL_MARK_IDS.includes(type) ? type : 'automatic';
+    const out = {};
+    for (const id of markRows(mark)) {
+      if (mark === 'map' || mark === 'filled-map') { out[id] = MAP_REASON; continue; }
+      const entry = (GREYED[id] || {})[mark];
+      const reason = typeof entry === 'string' ? entry : entry && typeof entry === 'object' ? entry[engine] : null;
+      out[id] = reason || true;
+    }
+    return out;
+  }
+
+  // A pill, a list of pills, and the Shape encoding: a field whose members take
+  // palette shapes (with optional member -> glyph choices), or one glyph for
+  // every mark.
+  const plainObject = value => !!value && typeof value === 'object' && !Array.isArray(value);
+  const pillOf = value => value == null ? null : pill(value);
+  function shapeEncoding(value) {
+    if (!plainObject(value)) return null;
+    if (value.column != null) {
+      const p = pill(value);
+      if (!p) return null;
+      const glyphs = plainObject(value.glyphs)
+        ? Object.fromEntries(Object.entries(value.glyphs).filter(([, glyph]) => GLYPHS.includes(glyph))) : null;
+      return glyphs && Object.keys(glyphs).length ? Object.assign(p, {glyphs}) : p;
+    }
+    return typeof value.glyph === 'string' && GLYPHS.includes(value.glyph) ? {glyph: value.glyph} : null;
+  }
+  const blankEncodings = () => ({color: null, size: null, label: null, detail: [], tooltip: [], shape: null, path: null, angle: null});
+
+  // Every card of today's sheets: one, read from the v2 `marks` object.
+  function cardFromMarks(marks) {
+    const m = plainObject(marks) ? marks : {};
+    return {id: 'card-1', name: '', type: ALL_MARK_IDS.includes(m.type) ? m.type : (typeof m.type === 'string' && m.type ? m.type : 'automatic'),
+      encodings: Object.assign(blankEncodings(), {color: pillOf(m.color), size: pillOf(m.size), label: pillOf(m.label),
+        detail: shelf(m.detail), tooltip: shelf(m.tooltip)}),
+      opacity: 100, border: 'automatic', halo: 'automatic', visible: true, selectable: true, zoomExtent: true};
+  }
+  // The v2 `marks` a card is read as by a console without v3, in createSheet's
+  // key order. `base` keeps a v2-only key (orientation) the card does not own.
+  function marksFromCard(card, base) {
+    const e = card.encodings || blankEncodings();
+    const out = {type: card.type, color: e.color ? clone(e.color) : null, size: e.size ? clone(e.size) : null,
+      label: e.label ? clone(e.label) : null, detail: clone(e.detail || []), tooltip: clone(e.tooltip || [])};
+    if (plainObject(base) && base.orientation) out.orientation = base.orientation;
+    return out;
+  }
+  // What only a v3 console can carry. A card without any of it is written in
+  // the v2 shape, so a sheet that never used them saves byte-identical.
+  function hasV3Fields(card) {
+    const e = (card && card.encodings) || {};
+    return !!(e.shape || e.path || e.angle || card.measure || (card.name || '') !== '' ||
+      card.opacity !== 100 || card.border !== 'automatic' || card.halo !== 'automatic' ||
+      card.visible === false || card.selectable === false || card.zoomExtent === false ||
+      card.source != null || card.geography != null);
+  }
+  // One card on disk, keys in the contract's order.
+  function serializeCard(card) {
+    const e = card.encodings || blankEncodings();
+    const out = {id: card.id, name: card.name || ''};
+    if (card.measure) out.measure = clone(card.measure);
+    out.type = card.type;
+    out.encodings = {color: e.color ? clone(e.color) : null, size: e.size ? clone(e.size) : null,
+      label: e.label ? clone(e.label) : null, detail: clone(e.detail || []), tooltip: clone(e.tooltip || []),
+      shape: e.shape ? clone(e.shape) : null, path: e.path ? clone(e.path) : null, angle: e.angle ? clone(e.angle) : null};
+    out.opacity = card.opacity; out.border = card.border; out.halo = card.halo;
+    out.visible = card.visible; out.selectable = card.selectable; out.zoomExtent = card.zoomExtent;
+    if (card.source != null) out.source = clone(card.source);
+    if (card.geography != null) out.geography = card.geography;
+    return out;
+  }
+
+  // The shape a saved sheet's `marksCards` must have (studio_api.json v3).
+  // server.py validate_view_marks applies the same rules on save, so a card
+  // that opens here is a card that saves. Returns '' or the first fault.
+  const isInt = value => typeof value === 'number' && Number.isInteger(value);
+  function pillFault(value, what, allowGlyphs) {
+    if (!plainObject(value)) return what + ' is not a pill';
+    const allowed = allowGlyphs ? ['column', 'aggregation', 'glyphs'] : ['column', 'aggregation'];
+    if (Object.keys(value).some(key => !allowed.includes(key))) return what + ' has an unknown key';
+    if (!isInt(value.column) || value.column < 0) return what + ' needs a column index';
+    if (!AGGREGATION_IDS.includes(value.aggregation)) return what + ' needs a known aggregation';
+    if (allowGlyphs && value.glyphs != null) {
+      if (!plainObject(value.glyphs) || Object.keys(value.glyphs).length > 64) return what + ' glyphs are malformed';
+      if (Object.entries(value.glyphs).some(([member, glyph]) => member.length > 200 || !GLYPHS.includes(glyph))) return what + ' names an unknown shape';
+    }
+    return '';
+  }
+  function cardFault(card) {
+    if (!plainObject(card)) return 'a card is not an object';
+    if (Object.keys(card).some(key => !CARD_KEYS.includes(key))) return 'a card has an unknown key';
+    if (typeof card.id !== 'string' || !card.id || card.id.length > 64) return 'a card needs an id';
+    if (typeof card.name !== 'string' || card.name.length > 120) return 'a card name must be text';
+    if (!CARD_TYPES.includes(card.type)) return 'a card names an unknown mark type';
+    if (!plainObject(card.encodings)) return 'a card needs its encodings';
+    const keys = Object.keys(card.encodings);
+    if (keys.length !== ENCODING_IDS.length || ENCODING_IDS.some(id => !keys.includes(id))) return 'a card must carry all eight encodings';
+    for (const id of ['color', 'size', 'label', 'path', 'angle']) {
+      const value = card.encodings[id];
+      if (value !== null) { const fault = pillFault(value, id); if (fault) return fault; }
+    }
+    for (const id of LIST_ENCODINGS) {
+      const list = card.encodings[id];
+      if (!Array.isArray(list) || list.length > MAX_LIST_PILLS) return id + ' must be a list of pills';
+      for (const value of list) { const fault = pillFault(value, id); if (fault) return fault; }
+    }
+    const shape = card.encodings.shape;
+    if (shape !== null) {
+      if (plainObject(shape) && 'glyph' in shape) {
+        if (Object.keys(shape).length !== 1 || !GLYPHS.includes(shape.glyph)) return 'shape names an unknown shape';
+      } else { const fault = pillFault(shape, 'shape', true); if (fault) return fault; }
+    }
+    if (!isInt(card.opacity) || card.opacity < 0 || card.opacity > 100) return 'opacity must be a whole percent';
+    if (!STYLE_COLOURS.includes(card.border)) return 'border names an unknown colour';
+    if (!STYLE_COLOURS.includes(card.halo)) return 'halo names an unknown colour';
+    for (const id of ['visible', 'selectable', 'zoomExtent']) if (typeof card[id] !== 'boolean') return id + ' must be true or false';
+    if ('measure' in card) { const fault = pillFault(card.measure, 'measure'); if (fault) return fault; }
+    if ('source' in card && !plainObject(card.source)) return 'source must be an object';
+    if ('geography' in card && (typeof card.geography !== 'string' || !card.geography || card.geography.length > 64)) return 'geography must be a level name';
+    return '';
+  }
+  function marksCardsFault(sheet) {
+    if (!plainObject(sheet)) return '';
+    if ('syncAxes' in sheet && typeof sheet.syncAxes !== 'boolean') return 'syncAxes must be true or false';
+    if (!('marksCards' in sheet)) return '';
+    const cards = sheet.marksCards;
+    if (!Array.isArray(cards) || !cards.length || cards.length > MAX_CARDS) return 'marksCards must be a list of 1 to 12 cards';
+    for (const card of cards) { const fault = cardFault(card); if (fault) return fault; }
+    if (new Set(cards.map(card => card.id)).size !== cards.length) return 'two cards share an id';
+    if (cards.length >= 2) {
+      const rows = shelf(sheet.rows).map(p => p.column + '|' + p.aggregation);
+      const measures = cards.map(card => card.measure ? card.measure.column + '|' + card.measure.aggregation : '');
+      if (measures.some(key => !key)) return 'every card of a dual axis names its measure';
+      if (new Set(measures).size !== measures.length) return 'two cards name the same measure';
+      if (measures.some(key => !rows.includes(key))) return 'a card names a measure that is not on Rows';
+    }
+    return '';
+  }
+  const validateMarksCards = sheet => marksCardsFault(sheet);
+  function normalizeCard(card) {
+    const e = card.encodings;
+    return {id: card.id, name: card.name, ...(card.measure ? {measure: pill(card.measure)} : {}), type: card.type,
+      encodings: {color: pillOf(e.color), size: pillOf(e.size), label: pillOf(e.label), detail: shelf(e.detail),
+        tooltip: shelf(e.tooltip), shape: shapeEncoding(e.shape), path: pillOf(e.path), angle: pillOf(e.angle)},
+      opacity: card.opacity, border: card.border, halo: card.halo, visible: card.visible,
+      selectable: card.selectable, zoomExtent: card.zoomExtent,
+      ...(card.source != null ? {source: clone(card.source)} : {}), ...(card.geography != null ? {geography: card.geography} : {})};
+  }
+  // The sheet's cards, validated and copied, or null when it has none (a v2
+  // sheet) or when the ones it has are malformed (dropped on open, like a board).
+  function normalizeMarksCards(sheet) {
+    if (!plainObject(sheet) || !Array.isArray(sheet.marksCards) || marksCardsFault(sheet)) return null;
+    return sheet.marksCards.map(normalizeCard);
+  }
+  // The cards an edit works on: each card well formed, without the save-time
+  // check that every measure is still on Rows (an edit to Rows is what
+  // syncCardsToRows repairs before anything is drawn or saved).
+  function looseCards(sheet) {
+    const list = plainObject(sheet) && Array.isArray(sheet.marksCards) ? sheet.marksCards : null;
+    if (!list || !list.length || list.length > MAX_CARDS || list.some(card => cardFault(card))) return null;
+    return list.map(normalizeCard);
+  }
+  // Every card a sheet draws, v2 or v3. One card: `marks` is canonical for the
+  // v2 fields (every v2 gesture still edits it in place) and the card adds what
+  // only v3 carries. Several cards (a dual axis): the cards are canonical and
+  // `marks` mirrors the first.
+  function readCards(sheet) {
+    const state = plainObject(sheet) ? sheet : {};
+    const cards = looseCards(state);
+    if (!cards) return [cardFromMarks(state.marks)];
+    if (cards.length === 1) {
+      const v2 = cardFromMarks(state.marks);
+      cards[0].type = v2.type;
+      for (const id of ['color', 'size', 'label', 'detail', 'tooltip']) cards[0].encodings[id] = v2.encodings[id];
+    }
+    return cards;
+  }
+  // Writes cards back. One card without v3 fields leaves the v2 shape alone
+  // (no marksCards key), which is what keeps old views byte-identical.
+  function writeCards(sheet, cards, options) {
+    const list = (cards || []).filter(Boolean);
+    if (!list.length) return sheet;
+    if (list.length >= 2) {
+      sheet.marksCards = list.map(serializeCard);
+      sheet.marks = marksFromCard(list[0], sheet.marks);
+      if (options && options.syncAxes != null) {
+        if (options.syncAxes) sheet.syncAxes = true; else delete sheet.syncAxes;
+      }
+      return sheet;
+    }
+    const card = Object.assign({}, list[0]);
+    delete card.measure;
+    const marks = plainObject(sheet.marks) ? sheet.marks : (sheet.marks = {});
+    const v2 = marksFromCard(card, marks);
+    for (const key of ['type', 'color', 'size', 'label', 'detail', 'tooltip']) {
+      if (JSON.stringify(marks[key]) !== JSON.stringify(v2[key])) marks[key] = v2[key];
+    }
+    if (hasV3Fields(card)) sheet.marksCards = [serializeCard(card)];
+    else delete sheet.marksCards;
+    delete sheet.syncAxes;
+    return sheet;
+  }
+  // A v2 producer (Show Me, the Chart menu, Company overview) just set `marks`.
+  // One card keeps its v3 fields; a dual axis collapses to the view Show Me drew.
+  function adoptMarks(sheet) {
+    if (!plainObject(sheet) || !('marksCards' in sheet)) { if (plainObject(sheet)) delete sheet.syncAxes; return sheet; }
+    const cards = normalizeMarksCards(sheet);
+    const first = cards ? cards[0] : null;
+    const card = cardFromMarks(sheet.marks);
+    if (first && cards.length === 1) {
+      for (const key of ['name', 'opacity', 'border', 'halo', 'visible', 'selectable', 'zoomExtent', 'source', 'geography'])
+        if (first[key] != null) card[key] = first[key];
+      card.id = first.id;
+      for (const id of ['shape', 'path', 'angle']) card.encodings[id] = first.encodings[id];
+    }
+    delete sheet.marksCards;
+    return writeCards(sheet, [card]);
+  }
+
+  // Dual axis (#52): two or more measures on Rows, each with its own card.
+  function measuresOnRows(sheet, columns) {
+    const meta = classifyFields(columns, sheet && sheet.types);
+    return shelf(sheet && sheet.rows).filter(p => { const f = fieldAt(meta, p.column); return f && f.role === 'measure'; });
+  }
+  const measureKey = p => p ? p.column + '|' + p.aggregation : '';
+  const dualAxisOn = sheet => Array.isArray(sheet && sheet.marksCards) && sheet.marksCards.length >= 2;
+  function setDualAxis(sheet, columns, on) {
+    const cards = readCards(sheet);
+    if (!on) {
+      const first = Object.assign({}, cards[0]);
+      delete first.measure;
+      delete sheet.marksCards;
+      writeCards(sheet, [first]);
+      return sheet;
+    }
+    const measures = measuresOnRows(sheet, columns);
+    if (measures.length < 2) return sheet;
+    const base = cards[0];
+    const next = measures.map((p, i) => {
+      const card = JSON.parse(JSON.stringify(base));
+      card.id = 'card-' + (i + 1);
+      card.measure = {column: p.column, aggregation: p.aggregation};
+      // #52: the first measure keeps the mark; the next ones start as lines.
+      if (i > 0 && ['automatic', 'bar'].includes(base.type)) card.type = 'line';
+      return card;
+    });
+    return writeCards(sheet, next, {syncAxes: false});
+  }
+  // The cards follow Rows: a measure moved or re-aggregated keeps its card, a
+  // new measure gets one copied from the first, a removed one loses it, and a
+  // dual axis left with fewer than two measures goes back to one card.
+  function syncCardsToRows(sheet, columns) {
+    if (!dualAxisOn(sheet)) return sheet;
+    const cards = looseCards(sheet);
+    if (!cards) { delete sheet.marksCards; delete sheet.syncAxes; return sheet; }
+    const measures = measuresOnRows(sheet, columns);
+    const pool = cards.slice();
+    const take = (test) => { const at = pool.findIndex(test); return at < 0 ? null : pool.splice(at, 1)[0]; };
+    const next = measures.map(p => take(card => measureKey(card.measure) === measureKey(p))
+      || take(card => card.measure && card.measure.column === p.column) || null);
+    next.forEach((card, i) => {
+      if (!card) {
+        const copy = JSON.parse(JSON.stringify(cards[0]));
+        copy.id = 'card-' + (i + 1) + '-' + measures[i].column;
+        next[i] = copy;
+      }
+      next[i].measure = {column: measures[i].column, aggregation: measures[i].aggregation};
+    });
+    if (next.length < 2) {
+      const keep = Object.assign({}, next[0] || cards[0]);
+      delete keep.measure;
+      delete sheet.marksCards;
+      return writeCards(sheet, [keep]);
+    }
+    const ids = new Set();
+    next.forEach((card, i) => { if (ids.has(card.id)) card.id = 'card-' + (i + 1) + '-' + card.measure.column; ids.add(card.id); });
+    return writeCards(sheet, next);
+  }
+
+  // The All card (#52): what every card shares. A single-pill encoding is
+  // shown when every card has the same one; a list shows the pills every card
+  // has. Editing All edits every card.
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  function cardEncodingPills(cards, target, zone) {
+    if (target !== 'all') {
+      const card = cards[target];
+      if (!card) return [];
+      const value = card.encodings[zone];
+      return LIST_ENCODINGS.includes(zone) ? clone(value || []) : value ? [clone(value)] : [];
+    }
+    if (LIST_ENCODINGS.includes(zone)) {
+      return clone((cards[0].encodings[zone] || []).filter(p => cards.every(card => (card.encodings[zone] || []).some(q => same(p, q)))));
+    }
+    const first = cards[0].encodings[zone];
+    return first && cards.every(card => same(card.encodings[zone], first)) ? [clone(first)] : [];
+  }
+  function setCardEncoding(cards, target, zone, list) {
+    const targets = target === 'all' ? cards : [cards[target]].filter(Boolean);
+    const before = target === 'all' ? cardEncodingPills(cards, 'all', zone) : null;
+    for (const card of targets) {
+      if (LIST_ENCODINGS.includes(zone)) {
+        if (target === 'all') {
+          // Pills All shows are replaced; each card keeps its own others.
+          const own = (card.encodings[zone] || []).filter(p => !before.some(q => same(p, q)));
+          card.encodings[zone] = [...clone(list), ...own];
+        } else card.encodings[zone] = clone(list);
+      } else card.encodings[zone] = list.length ? clone(list[0]) : null;
+    }
+    return cards;
+  }
+  function setCardType(cards, target, type) {
+    for (const card of target === 'all' ? cards : [cards[target]].filter(Boolean)) card.type = type;
+    return cards;
+  }
+  function setCardStyle(cards, target, style) {
+    for (const card of target === 'all' ? cards : [cards[target]].filter(Boolean)) {
+      for (const key of ['opacity', 'border', 'halo']) if (style && style[key] != null) card[key] = style[key];
+    }
+    return cards;
+  }
+  // The type All shows: the shared one, or 'mixed' when the cards differ.
+  const allCardType = cards => cards.every(card => card.type === cards[0].type) ? cards[0].type : 'mixed';
+  // The glyph each member of a Shape field takes: its chosen one, else the
+  // palette in order. One glyph for every mark when no field is on Shape.
+  function glyphFor(shape, member, index) {
+    if (shape && shape.glyph) return shape.glyph;
+    const chosen = shape && shape.glyphs && shape.glyphs[member];
+    return chosen || GLYPHS[Math.max(0, index) % GLYPHS.length];
+  }
+  // The marks a dual axis can share one pane with. Pie, Gantt, Map and Flow
+  // need their own frame, so their tiles are greyed on a card of a dual axis.
+  const DUAL_MARKS = ['automatic', 'bar', 'line', 'area', 'square', 'circle', 'shape', 'text', 'polygon', 'density'];
+  const DUAL_REASON = 'A dual-axis card draws Bar, Line, Area, Square, Circle, Shape, Text, Polygon or Density on the shared axis.';
+  // Automatic on a dual axis: the first measure as bars (lines over a date),
+  // every other measure as a line, as #52 draws them.
+  const dualCardMark = (type, index, timeAxis) => type === 'automatic'
+    ? (index === 0 && !timeAxis ? 'bar' : 'line') : DUAL_MARKS.includes(type) ? type : (index === 0 ? 'bar' : 'line');
+
+  // A worksheet dual axis. The shelves compile once, as one bar view grouped
+  // by the axis and every card's dimensions, with every other card's measure
+  // and every measure a card encodes carried per group; charts.js then draws
+  // each card's measure with its own mark (config.cards).
+  function compileCards(state, columns, cards) {
+    const meta = classifyFields(columns, state && state.types);
+    const role = p => { const f = p && fieldAt(meta, p.column); return f ? f.role : ''; };
+    const proxy = clone(state);
+    delete proxy.marksCards; delete proxy.syncAxes;
+    const measures = cards.map(card => card.measure).filter(Boolean);
+    const dims = [], carried = [];
+    const keep = (list, p) => { if (p && !list.some(q => q.column === p.column && q.aggregation === p.aggregation)) list.push({column: p.column, aggregation: p.aggregation}); };
+    for (const card of cards) {
+      const e = card.encodings;
+      const shapePill = e.shape && e.shape.column != null ? {column: e.shape.column, aggregation: e.shape.aggregation} : null;
+      for (const p of [e.color, e.size, e.label, e.path, shapePill, ...e.detail, ...e.tooltip]) {
+        if (!p || !role(p)) continue;
+        keep(role(p) === 'dimension' ? dims : carried, p);
+      }
+    }
+    proxy.rows = [...shelf(state.rows).filter(p => role(p) !== 'measure'), ...measures.slice(0, 1)];
+    proxy.marks = {type: 'bar', color: null, size: null, label: null, detail: dims,
+      tooltip: [...measures.slice(1).map(p => ({column: p.column, aggregation: p.aggregation})), ...carried]};
+    proxy.analytics = Object.assign({}, proxy.analytics, {transform: 'none'});
+    const report = compileReport(proxy, columns);
+    const notes = report.notes.filter(note => !/^Detail, Label and Tooltip/.test(note));
+    if ((state.analytics || {}).transform && state.analytics.transform !== 'none') notes.push('A dual axis draws each measure with its own mark, so period analysis is left off.');
+    if (dims.length) notes.push('The cards share one level of detail: ' + [...new Set(dims.map(p => (fieldAt(meta, p.column) || {name: 'a field'}).name))].join(' / ') + ' splits every card’s marks.');
+    const timeAxis = !!(report.config && fieldAt(meta, report.config.x) && fieldAt(meta, report.config.x).isTime);
+    if (report.config) {
+      report.config.mark = 'cards';
+      report.config.series = -1;
+      report.config.synchronize = !!state.syncAxes;
+      report.config.cards = cards.map((card, i) => {
+        const e = card.encodings;
+        const shapeField = e.shape && e.shape.column != null ? fieldAt(meta, e.shape.column) : null;
+        if (!DUAL_MARKS.includes(card.type)) notes.push(markLabel(card.type) + ' cannot share a dual axis, so ' + ((fieldAt(meta, card.measure.column) || {}).name || 'its measure') + ' is drawn as ' + (i === 0 ? 'bars' : 'a line') + '.');
+        return {id: card.id, type: dualCardMark(card.type, i, timeAxis), measure: {column: card.measure.column, aggregation: card.measure.aggregation},
+          glyph: card.type === 'square' ? 'square' : (e.shape && e.shape.glyph) || '',
+          shape: shapeField && shapeField.role === 'dimension' ? shapeField.index : -1, glyphs: (e.shape && e.shape.glyphs) || null,
+          color: e.color ? {column: e.color.column, aggregation: e.color.aggregation, role: role(e.color)} : null,
+          size: e.size && role(e.size) === 'measure' ? clone(e.size) : null,
+          label: e.label ? {column: e.label.column, aggregation: e.label.aggregation, role: role(e.label)} : null,
+          tooltip: e.tooltip.filter(p => role(p) === 'measure').map(p => clone(p)),
+          path: e.path ? {column: e.path.column, aggregation: e.path.aggregation, role: role(e.path)} : null,
+          opacity: card.opacity, border: card.border, halo: card.halo, visible: card.visible};
+      });
+    }
+    return Object.assign(report, {notes: notes, markType: 'cards', cards: cards});
+  }
+
   /* --------------------------------------------------------------- compile */
 
   const positiveInteger = value => {
@@ -348,6 +857,11 @@
   // source and named in a quiet note; every sentence that used to block the
   // drawing is a note under it. Only an empty sheet has nothing to draw.
   function compileReport(state, columns) {
+    // Marks v3 (#52): a dual axis compiles through compileCards; one card
+    // reads its v3 encodings (Shape, Path, Angle) through readCards.
+    const cardSet = readCards(state);
+    if (cardSet.length >= 2) return compileCards(state, columns, cardSet);
+    const card = cardSet[0];
     const meta = classifyFields(columns, state && state.types);
     const issues = [], notes = [];
     const attach = list => shelf(list)
@@ -376,8 +890,21 @@
     // Dimensions on Detail, Tooltip, Label and Size join the grouping behind
     // each mark, as they do on the verified path; a measure on Detail or
     // Tooltip is carried into each mark's tooltip (census B-S03).
+    // Marks v3 (#50-#52): Shape on Shape marks, Path on Line, Area and
+    // Polygon, Angle on Pie. A dimension on any of them joins each mark's
+    // grouping; on Square, Shape, Polygon and Density a Colour dimension does
+    // too, so every point keeps its member instead of becoming a series.
+    const v3Pill = zone => {
+      const value = card.encodings[zone];
+      return value && value.column != null ? attach([{column: value.column, aggregation: value.aggregation}])[0] || null : null;
+    };
+    const shapePill = markType === 'shape' ? v3Pill('shape') : null;
+    const pathPill = PATH_TYPES.includes(markType) ? v3Pill('path') : null;
+    const anglePill = ANGLE_TYPES.includes(markType) ? v3Pill('angle') : null;
+    const v3Mark = V3_MARK_IDS.includes(markType);
+    const v3Dimensions = [shapePill, pathPill, anglePill, v3Mark ? colorPill : null].filter(p => p && isDimension(p));
     const markDimensions = [...details, ...tooltipPills, ...(labelPill ? [labelPill] : []),
-      ...(sizePill ? [sizePill] : [])].filter(isDimension);
+      ...(sizePill ? [sizePill] : []), ...v3Dimensions].filter(isDimension);
     const anything = columnPills.length || rowPills.length || colorPill || sizePill || labelPill ||
       tooltipPills.length || details.length;
 
@@ -491,6 +1018,18 @@
       type = 'bullet'; xPill = firstDimension; yPill = firstMeasure;
       needMeasure('needs a measure');
       secondMeasure('needs a second measure to compare');
+    } else if (v3Mark) {
+      // Square, Shape, Polygon and Density place points: two measures put them
+      // on two axes (a point per group, or per worksheet row when nothing
+      // groups them), one measure along the first grouping.
+      yPill = rowMeasures[0] || allMeasures[0] || null;
+      xPill = colMeasures.find(p => p !== yPill) || allMeasures.find(p => p !== yPill) || null;
+      if (xPill && yPill) type = 'scatter';
+      else {
+        type = 'dot'; xPill = firstDimension; yPill = firstMeasure;
+        needMeasure('needs a measure to place its marks');
+        needAxis('needs a grouping for its marks');
+      }
     } else if (['bar', 'text', 'stacked', 'combination', 'map', 'filled-map'].includes(markType)) {
       barLike();
       if (markType === 'stacked') {
@@ -554,20 +1093,30 @@
     // Colour: a dimension separates series (or joins the grouping), a measure
     // shades each mark (contract W11 colorMeasure). Colour that repeats the
     // axis gives every mark its own colour, which the bars already have.
+    // Angle (Pie, #51): the measure on Angle sets each wedge.
+    if (type && anglePill) {
+      if (isMeasure(anglePill)) yPill = anglePill;
+      else notes.push('Angle takes a measure; ' + anglePill.field.name + ' joins the grouping instead.');
+    }
+    if (type && shapePill && isMeasure(shapePill)) notes.push('Shape takes a dimension; ' + shapePill.field.name + ' is in each mark’s tooltip.');
     if (type && color) {
       if (color.role === 'measure') extra.colorMeasure = {column: colorPill.column, aggregation: colorPill.aggregation};
-      else if (!xPill || color.index !== xPill.column) seriesPill = colorPill;
+      else if (!v3Mark && (!xPill || color.index !== xPill.column)) seriesPill = colorPill;
     }
     if (type && sizePill) {
       if (isMeasure(sizePill)) extra.size = {column: sizePill.column, aggregation: sizePill.aggregation};
       else notes.push('Size follows a measure; ' + sizePill.field.name + ' joins the grouping instead.');
     }
     if (type && labelPill) extra.label = {column: labelPill.column, aggregation: isMeasure(labelPill) ? labelPill.aggregation : 'first'};
-    const tips = [...tooltipPills, ...details].filter(isMeasure).map(p => ({column: p.column, aggregation: p.aggregation}));
+    const tips = [...tooltipPills, ...details, ...[shapePill, pathPill].filter(Boolean)].filter(isMeasure).map(p => ({column: p.column, aggregation: p.aggregation}));
     if (type && tips.length) extra.tooltip = tips;
 
     const analytics = state.analytics || {};
     let transform = TRANSFORMS.includes(analytics.transform) ? analytics.transform : 'none';
+    if (transform !== 'none' && type && v3Mark) {
+      notes.push(markName + ' places each mark by its value, so period analysis is left off.');
+      transform = 'none';
+    }
     if (transform !== 'none' && type && map) {
       // A map has no time axis: it draws each place's total over the rows
       // selected, so period analysis is left off and said to be.
@@ -610,6 +1159,15 @@
     const detailGrain = (type === 'box' || type === 'histogram') && markDimensions.length > 0;
     const grain = (type === 'scatter' && grouping.length) || detailGrain ? 'group' : 'row';
     const AGGREGATE_WORD = {sum: 'total', mean: 'average', count: 'row count', median: 'median', min: 'minimum', max: 'maximum', countd: 'distinct count'};
+    // Marks v3: a Colour dimension on a scatter of groups splits the points by
+    // member and colours them (contribution-plot draws it); the engine's group
+    // grain would otherwise drop the colour silently.
+    let scatterColour = -1;
+    if (grain === 'group' && type === 'scatter' && color && color.role === 'dimension' && !v3Mark) {
+      scatterColour = colorPill.column;
+      if (!grouping.includes(scatterColour)) grouping.push(scatterColour);
+      series = -1;
+    }
     if (grain === 'group' && type === 'scatter') {
       extra.grain = 'group';
       extra.xAggregation = xPill.aggregation;
@@ -689,6 +1247,20 @@
     if (config) {
       if (measures.length) config.measures = measures;
       for (const key of Object.keys(extra)) config[key] = extra[key];
+      // Marks v3: charts.js draws these marks through contribution-plot.js
+      // (config.mark), so only a view that uses them takes the new path.
+      if (scatterColour >= 0) {
+        config.mark = 'circle';
+        config.v3 = {glyph: '', shape: -1, glyphs: null, color: scatterColour, path: null};
+      }
+      if (v3Mark || pathPill) {
+        const shape = card.encodings.shape;
+        config.mark = markType;
+        config.v3 = {glyph: markType === 'square' ? 'square' : (shape && shape.glyph) || '',
+          shape: shapePill && isDimension(shapePill) ? shapePill.column : -1, glyphs: (shape && shape.glyphs) || null,
+          color: colorPill && isDimension(colorPill) ? colorPill.column : -1,
+          path: pathPill ? {column: pathPill.column, aggregation: pathPill.aggregation, role: pathPill.field.role} : null};
+      }
       const width = Number(params.binWidth);
       if (type === 'histogram' && Number.isFinite(width) && width > 0) config.binWidth = width;
       if (type === 'histogram' && positiveInteger(params.bins)) config.bins = Math.min(1000, positiveInteger(params.bins));
@@ -926,7 +1498,7 @@
   // encoding on the sheet (census B-S28). Shelves that are empty are seeded
   // from the fields in use, then from the source itself, so a click on an
   // empty sheet still draws.
-  function showMeApply(tileId, state, columns, selected) {
+  function showMeApplyV2(tileId, state, columns, selected) {
     const t = SHOW_ME.find(item => item.id === tileId);
     if (!t) return clone(state);
     const meta = classifyFields(columns, state && state.types);
@@ -1000,6 +1572,11 @@
     }
     return next;
   }
+
+  // Show Me draws a view of its own: one card keeps its v3 fields, and a dual
+  // axis collapses to the mark the tile chose (core.adoptMarks).
+  const showMeApply = (tileId, state, columns, selected) => SHOW_ME.some(t => t.id === tileId)
+    ? adoptMarks(showMeApplyV2(tileId, state, columns, selected)) : clone(state);
 
   const RECOMMENDED_TILE = {bar: 'horizontal-bars', pie: 'pie-chart', line: 'lines-continuous',
     scatter: 'scatter-plot', box: 'box-and-whisker', histogram: 'histogram'};
@@ -1533,7 +2110,14 @@
     sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary,
     sourceLabelOf, captionSource, captionSourceForKey, viewSourceRecord, chartSourceRecord, chartProvenanceRecord,
     normalizeBoard,
-    parseSnapshotRegistry
+    parseSnapshotRegistry,
+    // Marks v3 (boards #50-#52, studio_api.json v3).
+    MARK_STRIP, FLOW_REASON, V3_MARK_IDS, ENCODING_IDS, ENCODING_LABELS, GLYPHS, GLYPH_BASES, STYLE_COLOURS,
+    CARDS_REFUSAL, DUAL_MARKS, DUAL_REASON, PATH_TYPES, ANGLE_TYPES,
+    markRows, markOfEngineType, encodingSupport, roleSupport, styleSupport, shapeEncoding, cardFromMarks, marksFromCard, hasV3Fields,
+    serializeCard, validateMarksCards, normalizeMarksCards, readCards, writeCards, adoptMarks, measuresOnRows,
+    dualAxisOn, setDualAxis, syncCardsToRows, cardEncodingPills, setCardEncoding, setCardType, setCardStyle,
+    allCardType, glyphFor, dualCardMark, compileCards
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatStudioCore = api;

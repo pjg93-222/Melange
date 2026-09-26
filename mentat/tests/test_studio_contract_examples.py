@@ -167,7 +167,8 @@ class StudioContractExampleTests(unittest.TestCase):
                           .read_text(encoding='utf-8'))
 
     def test_the_contract_is_v2_and_carries_the_board_examples_and_controls(self):
-        self.assertEqual(STUDIO_API['version'], 2)
+        # v3 (lane M) adds marks cards; every v2 board example and control is kept.
+        self.assertEqual(STUDIO_API['version'], 3)
         for name in ('views_save_board', 'views_get_board', 'views_save_board_four'):
             self.assertIn(name, STUDIO_API['examples'])
         self.assertEqual(len(self.board_controls()), 6)

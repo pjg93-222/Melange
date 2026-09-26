@@ -229,8 +229,21 @@
       rows=result.groups.map(g=>{const parts=tupleOf(g,dimIds.length),row={};dimIds.forEach((id,k)=>{row[id]=parts[k]??'(Missing)';});return Object.assign(row,{first_date:g.first??null,last_date:g.last??null,span_days:g.span??null});});
       measures=['span_days'];cols=[...dimIds.map(id=>({id,name:id})),{id:'span_days',name:'Span (days)',unit:'days'}];
     }
+    // Marks v3 (lane M): the worksheet's Size, Label, Colour measure and Tooltip
+    // fields reach the delegated drawing; each group carries them (W7).
+    const groupsOf=result.groups||[],carried=(g,key)=>g&&(g[key]!=null||Array.isArray(g.values)&&g.values.some(v=>v&&v[key]!=null));
+    const enc={size:result.sizeLabel&&groupsOf.some(g=>carried(g,'size'))?idOf(result.sizeLabel):'',label:result.labelLabel&&groupsOf.some(g=>carried(g,'labelValue'))?idOf(result.labelLabel):'',
+      colour:result.colorLabel&&groupsOf.some(g=>carried(g,'colorValue'))?idOf(result.colorLabel):''};
+    const tips=(result.extraLabels||[]).filter(label=>groupsOf.some(g=>g&&(g.extra&&g.extra[label]!==undefined||Array.isArray(g.values)&&g.values.some(v=>v&&v.extra&&v.extra[label]!==undefined))));
+    if(enc.size||enc.label||enc.colour||tips.length){
+      const pick=(g,key)=>g[key]!=null?g[key]:Array.isArray(g.values)?(g.values.find(v=>v&&v[key]!=null)||{})[key]:undefined;
+      rows=rows.map((row,i)=>{const g=groupsOf[i]||{},out=Object.assign({},row,g.extra||(Array.isArray(g.values)?(g.values.find(v=>v&&v.extra)||{}).extra:null)||{});
+        if(enc.size&&pick(g,'size')!=null)out[enc.size]=pick(g,'size');if(enc.label&&pick(g,'labelValue')!=null)out[enc.label]=pick(g,'labelValue');if(enc.colour&&pick(g,'colorValue')!=null)out[enc.colour]=pick(g,'colorValue');return out;});
+      for(const id of [enc.size,enc.label,enc.colour,...tips])if(id&&!cols.some(c=>c.id===id))cols.push({id,name:id,unit:'number'});
+    }
     const container=document.createElement('div');
-    const svg=charts.render(container,rows,{type:result.type,dimensions:dims,measures,columns:cols,labels:!!(options&&options.labels),title:titleText},()=>{})||null;
+    const svg=charts.render(container,rows,{type:result.type,dimensions:dims,measures,columns:cols,labels:!!(options&&options.labels),title:titleText,
+      ...(enc.size?{size:enc.size}:{}),...(enc.label?{labelFields:[enc.label]}:{}),...(enc.colour?{colorMeasure:enc.colour}:{}),...(tips.length?{tooltip:tips}:{})},()=>{})||null;
     if(svg){svg.setAttribute('aria-label',titleText);const desc=svgNode('desc',{},scopeText);svg.insertBefore(desc,svg.firstChild);return {svg,plot:null};}
     const empty=svgNode('svg',{xmlns:'http://www.w3.org/2000/svg',viewBox:'0 0 960 200',role:'img','aria-label':titleText});
     empty.append(svgNode('title',{},titleText),svgNode('desc',{},scopeText),svgNode('rect',{width:960,height:200,fill:'#fff'}),svgNode('text',{x:20,y:100,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':14},container.textContent||'Nothing to draw for this selection.'));
@@ -355,6 +368,9 @@
     const opts=options||{};
     const grouping=result.groupingLabel||columnLabel(config.x,source),xTitle=result.type==='histogram'?columnLabel(config.y,source):grouping;
     if(DELEGATED.includes(result.type))return delegatedSVG(result,measure,config,source,titleText,scopeText,options);
+    // Marks v3 (lane M): only a configuration that carries them takes this path.
+    if(config&&(V3_CHART.includes(config.mark)||(config.v3&&config.v3.path)))return v3SVG(result,measure,config,source,titleText,scopeText,options);
+    result=liftEncodings(result);
     // With the r3 options argument a JSON tuple label reads as "A / NY"; the
     // six-argument call keeps today's labels.
     if(options&&Array.isArray(result.groups)&&result.groups.some(g=>typeof g.label==='string'&&g.label.startsWith('[')))result={...result,groups:result.groups.map(g=>({...g,label:readable(g.label)}))};
@@ -605,6 +621,89 @@
       }
     }
     return {svg,plot};
+  }
+  // Marks v3 (lane M, boards #50-#52). Square, Shape, Polygon, Density, a Path
+  // on a line or area and a dual axis of marks cards are drawn by
+  // contribution-plot.js (a one-measure Square or Shape by contribution-charts.js,
+  // as Circle is), from the worksheet's groups turned into rows. Only a
+  // configuration that carries config.mark or config.v3.path gets here.
+  const V3_CHART=['square','shape','polygon','density','cards','circle'];
+  const AGG_NAME={sum:'SUM',mean:'AVG',count:'COUNT',countd:'COUNTD',median:'MEDIAN',min:'MIN',max:'MAX',first:'FIRST'};
+  const specName=(spec,source)=>spec.column<0?'Row count':(AGG_NAME[spec.aggregation]||'SUM')+'('+(source?.columns[spec.column]?.name||'Field')+')';
+  // A group that carries its own encoding labels (Chart Studio's verified pie,
+  // doughnut, waterfall, Pareto and radar views) lends them to the result, so
+  // its Colour measure shades and its Size and Label reach the hover text.
+  function liftEncodings(result){
+    const groups=Array.isArray(result&&result.groups)?result.groups:null;
+    if(!groups||!groups.some(g=>g&&(g.colorLabel||g.sizeLabel||g.labelLabel)))return result;
+    const out=Object.assign({},result),first=key=>(groups.find(g=>g&&g[key])||{})[key];
+    const shades=groups.map(g=>g&&g.colorValue).filter(v=>typeof v==='number'&&Number.isFinite(v));
+    if(!out.colorLabel&&first('colorLabel')){out.colorLabel=first('colorLabel');if(shades.length)out.colorRange=[Math.min(...shades),Math.max(...shades)];}
+    if(!out.sizeLabel&&first('sizeLabel'))out.sizeLabel=first('sizeLabel');
+    if(!out.labelLabel&&first('labelLabel'))out.labelLabel=first('labelLabel');
+    return out;
+  }
+  function v3SVG(result, measure, config, source, titleText, scopeText, options) {
+    const plot=globalThis.MentatContributionPlot,charts=globalThis.MentatContributionCharts;
+    if(!plot||typeof plot.render!=='function')throw new Error((config.mark||'This mark')+' needs contribution-plot.js');
+    const v3=config.v3||{},opts=options||{},scatter=result.type==='scatter';
+    const used=new Set(),idOf=name=>{let id=String(name),k=2;while(used.has(id))id=name+' ('+(k++)+')';used.add(id);return id;};
+    const listed=Array.isArray(config.dimensions)?config.dimensions:[];
+    const dimColumns=scatter?listed.filter(c=>c!==config.x&&c!==config.y):(listed.length?listed:config.x>=0?[config.x]:[]);
+    const dimIds=dimColumns.map(c=>idOf(columnLabel(c,source)));
+    const dimOf=column=>{const at=dimColumns.indexOf(column);return at<0?'':dimIds[at];};
+    const valueSpec=Array.isArray(config.measures)&&config.measures.length?config.measures[scatter&&config.measures.length>1?1:0]:{column:config.y,aggregation:config.aggregation};
+    const yId=idOf(specName(scatter?{column:config.y,aggregation:config.aggregation}:valueSpec,source));
+    const xId=scatter?idOf(specName({column:config.x,aggregation:config.xAggregation||'sum'},source)):'';
+    const extraIds=(result.extraLabels||[]).slice(),sizeId=result.sizeLabel||'',labelId=result.labelLabel||'',colourId=result.colorLabel||'';
+    const carry=(row,item)=>{if(item.extra)for(const [k,v] of Object.entries(item.extra))row[k]=v;if(sizeId&&item.size!=null)row[sizeId]=item.size;
+      if(labelId&&item.labelValue!=null)row[labelId]=item.labelValue;if(colourId&&item.colorValue!=null)row[colourId]=item.colorValue;return row;};
+    const partsOf=(label,other)=>{const parts=tupleOf({label,other},dimIds.length),row={};dimIds.forEach((id,k)=>{row[id]=parts[k]??'(Missing)';});return row;};
+    const pointTypes=['polygon','density'].includes(config.mark);
+    let rows,seriesId='';
+    if(scatter)rows=(result.points||[]).map(p=>carry(Object.assign(dimIds.length&&p.label!=null?partsOf(p.label,false):{},{[xId]:p.x,[yId]:p.y}),p));
+    else if(result.series&&(result.groups||[]).every(g=>Array.isArray(g.values))){
+      seriesId=idOf(result.colorField||(config.series>=0?columnLabel(config.series,source):'Series'));
+      rows=result.groups.flatMap(g=>g.values.filter(v=>v.value!=null).map(v=>carry(Object.assign(partsOf(g.label,g.other),{[seriesId]:v.series,[yId]:v.value}),v)));
+    }else rows=(result.groups||[]).filter(g=>!(g.other&&pointTypes)).map(g=>carry(Object.assign(partsOf(g.label,g.other),{[yId]:g.value}),g));
+    const dims=seriesId?[...dimIds,seriesId]:dimIds,measures=scatter?[xId,yId]:[yId];
+    const valueIds=[...new Set([...measures,...extraIds,sizeId,labelId,colourId].filter(Boolean))];
+    const cols=[...dims.map(id=>({id,name:id,role:'dimension'})),...valueIds.filter(id=>!dims.includes(id)).map(id=>({id,name:id,unit:'number'}))];
+    const pillId=p=>!p?'':p.role==='dimension'?dimOf(p.column):(p.column===valueSpec.column&&p.aggregation===valueSpec.aggregation?yId:specName(p,source));
+    const spec={dimensions:dims,measures,columns:cols,labels:!!opts.labels,title:titleText,tooltip:extraIds.filter(id=>!measures.includes(id))};
+    if(opts.axisLabels)spec.axisLabels=opts.axisLabels;
+    const colourDim=v3.color>=0?dimOf(v3.color):seriesId;
+    if(colourDim)spec.color=colourDim;
+    if(config.colorMeasure&&colourId)spec.colorMeasure=colourId;
+    if(config.size&&sizeId)spec.size=sizeId;
+    if(labelId)spec.labelFields=[labelId];
+    if(config.mark==='cards'){
+      const cards=Array.isArray(config.cards)?config.cards:[];
+      Object.assign(spec,{type:'cards',synchronize:config.synchronize===true,measures:[...new Set(cards.map(c=>pillId(Object.assign({},c.measure,{role:'measure'}))))]});
+      spec.tooltip=extraIds.filter(id=>!spec.measures.includes(id));
+      spec.cards=cards.map(c=>({id:c.id,measure:pillId(Object.assign({},c.measure,{role:'measure'})),type:c.type,glyph:c.glyph||'',shape:c.shape>=0?dimOf(c.shape):'',shapeMap:c.glyphs||null,
+        color:c.color&&c.color.role==='dimension'?dimOf(c.color.column):'',colorMeasure:c.color&&c.color.role==='measure'?specName(c.color,source):'',size:c.size?specName(c.size,source):'',
+        labelFields:c.label?[pillId(c.label)].filter(Boolean):[],tooltip:(c.tooltip||[]).map(p=>specName(p,source)),path:c.path?pillId(c.path):'',
+        opacity:c.opacity,border:c.border,halo:c.halo,visible:c.visible!==false}));
+      for(const key of ['color','colorMeasure','size','labelFields'])delete spec[key];
+    }else if(['square','shape','circle'].includes(config.mark)){
+      spec.type=scatter?'scatter':'dot';
+      spec.glyph=config.mark==='circle'?'':v3.glyph||(v3.shape>=0?'':'circle');
+      if(v3.shape>=0){spec.shape=dimOf(v3.shape);if(v3.glyphs)spec.shapeMap=v3.glyphs;}
+    }else if(pointTypes){spec.type=config.mark;spec.layout=scatter?'scatter':'axis';}
+    else spec.type=['area','multiarea'].includes(result.type)?'area':'line';
+    if(v3.path)spec.path=pillId(v3.path);
+    const container=document.createElement('div');
+    const draw=spec.type==='dot'&&charts&&typeof charts.render==='function'?charts.render:plot.render;
+    const svg=draw(container,rows,spec,()=>{})||null;
+    if(svg){svg.setAttribute('aria-label',titleText);svg.insertBefore(svgNode('desc',{},scopeText),svg.firstChild);
+      // The drawing labels its own marks (data-label), so the Studio lays none over them.
+      if(opts.labels)svg.append(svgNode('g',{'data-mark-label':'drawn'}));
+      return {svg,plot:null};}
+    const empty=svgNode('svg',{xmlns:'http://www.w3.org/2000/svg',viewBox:'0 0 960 200',role:'img','aria-label':titleText});
+    empty.append(svgNode('title',{},titleText),svgNode('desc',{},scopeText),svgNode('rect',{width:960,height:200,fill:'#fff'}),
+      svgNode('text',{x:20,y:100,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':14},container.textContent||'Nothing to draw for this selection.'));
+    return {svg:empty,plot:null};
   }
   function draw(result, measure) {
     el('image').replaceChildren(chartSVG(result,measure,chartConfig,data,el('title').textContent,el('scope').textContent).svg);

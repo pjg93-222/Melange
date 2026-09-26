@@ -985,3 +985,78 @@
    page 17px past the fold. On Chart Studio the padding is the studio's own
    remaining room, so the sheet tabs and status line end at the fold. */
 @media (min-width:1100px) {body[data-view="chart-studio"] main .workspace {padding-bottom:23px}}
+/* Marks v3 (lane M, boards #50-#52, approved 2026-09-25). The Marks tab keeps
+   S1's labelled rows under a type strip of fourteen tiles (#51); a dual axis
+   stacks an All card and one card per measure (#52). Plum marks the chosen
+   tile, as it marks a selected control elsewhere; gold stays the one Show Me. */
+#view-chart-studio .studio-marks-block{display:block}
+#view-chart-studio .studio-marks-block.studio-folded{display:none}
+#view-chart-studio .studio-mark-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:2px 0 8px}
+#view-chart-studio .studio-mark-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;height:48px;padding:0;border:1px solid #e4dfe8;border-radius:6px;background:#fdfcfb;color:#4a4552;font:400 9px/1 var(--font-sans);letter-spacing:-.1px;cursor:pointer}
+#view-chart-studio .studio-mark-tile>span{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#view-chart-studio .studio-mark-tile .studio-icon{width:18px;height:18px}
+#view-chart-studio .studio-mark-tile:hover{border-color:var(--acu-purple)}
+#view-chart-studio .studio-mark-tile:focus-visible{outline:2px solid var(--acu-gold);outline-offset:1px}
+#view-chart-studio .studio-mark-tile[aria-checked=true]{background:var(--acu-purple);border-color:var(--acu-purple);color:#fff}
+#view-chart-studio .studio-mark-tile[aria-checked=true] .studio-icon{color:#fff}
+#view-chart-studio .studio-mark-tile.is-unavailable{opacity:.42;cursor:not-allowed}
+#view-chart-studio .studio-mark-tile.is-unavailable:hover{border-color:#e4dfe8}
+#view-chart-studio .studio-mark-card-body .studio-prop{height:50px}
+#view-chart-studio .studio-mark-card-body .studio-prop .studio-drop{min-height:34px}
+#view-chart-studio .studio-prop[hidden]{display:none}
+#view-chart-studio .studio-prop.is-unavailable>span{color:#9d97a4}
+#view-chart-studio .studio-prop.is-unavailable .studio-drop{border-style:dotted;background:#f6f4f7}
+#view-chart-studio .studio-prop.is-unavailable .studio-drop[data-empty=true]::after{content:attr(data-reason-short);color:#8f8996}
+#view-chart-studio .studio-prop .studio-pill.is-inert{opacity:.55;outline:1px dashed #8f8996;outline-offset:1px}
+#view-chart-studio .studio-prop-options{display:inline-flex;flex:none;align-items:center;justify-content:center;width:18px;height:24px;margin:0;padding:0;border:0;border-radius:4px;background:none;color:#4a4552;cursor:pointer}
+/* The fold chevron sits before the row's icon, as on every other row: 18px icon, 13px gap, 11px. */
+#view-chart-studio .studio-prop>span:has(>.studio-prop-options) button.studio-fold::before{left:-42px}
+#view-chart-studio .studio-prop-options:hover,#view-chart-studio .studio-prop-options[aria-expanded=true]{background:#f1ecf4;color:var(--acu-purple)}
+#view-chart-studio .studio-prop-options:focus-visible{outline:2px solid var(--acu-gold);outline-offset:1px}
+#view-chart-studio .studio-prop>span .studio-prop-options .studio-icon{width:18px;height:18px}
+#view-chart-studio .studio-mark-rows-note{margin:8px 0 0 7px;font:400 12px/1.35 var(--font-sans);color:#77727d}
+#view-chart-studio .studio-mark-rows-note:empty{display:none}
+#view-chart-studio .studio-mark-cards{display:grid;gap:8px;margin:2px 0 6px}
+#view-chart-studio .studio-mark-cards[hidden]{display:none}
+#view-chart-studio .studio-mark-card{border:1px solid #e4dfe8;border-radius:8px;background:#fdfcfb}
+#view-chart-studio .studio-mark-card.is-open{background:#fff;border-color:#d8cfe0}
+#view-chart-studio .studio-mark-card>.studio-mark-card-body{padding:0 8px 8px}
+/* An open card is compact (#52), so the card list, Synchronize axes and the disclosures stay in view. */
+#view-chart-studio .studio-mark-card .studio-mark-tile{height:40px;gap:3px}
+#view-chart-studio .studio-mark-card .studio-mark-card-body .studio-prop{height:42px}
+#view-chart-studio .studio-mark-card .studio-mark-rows-note{display:none}
+#view-chart-studio .studio-mark-card-head{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 10px 0 4px}
+#view-chart-studio .studio-mark-card-toggle{display:flex;flex:1;align-items:center;gap:10px;min-width:0;padding:8px 4px;border:0;background:none;color:#2f273f;font:400 15px/1.1 var(--font-sans);text-align:left;cursor:pointer}
+#view-chart-studio .studio-mark-card-toggle>span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#view-chart-studio .studio-mark-card-toggle::before{content:"";flex:none;width:6px;height:6px;margin:0 6px 0 4px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg)}
+#view-chart-studio .studio-mark-card-toggle[aria-expanded=true]::before{transform:rotate(-135deg);margin-top:4px}
+#view-chart-studio .studio-mark-card-type{display:inline-flex;flex:none;align-items:center;gap:6px;color:#4a4552;font:400 12.5px/1 var(--font-sans)}
+#view-chart-studio .studio-mark-card-type .studio-icon{width:17px;height:17px}
+#view-chart-studio .studio-pane select.studio-mark-card-select{flex:none;width:auto;min-width:88px;margin:0;padding:4px 6px;font:400 12.5px/1 var(--font-sans)}
+#view-chart-studio .studio-mark-sync{margin:6px 0 0;padding:0 0 0 7px}
+#view-chart-studio .studio-mark-sync[hidden]{display:none}
+#view-chart-studio .studio-mark-sync .studio-check{margin:0;font:400 14px/1.2 var(--font-sans);color:#2f273f}
+#view-chart-studio .studio-shelf .studio-drop>button.studio-dual-axis{flex:none;height:24px;margin:0 1px;padding:0 9px;border:1px solid #d8cfe0;border-radius:6px;background:#fff;color:#4a4552;font:400 12px/1 var(--font-sans);cursor:pointer}
+#view-chart-studio .studio-shelf .studio-drop>button.studio-dual-axis[aria-pressed=true]{border-color:var(--acu-purple);background:#f1ecf4;color:var(--acu-purple);font-weight:600}
+.studio-popover{position:absolute;z-index:40;box-sizing:border-box;width:292px;max-width:calc(100vw - 16px);padding:12px 14px 14px;border:1px solid #d8cfe0;border-radius:8px;background:#fff;box-shadow:0 10px 28px rgba(47,39,63,.18);color:#2f273f;font:400 13px/1.3 var(--font-sans)}
+.studio-popover h4{margin:0 0 10px;font:600 12px/1 var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:#4a4552}
+.studio-popover .studio-pop-row{display:grid;grid-template-columns:62px 1fr 42px;align-items:center;gap:8px;margin:0 0 10px}
+.studio-popover .studio-pop-row input[type=range]{width:100%;accent-color:var(--acu-purple)}
+.studio-popover .studio-pop-row output{text-align:right;font-variant-numeric:tabular-nums}
+.studio-popover .studio-pop-label{margin:4px 0 6px;font:400 12px/1 var(--font-sans);color:#62596e}
+.studio-popover .studio-swatches{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 10px}
+.studio-popover .studio-swatches button{box-sizing:border-box;min-width:22px;height:22px;padding:0 6px;border:1px solid #d8cfe0;border-radius:4px;background:#fff;color:#2f273f;font:400 11.5px/1 var(--font-sans);cursor:pointer}
+.studio-popover .studio-swatches button.is-swatch{width:22px;padding:0}
+.studio-popover .studio-swatches button[aria-pressed=true]{outline:2px solid var(--acu-purple);outline-offset:1px}
+.studio-popover button:disabled,.studio-popover input:disabled{opacity:.45;cursor:not-allowed}
+.studio-popover .studio-pop-reason{margin:0 0 10px;font-size:12px;color:#77727d}
+.studio-popover .studio-glyphs{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;margin:0 0 10px}
+.studio-popover .studio-glyphs button{display:flex;align-items:center;justify-content:center;height:24px;padding:0;border:1px solid #e4dfe8;border-radius:4px;background:#fff;color:#2f273f;cursor:pointer}
+.studio-popover .studio-glyphs button[aria-pressed=true]{background:#f1ecf4;border-color:var(--acu-purple);color:var(--acu-purple)}
+.studio-popover .studio-glyphs svg{width:14px;height:14px}
+.studio-popover .studio-glyph-members{display:grid;gap:2px;max-height:180px;margin:0 0 10px;overflow:auto}
+.studio-popover .studio-glyph-members button{display:flex;align-items:center;gap:8px;padding:4px 6px;border:1px solid transparent;border-radius:4px;background:none;color:#2f273f;font:400 12.5px/1.2 var(--font-sans);text-align:left;cursor:pointer}
+.studio-popover .studio-glyph-members button[aria-pressed=true]{border-color:var(--acu-purple);background:#f7f3fa}
+.studio-popover .studio-glyph-members svg{flex:none;width:14px;height:14px}
+.studio-popover .studio-pop-actions{display:flex;justify-content:space-between;gap:8px}
+.studio-popover .studio-pop-actions button{padding:5px 10px;border:1px solid #d8cfe0;border-radius:5px;background:#fff;color:#2f273f;font:400 12.5px/1 var(--font-sans);cursor:pointer}

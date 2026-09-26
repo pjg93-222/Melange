@@ -161,7 +161,10 @@ test('explicit mark types override Automatic', () => {
     text: 'bar', box: 'box', histogram: 'histogram', waterfall: 'waterfall', pareto: 'pareto', radar: 'radar',
     map: 'bar', 'filled-map': 'bar', heatmap: 'heatmap', highlight: 'highlight', stacked: 'grouped', dot: 'dot',
     'series-dot': 'dot', treemap: 'treemap', bubbles: 'bubbles', gantt: 'gantt', bullet: 'bullet',
-    combination: 'bar', 'dual-line': 'line'};
+    combination: 'bar', 'dual-line': 'line',
+    // Marks v3 (#50-#52): Square, Shape, Polygon and Density place one point per
+    // group along the axis (a dot view the v3 drawing renders).
+    square: 'dot', shape: 'dot', polygon: 'dot', density: 'dot'};
   assert.deepStrictEqual(Object.keys(expected).sort(), core.ALL_MARK_IDS.filter(id => id !== 'automatic').sort(),
     'every mark the menu offers is covered');
   for (const [mark, type] of Object.entries(expected)) {

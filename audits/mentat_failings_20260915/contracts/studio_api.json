@@ -1,7 +1,7 @@
 {
   "contract": "studio_api",
-  "version": 2,
-  "owner": "S4 (industry fields); UI1 (board fields)",
+  "version": 3,
+  "owner": "S4 (industry fields); UI1 (board fields); Lane M (marks cards)",
   "produced_by": [
     "mentat/app/chart-studio-core.js:viewSourceRecord",
     "mentat/app/chart-studio-core.js:createSheet",
@@ -16,7 +16,11 @@
     "mentat/app/chart-studio-core.js:normalizeBoard (validates a view's board on save and on open; returns the board or null)",
     "mentat/app/chart-studio.js:saveViewNamed (writes `board` only when the user chose a board of 2 or 4 tiles)",
     "mentat/app/server.py:Console.save_view (whitelists `board`; rejects a malformed one with 400)",
-    "mentat/app/server.py:Console.get_view (echoes `board` exactly as saved)"
+    "mentat/app/server.py:Console.get_view (echoes `board` exactly as saved)",
+    "mentat/app/chart-studio-core.js:writeCards (writes `marksCards` only for a dual axis or a card with v3-only fields; one card without them leaves `marks` exactly as it was and adds no key)",
+    "mentat/app/chart-studio-core.js:serializeCard (one card, keys in this contract's order)",
+    "mentat/app/chart-studio-core.js:validateMarksCards (the save-time rules; normalizeMarksCards applies them on open and drops a malformed set, so the sheet opens as its v2 marks)",
+    "mentat/app/server.py:validate_view_marks via Console.save_view (400 \"The saved view's marks cards are malformed.\")"
   ],
   "consumed_by": [
     "mentat/app/chart-studio.js:renderViewPicker / openView (reads list_views + get_view)",
@@ -26,9 +30,12 @@
     "mentat/app/server.py:Console.get_view (reads what chart-studio.js:saveViewNamed persisted)",
     "mentat/app/chart-studio.js:openView (reads `board`; a view without it opens as one sheet)",
     "mentat/app/chart-studio.js:renderBoard (Canvas mode: 1, 2 or 4 sheet tiles)",
-    "mentat/app/chart-briefing.js (Add board to briefing: one briefing_add per filled tile)"
+    "mentat/app/chart-briefing.js (Add board to briefing: one briefing_add per filled tile)",
+    "mentat/app/chart-studio-core.js:readCards (every card a sheet draws; a v2 `marks` alone reads as one card)",
+    "mentat/app/chart-studio-core.js:compileReport / compileCards and mentat/app/chart-studio-contributions.js:compile (draw each card)",
+    "mentat/app/chart-studio.js (the Inspector's Marks tab: type strip, rows, Colour and Shape popovers, All and per-measure cards)"
   ],
-  "description": "Every producer that builds a sheet or view `source` (or a `sources[]` fan-out entry) sets `industry` as a non-empty string \u2014 never an object, never dropped, and never placed outside `source` where the server's record whitelist silently drops it. A sheet saved before this change is backfilled at load time: `source.dataset` with no `source.industry` gets `industry = dataset` and gains an empty `sources: []`. v2 (UI1, 2026-09-17): a view MAY carry a top-level `board` object {tiles, slots}. `tiles` is the integer 1, 2 or 4; `slots` is an array of exactly `tiles` entries, each a non-negative integer index into `sheets` or null for an empty tile, with no sheet index repeated. `board` is written only when the user chose a board of 2 or 4 tiles, so every v1 view stays byte-identical and a view without `board` opens as one sheet, exactly as before. `active` still names the selected sheet; in board mode the selected tile is the slot holding `active`, else the first filled slot. Console.save_view adds `board` to its record whitelist and rejects a malformed board with 400 \"The saved view's board does not match its sheets.\"; chart-studio-core.js:normalizeBoard applies the same rules on the client and, on open, drops a malformed board with a status note instead of failing the open. A `board` key anywhere else (inside `source`, inside a sheet) is not a board and is ignored by every consumer.",
+  "description": "Every producer that builds a sheet or view `source` (or a `sources[]` fan-out entry) sets `industry` as a non-empty string \u2014 never an object, never dropped, and never placed outside `source` where the server's record whitelist silently drops it. A sheet saved before this change is backfilled at load time: `source.dataset` with no `source.industry` gets `industry = dataset` and gains an empty `sources: []`. v2 (UI1, 2026-09-17): a view MAY carry a top-level `board` object {tiles, slots}. `tiles` is the integer 1, 2 or 4; `slots` is an array of exactly `tiles` entries, each a non-negative integer index into `sheets` or null for an empty tile, with no sheet index repeated. `board` is written only when the user chose a board of 2 or 4 tiles, so every v1 view stays byte-identical and a view without `board` opens as one sheet, exactly as before. `active` still names the selected sheet; in board mode the selected tile is the slot holding `active`, else the first filled slot. Console.save_view adds `board` to its record whitelist and rejects a malformed board with 400 \"The saved view's board does not match its sheets.\"; chart-studio-core.js:normalizeBoard applies the same rules on the client and, on open, drops a malformed board with a status note instead of failing the open. A `board` key anywhere else (inside `source`, inside a sheet) is not a board and is ignored by every consumer. v3 (Lane M, boards #50-#52, 2026-09-25): a sheet MAY carry `marksCards`, a list of 1 to 12 cards {id, name, measure?, type, encodings: {color, size, label, detail: [], tooltip: [], shape, path, angle}, opacity, border, halo, visible, selectable, zoomExtent, source?, geography?}. A pill is {column: integer >= 0, aggregation: one of sum|mean|count|median|min|max|countd}; detail and tooltip are lists of at most 24 pills; shape is null, a pill (optionally with glyphs: {member: shape}) or {glyph: shape}, a shape being one of the 22 in chart-studio-core.js GLYPHS; opacity is a whole percent 0-100; border and halo are automatic, none, ink, white or c1..c12 (theme.js categorical slots); visible, selectable and zoomExtent are booleans; every one of these keys is required and no other is allowed; ids are unique. Two or more cards are a dual axis: every card names its `measure`, no two the same, each one a pill on the sheet's Rows, and the sheet MAY carry `syncAxes: true`. The v2 `marks` object stays readable forever and is always written: with one card it is canonical for type, color, size, label, detail and tooltip and `marksCards` holds only what v2 cannot; with a dual axis it mirrors the first card, so a console without v3 opens the view as that card. A sheet with one card and no v3-only field is written in the v2 shape, byte-identical (marks_v2_sheet -> marks_v2_written). Console.save_view refuses a malformed card set with 400 \"The saved view's marks cards are malformed.\"; source and geography are hooks for map layers (lane P).",
   "examples": {
     "views_save": {
       "name": "Cross-industry PAC comparison",
@@ -870,6 +877,603 @@
           null
         ]
       }
+    },
+    "marks_card": {
+      "id": "card-1",
+      "name": "",
+      "type": "shape",
+      "encodings": {
+        "color": {
+          "column": 7,
+          "aggregation": "sum"
+        },
+        "size": {
+          "column": 13,
+          "aggregation": "sum"
+        },
+        "label": null,
+        "detail": [
+          {
+            "column": 3,
+            "aggregation": "sum"
+          }
+        ],
+        "tooltip": [],
+        "shape": {
+          "column": 7,
+          "aggregation": "sum",
+          "glyphs": {
+            "DEM": "circle",
+            "REP": "triangle-up"
+          }
+        },
+        "path": null,
+        "angle": null
+      },
+      "opacity": 85,
+      "border": "ink",
+      "halo": "white",
+      "visible": true,
+      "selectable": true,
+      "zoomExtent": true
+    },
+    "views_save_marks_dual": {
+      "name": "Money and donors, by year",
+      "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+      "source": {
+        "label": "Banking",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "runName": "Configured completed-report folder",
+        "sheet": "Verified source observations",
+        "mode": "contributions",
+        "dataset": "Banking",
+        "datasetLabel": "Banking",
+        "industry": "Banking"
+      },
+      "sheets": [
+        {
+          "id": "sheet-dual",
+          "name": "Money and donors, by year",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Banking Industry Spending Overview.xlsx",
+            "reportName": "Banking Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+            "industry": "Banking",
+            "dataset": "Banking"
+          },
+          "sources": [],
+          "columns": [
+            {
+              "column": 2,
+              "aggregation": "sum"
+            }
+          ],
+          "rows": [
+            {
+              "column": 11,
+              "aggregation": "sum"
+            },
+            {
+              "column": 13,
+              "aggregation": "sum"
+            }
+          ],
+          "marks": {
+            "type": "bar",
+            "color": null,
+            "size": null,
+            "label": {
+              "column": 11,
+              "aggregation": "sum"
+            },
+            "detail": [],
+            "tooltip": [
+              {
+                "column": 3,
+                "aggregation": "sum"
+              }
+            ]
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard",
+          "marksCards": [
+            {
+              "id": "card-1",
+              "name": "",
+              "measure": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "type": "bar",
+              "encodings": {
+                "color": null,
+                "size": null,
+                "label": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "detail": [],
+                "tooltip": [
+                  {
+                    "column": 3,
+                    "aggregation": "sum"
+                  }
+                ],
+                "shape": null,
+                "path": null,
+                "angle": null
+              },
+              "opacity": 100,
+              "border": "automatic",
+              "halo": "automatic",
+              "visible": true,
+              "selectable": true,
+              "zoomExtent": true
+            },
+            {
+              "id": "card-2",
+              "name": "",
+              "measure": {
+                "column": 13,
+                "aggregation": "sum"
+              },
+              "type": "line",
+              "encodings": {
+                "color": null,
+                "size": null,
+                "label": null,
+                "detail": [],
+                "tooltip": [],
+                "shape": null,
+                "path": {
+                  "column": 2,
+                  "aggregation": "sum"
+                },
+                "angle": null
+              },
+              "opacity": 100,
+              "border": "automatic",
+              "halo": "automatic",
+              "visible": true,
+              "selectable": true,
+              "zoomExtent": true
+            }
+          ],
+          "syncAxes": true
+        }
+      ],
+      "active": 0
+    },
+    "views_get_marks_dual": {
+      "id": "<32hex>",
+      "name": "Money and donors, by year",
+      "saved_at": 1789000000.25,
+      "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+      "source": {
+        "label": "Banking",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "runName": "Configured completed-report folder",
+        "sheet": "Verified source observations",
+        "mode": "contributions",
+        "dataset": "Banking",
+        "datasetLabel": "Banking",
+        "industry": "Banking"
+      },
+      "sheets": [
+        {
+          "id": "sheet-dual",
+          "name": "Money and donors, by year",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Banking Industry Spending Overview.xlsx",
+            "reportName": "Banking Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+            "industry": "Banking",
+            "dataset": "Banking"
+          },
+          "sources": [],
+          "columns": [
+            {
+              "column": 2,
+              "aggregation": "sum"
+            }
+          ],
+          "rows": [
+            {
+              "column": 11,
+              "aggregation": "sum"
+            },
+            {
+              "column": 13,
+              "aggregation": "sum"
+            }
+          ],
+          "marks": {
+            "type": "bar",
+            "color": null,
+            "size": null,
+            "label": {
+              "column": 11,
+              "aggregation": "sum"
+            },
+            "detail": [],
+            "tooltip": [
+              {
+                "column": 3,
+                "aggregation": "sum"
+              }
+            ]
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard",
+          "marksCards": [
+            {
+              "id": "card-1",
+              "name": "",
+              "measure": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "type": "bar",
+              "encodings": {
+                "color": null,
+                "size": null,
+                "label": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "detail": [],
+                "tooltip": [
+                  {
+                    "column": 3,
+                    "aggregation": "sum"
+                  }
+                ],
+                "shape": null,
+                "path": null,
+                "angle": null
+              },
+              "opacity": 100,
+              "border": "automatic",
+              "halo": "automatic",
+              "visible": true,
+              "selectable": true,
+              "zoomExtent": true
+            },
+            {
+              "id": "card-2",
+              "name": "",
+              "measure": {
+                "column": 13,
+                "aggregation": "sum"
+              },
+              "type": "line",
+              "encodings": {
+                "color": null,
+                "size": null,
+                "label": null,
+                "detail": [],
+                "tooltip": [],
+                "shape": null,
+                "path": {
+                  "column": 2,
+                  "aggregation": "sum"
+                },
+                "angle": null
+              },
+              "opacity": 100,
+              "border": "automatic",
+              "halo": "automatic",
+              "visible": true,
+              "selectable": true,
+              "zoomExtent": true
+            }
+          ],
+          "syncAxes": true
+        }
+      ],
+      "active": 0
+    },
+    "views_save_marks_shape": {
+      "name": "Candidates by party shape",
+      "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+      "source": {
+        "label": "Banking",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "runName": "Configured completed-report folder",
+        "sheet": "Verified source observations",
+        "mode": "contributions",
+        "dataset": "Banking",
+        "datasetLabel": "Banking",
+        "industry": "Banking"
+      },
+      "sheets": [
+        {
+          "id": "sheet-shape",
+          "name": "Selected amount vs gift count, by candidate",
+          "source": {
+            "run": "published-reports",
+            "runName": "Configured completed-report folder",
+            "report": "Banking Industry Spending Overview.xlsx",
+            "reportName": "Banking Industry Spending Overview.xlsx",
+            "sheet": "Verified source observations",
+            "header": 0,
+            "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+            "industry": "Banking",
+            "dataset": "Banking"
+          },
+          "sources": [],
+          "columns": [
+            {
+              "column": 12,
+              "aggregation": "sum"
+            }
+          ],
+          "rows": [
+            {
+              "column": 11,
+              "aggregation": "sum"
+            }
+          ],
+          "marks": {
+            "type": "shape",
+            "color": {
+              "column": 7,
+              "aggregation": "sum"
+            },
+            "size": {
+              "column": 13,
+              "aggregation": "sum"
+            },
+            "label": null,
+            "detail": [
+              {
+                "column": 3,
+                "aggregation": "sum"
+              }
+            ],
+            "tooltip": []
+          },
+          "filters": [],
+          "pages": null,
+          "pageMember": "",
+          "analytics": {
+            "transform": "none",
+            "period": "",
+            "horizon": 2,
+            "totals": false,
+            "average": false,
+            "median": false
+          },
+          "types": {},
+          "params": {
+            "start": 0,
+            "end": 0,
+            "limit": 0,
+            "subject": "",
+            "maxGroups": 0,
+            "splitMulti": false
+          },
+          "sort": "none",
+          "showLabels": false,
+          "fit": "standard",
+          "marksCards": [
+            {
+              "id": "card-1",
+              "name": "",
+              "type": "shape",
+              "encodings": {
+                "color": {
+                  "column": 7,
+                  "aggregation": "sum"
+                },
+                "size": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "label": null,
+                "detail": [
+                  {
+                    "column": 3,
+                    "aggregation": "sum"
+                  }
+                ],
+                "tooltip": [],
+                "shape": {
+                  "column": 7,
+                  "aggregation": "sum",
+                  "glyphs": {
+                    "DEM": "circle",
+                    "REP": "triangle-up"
+                  }
+                },
+                "path": null,
+                "angle": null
+              },
+              "opacity": 85,
+              "border": "ink",
+              "halo": "white",
+              "visible": true,
+              "selectable": true,
+              "zoomExtent": true
+            }
+          ]
+        }
+      ],
+      "active": 0
+    },
+    "marks_v2_sheet": {
+      "id": "sheet-1",
+      "name": "Recipients",
+      "source": {
+        "run": "published-reports",
+        "runName": "Configured completed-report folder",
+        "report": "Banking Industry Spending Overview.xlsx",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "industry": "Banking",
+        "dataset": "Banking"
+      },
+      "sources": [],
+      "columns": [],
+      "rows": [],
+      "marks": {
+        "type": "automatic",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
+    },
+    "marks_v2_cards": [
+      {
+        "id": "card-1",
+        "name": "",
+        "type": "automatic",
+        "encodings": {
+          "color": null,
+          "size": null,
+          "label": null,
+          "detail": [],
+          "tooltip": [],
+          "shape": null,
+          "path": null,
+          "angle": null
+        },
+        "opacity": 100,
+        "border": "automatic",
+        "halo": "automatic",
+        "visible": true,
+        "selectable": true,
+        "zoomExtent": true
+      }
+    ],
+    "marks_v2_written": {
+      "id": "sheet-1",
+      "name": "Recipients",
+      "source": {
+        "run": "published-reports",
+        "runName": "Configured completed-report folder",
+        "report": "Banking Industry Spending Overview.xlsx",
+        "reportName": "Banking Industry Spending Overview.xlsx",
+        "sheet": "Verified source observations",
+        "header": 0,
+        "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "industry": "Banking",
+        "dataset": "Banking"
+      },
+      "sources": [],
+      "columns": [],
+      "rows": [],
+      "marks": {
+        "type": "automatic",
+        "color": null,
+        "size": null,
+        "label": null,
+        "detail": [],
+        "tooltip": []
+      },
+      "filters": [],
+      "pages": null,
+      "pageMember": "",
+      "analytics": {
+        "transform": "none",
+        "period": "",
+        "horizon": 2,
+        "totals": false,
+        "average": false,
+        "median": false
+      },
+      "types": {},
+      "params": {
+        "start": 0,
+        "end": 0,
+        "limit": 0,
+        "subject": "",
+        "maxGroups": 0,
+        "splitMulti": false
+      },
+      "sort": "none",
+      "showLabels": false,
+      "fit": "standard"
     }
   },
   "negative_controls": [
@@ -1861,6 +2465,2056 @@
         ],
         "active": 0,
         "board": "2"
+      }
+    },
+    {
+      "why": "a card's type must be a mark the Marks card offers; 'sparkle' is not one",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "sparkle",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "encodings.detail is a list of pills; a single pill object there is the DE-021 shape (agreed as a list, sent as something else)",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": {
+                    "column": 3,
+                    "aggregation": "sum"
+                  },
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "a pill's column is an integer index; the string '3' is the DE-021 shape",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": {
+                    "column": "3",
+                    "aggregation": "sum"
+                  },
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "opacity is a whole percent from 0 to 100; 140 is not",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 140,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "border is automatic, none, ink, white or a theme slot c1-c12; a raw colour name is refused",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "red",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "every card of a dual axis names its measure; a card without one has no axis to sit on",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "a card's measure must be on the sheet's Rows; this one names a measure the shelves do not hold",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 99,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "card ids are unique within a sheet; two cards called card-1 cannot be told apart",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "marksCards is a list; an object keyed by card id is the DE-021 shape",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": {
+              "card-1": {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              "card-2": {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            },
+            "syncAxes": true
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "a card carries only the contract's keys; 'colour' is a misspelling the record would otherwise keep",
+      "payload": {
+        "name": "Candidates by party shape",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-shape",
+            "name": "Selected amount vs gift count, by candidate",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 12,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "shape",
+              "color": {
+                "column": 7,
+                "aggregation": "sum"
+              },
+              "size": {
+                "column": 13,
+                "aggregation": "sum"
+              },
+              "label": null,
+              "detail": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "type": "shape",
+                "encodings": {
+                  "color": {
+                    "column": 7,
+                    "aggregation": "sum"
+                  },
+                  "size": {
+                    "column": 13,
+                    "aggregation": "sum"
+                  },
+                  "label": null,
+                  "detail": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "tooltip": [],
+                  "shape": {
+                    "column": 7,
+                    "aggregation": "sum",
+                    "glyphs": {
+                      "DEM": "circle",
+                      "REP": "triangle-up"
+                    }
+                  },
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 85,
+                "border": "ink",
+                "halo": "white",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true,
+                "colour": "c1"
+              }
+            ]
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "a Shape encoding names shapes from the palette; 'hexagon' is not one",
+      "payload": {
+        "name": "Candidates by party shape",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-shape",
+            "name": "Selected amount vs gift count, by candidate",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 12,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "shape",
+              "color": {
+                "column": 7,
+                "aggregation": "sum"
+              },
+              "size": {
+                "column": 13,
+                "aggregation": "sum"
+              },
+              "label": null,
+              "detail": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "type": "shape",
+                "encodings": {
+                  "color": {
+                    "column": 7,
+                    "aggregation": "sum"
+                  },
+                  "size": {
+                    "column": 13,
+                    "aggregation": "sum"
+                  },
+                  "label": null,
+                  "detail": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "tooltip": [],
+                  "shape": {
+                    "column": 7,
+                    "aggregation": "sum",
+                    "glyphs": {
+                      "DEM": "circle",
+                      "REP": "hexagon"
+                    }
+                  },
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 85,
+                "border": "ink",
+                "halo": "white",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ]
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "marksCards holds 1 to 12 cards; an empty list is not a card set",
+      "payload": {
+        "name": "Candidates by party shape",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-shape",
+            "name": "Selected amount vs gift count, by candidate",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 12,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "shape",
+              "color": {
+                "column": 7,
+                "aggregation": "sum"
+              },
+              "size": {
+                "column": 13,
+                "aggregation": "sum"
+              },
+              "label": null,
+              "detail": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": []
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "syncAxes is true or false; the string 'yes' is refused",
+      "payload": {
+        "name": "Money and donors, by year",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-dual",
+            "name": "Money and donors, by year",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 2,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              {
+                "column": 13,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "bar",
+              "color": null,
+              "size": null,
+              "label": {
+                "column": 11,
+                "aggregation": "sum"
+              },
+              "detail": [],
+              "tooltip": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ]
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "measure": {
+                  "column": 11,
+                  "aggregation": "sum"
+                },
+                "type": "bar",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": {
+                    "column": 11,
+                    "aggregation": "sum"
+                  },
+                  "detail": [],
+                  "tooltip": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "shape": null,
+                  "path": null,
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              },
+              {
+                "id": "card-2",
+                "name": "",
+                "measure": {
+                  "column": 13,
+                  "aggregation": "sum"
+                },
+                "type": "line",
+                "encodings": {
+                  "color": null,
+                  "size": null,
+                  "label": null,
+                  "detail": [],
+                  "tooltip": [],
+                  "shape": null,
+                  "path": {
+                    "column": 2,
+                    "aggregation": "sum"
+                  },
+                  "angle": null
+                },
+                "opacity": 100,
+                "border": "automatic",
+                "halo": "automatic",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ],
+            "syncAxes": "yes"
+          }
+        ],
+        "active": 0
+      }
+    },
+    {
+      "why": "a card carries all eight encodings; a missing path cannot be told from one that was dropped",
+      "payload": {
+        "name": "Candidates by party shape",
+        "sourceKey": "contributions|Banking|5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+        "source": {
+          "label": "Banking",
+          "reportName": "Banking Industry Spending Overview.xlsx",
+          "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+          "runName": "Configured completed-report folder",
+          "sheet": "Verified source observations",
+          "mode": "contributions",
+          "dataset": "Banking",
+          "datasetLabel": "Banking",
+          "industry": "Banking"
+        },
+        "sheets": [
+          {
+            "id": "sheet-shape",
+            "name": "Selected amount vs gift count, by candidate",
+            "source": {
+              "run": "published-reports",
+              "runName": "Configured completed-report folder",
+              "report": "Banking Industry Spending Overview.xlsx",
+              "reportName": "Banking Industry Spending Overview.xlsx",
+              "sheet": "Verified source observations",
+              "header": 0,
+              "sha256": "5777b145023675c0e5ae4947ef0055b9fc5812f8d97680b6d321498208734d31",
+              "industry": "Banking",
+              "dataset": "Banking"
+            },
+            "sources": [],
+            "columns": [
+              {
+                "column": 12,
+                "aggregation": "sum"
+              }
+            ],
+            "rows": [
+              {
+                "column": 11,
+                "aggregation": "sum"
+              }
+            ],
+            "marks": {
+              "type": "shape",
+              "color": {
+                "column": 7,
+                "aggregation": "sum"
+              },
+              "size": {
+                "column": 13,
+                "aggregation": "sum"
+              },
+              "label": null,
+              "detail": [
+                {
+                  "column": 3,
+                  "aggregation": "sum"
+                }
+              ],
+              "tooltip": []
+            },
+            "filters": [],
+            "pages": null,
+            "pageMember": "",
+            "analytics": {
+              "transform": "none",
+              "period": "",
+              "horizon": 2,
+              "totals": false,
+              "average": false,
+              "median": false
+            },
+            "types": {},
+            "params": {
+              "start": 0,
+              "end": 0,
+              "limit": 0,
+              "subject": "",
+              "maxGroups": 0,
+              "splitMulti": false
+            },
+            "sort": "none",
+            "showLabels": false,
+            "fit": "standard",
+            "marksCards": [
+              {
+                "id": "card-1",
+                "name": "",
+                "type": "shape",
+                "encodings": {
+                  "color": {
+                    "column": 7,
+                    "aggregation": "sum"
+                  },
+                  "size": {
+                    "column": 13,
+                    "aggregation": "sum"
+                  },
+                  "label": null,
+                  "detail": [
+                    {
+                      "column": 3,
+                      "aggregation": "sum"
+                    }
+                  ],
+                  "tooltip": [],
+                  "shape": {
+                    "column": 7,
+                    "aggregation": "sum",
+                    "glyphs": {
+                      "DEM": "circle",
+                      "REP": "triangle-up"
+                    }
+                  },
+                  "angle": null
+                },
+                "opacity": 85,
+                "border": "ink",
+                "halo": "white",
+                "visible": true,
+                "selectable": true,
+                "zoomExtent": true
+              }
+            ]
+          }
+        ],
+        "active": 0
       }
     }
   ]

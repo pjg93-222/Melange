@@ -88,7 +88,10 @@
  }
  function validate(rows,spec){
   if(!Array.isArray(rows))throw new Error('Chart data must be a list of aggregate rows.');
-  if(!['bar','line','area','scatter','table'].includes(spec.type))throw new Error('Choose a supported chart type.');
+  if(!['bar','line','area','scatter','table',...V3_TYPES].includes(spec.type))throw new Error('Choose a supported chart type.');
+  // Marks v3: every card draws one of the plotted measures, and two measures place Polygon and Density on two axes.
+  if(spec.type==='cards'&&(!Array.isArray(spec.cards)||!spec.cards.length||spec.cards.some(c=>!c||!spec.measures.includes(c.measure)||(c.color&&!(spec.dimensions||[]).includes(c.color)))))throw new Error('Each marks card draws one of the plotted measures.');
+  if(['polygon','density'].includes(spec.type)&&spec.layout==='scatter'&&spec.measures.length<2)throw new Error('Two measures place these marks on two axes.');
   if(!spec.measures?.length)throw new Error('Add a measure to build a chart.');
   if(!Array.isArray(spec.measures)||spec.measures.some(id=>typeof id!=='string')||new Set(spec.measures).size!==spec.measures.length)throw new Error('Choose distinct named measures.');
   if(spec.dimensions!=null&&(!Array.isArray(spec.dimensions)||spec.dimensions.some(id=>typeof id!=='string')||new Set(spec.dimensions).size!==spec.dimensions.length))throw new Error('Choose distinct named dimensions.');
@@ -145,10 +148,151 @@
   return {series,ticks:[...ticks].sort((a,b)=>a[0]-b[0]),excluded,merged,outcomes};
  }
  const scatterPairs=(rows,measures)=>rows.filter(row=>measures.every(id=>typeof row[id]==='number'&&Number.isFinite(row[id])));
+ /* Marks v3 (lane M, boards #50-#52, 2026-09-25). Paul's Tableau shape palette:
+    eleven shapes, each filled and outline ('-open'), drawn as one path each so
+    every renderer places them the same way. r is the circle radius the shape
+    replaces; the others are scaled to about the same ink. */
+ const GLYPH_BASES=['circle','square','plus','times','asterisk','diamond','triangle-up','triangle-down','triangle-left','triangle-right','star'];
+ const GLYPH_IDS=[...GLYPH_BASES,...GLYPH_BASES.map(g=>g+'-open')];
+ const V3_TYPES=['polygon','density','cards'];
+ const f2=v=>Number(v.toFixed(2));
+ function glyphPoints(base,r){
+  const turn=(pts,deg)=>{const a=deg*Math.PI/180,c=Math.cos(a),s=Math.sin(a);return pts.map(([x,y])=>[x*c-y*s,x*s+y*c]);};
+  if(base==='square'){const s=r*.886;return [[-s,-s],[s,-s],[s,s],[-s,s]];}
+  if(base==='diamond'){const s=r*1.2;return [[0,-s],[s*.8,0],[0,s],[-s*.8,0]];}
+  if(base==='plus'||base==='times'){const w=r*.34,q=r*1.05,pts=[[-w,-q],[w,-q],[w,-w],[q,-w],[q,w],[w,w],[w,q],[-w,q],[-w,w],[-q,w],[-q,-w],[-w,-w]];return base==='times'?turn(pts,45):pts;}
+  if(base==='asterisk'){
+   // Six arms of half-width w; between two arms the edges meet on the
+   // bisector, 2w from the centre (w / sin 30 degrees).
+   const w=r*.2,q=r*1.1,pts=[];
+   for(let k=0;k<6;k++){const a=(k*60-90)*Math.PI/180,u=[Math.cos(a),Math.sin(a)],n=[-u[1],u[0]];
+    pts.push([q*u[0]-w*n[0],q*u[1]-w*n[1]],[q*u[0]+w*n[0],q*u[1]+w*n[1]],[2*w*Math.cos(a+Math.PI/6),2*w*Math.sin(a+Math.PI/6)]);}
+   return pts;
+  }
+  if(base==='star'){const pts=[];for(let k=0;k<10;k++){const a=(k*36-90)*Math.PI/180,rad=k%2?r*.5:r*1.2;pts.push([rad*Math.cos(a),rad*Math.sin(a)]);}return pts;}
+  if(base.startsWith('triangle-')){const s=r*1.25,up=[[0,-s],[s*.95,s*.62],[-s*.95,s*.62]];return turn(up,{up:0,right:90,down:180,left:270}[base.slice(9)]||0);}
+  return null;
+ }
+ // The path of one shape centred on (cx, cy). An unknown id draws a circle.
+ function glyphD(id,cx,cy,r){
+  const base=String(id||'circle').replace(/-open$/,''),pts=glyphPoints(base,r);
+  if(!pts)return `M${f2(cx-r)},${f2(cy)} a${f2(r)},${f2(r)} 0 1,0 ${f2(2*r)},0 a${f2(r)},${f2(r)} 0 1,0 ${f2(-2*r)},0 Z`;
+  return pts.map(([x,y],i)=>(i?'L':'M')+f2(cx+x)+','+f2(cy+y)).join(' ')+' Z';
+ }
+ const glyphOpen=id=>/-open$/.test(String(id||''));
+ // The shape each member of a Shape field takes: its chosen one, else the
+ // palette in the members' own order.
+ function glyphFor(spec,member,members){
+  const chosen=spec.shapeMap&&spec.shapeMap[member];
+  if(chosen&&GLYPH_IDS.includes(chosen))return chosen;
+  return GLYPH_IDS[Math.max(0,members.indexOf(member))%GLYPH_IDS.length];
+ }
+ /* A card's Opacity, Border and Halo (the Colour popover, as Tableau's), laid
+    over any renderer's drawing after it is drawn, so every mark type takes
+    them the same way. Automatic is the renderer's own drawing. A mark is an
+    element classed plot-mark, or a shape carrying its own tooltip <title>; a
+    line is a stroked, unfilled path at least 2 wide. Legends, reference lines
+    and invisible hover targets are left alone. */
+ const STYLE_INK='#202522';
+ // A group's or a style slot's colour: the theme's twelve categorical colours
+ // (theme.js categoryColour) when the theme has them, else the theme palette.
+ const slotColour=i=>(root.MentatTheme?.categoryColour||(k=>palette[k%palette.length]))(i);
+ function styleColour(value){
+  if(value==='ink')return STYLE_INK;
+  if(value==='white')return '#ffffff';
+  const slot=/^c(\d{1,2})$/.exec(String(value||''));
+  return slot?slotColour(Number(slot[1])-1):null;
+ }
+ const GEOMETRY=['d','x','y','width','height','rx','ry','cx','cy','r','points','x1','y1','x2','y2','transform'];
+ function styleMarks(root,style){
+  if(!root||!style)return root;
+  const opacity=Number.isFinite(Number(style.opacity))&&Number(style.opacity)<100?Math.max(0,Number(style.opacity))/100:null;
+  const border=style.border&&style.border!=='automatic'?style.border:null;
+  const halo=style.halo&&!['automatic','none'].includes(style.halo)?styleColour(style.halo):null;
+  if(opacity==null&&!border&&!halo)return root;
+  const attr=(node,key)=>node.getAttribute?node.getAttribute(key):null;
+  const found=[];
+  const walk=(parent,skip)=>{for(const child of [...(parent.children||[])]){
+   const tag=String(child.tagName||'').toLowerCase();
+   const off=skip||attr(child,'data-legend')!=null||attr(child,'data-reference')!=null||attr(child,'data-halo')!=null;
+   if(!off&&attr(child,'data-density-layer')!=null){found.push({parent,child,kind:'layer'});continue;}
+   if(!off&&attr(child,'data-hover-target')==null){
+    const titled=(child.children||[]).some?.(c=>String(c.tagName||'').toLowerCase()==='title');
+    const markLike=String(attr(child,'class')||'').split(/\s+/).includes('plot-mark')||(['rect','circle','path','polygon','ellipse'].includes(tag)&&titled);
+    const lineLike=!markLike&&['path','polyline','line'].includes(tag)&&(tag==='line'||attr(child,'fill')==='none')&&attr(child,'stroke')&&attr(child,'stroke')!=='none'&&Number(attr(child,'stroke-width')||1)>=2;
+    if(markLike||lineLike)found.push({parent,child,kind:markLike?'mark':'line'});
+   }
+   if(tag!=='title')walk(child,off);
+  }};
+  walk(root,false);
+  for(const {parent,child,kind} of found){
+   if(opacity!=null)child.setAttribute('opacity',String(Number(((Number(attr(child,'opacity'))||1)*opacity).toFixed(3))));
+   if(border&&kind==='mark'&&attr(child,'fill')!=='none'){
+    if(border==='none')child.setAttribute('stroke','none');
+    else{child.setAttribute('stroke',styleColour(border));child.setAttribute('stroke-width','1.5');}
+   }
+   if(halo&&kind!=='layer'&&typeof parent.insertBefore==='function'){
+    const doc=root.ownerDocument||(typeof document!=='undefined'?document:null);if(!doc)continue;
+    const ring=doc.createElementNS('http://www.w3.org/2000/svg',String(child.tagName).toLowerCase());
+    for(const key of GEOMETRY){const value=attr(child,key);if(value!=null)ring.setAttribute(key,value);}
+    ring.setAttribute('fill','none');ring.setAttribute('stroke',halo);
+    ring.setAttribute('stroke-width',String((kind==='line'?Number(attr(child,'stroke-width'))||2:1)+4));
+    ring.setAttribute('stroke-linejoin','round');ring.setAttribute('stroke-linecap','round');
+    ring.setAttribute('data-halo','true');ring.setAttribute('pointer-events','none');
+    if(opacity!=null)ring.setAttribute('opacity',String(opacity));
+    parent.insertBefore(ring,child);
+   }
+  }
+  return root;
+ }
+ const setStyle=(node,key,value)=>{if(!node.style)node.style={};node.style[key]=value;};
+ /* A text table (Text mark) that draws its encodings: Colour as a swatch per
+    member or a tint by measure, Size as the value's type size, Label as its own
+    column, Tooltip on hover. Used only when one is placed; without any the
+    table is today's. */
+ function tableV3(container,rows,spec,onSelect){
+  const columns=spec.columns||[],dims=spec.dimensions||[],measures=spec.measures;
+  const extra=[...new Set([...(spec.labelFields||[]),...(spec.size?[spec.size]:[]),...(spec.colorMeasure?[spec.colorMeasure]:[])])].filter(id=>!dims.includes(id)&&!measures.includes(id));
+  const shown=[...dims,...measures,...extra],valued=[...measures,...extra];
+  const isDim=id=>dims.includes(id)||columns.some(c=>c.id===id&&(c.role==='dimension'||c.type==='category'));
+  const valueText=(row,id)=>isDim(id)?String(row[id]??'Unknown'):format(row[id],id,columns);
+  const members=spec.color?[...new Set(rows.map(r=>String(r[spec.color]??'Unknown')))].sort((a,b)=>a.localeCompare(b)):[];
+  const heatValues=spec.colorMeasure?rows.map(r=>r[spec.colorMeasure]).filter(finite):[],heat=heatValues.length?[Math.min(...heatValues),Math.max(...heatValues)]:null;
+  const maxSize=spec.size?Math.max(1e-9,...rows.map(r=>Math.abs(Number(r[spec.size])||0))):0;
+  const table=document.createElement('table'),head=document.createElement('thead'),tr=document.createElement('tr');
+  table.setAttribute('data-encoded','true');
+  for(const id of shown){const th=document.createElement('th');th.textContent=name(id,columns)+(extra.includes(id)&&(spec.labelFields||[]).includes(id)?' (label)':'');tr.append(th);}head.append(tr);table.append(head);
+  const body=document.createElement('tbody');
+  for(const row of rows){const line=document.createElement('tr');line.className='selectable';line.tabIndex=0;line.setAttribute('aria-label','Inspect '+label(row,dims));
+   const tip=[label(row,dims),...valued.map(id=>name(id,columns)+': '+valueText(row,id)),...(spec.tooltip||[]).filter(id=>!valued.includes(id)).map(id=>name(id,columns)+': '+valueText(row,id))];
+   line.title=tip.join('\n');line.setAttribute('data-tooltip',tip.join(' | '));
+   const tint=heat&&finite(row[spec.colorMeasure])?(heat[1]>heat[0]?(row[spec.colorMeasure]-heat[0])/(heat[1]-heat[0]):1):null;
+   const scale=spec.size&&finite(row[spec.size])?Math.sqrt(Math.abs(row[spec.size])/maxSize):null;
+   shown.forEach((id,at)=>{const td=document.createElement('td'),value=valued.includes(id)?format(row[id],id,columns):row[id]??'Unknown';
+    if(valued.includes(id)&&spec.labels===false){td.title=String(value);td.dataset.valueHidden='true';}else td.textContent=value;
+    if(valued.includes(id))td.className='numeric';
+    if(at===0&&spec.color){const swatch=document.createElement('span');swatch.className='plot-swatch';swatch.setAttribute('aria-hidden','true');setStyle(swatch,'backgroundColor',slotColour(members.indexOf(String(row[spec.color]??'Unknown'))));td.prepend?td.prepend(swatch):td.append(swatch);td.setAttribute('data-colour',String(row[spec.color]??'Unknown'));}
+    if(tint!=null&&measures.includes(id)){setStyle(td,'backgroundColor','rgba(87, 68, 123, '+(.1+.55*tint).toFixed(3)+')');td.setAttribute('data-shade',tint.toFixed(3));}
+    if(scale!=null&&measures.includes(id)){setStyle(td,'fontSize',(12+8*scale).toFixed(1)+'px');td.setAttribute('data-size',scale.toFixed(3));}
+    line.append(td);});
+   line.onclick=()=>onSelect?.(row);line.onkeydown=e=>{if(e.key==='Enter')onSelect?.(row);};body.append(line);}
+  table.append(body);container.append(table);return null;
+ }
+ // Path (Line, Area): the series of a timeline regrouped without the Path field
+ // and joined in its order, as Tableau's Path shelf orders a line's marks.
+ function pathSeries(list,dims,path,m){
+  const keyDims=dims.slice(1).filter(d=>d!==path),groups=new Map();
+  for(const s of list)for(const item of s.rows){const key=JSON.stringify(keyDims.map(d=>item.row[d]??null));
+   if(!groups.has(key))groups.set(key,{key,label:label(item.row,keyDims),rows:[]});groups.get(key).rows.push(item);}
+  const cmp=(a,b)=>{const x=a.row[path],y=b.row[path];if(finite(x)&&finite(y))return x-y||a.at-b.at;
+   return String(x??'').localeCompare(String(y??''),undefined,{numeric:true})||a.at-b.at;};
+  return [...groups.values()].sort((a,b)=>a.key.localeCompare(b.key)).map(g=>{g.rows.sort(cmp);g.segments=[g.rows.filter(item=>item.row[m]!=null)].filter(s=>s.length);return g;});
+ }
  function render(container,rows,spec,onSelect){
   validate(rows,spec);container.replaceChildren();
   const columns=spec.columns||[],dims=spec.dimensions||[],measures=spec.measures;
   if(!rows.length){const p=document.createElement('p');p.className='empty-view';p.textContent='No records match these filters. Try another cycle or accounting basis.';container.append(p);return null;}
+  if(spec.type==='table'&&(spec.size||spec.colorMeasure||spec.color||(spec.labelFields||[]).length||(spec.tooltip||[]).length))return tableV3(container,rows,spec,onSelect);
   if(spec.type==='table'){const table=document.createElement('table'),head=document.createElement('thead'),tr=document.createElement('tr');for(const id of [...dims,...measures]){const th=document.createElement('th');th.textContent=name(id,columns);tr.append(th);}head.append(tr);table.append(head);const body=document.createElement('tbody');for(const row of rows){const tr=document.createElement('tr');tr.className='selectable';tr.tabIndex=0;tr.setAttribute('aria-label','Inspect '+label(row,dims));for(const id of [...dims,...measures]){const td=document.createElement('td'),shownValue=measures.includes(id)?format(row[id],id,columns):row[id]??'Unknown';if(measures.includes(id)&&spec.labels===false){td.title=String(shownValue);td.dataset.valueHidden='true';}else td.textContent=shownValue;if(measures.includes(id))td.className='numeric';tr.append(td);}tr.onclick=()=>onSelect?.(row);tr.onkeydown=e=>{if(e.key==='Enter')onSelect?.(row);};body.append(tr);}table.append(body);container.append(table);return null;}
   // V01: a line or area whose first dimension is not a time field, or any line
   // with spec.categorical, is drawn on category positions in row order.
@@ -173,7 +317,7 @@
   // CSS pixel; spec.barLeft is then the label column. Otherwise 1000 units.
   const native=spec.type==='bar'&&!dual&&Number(spec.width)>0;let barLeft=native&&Number(spec.barLeft)>0?Number(spec.barLeft):255;
   if(native)svg.setAttribute('data-native','');
-  const width=native?Math.max(560,Math.round(Number(spec.width))):1000,panels=spec.type==='scatter'||dual?1:measures.length;let barRight=width-(native?110:125),panelH=spec.type==='bar'&&!dual?Math.max(spec.panelTitles===false?300:350,barCount*pitch+(spec.panelTitles===false?70:105)):dual?500:420;
+  const width=native?Math.max(560,Math.round(Number(spec.width))):1000,panels=spec.type==='scatter'||dual||V3_TYPES.includes(spec.type)?1:measures.length;let barRight=width-(native?110:125),panelH=spec.type==='bar'&&!dual?Math.max(spec.panelTitles===false?300:350,barCount*pitch+(spec.panelTitles===false?70:105)):dual||spec.type==='cards'?500:420;
   svg.setAttribute('viewBox',`0 0 ${width} ${panelH*panels}`);svg.setAttribute('width',width);svg.setAttribute('height',panelH*panels);svg.setAttribute('font-family','Arial, sans-serif');svg.setAttribute('font-size','15');
   const title=document.createElementNS(NS,'title');title.textContent=spec.title||'Contribution analysis';svg.append(title);
   const node=(tag,attrs={},text,parent=svg)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!=null)n.textContent=text;parent.append(n);return n;};
@@ -230,11 +374,18 @@
   // Per-panel value axes of the r3 layouts, so reference lines use the drawn scale.
   const axes=[];
   const mark=(tag,attrs,row,parent,keepRadius)=>{if(sizeId&&tag==='circle'&&!keepRadius)attrs={...attrs,r:3+12*Math.sqrt(Math.abs(row[sizeId]||0)/maxSize)};const detail=encodedFields.map(m=>`${name(m,columns)}: ${valueText(row,m)}`).join('\n');const n=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':label(row,dims)+'; '+detail},null,parent);node('title',{},label(row,dims)+'\n'+detail,n);n.addEventListener('click',()=>onSelect?.(row));n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(row);}});return n;};
+  // Marks v3: a point drawn as a shape from the palette (Square, Shape), one per
+  // member of a Shape field; without either it is today's circle.
+  const shapeMembers=spec.shape?[...new Set(plotted.map(r=>String(r[spec.shape]??'Unknown')))].sort((a,b)=>a.localeCompare(b)):[];
+  const glyphOf=row=>spec.shape?glyphFor(spec,String(row[spec.shape]??'Unknown'),shapeMembers):(spec.glyph||'');
+  const pointMark=(row,cx,cy,base,paint,parent)=>{const id=glyphOf(row);if(!id)return mark('circle',{cx,cy,r:base,...paint,stroke:'white','stroke-width':1.4},row,parent);
+   const rad=sizeId&&typeof row[sizeId]==='number'?3+12*Math.sqrt(Math.abs(row[sizeId])/maxSize):base;
+   return mark('path',{d:glyphD(id,cx,cy,rad),...(glyphOpen(id)?{fill:'none',stroke:paint.fill,'stroke-width':1.8}:{...paint,stroke:'white','stroke-width':1.2}),'data-glyph':id},row,parent,true);};
   for(let p=0;p<panels;p++){
    const g=node('g',{transform:`translate(0 ${p*panelH})`}),m=measures[p];
    // spec.panelTitles===false (Chart Studio, one measure): the canvas title
    // above the drawing already names the measure, so the panel skips its own.
-   if(spec.panelTitles!==false)node('text',{x:20,y:23,fill:'#202522','font-size':18,'font-weight':600},spec.type==='scatter'?`${name(measures[1],columns)} by ${name(measures[0],columns)}`:dual?`${name(measures[0],columns)} (left axis) · ${measures.slice(1).map(id=>name(id,columns)).join(', ')} (right axis)`:name(m,columns),g);
+   if(spec.panelTitles!==false&&spec.type!=='cards')node('text',{x:20,y:23,fill:'#202522','font-size':18,'font-weight':600},spec.type==='scatter'?`${name(measures[1],columns)} by ${name(measures[0],columns)}`:dual?`${name(measures[0],columns)} (left axis) · ${measures.slice(1).map(id=>name(id,columns)).join(', ')} (right axis)`:name(m,columns),g);
    if(spec.type==='bar'&&!dual){
     // Stacked (V02): each group's segments in Colour order, positives rightward
     // from zero and negatives leftward; 'percent' draws shares of the positive total.
@@ -294,10 +445,176 @@
     rightIds.forEach((id,k)=>{const colour=r=>spec.color?color(r):categoryColour(k+1);if(dualMark==='bar')drawBars(id,ry,colour);else drawLine(id,ry,colour,!!spec.color);});
     node('text',{x:left,y:bottom+50,fill:'#59645c','font-size':13},`${name(measures[0],columns)}: left axis. ${rightIds.map(id=>name(id,columns)).join(', ')}: right axis${spec.color?' (dashed lines)':''}. Independent, labelled scales.`,g);
     axes[p]={values:rows.map(r=>r[measures[0]]),lo:la,hi:lb,at:ly,x1:left,x2:right,bar:false};
+   }else if(spec.type==='polygon'||spec.type==='density'){
+    // Marks v3 (#50-#52). Two measures place the marks on two axes (layout
+    // 'scatter'); one measure places them along the first dimension ('axis').
+    const scatterLayout=spec.layout==='scatter'&&measures.length>=2,left=100,right=935,top=65,bottom=345;
+    let pts,xOf,yOf;
+    if(scatterLayout){
+     const [mx,my]=measures;pts=scatterPairs(rows,[mx,my]);
+     const [xl,xh]=extent(pts.map(r=>r[mx]),false),[yl,yh]=extent(pts.map(r=>r[my]),false);
+     xOf=r=>left+(r[mx]-xl)/(xh-xl)*(right-left);yOf=r=>bottom-(r[my]-yl)/(yh-yl)*(bottom-top);
+     for(let i=0;i<=5;i++){const vx=xl+(xh-xl)*i/5,vy=yl+(yh-yl)*i/5,px=left+(vx-xl)/(xh-xl)*(right-left),py=bottom-(vy-yl)/(yh-yl)*(bottom-top);
+      node('line',{x1:px,x2:px,y1:top,y2:bottom,stroke:'#e8ebe6'},null,g);node('line',{x1:left,x2:right,y1:py,y2:py,stroke:'#e8ebe6'},null,g);
+      fittedText({x:px,y:bottom+23,'text-anchor':'middle',fill:'#68706b','font-size':15},format(vx,mx,columns,true),110,g);
+      fittedText({x:left-10,y:py+3,'text-anchor':'end',fill:'#68706b','font-size':15},format(vy,my,columns,true),78,g);}
+     node('text',{x:(left+right)/2,y:400,'text-anchor':'middle',fill:'#59645c'},name(mx,columns),g);node('text',{x:18,y:45,fill:'#59645c'},name(my,columns),g);
+    }else{
+     const m0=measures[0],axisDim=dims[0],key=r=>axisDim==null?'All':r[axisDim]==null||r[axisDim]===''?'Unknown':String(r[axisDim]);
+     const timeAxis=!!axisDim&&TIME_FIELDS.includes(axisDim)&&!spec.categorical&&rows.every(r=>r[axisDim]==null||timeValue(r[axisDim],axisDim)!=null);
+     const order=new Map();for(const r of rows)if(!order.has(key(r)))order.set(key(r),order.size);
+     const atOf=r=>timeAxis?timeValue(r[axisDim],axisDim):order.get(key(r));
+     pts=rows.filter(r=>finite(r[m0])&&atOf(r)!=null);
+     const ats=pts.map(atOf),lo=ats.length?Math.min(...ats):0,hi=ats.length?Math.max(...ats):1,[yl,yh]=extent(pts.map(r=>r[m0]));
+     const xAt=at=>left+(hi===lo?.5:(at-lo)/(hi-lo))*(right-left),yAt=v=>bottom-(v-yl)/(yh-yl)*(bottom-top);
+     xOf=r=>xAt(atOf(r));yOf=r=>yAt(r[m0]);
+     for(let i=0;i<=5;i++){const v=yl+(yh-yl)*i/5;node('line',{x1:left,x2:right,y1:yAt(v),y2:yAt(v),stroke:'#e8ebe6'},null,g);
+      fittedText({x:left-12,y:yAt(v)+4,'text-anchor':'end',fill:'#68706b','font-size':15},format(v,m0,columns,true),76,g);}
+     const ticks=[...new Map(pts.map(r=>[atOf(r),key(r)])).entries()].sort((a,b)=>a[0]-b[0]),every=Math.max(1,Math.ceil(ticks.length/Math.max(1,Math.floor((right-left)/90))));
+     ticks.forEach(([at,text],i)=>{if(spec.axisLabels==='all'||i%every===0)fittedText({x:xAt(at),y:bottom+25,'text-anchor':'middle',fill:'#68706b','font-size':14},text,Math.max(40,(right-left)/Math.max(1,ticks.length)*every-6),g);});
+     axes[p]={values:pts.map(r=>r[m0]),lo:yl,hi:yh,at:yAt,x1:left,x2:right,bar:false};
+    }
+    const partDims=(scatterLayout?dims:dims.slice(1)).filter(d=>d!==spec.path);
+    const partOf=r=>partDims.length?partDims.map(d=>r[d]==null||r[d]===''?'Unknown':String(r[d])).join(' / '):'All marks';
+    const parts=new Map();for(const r of pts){const k=partOf(r);if(!parts.has(k))parts.set(k,[]);parts.get(k).push(r);}
+    const baseFill=spec.seriesColor||slotColour(0),fillOf=r=>spec.color?color(r):shade(r)?palette[0]:baseFill;
+    if(spec.type==='polygon'){
+     // Each partition (Colour and Detail members) is one closed shape; Path
+     // orders its vertices, else the axis does (the rows' order for two measures).
+     const cmp=(a,b)=>{if(spec.path){const va=a[spec.path],vb=b[spec.path];if(finite(va)&&finite(vb))return va-vb;return String(va??'').localeCompare(String(vb??''),undefined,{numeric:true});}return scatterLayout?0:xOf(a)-xOf(b);};
+     for(const [k,list] of parts){const verts=list.slice().sort(cmp),fill=fillOf(verts[0]),shading=shade(verts[0]);
+      const poly=node('path',{d:verts.map((r,j)=>(j?'L':'M')+f2(xOf(r))+','+f2(yOf(r))).join(' ')+' Z',fill,'fill-opacity':shading?shading['fill-opacity']:.35,stroke:fill,'stroke-width':1.6,'stroke-linejoin':'round',class:'plot-mark','data-partition':k,tabindex:0,role:'button','aria-label':k+'; '+verts.length+' vertices'},null,g);
+      node('title',{},k+'\n'+verts.length+' vertices'+(spec.path?' in '+name(spec.path,columns)+' order':''),poly);
+      poly.addEventListener('click',()=>onSelect?.(verts[0]));
+      for(const r of verts)mark('circle',{cx:f2(xOf(r)),cy:f2(yOf(r)),r:6,fill,'fill-opacity':0,'data-hover-target':'vertex'},r,g,true);
+      if(spec.labels){const px=verts.reduce((a,r)=>a+xOf(r),0)/verts.length,py=verts.reduce((a,r)=>a+yOf(r),0)/verts.length;
+       fittedText({x:f2(px),y:f2(py+5),'text-anchor':'middle',fill:'#35483b','font-size':14,'data-label':'value'},labelText(verts[0],k),220,g);}
+     }
+    }else{
+     // Density (the non-map case of #47/#48): a kernel density of the marks.
+     // Size is each mark's radius, a Colour measure its weight, a Colour
+     // dimension one layer per member. Low density fades to the plain chart.
+     const cell=6,cols=Math.ceil((right-left)/cell),lines=Math.ceil((bottom-top)/cell);
+     const radius=r=>sizeId&&finite(r[sizeId])?8+32*Math.sqrt(Math.abs(r[sizeId])/maxSize):18;
+     const weight=r=>spec.colorMeasure&&finite(r[spec.colorMeasure])?Math.abs(r[spec.colorMeasure]):1;
+     const layers=new Map();for(const r of pts){const k=spec.color?String(r[spec.color]??'Unknown'):'All marks';if(!layers.has(k))layers.set(k,[]);layers.get(k).push(r);}
+     let peak=0;
+     const grids=[...layers].map(([k,list])=>{const grid=new Float64Array(cols*lines);
+      for(const r of list){const px=xOf(r),py=yOf(r),h=radius(r),w=weight(r),reach=2.5*h;
+       const c0=Math.max(0,Math.floor((px-reach-left)/cell)),c1=Math.min(cols-1,Math.ceil((px+reach-left)/cell)),l0=Math.max(0,Math.floor((py-reach-top)/cell)),l1=Math.min(lines-1,Math.ceil((py+reach-top)/cell));
+       for(let l=l0;l<=l1;l++)for(let c=c0;c<=c1;c++){const dx=left+(c+.5)*cell-px,dy=top+(l+.5)*cell-py;grid[l*cols+c]+=w*Math.exp(-(dx*dx+dy*dy)/(h*h/2));}}
+      for(const v of grid)if(v>peak)peak=v;return {k,grid};});
+     for(const layer of grids){const fill=spec.color?colorOf(layer.k):spec.colorMeasure?palette[0]:baseFill,layerG=node('g',{'data-density-layer':layer.k},null,g);
+      for(let l=0;l<lines;l++)for(let c=0;c<cols;c++){const v=layer.grid[l*cols+c]/(peak||1);if(v<.04)continue;
+       node('rect',{x:f2(left+c*cell),y:f2(top+l*cell),width:cell,height:cell,fill,'fill-opacity':f2(Math.min(.9,.05+.85*v))},null,layerG);}}
+     for(const r of pts)mark('circle',{cx:f2(xOf(r)),cy:f2(yOf(r)),r:5,fill:fillOf(r),'fill-opacity':0,'data-hover-target':'point'},r,g,true);
+     node('text',{x:left,y:bottom+48,fill:'#59645c','font-size':13,'data-note':'density'},'Darker cells hold more marks; each mark spreads '+(sizeId?'over a radius set by '+name(sizeId,columns):'about 18 px')+(spec.colorMeasure?', weighted by '+name(spec.colorMeasure,columns):'')+'.',g);
+    }
+   }else if(spec.type==='cards'){
+    // Several marks cards (#52): one pane and one category axis, each card's
+    // measure drawn with its own mark. The first card reads on the left axis,
+    // every other card on the right; Synchronize axes gives them one scale.
+    const cards=spec.cards.filter(c=>c.visible!==false),left=120,right=880,top=92,bottom=430,axisDim=dims[0];
+    // Round steps (1, 2, 2.5 or 5 times a power of ten), as the Studio's bar axes use.
+    const nice=(lo,hi)=>{const span=hi-lo||Math.abs(hi)||1,raw=span/5,mag=Math.pow(10,Math.floor(Math.log10(raw))),n=raw/mag,stepSize=(n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*mag;return [Math.floor(lo/stepSize+1e-9)*stepSize,Math.ceil(hi/stepSize-1e-9)*stepSize,stepSize];};
+    // A card with a Label field labels its marks; with none, Labels labels every card.
+    const labelled=cards.some(c=>c.labelFields&&c.labelFields.length);
+    const catKey=r=>axisDim==null?'All':r[axisDim]==null||r[axisDim]===''?'Unknown':String(r[axisDim]);
+    let cats=[...new Set(rows.map(catKey))];
+    if(axisDim&&TIME_FIELDS.includes(axisDim)&&cats.every(c=>c==='Unknown'||timeValue(c,axisDim)!=null))cats=cats.sort((a,b)=>(timeValue(a,axisDim)??Infinity)-(timeValue(b,axisDim)??Infinity));
+    const catAt=new Map(cats.map((c,i)=>[c,i])),n=cats.length,step=(right-left)/Math.max(1,n),cx=r=>left+step*(catAt.get(catKey(r))+.5);
+    const sync=spec.synchronize===true,leftIds=[cards[0].measure],rightIds=cards.slice(1).map(c=>c.measure);
+    const valuesOf=ids=>rows.flatMap(r=>ids.map(id=>r[id]));
+    const [la,lb,ls]=nice(...extent(sync?valuesOf(cards.map(c=>c.measure)):valuesOf(leftIds))),[ra,rb,rs]=sync||!rightIds.length?[la,lb,ls]:nice(...extent(valuesOf(rightIds)));
+    const ly=v=>bottom-(v-la)/(lb-la)*(bottom-top),ry=v=>bottom-(v-ra)/(rb-ra)*(bottom-top),scaleOf=i=>i===0||sync?ly:ry;
+    const inkOf=i=>i===0?(spec.seriesColor||slotColour(0)):slotColour(i);
+    for(let v=la;v<=lb+ls*1e-6;v+=ls){node('line',{x1:left,x2:right,y1:f2(ly(v)),y2:f2(ly(v)),stroke:'#e8ebe6'},null,g);
+     fittedText({x:left-10,y:f2(ly(v)+4),'text-anchor':'end',fill:'#68706b','font-size':14,'data-axis':'left'},format(v,cards[0].measure,columns,true),110,g);}
+    if(rightIds.length)for(let w=ra;w<=rb+rs*1e-6;w+=rs)fittedText({x:right+10,y:f2(ry(w)+4),'text-anchor':'start',fill:'#68706b','font-size':14,'data-axis':'right'},format(w,rightIds[0],columns,true),110,g);
+    node('line',{x1:left,x2:left,y1:top,y2:bottom,stroke:'#8a8690'},null,g);
+    if(rightIds.length)node('line',{x1:right,x2:right,y1:top,y2:bottom,stroke:'#8a8690'},null,g);
+    fittedText({x:left-10,y:top-16,'text-anchor':'start',fill:inkOf(0),'font-size':15,'data-axis-title':'left'},name(cards[0].measure,columns)+(sync&&rightIds.length?' and '+rightIds.map(id=>name(id,columns)).join(', ')+' (one scale)':''),(right-left)/2,g);
+    if(rightIds.length&&!sync)fittedText({x:right+10,y:top-16,'text-anchor':'end',fill:inkOf(1),'font-size':15,'data-axis-title':'right'},rightIds.map(id=>name(id,columns)).join(', '),(right-left)/2,g);
+    const every=Math.max(1,Math.ceil(n/Math.max(1,Math.min(14,Math.floor((right-left)/70)))));
+    cats.forEach((text,i)=>{if(spec.axisLabels==='all'||i%every===0)fittedText({x:f2(left+step*(i+.5)),y:bottom+24,'text-anchor':'middle',fill:'#68706b','font-size':14},text,Math.max(40,step*every-6),g);});
+    const membersOf=c=>c.color?[...new Set(rows.map(r=>String(r[c.color]??'Unknown')))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})):[''];
+    // Bars share each category's slot: one per bar card and Colour member.
+    const slots=Math.max(1,cards.filter(c=>c.type==='bar').reduce((total,c)=>total+membersOf(c).length,0)),bw=Math.min(48,step*.72/slots);
+    let slotBase=0;
+    // Labels never sit on one another (Tableau's default): a label that would overlap
+    // one already drawn is left off, and its value stays in the mark's hover text.
+    const placed=[],free=(x,y,w,h)=>{if(placed.some(b=>x<b.x+b.w&&b.x<x+w&&y<b.y+b.h&&b.y<y+h))return false;placed.push({x,y,w,h});return true;};
+    cards.forEach((c,index)=>{
+     const y=scaleOf(index),m=c.measure,ink=inkOf(index),cg=node('g',{'data-card':c.id||String(index),'data-card-type':c.type},null,g);
+     const members=membersOf(c),memberOf=r=>c.color?String(r[c.color]??'Unknown'):'';
+     const heatVals=c.colorMeasure?rows.map(r=>r[c.colorMeasure]).filter(finite):[],hl=heatVals.length?Math.min(...heatVals):0,hh=heatVals.length?Math.max(...heatVals):0;
+     const fillOf=r=>c.color?slotColour(members.indexOf(memberOf(r))):ink;
+     const opacityOf=r=>c.colorMeasure&&finite(r[c.colorMeasure])?.25+.75*(hh>hl?(r[c.colorMeasure]-hl)/(hh-hl):1):null;
+     const sizeMax=c.size?Math.max(1e-9,...rows.map(r=>Math.abs(Number(r[c.size])||0))):0,share=r=>c.size&&finite(r[c.size])?Math.sqrt(Math.abs(r[c.size])/sizeMax):null;
+     const fields=[...new Set([m,...(c.tooltip||[]),...(c.labelFields||[]),...(c.size?[c.size]:[]),...(c.colorMeasure?[c.colorMeasure]:[])])];
+     const tip=r=>label(r,dims)+'\n'+fields.map(id=>name(id,columns)+': '+valueText(r,id)).join('\n');
+     const cardMark=(tag,attrs,r)=>{const made=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':tip(r).replace(/\n/g,'; ')},null,cg);node('title',{},tip(r),made);
+      made.addEventListener('click',()=>onSelect?.(r));made.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(r);}});return made;};
+     const cardLabel=(r,xx,yy,fill)=>{if(!spec.labels||(labelled&&!(c.labelFields&&c.labelFields.length)))return;const text=c.labelFields&&c.labelFields.length?c.labelFields.map(id=>valueText(r,id)).join(' / '):format(r[m],m,columns,true);
+      // Measured at 18px, the size the Studio draws chart text at.
+      const w=measure(fit(text,110,12),18)+6;if(!free(xx-w/2,yy-17,w,21))return;
+      fittedText({x:f2(xx),y:f2(yy),'text-anchor':'middle',fill:fill||'#35483b','font-size':12,'data-label':'value'},text,110,cg);};
+     const plotted=rows.filter(r=>finite(r[m])&&catAt.has(catKey(r)));
+     const byMember=new Map(members.map(k=>[k,[]]));for(const r of plotted){const k=memberOf(r);if(!byMember.has(k))byMember.set(k,[]);byMember.get(k).push(r);}
+     const ordered=list=>list.slice().sort((a,b)=>{if(c.path){const va=a[c.path],vb=b[c.path];if(finite(va)&&finite(vb))return va-vb;const t=String(va??'').localeCompare(String(vb??''),undefined,{numeric:true});if(t)return t;}return cx(a)-cx(b);});
+     if(c.type==='bar'){
+      for(const r of plotted){const slot=slotBase+Math.max(0,members.indexOf(memberOf(r))),x0=cx(r)-bw*slots/2+slot*bw,f=share(r),w=f==null?Math.max(1,bw-2):Math.max(1,(bw-2)*(.35+.65*f));
+       cardMark('rect',{x:f2(x0+(bw-w)/2),y:f2(Math.min(y(0),y(r[m]))),width:f2(w),height:f2(Math.max(1,Math.abs(y(r[m])-y(0)))),fill:fillOf(r),...(opacityOf(r)!=null?{'fill-opacity':f2(opacityOf(r))}:{})},r);
+       cardLabel(r,x0+bw/2,Math.min(y(0),y(r[m]))-6);}
+      slotBase+=members.length;
+     }else if(['line','area','polygon'].includes(c.type)){
+      for(const [k,list] of byMember){if(!list.length)continue;const pts=ordered(list),stroke=fillOf(pts[0]),d=pts.map((r,j)=>(j?'L':'M')+f2(cx(r))+','+f2(y(r[m]))).join(' ');
+       if(c.type==='area')node('path',{d:d+' L'+f2(cx(pts.at(-1)))+','+f2(y(0))+' L'+f2(cx(pts[0]))+','+f2(y(0))+' Z',fill:stroke,'fill-opacity':.18,stroke:'none'},null,cg);
+       if(c.type==='polygon'){cardMark('path',{d:d+' Z',fill:stroke,'fill-opacity':.3,stroke,'stroke-width':1.6,'stroke-linejoin':'round','data-partition':k||'All'},pts[0]);}
+       else{const widths=pts.map(share);
+        if(widths.some(v=>v!=null))pts.slice(1).forEach((r,j)=>{node('path',{d:'M'+f2(cx(pts[j]))+','+f2(y(pts[j][m]))+' L'+f2(cx(r))+','+f2(y(r[m])),fill:'none',stroke,'stroke-width':f2(1.5+4.5*(((widths[j]??0)+(widths[j+1]??0))/2)),'stroke-linecap':'round'},null,cg);});
+        else node('path',{d,fill:'none',stroke,'stroke-width':2.5,'stroke-linejoin':'round'},null,cg);}
+       for(const r of pts){const f=share(r);cardMark('circle',{cx:f2(cx(r)),cy:f2(y(r[m])),r:c.type==='polygon'?5:f==null?4.5:f2(3+8*f),fill:stroke,...(c.type==='polygon'?{'fill-opacity':0,'data-hover-target':'vertex'}:{stroke:'white','stroke-width':1.5})},r);cardLabel(r,cx(r),y(r[m])-10,stroke);}}
+     }else if(c.type==='text'){
+      for(const r of plotted){const text=c.labelFields&&c.labelFields.length?c.labelFields.map(id=>valueText(r,id)).join(' / '):format(r[m],m,columns,true),f=share(r);
+       const t=node('text',{x:f2(cx(r)),y:f2(y(r[m])+4),'text-anchor':'middle',fill:fillOf(r),'font-size':f==null?13:f2(11+9*f),'font-weight':600,class:'plot-mark','data-label':'value'},text,cg);
+       node('title',{},tip(r),t);t.addEventListener('click',()=>onSelect?.(r));}
+     }else if(c.type==='density'){
+      const cell=6,cols=Math.ceil((right-left)/cell),lines=Math.ceil((bottom-top)/cell),grid=new Float64Array(cols*lines);let peak=0;
+      for(const r of plotted){const px=cx(r),py=y(r[m]),f=share(r),h=f==null?18:8+32*f,reach=2.5*h;
+       const c0=Math.max(0,Math.floor((px-reach-left)/cell)),c1=Math.min(cols-1,Math.ceil((px+reach-left)/cell)),l0=Math.max(0,Math.floor((py-reach-top)/cell)),l1=Math.min(lines-1,Math.ceil((py+reach-top)/cell));
+       for(let l=l0;l<=l1;l++)for(let q=c0;q<=c1;q++){const dx=left+(q+.5)*cell-px,dy=top+(l+.5)*cell-py;grid[l*cols+q]+=Math.exp(-(dx*dx+dy*dy)/(h*h/2));}}
+      for(const v of grid)if(v>peak)peak=v;
+      const layer=node('g',{'data-density-layer':c.id||String(index)},null,cg);
+      for(let l=0;l<lines;l++)for(let q=0;q<cols;q++){const v=grid[l*cols+q]/(peak||1);if(v<.04)continue;node('rect',{x:f2(left+q*cell),y:f2(top+l*cell),width:cell,height:cell,fill:ink,'fill-opacity':f2(Math.min(.85,.05+.8*v))},null,layer);}
+      for(const r of plotted)cardMark('circle',{cx:f2(cx(r)),cy:f2(y(r[m])),r:5,fill:ink,'fill-opacity':0,'data-hover-target':'point'},r);
+     }else{
+      // Circle, Square and Shape: a point per group.
+      const shapeMembers=c.shape?[...new Set(rows.map(r=>String(r[c.shape]??'Unknown')))].sort((a,b)=>a.localeCompare(b)):[];
+      const glyph=r=>c.shape?glyphFor({shapeMap:c.shapeMap},String(r[c.shape]??'Unknown'),shapeMembers):c.glyph||(c.type==='square'?'square':'circle');
+      for(const r of plotted){const id=glyph(r),f=share(r),rad=f==null?6:3+12*f,fill=fillOf(r);
+       cardMark('path',{d:glyphD(id,cx(r),y(r[m]),rad),...(glyphOpen(id)?{fill:'none',stroke:fill,'stroke-width':1.8}:{fill,stroke:'white','stroke-width':1.2,...(opacityOf(r)!=null?{'fill-opacity':f2(opacityOf(r))}:{})}),'data-glyph':id},r);
+       cardLabel(r,cx(r),y(r[m])-rad-5,fill);}
+     }
+     if(Number.isFinite(c.opacity)&&c.opacity<100)cg.setAttribute('opacity',String(c.opacity/100));
+     styleMarks(cg,{border:c.border,halo:c.halo});
+    });
+    // The legend reads each card's own mark (#52): a bar swatch, a line with its dot.
+    let lx=right;const baseline=22;
+    // Measured at 18: the Studio sets chart text to 18px (workspace-polish.css), whatever the attribute says.
+    for(const [index,c] of [...cards.entries()].reverse()){const ink=inkOf(index),text=name(c.measure,columns),w=measure(text,18)+26;lx-=w+20;
+     const item=node('g',{'data-legend':'cards','data-card':c.id||String(index)},null,g);
+     if(c.type==='bar')node('rect',{x:f2(lx),y:baseline-12,width:14,height:14,rx:2,fill:ink},null,item);
+     else if(['line','area','polygon'].includes(c.type)){node('line',{x1:f2(lx-3),x2:f2(lx+17),y1:baseline-5,y2:baseline-5,stroke:ink,'stroke-width':2.5},null,item);node('circle',{cx:f2(lx+7),cy:baseline-5,r:4,fill:ink},null,item);}
+     else if(c.type==='text')node('text',{x:f2(lx+7),y:baseline,'text-anchor':'middle',fill:ink,'font-size':15,'font-weight':700},'T',item);
+     else if(c.type==='density')node('rect',{x:f2(lx),y:baseline-12,width:14,height:14,rx:7,fill:ink,'fill-opacity':.45},null,item);
+     else node('path',{d:glyphD(c.glyph||(c.type==='square'?'square':'circle'),lx+7,baseline-5,6),fill:ink},null,item);
+     node('text',{x:f2(lx+24),y:baseline,fill:'#59645c','font-size':14},text,item);}
+    axes[p]={values:rows.map(r=>r[cards[0].measure]),lo:la,hi:lb,at:ly,x1:left,x2:right,bar:false};
    }else if(spec.type==='scatter'){
     const [mx,my]=measures,left=100,right=935,top=65,bottom=345,[xl,xh]=extent(plotted.map(r=>r[mx]),false),[yl,yh]=extent(plotted.map(r=>r[my]),false),x=v=>left+(v-xl)/(xh-xl)*(right-left),y=v=>bottom-(v-yl)/(yh-yl)*(bottom-top);
     for(let i=0;i<=5;i++){const vx=xl+(xh-xl)*i/5,vy=yl+(yh-yl)*i/5;node('line',{x1:x(vx),x2:x(vx),y1:top,y2:bottom,stroke:'#e8ebe6'},null,g);node('line',{x1:left,x2:right,y1:y(vy),y2:y(vy),stroke:'#e8ebe6'},null,g);fittedText({x:x(vx),y:bottom+23,'text-anchor':'middle',fill:'#68706b','font-size':15},format(vx,mx,columns,true),110,g);fittedText({x:left-10,y:y(vy)+3,'text-anchor':'end',fill:'#68706b','font-size':15},format(vy,my,columns,true),78,g);}
-    node('text',{x:(left+right)/2,y:400,'text-anchor':'middle',fill:'#59645c'},name(mx,columns),g);node('text',{x:18,y:45,fill:'#59645c'},name(my,columns),g);plotted.forEach(r=>{mark('circle',{cx:x(r[mx]),cy:y(r[my]),r:6,...(shade(r)||{fill:color(r),'fill-opacity':.72}),stroke:'white','stroke-width':1.4},r,g);if(spec.labels){const at=x(r[mx]),end=at>(left+right)/2;fittedText({x:at+(end?-8:8),y:y(r[my])-8,'text-anchor':end?'end':'start',fill:'#35483b','font-size':15},labelText(r,label(r,dims)),Math.min(300,end?at-24:width-at-24),g);}});
+    node('text',{x:(left+right)/2,y:400,'text-anchor':'middle',fill:'#59645c'},name(mx,columns),g);node('text',{x:18,y:45,fill:'#59645c'},name(my,columns),g);plotted.forEach(r=>{pointMark(r,x(r[mx]),y(r[my]),6,shade(r)||{fill:color(r),'fill-opacity':.72},g);if(spec.labels){const at=x(r[mx]),end=at>(left+right)/2;fittedText({x:at+(end?-8:8),y:y(r[my])-8,'text-anchor':end?'end':'start',fill:'#35483b','font-size':15},labelText(r,label(r,dims)),Math.min(300,end?at-24:width-at-24),g);}});
    }else{
     const prepared=timelines[p],xs=prepared.ticks,left=100,right=940,top=60,bottom=345,[lo,hi]=extent(plotted.map(r=>r[m])),x=at=>left+(xs.length===1?.5:(at-xs[0][0])/(xs.at(-1)[0]-xs[0][0]))*(right-left),y=v=>bottom-(v-lo)/(hi-lo)*(bottom-top);
     for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5;node('line',{x1:left,x2:right,y1:y(v),y2:y(v),stroke:'#e8ebe6'},null,g);fittedText({x:left-12,y:y(v)+4,'text-anchor':'end',fill:'#68706b','font-size':15},format(v,m,columns,true),76,g);}
@@ -307,7 +624,7 @@
     xs.forEach(([at,text],i)=>{if(turnTicks)fittedText({x:x(at),y:bottom+16,'text-anchor':'end',fill:'#68706b','font-size':12,transform:`rotate(-35 ${x(at)} ${bottom+16})`,'data-axis-label':'all'},text,110,g);else if(allTicks||i%Math.max(1,Math.ceil(xs.length/tickCount))===0)node('text',{x:x(at),y:bottom+25,'text-anchor':'middle',fill:'#68706b','font-size':15},text,g);});
     // Colour on the time axis itself colours each point by its period.
     const perPoint=spec.color&&spec.color===dims[0];
-    for(const [seriesIndex,s] of prepared.series.entries()){const stroke=perPoint?'#8a8690':spec.color?color(s.rows[0].row):categoryColour(seriesIndex);
+    for(const [seriesIndex,s] of (spec.path?pathSeries(prepared.series,dims,spec.path,m):prepared.series).entries()){const stroke=perPoint?'#8a8690':spec.color?color(s.rows[0].row):categoryColour(seriesIndex);
      for(const segment of s.segments){const d=segment.map((item,i)=>(i?'L':'M')+x(item.at)+','+y(item.row[m])).join(' ');
       if(spec.type==='area'){const path=`M${x(segment[0].at)},${y(0)} `+segment.map(item=>`L${x(item.at)},${y(item.row[m])}`).join(' ')+` L${x(segment.at(-1).at)},${y(0)} Z`;node('path',{d:path,fill:perPoint?palette[0]:stroke,'fill-opacity':.1,stroke:'none'},null,g);}
       if(sizeId)segment.slice(1).forEach((item,k)=>{const prev=segment[k],share=v=>typeof v==='number'?Math.abs(v)/maxSize:0;node('path',{d:`M${x(prev.at)},${y(prev.row[m])} L${x(item.at)},${y(item.row[m])}`,fill:'none',stroke,'stroke-width':1.5+4.5*(share(prev.row[sizeId])+share(item.row[sizeId]))/2,'stroke-linecap':'round'},null,g);});
@@ -316,8 +633,8 @@
     }
    }
   }
-  if(spec.references&&(spec.references.average||spec.references.median)&&spec.type!=='scatter'){
-   for(let p=0;p<(dual?1:measures.length);p++){
+  if(spec.references&&(spec.references.average||spec.references.median)&&spec.type!=='scatter'&&!(V3_TYPES.includes(spec.type)&&!axes[0])){
+   for(let p=0;p<(dual||V3_TYPES.includes(spec.type)?1:measures.length);p++){
     const ax=axes[p];
     const id=measures[p],values=(ax?ax.values:plotted.map(row=>row[id])).filter(v=>typeof v==='number'&&Number.isFinite(v)).sort((a,b)=>a-b);if(!values.length)continue;
     const average=values.reduce((a,b)=>a+b,0)/values.length,middle=Math.floor(values.length/2),median=values.length%2?values[middle]:(values[middle-1]+values[middle])/2,[lo,hi]=ax?[ax.lo,ax.hi]:extent(values),bar=ax?ax.bar:spec.type==='bar';
@@ -330,7 +647,7 @@
   }
   // Keep legends inside the exported SVG. A sibling HTML legend is absent from
   // PNG/SVG downloads, leaving a coloured series impossible to identify.
-  const legends=spec.color?colorValues:timed&&dims.length>1?timelines[0].series.map(s=>s.label):dual?measures.map((id,i)=>name(id,columns)+(i?' (right axis)':' (left axis)')):[];
+  const legends=spec.type==='cards'?[]:spec.color?colorValues:timed&&dims.length>1?timelines[0].series.map(s=>s.label):dual?measures.map((id,i)=>name(id,columns)+(i?' (right axis)':' (left axis)')):[];
   if(legends.length){
    const legend=node('g',{'data-legend':'series','aria-label':'Series legend'}),plan=legendPlan(legends),base=panelH*panels;
    for(const {i,value,lines,x,y}of plan.items){
@@ -347,8 +664,18 @@
    node('rect',{x:180,y:base+34,width:14,height:14,rx:2,fill:palette[0],'fill-opacity':1},null,legend);node('text',{x:200,y:base+46,fill:'#59645c','font-size':14},format(heat[1],spec.colorMeasure,columns,true),legend);
    const height=base+60;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);background.setAttribute('height',height);
   }
+  // Marks v3: which shape each member of a Shape field takes.
+  if(spec.shape&&shapeMembers.length&&spec.type==='scatter'){
+   const box=svg.getAttribute('viewBox').split(' ').map(Number),base=box[3],legend=node('g',{'data-legend':'shape','aria-label':'Shape legend'});
+   node('text',{x:24,y:base+22,fill:'#59645c','font-size':14},name(spec.shape,columns),legend);
+   let x=24,y=base+46;
+   for(const member of shapeMembers){const id=glyphFor(spec,member,shapeMembers),w=measure(member,14)+36;if(x>24&&x+w>width-24){x=24;y+=24;}
+    node('path',{d:glyphD(id,x+7,y-5,6),...(glyphOpen(id)?{fill:'none',stroke:'#59645c','stroke-width':1.5}:{fill:'#59645c'})},null,legend);node('text',{x:x+18,y,fill:'#59645c','font-size':14},member,legend);x+=w;}
+   const height=y+14;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);background.setAttribute('height',height);
+  }
   container.append(svg);
   return svg;
  }
- const api={render,format,isMoney,validate,extent,label,timeValue,timeline,drawnTimeline,scatterPairs,combine,combineGroup,combineRule,combineNote,COMBINE_RULE};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatContributionPlot=api;
+ const api={render,format,isMoney,validate,extent,label,timeValue,timeline,drawnTimeline,scatterPairs,combine,combineGroup,combineRule,combineNote,COMBINE_RULE,
+  glyphD,glyphFor,glyphOpen,GLYPH_IDS,V3_TYPES,styleMarks,styleColour,tableV3,pathSeries};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.MentatContributionPlot=api;
 })(globalThis);
