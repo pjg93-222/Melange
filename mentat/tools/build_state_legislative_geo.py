@@ -18,9 +18,10 @@ to get here), so the page fetches one 20-400 KB file instead of holding the
 country. ``sld/index.json`` is the small file it can hold.
 
 NOTHING IS RE-PROJECTED HERE. ``Albers``, ``REGIONS``, ``region_of``,
-``project_rings``, ``simplify``, ``to_path``, ``bbox_of``, ``centroid_of``,
-``point_in_rings`` and the shapefile reader are all IMPORTED from
-build_district_geo, and the placements come from build_zip_centroids'
+``project_rings_counted`` (Hawaii's clip included), ``simplify``,
+``to_path``, ``bbox_of``, ``centroid_of``, ``point_in_rings`` and the
+shapefile reader are all IMPORTED from build_district_geo, and the
+placements come from build_zip_centroids'
 ``canvas_placements``, which recomputes them through build_district_geo's own
 ``build_states`` from the same state shapefile cd119.json was fitted with.
 A state-house path therefore lands exactly on top of the congressional path
@@ -154,19 +155,23 @@ def has_seat(code):
 def drop_offcanvas(rings):
     """(rings the canvas can hold, count dropped).
 
-    Two districts need this, both Hawaiian. The 500k state-legislative file
-    carries the Northwestern Hawaiian Islands - Papahanaumokuakea, out to Kure
-    Atoll at 178.3W - inside Senate District 25 and House District 51, as 17
-    and 16 separate rings. The 20m congressional file does not: cd119.json's
-    HI-02 bbox stops at x=258, the west edge of the Hawaii inset box, because
-    the hawaii placement was fitted to the main islands alone. Projected with
-    that placement, an atoll 1,300 miles west lands at x=-43, off the canvas.
+    The guard for a ring that projects wholly off the canvas. Since lane L3
+    (2026-09-26) no district needs it; the two that did are Hawaiian. The 500k
+    state-legislative file carries the Northwestern Hawaiian Islands -
+    Papahanaumokuakea, out to Kure Atoll at 178.3W - inside Senate District 25
+    and House District 51, as 15 separate rings in each (each district's other
+    two rings are on Oahu; counted 2026-09-26). The 20m congressional
+    file does not: cd119.json's HI-02 bbox stops at x=258, the west edge of the
+    Hawaii inset box, because the hawaii placement was fitted to the main
+    islands alone. Projected with that placement, an atoll 1,300 miles west
+    lands at x=-43, off the canvas, and the nearer ones inside the Alaska box.
 
     Re-fitting the Hawaii inset to hold them would move every Hawaiian pixel
     and break the one thing this tool must not break - that its paths sit
-    exactly on cd119.json's. So the rings the canvas cannot hold are dropped
-    and counted, which also keeps this layer consistent with the congressional
-    layer under it, and the index names every district it happened to.
+    exactly on cd119.json's. build_district_geo clips the Hawaii inset to its
+    extent instead, as d3's clipExtent does, so project_rings_counted removes
+    those rings first and the index counts them under clipped_rings; whatever
+    the canvas still cannot hold is dropped here and counted too.
     """
     kept, dropped = [], 0
     for ring in rings:
@@ -208,10 +213,12 @@ def read_chamber(cache_dir, chamber, log=print):
 def build_state_file(chamber, stusps, statefp, entries, placements, out_dir):
     """Write one sld/<chamber>/<ST>.json. Returns (payload, path, collapsed)."""
     region = builder.region_of(statefp)
-    districts, collapsed, offcanvas = [], [], {}
+    districts, collapsed, offcanvas, clipped = [], [], {}, {}
     anchor_fallback, subpixel = [], []
     for geoid, namelsad, rings in entries:
-        projected, _region = builder.project_rings(rings, statefp, placements)
+        projected, _region, removed = builder.project_rings_counted(rings, statefp, placements)
+        if removed:
+            clipped[geoid] = removed
         projected, dropped = drop_offcanvas(projected)
         if dropped:
             offcanvas[geoid] = dropped
@@ -241,7 +248,7 @@ def build_state_file(chamber, stusps, statefp, entries, placements, out_dir):
                'region': region, 'districts': districts}
     target = out_dir / 'sld' / chamber / f'{stusps}.json'
     builder.write_json(target, payload)
-    return payload, target, {'collapsed': collapsed, 'offcanvas': offcanvas,
+    return payload, target, {'collapsed': collapsed, 'offcanvas': offcanvas, 'clipped': clipped,
                              'anchor_fallback': anchor_fallback, 'subpixel': subpixel}
 
 
@@ -316,7 +323,7 @@ def build(cache_dir, out_dir, min_step=DEFAULT_MIN_STEP, log=print):
         for chamber in CHAMBERS:
             by_state, url, no_seat = read_chamber(cache_dir, chamber, log=log)
             states, total_bytes, total_districts = {}, 0, 0
-            collapsed_all, offcanvas_all = {}, {}
+            collapsed_all, offcanvas_all, clipped_all = {}, {}, {}
             anchor_fallback_all, subpixel_all = [], {}
             for statefp, entries in sorted(by_state.items()):
                 stusps = codes.get(statefp)
@@ -336,6 +343,8 @@ def build(cache_dir, out_dir, min_step=DEFAULT_MIN_STEP, log=print):
                     collapsed_all[stusps] = notes['collapsed']
                 if notes['offcanvas']:
                     offcanvas_all.update(notes['offcanvas'])
+                if notes['clipped']:
+                    clipped_all.update(notes['clipped'])
                 anchor_fallback_all.extend(notes['anchor_fallback'])
                 if notes['subpixel']:
                     subpixel_all[stusps] = notes['subpixel']
@@ -354,17 +363,23 @@ def build(cache_dir, out_dir, min_step=DEFAULT_MIN_STEP, log=print):
                 'no_seat': no_seat,
                 'offcanvas_rings': dict(sorted(offcanvas_all.items())),
                 'offcanvas_reason': 'rings that project entirely off the 975x610 canvas are '
-                                    'dropped and counted here: the Northwestern Hawaiian '
-                                    'Islands, which the 500k state-legislative file carries '
-                                    'and the 20m congressional file does not, would need the '
-                                    'Hawaii inset re-fitted and every Hawaiian pixel moved '
-                                    'off cd119.json',
+                                    'dropped and counted here; since the Hawaii clip there '
+                                    'are none (see clipped_rings)',
+                'clipped_rings': dict(sorted(clipped_all.items())),
+                'clipped_reason': "rings removed whole by the Hawaii inset's clip extent "
+                                  "(build_district_geo REGIONS['hawaii']['clip'], as d3's "
+                                  'geoAlbersUsa clips each inset to its clipExtent): the '
+                                  'Northwestern Hawaiian Islands, which the 500k '
+                                  'state-legislative file carries and the 20m congressional '
+                                  'file does not. The Hawaii conic drew them west of the '
+                                  'inset, the nearer ones inside the Alaska box and the '
+                                  'farther ones off the canvas',
                 'anchor_fallback': sorted(anchor_fallback_all),
                 'subpixel': dict(sorted(subpixel_all.items())),
                 'subpixel_reason': 'a district whose whole projected box is under a pixel in '
                                    'both directions: it is in the file and clickable, and '
-                                   'only a zoom makes it readable. 31 of 1,958 upper and '
-                                   '267 of 4,873 lower seats are, and they are the dense '
+                                   'only a zoom makes it readable. 29 of 1,958 upper and '
+                                   '264 of 4,873 lower seats are, and they are the dense '
                                    'cities - Manhattan, Providence, Hartford, the DC wards '
                                    '- plus Anchorage, whose inset is capped at 0.35x the '
                                    'lower-48 scale. A city inset would be the fix and is a '
@@ -379,6 +394,8 @@ def build(cache_dir, out_dir, min_step=DEFAULT_MIN_STEP, log=print):
                 f'{sum(len(v) for v in collapsed_all.values())} districts collapsed, '
                 f'{sum(offcanvas_all.values())} off-canvas rings dropped from '
                 f'{len(offcanvas_all)} districts, '
+                f'{sum(clipped_all.values())} rings clipped from '
+                f'{len(clipped_all)} districts, '
                 f'{sum(len(v) for v in subpixel_all.values())} sub-pixel districts '
                 f'({len(anchor_fallback_all)} needed a box-centre anchor)')
             del by_state
@@ -402,9 +419,9 @@ def build(cache_dir, out_dir, min_step=DEFAULT_MIN_STEP, log=print):
             'Paths are in the same canvas and precision as cd119.json, projected with '
             'build_district_geo.py imported, not copied.',
             'Hawaii Senate District 25 and House District 51 reach the Northwestern '
-            'Hawaiian Islands, which the Hawaii inset was never fitted to hold; those '
-            'rings are dropped and counted under offcanvas_rings, which is also why '
-            "cd119.json's HI-02 stops at the inset's west edge.",
+            'Hawaiian Islands, which the Hawaii inset was never fitted to hold (the 20m '
+            "congressional file, and so cd119.json's HI-02, has the main islands only); "
+            'the Hawaii clip removes those rings and counts them under clipped_rings.',
         ],
         'chambers': chambers,
     }

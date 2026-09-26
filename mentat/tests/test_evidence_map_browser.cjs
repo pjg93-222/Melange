@@ -113,6 +113,25 @@ function stopServer(child) {
   }), 10000, 'stopServer()').catch(error => console.error(error.message));
 }
 
+// server.py chdir()s into its report directory (MENTAT_REPORT_DIRECTORY). With MENTAT_PYTHON set to
+// a venv's python.exe, the child stopServer() kills is the venv launcher (bpo-35797) and the console,
+// the launcher's child, is still exiting - and still in that folder - when the launcher's exit is
+// reported. Node 24's rmSync then throws EPERM at once, whatever maxRetries and retryDelay say, which
+// left an empty %TEMP% *-reports-* folder after every such run. So wait for the folder to be free, up
+// to 10 s, pass or fail: the strip suite's cleanupPath (lanes L2 and L3, 2026-09-26).
+async function cleanupPath(target) {
+  for (let attempt = 1; ; attempt += 1) {
+    try { fs.rmSync(target, {recursive: true, force: true}); return; }
+    catch (error) {
+      if (attempt >= 40 || !['EPERM', 'EBUSY', 'ENOTEMPTY', 'EACCES'].includes(error.code)) {
+        console.error(`cleanup failed for ${target} after ${attempt} attempt(s): ${error.message}`);
+        return;
+      }
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+  }
+}
+
 // One industry-workbook fixture, built the same way the S6 fixture is
 // (openpyxl, HEAD row, two_year_transaction_period decides the sheet), plus a
 // State and a ZIP column so evidence_geo.py's STATE_FIELDS/ZIP_FIELDS lookup
@@ -716,10 +735,7 @@ function startStubGeocoder() {
     if (browser) await browser.close().catch(() => {});
     await stopServer(server);
     if (stubbed) await new Promise(resolve => stubbed.stub.close(() => resolve()));
-    for (const target of [dataRoot, fixtureDir, reportRoot]) {
-      try { fs.rmSync(target, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}); }
-      catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }
-    }
+    for (const target of [dataRoot, fixtureDir, reportRoot]) await cleanupPath(target);
     process.exit(failed ? 1 : 0);
   }
 })();

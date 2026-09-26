@@ -68,7 +68,9 @@ def albers_from_payload(longitude, latitude, region):
     c = math.cos(first) ** 2 + 2 * n * math.sin(first)
     rho = math.sqrt(max(c - 2 * n * math.sin(math.radians(latitude)), 0.0)) / n
     rho0 = math.sqrt(max(c - 2 * n * math.sin(math.radians(region['origin'])), 0.0)) / n
-    theta = n * (math.radians(longitude) - math.radians(region['meridian']))
+    delta = math.radians(longitude) - math.radians(region['meridian'])
+    delta = delta - 2 * math.pi if delta > math.pi else delta + 2 * math.pi if delta < -math.pi else delta
+    theta = n * delta
     x, y = rho * math.sin(theta), rho0 - rho * math.cos(theta)
     return (region['translate'][0] + region['scale'] * x,
             region['translate'][1] - region['scale'] * y)

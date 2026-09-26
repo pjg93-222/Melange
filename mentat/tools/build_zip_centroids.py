@@ -56,6 +56,12 @@ is selectable would be the worse error, so a point whose state named its
 region is kept whenever it lands ON THE CANVAS, and the handful that fall
 outside their region's box are listed by name under ``outside_region_box``.
 
+Hawaii's CLIP EXTENT is the one border (build_district_geo
+REGIONS['hawaii']['clip'], lane L3, 2026-09-26): as d3's clipExtent drops
+it, a Hawaiian point outside it is not placed - project_point returns None,
+the box fallback finds no region, and the ZCTA is omitted with its state.
+No Hawaiian ZCTA lies outside it today.
+
 WHAT IS ACTUALLY OMITTED (measured 2026-09-19, 12 of 33,791 ZCTAs)
 
   * 11 ZCTAs in American Samoa (1), Guam (7) and the Northern Marianas (3).
@@ -205,13 +211,15 @@ def project_point(longitude, latitude, region, placements):
 
     This is project_rings' screen transform for a single point: the same
     imported Albers conic and the same (scale, tx, ty) the paths were drawn
-    with, so the dot lands on the shape.
+    with, so the dot lands on the shape. A point outside its region's clip
+    extent (Hawaii's) is None too, as project_rings removes a ring there.
     """
     if region not in placements:
         return None
     scale, tx, ty = placements[region]
     x, y = builder.projector(region)(longitude, latitude)
-    return tx + scale * x, ty - scale * y
+    point = tx + scale * x, ty - scale * y
+    return point if builder.in_clip(region, point) else None
 
 
 def in_box(region, point):

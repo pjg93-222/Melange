@@ -46,7 +46,8 @@ Albers conic equal area, computed on the unit sphere with Snyder's formulas
     C  = cos^2 f1 + 2 n sin f1
     p  = sqrt(C - 2 n sin f) / n
     p0 = sqrt(C - 2 n sin f0) / n
-    t  = n (l - l0)
+    t  = n (l - l0)    (l - l0 wrapped into -180..180 degrees, as d3 wraps a
+                        rotated longitude; Alaska's islands east of 180 need it)
     x  = p sin t
     y  = p0 - p cos t          (y grows north; the screen transform flips it)
 
@@ -76,6 +77,22 @@ Every region is projected with ITS OWN conic and then fitted into its target
 box, so no geometry is ever run through the lower-48 conic from the far side of
 the date line. A state or district whose STATEFP is in no region is written to
 the output's ``unplaced`` list and never silently dropped.
+
+Hawaii alone is also CLIPPED, the way d3's geoAlbersUsa clips each inset to
+its clipExtent (lane L3, 2026-09-26): its conic draws only inside
+REGIONS['hawaii']['clip'], the canvas around the Hawaii box one pixel clear
+of the Alaska, lower-48 and American Samoa boxes (x 247-371, y 497-610).
+The 20m files hold the main islands only, which the fit put inside the box;
+the 500k files build_state_legislative_geo and build_geo_layers project
+through this module also carry the Northwestern Hawaiian Islands, which the
+Hawaii conic drew west of the box - the nearer ones inside the Alaska box,
+French Frigate Shoals on the Kenai Peninsula, the farther ones off the
+canvas. A ring wholly outside the clip is removed (project_rings_counted
+counts it), a ring crossing it is cut to it, a ring inside it is untouched,
+and a point outside it is not drawn (in_clip). The clip is wider than the box
+on purpose: the 500k Big Island reaches 0.135 px east of the box (Cape
+Kumukahi), Kaula lies 5 px west of it and the hexagons over the islands reach
+further still, and none of that may move.
 
 OUTPUT (mentat/app/geo/)
 
@@ -153,8 +170,11 @@ REGIONS = {
                     box=(8.0, 6.0, 967.0, 496.0), scale_cap=None),
     'alaska': dict(fips={'02'}, parallels=(55.0, 65.0), meridian=-154.0, origin=50.0,
                    box=(10.0, 366.0, 246.0, 600.0), scale_cap=0.35),
+    # Hawaii alone also has a clip extent (see the docstring): it draws only inside `clip`,
+    # the canvas around its box one pixel clear of the Alaska, lower-48 and Samoa boxes.
     'hawaii': dict(fips={'15'}, parallels=(8.0, 18.0), meridian=-157.0, origin=13.0,
-                   box=(258.0, 512.0, 352.0, 602.0), scale_cap=1.0),
+                   box=(258.0, 512.0, 352.0, 602.0), scale_cap=1.0,
+                   clip=(247.0, 497.0, 371.0, 610.0)),
     'caribbean': dict(fips={'72', '78'}, parallels=(18.0, 18.5), meridian=-66.4, origin=17.8,
                       box=(838.0, 540.0, 963.0, 602.0), scale_cap=1.0),
     'samoa': dict(fips={'60'}, parallels=(-14.5, -14.1), meridian=-170.7, origin=-14.3,
@@ -293,7 +313,19 @@ class Albers:
 
     def __call__(self, longitude, latitude):
         rho = self._rho(math.radians(latitude))
-        theta = self.n * (math.radians(longitude) - self.meridian)
+        # The longitude difference is wrapped into [-180, 180] degrees, as d3's rotation
+        # wraps it (geoAlbersUsa's Alaska conic is rotate([154, 0])). Alaska's Near and
+        # Rat Islands lie east of 180 degrees: unwrapped they drew at the top left of the
+        # inset, and the fit that included them shrank the whole inset to scale 254.24
+        # instead of the 0.35 x lower-48 cap, 376.54 (lane L2, 2026-09-26). A longitude
+        # already within 180 degrees of the meridian - every other region - takes exactly
+        # the arithmetic it took before.
+        delta = math.radians(longitude) - self.meridian
+        if delta > math.pi:
+            delta -= 2 * math.pi
+        elif delta < -math.pi:
+            delta += 2 * math.pi
+        theta = self.n * delta
         return rho * math.sin(theta), self.rho0 - rho * math.cos(theta)
 
 
@@ -371,23 +403,84 @@ def projector(name):
     return _PROJECTORS[name]
 
 
+def in_clip(region, point):
+    """False when `region` has a clip extent and screen `point` lies outside it.
+
+    d3's clipExtent drops such a point; build_zip_centroids.project_point and
+    map-layers.js projectFrame do the same.
+    """
+    clip = REGIONS[region].get('clip')
+    return clip is None or (clip[0] <= point[0] <= clip[2] and clip[1] <= point[1] <= clip[3])
+
+
+def clip_ring(ring, box):
+    """The part of one screen-space ring inside `box` (x0, y0, x1, y1), as d3's clipExtent keeps it.
+
+    A ring wholly inside comes back as it is (the same list, untouched); a ring whose bounds
+    miss the box comes back empty; a ring crossing an edge is cut to the box (Sutherland-Hodgman,
+    exact against a rectangle) and comes back empty when fewer than three points are left.
+    """
+    x0, y0, x1, y1 = box
+    if all(x0 <= x <= x1 and y0 <= y <= y1 for x, y in ring):
+        return ring
+    xs = [x for x, _y in ring]
+    ys = [y for _x, y in ring]
+    if max(xs) < x0 or min(xs) > x1 or max(ys) < y0 or min(ys) > y1:
+        return []
+    points = list(ring)
+    for axis, limit, keep_above in ((0, x0, True), (0, x1, False), (1, y0, True), (1, y1, False)):
+        kept = []
+        for index, point in enumerate(points):
+            before = points[index - 1]
+            here_in = point[axis] >= limit if keep_above else point[axis] <= limit
+            before_in = before[axis] >= limit if keep_above else before[axis] <= limit
+            if here_in != before_in:
+                share = (limit - before[axis]) / (point[axis] - before[axis])
+                cut = [before[0] + share * (point[0] - before[0]),
+                       before[1] + share * (point[1] - before[1])]
+                cut[axis] = limit
+                kept.append((cut[0], cut[1]))
+            if here_in:
+                kept.append(point)
+        points = kept
+        if not points:
+            return []
+    return points if len(points) >= 3 else []
+
+
 def project_rings(rings, statefp, placements):
-    """Screen-space rings for one feature, simplified and rounded."""
+    """Screen-space rings for one feature, clipped to its region's extent, simplified, rounded."""
+    out, name, _clipped = project_rings_counted(rings, statefp, placements)
+    return out, name
+
+
+def project_rings_counted(rings, statefp, placements):
+    """(rings, region, rings its region's clip removed whole): project_rings, counted.
+
+    Only a region with a ``clip`` extent (Hawaii) removes anything; every ring of every
+    other region takes exactly the arithmetic it took before the clip existed.
+    """
     name = region_of(statefp)
     if name not in placements:
-        return [], name
+        return [], name, 0
     scale, tx, ty = placements[name]
     projection = projector(name)
-    out = []
+    clip = REGIONS[name].get('clip')
+    out, clipped = [], 0
     for ring in rings:
         screen = []
         for longitude, latitude in ring:
             x, y = projection(longitude, latitude)
             screen.append((tx + scale * x, ty - scale * y))
+        if clip is not None:
+            screen = clip_ring(screen, clip)
+            if not screen:
+                clipped += 1
+                continue
         simplified = simplify(screen)
         if len(simplified) >= 3:
             out.append(simplified)
-    return out, name
+    return out, name, clipped
 
 
 def simplify(ring):
@@ -621,14 +714,19 @@ def projection_payload(placements):
                          'scale': round(scale, 6),
                          'translate': [round(tx, 6), round(ty, 6)],
                          'statefp': sorted(region['fips']) if region['fips'] else None}
+        if region.get('clip'):
+            regions[name]['clip'] = list(region['clip'])
     return {'kind': 'albers conic equal area, one conic per region',
             'formula': ('n = (sin f1 + sin f2)/2; C = cos^2 f1 + 2 n sin f1; '
                         'p = sqrt(C - 2 n sin f)/n; p0 = sqrt(C - 2 n sin f0)/n; '
-                        't = n (l - l0); x = p sin t; y = p0 - p cos t; '
+                        't = n (l - l0), l - l0 wrapped into -180..180 degrees; '
+                        'x = p sin t; y = p0 - p cos t; '
                         'screen = [translate[0] + scale*x, translate[1] - scale*y]. '
                         'f1/f2 = parallels, f0 = origin, l0 = meridian, all in degrees, '
                         'radians inside. The lower48 region takes every STATEFP that no '
-                        'other region lists.'),
+                        'other region lists. A region with a clip [x0, y0, x1, y1] (screen '
+                        "pixels) draws only inside it, as d3's clipExtent: a point outside it "
+                        'is not drawn and a ring is cut to it.'),
             'regions': regions}
 
 

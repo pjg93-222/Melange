@@ -1,14 +1,14 @@
 {
  "version": 2,
  "tool": "mentat/tools/build_geo_layers.py",
- "tool_version": "2026-09-25.2",
- "built_at": "2026-09-26T02:16:04+00:00",
+ "tool_version": "2026-09-26.2",
+ "built_at": "2026-09-26T18:38:34+00:00",
  "frame": {
   "width": 975,
   "height": 610,
   "projection": {
    "kind": "albers conic equal area, one conic per region",
-   "formula": "n = (sin f1 + sin f2)/2; C = cos^2 f1 + 2 n sin f1; p = sqrt(C - 2 n sin f)/n; p0 = sqrt(C - 2 n sin f0)/n; t = n (l - l0); x = p sin t; y = p0 - p cos t; screen = [translate[0] + scale*x, translate[1] - scale*y]. f1/f2 = parallels, f0 = origin, l0 = meridian, all in degrees, radians inside. The lower48 region takes every STATEFP that no other region lists.",
+   "formula": "n = (sin f1 + sin f2)/2; C = cos^2 f1 + 2 n sin f1; p = sqrt(C - 2 n sin f)/n; p0 = sqrt(C - 2 n sin f0)/n; t = n (l - l0), l - l0 wrapped into -180..180 degrees; x = p sin t; y = p0 - p cos t; screen = [translate[0] + scale*x, translate[1] - scale*y]. f1/f2 = parallels, f0 = origin, l0 = meridian, all in degrees, radians inside. The lower48 region takes every STATEFP that no other region lists. A region with a clip [x0, y0, x1, y1] (screen pixels) draws only inside it, as d3's clipExtent: a point outside it is not drawn and a ring is cut to it.",
    "regions": {
     "alaska": {
      "parallels": [
@@ -17,10 +17,10 @@
      ],
      "meridian": -154.0,
      "origin": 50.0,
-     "scale": 254.242224,
+     "scale": 376.541954,
      "translate": [
-      186.65611,
-      568.828331
+      147.942585,
+      565.23175
      ],
      "statefp": [
       "02"
@@ -57,6 +57,12 @@
      ],
      "statefp": [
       "15"
+     ],
+     "clip": [
+      247.0,
+      497.0,
+      371.0,
+      610.0
      ]
     },
     "lower48": {
@@ -2935,14 +2941,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.09,
-    413.68,
-    246.04,
-    552.35
+    20.22,
+    424.96,
+    235.89,
+    540.83
    ],
    "path": "albers/detail/AK/county.json",
-   "bytes": 1361612,
-   "sha256": "6212cf84500bed7e8e35d26bdcbcc32e99da1bf7eee10f5032220bcbdcdb00e7"
+   "bytes": 1470259,
+   "sha256": "d3c971e8f034cdb6606e1d0ddecd35f410f13716586fde1766529cd4f6e5a645"
   },
   {
    "level": "place",
@@ -2968,14 +2974,14 @@
     71.33971
    ],
    "bbox_px": [
-    11.86,
-    414.93,
-    244.94,
-    551.78
+    21.77,
+    425.25,
+    234.27,
+    539.98
    ],
    "path": "albers/detail/AK/place.json",
-   "bytes": 627828,
-   "sha256": "3a99da1558eb74261186cf4042605807e03141d160e59191caa8ebc15a5070ce"
+   "bytes": 681330,
+   "sha256": "f270d3897e2640ac01d3b5ee11918c4781a240c11dacd9115cf8dcdb3b27d765"
   },
   {
    "level": "sldl",
@@ -3001,14 +3007,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.09,
-    413.68,
-    246.04,
-    552.35
+    20.22,
+    424.96,
+    235.89,
+    540.83
    ],
    "path": "albers/detail/AK/sldl.json",
-   "bytes": 1362208,
-   "sha256": "b42dcd1fbd7210c29ae14ef89514a87d2ab9e2e9e20d8e6dd8461fed082e1aa3"
+   "bytes": 1472372,
+   "sha256": "65bfec7801e197485d5f855cd28b5d53552d51efeff77b2abe05e313e26af63c"
   },
   {
    "level": "sldu",
@@ -3034,14 +3040,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.09,
-    413.68,
-    246.04,
-    552.35
+    20.22,
+    424.96,
+    235.89,
+    540.83
    ],
    "path": "albers/detail/AK/sldu.json",
-   "bytes": 1351341,
-   "sha256": "3d71792630b446da8b7f48d7ca7771d8b8005d3be0502d7f3f116fe586315130"
+   "bytes": 1458629,
+   "sha256": "a922cc02aa6e98006650168f8ac8872b0dc6801621ab76ec16a061eb03be2001"
   },
   {
    "level": "state",
@@ -3067,14 +3073,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.09,
-    413.68,
-    246.04,
-    552.35
+    20.22,
+    424.96,
+    235.89,
+    540.83
    ],
    "path": "albers/detail/AK/state.json",
-   "bytes": 1329023,
-   "sha256": "d162e3a03a95bc5e62c114a8bc312976076ad6e9196de165f8bd8aa7b0bd7033"
+   "bytes": 1430074,
+   "sha256": "309c5122b4148bc06380230107c7d36ed80b2782a984685bcf08185a9c4d3a1a"
   },
   {
    "level": "tract",
@@ -3100,14 +3106,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.09,
-    413.68,
-    246.04,
-    552.35
+    20.22,
+    424.96,
+    235.89,
+    540.83
    ],
    "path": "albers/detail/AK/tract.json",
-   "bytes": 1417698,
-   "sha256": "67eb1830394824d2215d2735c35d936083524ec77393dc8f27325a3fc5f375d5"
+   "bytes": 1548299,
+   "sha256": "a22e695ccb3b775f7631aa36dca2de15020de0121105f235a58fc50b9379a828"
   },
   {
    "level": "zcta",
@@ -3123,7 +3129,6 @@
    "simplified": "coverage",
    "tolerance": 0.05,
    "tolerance_unit": "px",
-   "collapsed": 1,
    "part": 1,
    "parts": 1,
    "features": 245,
@@ -3134,14 +3139,14 @@
     71.34122
    ],
    "bbox_px": [
-    125.31,
-    474.31,
-    244.96,
-    551.78
+    57.08,
+    425.25,
+    234.3,
+    539.98
    ],
    "path": "albers/detail/AK/zcta.json",
-   "bytes": 1369430,
-   "sha256": "e8db2e8fa7ee2e48013486ba11d88e2765999b7d25fddc050967a0820f4829a6"
+   "bytes": 1521781,
+   "sha256": "f37cd6f8d652ace73e15ec55b9212bca1fccb5de1952f81c06b1068027785930"
   },
   {
    "level": "county",
@@ -5502,7 +5507,7 @@
    "simplified": "coverage",
    "tolerance": 0.05,
    "tolerance_unit": "px",
-   "offcanvas_rings": 5,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
    "features": 5,
@@ -5513,14 +5518,14 @@
     28.40212
    ],
    "bbox_px": [
-    26.84,
-    447.58,
+    252.87,
+    526.59,
     352.14,
     587.54
    ],
    "path": "albers/detail/HI/county.json",
-   "bytes": 37876,
-   "sha256": "b7b631f16628a522eebc5c57fcf0859e5bc32ac1f9829ccc0210f111eec097ab"
+   "bytes": 36892,
+   "sha256": "3c0196b8871fe1aa97050cfe1e57b842a7ebde8aad71799973a5a437555dd55b"
   },
   {
    "level": "place",
@@ -5569,7 +5574,7 @@
    "simplified": "coverage",
    "tolerance": 0.05,
    "tolerance_unit": "px",
-   "offcanvas_rings": 5,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
    "features": 51,
@@ -5580,14 +5585,14 @@
     28.40212
    ],
    "bbox_px": [
-    26.84,
-    447.58,
+    252.87,
+    526.59,
     352.14,
     587.54
    ],
    "path": "albers/detail/HI/sldl.json",
-   "bytes": 70682,
-   "sha256": "d7ebf409334c480d2a234078e94b24e0be92ef27aeb1cccf850abf0b126aad89"
+   "bytes": 69697,
+   "sha256": "f1895d9808fa84ab89ce75c83011790d973c1b66ee0c85f66ff5b127d1e8a27d"
   },
   {
    "level": "sldu",
@@ -5603,7 +5608,7 @@
    "simplified": "coverage",
    "tolerance": 0.05,
    "tolerance_unit": "px",
-   "offcanvas_rings": 5,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
    "features": 25,
@@ -5614,14 +5619,14 @@
     28.40212
    ],
    "bbox_px": [
-    26.84,
-    447.58,
+    252.87,
+    526.59,
     352.14,
     587.54
    ],
    "path": "albers/detail/HI/sldu.json",
-   "bytes": 55130,
-   "sha256": "88882448e6766c39e07b92db268557cb8d75a9ed53c2d21f64520c951d5929bd"
+   "bytes": 54145,
+   "sha256": "90caa453f2184739ae751bc8eb4f3f3b341fa03b9e2c2d0aa8e2cb2e83a01a50"
   },
   {
    "level": "state",
@@ -5637,7 +5642,7 @@
    "simplified": "coverage",
    "tolerance": 0.05,
    "tolerance_unit": "px",
-   "offcanvas_rings": 5,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
    "features": 1,
@@ -5648,14 +5653,14 @@
     28.40212
    ],
    "bbox_px": [
-    26.84,
-    447.58,
+    252.87,
+    526.59,
     352.14,
     587.54
    ],
    "path": "albers/detail/HI/state.json",
-   "bytes": 36821,
-   "sha256": "066378413e4e8d3dc66dd2e24d4788b1ef32f248e32270b7f05827721a9a2e0b"
+   "bytes": 35837,
+   "sha256": "c74f7f132dc2f273a9c381b7a764d50715699037972ea3e797936a46866ae95e"
   },
   {
    "level": "tract",
@@ -5671,25 +5676,26 @@
    "simplified": "coverage",
    "tolerance": 0.05,
    "tolerance_unit": "px",
-   "offcanvas_rings": 5,
+   "clipped": 1,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
-   "features": 436,
+   "features": 435,
    "bbox_lonlat": [
-    -178.3347,
+    -160.54496,
     18.91036,
     -154.80677,
-    28.40212
+    22.2326
    ],
    "bbox_px": [
-    26.84,
-    447.58,
+    252.87,
+    526.59,
     352.14,
     587.54
    ],
    "path": "albers/detail/HI/tract.json",
-   "bytes": 139267,
-   "sha256": "1cd213b8a9eea392e1d09969e0c8f3ffbac8d5baea7f969adf21715b81b36f5a"
+   "bytes": 138246,
+   "sha256": "b1fa503879adf367523715a4f1061291be9409b8c7eb680a98436e9fb48aa437"
   },
   {
    "level": "zcta",
@@ -15192,14 +15198,14 @@
     71.53971
    ],
    "bbox_px": [
-    9.55,
-    413.58,
-    246.51,
-    552.73
+    19.8,
+    424.0,
+    236.59,
+    541.39
    ],
    "path": "albers/hex/AK/hex10.json",
-   "bytes": 1367196,
-   "sha256": "54f6b8de1e02ae10d1e7db2355122d5e4abe02eb0d99685c5517cfe6a2f9d2b9"
+   "bytes": 1365888,
+   "sha256": "bbb1159e698a392795afb9dde29d8ceb5434b262755c8eab25bbf56ed20ab3e1"
   },
   {
    "level": "hex10",
@@ -15578,25 +15584,25 @@
    "simplified": "none",
    "tolerance": 0,
    "tolerance_unit": "none",
-   "offcanvas": 4,
+   "clipped": 13,
    "part": 1,
    "parts": 1,
-   "features": 146,
+   "features": 137,
    "bbox_lonlat": [
-    -175.79115,
+    -160.60764,
     18.75848,
     -154.66113,
-    27.99235
+    22.35662
    ],
    "bbox_px": [
-    -1.43,
-    411.44,
+    251.79,
+    524.31,
     354.66,
     590.34
    ],
    "path": "albers/hex/HI/hex10.json",
-   "bytes": 25984,
-   "sha256": "094c4fcc9f33f1bacaa33202993d841e5681c20d9b4a2f3fa97b14e413b14d43"
+   "bytes": 24591,
+   "sha256": "ff3f239a01f4a07944749ecd7ee793470f7f05dd328e7eac7be089d216738c26"
   },
   {
    "level": "hex10",
@@ -17092,10 +17098,10 @@
    "tolerance": 0,
    "tolerance_unit": "none",
    "unplaced": 31,
-   "offcanvas": 2,
+   "clipped": 8,
    "part": 1,
    "parts": 1,
-   "features": 7410,
+   "features": 7404,
    "bbox_lonlat": [
     -179.60833,
     17.46855,
@@ -17103,14 +17109,14 @@
     71.60121
    ],
    "bbox_px": [
-    -4.07,
+    19.33,
     1.23,
     941.97,
     590.08
    ],
    "path": "albers/hex/hex25.json",
-   "bytes": 1370997,
-   "sha256": "9ba4b4cbf9a1355120b2921b5627ba02e4e59df96b54be9a05dd15dc6edb3b63"
+   "bytes": 1369558,
+   "sha256": "e08ecc746dc697eaff5a7ea098a574619b3ac1ce720b09cab3ce4a7ee5ad6a62"
   },
   {
    "level": "hex50",
@@ -17130,10 +17136,10 @@
    "tolerance": 0,
    "tolerance_unit": "none",
    "unplaced": 18,
-   "offcanvas": 1,
+   "clipped": 7,
    "part": 1,
    "parts": 1,
-   "features": 2011,
+   "features": 2005,
    "bbox_lonlat": [
     -180.31026,
     17.34989,
@@ -17141,14 +17147,14 @@
     72.40411
    ],
    "bbox_px": [
-    -6.21,
+    19.69,
     3.16,
     939.48,
     597.85
    ],
    "path": "albers/hex/hex50.json",
-   "bytes": 371426,
-   "sha256": "ad46244f63e0f375ab57ad5d06bf4311460513664bd158e28e7b4eee409f130e"
+   "bytes": 370239,
+   "sha256": "7072e8489412b0429c39eba31fe5b73698ae5e1f1e63c67012a52be285f3129b"
   },
   {
    "level": "place",
@@ -17164,7 +17170,7 @@
    "simplified": "coverage",
    "tolerance": 0.2,
    "tolerance_unit": "px",
-   "collapsed": 17,
+   "collapsed": 10,
    "part": 1,
    "parts": 1,
    "features": 355,
@@ -17175,14 +17181,14 @@
     71.33971
    ],
    "bbox_px": [
-    11.9,
-    414.9,
-    244.9,
-    551.6
+    21.8,
+    425.3,
+    234.3,
+    539.8
    ],
    "path": "albers/national/AK/place.json",
-   "bytes": 54133,
-   "sha256": "0bdec85e4acf8119b88516638abe05323c8d40c972a326419cabe5cec5b11c61"
+   "bytes": 60055,
+   "sha256": "8ae11424756372424a706b2c5b9f0a361f7b6e03c74bf0a282ff8b9665ee81fa"
   },
   {
    "level": "sldl",
@@ -17198,7 +17204,6 @@
    "simplified": "coverage",
    "tolerance": 0.2,
    "tolerance_unit": "px",
-   "collapsed": 1,
    "part": 1,
    "parts": 1,
    "features": 40,
@@ -17209,14 +17214,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.1,
-    413.7,
-    246.0,
-    552.2
+    20.2,
+    425.2,
+    235.9,
+    540.7
    ],
    "path": "albers/national/AK/sldl.json",
-   "bytes": 41425,
-   "sha256": "a0cc8fb85c4e9435294634eaea513b7faa5c11f4e825c28fb09c857977fc040b"
+   "bytes": 56635,
+   "sha256": "ae9016f96536ce80c49038c0d6a7638c5e0a9d1949ac6b97a565af07e8caa3db"
   },
   {
    "level": "sldu",
@@ -17242,14 +17247,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.1,
-    413.7,
-    246.0,
-    552.2
+    20.2,
+    425.2,
+    235.9,
+    540.7
    ],
    "path": "albers/national/AK/sldu.json",
-   "bytes": 36535,
-   "sha256": "07ce287b553745d2f1652b42cac5bb5896182953177c2b5bb09dc0d75cc3fc99"
+   "bytes": 50669,
+   "sha256": "1d7a987b0cbd4dbaf879974b616ba7d3b3ae0d9c0adf8292c27c8d4cee694052"
   },
   {
    "level": "tract",
@@ -17265,7 +17270,7 @@
    "simplified": "coverage",
    "tolerance": 0.2,
    "tolerance_unit": "px",
-   "collapsed": 27,
+   "collapsed": 5,
    "part": 1,
    "parts": 1,
    "features": 177,
@@ -17276,14 +17281,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.1,
-    413.7,
-    246.0,
-    552.2
+    20.2,
+    425.2,
+    235.9,
+    540.7
    ],
    "path": "albers/national/AK/tract.json",
-   "bytes": 61327,
-   "sha256": "4b9c064af1bcb4e4cb92ea0624cafea5304d22b361e076d88145ec1802fb46ec"
+   "bytes": 81379,
+   "sha256": "0992f800b9ecc789eddf4c2d55d4e46f8e36414df7219c3920f4bd8bf0e9bb3c"
   },
   {
    "level": "zcta",
@@ -17299,7 +17304,7 @@
    "simplified": "coverage",
    "tolerance": 0.2,
    "tolerance_unit": "px",
-   "collapsed": 17,
+   "collapsed": 8,
    "part": 1,
    "parts": 1,
    "features": 245,
@@ -17310,14 +17315,14 @@
     71.34122
    ],
    "bbox_px": [
-    125.3,
-    474.3,
-    244.9,
-    551.6
+    57.1,
+    425.3,
+    234.3,
+    539.8
    ],
    "path": "albers/national/AK/zcta.json",
-   "bytes": 49057,
-   "sha256": "b3d0a24b52c05a2c8e0db9a1f51f811e97fd775195a1277cf8f0d3eef56b416f"
+   "bytes": 64489,
+   "sha256": "50763a19bdf3cae4ac29e0ddf5ca626c1dcd722d28006e3c70a8622dd3025676"
   },
   {
    "level": "place",
@@ -19010,7 +19015,7 @@
    "simplified": "coverage",
    "tolerance": 0.2,
    "tolerance_unit": "px",
-   "offcanvas_rings": 5,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
    "features": 51,
@@ -19021,14 +19026,14 @@
     28.40212
    ],
    "bbox_px": [
-    26.8,
-    447.6,
+    258.1,
+    526.6,
     352.1,
     587.5
    ],
    "path": "albers/national/HI/sldl.json",
-   "bytes": 17355,
-   "sha256": "e09ac09299e4e9fa7d374ead27b274b7d7aed97c2fa2c7e31ef6eb80028f4301"
+   "bytes": 17163,
+   "sha256": "fda46467ed4ccd08e2a3d5085c534146a9737ba04ddf66efbb9e33c0b1938a99"
   },
   {
    "level": "sldu",
@@ -19044,7 +19049,7 @@
    "simplified": "coverage",
    "tolerance": 0.2,
    "tolerance_unit": "px",
-   "offcanvas_rings": 5,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
    "features": 25,
@@ -19055,14 +19060,14 @@
     28.40212
    ],
    "bbox_px": [
-    26.8,
-    447.6,
+    258.1,
+    526.6,
     352.1,
     587.5
    ],
    "path": "albers/national/HI/sldu.json",
-   "bytes": 10974,
-   "sha256": "e005bc3c59c8719837c2db64c92d0c8f4127e7609f3c8c06cb3b81aa4421b88b"
+   "bytes": 10782,
+   "sha256": "25b52a2996604b7362e9e9773560e16aacde6dbf9d8b992384fd6aade0fa27af"
   },
   {
    "level": "tract",
@@ -19079,25 +19084,26 @@
    "tolerance": 0.2,
    "tolerance_unit": "px",
    "collapsed": 22,
-   "offcanvas_rings": 5,
+   "clipped": 1,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
-   "features": 436,
+   "features": 435,
    "bbox_lonlat": [
-    -178.3347,
+    -160.54496,
     18.91036,
     -154.80677,
-    28.40212
+    22.2326
    ],
    "bbox_px": [
-    26.8,
-    447.6,
+    258.1,
+    526.6,
     352.1,
     587.5
    ],
    "path": "albers/national/HI/tract.json",
-   "bytes": 56646,
-   "sha256": "3deeb79691ceb105f812cf9e12db711b4ec50d291b7adb9eab32df6f6e6f1848"
+   "bytes": 56419,
+   "sha256": "0028e951328e9efd882698ac7fa9ff2a08532696ae044e4a1a405f4b21e8a17d"
   },
   {
    "level": "zcta",
@@ -25916,8 +25922,8 @@
     "sha256": "e920eb53bc69df928a57dd422659ddfc3871c5659a8b259ee40030f9e3f3936a"
    },
    "path": "albers/national/cd116.json",
-   "bytes": 349380,
-   "sha256": "af7abebd83c68544fe83b98966ff4c2d95eb7b563d05490964e05d8843c6d797"
+   "bytes": 353583,
+   "sha256": "8645a22e2808752a942ebf1c82125f532b26fdc67b52ce03607e9f600fde12ee"
   },
   {
    "form": "albers",
@@ -25936,8 +25942,8 @@
     "sha256": "ff4ae821d47300a0c5345a8eab5e1c5da7566d7cc7ea9cd25eaf32a4f7569c0e"
    },
    "path": "albers/national/cd118.json",
-   "bytes": 344601,
-   "sha256": "19fc1a325fcea339d4194651e70fffb6d8869584a0ba75ba5d85160a2b42f226"
+   "bytes": 348804,
+   "sha256": "f070432967fd05b5dc4c8815f380f72d45ed393e077c9b51f17ccb02a57405bc"
   },
   {
    "form": "albers",
@@ -25956,8 +25962,8 @@
     "sha256": "b4d141a4395ab411e45af416f5a851cca8fed21af639dabc8d2b642fde0defa5"
    },
    "path": "albers/national/cd119.json",
-   "bytes": 348583,
-   "sha256": "5ef65608ff4da3765b7f5df20ba9b17beea8bb32b404888fc8345b1866e4a5d1"
+   "bytes": 352798,
+   "sha256": "17b49780b7cb4f6896bd06bd87a23e4f3194d37192944d917804d4692be137c7"
   },
   {
    "level": "county",
@@ -25974,7 +25980,7 @@
    "tolerance": 0.2,
    "tolerance_unit": "px",
    "unplaced": 10,
-   "offcanvas_rings": 5,
+   "clipped_rings": 15,
    "part": 1,
    "parts": 1,
    "features": 3225,
@@ -25985,14 +25991,14 @@
     71.38782
    ],
    "bbox_px": [
-    10.1,
+    20.2,
     4.8,
     936.7,
     587.5
    ],
    "path": "albers/national/county.json",
-   "bytes": 1422241,
-   "sha256": "dc06d63fe4129a82ee47a0b3249f891bd7ead2d31e4f5d7dc750b4366b3613ee"
+   "bytes": 1437270,
+   "sha256": "8560d5f79f0d0a562f7b1464bf40f6c046df3ca9dc61460d23f224a8d86f991f"
   },
   {
    "form": "albers",
@@ -26011,8 +26017,8 @@
     "sha256": "7bc773d83c01b6df69b8aada9c2b5983d97f22f4551947cc5c00b87c663223ef"
    },
    "path": "albers/national/state.json",
-   "bytes": 130654,
-   "sha256": "f0195eb7c89c9528140b8e845482ee21daa508f1daa64cae429ed9a8589247a9"
+   "bytes": 135094,
+   "sha256": "91cc11d305079f0609706b3b24f4c280af4a15d951f0af8bc0d69eddc22b6dcb"
   },
   {
    "level": "hex_pins",
@@ -29243,121 +29249,121 @@
  "summary": {
   "albers/detail/county": {
    "files": 53,
-   "bytes": 7157035,
+   "bytes": 7264698,
    "features": 3225,
-   "largest": 1361612
+   "largest": 1470259
   },
   "albers/detail/place": {
    "files": 53,
-   "bytes": 24891709,
+   "bytes": 24945211,
    "features": 32343,
    "largest": 1863753
   },
   "albers/detail/sldl": {
    "files": 50,
-   "bytes": 9373251,
+   "bytes": 9482430,
    "features": 4873,
-   "largest": 1362208
+   "largest": 1472372
   },
   "albers/detail/sldu": {
    "files": 52,
-   "bytes": 7116491,
+   "bytes": 7222794,
    "features": 1958,
-   "largest": 1351341
+   "largest": 1458629
   },
   "albers/detail/state": {
    "files": 53,
-   "bytes": 3614919,
+   "bytes": 3714986,
    "features": 53,
-   "largest": 1329023
+   "largest": 1430074
   },
   "albers/detail/tract": {
    "files": 55,
-   "bytes": 29146718,
-   "features": 85087,
+   "bytes": 29276298,
+   "features": 85086,
    "largest": 1887804
   },
   "albers/detail/zcta": {
    "files": 55,
-   "bytes": 35735589,
+   "bytes": 35887940,
    "features": 33780,
    "largest": 1897003
   },
   "albers/hex/hex10": {
    "files": 53,
-   "bytes": 7620865,
-   "features": 43928,
-   "largest": 1367196
+   "bytes": 7618164,
+   "features": 43919,
+   "largest": 1365888
   },
   "albers/hex/hex25": {
    "files": 1,
-   "bytes": 1370997,
-   "features": 7410,
-   "largest": 1370997
+   "bytes": 1369558,
+   "features": 7404,
+   "largest": 1369558
   },
   "albers/hex/hex50": {
    "files": 1,
-   "bytes": 371426,
-   "features": 2011,
-   "largest": 371426
+   "bytes": 370239,
+   "features": 2005,
+   "largest": 370239
   },
   "albers/national/cd116": {
    "files": 1,
-   "bytes": 349380,
+   "bytes": 353583,
    "features": 437,
-   "largest": 349380
+   "largest": 353583
   },
   "albers/national/cd118": {
    "files": 1,
-   "bytes": 344601,
+   "bytes": 348804,
    "features": 437,
-   "largest": 344601
+   "largest": 348804
   },
   "albers/national/cd119": {
    "files": 1,
-   "bytes": 348583,
+   "bytes": 352798,
    "features": 437,
-   "largest": 348583
+   "largest": 352798
   },
   "albers/national/county": {
    "files": 1,
-   "bytes": 1422241,
+   "bytes": 1437270,
    "features": 3225,
-   "largest": 1422241
+   "largest": 1437270
   },
   "albers/national/place": {
    "files": 53,
-   "bytes": 5518270,
+   "bytes": 5524192,
    "features": 32343,
    "largest": 366458
   },
   "albers/national/sldl": {
    "files": 50,
-   "bytes": 2238683,
+   "bytes": 2253701,
    "features": 4873,
    "largest": 101669
   },
   "albers/national/sldu": {
    "files": 52,
-   "bytes": 1365812,
+   "bytes": 1379754,
    "features": 1958,
    "largest": 59911
   },
   "albers/national/state": {
    "files": 1,
-   "bytes": 130654,
+   "bytes": 135094,
    "features": 52,
-   "largest": 130654
+   "largest": 135094
   },
   "albers/national/tract": {
    "files": 53,
-   "bytes": 12192759,
-   "features": 85087,
+   "bytes": 12212584,
+   "features": 85086,
    "largest": 1156707
   },
   "albers/national/zcta": {
    "files": 53,
-   "bytes": 8993389,
+   "bytes": 9008821,
    "features": 33780,
    "largest": 657421
   },
@@ -29544,7 +29550,7 @@
  },
  "totals": {
   "files": 866,
-  "bytes": 204718045
+  "bytes": 205573592
  },
  "memory_runs": [
   {
@@ -30185,10 +30191,150 @@
     }
    ],
    "finished_at": "2026-09-26T02:16:04+00:00"
+  },
+  {
+   "process_peak_wset_mb": 273.9,
+   "max_step_mb": 263.8,
+   "steps": [
+    {
+     "step": "frame",
+     "peak_mb": 114.1,
+     "seconds": 0.03
+    },
+    {
+     "step": "outlines: 500k counties dissolved by state",
+     "peak_mb": 161.1,
+     "seconds": 0.3
+    },
+    {
+     "step": "national: state + cd (compat), county, z0",
+     "peak_mb": 251.4,
+     "seconds": 6.06
+    },
+    {
+     "step": "hex10",
+     "peak_mb": 263.8,
+     "seconds": 12.23
+    },
+    {
+     "step": "hex25",
+     "peak_mb": 226.7,
+     "seconds": 2.38
+    },
+    {
+     "step": "hex50",
+     "peak_mb": 229.2,
+     "seconds": 0.97
+    }
+   ],
+   "finished_at": "2026-09-26T17:45:57+00:00"
+  },
+  {
+   "process_peak_wset_mb": 303.0,
+   "max_step_mb": 299.8,
+   "steps": [
+    {
+     "step": "frame",
+     "peak_mb": 114.5,
+     "seconds": 0.04
+    },
+    {
+     "step": "outlines: 500k counties dissolved by state",
+     "peak_mb": 163.1,
+     "seconds": 0.33
+    },
+    {
+     "step": "hex10",
+     "peak_mb": 253.6,
+     "seconds": 5.48
+    },
+    {
+     "step": "zcta: homes + one-pass split into per-state parquet",
+     "peak_mb": 199.8,
+     "seconds": 0.25
+    },
+    {
+     "step": "state AK",
+     "peak_mb": 299.8,
+     "seconds": 6.47
+    }
+   ],
+   "finished_at": "2026-09-26T17:46:12+00:00"
+  },
+  {
+   "process_peak_wset_mb": 272.0,
+   "max_step_mb": 265.2,
+   "steps": [
+    {
+     "step": "frame",
+     "peak_mb": 114.6,
+     "seconds": 0.05
+    },
+    {
+     "step": "outlines: 500k counties dissolved by state",
+     "peak_mb": 161.6,
+     "seconds": 0.3
+    },
+    {
+     "step": "national: state + cd (compat), county, z0",
+     "peak_mb": 265.2,
+     "seconds": 4.39
+    },
+    {
+     "step": "hex10",
+     "peak_mb": 260.0,
+     "seconds": 11.99
+    },
+    {
+     "step": "hex25",
+     "peak_mb": 222.4,
+     "seconds": 2.38
+    },
+    {
+     "step": "hex50",
+     "peak_mb": 226.3,
+     "seconds": 0.98
+    }
+   ],
+   "finished_at": "2026-09-26T18:38:26+00:00"
+  },
+  {
+   "process_peak_wset_mb": 274.1,
+   "max_step_mb": 274.1,
+   "steps": [
+    {
+     "step": "frame",
+     "peak_mb": 114.9,
+     "seconds": 0.04
+    },
+    {
+     "step": "outlines: 500k counties dissolved by state",
+     "peak_mb": 161.4,
+     "seconds": 0.32
+    },
+    {
+     "step": "hex10",
+     "peak_mb": 262.7,
+     "seconds": 4.05
+    },
+    {
+     "step": "zcta: homes + one-pass split into per-state parquet",
+     "peak_mb": 202.5,
+     "seconds": 0.26
+    },
+    {
+     "step": "state HI",
+     "peak_mb": 274.1,
+     "seconds": 1.78
+    }
+   ],
+   "finished_at": "2026-09-26T18:38:34+00:00"
   }
  ],
  "notes": [
-  "The frame keeps two properties of today's shipped files on purpose: the Alaska conic does not wrap longitude (the Near Islands east of 180 degrees draw at x 10-13, y 414-434, and the Alaska inset fit includes them: scale 254.24 where the 0.35 cap alone gives 376.54), and rings wholly off the canvas (the Northwestern Hawaiian Islands) are dropped and counted. Both are pre-existing; fixing them moves every Alaskan or Hawaiian pixel of every shipped file.",
+  "Hawaii is clipped to its extent (build_district_geo REGIONS['hawaii']['clip'], the canvas around the Hawaii box one pixel clear of the Alaska, lower-48 and American Samoa boxes), as d3's geoAlbersUsa clips each inset to its clipExtent (2026-09-26): the Northwestern Hawaiian Islands, which the 500k files carry and the 20m fit never held, are removed and counted (clipped_rings; a feature left with nothing is listed under clipped), and no Hawaiian pixel moves. Rings wholly off the canvas are still dropped and counted (offcanvas_rings); after the clip there are none.",
+  "The Alaska conic wraps longitude into [-180, 180] degrees like d3's geoAlbersUsa (2026-09-26): the Near Islands east of 180 degrees draw at the west end of the Aleutian chain, and the inset takes the 0.35 x lower-48 cap (scale 376.54) instead of the 254.24 the unwrapped vertices forced on the fit.",
+  "A national layer that is not one valid coverage is simplified region by region (simplify_regions), never per feature for the whole nation: before the Hawaii clip, French Frigate Shoals, drawn by the Hawaii conic inside the Alaska box, overlapped the Kenai Peninsula at Alaska's corrected scale.",
   "American Samoa, Guam and the Northern Marianas have no placement in the frame (the 20m state file has no polygon for them): they are in every wgs84 file and in the lookup tables, and counted as unplaced in the albers ones.",
   "Congressional districts come from the 20m files only (no 500k district file is cached): albers/national, wgs84/z0 and wgs84/z5, never wgs84/z10, where 1:20,000,000 lines would sit a kilometre or more off the 500k tracts.",
   "A ZCTA belongs to the state holding its gazetteer internal point (else the nearest outline within 20 km); a ZCTA crossing a state line is drawn whole in that state's file only.",

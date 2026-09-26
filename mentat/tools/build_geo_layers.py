@@ -34,21 +34,26 @@ vectorised (numpy over whole coordinate arrays instead of one point at a time);
 mentat/tests/test_geo_v2_alignment.py pins it to build_district_geo.Albers and
 the output paths to the shipped ones.
 
-Two properties of today's frame are kept on purpose, because every shipped
-file (cd*.json, sld/*, zcta_points.json) already has them and a layer that
-"fixed" them would not sit on the layers under it:
+Hawaii is clipped, the way d3's geoAlbersUsa clips each inset to its
+clipExtent (lane L3, 2026-09-26): after projection every Hawaiian geometry is
+cut to build_district_geo.REGIONS['hawaii']['clip'] (Frame.clip), the canvas
+around the Hawaii box one pixel clear of the Alaska, lower-48 and American
+Samoa boxes, as build_district_geo.project_rings clips the rings of cd*.json
+and sld/*. The Northwestern Hawaiian Islands, which the 500k files carry and
+the 20m fit never held, drew west of the Hawaii box - the nearer ones inside
+the Alaska box, French Frigate Shoals on the Kenai Peninsula, the farther ones
+off the canvas - and are now removed and counted: clipped_rings in a file's
+header and index entry; a feature left with nothing is listed under clipped
+and not written. The main islands do not move. Rings that still project
+entirely off the canvas are dropped and counted (offcanvas_rings), as
+build_state_legislative_geo.drop_offcanvas does; after the clip there are none.
 
-  * The Alaska conic does not wrap longitude. The 20m state file carries 102
-    Alaskan vertices east of 180 degrees (the Near Islands, Attu); the
-    builder projects them with theta = n (lon - l0) unwrapped, which draws
-    them at x 10-13, y 414-434 instead of at the west end of the chain
-    (x 100-116, y 534-548), and the Alaska fit includes them, so the inset is
-    drawn at scale 254.24 where the 0.35 cap alone would give 376.54.
-    A pre-existing defect, reported; fixing it moves every Alaskan pixel of
-    every shipped file.
-  * Rings that project entirely off the canvas are dropped and counted (the
-    Northwestern Hawaiian Islands, which the 500k files carry and the 20m
-    fit never saw), exactly as build_state_legislative_geo.drop_offcanvas does.
+The Alaska conic wraps longitude into [-180, 180] degrees, as d3's geoAlbersUsa
+does (lane L2, 2026-09-26). Until then it did not: the 102 Alaskan vertices east
+of 180 degrees in the 20m state file (the Near Islands, Attu) drew at the top
+left of the inset, and the Alaska fit that included them drew the whole inset at
+scale 254.24 instead of the 0.35 x lower-48 cap (376.54, d3's factor). Every
+shipped file was rebuilt with the wrap; only Alaska moved.
 
 FORMS, TIERS AND LEVELS (index.json repeats every number)
 
@@ -171,7 +176,7 @@ DEFAULT_CACHE = MENTAT / '.cache' / 'geo'
 DEFAULT_TILES = MENTAT / '.cache' / 'basemap' / 'tiles'
 TODAY = MENTAT / 'app' / 'geo'
 TOOL = 'mentat/tools/build_geo_layers.py'
-VERSION = '2026-09-25.2'
+VERSION = '2026-09-26.2'
 
 WIDTH, HEIGHT = builder.WIDTH, builder.HEIGHT
 PART_BYTES = 1_900_000
@@ -404,7 +409,8 @@ class Frame:
 
     project() is build_district_geo.Albers.__call__ plus the placement, over a
     whole coordinate array at once, with the SAME constants (the builder's own
-    projector objects are read, not re-derived) and the same unwrapped theta.
+    projector objects are read, not re-derived) and the same theta, its longitude
+    difference wrapped into [-pi, pi] exactly as Albers.__call__ wraps it.
     """
 
     def __init__(self, cache, log=print):
@@ -444,7 +450,10 @@ class Frame:
         longitude = np.radians(lonlat[:, 0])
         latitude = np.radians(lonlat[:, 1])
         rho = np.sqrt(np.maximum(c - 2 * n * np.sin(latitude), 0.0)) / n
-        theta = n * (longitude - meridian)
+        delta = longitude - meridian
+        delta = np.where(delta > np.pi, delta - 2 * np.pi,
+                         np.where(delta < -np.pi, delta + 2 * np.pi, delta))
+        theta = n * delta
         x = rho * np.sin(theta)
         y = rho0 - rho * np.cos(theta)
         return np.column_stack((tx + scale * x, ty - scale * y))
@@ -461,6 +470,48 @@ class Frame:
                 continue
             out[mask] = shapely.transform(geoms[mask], lambda xy, r=region: self.project(xy, r))
         return out, regions
+
+    @staticmethod
+    def clip(geom, region):
+        """(geometry or None, rings removed): a projected geometry cut to its region's clip.
+
+        build_district_geo.REGIONS[region]['clip'], canvas pixels, as d3's clipExtent. Only
+        Hawaii has one; every other geometry comes back as the same object. A polygon wholly
+        inside the extent is kept as it is (same coordinates, same order); a polygon whose
+        bounds miss it is removed and its rings counted; a polygon crossing an edge is cut to
+        it (shapely.clip_by_rect). None when nothing is left.
+        """
+        box = builder.REGIONS.get(region, {}).get('clip')
+        if box is None or geom is None:
+            return geom, 0
+        x0, y0, x1, y1 = box
+        kept, removed, changed = [], 0, False
+        for part in shapely.get_parts(geom):
+            if shapely.get_type_id(part) != 3:
+                continue
+            outline = shapely.get_coordinates(shapely.get_exterior_ring(part))
+            if bool(np.all((outline[:, 0] >= x0) & (outline[:, 0] <= x1)
+                           & (outline[:, 1] >= y0) & (outline[:, 1] <= y1))):
+                kept.append(part)
+                continue
+            changed = True
+            left, low, right, high = shapely.bounds(part).tolist()
+            if right < x0 or left > x1 or high < y0 or low > y1:
+                removed += 1 + int(shapely.get_num_interior_rings(part))
+                continue
+            pieces = [piece for piece in shapely.get_parts(shapely.clip_by_rect(part, x0, y0, x1, y1))
+                      if shapely.get_type_id(piece) == 3 and not shapely.is_empty(piece)]
+            if pieces:
+                kept.extend(pieces)
+            else:
+                removed += 1 + int(shapely.get_num_interior_rings(part))
+        if not changed:
+            return geom, 0
+        if not kept:
+            return None, removed
+        if len(kept) == 1 and shapely.get_type_id(geom) == 3:
+            return kept[0], removed
+        return shapely.multipolygons(kept), removed
 
 
 # ----------------------------------------------------------------- reading
@@ -507,6 +558,32 @@ def simplify(geoms, tolerance, simplify_boundary):
     except Exception:                                   # noqa: BLE001 - fall back and say so
         pass
     return shapely.simplify(geoms, tolerance, preserve_topology=True), 'per-feature'
+
+
+def simplify_regions(geoms, regions, tolerance, simplify_boundary):
+    """simplify() over the whole collection; if it is not one valid coverage, per region.
+
+    The regions are separate conics fitted into separate insets, so no edge is shared
+    between two of them and each is a coverage of its own. One collection spanning
+    regions can still fail as a single coverage where one inset's geometry is drawn over
+    another's, as the Northwestern Hawaiian Islands, which the Hawaii fit never held, did
+    inside the Alaska box at Alaska's corrected scale (2026-09-26: French Frigate Shoals on
+    the Kenai Peninsula) until the Hawaii clip removed them (lane L3). Such an overlap must
+    not send the whole nation to per-feature simplification.
+    """
+    result, method = simplify(geoms, tolerance, simplify_boundary)
+    names = sorted(set(np.asarray(regions).tolist()))
+    if method != 'per-feature' or len(names) < 2:
+        return result, method
+    regions = np.asarray(regions, dtype=object)
+    result = np.empty(len(geoms), dtype=object)
+    methods = {}
+    for name in names:
+        mask = regions == name
+        result[mask], methods[name] = simplify(geoms[mask], tolerance, simplify_boundary)
+    fallback = sorted(name for name, how in methods.items() if how != 'coverage')
+    return result, 'coverage by region' + (' (per-feature: ' + ', '.join(fallback) + ')'
+                                           if fallback else '')
 
 
 def hilbert_order(points_lonlat):
@@ -596,12 +673,22 @@ def albers_features(frame, level, keys, names, geoms_lonlat, statefps, anchors_l
     projected, regions = frame.project_geoms(geoms_lonlat, statefps)
     placed = np.array([geom is not None for geom in projected], dtype=bool)
     notes = {'unplaced': sorted(str(k) for k, ok in zip(keys, placed) if not ok),
-             'collapsed': [], 'offcanvas_rings': 0, 'method': 'none'}
+             'collapsed': [], 'offcanvas_rings': 0, 'method': 'none',
+             'clipped': [], 'clipped_rings': 0}
+    # Hawaii's clip extent (Frame.clip): a feature left with nothing is listed, not written.
+    for index in np.flatnonzero(placed).tolist():
+        clipped, removed = frame.clip(projected[index], regions[index])
+        notes['clipped_rings'] += removed
+        if clipped is None:
+            placed[index] = False
+            notes['clipped'].append(str(keys[index]))
+        projected[index] = clipped
+    notes['clipped'].sort()
     if not placed.any():
         return [], notes
     simplified = np.empty(len(projected), dtype=object)
-    result, notes['method'] = simplify(projected[placed], settings['tolerance'],
-                                       settings['simplify_boundary'])
+    result, notes['method'] = simplify_regions(projected[placed], regions[placed],
+                                               settings['tolerance'], settings['simplify_boundary'])
     simplified[placed] = result
     features = []
     for index in order:
@@ -611,6 +698,8 @@ def albers_features(frame, level, keys, names, geoms_lonlat, statefps, anchors_l
         path, dropped, bounds_px = svg_path(simplified[index], decimals)
         notes['offcanvas_rings'] += dropped
         anchor = frame.project(anchors_lonlat[index], regions[index])[0]
+        if not builder.in_clip(regions[index], anchor):         # it stood on a clipped-away island
+            anchor = shapely.get_coordinates(shapely.point_on_surface(projected[index]))[0]
         record = {} if level in LEAN_LEVELS else {'name': names[index]}
         record['path'] = path
         record['anchor'] = [round(float(anchor[0]), decimals), round(float(anchor[1]), decimals)]
@@ -676,6 +765,8 @@ def write_level(output, frame, level, state, statefp, rows, source_info, tiers, 
                               unplaced=notes['unplaced'][:500], source=source_info['file'],
                               grammar='M x y L x y ... Z per ring; first point not repeated; '
                                       'close each ring before a point-in-polygon test')
+                if notes['clipped_rings'] or notes['clipped']:
+                    header.update(clipped_rings=notes['clipped_rings'], clipped=notes['clipped'][:500])
                 folder = f'albers/{tier}' + ('' if national else f'/{state}')
                 suffix = '.json'
             else:
@@ -690,11 +781,12 @@ def write_level(output, frame, level, state, statefp, rows, source_info, tiers, 
             entry = dict(base, source={'file': source_info['file'], 'sha256': source_info['sha256']},
                          simplified=notes['method'], tolerance=settings['tolerance'],
                          tolerance_unit=settings['unit'])
-            for field in ('collapsed', 'unplaced'):
+            for field in ('collapsed', 'unplaced', 'clipped'):
                 if notes.get(field):
                     entry[field] = len(notes[field])
-            if notes.get('offcanvas_rings'):
-                entry['offcanvas_rings'] = notes['offcanvas_rings']
+            for field in ('offcanvas_rings', 'clipped_rings'):
+                if notes.get(field):
+                    entry[field] = notes[field]
             if not features:
                 output.clear_group(folder, level, suffix)
                 continue
@@ -706,11 +798,16 @@ def write_level(output, frame, level, state, statefp, rows, source_info, tiers, 
 # ------------------------------------------------------------ the national
 
 def compat_rings(frame, geom, region):
-    """build_district_geo.project_rings on a GeoPandas geometry: project, simplify, round."""
+    """build_district_geo.project_rings on a GeoPandas geometry: project, clip, simplify, round."""
+    box = builder.REGIONS[region].get('clip')
     rings = []
     for exterior, holes in polygon_parts(geom):
         for coords in [exterior] + holes:
             screen = [tuple(point) for point in frame.project(coords, region).tolist()]
+            if box is not None:
+                screen = builder.clip_ring(screen, box)
+                if not screen:
+                    continue
             kept = builder.simplify(screen)
             if len(kept) >= 3:
                 rings.append(kept)
@@ -910,7 +1007,7 @@ def write_hex(output, frame, size_miles, grid, form, statefps=None, log=print):
             continue
         state = frame.codes.get(statefp) if statefp else None
         order = indices[hilbert_order(shapely.points(centres[indices]))]
-        features, unplaced, offcanvas = [], [], []
+        features, unplaced, offcanvas, clipped = [], [], [], []
         for index in order.tolist():
             key = str(ids[index])
             home = frame.codes.get(homes[index])
@@ -922,11 +1019,17 @@ def write_hex(output, frame, size_miles, grid, form, statefps=None, log=print):
                     unplaced.append(key)
                     continue
                 ring = frame.project(shapely.get_coordinates(polygons[index]), region)
-                path, _dropped, px_bounds = svg_path(shapely.polygons(ring), decimals)
-                if path is None:                  # wholly off the canvas: the NW Hawaiian Islands
+                shape, _removed = frame.clip(shapely.polygons(ring), region)
+                if shape is None:                 # wholly outside Hawaii's clip: the NW Hawaiian Islands
+                    clipped.append(key)
+                    continue
+                path, _dropped, px_bounds = svg_path(shape, decimals)
+                if path is None:                  # wholly off the canvas
                     offcanvas.append(key)
                     continue
                 anchor = frame.project(centres[index], region)[0]
+                if not builder.in_clip(region, anchor):
+                    anchor = shapely.get_coordinates(shapely.point_on_surface(shape))[0]
                 record = {'path': path, 'anchor': [round(float(anchor[0]), decimals),
                                                    round(float(anchor[1]), decimals)],
                           'center_lonlat': centre}
@@ -946,6 +1049,8 @@ def write_hex(output, frame, size_miles, grid, form, statefps=None, log=print):
             header = dict(base, width=WIDTH, height=HEIGHT, unplaced=unplaced[:500],
                           offcanvas=offcanvas[:500],
                           id='h<size>:<q>:<r>, pointy-top axial coordinates in EPSG:5070')
+            if clipped:
+                header['clipped'] = clipped[:500]
             suffix = '.json'
         else:
             header = dict({'type': 'FeatureCollection'}, **base, promote_id='id',
@@ -958,6 +1063,8 @@ def write_hex(output, frame, size_miles, grid, form, statefps=None, log=print):
             entry['unplaced'] = len(unplaced)
         if offcanvas:
             entry['offcanvas'] = len(offcanvas)
+        if clipped:
+            entry['clipped'] = len(clipped)
         if features:
             output.chunked(folder, level, suffix, compact(header)[:-1], features, entry, form)
 
@@ -1326,12 +1433,21 @@ def write_index(output, frame, sources, memory, log=print):
         'totals': {'files': len(files), 'bytes': sum(entry['bytes'] for entry in files)},
         'memory_runs': memory_log,
         'notes': [
-            'The frame keeps two properties of today\'s shipped files on purpose: the Alaska conic '
-            'does not wrap longitude (the Near Islands east of 180 degrees draw at x 10-13, y '
-            '414-434, and the Alaska inset fit includes them: scale 254.24 where the 0.35 cap '
-            'alone gives 376.54), and rings wholly off the canvas (the Northwestern Hawaiian '
-            'Islands) are dropped and counted. Both are pre-existing; fixing them moves every '
-            'Alaskan or Hawaiian pixel of every shipped file.',
+            'Hawaii is clipped to its extent (build_district_geo REGIONS[\'hawaii\'][\'clip\'], '
+            'the canvas around the Hawaii box one pixel clear of the Alaska, lower-48 and American '
+            'Samoa boxes), as d3\'s geoAlbersUsa clips each inset to its clipExtent (2026-09-26): '
+            'the Northwestern Hawaiian Islands, which the 500k files carry and the 20m fit never '
+            'held, are removed and counted (clipped_rings; a feature left with nothing is listed '
+            'under clipped), and no Hawaiian pixel moves. Rings wholly off the canvas are still '
+            'dropped and counted (offcanvas_rings); after the clip there are none.',
+            'The Alaska conic wraps longitude into [-180, 180] degrees like d3\'s geoAlbersUsa '
+            '(2026-09-26): the Near Islands east of 180 degrees draw at the west end of the '
+            'Aleutian chain, and the inset takes the 0.35 x lower-48 cap (scale 376.54) instead '
+            'of the 254.24 the unwrapped vertices forced on the fit.',
+            'A national layer that is not one valid coverage is simplified region by region '
+            '(simplify_regions), never per feature for the whole nation: before the Hawaii clip, '
+            'French Frigate Shoals, drawn by the Hawaii conic inside the Alaska box, overlapped '
+            'the Kenai Peninsula at Alaska\'s corrected scale.',
             'American Samoa, Guam and the Northern Marianas have no placement in the frame (the '
             '20m state file has no polygon for them): they are in every wgs84 file and in the '
             'lookup tables, and counted as unplaced in the albers ones.',

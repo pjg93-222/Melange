@@ -115,9 +115,24 @@ function stopServer(child) {
     child.kill();
   }), 10000, 'stopServer()').catch(error => { console.error(error.message); });
 }
-function cleanupPath(target) {
-  try { fs.rmSync(target, {recursive: true, force: true, maxRetries: 10, retryDelay: 200}); }
-  catch (error) { console.error(`cleanup failed for ${target}: ${error.message}`); }
+// The report folder is the server's working directory: server.py chdir()s into its report
+// directory. With MENTAT_PYTHON set to a venv's python.exe, the child stopServer() kills is
+// the venv launcher (bpo-35797) and the console is the launcher's child, still exiting - and
+// still in that folder - when the launcher's exit is reported. Node 24's rmSync then throws
+// EPERM "Permission denied" at once, whatever maxRetries and retryDelay say (measured: 1 ms),
+// which left an empty %TEMP%\mentat-strip-reports-* after every such run. So wait here for
+// the folder to be free, up to 10 s, pass or fail.
+async function cleanupPath(target) {
+  for (let attempt = 1; ; attempt += 1) {
+    try { fs.rmSync(target, {recursive: true, force: true}); return; }
+    catch (error) {
+      if (attempt >= 40 || !['EPERM', 'EBUSY', 'ENOTEMPTY', 'EACCES'].includes(error.code)) {
+        console.error(`cleanup failed for ${target} after ${attempt} attempt(s): ${error.message}`);
+        return;
+      }
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+  }
 }
 
 /* ------------------------------------------------------------- the fixtures */
@@ -386,8 +401,8 @@ const VISIBLE_SOURCE = `node => {
   } finally {
     if (browser) await withTimeout(browser.close(), 15000, 'browser.close()').catch(() => {});
     await stopServer(server);
-    cleanupPath(dataRoot);
-    cleanupPath(reportRoot);
+    await cleanupPath(dataRoot);
+    await cleanupPath(reportRoot);
   }
   console.log(failed ? `RESULT: FAILED after ${passes} passing steps`
     : `RESULT: ${passes} of ${stepNumber} steps passed`);

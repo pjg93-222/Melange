@@ -271,6 +271,24 @@ class ProjectionPin(unittest.TestCase):
             worst = max(worst, abs(got[0] - want[0]), abs(got[1] - want[1]))
         self.assertGreater(worst, 1e-3)
 
+    def test_alaskas_vertices_east_of_180_wrap_as_the_builder_wraps_them(self):
+        # Lane L2, 2026-09-26: both projections wrap l - l0 into [-180, 180] degrees, as
+        # d3's rotation does, so the Near Islands (Attu, 172.9 E) sit at the west end of
+        # the Aleutian chain and the Alaska fit takes the 0.35 x lower-48 cap.
+        features = self.builder.read_shapefile(
+            self.layers.DEFAULT_CACHE / 'cb_2024_us_state_20m.zip')
+        rings = next(rings for row, rings in features if row['STATEFP'] == '02')
+        east = np.array([point for ring in rings for point in ring if point[0] > 0], dtype=float)
+        self.assertGreaterEqual(len(east), 100)
+        got = self.frame.project(east, 'alaska')
+        want = np.array([self.reference('alaska', lon, lat) for lon, lat in east])
+        self.assertLess(float(np.abs(got - want).max()), 1e-6)
+        self.assertAlmostEqual(self.frame.placements['alaska'][0]
+                               / self.frame.placements['lower48'][0], 0.35, places=9)
+        adak = self.reference('alaska', -176.6, 51.9)
+        self.assertTrue(bool(np.all(got[:, 0] < adak[0])),
+                        'every Alaskan vertex east of 180 degrees draws west of Adak')
+
 
 if __name__ == '__main__':
     unittest.main()

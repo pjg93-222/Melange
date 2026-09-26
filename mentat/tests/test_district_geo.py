@@ -264,13 +264,19 @@ class FixtureTests(unittest.TestCase):
 
 
 def albers(longitude, latitude, region):
-    """The projection the vintage file documents, implemented from its numbers."""
+    """The projection the vintage file documents, implemented from its numbers.
+
+    Its formula wraps l - l0 into -180..180 degrees (lane L2, 2026-09-26), as d3's
+    rotation does; Alaska's islands east of 180 degrees need it.
+    """
     first, second = (math.radians(value) for value in region['parallels'])
     n = (math.sin(first) + math.sin(second)) / 2
     c = math.cos(first) ** 2 + 2 * n * math.sin(first)
     rho = math.sqrt(max(c - 2 * n * math.sin(math.radians(latitude)), 0.0)) / n
     rho0 = math.sqrt(max(c - 2 * n * math.sin(math.radians(region['origin'])), 0.0)) / n
-    theta = n * (math.radians(longitude) - math.radians(region['meridian']))
+    delta = math.radians(longitude) - math.radians(region['meridian'])
+    delta = delta - 2 * math.pi if delta > math.pi else delta + 2 * math.pi if delta < -math.pi else delta
+    theta = n * delta
     x, y = rho * math.sin(theta), rho0 - rho * math.cos(theta)
     return (region['translate'][0] + region['scale'] * x,
             region['translate'][1] - region['scale'] * y)
@@ -321,6 +327,44 @@ class BuiltGeographyTests(unittest.TestCase):
                         f'DC projects to ({x:.1f}, {y:.1f}), outside {[x0, y0, x1, y1]}')
         self.assertTrue(0 <= x <= self.vintage['width']
                         and 0 <= y <= self.vintage['height'])
+
+    def test_the_alaska_inset_is_d3s_035_and_attu_closes_the_aleutian_chain(self):
+        # Lane L2, 2026-09-26. d3's geoAlbersUsa draws Alaska at 0.35 x the lower-48
+        # scale, on a conic rotated 154 degrees whose rotation wraps longitude, so Attu
+        # (172.9 E) is the west end of the Aleutian chain. The builder did not wrap:
+        # the Near Islands drew at the top left of the inset and the fit that held
+        # them shrank Alaska to 0.236 x (scale 254.24).
+        regions = self.vintage['projection']['regions']
+        self.assertAlmostEqual(regions['alaska']['scale'] / regions['lower48']['scale'],
+                               0.35, places=6)
+        x0, y0, x1, y1 = self.vintage['states']['AK']['bbox']
+        attu = albers(172.9, 52.9, regions['alaska'])
+        adak = albers(-176.6, 51.9, regions['alaska'])
+        anchorage = albers(-149.9, 61.2, regions['alaska'])
+        for name, (x, y) in (('Attu', attu), ('Adak', adak), ('Anchorage', anchorage)):
+            self.assertTrue(x0 <= x <= x1 and y0 <= y <= y1,
+                            f'{name} projects to ({x:.1f}, {y:.1f}), outside {[x0, y0, x1, y1]}')
+        self.assertLess(attu[0], adak[0], 'Attu lies west of Adak')
+        self.assertGreater(attu[1], anchorage[1], 'and south of Anchorage, on the chain')
+        self.assertLess(abs(attu[1] - adak[1]), 30.0)
+        # The westernmost drawn Alaska vertices are that end of the chain, low in the
+        # inset - not the top-left corner where the unwrapped islands used to draw.
+        values = [float(v) for v in self.vintage['states']['AK']['path']
+                  .replace('M', ' ').replace('L', ' ').replace('Z', ' ').split()]
+        points = list(zip(values[0::2], values[1::2]))
+        west = min(points)
+        self.assertGreater(west[1], (y0 + y1) / 2, f'westernmost Alaska vertex {west}')
+        # Teeth: the same point without the wrap leaves the chain entirely.
+        region = regions['alaska']
+        first, second = (math.radians(value) for value in region['parallels'])
+        n = (math.sin(first) + math.sin(second)) / 2
+        c = math.cos(first) ** 2 + 2 * n * math.sin(first)
+        rho = math.sqrt(c - 2 * n * math.sin(math.radians(52.9))) / n
+        rho0 = math.sqrt(c - 2 * n * math.sin(math.radians(region['origin']))) / n
+        theta = n * (math.radians(172.9) - math.radians(region['meridian']))     # unwrapped
+        raw = (region['translate'][0] + region['scale'] * rho * math.sin(theta),
+               region['translate'][1] - region['scale'] * (rho0 - rho * math.cos(theta)))
+        self.assertGreater(math.dist(raw, adak), 100.0, raw)
 
     def test_every_centroid_sits_inside_its_own_bbox(self):
         for key, district in self.vintage['districts'].items():

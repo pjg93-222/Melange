@@ -882,7 +882,7 @@
       // console still preparing its data (r6: over a minute on 8806 while it
       // rebuilt its query store after a restart), under a blank canvas.
       if(!view.result&&node('note').textContent==='Choose a verified report in the Data panel to begin.')node('note').textContent='Reading verified source observations\u2026';
-      if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
+      if(!previous||JSON.stringify(previous)!==key){node('canvas').setAttribute('aria-busy','true');node('canvas').__busyTicket=ticket;node('verified-summary').textContent='Reading verified totals…';if(view.primary){status('Reading verified source observations…');el('inspection').hidden=true;++recordRevision;lastResult=null;}}
       const result=await queryCached(query,view,{retry:again?.retry===true,onProgress});if(view.stale(ticket)||!verified())return;clearPending(node('canvas'));
       view.result=result;view.request=query;
       if(view.primary){failure('');lastResult=result;lastConfig=compiled;data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));}
@@ -956,7 +956,7 @@
       // the canvas, once, with a Retry that asks again with retry:true.
       if(retry)drawStopped(node('canvas'),error.message,()=>renderContributionView(view,{retry:true}));
       if(view.primary){failure(guidance||retry?'':error.message);lastResult=null;}}}
-    finally{if(!view.stale(ticket)){clearPending(node('canvas'),'pending');if(statusWrote!==null&&node('status').textContent===statusWrote)node('status').textContent=statusBefore;if(!view.result&&node('note').textContent==='Reading verified source observations\u2026')node('note').textContent='Choose a verified report in the Data panel to begin.';node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}}
+    finally{if(!view.stale(ticket)){clearPending(node('canvas'),'pending');if(statusWrote!==null&&node('status').textContent===statusWrote)node('status').textContent=statusBefore;if(!view.result&&node('note').textContent==='Reading verified source observations\u2026')node('note').textContent='Choose a verified report in the Data panel to begin.';node('canvas').setAttribute('aria-busy','false');node('note').title=node('note').textContent;}else if(node('canvas').__busyTicket===ticket)/* A render that went stale still owns the busy mark it set (opacity .45, no pointer events): a Data source switch aborts it, and a map layer or report worksheet drawn next never bumps this ticket, so nothing else would clear it (lane L2, 2026-09-26). A newer render that set its own mark owns it instead. */node('canvas').setAttribute('aria-busy','false');}
   }
   async function renderContributionMap(ticket,compiled,bbox=null,view=null,notes=[]) {
     view=view||mainSurface();const node=view.el;
@@ -4486,7 +4486,7 @@
       queries = [query];
     }
     if (!view.request || JSON.stringify(view.request) !== JSON.stringify(queries[0])) {
-      node('canvas').setAttribute('aria-busy', 'true'); node('verified-summary').textContent = 'Reading verified totals…';
+      node('canvas').setAttribute('aria-busy', 'true'); node('canvas').__busyTicket = ticket; node('verified-summary').textContent = 'Reading verified totals…';
       status('Reading verified source observations…'); el('inspection').hidden = true; ++recordRevision; lastResult = null;
     }
     const results = await Promise.all(queries.map((query, i) => queryCached(query, {flight: compareFlights[i]}, again)));

@@ -343,11 +343,12 @@
 
   // The 975x610 frame lane G's v2 Albers paths are drawn in (build_district_geo
   // REGIONS; geo/v2/index.json frame.projection): spherical Albers, one conic
-  // per region. Pinned to geo/zcta_points.json by the node test.
+  // per region; Hawaii's also carries its clip extent (lane L3). Pinned to
+  // geo/zcta_points.json and geo/cd119.json by the node tests.
   const FRAME = {width: 975, height: 610, regions: {
-    alaska: {parallels: [55.0, 65.0], meridian: -154.0, origin: 50.0, scale: 254.242224, translate: [186.65611, 568.828331], statefp: ['02']},
+    alaska: {parallels: [55.0, 65.0], meridian: -154.0, origin: 50.0, scale: 376.541954, translate: [147.942585, 565.23175], statefp: ['02']},
     caribbean: {parallels: [18.0, 18.5], meridian: -66.4, origin: 17.8, scale: 1075.834155, translate: [903.882975, 578.763317], statefp: ['72', '78']},
-    hawaii: {parallels: [8.0, 18.0], meridian: -157.0, origin: 13.0, scale: 1054.448054, translate: [313.986915, 696.598075], statefp: ['15']},
+    hawaii: {parallels: [8.0, 18.0], meridian: -157.0, origin: 13.0, scale: 1054.448054, translate: [313.986915, 696.598075], statefp: ['15'], clip: [247.0, 497.0, 371.0, 610.0]},
     lower48: {parallels: [29.5, 45.5], meridian: -96.0, origin: 37.5, scale: 1075.834155, translate: [495.794672, 269.296591], statefp: null}}};
   const RAD = Math.PI / 180;
   function regionOf(statefp) {
@@ -363,9 +364,20 @@
     const n = (Math.sin(f1) + Math.sin(f2)) / 2, C = Math.cos(f1) * Math.cos(f1) + 2 * n * Math.sin(f1);
     const p = Math.sqrt(Math.max(0, C - 2 * n * Math.sin(lat * RAD))) / n;
     const p0 = Math.sqrt(Math.max(0, C - 2 * n * Math.sin(f0))) / n;
-    const t = n * (lon * RAD - l0);
+    // The longitude difference is wrapped into [-180, 180] degrees, as build_district_geo's
+    // Albers and d3's rotation wrap it: Alaska's islands east of 180 degrees sit at the
+    // west end of the Aleutian chain, not on the far side of the cone.
+    let delta = lon * RAD - l0;
+    if (delta > Math.PI) delta -= 2 * Math.PI;
+    else if (delta < -Math.PI) delta += 2 * Math.PI;
+    const t = n * delta;
     const x = p * Math.sin(t), y = p0 - p * Math.cos(t);
-    return [region.translate[0] + region.scale * x, region.translate[1] - region.scale * y];
+    const at = [region.translate[0] + region.scale * x, region.translate[1] - region.scale * y];
+    // A region with a clip extent places nothing outside it, as d3's clipExtent: Hawaii's
+    // Northwestern Islands, which its conic draws inside the Alaska box, come back null.
+    const clip = region.clip;
+    if (clip && !(at[0] >= clip[0] && at[0] <= clip[2] && at[1] >= clip[1] && at[1] <= clip[3])) return null;
+    return at;
   }
 
   // EPSG:5070 (NAD83 / Conus Albers, GRS80 ellipsoid) and the pointy-top

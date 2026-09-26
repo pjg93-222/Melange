@@ -181,7 +181,7 @@ class BuiltIndexTests(unittest.TestCase):
 
     def test_the_sub_pixel_districts_are_named_and_stay_a_small_minority(self):
         # The honest limit of a 975x610 map of the whole country: a city seat
-        # is under a pixel across. 31 of 1,958 upper and 267 of 4,873 lower
+        # is under a pixel across. 29 of 1,958 upper and 264 of 4,873 lower
         # districts are - Manhattan, Providence, Hartford, Anchorage, the DC
         # wards. They ship and they are clickable, and only a zoom makes them
         # readable, so the index names every one rather than letting the page
@@ -200,14 +200,20 @@ class BuiltIndexTests(unittest.TestCase):
                 # always one of these; anywhere else it would be a real fault.
                 self.assertIn(geoid, everything, f'{chamber} {geoid}')
 
-    def test_only_the_northwestern_hawaiian_islands_fall_off_the_canvas(self):
+    def test_only_the_northwestern_hawaiian_islands_are_clipped_and_nothing_falls_off(self):
         # The one place where geometry is dropped rather than drawn, and the
         # index has to name it: HI Senate 25 and HI House 51 reach out to Kure
         # Atoll, 1,300 miles west of the Hawaii inset the canvas was fitted to.
-        self.assertEqual(sorted(self.index['chambers']['upper']['offcanvas_rings']),
-                         ['15025'])
-        self.assertEqual(sorted(self.index['chambers']['lower']['offcanvas_rings']),
-                         ['15051'])
+        # Lane L3, 2026-09-26: the Hawaii inset is clipped to its extent, as d3
+        # clips it, so all fifteen NWHI rings of each are removed and counted
+        # under clipped_rings (their two Oahu rings stay), and no ring is left
+        # to fall off the canvas. Before: offcanvas_rings named 15025 and 15051
+        # (2 rings each), and five more NWHI rings of each drew west of the
+        # inset, inside the Alaska box.
+        for chamber, geoid in (('upper', '15025'), ('lower', '15051')):
+            entry = self.index['chambers'][chamber]
+            self.assertEqual(entry['offcanvas_rings'], {}, chamber)
+            self.assertEqual(entry['clipped_rings'], {geoid: 15}, chamber)
 
     def test_the_largest_file_stays_inside_the_per_state_budget(self):
         for chamber, entry in self.index['chambers'].items():

@@ -70,6 +70,51 @@ test('[map layers] the frame projection places every ZCTA where geo/zcta_points.
   assert.ok(worst <= 0.1, 'within the shipped file’s 0.1 px rounding, worst ' + worst);
 });
 
+test('[map layers] FRAME is the frame cd119.json ships: Alaska at 0.35 of the lower 48, Attu at the west end of the Aleutians', () => {
+  // Lane L2, 2026-09-26: d3's geoAlbersUsa draws Alaska at 0.35 x the lower-48 scale on a conic whose
+  // rotation wraps longitude. Unwrapped, the Near Islands (east of 180 degrees) drew at the top left of
+  // the inset and the fit that held them shrank Alaska to 0.236 x.
+  const shipped = readJson(path.join(APP, 'geo', 'cd119.json'));
+  for (const [name, region] of Object.entries(shipped.projection.regions)) {
+    const mine = layers.FRAME.regions[name];
+    assert.ok(mine, name + ' is in FRAME');
+    for (const key of ['parallels', 'meridian', 'origin', 'scale', 'translate', 'statefp', 'clip']) assert.deepEqual(mine[key], region[key], name + '.' + key);
+  }
+  const {alaska, lower48} = layers.FRAME.regions;
+  assert.ok(Math.abs(alaska.scale / lower48.scale - 0.35) < 1e-6, 'Alaska scale ' + alaska.scale);
+  const [x0, y0, x1, y1] = shipped.states.AK.bbox;
+  const attu = layers.projectFrame(52.9, 172.9, '02'), adak = layers.projectFrame(51.9, -176.6, '02');
+  assert.ok(attu[0] >= x0 && attu[0] <= x1 && attu[1] >= y0 && attu[1] <= y1, 'Attu inside the Alaska outline box: ' + attu);
+  assert.ok(attu[0] < adak[0] && Math.abs(attu[1] - adak[1]) < 30, 'Attu west of Adak on the chain: ' + attu + ' / ' + adak);
+});
+
+test('[map layers] Hawaii is clipped as d3 clips it: the Northwestern Hawaiian Islands are not placed, the main islands and Kaula are', () => {
+  // Lane L3, 2026-09-26: the Hawaii conic drew the Northwestern Hawaiian Islands west of the Hawaii box,
+  // French Frigate Shoals inside the Alaska box. The clip extent is the canvas round the Hawaii box, a
+  // pixel clear of the Alaska, lower-48 and American Samoa boxes; the main islands and Kaula stay.
+  const shipped = readJson(path.join(APP, 'geo', 'cd119.json'));
+  const hawaii = layers.FRAME.regions.hawaii;
+  assert.deepEqual(hawaii.clip, shipped.projection.regions.hawaii.clip, 'FRAME carries the clip cd119.json ships');
+  const ALASKA_BOX = [10, 366, 246, 600];                 // build_district_geo REGIONS['alaska']['box']
+  const inside = (p, box) => p[0] >= box[0] && p[0] <= box[2] && p[1] >= box[1] && p[1] <= box[3];
+  for (const [name, lat, lon] of [['Honolulu', 21.3069, -157.8583], ['Hilo', 19.7241, -155.0868],
+    ['Kaula', 21.656, -160.542], ['Cape Kumukahi', 19.5163, -154.8108]]) {
+    const at = layers.projectFrame(lat, lon, '15');
+    assert.ok(at && inside(at, hawaii.clip) && !inside(at, ALASKA_BOX), name + ' is placed in the Hawaii inset: ' + at);
+  }
+  const shoals = [23.8697, -166.2847];
+  for (const [name, lat, lon] of [['Nihoa', 23.0605, -161.9218], ['French Frigate Shoals', ...shoals], ['Kure Atoll', 28.3921, -178.2937]]) {
+    assert.equal(layers.projectFrame(lat, lon, '15'), null, name + ' is clipped');
+  }
+  assert.ok(layers.projectFrame(61.2181, -149.9003, '02'), 'Anchorage is still placed');
+  // Teeth: the same conic without the clip puts French Frigate Shoals inside the Alaska box.
+  const clip = hawaii.clip;
+  delete hawaii.clip;
+  let unclipped;
+  try { unclipped = layers.projectFrame(shoals[0], shoals[1], '15'); } finally { hawaii.clip = clip; }
+  assert.ok(unclipped && inside(unclipped, ALASKA_BOX), 'unclipped, French Frigate Shoals lands in the Alaska box: ' + unclipped);
+});
+
 test('[map layers] rows are placed or listed, never dropped, at every level', async () => {
   const lookup = await fakeLookup().ready(ROWS.map(row => row.zip));
   for (const level of layers.LEVEL_IDS) {
