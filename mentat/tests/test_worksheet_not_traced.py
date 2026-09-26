@@ -92,6 +92,34 @@ class WorksheetNotes(unittest.TestCase):
     def test_no_bundle_says_nothing(self):
         self.assertNotIn('not traced', self.note('Beneficiary Summary').lower())
 
+    def test_a_split_part_of_the_data_workbook_carries_its_sheet_s_note(self):
+        # S1 (Paul, 2026-09-26): the Data workbook names a per-cycle part
+        # `<Sheet> <election year>`; books published before keep
+        # `<Sheet> <cycle label>` until rebuilt. Either spelling is its sheet.
+        bundle(self.path, {'2024': 'stale'})
+        data = self.path.with_name('Fixture Industry Spending Data.xlsx')
+        book = openpyxl.Workbook()
+        book.remove(book.active)
+        for name in ('Allocation Estimates 2024', 'Allocation Estimates 2023-2024',
+                     'Downstream Measurement 2024', 'Downstream Measurement 2023-2024',
+                     'Giving Facts 2024'):
+            sheet = book.create_sheet(name)
+            sheet.append(['Cycle', 'Amount'])
+            sheet.append([2024, 5])
+        book.save(data)
+        book.close()
+
+        def note(name):
+            worksheet_data.cache_clear()
+            return worksheet_data(stamp(data), name, 1)['note']
+
+        for name in ('Allocation Estimates 2024', 'Allocation Estimates 2023-2024'):
+            self.assertIn('Not traced: the transfer index for 2024 is stale: 2024 has no '
+                          'transfer-derived rows or values here; blank is not zero.', note(name), name)
+        for name in ('Downstream Measurement 2024', 'Downstream Measurement 2023-2024'):
+            self.assertIn('Direct only; transfers not traced for 2024', note(name), name)
+        self.assertNotIn('not traced', note('Giving Facts 2024').lower())
+
 
 if __name__ == '__main__':
     unittest.main()

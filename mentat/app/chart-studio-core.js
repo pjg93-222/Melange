@@ -319,8 +319,25 @@
     return guards;
   }
 
+  // S1 (Paul, 2026-09-26): the Data workbook splits a sheet over its row
+  // threshold into one sheet per cycle named `<Sheet> <election year>`
+  // ('Transfer Paths 2022'); books published before keep `<Sheet> <cycle label>`
+  // ('Transfer Paths 2021-2022') until they are rebuilt. Either part is its
+  // sheet and keeps its sheet's caption; a bare cycle label is not a part. The
+  // one sheet whose old part name broke Excel's 31 characters splits under a
+  // shorter base (report_insights.py split_sheet_base is the server's copy).
+  const SPLIT_SHEET_SUFFIX = /\s+(?:\d{4}-)?\d{4}$/;
+  const SPLIT_SHEET_BASES = {'Network Candidates': 'Network Candidate Activity'};
+  function splitSheetBase(name) {
+    const text = guardText(name);
+    const base = text.replace(SPLIT_SHEET_SUFFIX, '').trim();
+    if (!base || base === text) return text;
+    const known = Object.keys(SPLIT_SHEET_BASES).find(key => guardSame(key, base));
+    return known ? SPLIT_SHEET_BASES[known] : base;
+  }
+
   const committeeActivitySheet = name =>
-    COMMITTEE_ACTIVITY_SHEETS.some(sheet => guardSame(sheet, name)) ? COMMITTEE_ACTIVITY_NOTE : null;
+    COMMITTEE_ACTIVITY_SHEETS.some(sheet => guardSame(sheet, splitSheetBase(name))) ? COMMITTEE_ACTIVITY_NOTE : null;
 
   // The catalog tags every workbook with `kind` (server.py published_reports).
   // A server that does not send it still names the companion in the filename,
@@ -2298,7 +2315,7 @@
     classifyFields, fieldAt, paneBuckets, subjectField, pill, shelf, createSheet, clearSheet, swapShelves, sourceKey,
     carriedFilterValue, graphCycleValue, quickAddZone, migrateSheet,
     WORKSHEET_GROUP_LABELS, NO_DATA_WORKBOOK_HINT, COMMITTEE_ACTIVITY_NOTE,
-    defaultGuards, committeeActivitySheet, workbookKind, groupWorksheets,
+    defaultGuards, committeeActivitySheet, splitSheetBase, workbookKind, groupWorksheets,
     compileConfig, compileReport, geoKind, placeOf, placeData, mapConfig, mapGroups, NO_PLACE, SEVERAL_PLACES,
     showMeSelection, showMeEligibility, showMeApply, recommendedTile,
     sortResult, sortLocked, markValues, referenceValues, grandTotal, totalNote, rowsToMarksSummary,

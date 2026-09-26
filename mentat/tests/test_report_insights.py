@@ -260,6 +260,38 @@ class ReportInsightsTests(unittest.TestCase):
         giving = next(c for c in facts['columns'] if c['name'] == 'Giving')
         self.assertEqual(giving['unit'],'currency')
 
+    def test_split_parts_keep_their_sheet_s_summability_under_either_name(self):
+        # S1 (Paul, 2026-09-26): the writer now names a part `<Sheet> <election
+        # year>`; books published before keep `<Sheet> <cycle_label>` until they
+        # are rebuilt, and both keep the sheet-level non-summable flag.
+        rows = [['Candidate','Associated Funding'],['A',100],['B',100]]
+        self.book({'Transfer Paths 2022':[['Funded Committee','Reported Net Transfer'],
+                                          ['C00000001',100],['C00000002',100]],
+                   'Beneficiary Bridge 2024':rows,'Beneficiary Bridge 2023-2024':rows,
+                   'Funding Cohorts 2026':rows,
+                   'Giving Facts 2024':[['Company','Giving'],['A',100],['B',100]]})
+        for name in ('Transfer Paths 2022','Beneficiary Bridge 2024','Beneficiary Bridge 2023-2024',
+                     'Funding Cohorts 2026'):
+            with self.subTest(name=name):
+                result = insights.worksheet_data(insights.stamp(self.report),name)
+                self.assertFalse(result['accounting']['safe_to_sum'])
+                self.assertIn('association paths',result['accounting']['reason'])
+        facts = insights.worksheet_data(insights.stamp(self.report),'Giving Facts 2024')
+        self.assertTrue(facts['accounting']['safe_to_sum'])
+
+    def test_split_sheet_base_names_the_sheet_a_part_belongs_to(self):
+        for name, base in (('Transfer Paths 2022','Transfer Paths'),
+                           ('Transfer Paths 2021-2022','Transfer Paths'),
+                           ('Network Candidates 2022','Network Candidate Activity'),
+                           ('Network Candidates 2025-2026','Network Candidate Activity'),
+                           ('Transfer Paths','Transfer Paths'),
+                           ('Network Candidates','Network Candidates'),
+                           ('2023-2024','2023-2024'),('2024','2024'),
+                           ('Transfer Paths 22','Transfer Paths 22'),
+                           ('Recipient List','Recipient List'),('',''),(None,'')):
+            with self.subTest(name=name):
+                self.assertEqual(base,insights.split_sheet_base(name))
+
     def test_raw_amount_and_transfer_context_cannot_silently_be_summed(self):
         self.book({'2023-2024':[['Source ID','Amount','Analysis Amount'],['a',100,100],['b',100,0]],
                    'Beneficiary Bridge':[['Candidate','Associated Funding'],['A',100],['B',100]]})

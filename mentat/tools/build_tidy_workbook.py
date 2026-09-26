@@ -10,6 +10,14 @@ schema_version `tidy-1`): the sheet order, the column header registry of section
 `Data Quality` sheet carrying the store's own rows plus the writer's checks
 W1-W11.
 
+A sheet over `--split-rows` becomes one sheet per cycle named `<split base>
+<election year>`, e.g. `Contributions 2022` (Paul, S1, 2026-09-26). Section 3's
+`<Sheet> <cycle_label>` spelling made `Network Candidate Activity 2021-2022`, 36
+characters where Excel allows 31, so every all-cycles build that split that sheet
+crashed; that sheet now splits under the base `Network Candidates`. Books published
+before keep the old spelling until they are rebuilt, and the console reads both
+(`app/report_insights.split_sheet_base`).
+
 Nothing is published unless every severity-`fail` check passed: the workbook is
 written to `<out>.pending-<pid>` and only then `os.replace`d into place. On a
 failure the pending file is removed and the process exits 2, so a workbook whose
@@ -43,10 +51,12 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.filters import AutoFilter
 from openpyxl.worksheet.table import Table, TableColumn, TableStyleInfo
 
-WRITER_VERSION = "tidy-writer-1.0.0"
+WRITER_VERSION = "tidy-writer-1.1.0"
 SCHEMA_VERSION = "tidy-1"
 DEFAULT_SPLIT_ROWS = 50000
 MAX_SHEET_NAME = 31
+# Excel refuses a sheet name holding any of these characters.
+EXCEL_FORBIDDEN_SHEET_CHARACTERS = frozenset("[]:*?/\\")
 
 MONEY_FORMAT = "$#,##0.00;[Red]($#,##0.00);-"
 INTEGER_FORMAT = "#,##0"
@@ -374,11 +384,15 @@ ABOUT = (("key", "Key", "T"), ("value", "Value", "T"))
 class Sheet:
     """One staging table rendered as one sheet (or one sheet per cycle)."""
 
-    __slots__ = ("table", "name", "columns", "key", "dynamic")
+    __slots__ = ("table", "name", "columns", "key", "dynamic", "split_base")
 
-    def __init__(self, table, name, columns, key, dynamic=False):
+    def __init__(self, table, name, columns, key, dynamic=False, split_base=None):
         self.table, self.name, self.columns = table, name, columns
         self.key, self.dynamic = key, dynamic
+        # A per-cycle part is `<split_base> <election year>` (split_sheet_name).
+        # Every sheet splits under its own name except the one Paul gave a
+        # shorter base (S1, 2026-09-26).
+        self.split_base = split_base or name
 
 
 SHEETS = (
@@ -404,7 +418,8 @@ SHEETS = (
     Sheet("beneficiary_bridge", "Beneficiary Bridge", BENEFICIARY_BRIDGE,
           ("bridge_key",), dynamic=True),
     Sheet("beneficiary_activity", "Network Candidate Activity", BENEFICIARY_BRIDGE,
-          ("cycle_label", "source_committee_id", "candidate_id"), dynamic=True),
+          ("cycle_label", "source_committee_id", "candidate_id"), dynamic=True,
+          split_base="Network Candidates"),
     Sheet("transfer_paths", "Transfer Paths", TRANSFER_PATHS,
           ("cycle_label", "source_committee", "destination_committee")),
     Sheet("funding_cohorts", "Funding Cohorts", FUNDING_COHORTS,
@@ -560,6 +575,10 @@ def select(sheet, columns, available, where=None):
 def open_sheet(book, name, columns):
     if len(name) > MAX_SHEET_NAME:
         raise ValueError(f"Sheet name '{name}' exceeds {MAX_SHEET_NAME} characters.")
+    problems = sheet_name_problems(name)
+    if problems:
+        raise ValueError(f"Sheet name '{name}' is not a valid Excel sheet name: "
+                         f"{'; '.join(problems)}.")
     worksheet = book.create_sheet(title=name)
     for index, (_, header, kind) in enumerate(columns, start=1):
         worksheet.column_dimensions[get_column_letter(index)].width = width(kind, header)
@@ -608,6 +627,52 @@ def table_name(sheet_name, cycle_label=None):
     if cycle_label:
         name += "_" + str(cycle_label).split("-")[-1]
     return name
+
+
+def sheet_name_problems(name):
+    """Why Excel would refuse `name` as a worksheet name; [] when it would not."""
+    text = str(name or "")
+    problems = []
+    if not text.strip():
+        problems.append("blank")
+    if len(text) > MAX_SHEET_NAME:
+        problems.append(f"{len(text)} characters, over Excel's {MAX_SHEET_NAME}")
+    forbidden = sorted(set(text) & EXCEL_FORBIDDEN_SHEET_CHARACTERS)
+    if forbidden:
+        problems.append("holds " + " ".join(forbidden))
+    if text.startswith("'") or text.endswith("'"):
+        problems.append("begins or ends with an apostrophe")
+    if text.casefold() == "history":
+        problems.append("'History' is reserved by Excel")
+    return problems
+
+
+def election_year(cycle_label):
+    """The even year that ends an FEC two-year cycle ('2021-2022' -> '2022'); else None."""
+    match = re.fullmatch(r"(?:(\d{4})-)?(\d{4})", str(cycle_label or "").strip())
+    if (not match or int(match[2]) % 2
+            or (match[1] is not None and int(match[1]) != int(match[2]) - 1)):
+        return None
+    return match[2]
+
+
+def split_sheet_name(sheet, cycle_label):
+    """The sheet one cycle's rows go to when `sheet` is split: `<split base> <year>`.
+
+    Paul, S1 (2026-09-26): `Contributions 2022`, and `Network Candidates 2022`
+    for Network Candidate Activity. A label that is not an FEC two-year cycle
+    (the exporter's sprintf writes `NA-NA` for a receipt with no date) keeps its
+    own text, as every part did before S1, so a store that published before
+    still publishes. Books published before S1 keep `<Sheet> <cycle_label>`
+    until rebuilt; `app/report_insights.split_sheet_base` reads both back.
+    """
+    if cycle_label is None:
+        # `cycle_label = ?` never selects a NULL, so such a part would be planned
+        # and then written empty; the old spelling failed later on that count.
+        raise ValueError(f"{sheet.name}: rows with no cycle_label cannot be split "
+                         "into per-cycle sheets.")
+    label = str(cycle_label).strip()
+    return f"{sheet.split_base} {election_year(label) or label}"
 
 
 SHEET_OPEN = re.compile(rb"(<worksheet\b[^>]*>(?:\s*<sheetPr\b[^>]*(?:/>|>.*?</sheetPr>))?)",
@@ -969,12 +1034,24 @@ def plan_sheets(connection, present, split_rows):
             for label, count in connection.execute(
                     f'SELECT cycle_label, COUNT(*) FROM "{sheet.table}" '
                     f'GROUP BY cycle_label ORDER BY 1'):
-                emits.append(Emit(f"{sheet.name} {label}", sheet, columns, available,
+                emits.append(Emit(split_sheet_name(sheet, label), sheet, columns, available,
                                   "cycle_label = ?", (label,), count,
                                   table_name(sheet.name, label)))
         else:
             emits.append(Emit(sheet.name, sheet, columns, available, None, (), total,
                               table_name(sheet.name)))
+    # Every name is checked here, before a row is written: a name Excel would
+    # refuse, or two sheets that would share one, stops the build at once
+    # instead of after the writing it would waste.
+    used = set()
+    for emit in emits:
+        problems = sheet_name_problems(emit.name)
+        if emit.name.casefold() in used:
+            problems.append("already names another sheet")
+        used.add(emit.name.casefold())
+        if problems:
+            raise ValueError(f"Sheet name '{emit.name}' is not a valid Excel sheet name: "
+                             f"{'; '.join(problems)}.")
     return emits, absent
 
 

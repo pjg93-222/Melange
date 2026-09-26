@@ -1441,6 +1441,23 @@ test('the four committee-activity sheets carry a caption, and no other sheet doe
     assert.strictEqual(core.committeeActivitySheet(name), null, String(name) + ' must not carry the caption');
 });
 
+test('a per-cycle part of a committee-activity sheet keeps its caption under the new or the old name', () => {
+  // S1 (Paul, 2026-09-26): the Data workbook names a part `<Sheet> <election year>`;
+  // books published before keep `<Sheet> <cycle label>` until they are rebuilt.
+  const note = core.committeeActivitySheet('Transfer Paths');
+  for (const name of ['Transfer Paths 2022', 'Transfer Paths 2021-2022', 'Downstream Activity 2024',
+    'Downstream Activity 2023-2024', 'Beneficiary Bridge 2026', ' beneficiary bridge 2025-2026 '])
+    assert.strictEqual(core.committeeActivitySheet(name), note, name + ' must carry the caption');
+  for (const name of ['Giving Facts 2022', 'Contributions 2021-2022', 'Network Candidates 2022',
+    '2024', '2025-2026', 'Transfer Paths 22', 'Transfer Paths2022'])
+    assert.strictEqual(core.committeeActivitySheet(name), null, name + ' must not carry the caption');
+  assert.strictEqual(core.splitSheetBase('Transfer Paths 2022'), 'Transfer Paths');
+  assert.strictEqual(core.splitSheetBase('Transfer Paths 2021-2022'), 'Transfer Paths');
+  assert.strictEqual(core.splitSheetBase('Network Candidates 2022'), 'Network Candidate Activity');
+  assert.strictEqual(core.splitSheetBase('2025-2026'), '2025-2026');
+  assert.strictEqual(core.splitSheetBase('Recipient List'), 'Recipient List');
+});
+
 test('a committee-activity caption suppresses the grand total through the engine refusal', () => {
   const config = core.compileConfig(factSheet(), FACT_COLUMNS);
   const result = math.build(FACT_DATA, config);

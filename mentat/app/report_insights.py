@@ -344,13 +344,38 @@ TRANSFER_DERIVED_SHEETS = frozenset({'Transfer Paths', 'Allocation Estimates', '
 DIRECT_ONLY_SHEETS = frozenset({'Beneficiary Summary', 'Downstream Reach', 'Downstream Measurement'})
 
 
+# S1 (Paul, 2026-09-26). The Data workbook splits a sheet over its row
+# threshold into one sheet per cycle named `<Sheet> <election year>`
+# ('Transfer Paths 2022'). Books published before keep `<Sheet> <cycle label>`
+# ('Transfer Paths 2021-2022') until they are rebuilt, so both are read. The one
+# sheet whose old part name broke Excel's 31 characters splits under a shorter
+# base, which maps back to it. tools/build_tidy_workbook.split_sheet_name is the
+# writer's side; tests/test_tidy_workbook.py holds the two to each other.
+SPLIT_SHEET_SUFFIX = re.compile(r'\s+(?:\d{4}-)?\d{4}$')
+SPLIT_SHEET_BASES = {'Network Candidates': 'Network Candidate Activity'}
+
+
+def split_sheet_base(sheet_name):
+    """The sheet a per-cycle part belongs to; any other name comes back as it is.
+
+    A bare cycle label ('2023-2024', an Overview cycle sheet) is not a part:
+    nothing would be left of it, so it is not stripped (graph_data.py parses
+    those sheets separately).
+    """
+    name = str(sheet_name or '').strip()
+    base = SPLIT_SHEET_SUFFIX.sub('', name).strip()
+    if not base or base == name:
+        return name
+    return SPLIT_SHEET_BASES.get(base, base)
+
+
 def untraced_sheet_notes(path, sheet_name):
     """The not-traced sentences for one worksheet, from its workbook's audit bundle (F2).
 
     A companion Data workbook shares its Overview's bundle (one build writes
     both). No bundle, a legacy bundle or a current index says nothing.
     """
-    base = re.sub(r'\s+\d{4}-\d{4}$', '', str(sheet_name or '')).strip()
+    base = split_sheet_base(sheet_name)
     if base not in TRANSFER_DERIVED_SHEETS | DIRECT_ONLY_SHEETS:
         return []
     import graph_data  # graph_data imports this module, so it is read on use
@@ -383,14 +408,14 @@ def worksheet_accounting(sheet_name, headers, rows, row_numbers):
         accounting.update(grain='FEC source observation', basis='included itemized receipts at the named recipient; not verified unique giving')
         notes.append('Use Analysis Amount for included receipts. Raw Amount can include excluded or repeated source observations.')
     # Match the BASE sheet name. The companion Data workbook splits any sheet
-    # over its row threshold into `<Sheet> <cycle_label>` parts, so the sheet
-    # that used to be called exactly 'Transfer Paths' can arrive as
-    # 'Transfer Paths 2021-2022'. Against the exact-name list those parts fell
-    # through and their sums were offered as safe - the same association-path
-    # double count, now split three ways and harder to spot. A bare cycle label
-    # is not stripped (nothing is left to match, and graph_data.py parses those
-    # separately).
-    base_sheet_name = re.sub(r'\s+\d{4}-\d{4}$', '', sheet_name).strip() or sheet_name
+    # over its row threshold into per-cycle parts, so the sheet that used to be
+    # called exactly 'Transfer Paths' can arrive as 'Transfer Paths 2022' (or,
+    # in a book published before S1 of 2026-09-26, 'Transfer Paths 2021-2022').
+    # Against the exact-name list those parts fell through and their sums were
+    # offered as safe - the same association-path double count, now split three
+    # ways and harder to spot. split_sheet_base reads both spellings and leaves
+    # a bare cycle label alone (graph_data.py parses those separately).
+    base_sheet_name = split_sheet_base(sheet_name) or sheet_name
     if base_sheet_name in ('Beneficiary Bridge', 'Beneficiary Summary', 'Funding Cohorts', 'Allocation Estimates'):
         accounting.update(safe_to_sum=False, reason='This sheet repeats funding or committee activity across association paths. Use the contribution dataset and a named accounting basis.')
     elif base_sheet_name == 'Transfer Paths':

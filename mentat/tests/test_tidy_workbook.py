@@ -18,6 +18,9 @@ import openpyxl
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import build_tidy_workbook as writer
+# The console module that reads a split sheet's parts back (SheetNameTest).
+sys.path.append(str(Path(__file__).resolve().parents[1] / 'app'))
+import report_insights
 
 CONTRIBUTION = {
     "source_id": "4021620231727827649", "transaction_id": "SA11AI.12345",
@@ -262,16 +265,44 @@ class WriterTest(unittest.TestCase):
     def test_split_forces_per_cycle_sheets(self):
         self.assertEqual(0, self.run_writer("--split-rows", "1"))
         book = self.book()
-        self.assertIn("Contributions 2021-2022", book.sheetnames)
-        self.assertIn("Contributions 2023-2024", book.sheetnames)
+        # S1 (Paul, 2026-09-26): a part is `<Sheet> <election year>`. Before it,
+        # this test pinned "Contributions 2021-2022" and "Contributions 2023-2024".
+        self.assertIn("Contributions 2022", book.sheetnames)
+        self.assertIn("Contributions 2024", book.sheetnames)
         self.assertNotIn("Contributions", book.sheetnames)
+        self.assertNotIn("Contributions 2021-2022", book.sheetnames)
         for name in book.sheetnames:
             self.assertFalse(name.strip().replace("-", "").isdigit(), name)
-        self.assertEqual(2, book["Contributions 2021-2022"].max_row)
-        tables = list(book["Contributions 2021-2022"].tables)
+        self.assertEqual(2, book["Contributions 2022"].max_row)
+        tables = list(book["Contributions 2022"].tables)
         self.assertEqual(["tbl_contributions_2022"], tables)
         receipt = json.loads(Path(str(self.out) + ".receipt.json").read_text())
         self.assertIn("Contributions", receipt["split_sheets"])
+        self.assertEqual(["Contributions 2022", "Contributions 2024"],
+                         receipt["split_sheets"]["Contributions"])
+
+    def test_network_candidate_activity_splits_under_its_short_name(self):
+        # The crash S1 fixes: the old part name was 36 characters where Excel
+        # allows 31, so every all-cycles build that split this sheet died in
+        # open_sheet. Its parts are now `Network Candidates <election year>`.
+        self.assertGreater(len("Network Candidate Activity 2021-2022"), writer.MAX_SHEET_NAME)
+        activity = [dict(cycle_label=label, cycle=int(label[-4:]), company="Industry Total",
+                         source_committee_id="PAC", candidate_id="H00000001",
+                         bridge_key=f"network-{label}", downstream_activity=10.0)
+                    for label in ("2021-2022", "2023-2024")]
+        with closing(sqlite3.connect(self.store)) as connection, connection:
+            create(connection, "beneficiary_activity", activity)
+        self.assertEqual(0, self.run_writer("--split-rows", "1"))
+        book = self.book()
+        self.assertIn("Network Candidates 2022", book.sheetnames)
+        self.assertIn("Network Candidates 2024", book.sheetnames)
+        self.assertNotIn("Network Candidate Activity", book.sheetnames)
+        for name in book.sheetnames:
+            self.assertEqual([], writer.sheet_name_problems(name), name)
+        self.assertEqual(2, book["Network Candidates 2024"].max_row)
+        receipt = json.loads(Path(str(self.out) + ".receipt.json").read_text())
+        self.assertEqual(["Network Candidates 2022", "Network Candidates 2024"],
+                         receipt["split_sheets"]["Network Candidate Activity"])
 
     def test_checks_pass_and_about_lineage(self):
         self.assertEqual(0, self.run_writer())
@@ -423,6 +454,76 @@ class HelperTest(unittest.TestCase):
     def test_year_columns_are_not_thousands_formatted(self):
         self.assertEqual(writer.YEAR_FORMAT, writer.number_format("I", "Cycle End Year"))
         self.assertEqual(writer.INTEGER_FORMAT, writer.number_format("I", "Gift Count"))
+
+
+class SheetNameTest(unittest.TestCase):
+    """S1 (Paul, 2026-09-26): every sheet name the writer can emit is one Excel accepts.
+
+    A sheet over `--split-rows` becomes one sheet per cycle named `<split base>
+    <election year>`. The old `<Sheet> <cycle_label>` made "Network Candidate
+    Activity 2021-2022", 36 characters, and every all-cycles build that split that
+    sheet crashed. The checks walk the registry itself, so a sheet added later is
+    covered without anyone listing it here.
+    """
+
+    FORBIDDEN = set("[]:*?/\\")
+    # An election year is always four digits, so every part name of a sheet has
+    # the same length; the largest even four-digit year stands in for the longest.
+    CYCLES = ("2021-2022", "2025-2026", "9997-9998")
+
+    def test_every_splittable_sheet_name_fits_excel_with_its_longest_year(self):
+        # No registry sheet is exempt: a dynamic table takes whatever columns its
+        # store has, so any of them can arrive with a cycle_label and split.
+        for sheet in writer.SHEETS:
+            parts = [writer.split_sheet_name(sheet, label) for label in self.CYCLES]
+            longest = max(parts, key=len)
+            with self.subTest(sheet=sheet.name, longest=longest):
+                self.assertEqual({len(sheet.split_base) + 5}, {len(part) for part in parts})
+                for name in (sheet.name, longest):
+                    self.assertLessEqual(len(name), 31, name)
+                    self.assertFalse(self.FORBIDDEN & set(name), name)
+                    self.assertEqual([], writer.sheet_name_problems(name), name)
+
+    def test_a_part_is_named_for_its_cycle_s_election_year(self):
+        self.assertEqual("2022", writer.election_year("2021-2022"))
+        self.assertEqual("2026", writer.election_year("2025-2026"))
+        self.assertEqual("2024", writer.election_year("2024"))
+        for label in (None, "", "NA-NA", "2022-2023", "2020-2022", "2023", "22", "Unknown"):
+            with self.subTest(label=label):
+                self.assertIsNone(writer.election_year(label))
+        sheets = {sheet.table: sheet for sheet in writer.SHEETS}
+        self.assertEqual("Contributions 2022",
+                         writer.split_sheet_name(sheets["contributions"], "2021-2022"))
+        self.assertEqual("Network Candidates 2022",
+                         writer.split_sheet_name(sheets["beneficiary_activity"], "2021-2022"))
+        # A label that is not an FEC cycle (the exporter's sprintf writes "NA-NA"
+        # for a receipt with no date) keeps the pre-S1 spelling, so a store that
+        # published before still publishes; a NULL label cannot be split at all.
+        self.assertEqual("Contributions NA-NA",
+                         writer.split_sheet_name(sheets["contributions"], "NA-NA"))
+        with self.assertRaises(ValueError):
+            writer.split_sheet_name(sheets["contributions"], None)
+
+    def test_the_name_checks_can_fail(self):
+        # Negative controls: each rule refuses the name it exists to refuse, and
+        # the spelling S1 retired is refused for its length.
+        self.assertTrue(writer.sheet_name_problems("Network Candidate Activity 2021-2022"))
+        self.assertTrue(writer.sheet_name_problems("x" * 32))
+        for character in sorted(self.FORBIDDEN):
+            self.assertTrue(writer.sheet_name_problems(f"Transfer{character}Paths"), character)
+        for name in ("", "   ", "'Quoted", "Quoted'", "History"):
+            self.assertTrue(writer.sheet_name_problems(name), repr(name))
+
+    def test_the_console_reads_every_part_back_to_its_sheet(self):
+        for sheet in writer.SHEETS:
+            self.assertEqual(sheet.name, report_insights.split_sheet_base(sheet.name))
+            for label in ("2021-2022", "2023-2024", "2025-2026"):
+                with self.subTest(sheet=sheet.name, cycle=label):
+                    new = writer.split_sheet_name(sheet, label)
+                    self.assertEqual(sheet.name, report_insights.split_sheet_base(new))
+                    # Books published before S1 keep `<Sheet> <cycle_label>`.
+                    self.assertEqual(sheet.name,
+                                     report_insights.split_sheet_base(f"{sheet.name} {label}"))
 
 
 class RawSourcePolicyTests(unittest.TestCase):
