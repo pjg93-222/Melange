@@ -80,7 +80,7 @@ stopifnot(length(check_case(first, wrong)) >= 2L)
 # The shared statements: disclosure_pattern and the unitemized guard, on the
 # text normalised exactly as fec_receipt_role() normalises it.
 rules <- fec_receipt_rules()
-stopifnot(rules$version == 7)
+stopifnot(rules$version == 8)
 words <- function(x) trim_text(gsub("[^A-Z0-9]+", " ", toupper(trim_text(x))))
 statement_problems <- character()
 for (s in fixture$statements) {

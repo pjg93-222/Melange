@@ -90,7 +90,7 @@ class EvidenceTests(unittest.TestCase):
             'REVERSAL OF 08/27 ARKPAC FOR SEN. JOHN BOOZMAN CONTRIBUTION',
             'BANK REFUND OF STOLEN 7/26/21 CONTRIBUTION TO EXAMPLE FOR CONGRESS',
             'CREDIT FOR UNAUTHORIZED ACTIVITY','RECOVERED FUNDS FROM BANK FRAUD',
-            'NON-CONTRIBUTION AMOUNT','REFUND OF BANK FEES ERRONEOUSLY CHARGED',
+            'REFUND OF BANK FEES ERRONEOUSLY CHARGED',
             'REFUND OF MERCHANT FEES','REFUND OF CHECK ORDER FEE',
             'BANK STOP PAYMENT FEE REFUND','BANK FEE REVERSAL','BANK FEE REFUND',
             'INTEREST DISTRIBUTION FUND','INTEREST (DISTRIBUTION FUND)',
@@ -391,12 +391,52 @@ class NonContributionLabel(unittest.TestCase):
     def test_negative_control_explicit_text_beside_the_label_still_decides(self):
         row = self.rows()[0]
         for text, expected in (('NON-CONTRIBUTION: INTEREST', 'other_receipt'),
-                               ('NON-CONTRIBUTION AMOUNT', 'other_receipt'),
+                               ('NON-CONTRIBUTION ACCOUNT INTEREST', 'other_receipt'),
                                ('NON-CONTRIBUTION 1,500,000 USDC COINS LIQUIDATED VIA GEMINI TRUST - PURCHASER UNKNOWN',
                                 'asset_liquidation'),
                                ('NON-CONTRIBUTION ACCOUNT', 'contribution')):
             with self.subTest(text=text):
                 self.assertEqual(receipt_role({**row, 'receipt_type_full': text}), expected)
+
+
+class NonContributionAmountCaption(unittest.TestCase):
+    """Lane W (Paul's money rule, 2026-09-26): "NON-CONTRIBUTION AMOUNT" is the same kind of bare filer label as
+    "NON-CONTRIBUTION" (lane J3). On F3X line 17 under FEC type 10 (a contribution to a super PAC, hybrid PAC or
+    non-contribution account) it may name a non-contribution-account donation, which is giving, so the receipt
+    counts as the named donor's giving, flagged. Real row: one of the 241 Banking receipts ($4,420.00) whose memo
+    text is the caption, all from TIANO, ALICE (employer WELLS FARGO) to C00580068 Progressive Turnout Project."""
+
+    ROW = {'sub_id': '4010520231665591797', 'transaction_id': '14707921', 'committee_id': 'C00580068',
+           'contributor_name': 'TIANO, ALICE', 'contributor_employer': 'WELLS FARGO',
+           'contributor_occupation': 'FINANCIAL ADVISOR', 'entity_type': 'IND', 'filing_form': 'F3X',
+           'line_number': '17', 'receipt_type': '10', 'receipt_type_full': None,
+           'memo_text': 'NON-CONTRIBUTION AMOUNT', 'memo_code': None, 'memoed_subtotal': False,
+           'file_num': 1667091, 'contribution_receipt_amount': 100.0,
+           'contribution_receipt_date': '2022-11-13T00:00:00'}
+
+    def test_the_caption_counts_as_the_named_donors_giving_flagged(self):
+        self.assertEqual(receipt_role(self.ROW), 'unverified_other_receipt')
+        # the same caption filed as the receipt description instead of the memo text
+        self.assertEqual(receipt_role({**self.ROW, 'receipt_type_full': 'NON-CONTRIBUTION AMOUNT', 'memo_text': None}),
+                         'unverified_other_receipt')
+        snapshot = {'committee_id': 'C00580068', 'cycle': 2022, 'totals': {}, 'receipts': [dict(self.ROW)],
+                    'disbursements': [], 'expenditures': []}
+        receipts = summarize([snapshot], 'Tiano, Alice', ['TIANO, ALICE'])['receipts']
+        self.assertEqual(len(receipts), 1)
+        self.assertTrue(receipts[0]['included_company_contribution'])      # counted
+        self.assertTrue(receipts[0]['receipt_role_unverified'])            # flagged
+        self.assertEqual(receipts[0]['amount'], 100.0)
+
+    def test_negative_control_explicit_non_giving_text_beside_the_caption_still_decides(self):
+        for receipt, expected in (('INTEREST', 'other_receipt'), ('REFUND', 'other_receipt'),
+                                  ('SALE OF INVESTMENT', 'other_receipt'),
+                                  ('BITCOINS SOLD VIA EXAMPLE EXCHANGE - PURCHASER UNKNOWN', 'asset_liquidation')):
+            with self.subTest(receipt=receipt):
+                self.assertEqual(receipt_role({**self.ROW, 'receipt_type_full': receipt}), expected)
+        snapshot = {'committee_id': 'C00580068', 'cycle': 2022, 'totals': {}, 'disbursements': [],
+                    'expenditures': [], 'receipts': [{**self.ROW, 'receipt_type_full': 'INTEREST'}]}
+        receipts = summarize([snapshot], 'Tiano, Alice', ['TIANO, ALICE'])['receipts']
+        self.assertFalse(receipts[0]['included_company_contribution'])     # stays out
 
 
 if __name__ == '__main__':

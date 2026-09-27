@@ -93,8 +93,9 @@ def receipt_role(row):
     line = receipt_line_code(row)
     role = next((role for role,lines in rules['forms'].get(form,{}).items() if line in lines),'unverified_receipt_role')
     special = form == 'F3X' and line == '17' and re.search(rules['special_account_pattern'], description)
-    # A bare filer label such as NON-CONTRIBUTION may name a non-contribution-account donation, so it is not an
-    # exact non-giving description: it counts, flagged (twin of collect.R fec_receipt_role; lane J3, 2026-09-26).
+    # A bare filer label such as NON-CONTRIBUTION or NON-CONTRIBUTION AMOUNT may name a non-contribution-account
+    # donation (FEC type 10), so neither is an exact non-giving description: each counts, flagged (twin of
+    # collect.R fec_receipt_role; lanes J3 and W, 2026-09-26).
     exact_descriptions = {name_key(value) for value in rules.get('non_giving_exact_descriptions', [])}
     receipt_exact = (bool(re.search(rules['non_giving_exact_pattern'], receipt_description))
                      or receipt_description in exact_descriptions)

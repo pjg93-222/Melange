@@ -75,7 +75,7 @@ class SharedFixture(unittest.TestCase):
 
     def test_statements(self):
         rules = receipt_rules()
-        self.assertEqual(rules['version'], 7)
+        self.assertEqual(rules['version'], 8)
         for statement in FIXTURE['statements']:
             receipt, memo_text = statement['receipt_type_full'], statement['memo_text']
             text = (name_key(receipt) + ' ' + name_key(memo_text)).strip()

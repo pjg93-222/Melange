@@ -188,10 +188,12 @@ fec_receipt_role <- function(rows) {
   }
   # "Other federal receipts" includes genuine hybrid-PAC and party-account
   # contributions. The line label alone cannot establish economic meaning, and
-  # neither can a bare filer label such as NON-CONTRIBUTION, which may name a
-  # non-contribution-account donation: it is not an exact non-giving
-  # description, so it counts, flagged (lane J3, Paul's money rule of
-  # 2026-09-26; tools/pac_evidence.py receipt_role() is the twin).
+  # neither can a bare filer label such as NON-CONTRIBUTION or NON-CONTRIBUTION
+  # AMOUNT (on FEC type 10, a contribution to a super PAC, hybrid PAC or
+  # non-contribution account), which may name a non-contribution-account
+  # donation: neither is an exact non-giving description, so each counts,
+  # flagged (lanes J3 and W, Paul's money rule of 2026-09-26;
+  # tools/pac_evidence.py receipt_role() is the twin).
   special <- form == "F3X" & line == "17" & grepl(rules$special_account_pattern, description, perl = TRUE)
   exact_descriptions <- normalized(toupper(unlist(rules$non_giving_exact_descriptions)))
   receipt_exact <- grepl(rules$non_giving_exact_pattern, receipt_description, perl = TRUE) |

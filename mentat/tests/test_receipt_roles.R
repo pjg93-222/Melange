@@ -159,7 +159,7 @@ explicit_financial_events <- data.table(filing_form="F3X", line_number="17", rec
   "BANK ERRONEOUSLY DEPOSITED 251 17 INTO PAC ACCOUNT THIS ERROR WILL BE REVERSED",
   "REVERSAL OF 08/27 ARKPAC FOR SEN. JOHN BOOZMAN CONTRIBUTION",
   "BANK REFUND OF STOLEN 7/26/21 CONTRIBUTION TO EXAMPLE FOR CONGRESS",
-  "CREDIT FOR UNAUTHORIZED ACTIVITY", "RECOVERED FUNDS FROM BANK FRAUD", "NON-CONTRIBUTION AMOUNT",
+  "CREDIT FOR UNAUTHORIZED ACTIVITY", "RECOVERED FUNDS FROM BANK FRAUD",
   "REFUND OF BANK FEES ERRONEOUSLY CHARGED", "REFUND OF MERCHANT FEES",
   "REFUND OF CHECK ORDER FEE", "BANK STOP PAYMENT FEE REFUND", "BANK FEE REVERSAL",
   "BANK FEE REFUND", "INTEREST DISTRIBUTION FUND", "INTEREST (DISTRIBUTION FUND)",
@@ -190,7 +190,7 @@ stopifnot(all(fec_receipt_role(conflicting_income) == "unverified_contradicted_r
 # --- 2026-09-17 ruling ------------------------------------------------------
 # A cross-verification step may remove or zero a row only when the evidence
 # CONTRADICTS it. Missing or ambiguous information is counted and flagged.
-stopifnot(fec_receipt_rules()$version == 7)
+stopifnot(fec_receipt_rules()$version == 8)
 # True exact non-giving descriptions are still excluded.
 stopifnot(all(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
   receipt_type_full=c("INTEREST", "SERVICE FEE"))) == "other_receipt"))
@@ -199,7 +199,7 @@ stopifnot(all(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
 # so it counts as the named donor's giving, flagged. Real rows: Foris DAX's four receipts at
 # MAGA Inc. ($35,000,000; four transaction ids and dates; no other copy of that money in the
 # Crypto database). Explicit non-giving text beside the label still decides (negative
-# controls): interest, the NON-CONTRIBUTION AMOUNT caption and a sale to an unknown purchaser.
+# controls): interest, interest on the account and a sale to an unknown purchaser.
 foris <- data.table(committee_id = "C00892471", filing_form = "F3X", line_number = "17",
   contributor_name = "FORIS DAX, INC.", entity_type = "ORG", company = "Foris Dax Inc",
   company_match_status = "accepted", receipt_type_full = "NON-CONTRIBUTION",
@@ -212,7 +212,7 @@ stopifnot(all(foris_roles == "unverified_other_receipt"), all(fec_receipt_counta
           all(fec_receipt_role_unverified(foris_roles) == 1L),
           all(fec_receipt_role_reason(foris_roles) == "unverified_other_receipt"))
 still_non_giving <- data.table(filing_form = "F3X", line_number = "17", receipt_type_full = c(
-  "NON-CONTRIBUTION: INTEREST", "NON-CONTRIBUTION AMOUNT",
+  "NON-CONTRIBUTION: INTEREST", "NON-CONTRIBUTION ACCOUNT INTEREST",
   "NON-CONTRIBUTION 1,500,000 USDC COINS LIQUIDATED VIA GEMINI TRUST - PURCHASER UNKNOWN"))
 stopifnot(identical(fec_receipt_role(still_non_giving), c("other_receipt", "other_receipt", "asset_liquidation")),
           !any(fec_receipt_countable(still_non_giving)))
@@ -224,6 +224,32 @@ petkovich <- data.table(committee_id = "C00895003", filing_form = "", line_numbe
   company = "Gemini", company_match_status = "rejected", company_match_reason = "persistent_override:reject",
   receipt_type_full = "NON-CONTRIBUTION", transaction_id = "SA17.152400897", contribution_receipt_amount = 45000)
 stopifnot(fec_attribution_status(petkovich) == "explicit_source_exclusion", !fec_receipt_countable(petkovich))
+# Lane W (Paul's money rule of 2026-09-26): NON-CONTRIBUTION AMOUNT is the same kind of bare
+# filer label. On F3X line 17 under FEC type 10 (a contribution to a super PAC, hybrid PAC or
+# non-contribution account) it may name a non-contribution-account donation, so it counts as the
+# named donor's giving, flagged. Real row: one of the 241 Banking receipts ($4,420.00) whose memo
+# text is the caption, all from TIANO, ALICE (employer WELLS FARGO) to C00580068 Progressive
+# Turnout Project. Explicit non-giving text beside the caption still decides (negative controls).
+tiano <- data.table(sub_id = "4010520231665591797", transaction_id = "14707921",
+  committee_id = "C00580068", filing_form = "F3X", line_number = "17", receipt_type = "10",
+  contributor_name = "TIANO, ALICE", contributor_employer = "WELLS FARGO",
+  contributor_occupation = "FINANCIAL ADVISOR", entity_type = "IND", company = "Wells Fargo Bank NA",
+  company_match_status = "accepted", company_match_reason = "verified_roster_alias",
+  receipt_type_full = "", memo_text = "NON-CONTRIBUTION AMOUNT", memo_code = "",
+  contribution_receipt_date = "2022-11-13", contribution_receipt_amount = 100)
+tiano_role <- fec_receipt_role(tiano)
+stopifnot(identical(tiano_role, "unverified_other_receipt"), isTRUE(fec_receipt_countable(tiano)),
+          identical(fec_receipt_role_unverified(tiano_role), 1L),
+          identical(fec_receipt_role_reason(tiano_role), "unverified_other_receipt"))
+tiano_label <- copy(tiano)
+tiano_label[, `:=`(receipt_type_full = "NON-CONTRIBUTION AMOUNT", memo_text = "")]
+stopifnot(identical(fec_receipt_role(tiano_label), "unverified_other_receipt"))
+tiano_explicit <- tiano[rep(1L, 4L)]
+tiano_explicit[, receipt_type_full := c("INTEREST", "REFUND", "SALE OF INVESTMENT",
+  "BITCOINS SOLD VIA EXAMPLE EXCHANGE - PURCHASER UNKNOWN")]
+stopifnot(identical(fec_receipt_role(tiano_explicit),
+                    c("other_receipt", "other_receipt", "other_receipt", "asset_liquidation")),
+          !any(fec_receipt_countable(tiano_explicit)))
 # Redesignations, bank artifacts and fair-market-value sales: the filer's own
 # words say the money is not new giving.
 non_giving_v5 <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
