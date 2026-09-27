@@ -131,4 +131,83 @@ if ($buildText.Contains('Assert-WorkbookPackage $stageDataWorkbook $expectedWork
   throw 'The Data book must be checked against its OWN receipt, not the Overview count.'
 }
 
+# The tidy stage probe, run exactly as the builder runs it, under this host. Windows
+# PowerShell 5.1 (the host the builder documents) passes a native argument's embedded
+# double quotes unescaped, so a python -c program holding "..." arrives cut at the first
+# quote; every uncached build then failed after its export with "Tidy staging store could
+# not be read" (lane W, 2026-09-26).
+$probePattern = '\$stageProbe = @\(& \$PythonPath -c ''((?:[^'']|'''')*)'' \$pendingStage\)'
+$probeMatch = [regex]::Match($buildText, $probePattern)
+if (-not $probeMatch.Success) {
+  throw 'The tidy stage probe line was not found in build_industry_report.ps1.'
+}
+$probeProgram = $probeMatch.Groups[1].Value.Replace("''", "'")
+if ($probeProgram.Contains('"')) {
+  throw 'The tidy stage probe must not hold a double quote: Windows PowerShell 5.1 strips it from a native argument.'
+}
+Import-Module (Join-Path $projectRoot 'tools\mentat_python.psm1') -Force
+$probePython = (Resolve-MentatPython -ExplicitPath '').Path
+$probeStore = Join-Path ([IO.Path]::GetTempPath()) ('mentat-stage-probe-' + [Guid]::NewGuid().ToString('N') + '.sqlite')
+try {
+  & $probePython -c 'import sqlite3,sys;c=sqlite3.connect(sys.argv[1]);c.execute(''CREATE TABLE contributions(source_id TEXT)'');c.executemany(''INSERT INTO contributions VALUES(?)'',[(''a'',),(''b'',)]);c.commit();c.close()' $probeStore
+  if ($LASTEXITCODE -ne 0) { throw 'Could not create the stage probe test store.' }
+  $probeAnswer = @(& $probePython -c $probeProgram $probeStore)
+  if ($LASTEXITCODE -ne 0 -or $probeAnswer.Count -lt 2 -or $probeAnswer[0].Trim() -ne 'ok' -or $probeAnswer[1].Trim() -ne '2') {
+    throw "The tidy stage probe did not read a valid two-row store under PowerShell $($PSVersionTable.PSVersion): $($probeAnswer -join ' | ')"
+  }
+} finally {
+  if (Test-Path -LiteralPath $probeStore) { Remove-Item -LiteralPath $probeStore -Force }
+}
+
+# Assert-WorkbookPackage streams each worksheet part (lane W, 2026-09-26: an in-memory
+# [xml] cast refused a 659 MB Beneficiary Bridge part and failed a finished build). Run
+# the function itself, taken from the script, on small packages.
+if ($buildText -match '\[xml\]\$sheetXml') {
+  throw 'Assert-WorkbookPackage must stream worksheet parts, not load them into an XmlDocument.'
+}
+$buildAst = [System.Management.Automation.Language.Parser]::ParseFile($buildPath, [ref]$null, [ref]$null)
+$packageCheck = $buildAst.Find({ param($node)
+  $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Assert-WorkbookPackage'
+}, $true)
+if ($null -eq $packageCheck) { throw 'Assert-WorkbookPackage was not found in build_industry_report.ps1.' }
+Invoke-Expression $packageCheck.Extent.Text
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+function New-TestPackage([string]$Path, [string[]]$SheetBodies) {
+  $zip = [IO.Compression.ZipFile]::Open($Path, [IO.Compression.ZipArchiveMode]::Create)
+  try {
+    $parts = @{ '[Content_Types].xml' = '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>';
+                'xl/workbook.xml' = '<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"/>' }
+    for ($i = 0; $i -lt $SheetBodies.Count; $i++) {
+      $parts["xl/worksheets/sheet$($i + 1).xml"] = '<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
+        'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData>' +
+        $SheetBodies[$i] + '</worksheet>'
+    }
+    foreach ($name in $parts.Keys) {
+      $writer = [IO.StreamWriter]::new($zip.CreateEntry($name).Open())
+      try { $writer.Write($parts[$name]) } finally { $writer.Dispose() }
+    }
+  } finally { $zip.Dispose() }
+}
+$packageDir = Join-Path ([IO.Path]::GetTempPath()) ('mentat-package-check-' + [Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $packageDir | Out-Null
+try {
+  $plain = Join-Path $packageDir 'plain.xlsx'
+  New-TestPackage $plain @('')
+  Assert-WorkbookPackage $plain 1
+  $tableOnly = Join-Path $packageDir 'table.xlsx'
+  New-TestPackage $tableOnly @('<tableParts count="1"><tablePart r:id="rId1"/></tableParts>')
+  Assert-WorkbookPackage $tableOnly 1
+  $overlap = Join-Path $packageDir 'overlap.xlsx'
+  New-TestPackage $overlap @('', '<autoFilter ref="A1:A1"/><tableParts count="1"><tablePart r:id="rId1"/></tableParts>')
+  $refused = $false
+  try { Assert-WorkbookPackage $overlap 2 } catch { $refused = $_.Exception.Message -like '*overlapping worksheet AutoFilter*' }
+  if (-not $refused) { throw 'Assert-WorkbookPackage must refuse a worksheet AutoFilter beside an Excel table.' }
+  $refused = $false
+  try { Assert-WorkbookPackage $plain 2 } catch { $refused = $_.Exception.Message -like '*expected 2*' }
+  if (-not $refused) { throw 'Assert-WorkbookPackage must refuse a wrong worksheet count.' }
+} finally {
+  Remove-Item -LiteralPath $packageDir -Recurse -Force
+}
+
 Write-Host 'Test-MentatWorkbookBuilderGuards: PASS'

@@ -295,18 +295,38 @@ function Assert-WorkbookPackage([string]$Path, [int]$ExpectedWorksheetCount) {
     foreach ($entry in @($archive.Entries | Where-Object {
       $_.FullName -match '^xl/worksheets/sheet\d+\.xml$'
     })) {
-      $reader = [IO.StreamReader]::new($entry.Open())
-      try { [xml]$sheetXml = $reader.ReadToEnd() } finally { $reader.Dispose() }
-      $namespace = [Xml.XmlNamespaceManager]::new($sheetXml.NameTable)
-      $namespace.AddNamespace('m', 'http://schemas.openxmlformats.org/spreadsheetml/2006/main')
-      $hasSheetFilter = $null -ne $sheetXml.SelectSingleNode(
-        '/m:worksheet/m:autoFilter',
-        $namespace
-      )
-      $hasTables = $null -ne $sheetXml.SelectSingleNode(
-        '/m:worksheet/m:tableParts',
-        $namespace
-      )
+      # Streamed, never loaded whole: a worksheet part can be hundreds of MB (a
+      # Community Banks Beneficiary Bridge was 659 MB), past what an in-memory [xml]
+      # cast accepts ("exceeded a limit set by MaxCharactersInDocument"). Only the
+      # worksheet's own children are read, and each one - sheetData included - is
+      # skipped whole (lane W, 2026-09-26).
+      $sheetSettings = [Xml.XmlReaderSettings]::new()
+      $sheetSettings.DtdProcessing = [Xml.DtdProcessing]::Prohibit
+      $sheetSettings.IgnoreComments = $true
+      $sheetSettings.IgnoreWhitespace = $true
+      $hasSheetFilter = $false
+      $hasTables = $false
+      $sheetStream = $entry.Open()
+      try {
+        $sheetReader = [Xml.XmlReader]::Create($sheetStream, $sheetSettings)
+        try {
+          [void]$sheetReader.MoveToContent()
+          if (-not $sheetReader.IsEmptyElement) {
+            [void]$sheetReader.Read()
+            while (-not $sheetReader.EOF -and $sheetReader.Depth -ge 1) {
+              if ($sheetReader.NodeType -ne [Xml.XmlNodeType]::Element) {
+                [void]$sheetReader.Read()
+                continue
+              }
+              if ($sheetReader.NamespaceURI -eq 'http://schemas.openxmlformats.org/spreadsheetml/2006/main') {
+                if ($sheetReader.LocalName -eq 'autoFilter') { $hasSheetFilter = $true }
+                if ($sheetReader.LocalName -eq 'tableParts') { $hasTables = $true }
+              }
+              $sheetReader.Skip()
+            }
+          }
+        } finally { $sheetReader.Dispose() }
+      } finally { $sheetStream.Dispose() }
       if ($hasSheetFilter -and $hasTables) {
         throw "Worksheet part '$($entry.FullName)' has an overlapping worksheet AutoFilter and Excel table."
       }
@@ -532,7 +552,11 @@ if (-not $cacheHit) {
   if (-not (Test-Path -LiteralPath $pendingStage -PathType Leaf)) {
     throw "$Industry data export did not produce a tidy staging store: $pendingStage"
   }
-  $stageProbe = @(& $PythonPath -c 'import sqlite3,sys;connection=sqlite3.connect(sys.argv[1]);print(connection.execute("PRAGMA integrity_check").fetchone()[0]);print(connection.execute("SELECT COUNT(*) FROM contributions").fetchone()[0])' $pendingStage)
+  # Single quotes inside the program, never double: Windows PowerShell 5.1, the host this
+  # script documents, passes a native argument's embedded double quotes unescaped, so
+  # python received the program cut at the first one and every uncached build failed
+  # here (lane W, 2026-09-26; Test-MentatWorkbookBuilderGuards.ps1 runs this line).
+  $stageProbe = @(& $PythonPath -c 'import sqlite3,sys;connection=sqlite3.connect(sys.argv[1]);print(connection.execute(''PRAGMA integrity_check'').fetchone()[0]);print(connection.execute(''SELECT COUNT(*) FROM contributions'').fetchone()[0])' $pendingStage)
   if ($LASTEXITCODE -ne 0) {
     throw "Tidy staging store could not be read: $pendingStage"
   }
