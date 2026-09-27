@@ -28,17 +28,23 @@ Money semantics (packet section 4, binding):
   network is never counted again as a donor (the map removes it on both sides too).
 
 The route refuses (409, FlowRefused) when the candidate spending and transfers it draws
-differ from /api/evidence-network's for the same committees, to the cent.
+differ from /api/evidence-network's for the same committees, to the cent. The evidence
+network's side is network_view(): downstream.snapshot_view's relationships and edges for
+the same selection and walk, grouped from committee_flow's own walk rather than by reading
+the whole snapshot file a second time (lane P1: culac-20260921's is 320 MB).
 """
 from __future__ import annotations
 
 from collections import ChainMap, OrderedDict, defaultdict
+import copy
 from datetime import date
 from decimal import Decimal
 import json
+import os
 from pathlib import Path
 import re
 import threading
+import time
 
 import downstream
 import drawer_sidecars
@@ -580,6 +586,10 @@ def committee_flow(committee, cycle, *, identifier='', depth=DEFAULT_DEPTH, root
     selected = selected_unit(identifier, committee, cycle, root)
     units = ChainMap(selected, downstream.inventory(root))
     found = downstream.network(selected, units)
+    # The walk read the previous cycle's units (carryover) through `units`. They are not in
+    # found['units'] and nothing below reads them, so they are let go before the ledgers run
+    # (culac-20260921's 2022 unit is 111 MB of JSON).
+    del units
     activity = downstream.activity(found)
     facts = snapshot_facts(identifier, root)
     last = depth
@@ -869,7 +879,7 @@ def committee_flow(committee, cycle, *, identifier='', depth=DEFAULT_DEPTH, root
     return {'graph': graph, 'found': found, 'ledgers': ledgers, 'root_ledger': root_ledger, 'hop': hop,
             'drawn': drawn, 'names': names, 'facts': facts, 'identifier': identifier, 'stages': stages,
             'last': last, 'cycle': cycle, 'committee': committee, 'root': root, 'parents': parents,
-            'label': label, 'adjustments': adjustments}
+            'label': label, 'adjustments': adjustments, 'selected': selected, 'activity': activity}
 
 
 # ------------------------------------------------------------------ values, checks and grouping
@@ -1019,6 +1029,20 @@ def _reconciliation(built, network_candidates, network_transfers, scope):
             'candidates': {'evidence_network': cents(network_candidates), 'flow': cents(flow_candidates)},
             'transfers': {'evidence_network': cents(network_transfers), 'flow': cents(flow_transfers)},
             'committees': sorted(built['drawn']), 'scope': scope}
+
+
+def network_view(built):
+    """/api/evidence-network's relationships and edges for this flow's snapshot, committee and cycle.
+
+    downstream.snapshot_view selects the snapshot's unit for the committee/cycle (the last one when
+    a file repeats it, as selected_unit does), walks downstream.network over it and the saved
+    inventory, and groups downstream.activity with downstream.relationships. committee_flow made
+    that same selection and walk; this groups its activity the same way, so the reconciliation is
+    against the evidence network's own figures without parsing the whole snapshot file and walking
+    the network a second time. reconcile() reads only these two fields (lane P1, 2026-09-27)."""
+    found = built['found']
+    return {'relationships': downstream.relationships(built['activity'], built['selected'], found),
+            'edges': found['edges']}
 
 
 def reconcile(built, view):
@@ -1371,9 +1395,13 @@ def carry_summary(found):
             'opened': len(carried.get('opened') or []), 'missing_units': len(carried.get('missing_units') or [])}
 
 
+# The prepared flow of each snapshot/committee/cycle/depth (_prepare): everything its answer holds
+# but the Top N grouping. An entry keeps no saved unit (lane P1: six entries each holding a
+# ~117 MB culac-20260921 unit, parsed, kept the console's memory for every later request).
 _CACHE = OrderedDict()
-_CACHE_LIMIT = 6
+_CACHE_LIMIT = 12
 _cache_guard = threading.Lock()
+_preparing = {}                 # key -> the lock of the one request preparing it (single flight, DE-026)
 
 
 def _stamp(path):
@@ -1385,6 +1413,48 @@ def _inventory_stamps(root):
     return tuple(_stamp(path) for path in sorted(Path(root).glob('*/snapshots.json')))
 
 
+def _facts_stamp(root, identifier):
+    """snapshot_facts' file, so a rewritten evidence.json is read again (None when there is none)."""
+    try:
+        return _stamp(Path(root) / identifier / 'evidence.json')
+    except OSError:
+        return None
+
+
+def _prepared(key, prepare):
+    """The prepared flow for key: from the cache, or prepared by one request however many ask for
+    it at once (a cold culac-20260921 cycle is seconds and most of a gigabyte; two at once, as a
+    Top change during a load asked, doubled both)."""
+    with _cache_guard:
+        prepared = _CACHE.get(key)
+        if prepared is not None:
+            _CACHE.move_to_end(key)
+            return prepared
+        lock = _preparing.setdefault(key, threading.Lock())
+    with lock:
+        try:
+            with _cache_guard:
+                prepared = _CACHE.get(key)
+                if prepared is not None:
+                    _CACHE.move_to_end(key)
+                    return prepared
+            prepared = prepare()
+            with _cache_guard:
+                _CACHE[key] = prepared
+                while len(_CACHE) > _CACHE_LIMIT:
+                    _CACHE.popitem(last=False)
+            return prepared
+        finally:
+            with _cache_guard:
+                if _preparing.get(key) is lock:
+                    del _preparing[key]
+
+
+def _key(root, identifier, committee, cycle, depth):
+    return (_inventory_stamps(root), _stamp(_snapshot_path(root, identifier)), _facts_stamp(root, identifier),
+            committee, str(cycle), depth)
+
+
 def committee_payload(committee, cycle, *, identifier='', basis='reported', top=DEFAULT_TOP, depth=DEFAULT_DEPTH,
                       root=None, evidence_view=None, industry=None, build_stamp=None):
     """The /api/flow answer for root=committee:<id>. evidence_view is for tests only."""
@@ -1392,38 +1462,148 @@ def committee_payload(committee, cycle, *, identifier='', basis='reported', top=
     if basis == 'attributed':
         raise FlowRefused(NO_ESTIMATE_BUNDLE, 'no_estimate_bundle', basis='attributed', offer='reported')
     identifier = identifier or newest_snapshot(committee, cycle, root)
-    key = (_inventory_stamps(root), _stamp(_snapshot_path(root, identifier)), committee, str(cycle), depth)
+    if evidence_view is not None:
+        return _answer(_prepare(committee, cycle, identifier, depth, root, evidence_view), top, depth, industry,
+                       build_stamp)
+    cold = []
+
+    def prepare():
+        cold.append(True)
+        return _prepare(committee, cycle, identifier, depth, root)
+    answer = _answer(_prepared(_key(root, identifier, committee, cycle, depth), prepare), top, depth, industry,
+                     build_stamp)
+    if cold:
+        warm_cycles(committee, cycle, identifier, depth, root)
+    return answer
+
+
+# Lane P1: a cycle switch on a large snapshot is a cold preparation of its own (each culac-20260921
+# cycle is its own ~100 MB unit). After a cold preparation, the snapshot's other cycles for the same
+# committee are prepared on one daemon thread, newest first, so the switch finds its flow ready.
+# server.py turns this on for the console that warms (its own data root, or MENTAT_PREWARM=1);
+# MENTAT_FLOW_WARM=0 turns it off. Each cycle waits for the console's low-memory floor.
+WARM_CYCLES = False
+WARM_MIN_FREE_BYTES = drawer_sidecars.MIN_FREE_BYTES    # prewarm.MIN_FREE_BYTES, 1.5 GB
+WARM_DELAY_SECONDS = 0.5                               # the answer that asked goes out first
+_warming = set()
+
+
+def _snapshot_cycles(identifier, committee, root):
+    """The cycles the saved snapshot holds for this committee (its index), newest first."""
+    path = _snapshot_path(root, identifier)
+    info = path.stat()
+    try:
+        _fingerprint, entries = drawer_sidecars.snapshot_index(str(path), info.st_mtime_ns, info.st_size)
+    except drawer_sidecars.Unindexable:
+        return []
+    return sorted({str(entry.get('cycle')) for entry in entries if entry.get('committee_id') == committee},
+                  reverse=True)
+
+
+def warm_cycles(committee, cycle, identifier, depth, root):
+    """Prepare the snapshot's other cycles for this committee on one daemon thread. Never raises; a
+    cycle that cannot be drawn is left to the click that asks for it."""
+    if not WARM_CYCLES or os.environ.get('MENTAT_FLOW_WARM', '').strip().lower() in ('0', 'off', 'false', 'no'):
+        return None
+    job = (str(root), identifier, committee, depth)
     with _cache_guard:
-        cached = _CACHE.get(key) if evidence_view is None else None
-    if cached is None:
-        built = committee_flow(committee, cycle, identifier=identifier, depth=depth, root=root)
-        view = evidence_view if evidence_view is not None else downstream.snapshot_view(identifier, committee, str(cycle), root)
-        reconciliation = reconcile(built, view)
-        cached = (built, reconciliation)
-        if evidence_view is None:
+        if job in _warming:
+            return None
+        _warming.add(job)
+
+    def run():
+        began, done, skipped = time.perf_counter(), [], ''
+        try:
+            time.sleep(WARM_DELAY_SECONDS)
+            for other in _snapshot_cycles(identifier, committee, root):
+                if other == str(cycle):
+                    continue
+                # A preparation a click started runs alone: the next cycle waits for it (up to a minute).
+                deadline = time.monotonic() + 60
+                while _preparing and time.monotonic() < deadline:
+                    time.sleep(0.2)
+                if drawer_sidecars.free_physical_bytes() < WARM_MIN_FREE_BYTES:
+                    skipped = f'low memory before {other}'
+                    break
+                key = _key(root, identifier, committee, other, depth)
+                with _cache_guard:
+                    if key in _CACHE:
+                        continue
+                try:
+                    _prepared(key, lambda other=other: _prepare(committee, other, identifier, depth, root))
+                    done.append(other)
+                except Exception:  # noqa: BLE001 - the click that asks for it reports it
+                    continue
+        except Exception as error:  # noqa: BLE001 - a warm never breaks the console
+            skipped = f'{type(error).__name__}: {error}'
+        finally:
             with _cache_guard:
-                _CACHE[key] = cached
-                while len(_CACHE) > _CACHE_LIMIT:
-                    _CACHE.popitem(last=False)
-    built, reconciliation = cached
+                _warming.discard(job)
+            try:
+                import glassbox_emit
+                glassbox_emit.emit('mentat.flow.warm', 'completed' if not skipped else 'skipped',
+                                   f'Flow warm {identifier} {committee}: prepared {", ".join(done) or "none"}'
+                                   f'{"; " + skipped if skipped else ""}', source='mentat-flow', stage='flow_warm',
+                                   duration_ms=int((time.perf_counter() - began) * 1000))
+            except Exception:  # noqa: BLE001 - emission never breaks the console it observes
+                pass
+    thread = threading.Thread(target=run, name='mentat-flow-warm', daemon=True)
+    thread.start()
+    return thread
+
+
+def _answer(prepared, top, depth, industry, build_stamp):
+    """One request's answer from a prepared flow: its refusal, or its Top N grouping."""
+    reconciliation = prepared['reconciliation']
     if not reconciliation['equal']:
         raise FlowRefused(
             'The flow does not reconcile with the evidence network for the same committees '
             f"(flow ${reconciliation['flow_total']:,.2f}, evidence network "
             f"${reconciliation['evidence_network_total']:,.2f}); it is not drawn.",
             'reconciliation', reconciliation=reconciliation)
-    graph = built['graph']
-    nodes = OrderedDict((key_, dict(node)) for key_, node in graph.nodes.items())
-    links = [dict(link) for link in graph.links.values()]
-    measure(nodes, links)
-    broken = conservation_errors(nodes)
+    broken = prepared['broken']
     if broken:
         raise FlowRefused('A committee in this flow does not balance: ' + ', '.join(
             f'{ident} in {cents(value_in)} out {cents(value_out)}' for ident, value_in, value_out in broken[:3]),
             'conservation')
-    routes = routes_of(built)
+    # Each request groups its own copies (measure() writes value_in/value_out on the nodes it is given).
+    nodes = OrderedDict((key, dict(node)) for key, node in prepared['nodes'].items())
+    links = [dict(link) for link in prepared['links']]
     grouped_nodes, grouped_links = group(nodes, links, top)
     measure(grouped_nodes, grouped_links)
+    shared = copy.deepcopy(prepared['shared'])
+    return {
+        'version': VERSION, 'industry': industry, 'build_stamp': build_stamp or prepared['build_stamp'],
+        'root': shared['root'], 'cycle': shared['cycle'], 'window': shared['window'],
+        'basis': 'reported', 'top': top, 'depth': depth, 'min_share': float(MIN_SHARE),
+        'stages': shared['stages'],
+        'nodes': [_node_out(node) for node in grouped_nodes.values()],
+        'links': [_link_out(link) for link in grouped_links],
+        'routes': shared['routes'], 'totals': shared['totals'],
+        'coverage': shared['coverage'],
+        'reconciliation': reconciliation,
+        'carryover': shared['carryover'],
+        'notes': shared['notes'],
+    }
+
+
+def _prepare(committee, cycle, identifier, depth, root, evidence_view=None):
+    """Everything the answer for one snapshot, committee, cycle and depth holds but the Top N
+    grouping, worked out once: the reconciliation, the conservation check, the measured ungrouped
+    graph, routes, totals, coverage and notes. It keeps none of the saved units it was read from."""
+    built = committee_flow(committee, cycle, identifier=identifier, depth=depth, root=root)
+    view = evidence_view if evidence_view is not None else network_view(built)
+    prepared = {'reconciliation': reconcile(built, view), 'broken': []}
+    if not prepared['reconciliation']['equal']:
+        return prepared
+    graph = built['graph']
+    nodes = OrderedDict((key_, dict(node)) for key_, node in graph.nodes.items())
+    links = [dict(link) for link in graph.links.values()]
+    measure(nodes, links)
+    prepared['broken'] = conservation_errors(nodes)
+    if prepared['broken']:
+        return prepared
+    routes = routes_of(built)
     item = built['root_ledger']
     graph_links = list(graph.links.values())
     root_id = 'committee:' + committee
@@ -1476,25 +1656,21 @@ def committee_payload(committee, cycle, *, identifier='', basis='reported', top=
     totals['unreached_count'] = len(unreached)
     ended_early = [entry['id'] for entry in per_committee if entry['drawn'] and entry['snapshot_through']
                    and entry['snapshot_through'] < item['coverage_end']]
-    return {
-        'version': VERSION, 'industry': industry, 'build_stamp': build_stamp or item['unit'].get('_sha256'),
+    prepared.update(nodes=nodes, links=links, build_stamp=item['unit'].get('_sha256'), shared={
         'root': {'kind': 'committee', 'id': committee, 'label': built['label'](committee),
                  'name_as_filed': item['name'], 'cycle': built['cycle'], 'snapshot': built['identifier'],
                  'committee_type': str(item['totals'].get('committee_type_full') or ''),
                  'fec_url': committee_url(committee, built['cycle'])},
         'cycle': built['cycle'], 'window': {'start': item['coverage_start'], 'end': item['coverage_end']},
-        'basis': 'reported', 'top': top, 'depth': depth, 'min_share': float(MIN_SHARE),
         'stages': built['stages'],
-        'nodes': [_node_out(node) for node in grouped_nodes.values()],
-        'links': [_link_out(link) for link in grouped_links],
         'routes': routes, 'totals': totals,
         'coverage': {'through': item['coverage_end'], 'ended_early': ended_early,
                      'per_committee': per_committee, 'unreached': unreached,
                      'beyond_depth': sorted(ident for ident in built['hop'] if ident not in built['drawn'])},
-        'reconciliation': reconciliation,
         'carryover': carry_summary(built['found']),
         'notes': notes_of(built, totals),
-    }
+    })
+    return prepared
 
 
 # ------------------------------------------------------------------ the industry flow (Graph, board #45)

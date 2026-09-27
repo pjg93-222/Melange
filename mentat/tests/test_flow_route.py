@@ -26,11 +26,14 @@ from collections import OrderedDict
 import copy
 from decimal import Decimal
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
 import threading
+import time
 import unittest
+from unittest.mock import patch
 import urllib.error
 import urllib.request
 
@@ -417,6 +420,167 @@ class DonorRefunds(unittest.TestCase):
             flow_data._CACHE.clear()
 
 
+def saved_units_in(value):
+    """Every saved unit (a dict carrying the three schedules and a summary) reachable from value."""
+    found, seen, stack = [], set(), [value]
+    while stack:
+        item = stack.pop()
+        if id(item) in seen:
+            continue
+        seen.add(id(item))
+        if isinstance(item, dict):
+            if {'receipts', 'disbursements', 'expenditures', 'totals'} <= set(item):
+                found.append(item)
+            stack.extend(item.values())
+        elif isinstance(item, (list, tuple, set)):
+            stack.extend(item)
+    return found
+
+
+class PreparedFlow(unittest.TestCase):
+    """Lane P1 (performance only): the reconciliation's evidence-network side is exactly
+    downstream.snapshot_view's, without reading the snapshot file a second time; the cache keeps no
+    saved unit; one request prepares a flow however many ask for it at once; and every Top N grouped
+    from that one preparation is the answer a fresh preparation gives."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        write_fixture(cls.temp.name)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+        flow_data._CACHE.clear()
+
+    def assert_the_evidence_network_s_view(self, identifier, committee, cycle, root=None):
+        built = flow_data.committee_flow(committee, cycle, identifier=identifier, root=root)
+        mine = flow_data.network_view(built)
+        theirs = downstream.snapshot_view(identifier, committee, cycle, root)
+        # snapshot_view names each route's committees; the reconciliation reads neither those nor
+        # anything else beyond amounts, cycles, committees and terminal flags.
+        rows = [{key: value for key, value in row.items() if key != 'route_names'} for row in theirs['relationships']]
+        self.assertEqual(json.dumps(mine['relationships']), json.dumps(rows))
+        self.assertEqual(json.dumps(mine['edges']), json.dumps(theirs['edges']))
+        self.assertTrue(flow_data.reconcile(built, mine)['equal'])
+
+    def test_the_fixture_s_view_is_the_evidence_network_s(self):
+        self.assert_the_evidence_network_s_view('flow-fixture', ROOT_ID, '2024', Path(self.temp.name))
+
+    @unittest.skipUnless((SAVED / FAIRSHAKE / 'snapshots.json').exists() and (SAVED / SLF / 'snapshots.json').exists(),
+                         'the saved FAIRSHAKE and Senate Leadership Fund snapshots are not on this machine')
+    def test_the_saved_snapshots_views_are_the_evidence_network_s(self):
+        for identifier, committee, cycle in ((FAIRSHAKE, 'C00835959', '2024'), (FAIRSHAKE, 'C00835959', '2026'),
+                                             (SLF, 'C00571703', '2022'), (SLF, 'C00571703', '2024'),
+                                             (SLF, 'C00571703', '2026')):
+            with self.subTest(snapshot=identifier, cycle=cycle):
+                self.assert_the_evidence_network_s_view(identifier, committee, cycle)
+
+    def test_one_preparation_serves_every_top_and_keeps_no_saved_unit(self):
+        flow_data._CACHE.clear()
+        original, calls, bodies = flow_data._prepare, [], {}
+
+        def counted(*args, **kwargs):
+            calls.append(args[:2])
+            time.sleep(0.3)            # the preparation is still running when the other requests arrive
+            return original(*args, **kwargs)
+
+        def ask(top):
+            bodies[top] = json.dumps(produce(self.temp.name, top=top))
+        flow_data._prepare = counted
+        try:
+            threads = [threading.Thread(target=ask, args=(top,)) for top in (8, 3, 0)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+            ask(2)
+        finally:
+            flow_data._prepare = original
+        self.assertEqual(calls, [(ROOT_ID, '2024')])
+        self.assertEqual(len(flow_data._CACHE), 1)
+        self.assertEqual(saved_units_in(list(flow_data._CACHE.values())), [])
+        # Teeth: the walk the preparation came from does hold the saved units.
+        self.assertTrue(saved_units_in(flow_data.committee_flow(ROOT_ID, '2024', identifier='flow-fixture',
+                                                                root=Path(self.temp.name))))
+        # Each Top N from the one preparation is what a fresh preparation answers.
+        for top, body in bodies.items():
+            flow_data._CACHE.clear()
+            self.assertEqual(body, json.dumps(produce(self.temp.name, top=top)), top)
+        flow_data._CACHE.clear()
+
+
+class CycleWarm(unittest.TestCase):
+    """Lane P1 step 2: after a cold flow, the snapshot's other cycles for the committee are prepared on one
+    daemon thread when the console turns it on (server.py, on the console that warms). Off by default, off
+    with MENTAT_FLOW_WARM=0, and skipped below the memory floor; what it prepares is what a click would."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.temp = tempfile.TemporaryDirectory()
+        units = fixture_units()
+        earlier = copy.deepcopy(units[0])
+        earlier['cycle'] = 2022           # the same root, a second cycle in the same snapshot file
+        write_fixture(cls.temp.name, units + [earlier], identifier='flow-cycles')
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.temp.cleanup()
+
+    def setUp(self):
+        flow_data._CACHE.clear()
+
+    def tearDown(self):
+        flow_data.WARM_CYCLES = False
+        flow_data._CACHE.clear()
+
+    def ask(self, cycle):
+        return flow_data.committee_payload(ROOT_ID, cycle, identifier='flow-cycles', root=Path(self.temp.name))
+
+    @staticmethod
+    def settle():
+        for thread in [thread for thread in threading.enumerate() if thread.name == 'mentat-flow-warm']:
+            thread.join(60)
+
+    def test_it_is_off_unless_the_console_turns_it_on(self):
+        self.assertFalse(flow_data.WARM_CYCLES)
+        self.ask('2024')
+        self.settle()
+        self.assertEqual(len(flow_data._CACHE), 1)
+
+    def test_a_cold_flow_prepares_the_other_cycle_and_the_switch_reuses_it(self):
+        flow_data.WARM_CYCLES = True
+        original, calls = flow_data._prepare, []
+
+        def counted(*args, **kwargs):
+            calls.append(str(args[1]))
+            return original(*args, **kwargs)
+        flow_data._prepare = counted
+        try:
+            self.ask('2024')
+            self.settle()
+            switched = json.dumps(self.ask('2022'))
+            self.ask('2024')
+        finally:
+            flow_data._prepare = original
+        self.assertEqual(calls, ['2024', '2022'])       # the switch, and the way back, prepared nothing
+        flow_data.WARM_CYCLES = False
+        flow_data._CACHE.clear()
+        self.assertEqual(switched, json.dumps(self.ask('2022')))
+
+    def test_the_switch_and_the_memory_floor_turn_it_off(self):
+        flow_data.WARM_CYCLES = True
+        with patch.dict(os.environ, {'MENTAT_FLOW_WARM': '0'}):
+            self.ask('2024')
+            self.settle()
+        self.assertEqual(len(flow_data._CACHE), 1)
+        flow_data._CACHE.clear()
+        with patch.object(flow_data.drawer_sidecars, 'free_physical_bytes', return_value=0):
+            self.ask('2024')
+            self.settle()
+        self.assertEqual(len(flow_data._CACHE), 1)
+
+
 @unittest.skipUnless((SAVED / FAIRSHAKE / 'snapshots.json').exists(), 'the saved FAIRSHAKE snapshot is not on this machine')
 class Fairshake2024(unittest.TestCase):
     """Board #44's real figures, to the cent (packet section 4)."""
@@ -759,18 +923,20 @@ class Route(unittest.TestCase):
         self.assertEqual(status, 400)
 
     def test_the_route_refuses_a_flow_that_disagrees(self):
-        original = downstream.snapshot_view
+        # The route reads the evidence network's side through flow_data.network_view (lane P1), which
+        # PreparedFlow holds to downstream.snapshot_view's relationships and edges.
+        original = flow_data.network_view
 
         def disagreeing(*args, **kwargs):
             view = original(*args, **kwargs)
             view['relationships'][0]['amount'] += 1.0
             return view
         flow_data._CACHE.clear()
-        downstream.snapshot_view = disagreeing
+        flow_data.network_view = disagreeing
         try:
             status, body = get(self.port, f'root=committee:C00835959&cycle=2024&id={FAIRSHAKE}')
         finally:
-            downstream.snapshot_view = original
+            flow_data.network_view = original
             flow_data._CACHE.clear()
         self.assertEqual((status, body['reason'], body['reconciliation']['equal']), (409, 'reconciliation', False))
 

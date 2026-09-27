@@ -3524,6 +3524,10 @@ def main():
     if warm:
         prewarm.start_startup_warm(read_only=options.read_only, app=server.app)
         prewarm.launch_warmer(data_root=data_root, read_only=options.read_only, console_port=server.app.port)
+        # Lane P1: after a cold /api/flow, the snapshot's other cycles for the same committee are
+        # prepared in the background (flow_data.warm_cycles; MENTAT_FLOW_WARM=0 turns it off).
+        import flow_data
+        flow_data.WARM_CYCLES = True
     print(f"Mentat app: http://127.0.0.1:{options.port}", flush=True)
     server.serve_forever()
 
