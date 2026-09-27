@@ -37,6 +37,10 @@
   const MAX_CIRCLES = 800;       // adaptive clustering bounds SVG work at every zoom
   const LOCATOR_SCALE = 1.5;      // above this, the inset locator appears
   const TEAL_RAMP = ['#e8f3f1', '#b9ddd8', '#7cbfb7', '#4c9e95', '#327a7a'];
+  const FRAME_GAP = 10;           // px kept between the framed map and what covers it
+  const FRAME_PAD = 6;            // canvas units a frame keeps inside the canvas's edge
+  const FRAME_MIN = 0.3;          // below this the map keeps its full fit (too small to read)
+  const IDENTITY = Object.freeze({scale: 1, x: 0, y: 0});
 
   /* Circle size is the number of DISTINCT contributors, not the amount
      (owner's ruling on board 6): the amount is already carried by the heat fill
@@ -67,6 +71,78 @@
     const scale = clampScale(Math.min((width - pad * 2) / spanX, (height - pad * 2) / spanY));
     return {scale: scale, x: width / 2 - scale * (box[0] + box[2]) / 2,
             y: height / 2 - scale * (box[1] + box[3]) / 2};
+  }
+
+  /* THE FRAME (boards #48 and #55). With PAC evidence's Layer control open, the
+     whole map is fitted into the room the control and its toolbar leave, as the
+     boards compose it: the lower 48 beside the control, Alaska and Hawaii below
+     it when they fit there. The frame is a second, outer transform: the viewport
+     draws translate(frame) scale(frame) round the reader's own zoom and pan, which
+     it never changes, so Home, the zoom limits, Find and a saved view keep their
+     meaning inside the room. With no cover (the control closed) it is the
+     identity, the full fit.
+     regionBoxes: the map's separate pieces - the lower 48 and each inset - from
+     the region the boundary file tags each state with; a file without regions
+     is one piece. */
+  function regionBoxes(shapes, width, height) {
+    const boxes = new Map();
+    for (const entry of Object.values((shapes && shapes.states) || {})) {
+      const box = ((entry && entry.bbox) || []).map(Number);
+      if (box.length !== 4 || !box.every(Number.isFinite)) continue;
+      const key = (entry && entry.region) || 'lower48', found = boxes.get(key);
+      boxes.set(key, found ? [Math.min(found[0], box[0]), Math.min(found[1], box[1]),
+                              Math.max(found[2], box[2]), Math.max(found[3], box[3])] : box);
+    }
+    return boxes.size ? [...boxes.values()] : [[0, 0, width || 975, height || 610]];
+  }
+
+  /* The largest frame - never above the full fit, scale 1 - that keeps every
+     piece (`regions`, map units) inside the canvas, `pad` in from its edge, and
+     clear of every box in `covers` (canvas units). The offsets tried are the
+     edges the canvas, the pieces and the covers make, so the fit is exact rather
+     than a guess on a grid (a feasible offset can always slide to one of them),
+     and the middle; of those that fit, the one nearest the middle wins. Below FRAME_MIN, or with
+     the full fit already clear, the answer is the identity. Returned rather than
+     applied, as flyToTransform is. */
+  function frameAround(regions, covers, width, height, pad) {
+    const pieces = (regions || []).filter(box => Array.isArray(box) && box.length === 4 && box.every(Number.isFinite));
+    const blocks = (covers || []).filter(box => Array.isArray(box) && box.length === 4 && box.every(Number.isFinite)
+                                               && box[2] > box[0] && box[3] > box[1]);
+    const margin = Number(pad) || 0, eps = 1e-6;
+    const clear = (s, tx, ty) => pieces.every(p => blocks.every(o => s * p[2] + tx <= o[0] + eps
+      || s * p[0] + tx >= o[2] - eps || s * p[3] + ty <= o[1] + eps || s * p[1] + ty >= o[3] - eps));
+    if (!pieces.length || !blocks.length || clear(1, 0, 0)) return {scale: 1, x: 0, y: 0};
+    const all = [Math.min(...pieces.map(p => p[0])), Math.min(...pieces.map(p => p[1])),
+                 Math.max(...pieces.map(p => p[2])), Math.max(...pieces.map(p => p[3]))];
+    const place = s => {
+      const x0 = margin - s * all[0], x1 = width - margin - s * all[2];
+      const y0 = margin - s * all[1], y1 = height - margin - s * all[3];
+      if (x0 > x1 + eps || y0 > y1 + eps) return null;
+      // The middle itself is tried too, so a map with room to spare sits centred on that axis.
+      const mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+      const xs = [x0, x1, mx], ys = [y0, y1, my];
+      for (const p of pieces) {
+        for (const o of blocks) { xs.push(o[0] - s * p[2], o[2] - s * p[0]); ys.push(o[1] - s * p[3], o[3] - s * p[1]); }
+      }
+      let best = null;
+      for (const tx of xs) {
+        if (tx < x0 - eps || tx > x1 + eps) continue;
+        for (const ty of ys) {
+          if (ty < y0 - eps || ty > y1 + eps || !clear(s, tx, ty)) continue;
+          const distance = (tx - mx) * (tx - mx) + (ty - my) * (ty - my);
+          if (!best || distance < best.distance) best = {x: tx, y: ty, distance: distance};
+        }
+      }
+      return best;
+    };
+    let low = FRAME_MIN, high = 1;
+    if (!place(low)) return {scale: 1, x: 0, y: 0};
+    for (let round = 0; round < 24; round += 1) {
+      const mid = (low + high) / 2;
+      if (place(mid)) low = mid; else high = mid;
+    }
+    const spot = place(low);
+    return {scale: low, x: spot.x, y: spot.y};
   }
 
   /* Circles whose centres land within MERGE_PIXELS of each other on SCREEN are
@@ -206,6 +282,7 @@
   }
 
   const PURE = {clampScale: clampScale, donorRadius: donorRadius, flyToTransform: flyToTransform, shareBaseFor: shareBaseFor, shareOf: shareOf,
+                regionBoxes: regionBoxes, frameAround: frameAround, FRAME_GAP: FRAME_GAP, FRAME_PAD: FRAME_PAD, FRAME_MIN: FRAME_MIN,
                 mergeCircles: mergeCircles, indexPoints, pointsInBox, parseSearch: parseSearch, heatColour: heatColour,
                 heatDomain: heatDomain, amountsFor: amountsFor, domainFor: domainFor, legislativeRows,
                 unionDomain: unionDomain, rangeFor: rangeFor,
@@ -236,7 +313,7 @@
   function build(host, view) {
     host.textContent = '';
     const shapes = view.shapes || {};
-    const state = {scale: 1, x: 0, y: 0, width: shapes.width || 975, height: shapes.height || 610,
+    const state = {scale: 1, x: 0, y: 0, frame: IDENTITY, width: shapes.width || 975, height: shapes.height || 610,
                    layers: {}, points: [], missing: [], frames: [], shapesKey: '',
                    reduced: Boolean(window.matchMedia
                      && window.matchMedia('(prefers-reduced-motion: reduce)').matches)};
@@ -661,10 +738,19 @@
     return {placed: placed, missing: missing};
   }
 
+  // The drawn zoom and offset: the reader's zoom and pan inside the frame (the
+  // whole canvas, or the room an open Layer control leaves). Every screen-sized
+  // thing - circle radii, badge text, the merge distance, the visible box - reads
+  // these; the reader's own state.scale/x/y keep their meaning inside the frame.
+  const zoomOf = state => state.scale * (state.frame || IDENTITY).scale;
+  const offsetOf = state => {
+    const frame = state.frame || IDENTITY;
+    return {x: frame.x + frame.scale * state.x, y: frame.y + frame.scale * state.y};
+  };
   function viewportBox(state) {
-    const inverse = 1 / state.scale;
-    return [(0 - state.x) * inverse, (0 - state.y) * inverse,
-            (state.width - state.x) * inverse, (state.height - state.y) * inverse];
+    const inverse = 1 / zoomOf(state), at = offsetOf(state);
+    return [(0 - at.x) * inverse, (0 - at.y) * inverse,
+            (state.width - at.x) * inverse, (state.height - at.y) * inverse];
   }
 
   function drawCircles(host, state, view) {
@@ -688,11 +774,13 @@
       wanted = state.pointIndex ? pointsInBox(state.pointIndex, box) : all.filter(point => point.x >= box[0] && point.x <= box[2]
         && point.y >= box[1] && point.y <= box[3]);
     }
+    // Screen sizes (the merge distance, radii, badge text) follow the drawn zoom, frame included.
+    const zoom = zoomOf(state);
     let spacing = MERGE_PIXELS;
-    let merged = mergeCircles(wanted, state.scale, spacing);
+    let merged = mergeCircles(wanted, zoom, spacing);
     while (merged.length > MAX_CIRCLES) {
       spacing *= 1.4;
-      merged = mergeCircles(wanted, state.scale, spacing);
+      merged = mergeCircles(wanted, zoom, spacing);
     }
     const zipDomain = state.domain || rangeFor(view);
     merged.forEach((point, index) => {
@@ -707,7 +795,7 @@
         circle.style.fill = heatColour(point.member.amount, null, zipDomain) || '#f3f1ed';
         circle.dataset.heatAmount = point.member.amount; circle.dataset.emptyFill = '#f3f1ed';
       }
-      circle.setAttribute('r', (radius / state.scale).toFixed(4));
+      circle.setAttribute('r', (radius / zoom).toFixed(4));
       state.circleNodes.push({node:circle, radius});
       const title = node('title', {});
       title.textContent = point.places > 1
@@ -723,14 +811,14 @@
                                     y: point.y.toFixed(2), 'text-anchor': 'middle',
                                     'dominant-baseline': 'central'});
         badge.textContent = String(point.contributors);
-        badge.style.fontSize = (8 / state.scale).toFixed(4) + 'px';
+        badge.style.fontSize = (8 / zoom).toFixed(4) + 'px';
         state.badgeNodes.push(badge);
         state.layers.badges.appendChild(badge);
       }
     });
     // Re-clustering is part of navigation: restarting arrival animations for
     // thousands of circles on every wheel event stalls subsequent frames.
-    state.circleScale = state.scale;
+    state.circleScale = zoom;
     if (view.focus) api.select(host, view.focus);
   }
 
@@ -741,18 +829,20 @@
     // Keep some of the national canvas reachable, even after a long drag.
     state.x = Math.max(state.width * (1-state.scale)-40, Math.min(40,state.x));
     state.y = Math.max(state.height * (1-state.scale)-40, Math.min(40,state.y));
+    // One transform still: the reader's zoom and pan drawn inside the frame.
+    const zoom = zoomOf(state), at = offsetOf(state);
     state.viewport.setAttribute('transform',
-      'translate(' + state.x.toFixed(3) + ' ' + state.y.toFixed(3) + ') scale('
-      + state.scale.toFixed(5) + ')');
+      'translate(' + at.x.toFixed(3) + ' ' + at.y.toFixed(3) + ') scale('
+      + zoom.toFixed(5) + ')');
     // An inherited zoom CSS variable invalidated every map descendant's
     // style on each frame. Only circle radii and badge text need resizing.
-    if (state.circleScale !== state.scale) {
+    if (state.circleScale !== zoom) {
       for (const entry of state.circleNodes || [])
-        entry.node.setAttribute('r', (entry.radius / state.scale).toFixed(4));
+        entry.node.setAttribute('r', (entry.radius / zoom).toFixed(4));
       // Re-laying out thousands of numeric labels dominates wheel frames.
       // Restore their exact size with the settled cluster pass instead.
       state.layers.badges.style.visibility = 'hidden';
-      state.circleScale = state.scale;
+      state.circleScale = zoom;
     }
     // Layout profiling is opt-in. Forcing it during every live wheel/pan frame
     // defeats the browser's frame batching and makes instrumentation the stall.
@@ -839,7 +929,10 @@
     stopFlight(state);
     const next = clampScale(state.scale * factor);
     if (next === state.scale) return;
-    const at = point || {x: state.width / 2, y: state.height / 2};
+    // `point` is in the canvas's units; the zoom and pan it moves live inside the frame.
+    const frame = state.frame || IDENTITY;
+    const at = point ? {x: (point.x - frame.x) / frame.scale, y: (point.y - frame.y) / frame.scale}
+      : {x: state.width / 2, y: state.height / 2};
     const mapX = (at.x - state.x) / state.scale;
     const mapY = (at.y - state.y) / state.scale;
     state.scale = next;
@@ -854,6 +947,45 @@
     state.animation = 0;
     state.flightTarget = null;
     clearTimeout(state.circleTimer);
+  }
+
+  /* Move the frame (api.frame), easing as a fly does; the reader's own zoom and
+     pan are not touched. A map's first frame lands at once (a map drawn with its
+     Layer control already open does not slide), as does any frame under reduced
+     motion. Fills, circles and the overlays settle when the frame does. */
+  function setFrame(host, state, target) {
+    const first = !state.framed;
+    state.framed = true;
+    const near = (a, b) => Math.abs(a.scale - b.scale) < 1e-4 && Math.abs(a.x - b.x) < 0.05 && Math.abs(a.y - b.y) < 0.05;
+    if (state.frameAnimation) {
+      if (state.frameTarget && near(state.frameTarget, target)) return;   // already easing there
+      cancelAnimationFrame(state.frameAnimation);
+      state.frameAnimation = 0;
+    } else if (near(state.frame || IDENTITY, target)) return;
+    const from = state.frame || IDENTITY;
+    state.frameTarget = target;
+    const settle = () => {
+      state.frameAnimation = 0;
+      state.frameTarget = null;
+      state.frame = target.scale === 1 && target.x === 0 && target.y === 0 ? IDENTITY
+        : Object.freeze({scale: target.scale, x: target.x, y: target.y});
+      applyTransform(state);
+      updateHeat(state);
+      drawCircles(host, state, state.view || {});
+      drawLegislative(host, state, state.view || {});
+    };
+    if (first || state.reduced) { settle(); return; }
+    const started = performance.now();
+    const step = now => {
+      const at = Math.max(0, Math.min(1, (now - started) / FLY_MS));
+      if (at >= 1) { settle(); return; }
+      const eased = 1 - Math.pow(1 - at, 3);
+      state.frame = {scale: from.scale + (target.scale - from.scale) * eased,
+                     x: from.x + (target.x - from.x) * eased, y: from.y + (target.y - from.y) * eased};
+      applyTransform(state);
+      state.frameAnimation = requestAnimationFrame(step);
+    };
+    state.frameAnimation = requestAnimationFrame(step);
   }
 
   function pointIn(state, event) {
@@ -886,9 +1018,10 @@
       stopFlight(state);
       hide(state);
       const matrix = svg.getScreenCTM();
+      // A screen pixel in the reader's own units: the canvas's scale, then the frame's.
       dragging = {id: event.pointerId, x: event.clientX, y: event.clientY,
                   fromX: state.x, fromY: state.y, moved: false,
-                  unit: matrix?.a ? 1 / matrix.a : 1};
+                  unit: (matrix?.a ? 1 / matrix.a : 1) / (state.frame || IDENTITY).scale};
     });
     svg.addEventListener('pointermove', event => {
       const state = views.get(host);
@@ -1051,7 +1184,7 @@
       const state = views.get(host);
       if (!state || !state.svg) return null;
       if (!state.decor) state.decor = {svg: state.svg, viewport: state.viewport, layers: state.layers, plot: state.plot,
-        width: state.width, height: state.height, scale: () => state.scale, visibleBox: () => viewportBox(state)};
+        width: state.width, height: state.height, scale: () => zoomOf(state), visibleBox: () => viewportBox(state)};
       state.decor.shapes = (state.view && state.view.shapes) || {};
       state.decor.points = state.points || [];
       return state.decor;
@@ -1160,6 +1293,42 @@
     reset: function (host) {
       const state = views.get(host);
       if (state) flyTo(host, state, {scale: 1, x: 0, y: 0});
+    },
+
+    /* Boards #48 and #55: fit the whole map into the room `covers` leave - the
+       client rects of what floats over the map (PAC evidence's open Layer control
+       and the toolbar beside it) - as the frame round the reader's own zoom and
+       pan (see frameAround). No covers, or covers clear of the full fit, is the
+       full fit. Returns the frame, in the canvas's units. */
+    frame: function (host, covers) {
+      const state = views.get(host);
+      if (!state || !state.svg) return null;
+      let target = IDENTITY;
+      const rects = (covers || []).filter(rect => rect && rect.width > 0 && rect.height > 0);
+      const matrix = rects.length ? state.svg.getScreenCTM() : null;
+      if (matrix && matrix.a) {
+        const inverse = matrix.inverse(), gap = FRAME_GAP / matrix.a;
+        const toCanvas = (x, y) => {
+          const point = state.svg.createSVGPoint();
+          point.x = x; point.y = y;
+          return point.matrixTransform(inverse);
+        };
+        const blocks = rects.map(rect => {
+          const a = toCanvas(rect.left, rect.top), b = toCanvas(rect.right, rect.bottom);
+          return [Math.min(a.x, b.x) - gap, Math.min(a.y, b.y) - gap, Math.max(a.x, b.x) + gap, Math.max(a.y, b.y) + gap];
+        });
+        target = frameAround(regionBoxes((state.view && state.view.shapes) || {}, state.width, state.height),
+                             blocks, state.width, state.height, FRAME_PAD);
+      }
+      setFrame(host, state, target);
+      return {scale: target.scale, x: target.x, y: target.y};
+    },
+
+    /* The frame now drawn (identity when none), for the suites and captures. */
+    framing: function (host) {
+      const state = views.get(host);
+      const frame = state ? (state.frame || IDENTITY) : null;
+      return frame ? {scale: frame.scale, x: frame.x, y: frame.y, animating: Boolean(state.frameAnimation)} : null;
     },
 
     /* JS transform-update duration, not total paint/frame time. Tests may set

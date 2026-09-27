@@ -218,3 +218,71 @@ test('build 06: two compared cycles share one heat range, the union over the sam
   assert.deepEqual(map.rangeFor({...b,layer:'state',direction:'raised',companion:a}),[50,900],
     'both maps compute the same shared range');
 });
+
+/* Lane G2b (boards #48, #55): the frame that fits the whole map beside an open Layer control. */
+const REGIONS = {states: {
+  AK: {bbox: [20.3, 425.2, 235.6, 540.7], region: 'alaska'}, HI: {bbox: [258.0, 526.6, 352.0, 587.4], region: 'hawaii'},
+  PR: {bbox: [876.1, 565.4, 924.9, 576.5], region: 'caribbean'},
+  CA: {bbox: [99.1, 150.0, 260.0, 420.0], region: 'lower48'}, ME: {bbox: [800.0, 6.0, 876.1, 120.0], region: 'lower48'},
+  TX: {bbox: [300.0, 300.0, 560.0, 496.0], region: 'lower48'}}};
+const placedBox = (frame, p) => [frame.x + frame.scale * p[0], frame.y + frame.scale * p[1], frame.x + frame.scale * p[2], frame.y + frame.scale * p[3]];
+const overlaps = (a, b) => a[2] > b[0] + 1e-6 && a[0] < b[2] - 1e-6 && a[3] > b[1] + 1e-6 && a[1] < b[3] - 1e-6;
+
+test('G2b: the map\'s pieces are its regions - the lower 48 and each inset', () => {
+  const boxes = map.regionBoxes(REGIONS, 975, 610);
+  assert.strictEqual(boxes.length, 4);
+  assert.deepStrictEqual(boxes.find(box => box[0] === 99.1), [99.1, 6.0, 876.1, 496.0], 'the lower 48 is the union of its states');
+  assert.deepStrictEqual(map.regionBoxes({}, 975, 610), [[0, 0, 975, 610]], 'a file without states is one piece: the canvas');
+  assert.deepStrictEqual(map.regionBoxes({states: {XX: {bbox: [1, 2, 3, 4]}}}, 975, 610), [[1, 2, 3, 4]], 'no region tag counts as the lower 48');
+});
+
+test('G2b: with nothing over the map, or covers clear of it, the frame is the full fit', () => {
+  const pieces = map.regionBoxes(REGIONS, 975, 610);
+  assert.deepStrictEqual(map.frameAround(pieces, [], 975, 610, 6), {scale: 1, x: 0, y: 0});
+  assert.deepStrictEqual(map.frameAround(pieces, [[0, 0, 15, 90]], 975, 610, 6), {scale: 1, x: 0, y: 0}, 'a toolbar in the empty corner');
+  assert.deepStrictEqual(map.frameAround(pieces, [[5, 5, 5, 90]], 975, 610, 6), {scale: 1, x: 0, y: 0}, 'an empty rect covers nothing');
+});
+
+test('G2b: an open control at the top left: the whole map fits in the room to its right, insets below it', () => {
+  const pieces = map.regionBoxes(REGIONS, 975, 610);
+  // The Layer control and the toolbar column, in canvas units (b55's measured place), with the 10px gap.
+  const covers = [[103, 29, 465, 405], [5, 5, 60, 250]];
+  const frame = map.frameAround(pieces, covers, 975, 610, 6);
+  assert.ok(frame.scale < 1 && frame.scale > 0.5, 'scaled to fit, not shrunk to nothing: ' + frame.scale);
+  for (const piece of pieces) {
+    const box = placedBox(frame, piece);
+    assert.ok(box[0] >= 6 - 1e-6 && box[1] >= 6 - 1e-6 && box[2] <= 969 + 1e-6 && box[3] <= 604 + 1e-6, 'inside the canvas: ' + box);
+    for (const cover of covers) assert.ok(!overlaps(box, cover), 'clear of ' + cover + ': ' + box);
+  }
+  const lower48 = placedBox(frame, pieces.find(box => box[0] === 99.1));
+  assert.ok(lower48[0] >= 465 - 1e-6, 'the lower 48 sits right of the control');
+  const alaska = placedBox(frame, pieces.find(box => box[0] === 20.3));
+  assert.ok(alaska[1] >= 405 - 1e-6 || alaska[0] >= 465 - 1e-6, 'Alaska is below the control or right of it');
+  // Nearly the largest fit: 2% more scale has no clear placement on a fine grid.
+  const bigger = frame.scale * 1.02, fits = [];
+  for (let x = -200; x <= 975; x += 2.5) {
+    for (let y = -100; y <= 610; y += 2.5) {
+      const trial = {scale: bigger, x, y};
+      if (pieces.every(piece => { const box = placedBox(trial, piece);
+        return box[0] >= 6 && box[1] >= 6 && box[2] <= 969 && box[3] <= 604 && covers.every(cover => !overlaps(box, cover)); })) fits.push([x, y]);
+    }
+  }
+  assert.deepStrictEqual(fits, [], 'no clear placement at 2% more scale');
+});
+
+test('G2b: beside a control as tall as the map, the whole map sits right of it, centred top to bottom', () => {
+  const pieces = map.regionBoxes(REGIONS, 975, 610);
+  const covers = [[103, 29, 465, 590], [5, 5, 60, 250]];
+  const frame = map.frameAround(pieces, covers, 975, 610, 6);
+  assert.ok(frame.scale < 0.62 && frame.scale > 0.5, 'the room right of the control sets the scale: ' + frame.scale);
+  const boxes = pieces.map(piece => placedBox(frame, piece));
+  for (const box of boxes) assert.ok(box[0] >= 465 - 1e-6, 'every piece right of the control: ' + box);
+  const top = Math.min(...boxes.map(box => box[1])), bottom = Math.max(...boxes.map(box => box[3]));
+  assert.ok(Math.abs((top + bottom) / 2 - 305) < 1, 'centred in the canvas height: ' + top + '..' + bottom);
+});
+
+test('G2b: a control that leaves no readable room keeps the full fit', () => {
+  const pieces = map.regionBoxes(REGIONS, 975, 610);
+  assert.deepStrictEqual(map.frameAround(pieces, [[0, 0, 900, 610]], 975, 610, 6), {scale: 1, x: 0, y: 0});
+  assert.strictEqual(map.FRAME_MIN, 0.3);
+});

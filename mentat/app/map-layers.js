@@ -734,17 +734,37 @@
   }
   // A continuous scale over a layer's positive values: logarithmic for
   // money and counts that span decades, linear when the range is narrow.
-  function scaleFor(values) {
+  // With `clamp` (a Filled or Hexbin layer's colour, #53) and values that span
+  // more than CLAMP_DECADES orders of magnitude, the log scale is clamped low
+  // (the lead's call on lane F2c's note): it starts at the CLAMP_LOW quantile of
+  // the places - a real value of the layer - and every place at or below that
+  // floor takes the ramp's first colour, so a few near-empty places cannot
+  // stretch the scale. The top stays the largest place unless CLAMP_HIGH names
+  // a quantile (then every place at or above it takes the last colour).
+  // `floor` and `ceiling` are the scale's ends; the legend prints them.
+  const CLAMP_DECADES = 3, CLAMP_LOW = 0.1, CLAMP_HIGH = 0.95;
+  function scaleFor(values, options) {
     const positive = [...values].filter(value => Number.isFinite(value) && value > 0);
-    if (!positive.length) return {min: 0, max: 0, log: false, position: () => 0};
+    if (!positive.length) return {min: 0, max: 0, log: false, floor: 0, ceiling: 0, clamped: false, position: () => 0};
     const min = Math.min(...positive), max = Math.max(...positive);
     const log = max / min > 20;
+    let floor = min, ceiling = max;
+    if (log && options && options.clamp && max / min > Math.pow(10, CLAMP_DECADES)) {
+      const sorted = positive.slice().sort((a, b) => a - b);
+      const at = share => sorted[Math.max(0, Math.min(sorted.length - 1, Math.floor(share * (sorted.length - 1))))];
+      floor = at(CLAMP_LOW);
+      if (CLAMP_HIGH != null) ceiling = at(CLAMP_HIGH);
+      if (!(ceiling > floor)) { floor = min; ceiling = max; }
+    }
+    const clamped = floor > min || ceiling < max;
     const position = value => {
       if (!(value > 0) || max <= 0) return 0;
       if (max === min) return 1;
-      return log ? (Math.log(value) - Math.log(min)) / (Math.log(max) - Math.log(min)) : (value - min) / (max - min);
+      if (!log) return (value - min) / (max - min);
+      if (!clamped) return (Math.log(value) - Math.log(min)) / (Math.log(max) - Math.log(min));
+      return Math.max(0, Math.min(1, (Math.log(value) - Math.log(floor)) / (Math.log(ceiling) - Math.log(floor))));
     };
-    return {min, max, log, position};
+    return {min, max, log, floor, ceiling, clamped, position};
   }
 
   /* ---------------------------------------------------------- the layer */
@@ -770,7 +790,8 @@
       const raw = feature[measure.id];
       return measure.aggregation === 'mean' && feature.places ? raw / feature.places : raw;
     };
-    const colourScale = scaleFor(features.map(feature => valueOf(feature, colourMeasure || {id: 'amount'})));
+    // A Filled (or Hexbin) layer's colours clamp a log scale that spans more than three decades (#53).
+    const colourScale = scaleFor(features.map(feature => valueOf(feature, colourMeasure || {id: 'amount'})), {clamp: mark === 'filled-map'});
     const sizeScale = scaleFor(features.map(feature => Math.abs(valueOf(feature, sizeMeasure || {id: 'amount'}))));
     const maxRadius = (card.map && card.map.radius) || DEFAULT_RADIUS[mark] || 10;
     const items = features.map(feature => {
@@ -790,7 +811,7 @@
       measure: colourMeasure ? colourMeasure.name : sizeMeasure ? sizeMeasure.name : '',
       unit: colourMeasure ? colourMeasure.id : 'amount',
       stops: mark === 'density' ? ramp.slice() : ramp.slice(), swatch: colourMeasure ? '' : slotColour(settings.slot == null ? 0 : settings.slot),
-      min: colourScale.min, max: colourScale.max, log: colourScale.log,
+      min: colourScale.min, max: colourScale.max, log: colourScale.log, floor: colourScale.floor, ceiling: colourScale.ceiling,
       // One side of Spent counts dollars (the server counts rows per place, not per side), even when it holds none.
       located: !aggregateResult ? '' : stance ? amountLine(aggregateResult.placed.amount, aggregateResult.total.amount) : aggregateResult.line,
       unplaced: aggregateResult ? aggregateResult.unplaced : [],
@@ -823,11 +844,25 @@
     return (number < 0 ? '-$' : '$') + Math.abs(number).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   }
   // Legend end labels (#54: "$0 ... $250K+"): the low end, and the high end
-  // with a plus when the ramp is capped at the largest place.
+  // with a plus when the ramp is capped at the largest place. A log ramp (#53)
+  // shows its real ends instead: its lowest and largest places, or where it is
+  // clamped, "≤" the floor every smaller place shares (and "≥" a ceiling).
   function legendRange(legend) {
     if (!(legend.max > 0)) return ['No positive amount', ''];
     const format = value => legend.unit === 'amount' ? money(value, 'amount') : count(value);
-    return [format(legend.log ? legend.min : 0), format(legend.max) + '+'];
+    if (!legend.log) return [format(0), format(legend.max) + '+'];
+    const floor = legend.floor > 0 ? legend.floor : legend.min, ceiling = legend.ceiling > 0 ? legend.ceiling : legend.max;
+    return [(floor > legend.min ? '≤' : '') + format(floor), (ceiling < legend.max ? '≥' : '') + format(ceiling)];
+  }
+  // A log ramp's words for its legend card's tooltip: the scale, its clamp, the layer's real range.
+  function legendScaleNote(legend) {
+    if (!legend || legend.kind !== 'ramp' || !legend.log || !(legend.max > 0)) return '';
+    const format = value => legend.unit === 'amount' ? money(value, 'amount') : count(value);
+    const floor = legend.floor > 0 ? legend.floor : legend.min, ceiling = legend.ceiling > 0 ? legend.ceiling : legend.max;
+    const clamp = [floor > legend.min ? 'places at or below ' + format(floor) + ' share the first colour' : '',
+      ceiling < legend.max ? 'places at or above ' + format(ceiling) + ' share the last' : ''].filter(Boolean).join('; ');
+    return ' Colours on a log scale' + (clamp ? ' (' + clamp + ')' : '') + '; the places run from '
+      + format(legend.min) + ' to ' + format(legend.max) + '.';
   }
 
   /* -------------------------------------------------------------- density */
@@ -863,15 +898,20 @@
   // RGBA for a density grid: hotspots glow (#47, #48). The grid - the
   // measure-weighted kernel density - is left as it is; only its drawing
   // follows a gamma transfer against the view's peak (a monotone curve, so the
-  // order of places never changes): a metro a hundredth of the peak still
+  // order of places never changes): a metro a thousandth of the peak still
   // glows, overlapping hotspots build up to the ramp's gold core, and every
   // hotspot keeps a gradient - a gold core in a purple halo that fades out into
   // the plain base - rather than a flat disc. Intensity (1-100) is the curve's
   // lift: how soon a place reaches the core (kept apart from the layer's
   // opacity, as Tableau keeps it). Density below the cut-off stays transparent,
   // so the whole country is never tinted (#48's Don't copy).
+  // The curve (#47, #48; the lead's call on lane F2c's option): gamma =
+  // 1 - 0.95 x I^0.75, I the intensity as a fraction. At the 70% default gamma
+  // is 0.27, so a place at a thousandth of the peak draws at about 0.19 opacity
+  // (0.05 under the earlier 1 - 0.9 x I) and one at a hundredth at about 0.40.
+  // The same curve places the street map's heatmap stops (densityColourStops).
   const DENSITY_CUT = 0.06;
-  const densityGamma = intensity => 1 - 0.9 * Math.max(1, Math.min(100, intensity || DEFAULT_INTENSITY)) / 100;
+  const densityGamma = intensity => 1 - 0.95 * Math.pow(Math.max(1, Math.min(100, intensity || DEFAULT_INTENSITY)) / 100, 0.75);
   const densityAlpha = t => Math.min(1, Math.pow((t - DENSITY_CUT) / (1 - DENSITY_CUT), 0.8) * 1.25);
   function densityPixels(density, stops, intensity, opacity) {
     const {grid, max} = density;
@@ -899,15 +939,21 @@
   }
   // The same curve for the street map's heatmap, whose density MapLibre accumulates
   // itself: the colour stops of 'heatmap-color', [density, colour, ...], placed where
-  // the gamma puts them, so its hotspots glow as the boundary map's do.
+  // the gamma puts them, so its hotspots glow as the boundary map's do. MapLibre
+  // refuses an 'interpolate' whose stops do not rise strictly, and a steep curve
+  // (intensity above about 86%) puts the lowest stops under 1e-4 together, so each
+  // stop sits at least 1e-4 above the one before it.
+  const STOP_STEP = 1e-4;
   function densityColourStops(stops, intensity) {
     const gamma = densityGamma(intensity), span = stops.length - 1, start = stops.length > 2 ? 1 / span : 0;
     const out = [0, 'rgba(0,0,0,0)'];
+    let last = 0;
     for (let k = 0; k <= 5; k += 1) {
       const t = DENSITY_CUT + (1 - DENSITY_CUT) * k / 5;
       const hex = colourAt(stops, Math.min(1, start + (1 - start) * t));
       const rgb = [1, 3, 5].map(at => parseInt(hex.slice(at, at + 2), 16));
-      out.push(Math.max(1e-4, Math.pow(t, 1 / gamma)), 'rgba(' + rgb.join(',') + ',' + densityAlpha(t).toFixed(3) + ')');
+      last = Math.max(last + STOP_STEP, Math.pow(t, 1 / gamma));
+      out.push(last, 'rgba(' + rgb.join(',') + ',' + densityAlpha(t).toFixed(3) + ')');
     }
     return out;
   }
@@ -1003,8 +1049,9 @@
     markRows, encodingSupport, markSummary, aggregateLabel, reasonShort, SIZE_MEANS, measureField,
     FRAME, regionOf, projectFrame, albers5070, hexAxial, hexId, createLookup, primary,
     rowsFromContributions, rowsFromEvidence, aggregate, locatedLine, amountLine,
-    rampStops, colourAt, scaleFor, mix, slotColour, REVERSAL, styleColour, compileLayer, money, fullMoney, legendRange,
-    densityGrid, densityPixels, densityColourStops, DENSITY_CUT, controlRows, statusLine, subtitleOf, evidenceLayers, evidencePresets, EVIDENCE_LEVEL,
+    rampStops, colourAt, scaleFor, mix, slotColour, REVERSAL, styleColour, compileLayer, money, fullMoney, legendRange, legendScaleNote,
+    CLAMP_DECADES, CLAMP_LOW, CLAMP_HIGH,
+    densityGrid, densityPixels, densityColourStops, densityGamma, DENSITY_CUT, controlRows, statusLine, subtitleOf, evidenceLayers, evidencePresets, EVIDENCE_LEVEL,
     EVIDENCE_WORD, OPPOSITION_LAYERS};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MentatMapLayers = api;

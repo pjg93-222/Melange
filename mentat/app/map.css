@@ -109,6 +109,9 @@
 .mm-legend{box-sizing:border-box;display:grid;gap:3px;flex:1 1 176px;min-width:0;max-width:300px;padding:4px 7px 5px;border:1px solid var(--card-border);border-radius:7px;background:#ffffff}
 .mm-legend[hidden]{display:none}
 .mm-legend-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 11.5px/1.2 var(--font-sans);color:#2f273f}
+/* A log ramp's title line (#53): the title, then "log scale" as a quiet chip that never wraps. */
+.mm-legend-head{display:flex;align-items:center;gap:6px;min-width:0}
+.mm-legend-scale{flex:none;margin-left:auto;padding:1px 5px;border-radius:3px;background:#f3f0f5;font:500 9.5px/1.2 var(--font-sans);color:#5f5866;letter-spacing:.02em;white-space:nowrap}
 .mm-legend-located{flex:none;margin-left:auto;padding-left:4px;font:400 10.5px/1.2 var(--font-sans);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .mm-legend-values{display:flex;align-items:center;gap:5px;min-width:0;font:400 10.5px/1 var(--font-sans);color:#5f5866;font-variant-numeric:tabular-nums;white-space:nowrap}
 .mm-legend-ramp{flex:1 1 auto;min-width:36px;max-width:150px;height:7px;border-radius:4px}
@@ -188,8 +191,8 @@
 .studio-map-levels button[aria-pressed=true]{background:#57447b;color:#ffffff;font-weight:500}
 .studio-map-levels button:disabled{color:#b3abbb;cursor:not-allowed}
 
-/* Aggregate by (#53, MP6): a compact 3 x 2 grid of mini-maps beside the shelf row, over
-   the Inspector, so it never covers the map. */
+/* Aggregate by (#53, MP6): a compact 3 x 2 grid of mini-maps, inside the chart card's top-right
+   corner over the map's right side, as the board draws it (map-studio.js placeAggregate). */
 .studio-map-aggregate{box-sizing:border-box;width:280px;max-width:calc(100vw - 16px);padding:9px 10px 10px}
 .studio-map-aggregate h4{margin:0 0 7px;font:600 12.5px/1.2 var(--font-sans);color:#2f273f;letter-spacing:0;text-transform:none}
 .studio-map-aggregate .studio-map-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 9px}
@@ -249,6 +252,11 @@
 .studio-layer-menu hr{margin:4px 0;border:0;border-top:1px solid #efebf1}
 .studio-layer-menu .studio-layer-check{width:14px;color:#57447b}
 .studio-layer-source-menu{max-height:360px;overflow:auto}
+/* A layer card's caret menu (#54): compact - 12.5px words on 22px rows, hairline breaks - no
+   wider than its longest item, and opened beside the card (map-studio.js menuBeside). */
+.studio-layer-menu.studio-layer-caret-menu{min-width:0;width:max-content;max-width:220px;padding:3px 0;border-radius:7px;box-shadow:0 8px 22px rgba(47,39,63,.18)}
+.studio-layer-menu.studio-layer-caret-menu button{gap:6px;box-sizing:border-box;height:22px;min-height:0;margin:0;padding:0 12px 0 10px;border:0;border-radius:0;font:400 12.5px/22px var(--font-sans);white-space:nowrap}
+.studio-layer-menu.studio-layer-caret-menu hr{margin:3px 0}
 .studio-layer-source-menu .studio-layer-group{padding:8px 12px 3px;font:600 10.5px/1 var(--font-sans);letter-spacing:.08em;text-transform:uppercase;color:#8a8292}
 /* The map fills its card (MP4): the builder's map takes the card's height left under the
    title, and a map title stays one line (its tooltip has it whole). Board tiles keep

@@ -370,3 +370,100 @@ test('[map layers] a side and a hatch: the card faults, the labels and the compi
   assert.equal(solid.pattern, '');
   assert.equal(solid.legend.kind, 'ramp');
 });
+
+test('[map layers] G2b #47/#48: the glow curve is 1 - 0.95 x I^0.75, and a place at a thousandth of the peak still shows', () => {
+  const gamma = layers.densityGamma;
+  assert.ok(Math.abs(gamma(70) - (1 - 0.95 * Math.pow(0.7, 0.75))) < 1e-12);
+  assert.ok(Math.abs(gamma(70) - 0.2729) < 1e-3, 'the 70% default: ' + gamma(70));
+  assert.ok(Math.abs(gamma(100) - 0.05) < 1e-12);
+  assert.ok(Math.abs(gamma(1) - (1 - 0.95 * Math.pow(0.01, 0.75))) < 1e-12);
+  assert.equal(gamma(0), gamma(70), 'no intensity is the default');
+  assert.equal(gamma(250), gamma(100), 'intensity is capped at 100');
+  for (let i = 1; i < 100; i += 1) assert.ok(gamma(i + 1) < gamma(i), 'more intensity lifts the curve: ' + i);
+  // Four cells: the peak, a hundredth of it, a thousandth, and far below the cut-off; drawn at the default.
+  const density = {grid: Float32Array.from([1, 0.01, 0.001, 0.00001]), columns: 4, rows: 1, cell: 1, max: 1};
+  const pixels = layers.densityPixels(density, layers.rampStops('heat'), 70, 1);
+  const alpha = at => pixels[at * 4 + 3] / 255;
+  assert.ok(alpha(0) > 0.99, 'the peak is opaque');
+  assert.ok(Math.abs(alpha(1) - 0.40) < 0.02, 'a hundredth of the peak: ' + alpha(1).toFixed(3));
+  assert.ok(Math.abs(alpha(2) - 0.19) < 0.02, 'a thousandth of the peak: ' + alpha(2).toFixed(3));
+  assert.equal(alpha(3), 0, 'far below the cut-off stays transparent');
+  // The order of places never changes: alpha falls with density.
+  assert.ok(alpha(0) > alpha(1) && alpha(1) > alpha(2) && alpha(2) > alpha(3));
+});
+
+test('[map layers] G2b: the street heatmap stops rise strictly at every intensity (MapLibre refuses anything else)', () => {
+  const stops = layers.rampStops('heat');
+  for (let intensity = 1; intensity <= 100; intensity += 1) {
+    const out = layers.densityColourStops(stops, intensity);
+    assert.equal(out.length, 14, 'the transparent start and six stops');
+    assert.equal(out[0], 0);
+    const inputs = out.filter((_, at) => at % 2 === 0);
+    for (let k = 1; k < inputs.length; k += 1) assert.ok(inputs[k] > inputs[k - 1], 'intensity ' + intensity + ': ' + inputs.join(', '));
+    assert.ok(Math.abs(inputs[inputs.length - 1] - 1) < 1e-9, 'the peak is the last stop');
+  }
+  // Where the curve is gentle each stop sits where the gamma puts it, as before.
+  const gentle = layers.densityColourStops(stops, 20).filter((_, at) => at % 2 === 0);
+  const gamma = layers.densityGamma(20);
+  assert.ok(Math.abs(gentle[2] - Math.pow(layers.DENSITY_CUT + (1 - layers.DENSITY_CUT) / 5, 1 / gamma)) < 1e-12);
+});
+
+test('[map layers] G2b #53: a Filled or Hexbin colour scale over three decades is log, clamped low, with its real ends', () => {
+  // 100 places from $1 to $10M: seven decades.
+  const values = Array.from({length: 100}, (_, at) => Math.pow(10, 7 * at / 99));
+  const plain = layers.scaleFor(values), clamped = layers.scaleFor(values, {clamp: true});
+  assert.equal(plain.log, true);
+  assert.equal(plain.floor, plain.min, 'without clamp the scale starts at the smallest place');
+  assert.equal(clamped.min, 1);
+  assert.equal(clamped.max, values[99]);
+  assert.equal(clamped.floor, values[Math.floor(layers.CLAMP_LOW * 99)], 'the floor is a real place: the 10th percentile');
+  assert.equal(clamped.ceiling, values[Math.floor(layers.CLAMP_HIGH * 99)], 'clamped at both ends: the ceiling is a real place, the 95th percentile');
+  assert.equal(layers.CLAMP_HIGH, 0.95);
+  assert.equal(clamped.position(values[0]), 0, 'below the floor takes the first colour');
+  assert.equal(clamped.position(clamped.floor), 0);
+  assert.equal(clamped.position(clamped.max), 1);
+  assert.equal(clamped.position(clamped.ceiling), 1, 'at or above the ceiling takes the last colour');
+  for (let at = 1; at < values.length; at += 1) assert.ok(clamped.position(values[at]) >= clamped.position(values[at - 1]), 'monotone');
+  // Unclamped positions are exactly the earlier formula.
+  const old = value => (Math.log(value) - Math.log(plain.min)) / (Math.log(plain.max) - Math.log(plain.min));
+  for (const value of values) assert.equal(plain.position(value), old(value));
+  // Three decades or fewer: no clamp, even when asked.
+  const narrow = layers.scaleFor([1, 10, 100, 1000], {clamp: true});
+  assert.equal(narrow.floor, 1);
+  assert.equal(narrow.ceiling, 1000);
+  assert.equal(narrow.log, true);
+  // The legend: real ends, never a plus on a log ramp, and the words.
+  const legend = {kind: 'ramp', unit: 'amount', min: clamped.min, max: clamped.max, log: true, floor: clamped.floor, ceiling: clamped.ceiling};
+  assert.deepEqual(layers.legendRange(legend), ['≤' + layers.money(clamped.floor, 'amount'), '≥' + layers.money(clamped.ceiling, 'amount')]);
+  assert.deepEqual(layers.legendRange(Object.assign({}, legend, {floor: legend.min, ceiling: legend.max})), ['$1', '$10.0M']);
+  assert.deepEqual(layers.legendRange({kind: 'ramp', unit: 'amount', min: 5, max: 50, log: false}), ['$0', '$50+'], 'a linear ramp is unchanged');
+  assert.match(layers.legendScaleNote(legend), /log scale/);
+  assert.match(layers.legendScaleNote(legend), /the places run from \$1 to \$10\.0M/);
+  assert.equal(layers.legendScaleNote(Object.assign({}, legend, {kind: 'density'})), '');
+  assert.equal(layers.legendScaleNote(Object.assign({}, legend, {log: false})), '');
+});
+
+test('[map layers] G2b #53: compileLayer clamps a Filled layer’s colours, never a circle’s, and moves no value', () => {
+  const states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD'];
+  const rows = states.map((state, at) => ({zip: '', state, amount: Math.round(Math.pow(10, 1 + 5 * at / 19)), rows: 1, contributors: 1, precision: 'state'}));
+  const filled = layers.newLayerCard({id: 'layer-1', source: {kind: 'industry', industry: 'Crypto'}, geography: 'state', type: 'filled-map'});
+  const circle = layers.newLayerCard({id: 'layer-2', source: {kind: 'industry', industry: 'Crypto'}, geography: 'state', type: 'circle',
+    encodings: {color: {field: 'amount'}}});
+  const a = layers.compileLayer(filled, layers.aggregate(rows, 'state', null), {fields: []});
+  const b = layers.compileLayer(circle, layers.aggregate(rows, 'state', null), {fields: []});
+  assert.equal(a.items.length, 20);
+  assert.ok(a.legend.log && a.legend.floor > a.legend.min, 'the Filled layer is clamped low');
+  assert.ok(a.legend.ceiling < a.legend.max, 'the Filled layer is clamped high too');
+  assert.equal(b.legend.floor, b.legend.min, 'a circle layer keeps its whole range');
+  // Values, amounts and the located line are the aggregate's own.
+  const byState = Object.fromEntries(rows.map(row => [row.state, row.amount]));
+  for (const item of a.items) { assert.equal(item.value, byState[item.id]); assert.equal(item.amount, byState[item.id]); }
+  assert.equal(a.legend.located, b.legend.located);
+  // Every place at or below the floor shares the first colour; above it each has its own shade.
+  const low = a.items.filter(item => item.value <= a.legend.floor).map(item => item.colour);
+  assert.ok(low.length >= 2 && new Set(low).size === 1, 'the clamped places share one colour');
+  const mid = a.items.filter(item => item.value > a.legend.floor && item.value < a.legend.ceiling).map(item => item.colour);
+  assert.equal(new Set(mid).size, mid.length, 'every place between floor and ceiling has its own shade');
+  const top = a.items.filter(item => item.value >= a.legend.ceiling).map(item => item.colour);
+  assert.ok(top.length >= 1 && new Set(top).size === 1, 'places at or above the ceiling share the last colour');
+});

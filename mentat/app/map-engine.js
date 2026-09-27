@@ -854,7 +854,13 @@
       if (!legend || !layer.items.length && layer.mark !== 'density') continue;
       const card = el('div', 'mm-legend mm-legend--' + legend.kind);
       card.dataset.layer = layer.id;
-      card.append(el('span', 'mm-legend-title', legend.title));
+      if (legend.kind === 'ramp' && legend.log) {
+        // A ramp whose colours follow the log of the value says so (#53), on its title line,
+        // so the ends under it keep their room.
+        const head = el('div', 'mm-legend-head');
+        head.append(el('span', 'mm-legend-title', legend.title), el('span', 'mm-legend-scale', 'log scale'));
+        card.append(head);
+      } else card.append(el('span', 'mm-legend-title', legend.title));
       let row;
       if (legend.kind === 'ramp' || legend.kind === 'density') {
         const bar = el('div', 'mm-legend-ramp' + (legend.kind === 'density' ? ' is-density' : ''));
@@ -881,7 +887,7 @@
         if (listed) { located.title = 'Listed, not placed: ' + listed; listedText = ' Listed, not placed: ' + listed + '.'; }
         row.append(located);
       }
-      card.title = legend.title + (legend.located ? ' · ' + legend.located + '.' : '') + listedText;
+      card.title = legend.title + (legend.located ? ' · ' + legend.located + '.' : '') + listedText + L.legendScaleNote(legend);
       cards.push(card);
     }
     host.hidden = !cards.length;
@@ -1110,10 +1116,11 @@
     for (const card of [...state.legends.querySelectorAll(':scope > .mm-legend')].reverse()) {
       const title = card.querySelector('.mm-legend-title');
       const values = [...card.querySelectorAll('.mm-legend-low, .mm-legend-high')].map(node => node.textContent);
-      const located = card.querySelector('.mm-legend-located');
+      const located = card.querySelector('.mm-legend-located'), scale = card.querySelector('.mm-legend-scale');
       const group = svgEl('g', {class: 'mm-export-legend'});
       const text = (value, x, dy, weight) => { const node = svgEl('text', {x, y: y + dy, 'font-size': 11 * unit, fill: '#2c2a28', 'font-weight': weight || 400, 'font-family': 'Arial, sans-serif'}); node.textContent = value; group.append(node); };
-      text((title ? title.textContent : '') + (values.length ? '  ' + values.join(' \u2013 ') : '') + (located ? '  \u00b7 ' + located.textContent : ''), view[0] + 10 * unit, 0, 600);
+      text((title ? title.textContent : '') + (values.length ? '  ' + values.join(' \u2013 ') : '') + (scale ? ' (' + scale.textContent + ')' : '')
+        + (located ? '  \u00b7 ' + located.textContent : ''), view[0] + 10 * unit, 0, 600);
       drawing.append(group);
       y -= 16 * unit;
     }

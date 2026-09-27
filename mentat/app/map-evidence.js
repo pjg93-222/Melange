@@ -379,8 +379,12 @@
 
   function renderControl(inner, pane, mapState, view) {
     let panel = inner.plot.querySelector(':scope > .mm-control.ev-control');
-    if (!view.open) { if (panel) panel.remove(); syncButton(view); return; }
-    if (!panel) { panel = el('section', 'mm-control ev-control'); panel.id = 'evidence-map-control'; panel.setAttribute('aria-label', 'Layer control'); inner.plot.append(panel); }
+    if (!view.open) { if (panel) panel.remove(); syncButton(view); frameMap(inner, view); return; }
+    if (!panel) {
+      panel = el('section', 'mm-control ev-control'); panel.id = 'evidence-map-control'; panel.setAttribute('aria-label', 'Layer control'); inner.plot.append(panel);
+      // Dropped somewhere else, the control leaves another room: the map follows it once the drag ends.
+      panel.addEventListener('pointerup', () => { if (view.open) requestAnimationFrame(() => frameMap(inner, view)); });
+    }
     const rows = presetRows(mapState).map(row => {
       const spec = {id: row.id, name: row.name, mark: row.mark, visible: isOn(view, row.id), selectable: !view.locked.has(row.id),
         onEye: () => {
@@ -411,6 +415,48 @@
       footer: root.MentatMapStudio ? {id: 'evidence-map-edit-studio', label: 'Edit these layers in Chart Studio', onClick: () => openInStudio(pane, mapState)} : null,
       onClose: () => { view.open = false; redecorate(view); }, frame: inner.plot, position: view.position, onMove: position => { view.position = position; }});
     syncButton(view);
+    frameMap(inner, view);
+  }
+  // Boards #48 and #55: with the Layer control open, the whole map is fitted into the room the
+  // control and the toolbar leave (evidence-map.js frame) - the lower 48 beside the control, an
+  // inset below it when it fits there. Closed, the map has its full fit again. With two cycles
+  // compared the map keeps its full fit, so the two maps stay one picture at one zoom. The
+  // reader's own zoom and pan are kept either way. A change of the map's size re-fits it.
+  function frameMap(inner, view) {
+    const drawing = view.drawing;
+    if (!drawing || typeof drawing.frame !== 'function' || !view.host || !view.host.isConnected) return;
+    const panel = view.open ? inner.plot.querySelector(':scope > .mm-control.ev-control') : null;
+    const comparing = !!(view.mapState && view.mapState.compare && view.mapState.compareBody);
+    const covers = [];
+    if (panel && !comparing) {
+      covers.push(panel.getBoundingClientRect());
+      const bar = view.host.querySelector(':scope > .ev-toolbar');
+      if (bar) covers.push(bar.getBoundingClientRect());
+    }
+    drawing.frame(view.host, covers);
+    inner.frameView = view;
+    watchSize(inner);
+  }
+  // One observer per map canvas; it re-fits for whichever pane last framed that canvas.
+  const watched = new WeakSet();
+  function watchSize(inner) {
+    if (typeof ResizeObserver !== 'function' || !inner.svg || watched.has(inner.svg)) return;
+    watched.add(inner.svg);
+    let last = '', queued = 0;
+    const observer = new ResizeObserver(entries => {
+      const box = entries[entries.length - 1].contentRect, size = Math.round(box.width) + 'x' + Math.round(box.height);
+      if (size === last) return;
+      const first = !last;
+      last = size;
+      if (first || queued) return;
+      queued = requestAnimationFrame(() => {
+        queued = 0;
+        if (!inner.svg.isConnected) { observer.disconnect(); return; }
+        const view = inner.frameView;
+        if (view && view.open) frameMap(inner, view);
+      });
+    });
+    observer.observe(inner.svg);
   }
   function heatSliders(view) {
     const box = el('div', 'ev-heat-sliders');

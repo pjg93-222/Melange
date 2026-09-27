@@ -442,7 +442,30 @@
       ['Move down', index < total - 1 ? () => { commitCards(list => { list.splice(index + 1, 0, list.splice(index, 1)[0]); }); hooks.setExpanded(index + 1); } : null],
       null,
       ['Remove', () => { hooks.setExpanded(Math.max(0, index - 1)); commitCards(list => { list.splice(index, 1); return list; }, 'Layer removed.'); }, 'is-danger']];
-    menu(anchor, items, 'Layer');
+    // Compact (#54: 12.5px words on 22px rows) and beside its card, so it hides none of
+    // the card's own controls (menuBeside).
+    menuBeside(menu(anchor, items, 'Layer', 'studio-layer-caret-menu'), anchor);
+  }
+  // A layer card's caret menu opens beside the card, on the chart's side, level with the
+  // card's head row (the eye, name, source and caret stay in view, and the mark type and
+  // encodings under them stay free). Only when there is no room there does it drop under
+  // the head row, lined up with the card's right edge, covering what it must.
+  const MENU_GAP = 6;
+  function menuBeside(box, anchor) {
+    const card = anchor.closest('.studio-layer-card');
+    if (!box || !card) return;
+    const edge = card.getBoundingClientRect(), head = (card.querySelector('.studio-layer-head') || card).getBoundingClientRect();
+    const size = box.getBoundingClientRect();
+    let left = edge.left - MENU_GAP - size.width, top = head.top, placed = 'beside';
+    if (left < 8) {
+      left = Math.max(8, Math.min(window.innerWidth - size.width - 8, edge.right - size.width));
+      top = head.bottom + 2;
+      placed = 'under';
+    }
+    top = Math.max(8, Math.min(top, window.innerHeight - size.height - 8));
+    box.style.left = (left + window.scrollX) + 'px';
+    box.style.top = (top + window.scrollY) + 'px';
+    box.dataset.placed = placed;
   }
   function menu(anchor, items, label, className) {
     closeMenus();
@@ -913,23 +936,28 @@
     context.setTransform(1, 0, 0, 1, 0, 0);
     return canvas;
   }
-  // Beside the shelf row, over the Inspector, so it never covers the map (#53); below the
-  // Geography button when the window is too narrow for that.
+  // Inside the chart card's top-right corner, over the map's right side, as #53 draws it (the
+  // lead's call: beside the shelf row it covered the top of the Inspector). The chart is the
+  // map's own box (#studio-canvas), so the card's title, subtitle and Expand chart stay clear.
+  // Below the Geography button when the chart is too narrow or too short to hold it.
   const AGGREGATE_WIDTH = [236, 280];   // the popover's narrowest and widest (px)
+  const AGGREGATE_INSET = 10;           // px in from the chart's top and right edges
   function placeAggregate(pop, anchor) {
-    const shelves = $('shelves');
-    const row = (shelves || anchor).getBoundingClientRect(), rect = anchor.getBoundingClientRect();
-    const beside = row.right + 8, room = window.innerWidth - 8 - beside;
-    const fits = room >= AGGREGATE_WIDTH[0];
-    pop.style.width = (fits ? Math.min(AGGREGATE_WIDTH[1], room) : AGGREGATE_WIDTH[1]) + 'px';
+    const canvas = $('canvas');
+    const chart = canvas && !canvas.hidden ? canvas.getBoundingClientRect() : null;
+    const rect = anchor.getBoundingClientRect();
+    const room = chart ? chart.width - 2 * AGGREGATE_INSET : 0;
+    pop.style.width = (room >= AGGREGATE_WIDTH[0] ? Math.min(AGGREGATE_WIDTH[1], room) : AGGREGATE_WIDTH[1]) + 'px';
     const box = pop.getBoundingClientRect();
+    const inside = !!chart && room >= AGGREGATE_WIDTH[0] && chart.height >= box.height + 2 * AGGREGATE_INSET;
     let left, top;
-    if (fits) { left = beside; top = rect.top; }
-    else { left = Math.max(8, Math.min(window.innerWidth - 8 - box.width, row.right - box.width)); top = rect.bottom + 6; }
+    if (inside) { left = chart.right - AGGREGATE_INSET - box.width; top = chart.top + AGGREGATE_INSET; }
+    else { left = Math.max(8, Math.min(window.innerWidth - 8 - box.width, rect.left)); top = rect.bottom + 6; }
+    left = Math.max(8, Math.min(left, window.innerWidth - 8 - box.width));
     top = Math.max(8, Math.min(top, window.innerHeight - 8 - box.height));
     pop.style.left = (left + window.scrollX) + 'px';
     pop.style.top = (top + window.scrollY) + 'px';
-    pop.dataset.placed = fits ? 'beside' : 'below';
+    pop.dataset.placed = inside ? 'chart' : 'below';
   }
   async function aggregatePopover(anchor) {
     closeMenus();
