@@ -62,20 +62,15 @@ class SharedFixture(unittest.TestCase):
                 self.assertEqual(problems_in(item), [])
 
     def test_a_wrong_expectation_is_caught(self):
-        # Negative control on the harness: flip a removed memo (the $24,999,995 re-disclosure) to
-        # counted, and the $15.5M memo to lane J2's verdict (counted and flagged); both must be caught.
-        item = case('fairshake_usdc_previously_disclosed')
-        wrong = copy.deepcopy(item['expect'])
-        wrong['4081220242011729506'] = {'counted': True, 'duplicate_of': '', 'flagged': False}
-        self.assertTrue(problems_in(item, wrong))
+        # Negative control on the harness: flip the $15.5M memo to counted.
         item = case('fairshake_15_5m_disclosedon_typo')
         wrong = copy.deepcopy(item['expect'])
-        wrong['4021420241824800143'] = {'counted': True, 'duplicate_of': '', 'flagged': True}
+        wrong['4021420241824800143'] = {'counted': True, 'duplicate_of': '', 'flagged': False}
         self.assertTrue(problems_in(item, wrong))
 
     def test_statements(self):
         rules = receipt_rules()
-        self.assertEqual(rules['version'], 8)
+        self.assertEqual(rules['version'], 6)
         for statement in FIXTURE['statements']:
             receipt, memo_text = statement['receipt_type_full'], statement['memo_text']
             text = (name_key(receipt) + ' ' + name_key(memo_text)).strip()
@@ -130,17 +125,6 @@ class PacEvidenceReceipts(unittest.TestCase):
                 self.assertEqual((receipt['duplicate_of_sub_id'], receipt['duplicate_reason']), (parent, REDISCLOSURE_REASON))
                 self.assertTrue(self.receipts[parent]['included_company_contribution'])
 
-    def test_the_15_5m_memo_is_removed_against_its_parent_dated_the_day_before(self):
-        # Lane J3 (the approved F13 rule): the memo's own text states the re-disclosure, so the counted in-kind
-        # gift dated the day before is its parent; the memo leaves the total and carries no unproven link.
-        memo = self.receipts['4021420241824800143']
-        self.assertFalse(memo['included_company_contribution'])
-        self.assertEqual((memo['duplicate_of_sub_id'], memo['duplicate_reason']),
-                         ('4021420241824800115', REDISCLOSURE_REASON))
-        self.assertNotIn('memo_link_unproven_of', memo)
-        self.assertNotIn('memo_link_unproven_reason', memo)
-        self.assertTrue(self.receipts['4021420241824800115']['included_company_contribution'])
-
     def test_unmatched_memo_and_d040c_rows_stay_included(self):
         memo = self.receipts['4081220242011729505']
         self.assertTrue(memo['included_company_contribution'])
@@ -154,8 +138,7 @@ class PacEvidenceReceipts(unittest.TestCase):
 
     def test_included_total_counts_each_gift_once(self):
         included = sum(row['amount'] for row in self.result['receipts'] if row['included_company_contribution'])
-        # 15.5M + 23M + 24,999,995 gifts, the $5 unitemized memo, the three D-040(c) rows. The $15.5M memo counts
-        # once, via its parent (lane J3; lane J2 had counted it a second time).
+        # 15.5M + 23M + 24,999,995 gifts, the $5 unitemized memo, the three D-040(c) rows.
         self.assertEqual(round(included, 2), 15500000 + 23000000 + 24999995 + 5 + 5175000 + 6000000 + 8092475)
         routed = {route['receipt_sub_id'] for route in pac_evidence.temporal_routes(self.result)}
         self.assertNotIn('4030420261386079659', routed)

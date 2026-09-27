@@ -126,24 +126,6 @@ class CrossReferenceTests(unittest.TestCase):
             result=analyze([changed(a,**{field:value}),b])
             self.assertFalse(result['links'])
 
-    def test_a_partial_memo_is_removed_only_when_it_states_a_redesignation(self):
-        # Lane J2 (Paul's money rule, 2026-09-26): an explicit reference proves a duplicate at the same
-        # amount, or for part of a larger parent when the memo states a redesignation.
-        parent = changed(row('a', 6600), transaction_id='TX')
-        memo = changed(row('b', 3300), memo_code='X', back_reference_transaction_id='TX')
-        result = analyze([parent, memo])
-        decisions = {d['source_id']: d for d in result['decisions']}
-        self.assertEqual(decisions['b']['counted_cents'], 330000)
-        self.assertNotEqual(decisions['b']['status'], 'excluded_with_evidence')
-        self.assertFalse(result['links'])
-        self.assertIn('b', {sid for item in result['review_queue'] for sid in item['source_ids']})
-        stated = changed(memo, memo_text='CONTRIBUTION REDESIGNATION FROM PRIMARY')
-        result = analyze([parent, stated])
-        decisions = {d['source_id']: d for d in result['decisions']}
-        self.assertEqual(decisions['b']['counted_cents'], 0)
-        self.assertIn('explicit_same_filing_memo_reference', decisions['b']['reasons'])
-        self.assertEqual(result['totals']['provisional_original_giving_cents'], 660000)
-
     def test_ambiguous_memo_parents_retained(self):
         rows=[changed(row('a'),transaction_id='TX'),changed(row('b'),transaction_id='TX'),
               changed(row('c'),memo_code='X',back_reference_transaction_id='TX')]

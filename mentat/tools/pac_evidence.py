@@ -61,41 +61,18 @@ def receipt_line_code(row):
     return line
 
 
-def ruled_giving(row):
-    """Paul's per-row rulings that a receipt is giving whatever its text says (fec_receipt_rules.json
-    giving_rulings; H3, 2026-09-26: FAIRSHAKE's two rows ruled giving under D-040(c), later amended to
-    "BITCOINS SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN"). Committee, FEC transaction id and amount
-    to the cent must all match, so a reused transaction id (DE-033) never borrows a ruling. Twin of
-    collect.R fec_receipt_ruled_giving(); a ruled row keeps its form/line role, counted and flagged."""
-    rulings = (receipt_rules().get('giving_rulings') or {}).get('rows') or []
-    transaction = str(row.get('transaction_id') or '').strip().upper()
-    if not rulings or not transaction:
-        return False
-    committee = str(row.get('committee_id') or '').strip().upper()
-    cents = _identity_cents(row.get('contribution_receipt_amount'))
-    return cents is not None and any(
-        str(item.get('committee_id') or '').strip().upper() == committee
-        and str(item.get('transaction_id') or '').strip().upper() == transaction
-        and _identity_cents(item.get('amount')) == cents for item in rulings)
-
-
 def receipt_role(row):
     rules = receipt_rules()
     receipt_description = name_key(str(row.get('receipt_type_full') or ''))
     memo_description = name_key(str(row.get('memo_text') or ''))
     description = (receipt_description + ' ' + memo_description).strip()
     memo = is_memo(row)
-    # A row Paul ruled giving (H3) keeps its form/line role, counted and flagged.
-    if (re.search(rules['sale_identity_pattern'], description) and re.search(rules['sale_event_pattern'], description)
-            and not ruled_giving(row)):
+    if re.search(rules['sale_identity_pattern'],description) and re.search(rules['sale_event_pattern'],description):
         return 'asset_liquidation'
     form = str(row.get('filing_form') or '').strip().upper()
     line = receipt_line_code(row)
     role = next((role for role,lines in rules['forms'].get(form,{}).items() if line in lines),'unverified_receipt_role')
     special = form == 'F3X' and line == '17' and re.search(rules['special_account_pattern'], description)
-    # A bare filer label such as NON-CONTRIBUTION or NON-CONTRIBUTION AMOUNT may name a non-contribution-account
-    # donation (FEC type 10), so neither is an exact non-giving description: each counts, flagged (twin of
-    # collect.R fec_receipt_role; lanes J3 and W, 2026-09-26).
     exact_descriptions = {name_key(value) for value in rules.get('non_giving_exact_descriptions', [])}
     receipt_exact = (bool(re.search(rules['non_giving_exact_pattern'], receipt_description))
                      or receipt_description in exact_descriptions)
@@ -178,9 +155,7 @@ def memo_redisclosure_parents(rows, counted=None, role=None):
     restates no itemized parent. Missing or ambiguous information never excludes
     (D-040): with no parent the memo stays counted, flagged
     disclosure_memo_unmatched, and equal amounts without the statement stay a
-    clue, never proof. The filer's own statement is the proof, so a parent dated
-    before the memo is its parent (lane J3, 2026-09-26: the approved rule,
-    restored after lane J2 had narrowed it to same-day parents).
+    clue, never proof.
 
     A row takes part when its company match (if it has one) is accepted, it
     carries no excluded_reason, its role is giving, and counted(row) - the

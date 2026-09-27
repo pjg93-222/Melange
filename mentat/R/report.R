@@ -2094,9 +2094,7 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   memo_plan <- mentat_memo_duplicate_plan(rows)
   rows[, `:=`(duplicate_memo = memo_plan$duplicate_memo,
               duplicate_of_sub_id = memo_plan$duplicate_of_sub_id,
-              duplicate_reason = memo_plan$duplicate_reason,
-              memo_link_unproven_of = memo_plan$memo_link_unproven_of,
-              memo_link_unproven_reason = memo_plan$memo_link_unproven_reason)]
+              duplicate_reason = memo_plan$duplicate_reason)]
   rows[]
 }
 

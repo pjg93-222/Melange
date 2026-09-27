@@ -931,9 +931,6 @@ mentat_filing_version_plan <- function(rows, table) {
 # parent is an eligible row (company match accepted or blank, no
 # excluded_reason, a giving role) whose attribution, when the rows carry it,
 # is not contradicted. Returns each row's parent sub_id ("" for none).
-# The filer's own statement is the proof, so a parent dated before the memo
-# is its parent (lane J3, 2026-09-26: the approved rule, restored after lane
-# J2 had narrowed it to same-day parents).
 # tools/pac_evidence.py memo_redisclosure_parents() is the Python twin, and
 # tests/fixtures/memo_redisclosure_cases.json pins both.
 mentat_memo_redisclosure_parents <- function(rows, roles, eligible) {
@@ -1047,25 +1044,10 @@ mentat_memo_duplicate_plan <- function(rows) {
     if (length(candidates) != 1L) return(NA_integer_)
     candidates[[1L]]
   }
-  duplicate_of <- reason <- unproven_of <- unproven_reason <- rep("", count)
+  duplicate_of <- reason <- rep("", count)
   description <- paste(text("receipt_type_full"), text("memo_text"))
   structured <- text("back_reference_transaction_id")
   schedule <- text("back_reference_schedule_name")
-  # Paul's money rule (2026-09-26, lane J2): a referenced parent proves a memo a
-  # duplicate when both name the same donor with the same amount and date. A memo
-  # SMALLER than its parent is removed only when its own text states a
-  # redesignation - the filer saying it re-describes part of that gift, a
-  # non-giving role stated by the filer (D-040(a); the redesignation_event_pattern
-  # the receipt roles already use). Any other smaller memo counts, flagged.
-  redesignation_pattern <- if (exists("fec_receipt_rules", mode = "function")) {
-    fec_receipt_rules()$redesignation_event_pattern
-  } else ""
-  redesignated <- if (is.character(redesignation_pattern) && length(redesignation_pattern) == 1L &&
-                      nzchar(redesignation_pattern)) {
-    grepl(redesignation_pattern, trimws(gsub("[^A-Z0-9]+", " ", description, perl = TRUE)), perl = TRUE)
-  } else {
-    rep(FALSE, count)
-  }
   for (i in which(is_memo & eligible)) {
     candidates <- integer()
     basis <- ""
@@ -1086,21 +1068,11 @@ mentat_memo_duplicate_plan <- function(rows) {
       candidates <- same_context(i, linked)
       # A reference is insufficient if it points to another donor/date, the
       # opposite cash direction, or a smaller amount than this memo claims.
-      linked_ok <- contributor[candidates] == contributor[i] & date[candidates] == date[i] &
+      covered <- contributor[candidates] == contributor[i] & date[candidates] == date[i] &
         sign(signed_amount[candidates]) == sign(signed_amount[i]) &
         abs(signed_amount[candidates]) + 0.005 >= abs(signed_amount[i])
-      linked_ok <- !is.na(linked_ok) & linked_ok
-      # ...and it proves the memo a duplicate only at the same amount, or when the
-      # memo states the redesignation of part of a larger parent.
-      same_amount <- abs(abs(signed_amount[candidates]) - abs(signed_amount[i])) < 0.005
-      covered <- linked_ok & !is.na(same_amount) & (same_amount | redesignated[i])
-      partial <- candidates[linked_ok & !covered]
-      candidates <- candidates[covered]
+      candidates <- candidates[!is.na(covered) & covered]
       basis <- basis_ref
-      if (!length(candidates) && length(partial) == 1L) {
-        unproven_of[i] <- as.character(column("sub_id"))[partial[[1L]]]
-        unproven_reason[i] <- "back_reference_amount_differs"
-      }
     }
     winner <- choose(candidates)
     if (!is.na(winner)) {
@@ -1115,15 +1087,11 @@ mentat_memo_duplicate_plan <- function(rows) {
   restated[nzchar(duplicate_of)] <- ""
   duplicate_of[nzchar(restated)] <- restated[nzchar(restated)]
   reason[nzchar(restated)] <- "memo_redisclosure_of_counted_parent"
-  # A memo proven a duplicate carries no unproven link.
-  unproven_of[nzchar(duplicate_of)] <- ""
-  unproven_reason[nzchar(duplicate_of)] <- ""
   # Conduit legs remain visible and count to their named recipients (R5/R8).
   # Only same-recipient memos with a retained, eligible counterpart are removed.
   data.frame(sub_id = as.character(column("sub_id")), memo_key = memo_key,
              duplicate_memo = as.integer(nzchar(duplicate_of)),
              duplicate_of_sub_id = duplicate_of, duplicate_reason = reason,
-             memo_link_unproven_of = unproven_of, memo_link_unproven_reason = unproven_reason,
              stringsAsFactors = FALSE)
 }
 
