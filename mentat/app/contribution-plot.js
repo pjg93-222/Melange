@@ -318,6 +318,13 @@
   const native=spec.type==='bar'&&!dual&&Number(spec.width)>0;let barLeft=native&&Number(spec.barLeft)>0?Number(spec.barLeft):255;
   if(native)svg.setAttribute('data-native','');
   const width=native?Math.max(560,Math.round(Number(spec.width))):1000,panels=spec.type==='scatter'||dual||V3_TYPES.includes(spec.type)?1:measures.length;let barRight=width-(native?110:125),panelH=spec.type==='bar'&&!dual?Math.max(spec.panelTitles===false?300:350,barCount*pitch+(spec.panelTitles===false?70:105)):dual||spec.type==='cards'?500:420;
+  // Lane F2b (boards #50 and #51, 2026-09-26): four fields, each drawn only when a spec asks for it, so a
+  // spec without them draws byte for byte as before (RULE 0): plotHeight, legendPlacement 'right',
+  // labelCollide and endLabels. They apply to a scatter and to a one-panel line or area. plotHeight: the
+  // panel takes that many units of height (420 to 900), so the plot fills the chart box it is drawn in.
+  const f2bPlot=(spec.type==='scatter'||timed)&&!dual&&panels===1;
+  if(f2bPlot&&Number(spec.plotHeight)>0){panelH=Math.max(420,Math.min(900,Math.round(Number(spec.plotHeight))));svg.setAttribute('data-plot-fit',String(panelH));}
+  const plotBottom=f2bPlot?panelH-75:345;
   svg.setAttribute('viewBox',`0 0 ${width} ${panelH*panels}`);svg.setAttribute('width',width);svg.setAttribute('height',panelH*panels);svg.setAttribute('font-family','Arial, sans-serif');svg.setAttribute('font-size','15');
   const title=document.createElementNS(NS,'title');title.textContent=spec.title||'Contribution analysis';svg.append(title);
   const node=(tag,attrs={},text,parent=svg)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!=null)n.textContent=text;parent.append(n);return n;};
@@ -381,6 +388,48 @@
   const pointMark=(row,cx,cy,base,paint,parent)=>{const id=glyphOf(row);if(!id)return mark('circle',{cx,cy,r:base,...paint,stroke:'white','stroke-width':1.4},row,parent);
    const rad=sizeId&&typeof row[sizeId]==='number'?3+12*Math.sqrt(Math.abs(row[sizeId])/maxSize):base;
    return mark('path',{d:glyphD(id,cx,cy,rad),...(glyphOpen(id)?{fill:'none',stroke:paint.fill,'stroke-width':1.8}:{...paint,stroke:'white','stroke-width':1.2}),'data-glyph':id},row,parent,true);};
+  // spec.legendPlacement 'right' (#50, #51): the Colour, Size, Colour-measure and Shape legends are cards in a
+  // column at the plot's right, inside the drawing so an export keeps them; the plot gives up that width.
+  // Measured at 18: on screen the Studio sets chart text to 18px (workspace-polish.css).
+  const T=18,legendRight=f2bPlot&&spec.legendPlacement==='right',legendCards=[];let rightCol=0,ends=null;
+  if(legendRight){
+   const series=spec.color?colorValues:timed&&dims.length>1?timelines[0].series.map(s=>s.label):[];
+   if(series.length)legendCards.push({kind:'series',title:spec.color?name(spec.color,columns):dims.slice(1).map(d=>name(d,columns)).join(' / '),items:series.map((value,i)=>({text:value,fill:spec.color?colorOf(value):categoryColour(i)}))});
+   if(sizeId&&spec.type==='scatter'){
+    const nice=v=>{if(!(v>0))return 0;const mag=Math.pow(10,Math.floor(Math.log10(v))),n=v/mag;return (n>=5?5:n>=2?2:1)*mag;};
+    const values=[...new Set([maxSize/20,maxSize/4,maxSize].map(nice))].filter(v=>v>0).sort((a,b)=>a-b);
+    if(values.length)legendCards.push({kind:'size',title:name(sizeId,columns),items:values.map(v=>({text:format(v,sizeId,columns,true),r:3+12*Math.sqrt(v/maxSize)}))});
+   }
+   if(heat)legendCards.push({kind:'colour',title:name(spec.colorMeasure,columns),items:[{text:format(heat[0],spec.colorMeasure,columns,true),fill:palette[0],opacity:.25},{text:format(heat[1],spec.colorMeasure,columns,true),fill:palette[0],opacity:1}]});
+   if(spec.shape&&shapeMembers.length&&spec.type==='scatter')legendCards.push({kind:'shape',title:name(spec.shape,columns),items:shapeMembers.map(member=>({text:member,glyph:glyphFor(spec,member,shapeMembers)}))});
+   const lead=item=>item.r?2*Math.max(item.r,6)+10:24;
+   const cardW=legendCards.length?Math.max(110,Math.min(230,Math.ceil(Math.max(...legendCards.map(c=>Math.max(measure(c.title,T),...c.items.map(i=>lead(i)+measure(i.text,T))))))+26)):0;
+   const endW=spec.endLabels&&timed&&spec.color?Math.min(230,Math.ceil(Math.max(0,...colorValues.map(v=>measure(v,T))))+24):0;
+   if(cardW||endW)rightCol=Math.max(cardW,endW)+36;
+   let top=14;
+   // A card taller than the room left keeps the rows that fit and says how many it left out.
+   for(const c of legendCards){c.rows=c.items.map(i=>i.r?Math.max(24,2*i.r+8):24);
+    const height=()=>40+c.rows.reduce((a,b)=>a+b,0)+(c.more?24:0);
+    while(c.items.length>1&&top+height()>panelH-12){c.items.pop();c.rows.pop();c.more=(c.more||0)+1;}
+    c.x=width-cardW-12;c.y=top;c.w=cardW;c.h=height();top+=c.h+10;}
+  }
+  // spec.labelCollide (#50, #51; Tableau's default): labels wait here and are placed after every mark, the
+  // highest rank first - the extremes, then the largest marks, then the farthest from the middle. A label
+  // that would overlap one already placed, a legend card or a line's name is left off; its value stays
+  // in the mark's tooltip.
+  const collide=(f2bPlot||spec.type==='cards')&&!!spec.labelCollide,waiting=[],taken=[],markBoxes=[];
+  // own: a point inside the label's own mark (never in its way); alts: the other places the label may take.
+  const wantLabel=(attrs,text,room,parent,rank,own,alts)=>{waiting.push({attrs,text,room,parent,rank,own,alts,order:waiting.length});};
+  // A mark's box: a rect, a circle, or a glyph path (a circle glyph is drawn with arcs from its left edge).
+  const pathBox=d=>{const p=(String(d).match(/-?\d+(?:\.\d+)?/g)||[]).map(Number);if(/a/i.test(d)&&p.length>=3)return {x:p[0],y:p[1]-p[2],w:2*p[2],h:2*p[2]};
+   const xs=p.filter((_,i)=>i%2===0),ys=p.filter((_,i)=>i%2===1);return xs.length?{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)}:null;};
+  const markBox=(tag,a)=>tag==='rect'?{x:Number(a.x),y:Number(a.y),w:Number(a.width),h:Number(a.height)}:tag==='circle'?{x:Number(a.cx)-Number(a.r),y:Number(a.cy)-Number(a.r),w:2*Number(a.r),h:2*Number(a.r)}:tag==='path'&&a.d?pathBox(a.d):null;
+  const scatterRanks=(list,px,py,mx,my,spanX,spanY)=>{const rank=new Map(),n=Math.max(1,list.length),cx=list.reduce((a,r)=>a+px(r),0)/n,cy=list.reduce((a,r)=>a+py(r),0)/n;
+   [[my,1],[mx,1],[my,-1],[mx,-1]].forEach(([id,sign],k)=>{let best=null;for(const r of list)if(best==null||sign*(r[id]-best[id])>0)best=r;if(best&&!rank.has(best))rank.set(best,40-k);});
+   for(const r of list)if(!rank.has(r))rank.set(r,1+(sizeId&&finite(r[sizeId])?Math.sqrt(Math.abs(r[sizeId])/maxSize):0)+Math.hypot((px(r)-cx)/(spanX||1),(py(r)-cy)/(spanY||1)));
+   return r=>rank.get(r)||1;};
+  const lineRanks=(s,m)=>{const vals=s.rows.map(item=>item.row[m]).filter(finite),hi=vals.length?Math.max(...vals):0,lo=vals.length?Math.min(...vals):0,mean=vals.reduce((a,b)=>a+b,0)/Math.max(1,vals.length),span=hi-lo||1,last=((s.segments.at(-1)||[]).at(-1)||{}).row;
+   return r=>r[m]===hi?30:r[m]===lo?28:r===last?26:1+Math.abs(r[m]-mean)/span;};
   for(let p=0;p<panels;p++){
    const g=node('g',{transform:`translate(0 ${p*panelH})`}),m=measures[p];
    // spec.panelTitles===false (Chart Studio, one measure): the canvas title
@@ -553,9 +602,10 @@
      const sizeMax=c.size?Math.max(1e-9,...rows.map(r=>Math.abs(Number(r[c.size])||0))):0,share=r=>c.size&&finite(r[c.size])?Math.sqrt(Math.abs(r[c.size])/sizeMax):null;
      const fields=[...new Set([m,...(c.tooltip||[]),...(c.labelFields||[]),...(c.size?[c.size]:[]),...(c.colorMeasure?[c.colorMeasure]:[])])];
      const tip=r=>label(r,dims)+'\n'+fields.map(id=>name(id,columns)+': '+valueText(r,id)).join('\n');
-     const cardMark=(tag,attrs,r)=>{const made=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':tip(r).replace(/\n/g,'; ')},null,cg);node('title',{},tip(r),made);
+     const cardMark=(tag,attrs,r)=>{if(collide){const box=markBox(tag,attrs);if(box)markBoxes.push(box);}const made=node(tag,{...attrs,class:'plot-mark',tabindex:0,role:'button','aria-label':tip(r).replace(/\n/g,'; ')},null,cg);node('title',{},tip(r),made);
       made.addEventListener('click',()=>onSelect?.(r));made.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect?.(r);}});return made;};
      const cardLabel=(r,xx,yy,fill)=>{if(!spec.labels||(labelled&&!(c.labelFields&&c.labelFields.length)))return;const text=c.labelFields&&c.labelFields.length?c.labelFields.map(id=>valueText(r,id)).join(' / '):format(r[m],m,columns,true);
+      if(collide){const vals=plotted.map(q=>q[m]).filter(finite),hi=Math.max(...vals),lo=Math.min(...vals);wantLabel({x:f2(xx),y:f2(yy),'text-anchor':'middle',fill:fill||'#35483b','font-size':12},text,110,cg,r[m]===hi?30:r[m]===lo?28:1+Math.abs(r[m])/(Math.max(Math.abs(hi),Math.abs(lo))||1),{x:xx,y:yy+8},fill===undefined?[-24,-48].map(dy=>({x:f2(xx),y:f2(yy+dy),'text-anchor':'middle',fill:'#35483b','font-size':12})):[]);return;}
       // Measured at 18px, the size the Studio draws chart text at.
       const w=measure(fit(text,110,12),18)+6;if(!free(xx-w/2,yy-17,w,21))return;
       fittedText({x:f2(xx),y:f2(yy),'text-anchor':'middle',fill:fill||'#35483b','font-size':12,'data-label':'value'},text,110,cg);};
@@ -612,11 +662,11 @@
      node('text',{x:f2(lx+24),y:baseline,fill:'#59645c','font-size':14},text,item);}
     axes[p]={values:rows.map(r=>r[cards[0].measure]),lo:la,hi:lb,at:ly,x1:left,x2:right,bar:false};
    }else if(spec.type==='scatter'){
-    const [mx,my]=measures,left=100,right=935,top=65,bottom=345,[xl,xh]=extent(plotted.map(r=>r[mx]),false),[yl,yh]=extent(plotted.map(r=>r[my]),false),x=v=>left+(v-xl)/(xh-xl)*(right-left),y=v=>bottom-(v-yl)/(yh-yl)*(bottom-top);
+    const [mx,my]=measures,left=100,right=rightCol?width-rightCol:935,top=65,bottom=plotBottom,[xl,xh]=extent(plotted.map(r=>r[mx]),false),[yl,yh]=extent(plotted.map(r=>r[my]),false),x=v=>left+(v-xl)/(xh-xl)*(right-left),y=v=>bottom-(v-yl)/(yh-yl)*(bottom-top);
     for(let i=0;i<=5;i++){const vx=xl+(xh-xl)*i/5,vy=yl+(yh-yl)*i/5;node('line',{x1:x(vx),x2:x(vx),y1:top,y2:bottom,stroke:'#e8ebe6'},null,g);node('line',{x1:left,x2:right,y1:y(vy),y2:y(vy),stroke:'#e8ebe6'},null,g);fittedText({x:x(vx),y:bottom+23,'text-anchor':'middle',fill:'#68706b','font-size':15},format(vx,mx,columns,true),110,g);fittedText({x:left-10,y:y(vy)+3,'text-anchor':'end',fill:'#68706b','font-size':15},format(vy,my,columns,true),78,g);}
-    node('text',{x:(left+right)/2,y:400,'text-anchor':'middle',fill:'#59645c'},name(mx,columns),g);node('text',{x:18,y:45,fill:'#59645c'},name(my,columns),g);plotted.forEach(r=>{pointMark(r,x(r[mx]),y(r[my]),6,shade(r)||{fill:color(r),'fill-opacity':.72},g);if(spec.labels){const at=x(r[mx]),end=at>(left+right)/2;fittedText({x:at+(end?-8:8),y:y(r[my])-8,'text-anchor':end?'end':'start',fill:'#35483b','font-size':15},labelText(r,label(r,dims)),Math.min(300,end?at-24:width-at-24),g);}});
+    node('text',{x:(left+right)/2,y:plotBottom+55,'text-anchor':'middle',fill:'#59645c'},name(mx,columns),g);node('text',{x:18,y:45,fill:'#59645c'},name(my,columns),g);const rankOf=collide?scatterRanks(plotted,r=>x(r[mx]),r=>y(r[my]),mx,my,right-left,bottom-top):null;plotted.forEach(r=>{pointMark(r,x(r[mx]),y(r[my]),6,shade(r)||{fill:color(r),'fill-opacity':.72},g);if(rankOf){const rr=sizeId&&typeof r[sizeId]==='number'?3+12*Math.sqrt(Math.abs(r[sizeId])/maxSize):6;markBoxes.push({x:x(r[mx])-rr,y:y(r[my])-rr,w:2*rr,h:2*rr});}if(spec.labels){const at=x(r[mx]),end=at>(left+right)/2,attrs={x:at+(end?-8:8),y:y(r[my])-8,'text-anchor':end?'end':'start',fill:'#35483b','font-size':15},text=labelText(r,label(r,rankOf&&spec.color&&dims.length>1?dims.filter(d=>d!==spec.color):dims)),room=Math.min(300,end?at-24:width-at-24);if(rankOf)wantLabel(attrs,text,rightCol&&!end?Math.min(room,right-at-16):room,g,rankOf(r),{x:at,y:y(r[my])},[{...attrs,x:at+(end?8:-8),'text-anchor':end?'start':'end'}]);else fittedText(attrs,text,room,g);}});
    }else{
-    const prepared=timelines[p],xs=prepared.ticks,left=100,right=940,top=60,bottom=345,[lo,hi]=extent(plotted.map(r=>r[m])),x=at=>left+(xs.length===1?.5:(at-xs[0][0])/(xs.at(-1)[0]-xs[0][0]))*(right-left),y=v=>bottom-(v-lo)/(hi-lo)*(bottom-top);
+    const prepared=timelines[p],xs=prepared.ticks,left=100,right=rightCol?width-rightCol:940,top=60,bottom=plotBottom,[lo,hi]=extent(plotted.map(r=>r[m])),x=at=>left+(xs.length===1?.5:(at-xs[0][0])/(xs.at(-1)[0]-xs[0][0]))*(right-left),y=v=>bottom-(v-lo)/(hi-lo)*(bottom-top);
     for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5;node('line',{x1:left,x2:right,y1:y(v),y2:y(v),stroke:'#e8ebe6'},null,g);fittedText({x:left-12,y:y(v)+4,'text-anchor':'end',fill:'#68706b','font-size':15},format(v,m,columns,true),76,g);}
     const tickWidth=xs.reduce((max,[,text])=>Math.max(max,measure(text)),0),tickCount=Math.max(1,Math.min(12,Math.floor((right-left)/(tickWidth+16))));
     // spec.axisLabels 'all' (census B-E21): every tick is labelled, turned when they would collide.
@@ -624,15 +674,51 @@
     xs.forEach(([at,text],i)=>{if(turnTicks)fittedText({x:x(at),y:bottom+16,'text-anchor':'end',fill:'#68706b','font-size':12,transform:`rotate(-35 ${x(at)} ${bottom+16})`,'data-axis-label':'all'},text,110,g);else if(allTicks||i%Math.max(1,Math.ceil(xs.length/tickCount))===0)node('text',{x:x(at),y:bottom+25,'text-anchor':'middle',fill:'#68706b','font-size':15},text,g);});
     // Colour on the time axis itself colours each point by its period.
     const perPoint=spec.color&&spec.color===dims[0];
-    for(const [seriesIndex,s] of (spec.path?pathSeries(prepared.series,dims,spec.path,m):prepared.series).entries()){const stroke=perPoint?'#8a8690':spec.color?color(s.rows[0].row):categoryColour(seriesIndex);
+    // Lane F2b: a moved plot tells the reference lines its own scale; each coloured line is named at its end.
+    if(rightCol||plotBottom!==345)axes[p]={values:plotted.map(r=>r[m]),lo,hi,at:y,x1:left,x2:right,bar:false};
+    if(legendRight&&spec.endLabels&&spec.color&&!perPoint){const lines=spec.path?pathSeries(prepared.series,dims,spec.path,m):prepared.series,members=new Set(lines.map(s=>String((s.rows[0]||{row:{}}).row[spec.color]??'Unknown')));if(lines.length>=2&&lines.length<=12&&members.size===lines.length)ends=[];}
+    for(const [seriesIndex,s] of (spec.path?pathSeries(prepared.series,dims,spec.path,m):prepared.series).entries()){const stroke=perPoint?'#8a8690':spec.color?color(s.rows[0].row):categoryColour(seriesIndex);const rank=collide?lineRanks(s,m):null;if(rank)for(const seg of s.segments)for(const q of seg)markBoxes.push({x:x(q.at)-4.5,y:y(q.row[m])-4.5,w:9,h:9});if(ends&&s.segments.length){const q=s.segments.at(-1).at(-1);ends.push({x:x(q.at),y:y(q.row[m]),stroke,name:String(s.rows[0].row[spec.color]??'Unknown')});}
      for(const segment of s.segments){const d=segment.map((item,i)=>(i?'L':'M')+x(item.at)+','+y(item.row[m])).join(' ');
       if(spec.type==='area'){const path=`M${x(segment[0].at)},${y(0)} `+segment.map(item=>`L${x(item.at)},${y(item.row[m])}`).join(' ')+` L${x(segment.at(-1).at)},${y(0)} Z`;node('path',{d:path,fill:perPoint?palette[0]:stroke,'fill-opacity':.1,stroke:'none'},null,g);}
       if(sizeId)segment.slice(1).forEach((item,k)=>{const prev=segment[k],share=v=>typeof v==='number'?Math.abs(v)/maxSize:0;node('path',{d:`M${x(prev.at)},${y(prev.row[m])} L${x(item.at)},${y(item.row[m])}`,fill:'none',stroke,'stroke-width':1.5+4.5*(share(prev.row[sizeId])+share(item.row[sizeId]))/2,'stroke-linecap':'round'},null,g);});
-      else node('path',{d,fill:'none',stroke,'stroke-width':2.5},null,g);segment.forEach(({row:r,at})=>{mark('circle',{cx:x(at),cy:y(r[m]),r:4.5,fill:perPoint?color(r):stroke,stroke:'white','stroke-width':1.5},r,g,true);if(spec.labels)fittedText({x:x(at),y:y(r[m])-11,'text-anchor':'middle',fill:perPoint?color(r):stroke,'font-size':15},labelText(r,format(r[m],m,columns,true)),110,g);});
+      else node('path',{d,fill:'none',stroke,'stroke-width':2.5},null,g);segment.forEach(({row:r,at})=>{mark('circle',{cx:x(at),cy:y(r[m]),r:4.5,fill:perPoint?color(r):stroke,stroke:'white','stroke-width':1.5},r,g,true);if(spec.labels){const attrs={x:x(at),y:y(r[m])-11,'text-anchor':'middle',fill:perPoint?color(r):stroke,'font-size':15},text=labelText(r,format(r[m],m,columns,true));if(rank)wantLabel(attrs,text,110,g,rank(r),{x:x(at),y:y(r[m])},[{...attrs,y:y(r[m])+23}]);else fittedText(attrs,text,110,g);}});
      }
     }
    }
   }
+  // spec.endLabels (#51): with Colour on a dimension each line is named at its end, in its own colour, clear
+  // of the legend cards and of the other names. The waiting labels then take the room that is left.
+  for(const c of legendCards)taken.push({x:c.x-4,y:c.y-4,w:c.w+8,h:c.h+8});
+  if(ends&&ends.length){const group=node('g',{'data-legend':'line-ends','aria-label':'Line names'});let below=-Infinity;
+   for(const e of ends.sort((a,b)=>a.y-b.y)){const w=measure(e.name,T),tx=e.x+18;let ty=Math.max(e.y+6,below+T+3);
+    for(const c of legendCards)if(tx<c.x+c.w&&c.x<tx+w&&ty-T<c.y+c.h+4&&c.y<ty+6)ty=c.y+c.h+T+4;
+    if(ty>panelH-6)continue;below=ty;
+    node('line',{x1:f2(e.x+6),y1:f2(e.y),x2:f2(e.x+14),y2:f2(ty-6),stroke:e.stroke,'stroke-width':1.2},null,group);
+    const t=node('text',{x:f2(tx),y:f2(ty),fill:e.stroke,'font-size':15,'data-end-label':e.name},fit(e.name,width-tx-6,T),group);node('title',{},e.name,t);
+    taken.push({x:tx-3,y:ty-T*.8-2,w:w+6,h:T+4});}}
+  if(waiting.length){
+   // Lines are in the way too: every unfilled stroked path's segments, read off the drawing.
+   const segs=[],walk=n=>{for(const k of [...(n.children||[])]){const get=key=>k.getAttribute?k.getAttribute(key):null;if(get('data-legend')!=null||get('data-reference')!=null)continue;
+     if(String(k.tagName||'').toLowerCase()==='path'&&get('fill')==='none'&&get('stroke')&&get('stroke')!=='none')for(const part of String(get('d')||'').split('M').slice(1)){const p=(part.match(/-?\d+(?:\.\d+)?/g)||[]).map(Number);for(let i=2;i+1<p.length;i+=2)segs.push([p[i-2],p[i-1],p[i],p[i+1]]);}
+     // Text already drawn (axis ticks and titles) is never covered, even by an extreme; a turned tick keeps its own rule.
+     if(String(k.tagName||'').toLowerCase()==='text'&&!get('transform')){const words=k.childNodes?[...k.childNodes].filter(c=>c.nodeType===3).map(c=>c.nodeValue).join(''):String(k._text||'');
+      if(words.trim()){const w=measure(words,T),x0=Number(get('x'))||0,anchor=get('text-anchor')||'start';taken.push({x:anchor==='end'?x0-w:anchor==='middle'?x0-w/2:x0,y:(Number(get('y'))||0)-T*.8,w,h:T});}}
+     walk(k);}};
+   walk(svg);
+   const meets=(p,q)=>p.x<q.x+q.w&&q.x<p.x+p.w&&p.y<q.y+q.h&&q.y<p.y+p.h;
+   const cross=(a,b,c,d,e,f,g2,h)=>{const den=(c-a)*(h-f)-(d-b)*(g2-e);if(!den)return false;const t=((e-a)*(h-f)-(f-b)*(g2-e))/den,u=((e-a)*(d-b)-(f-b)*(c-a))/den;return t>=0&&t<=1&&u>=0&&u<=1;};
+   const onSeg=(r,[a,b,c,d])=>{const inside=(x,y)=>x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h;return inside(a,b)||inside(c,d)||cross(a,b,c,d,r.x,r.y,r.x+r.w,r.y)||cross(a,b,c,d,r.x,r.y+r.h,r.x+r.w,r.y+r.h)||cross(a,b,c,d,r.x,r.y,r.x,r.y+r.h)||cross(a,b,c,d,r.x+r.w,r.y,r.x+r.w,r.y+r.h);};
+   const mine=(own,m)=>own&&own.x>=m.x-1&&own.x<=m.x+m.w+1&&own.y>=m.y-1&&own.y<=m.y+m.h+1;
+   waiting.sort((a,b)=>b.rank-a.rank||a.order-b.order);
+   for(const q of waiting){let placed=false;
+    // An extreme (rank 26 and up) that finds every side on a mark takes its first side anyway.
+    for(const clear of q.rank>=26?[true,false]:[true]){for(const attrs of [q.attrs,...(q.alts||[])]){
+     const shown=fit(q.text,q.room,attrs['font-size']||15),w=measure(shown,T),x0=Number(attrs.x),y0=Number(attrs.y),anchor=attrs['text-anchor']||'start';
+     const b={x:(anchor==='end'?x0-w:anchor==='middle'?x0-w/2:x0)-3,y:y0-T*.8-2,w:w+6,h:T+4};
+     if(b.x<0||b.x+b.w>width||b.y<0||b.y+b.h>panelH*panels||taken.some(t=>meets(b,t)))continue;
+     if(clear&&(markBoxes.some(m=>!mine(q.own,m)&&meets(b,m))||segs.some(s=>onSeg(b,s))))continue;
+     taken.push(b);fittedText({...attrs,'data-label':'value'},q.text,q.room,q.parent);placed=true;break;}
+     if(placed||!clear)break;}}}
   if(spec.references&&(spec.references.average||spec.references.median)&&spec.type!=='scatter'&&!(V3_TYPES.includes(spec.type)&&!axes[0])){
    for(let p=0;p<(dual||V3_TYPES.includes(spec.type)?1:measures.length);p++){
     const ax=axes[p];
@@ -647,7 +733,7 @@
   }
   // Keep legends inside the exported SVG. A sibling HTML legend is absent from
   // PNG/SVG downloads, leaving a coloured series impossible to identify.
-  const legends=spec.type==='cards'?[]:spec.color?colorValues:timed&&dims.length>1?timelines[0].series.map(s=>s.label):dual?measures.map((id,i)=>name(id,columns)+(i?' (right axis)':' (left axis)')):[];
+  const legends=legendRight?[]:spec.type==='cards'?[]:spec.color?colorValues:timed&&dims.length>1?timelines[0].series.map(s=>s.label):dual?measures.map((id,i)=>name(id,columns)+(i?' (right axis)':' (left axis)')):[];
   if(legends.length){
    const legend=node('g',{'data-legend':'series','aria-label':'Series legend'}),plan=legendPlan(legends),base=panelH*panels;
    for(const {i,value,lines,x,y}of plan.items){
@@ -657,7 +743,7 @@
    const height=base+plan.height;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);
   }
   // A Colour measure's two-stop legend (V09), inside the exported SVG.
-  if(heat){
+  if(heat&&!legendRight){
    const box=svg.getAttribute('viewBox').split(' ').map(Number),base=box[3],legend=node('g',{'data-legend':'colour','aria-label':'Colour legend'});
    node('text',{x:24,y:base+24,fill:'#59645c','font-size':14},name(spec.colorMeasure,columns),legend);
    node('rect',{x:24,y:base+34,width:14,height:14,rx:2,fill:palette[0],'fill-opacity':.25},null,legend);node('text',{x:44,y:base+46,fill:'#59645c','font-size':14},format(heat[0],spec.colorMeasure,columns,true),legend);
@@ -665,7 +751,7 @@
    const height=base+60;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);background.setAttribute('height',height);
   }
   // Marks v3: which shape each member of a Shape field takes.
-  if(spec.shape&&shapeMembers.length&&spec.type==='scatter'){
+  if(spec.shape&&shapeMembers.length&&spec.type==='scatter'&&!legendRight){
    const box=svg.getAttribute('viewBox').split(' ').map(Number),base=box[3],legend=node('g',{'data-legend':'shape','aria-label':'Shape legend'});
    node('text',{x:24,y:base+22,fill:'#59645c','font-size':14},name(spec.shape,columns),legend);
    let x=24,y=base+46;
@@ -673,6 +759,18 @@
     node('path',{d:glyphD(id,x+7,y-5,6),...(glyphOpen(id)?{fill:'none',stroke:'#59645c','stroke-width':1.5}:{fill:'#59645c'})},null,legend);node('text',{x:x+18,y,fill:'#59645c','font-size':14},member,legend);x+=w;}
    const height=y+14;svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('height',height);background.setAttribute('height',height);
   }
+  // Lane F2b: the right-hand legend cards (spec.legendPlacement 'right'), drawn over the plot's column.
+  if(legendCards.length){const legend=node('g',{'data-legend':'cards-right','aria-label':'Legend'});
+   for(const c of legendCards){const card=node('g',{'data-legend-card':c.kind},null,legend);
+    node('rect',{x:f2(c.x),y:f2(c.y),width:f2(c.w),height:f2(c.h),rx:8,fill:'#ffffff',stroke:'#e6e1e8'},null,card);
+    const head=node('text',{x:f2(c.x+12),y:f2(c.y+26),fill:'#2f273f','font-size':15,'font-weight':600},fit(c.title,c.w-24,T),card);node('title',{},c.title,head);
+    let at=c.y+36;
+    c.items.forEach((item,i)=>{const mid=at+c.rows[i]/2,tx=c.x+12+(item.r?2*Math.max(item.r,6)+10:24);
+     if(item.r)node('circle',{cx:f2(c.x+12+Math.max(item.r,6)),cy:f2(mid),r:f2(item.r),fill:'#b9b3c2','fill-opacity':.55,stroke:'#8a8690','stroke-width':1},null,card);
+     else if(item.glyph)node('path',{d:glyphD(item.glyph,c.x+18,mid,6),...(glyphOpen(item.glyph)?{fill:'none',stroke:'#59645c','stroke-width':1.5}:{fill:'#59645c'})},null,card);
+     else node('circle',{cx:f2(c.x+18),cy:f2(mid),r:6,fill:item.fill,...(item.opacity!=null?{'fill-opacity':item.opacity}:{})},null,card);
+     const t=node('text',{x:f2(tx),y:f2(mid+6),fill:'#4a4552','font-size':15},fit(item.text,c.x+c.w-12-tx,T),card);node('title',{},item.text,t);at+=c.rows[i];});
+    if(c.more)node('text',{x:f2(c.x+12),y:f2(at+17),fill:'#77727d','font-size':15},'+ '+c.more+' more',card);}}
   container.append(svg);
   return svg;
  }

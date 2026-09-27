@@ -736,3 +736,156 @@ body[data-view] :is(.card,.page-actions) .secondary:hover:not(:disabled){backgro
    the sidebar foot. At desktop widths it is hidden and main takes the viewport, so a view
    whose content fits no longer scrolls. Below 1100px the footer shows as before. */
 @media(min-width:1100px){body[data-view]>footer{display:none}body[data-view] main{min-height:100vh}}
+/* ---- Lane F2b (2026-09-26): Chart Studio at the approved boards' fidelity (#46's chrome, #50, #51,
+   #52; fidelity round 0, gaps CS1-CS10). The boards are 1344x760; from 1100 to 1499px wide the studio
+   takes their density (13px text, controls about 30px high, a 185px Data pane and a 258px Inspector) and
+   one toolbar row. At every desktop width the chart title is one line, the shelves are one row each,
+   dimension pills carry no "Abc", the Chart select is as wide as its choice, and the marks cards fit
+   the Inspector. Wider than 1499px the rest stays S1's. This block loads after chart-studio.css, and
+   outranks flow.css (which loads after it) where the Stages shelf is concerned. */
+
+/* CS8: a dimension pill on a shelf or a marks row carries no type tag; a measure keeps its "#". */
+#view-chart-studio .studio-drop .studio-pill:not(.is-measure) .studio-glyph{display:none}
+/* CS8, CS10: every shelf and marks row is one row; a long pill gives way with an ellipsis (its full
+   name is its tooltip) and the Dual axis chip stays inline. */
+#view-chart-studio .studio-shelves .studio-shelf .studio-drop,#view-chart-studio .studio-prop .studio-drop{flex-wrap:nowrap;min-width:0}
+#view-chart-studio .studio-shelves .studio-shelf .studio-drop.studio-drop--stages{flex-wrap:nowrap;row-gap:0;min-width:0}
+#view-chart-studio .studio-drop>.studio-pill{flex:0 1 auto;min-width:0}
+#view-chart-studio .studio-drop>.studio-pill .studio-pill-name{min-width:0}
+#view-chart-studio .studio-drop>:is(.studio-stage-arrow,button.studio-dual-axis){flex:none}
+/* CS10: the Chart select is as wide as its choice ("Chart: Sankey"), at the end of the Columns row. */
+#view-chart-studio .studio-shelves{padding-right:36px}
+#view-chart-studio .studio-mark-chip{position:relative;inset:auto;flex:none;width:auto;max-width:210px;margin:0 1px 0 8px}
+#view-chart-studio .studio-mark-chip select{flex:none;width:auto;max-width:160px;field-sizing:content;text-overflow:ellipsis}
+/* CS9: the marks cards and the tile strip fit the Inspector's width. */
+#view-chart-studio .studio-mark-cards{grid-template-columns:minmax(0,1fr)}
+#view-chart-studio .studio-mark-card,#view-chart-studio .studio-mark-card>.studio-mark-card-body{min-width:0}
+#view-chart-studio .studio-mark-card-head{min-width:0;gap:6px;padding:0 6px 0 2px}
+#view-chart-studio .studio-pane select.studio-mark-card-select{flex:0 1 auto;min-width:0;max-width:48%}
+#view-chart-studio .studio-mark-card-type{min-width:0}
+
+@media(min-width:1100px){
+  /* CS3: the chart title is one line; a longer one ends in an ellipsis and its tooltip is the full title. */
+  #view-chart-studio .studio-canvas-wrap h2#studio-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* A subtitle keeps at most two lines (no display change: board mode hides it by display). */
+  #view-chart-studio .studio-subtitle{max-height:2lh;overflow:hidden}
+}
+
+/* CS4: below 1500px wide, or 1050px high, the plot has less than 480px, so the three figures fold into
+   one compact line under the subtitle ("$863,505.98 Selected net amount · 3,966 Source observations
+   · 444 Reported donor identities"). The figures and their words are unchanged. */
+@media(min-width:1100px) and (max-width:1499px),(min-width:1100px) and (max-height:1049px){
+  #view-chart-studio .studio-verified-summary{display:block;margin:4px 0 0;padding:0;border:0;font:400 12px/16px var(--font-sans);color:#69696e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #view-chart-studio .studio-verified-summary>span{display:inline;padding:0;border:0}
+  #view-chart-studio .studio-verified-summary>span+span{padding-left:0;border-left:0}
+  #view-chart-studio .studio-verified-summary>span+span::before{content:"\00b7";margin:0 8px;color:#a8a3ad}
+  #view-chart-studio .studio-verified-summary strong{margin-right:4px;font:600 12px/16px var(--font-sans);letter-spacing:0;color:#1d173b}
+  #view-chart-studio .studio-verified-summary strong+strong{margin-left:6px}
+}
+
+@media(min-width:1100px) and (max-width:1499px){
+  /* CS2: the page head row (S1's 40px title and workspace padding stay; test_workspace_polish pins them). */
+  #view-chart-studio .studio-header{min-height:44px;margin:0 0 4px}
+  #view-chart-studio button.studio-scope-change{height:28px;min-height:28px;line-height:26px}
+  #view-chart-studio .studio-compare .chip-add{height:28px;min-height:28px;padding:0 11px}
+  #view-chart-studio .studio-segmented.segmented{height:28px}
+  #view-chart-studio .studio-segmented.segmented>button{padding:0 14px}
+  /* CS1: one toolbar row at 1344px, Add to briefing in view. */
+  #view-chart-studio .studio-toolbar{gap:3px;padding:4px 6px 4px 8px}
+  #view-chart-studio .studio-toolbar .studio-group{gap:1px}
+  #view-chart-studio .studio-toolbar .studio-icon{width:15px;height:15px}
+  #view-chart-studio .studio-toolbar :is(.studio-tool,button.studio-tool){gap:5px;height:30px;min-height:30px;padding:0 5px}
+  #view-chart-studio .studio-toolbar .studio-divider{height:22px;margin:0 3px}
+  #view-chart-studio .studio-toolbar .studio-fit select{height:30px;min-height:30px}
+  #view-chart-studio .studio-toolbar>button,#view-chart-studio .studio-toolbar>.studio-menu>summary{gap:6px;height:30px;min-height:30px;padding:0 9px}
+  #view-chart-studio .studio-toolbar>.studio-menu>summary{padding-right:8px}
+  #view-chart-studio .studio-toolbar>button#studio-showme-toggle{padding:0 10px}
+  /* CS2: the grid - Data pane 185px, Inspector 258px - under a lower head and toolbar. */
+  #view-chart-studio .studio-grid{grid-template-columns:185px minmax(0,1fr) 258px;gap:12px;height:calc(100vh - 184px);margin-top:10px}
+  #view-chart-studio .studio.studio-inspector-collapsed:not(.studio-options-hidden) .studio-grid{grid-template-columns:185px minmax(0,1fr) 56px}
+  #view-chart-studio .studio.studio-data-collapsed:not(.studio-options-hidden):not(.studio-chart-expanded) #studio-grid{grid-template-columns:56px minmax(0,1fr) 258px}
+  #view-chart-studio .studio-sheets{height:36px;margin-top:10px}
+  #view-chart-studio .studio-sheets button{padding:0 14px;font-size:13px}
+  #view-chart-studio .studio-sheets #studio-sheet-source{padding:0 20px 0 14px}
+  /* CS2: the Data pane. */
+  #view-chart-studio #studio-pane-data{padding:8px 8px 10px}
+  #view-chart-studio .studio-search input{height:30px;min-height:30px;padding-left:28px;font-size:12.5px}
+  #view-chart-studio .studio-search-row .studio-search input{padding-right:31px}
+  #view-chart-studio .studio-search::before{left:10px;top:9px}
+  #view-chart-studio .studio-search::after{left:19.5px;top:19px}
+  #view-chart-studio .studio-from-menu{top:2px;right:2px}
+  #view-chart-studio .studio-from-menu>summary{width:26px;height:26px}
+  #view-chart-studio #studio-pane-data>h3:not(.studio-panel-title){margin:12px 0 4px}
+  #view-chart-studio .studio-fields .studio-pill{height:24px}
+  #view-chart-studio .studio-fields .studio-pill .studio-glyph{width:27px}
+  /* CS2, CS8: the shelves - 28px rows, compact pills. */
+  #view-chart-studio .studio-shelves{padding-top:6px;padding-bottom:6px;padding-left:8px}
+  #view-chart-studio .studio-shelf{height:28px;margin:0 0 5px;padding:0 0 0 8px}
+  #view-chart-studio .studio-shelves .studio-shelf:has(>.studio-drop--stages){height:28px;min-height:0;padding-top:0;padding-bottom:0}
+  #view-chart-studio .studio-shelf-name{flex:0 0 70px}
+  #view-chart-studio .studio-shelf .studio-drop{min-height:26px;gap:4px}
+  #view-chart-studio .studio-shelf .studio-drop .studio-pill{height:22px;padding:0 8px 0 9px;gap:6px;font-size:12.5px}
+  #view-chart-studio .studio-shelf .studio-drop>button.studio-dual-axis{height:22px;padding:0 8px}
+  #view-chart-studio .studio-shelf #studio-filters{margin:2px 0}
+  #view-chart-studio .studio-mark-chip{height:26px}
+  #view-chart-studio .studio-mark-chip select{height:24px}
+  #view-chart-studio .studio-mark-chip{padding:0 22px 0 8px}
+  #view-chart-studio .studio-mark-chip::after{right:9px}
+  #view-chart-studio #studio-shelves-collapse{right:6px;bottom:8px}
+  /* CS2, CS3: the chart card - a 24px title, a 13px subtitle, a compact foot line. */
+  #view-chart-studio .studio-view{gap:10px}
+  #view-chart-studio .studio-canvas-wrap{padding:6px 16px 8px}
+  #view-chart-studio .studio-canvas-wrap h2#studio-title{font:400 24px/30px var(--font-serif)}
+  #view-chart-studio .studio:not(.studio-options-hidden) #studio-canvas-wrap>h2#studio-title{padding-right:0}
+  #view-chart-studio .studio:not(.studio-options-hidden) #studio-canvas-wrap>#studio-subtitle{padding-right:112px}
+  #view-chart-studio #studio-expand{top:37px;right:16px;height:22px;min-height:22px;gap:5px;padding:0 8px 0 7px}
+  #view-chart-studio .studio-subtitle{margin:1px 0 0;font:400 13px/18px var(--font-sans)}
+  #view-chart-studio .studio-canvas-wrap>.studio-canvas{margin-top:6px}
+  #view-chart-studio .studio-foot{padding:4px 0 0}
+  #view-chart-studio .studio-note-line{min-height:28px;gap:10px}
+  #view-chart-studio .studio-note-line:has(#studio-reconcile:not([hidden])){padding:3px 10px 3px 12px}
+  #view-chart-studio .studio-reconcile{gap:8px;font:400 12px/1.3 var(--font-sans)}
+  #view-chart-studio .studio-reconcile-text{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #view-chart-studio button.studio-match-graph{height:22px;min-height:22px;padding:0 9px;font-size:12px}
+  #view-chart-studio button.studio-reconcile-why{font-size:12px}
+  #view-chart-studio .studio-note-line .studio-result-controls{font-size:12px;white-space:nowrap}
+  #view-chart-studio .studio-canvas-wrap>.studio-foot:not(:has(#studio-reconcile:not([hidden]))){min-height:28px}
+  #view-chart-studio .studio-canvas-wrap>.studio-foot:not(:has(#studio-reconcile:not([hidden]))) #studio-note{-webkit-line-clamp:1;font-size:12px;line-height:16px}
+  /* CS2, CS9: the Inspector - a 21px head, 13px tabs and rows, a 40px tile strip, 38px marks rows. */
+  #view-chart-studio .studio-inspector-head{padding:6px 8px 0 11px}
+  #view-chart-studio .studio-inspector-head .studio-panel-title{font:400 21px/26px var(--font-serif)}
+  #view-chart-studio button.studio-inspector-collapse{height:26px;min-height:26px;padding:0 10px}
+  #view-chart-studio .studio-inspector-tabs{margin:4px 10px 0}
+  #view-chart-studio .studio-inspector-tabs button{padding:9px 8px 10px;font-size:13px}
+  #view-chart-studio .studio-inspector-tabs button+button{margin-left:12px}
+  #view-chart-studio .studio-inspector .studio-pane{padding:7px 6px 10px 10px}
+  #view-chart-studio .studio-mark-strip{gap:2px;margin:2px 0 6px}
+  #view-chart-studio .studio-mark-tile{height:40px;gap:3px;font-size:8.5px;letter-spacing:-.15px}
+  #view-chart-studio .studio-mark-tile .studio-icon{width:16px;height:16px}
+  #view-chart-studio .studio-mark-card .studio-mark-tile{height:36px;letter-spacing:-.3px}
+  #view-chart-studio .studio-prop{grid-template-columns:84px minmax(0,1fr)}
+  #view-chart-studio .studio-mark-card-body .studio-prop{height:38px}
+  #view-chart-studio .studio-mark-card .studio-mark-card-body .studio-prop{height:36px}
+  #view-chart-studio .studio-prop>span{gap:10px;padding:0 0 0 5px;font-size:13px}
+  #view-chart-studio .studio-prop>span .studio-icon,#view-chart-studio .studio-prop>span .studio-prop-options .studio-icon{width:16px;height:16px}
+  #view-chart-studio .studio-prop>span.studio-fold-head{padding-left:5px}
+  #view-chart-studio .studio-prop>span.studio-fold-head button.studio-fold{gap:10px}
+  #view-chart-studio .studio-prop>span:has(>.studio-prop-options) button.studio-fold::before{left:-37px}
+  #view-chart-studio .studio-prop .studio-drop{padding:0 6px}
+  #view-chart-studio .studio-mark-card-body .studio-prop .studio-drop{min-height:28px}
+  #view-chart-studio .studio-prop .studio-drop .studio-pill{height:22px;padding:0 8px;font-size:12.5px}
+  #view-chart-studio .studio-mark-card-head{min-height:36px}
+  #view-chart-studio .studio-mark-card-toggle{gap:6px;padding:6px 2px;font-size:13px}
+  #view-chart-studio .studio-mark-card-type{font-size:12px}
+  #view-chart-studio .studio-mark-card>.studio-mark-card-body{padding:0 6px 6px}
+  #view-chart-studio .studio-mark-sync .studio-check{font-size:13px}
+  #view-chart-studio .studio-inspector .studio-disclosure{margin-top:10px}
+  #view-chart-studio .studio-inspector .studio-disclosure>summary{height:34px;font-size:15px}
+  /* CS10: the Stages row (#46): four stages and "Chart: Sankey" on one line. */
+  #view-chart-studio .studio-shelves .studio-shelf:has(>.studio-drop--stages) .studio-shelf-name{flex-basis:50px}
+  #view-chart-studio .studio-shelves .studio-shelf .studio-drop.studio-drop--stages{gap:2px}
+  #view-chart-studio .studio-shelf .studio-drop.studio-drop--stages .studio-pill{padding:0 5px 0 6px;gap:4px;font-size:11.5px}
+  #view-chart-studio .studio-shelf .studio-drop.studio-drop--stages .studio-pill>button.studio-pill-menu{width:14px;margin:0 -3px 0 1px}
+  #view-chart-studio .studio-shelf .studio-drop.studio-drop--stages .studio-pill>button.studio-pill-menu::before{left:4px}
+  #view-chart-studio .studio-drop.studio-drop--stages>.studio-stage-arrow{margin:0;font-size:11px}
+}

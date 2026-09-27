@@ -886,7 +886,7 @@
       const result=await queryCached(query,view,{retry:again?.retry===true,onProgress});if(view.stale(ticket)||!verified())return;clearPending(node('canvas'));
       view.result=result;view.request=query;
       if(view.primary){failure('');lastResult=result;lastConfig=compiled;data.row_count=result.totals.records;data.rows=result.rows.map(row=>data.columns.map(f=>row[f.id]??''));}
-      let title=contributions.BASIS[sheetBasis][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')title=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+title;view.title=title;view.scope=sourceScope(result,query);node('title').textContent=title;node('subtitle').textContent=scopeSubtitle(state);
+      let title=contributions.BASIS[sheetBasis][0]+(query.dimensions.length?' by '+query.dimensions.map(id=>data.columns.find(f=>f.id===id)?.name||id).join(' / '):'');if(compiled.spec.measures.length!==1||compiled.spec.measures[0]!=='amount')title=compiled.spec.measures.map(id=>result.columns.find(c=>c.id===id)?.name||id).join(' / ')+' · '+title;view.scope=sourceScope(result,query);view.title=showTitle(node,title,state,sheetBasis);node('subtitle').textContent=scopeSubtitle(state);
       const money=value=>contributionPlot.format(value,'amount');
       node('verified-summary').replaceChildren();
       for(const [label,value]of [[sheetBasis==='original_supported'?'Selected gross amount':'Selected net amount',money(result.totals.amount)],['Source observations',fmt(result.totals.records)],['Reported donor identities',fmt(result.totals.contributors)]]){const item=document.createElement('span'),strong=document.createElement('strong');strong.textContent=value;item.append(strong,document.createTextNode(label));node('verified-summary').append(item);}
@@ -897,7 +897,7 @@
       // The arrows appear only when there is another page of groups (S1).
       node('groups-prev').hidden=node('groups-next').hidden=compiled.spec.type==='map'||compiled.transform!=='none'||(!query.offset&&!result.has_more);
       node('inspect-all').disabled=false;node('inspect-all').title='';
-      let rows=compiled.spec.naturalOrder?contributions.naturalRows(result.rows,compiled.spec.dimensions):result.rows,spec={...compiled.spec,columns:result.columns,title:title,barPitch:28,niceTicks:true,panelTitles:compiled.spec.measures.length!==1,width:node('canvas').clientWidth,barLeftMax:190,seriesColor:seriesColour(),...roomFit(node('canvas'))},temporal=null;const notes=[...compiled.notes,...(result.notices||[])];
+      let rows=compiled.spec.naturalOrder?contributions.naturalRows(result.rows,compiled.spec.dimensions):result.rows,spec={...compiled.spec,columns:result.columns,title:title,barPitch:28,niceTicks:true,panelTitles:compiled.spec.measures.length!==1,width:node('canvas').clientWidth,barLeftMax:190,seriesColor:seriesColour(),...roomFit(node('canvas')),...cardFit(view,compiled.spec)},temporal=null;const notes=[...compiled.notes,...(result.notices||[])];
       if(spec.type==='table'&&!state.showLabels)notes.push(TABLE_LABELS_OFF);
       // Incomplete pages are drawn and said to be incomplete (census B-S30).
       if(spec.type==='histogram'&&result.has_more)notes.push('This histogram has more than 10,000 occupied bins and shows the first 10,000. Increase the bin width or narrow the filters to see the complete distribution.');
@@ -3060,6 +3060,55 @@
     if (window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) return false;
     return ROOM_CLASSES.some(name => host.classList.contains(name));
   }
+  // Lane F2b (boards #50-#52, 2026-09-26). The chart card's h2 is one concise line in the boards' words
+  // ("Selected amount vs Observation count, by Recipient committee"). An export, a copied image, the print
+  // sheet and a briefing card carry that same title (view.title); the full title the compiler built is the
+  // h2's tooltip, and the accounting basis it named stays in the scope line each of them prints.
+  function cardTitle(state, basis) {
+    const byIndex = new Map(columns().map(field => [field.index, field]));
+    const fieldsOf = list => core.shelf(list).map(pill => byIndex.get(pill.column)).filter(Boolean);
+    const names = list => list.map(field => field.name);
+    const across = fieldsOf(state.columns), down = fieldsOf(state.rows), marks = state.marks || {};
+    const colour = fieldsOf(marks.color == null ? [] : [marks.color])[0];
+    return core.conciseTitle({
+      xMeasures: names(across.filter(field => field.role === 'measure')),
+      yMeasures: names(down.filter(field => field.role === 'measure')),
+      axisDims: names([...across, ...down].filter(field => field.role === 'dimension')),
+      colorDim: colour && colour.role === 'dimension' ? colour.name : '',
+      detailDims: names(fieldsOf(marks.detail).filter(field => field.role === 'dimension')),
+      measureFallback: (contributions.BASIS[basis] || [])[0] || ''});
+  }
+  function showTitle(node, full, state, basis) {
+    const heading = node('title'), short = cardTitle(state, basis) || full;
+    heading.textContent = short;
+    if (short !== full) heading.title = full; else heading.removeAttribute('title');
+    return short;
+  }
+  // Lane F2b (#50, #51): a scatter or a line on the Studio's canvas is drawn as the boards' chart card -
+  // its legends in a column at the plot's right, labels that never sit on one another (the extremes
+  // first), each coloured line named at its end, no panel title under the card's own, and, on the
+  // desktop grid, a plot as tall as the chart box. contribution-plot.js draws each only when asked; any
+  // other mark ignores them.
+  // The window's size and the studio's pane classes: what a refit answers (not the canvas box alone).
+  function plotLayout() {
+    const host = document.querySelector('#view-chart-studio .studio');
+    return {viewport: window.innerWidth + 'x' + window.innerHeight,
+      layout: host ? [...ROOM_CLASSES, 'studio-options-hidden'].filter(name => host.classList.contains(name)).join(' ') : ''};
+  }
+  function cardFit(view, spec) {
+    const out = {legendPlacement: 'right', labelCollide: true, endLabels: true};
+    if (spec.type === 'scatter') out.panelTitles = false;
+    const canvas = view.el('canvas'), fit = (view.state && view.state.fit) || 'standard';
+    if (canvas !== el('canvas') || (window.matchMedia && window.matchMedia('(max-width: 1099px)').matches) || boardTiles() > 1) return out;
+    if (!['scatter', 'line', 'area'].includes(spec.type)) return out;
+    const box = fitBox(canvas);
+    if (!box) return out;
+    // Fit: Standard draws at most 1000 units wide; with panes put away fitRoom scales it to the room's width.
+    const drawnWidth = fit === 'standard' && !chartRoomy() ? Math.min(1000, box.width) : box.width;
+    const height = fit === 'entire' ? Math.min(box.height, window.innerHeight - 430) : box.height;
+    if (drawnWidth > 0 && height > 120) { out.plotHeight = Math.floor((height - 6) * 1000 / drawnWidth); canvas.__plotBox = Object.assign({}, box, plotLayout()); }
+    return out;
+  }
   function roomFit(canvas) {
     return canvas === el('canvas') && chartRoomy() ? {fitHeight: canvas.clientHeight, barPitchMax: ROOM_PITCH} : {};
   }
@@ -3310,6 +3359,9 @@
       maxGroups: Number.isInteger(config.maxGroups) ? config.maxGroups : 100000, splitMulti: false, series: -1, filters: config.filters};
   }
   function renderView(view) {
+    // Lane F2b: the h2's tooltip belongs to the chart that set it (showTitle); each drawing starts without one.
+    const heading = (view || mainSurface()).el('title');
+    if (heading) heading.removeAttribute('title');
     view = view || mainSurface();
     const node = view.el, state = view.state;
     // Lane P: a map whose marks cards are its layers draws through map-studio.js.
@@ -4526,6 +4578,7 @@
     view.title = title;
     view.scope = results.map((result, i) => sourceScope(result, queries[i])).join(' | ');
     node('title').textContent = title;
+    node('title').title = title;
     node('subtitle').textContent = scopeSubtitle(state) + ' · compared: ' + values.map(v => v.label).join(' vs ');
     // Totals: each report's own for industry; one query's combined totals for
     // cycle and company, said as combined (group identities are not additive).
@@ -5478,6 +5531,21 @@
       renderView();
     };
     new ResizeObserver(() => { clearTimeout(refitTimer); refitTimer = setTimeout(refit, 150); }).observe(el('canvas'));
+    // Lane F2b: a scatter or line drawn to the chart box's height (cardFit) is drawn again, from the answer
+    // already held, once that box has changed by 10px or more and the resize has settled.
+    let plotTimer = 0;
+    new ResizeObserver(() => {
+      clearTimeout(plotTimer);
+      plotTimer = setTimeout(() => {
+        const canvas = el('canvas'), drawn = canvas.__plotBox, box = fitBox(canvas);
+        if (!drawn || !box || canvas.hidden || !verified() || overviewMode || dataSourceTab || boardTiles() > 1) return;
+        if (!canvas.querySelector(':scope > svg[data-plot-fit]')) return;
+        if (Math.abs(box.width - drawn.width) < 10 && Math.abs(box.height - drawn.height) < 10) return;
+        const now = plotLayout();
+        if (now.viewport === drawn.viewport && now.layout === drawn.layout) return;
+        renderView();
+      }, 200);
+    }).observe(el('canvas'));
   }
   // Cancelling aborts the request that is preparing and leaves the last good
   // view exactly where it was: renderContributionView ignores AbortError.

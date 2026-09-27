@@ -2305,6 +2305,27 @@
     return list;
   }
 
+  /* Lane F2b (boards #50-#52, 2026-09-26): the chart card's title on one line, in the boards' words -
+     "Selected amount vs Gift count, by Candidate" (a measure on each axis), "Selected amount by
+     Contribution month, by Party" (a dimension on an axis, Colour on a dimension). Field names are kept
+     as the reader sees them on the shelves. Each argument is a list of display names; an empty answer
+     means the caller keeps the title it built. */
+  function conciseTitle(parts) {
+    const given = parts || {};
+    const list = value => (Array.isArray(value) ? value : []).map(item => String(item == null ? '' : item).trim()).filter(Boolean);
+    const unique = values => values.filter((value, i) => values.indexOf(value) === i);
+    const join = values => values.length < 3 ? values.join(' and ') : values.slice(0, -1).join(', ') + ' and ' + values[values.length - 1];
+    const across = unique(list(given.xMeasures)), down = unique(list(given.yMeasures));
+    const axes = unique(list(given.axisDims)), detail = unique(list(given.detailDims));
+    const colour = String(given.colorDim == null ? '' : given.colorDim).trim();
+    const lead = across.length && down.length ? join(down) + ' vs ' + join(across)
+      : join(unique([...down, ...across])) || String(given.measureFallback == null ? '' : given.measureFallback).trim();
+    if (!lead) return '';
+    if (axes.length) return lead + ' by ' + join(axes) + (colour && !axes.includes(colour) ? ', by ' + colour : '');
+    const by = detail.length ? detail : colour ? [colour] : [];
+    return by.length ? lead + ', by ' + join(by) : lead;
+  }
+
   const api = {
     AGGREGATIONS, AGGREGATION_IDS, MARK_TYPES, MARK_IDS, TRANSFORMS, SHOW_ME, STUDIO_GROUP_LIMIT,
     EXTRA_MARK_TYPES, ALL_MARK_TYPES, ALL_MARK_IDS, markLabel, groupLimitOf, SORTS,
@@ -2331,7 +2352,9 @@
     allCardType, glyphFor, dualCardMark, compileCards,
     // Flow (lane F, board #46, studio_api.json v4).
     FLOW_RIBBONS, FLOW_ORDERS, FLOW_DEFAULTS, FLOW_MIN_STAGES, FLOW_MAX_STAGES, FLOW_MAX_GROUP, flowReason, flowOptions,
-    flowFault, flowFit, isFlowSheet, flowSwitch, setFlowOptions, compileFlow
+    flowFault, flowFit, isFlowSheet, flowSwitch, setFlowOptions, compileFlow,
+    // Lane F2b (boards #50-#52): the chart card's one-line title.
+    conciseTitle
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatStudioCore = api;
