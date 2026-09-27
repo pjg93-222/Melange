@@ -2315,7 +2315,17 @@
     const list = value => (Array.isArray(value) ? value : []).map(item => String(item == null ? '' : item).trim()).filter(Boolean);
     const unique = values => values.filter((value, i) => values.indexOf(value) === i);
     const join = values => values.length < 3 ? values.join(' and ') : values.slice(0, -1).join(', ') + ' and ' + values[values.length - 1];
-    const across = unique(list(given.xMeasures)), down = unique(list(given.yMeasures));
+    // Lane G1 (boards #50, #52): a measure takes its shorter name where one says the same thing - a sum is
+    // its field ("SUM(Analysis Amount)" -> "Analysis Amount"), and "Distinct reported donor identities"
+    // drops "Distinct reported" ("Donor identities"; the figures above the chart count "Reported donor
+    // identities"). The shelves, the legends and the h2's tooltip keep the full names.
+    const shortMeasure = name => {
+      const sum = /^SUM\((.+)\)$/i.exec(name);
+      const base = sum ? sum[1].trim() : name;
+      const rest = /^distinct reported\s+(\S.*)$/i.exec(base);
+      return rest ? rest[1].charAt(0).toUpperCase() + rest[1].slice(1) : base;
+    };
+    const across = unique(list(given.xMeasures).map(shortMeasure)), down = unique(list(given.yMeasures).map(shortMeasure));
     const axes = unique(list(given.axisDims)), detail = unique(list(given.detailDims));
     const colour = String(given.colorDim == null ? '' : given.colorDim).trim();
     const lead = across.length && down.length ? join(down) + ' vs ' + join(across)
@@ -2324,6 +2334,44 @@
     if (axes.length) return lead + ' by ' + join(axes) + (colour && !axes.includes(colour) ? ', by ' + colour : '');
     const by = detail.length ? detail : colour ? [colour] : [];
     return by.length ? lead + ', by ' + join(by) : lead;
+  }
+
+  /* Lanes G1/G1b (board #47, 2026-09-27): the sources a sheet reads, one row each, for the Data pane's
+     list. Only a map's layers read sources of their own (lane P), so any other sheet answers none, and
+     the list is drawn for two sources or more. A row is the source's key, its swatch - the colour its
+     first layer draws in (map-layers.js compileLayer): a circle or shape with no colour measure in its
+     slot's one colour, a density in its ramp's purple, any other layer in its ramp's own hue, or a
+     darker, then a lighter stop of it where an earlier source already took that colour - its name, its
+     kind and its tooltip. `layers` is MentatMapLayers (map-layers.js); `bases` names each basis of an
+     industry (MentatStudioContributions.BASIS); `fields` are the sheet's fields (a colour measure is
+     read off them). */
+  function sheetSources(sheet, layers, bases, fields) {
+    if (!layers || typeof layers.sourceKey !== 'function' || !mapLayersOn(sheet)) return [];
+    const rows = [], taken = new Set();
+    readCards(sheet).forEach((card, slot) => {
+      const source = card && card.source;
+      const key = layers.sourceKey(source);
+      if (!key || rows.some(row => row.key === key)) return;
+      const mark = layers.markOf(card);
+      const flat = (mark === 'circle' || mark === 'shape') && typeof layers.slotColour === 'function'
+        && !(typeof layers.measureField === 'function' && layers.measureField(card, 'color', Array.isArray(fields) ? fields : []));
+      let colour = flat ? layers.slotColour(slot % 4) : '';
+      if (!flat) {
+        const ramp = (card.map && card.map.ramp) || (mark === 'density' ? 'heat' : 'teal');
+        const stops = layers.rampStops(ramp) || [];
+        const order = ramp === 'heat' ? [1, 2, 4] : [3, 4, 2];
+        colour = order.map(at => stops[at]).find(value => value && !taken.has(value)) || stops[order[0]];
+      }
+      colour = colour || '#a39b92';
+      taken.add(colour);
+      const industry = source.kind === 'industry';
+      const basis = industry ? ((bases && bases[source.basis || 'receipt']) || [])[0] || '' : '';
+      rows.push({key, colour, name: industry ? layers.paneLabel(source) : layers.sourceBadge(source),
+        kind: industry ? 'published workbook' : layers.sourceLabel(source),
+        title: industry ? layers.sourceLabel(source) + ' · published workbook' + (basis ? ' · ' + basis : '')
+          : layers.sourceBadge(source) + ' · ' + layers.sourceLabel(source)});
+    });
+    return rows;
   }
 
   const api = {
@@ -2354,7 +2402,9 @@
     FLOW_RIBBONS, FLOW_ORDERS, FLOW_DEFAULTS, FLOW_MIN_STAGES, FLOW_MAX_STAGES, FLOW_MAX_GROUP, flowReason, flowOptions,
     flowFault, flowFit, isFlowSheet, flowSwitch, setFlowOptions, compileFlow,
     // Lane F2b (boards #50-#52): the chart card's one-line title.
-    conciseTitle
+    conciseTitle,
+    // Lane G1 (board #47): the sources a sheet reads, for the Data pane's list.
+    sheetSources
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.MentatStudioCore = api;

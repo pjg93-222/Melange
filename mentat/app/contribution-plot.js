@@ -428,6 +428,8 @@
    [[my,1],[mx,1],[my,-1],[mx,-1]].forEach(([id,sign],k)=>{let best=null;for(const r of list)if(best==null||sign*(r[id]-best[id])>0)best=r;if(best&&!rank.has(best))rank.set(best,40-k);});
    for(const r of list)if(!rank.has(r))rank.set(r,1+(sizeId&&finite(r[sizeId])?Math.sqrt(Math.abs(r[sizeId])/maxSize):0)+Math.hypot((px(r)-cx)/(spanX||1),(py(r)-cy)/(spanY||1)));
    return r=>rank.get(r)||1;};
+  // Lane G1 (#51): an extreme's label may also sit beside its point - above or below, right or left.
+  const sideSpots=(px,py,attrs)=>[[9,-8,'start'],[-9,-8,'end'],[9,19,'start'],[-9,19,'end']].map(([dx,dy,anchor])=>({...attrs,x:f2(px+dx),y:f2(py+dy),'text-anchor':anchor}));
   const lineRanks=(s,m)=>{const vals=s.rows.map(item=>item.row[m]).filter(finite),hi=vals.length?Math.max(...vals):0,lo=vals.length?Math.min(...vals):0,mean=vals.reduce((a,b)=>a+b,0)/Math.max(1,vals.length),span=hi-lo||1,last=((s.segments.at(-1)||[]).at(-1)||{}).row;
    return r=>r[m]===hi?30:r[m]===lo?28:r===last?26:1+Math.abs(r[m]-mean)/span;};
   for(let p=0;p<panels;p++){
@@ -681,7 +683,7 @@
      for(const segment of s.segments){const d=segment.map((item,i)=>(i?'L':'M')+x(item.at)+','+y(item.row[m])).join(' ');
       if(spec.type==='area'){const path=`M${x(segment[0].at)},${y(0)} `+segment.map(item=>`L${x(item.at)},${y(item.row[m])}`).join(' ')+` L${x(segment.at(-1).at)},${y(0)} Z`;node('path',{d:path,fill:perPoint?palette[0]:stroke,'fill-opacity':.1,stroke:'none'},null,g);}
       if(sizeId)segment.slice(1).forEach((item,k)=>{const prev=segment[k],share=v=>typeof v==='number'?Math.abs(v)/maxSize:0;node('path',{d:`M${x(prev.at)},${y(prev.row[m])} L${x(item.at)},${y(item.row[m])}`,fill:'none',stroke,'stroke-width':1.5+4.5*(share(prev.row[sizeId])+share(item.row[sizeId]))/2,'stroke-linecap':'round'},null,g);});
-      else node('path',{d,fill:'none',stroke,'stroke-width':2.5},null,g);segment.forEach(({row:r,at})=>{mark('circle',{cx:x(at),cy:y(r[m]),r:4.5,fill:perPoint?color(r):stroke,stroke:'white','stroke-width':1.5},r,g,true);if(spec.labels){const attrs={x:x(at),y:y(r[m])-11,'text-anchor':'middle',fill:perPoint?color(r):stroke,'font-size':15},text=labelText(r,format(r[m],m,columns,true));if(rank)wantLabel(attrs,text,110,g,rank(r),{x:x(at),y:y(r[m])},[{...attrs,y:y(r[m])+23}]);else fittedText(attrs,text,110,g);}});
+      else node('path',{d,fill:'none',stroke,'stroke-width':2.5},null,g);segment.forEach(({row:r,at})=>{mark('circle',{cx:x(at),cy:y(r[m]),r:4.5,fill:perPoint?color(r):stroke,stroke:'white','stroke-width':1.5},r,g,true);if(spec.labels){const attrs={x:x(at),y:y(r[m])-11,'text-anchor':'middle',fill:perPoint?color(r):stroke,'font-size':15},text=labelText(r,format(r[m],m,columns,true));if(rank)wantLabel(attrs,text,110,g,rank(r),{x:x(at),y:y(r[m])},[{...attrs,y:y(r[m])+23},...(rank(r)>=26?sideSpots(x(at),y(r[m]),attrs):[])]);else fittedText(attrs,text,110,g);}});
      }
     }
    }
@@ -689,20 +691,35 @@
   // spec.endLabels (#51): with Colour on a dimension each line is named at its end, in its own colour, clear
   // of the legend cards and of the other names. The waiting labels then take the room that is left.
   for(const c of legendCards)taken.push({x:c.x-4,y:c.y-4,w:c.w+8,h:c.h+8});
+  // Lane G1b (#51): each name's short leader is a line too; the value labels keep clear of it.
+  const leaders=[];
   if(ends&&ends.length){const group=node('g',{'data-legend':'line-ends','aria-label':'Line names'});let below=-Infinity;
    for(const e of ends.sort((a,b)=>a.y-b.y)){const w=measure(e.name,T),tx=e.x+18;let ty=Math.max(e.y+6,below+T+3);
     for(const c of legendCards)if(tx<c.x+c.w&&c.x<tx+w&&ty-T<c.y+c.h+4&&c.y<ty+6)ty=c.y+c.h+T+4;
     if(ty>panelH-6)continue;below=ty;
-    node('line',{x1:f2(e.x+6),y1:f2(e.y),x2:f2(e.x+14),y2:f2(ty-6),stroke:e.stroke,'stroke-width':1.2},null,group);
+    node('line',{x1:f2(e.x+6),y1:f2(e.y),x2:f2(e.x+14),y2:f2(ty-6),stroke:e.stroke,'stroke-width':1.2},null,group);leaders.push([e.x+6,e.y,e.x+14,ty-6,.6]);
     const t=node('text',{x:f2(tx),y:f2(ty),fill:e.stroke,'font-size':15,'data-end-label':e.name},fit(e.name,width-tx-6,T),group);node('title',{},e.name,t);
     taken.push({x:tx-3,y:ty-T*.8-2,w:w+6,h:T+4});}}
   if(waiting.length){
+   // Lanes G1/G1b (#51, 2026-09-27): a label keeps a clear gap of GAP units from every other label (value
+   // labels, axis ticks and titles, line names) and from every mark, and GAP plus half the stroke from every
+   // line (the plot's lines and each name's leader). GAP is 4 units - 2.4px on the boards' 1344px screen -
+   // or spec.labelGap, which Chart Studio sets so the gap is at least 2px at the size the chart is drawn, up to
+   // 6 units: a label above its point sits 7.4 units over it, so a wider gap would part every label from the
+   // line it belongs to.
+   // A label's box is its glyphs' (ascent .78 and descent .2 of the size the Studio draws, T). On a scatter or
+   // the dual-axis cards an extreme that finds every side on a mark may sit beside another mark, never on a
+   // line; on a line or area chart the points are the lines' own ink, so no label comes nearer them than GAP.
+   // A label with no such side is left to its tooltip (the round-1 capture struck $7,920.00 through with a
+   // line, and set $4,372.00 against another line's point).
+   const GAP=Math.min(6,Math.max(4,Number(spec.labelGap)||0)),ink=(attrs,w)=>{const x0=Number(attrs.x),y0=Number(attrs.y),anchor=attrs['text-anchor']||'start';return {x:anchor==='end'?x0-w:anchor==='middle'?x0-w/2:x0,y:y0-T*.78,w,h:T*.98};};
+   const grown=(r,by)=>({x:r.x-by,y:r.y-by,w:r.w+2*by,h:r.h+2*by});
    // Lines are in the way too: every unfilled stroked path's segments, read off the drawing.
-   const segs=[],walk=n=>{for(const k of [...(n.children||[])]){const get=key=>k.getAttribute?k.getAttribute(key):null;if(get('data-legend')!=null||get('data-reference')!=null)continue;
-     if(String(k.tagName||'').toLowerCase()==='path'&&get('fill')==='none'&&get('stroke')&&get('stroke')!=='none')for(const part of String(get('d')||'').split('M').slice(1)){const p=(part.match(/-?\d+(?:\.\d+)?/g)||[]).map(Number);for(let i=2;i+1<p.length;i+=2)segs.push([p[i-2],p[i-1],p[i],p[i+1]]);}
+   const segs=[...leaders],walk=n=>{for(const k of [...(n.children||[])]){const get=key=>k.getAttribute?k.getAttribute(key):null;if(get('data-legend')!=null||get('data-reference')!=null)continue;
+     if(String(k.tagName||'').toLowerCase()==='path'&&get('fill')==='none'&&get('stroke')&&get('stroke')!=='none')for(const part of String(get('d')||'').split('M').slice(1)){const p=(part.match(/-?\d+(?:\.\d+)?/g)||[]).map(Number),half=(Number(get('stroke-width'))||1)/2;for(let i=2;i+1<p.length;i+=2)segs.push([p[i-2],p[i-1],p[i],p[i+1],half]);}
      // Text already drawn (axis ticks and titles) is never covered, even by an extreme; a turned tick keeps its own rule.
      if(String(k.tagName||'').toLowerCase()==='text'&&!get('transform')){const words=k.childNodes?[...k.childNodes].filter(c=>c.nodeType===3).map(c=>c.nodeValue).join(''):String(k._text||'');
-      if(words.trim()){const w=measure(words,T),x0=Number(get('x'))||0,anchor=get('text-anchor')||'start';taken.push({x:anchor==='end'?x0-w:anchor==='middle'?x0-w/2:x0,y:(Number(get('y'))||0)-T*.8,w,h:T});}}
+      if(words.trim()){const w=measure(words,T),x0=Number(get('x'))||0,anchor=get('text-anchor')||'start';taken.push(grown({x:anchor==='end'?x0-w:anchor==='middle'?x0-w/2:x0,y:(Number(get('y'))||0)-T*.8,w,h:T},GAP/2));}}
      walk(k);}};
    walk(svg);
    const meets=(p,q)=>p.x<q.x+q.w&&q.x<p.x+p.w&&p.y<q.y+q.h&&q.y<p.y+p.h;
@@ -711,12 +728,11 @@
    const mine=(own,m)=>own&&own.x>=m.x-1&&own.x<=m.x+m.w+1&&own.y>=m.y-1&&own.y<=m.y+m.h+1;
    waiting.sort((a,b)=>b.rank-a.rank||a.order-b.order);
    for(const q of waiting){let placed=false;
-    // An extreme (rank 26 and up) that finds every side on a mark takes its first side anyway.
-    for(const clear of q.rank>=26?[true,false]:[true]){for(const attrs of [q.attrs,...(q.alts||[])]){
-     const shown=fit(q.text,q.room,attrs['font-size']||15),w=measure(shown,T),x0=Number(attrs.x),y0=Number(attrs.y),anchor=attrs['text-anchor']||'start';
-     const b={x:(anchor==='end'?x0-w:anchor==='middle'?x0-w/2:x0)-3,y:y0-T*.8-2,w:w+6,h:T+4};
+    for(const clear of q.rank>=26&&!timed?[true,false]:[true]){for(const attrs of [q.attrs,...(q.alts||[])]){
+     const shown=fit(q.text,q.room,attrs['font-size']||15),glyphs=ink(attrs,measure(shown,T)),b=grown(glyphs,GAP/2);
      if(b.x<0||b.x+b.w>width||b.y<0||b.y+b.h>panelH*panels||taken.some(t=>meets(b,t)))continue;
-     if(clear&&(markBoxes.some(m=>!mine(q.own,m)&&meets(b,m))||segs.some(s=>onSeg(b,s))))continue;
+     if(segs.some(s=>onSeg(grown(glyphs,GAP+(s[4]||0)),s)))continue;
+     if(clear&&markBoxes.some(m=>!mine(q.own,m)&&meets(grown(glyphs,GAP),m)))continue;
      taken.push(b);fittedText({...attrs,'data-label':'value'},q.text,q.room,q.parent);placed=true;break;}
      if(placed||!clear)break;}}}
   if(spec.references&&(spec.references.average||spec.references.median)&&spec.type!=='scatter'&&!(V3_TYPES.includes(spec.type)&&!axes[0])){

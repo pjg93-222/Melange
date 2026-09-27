@@ -77,7 +77,8 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 .flow-route-amount { grid-area: amount; color: #2f273f; font: 500 14px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
 
 /* The Sankey. Lane F2a: labels beside the bars at 12-13px with no halo (FL3); the ribbons
-   rest at 28% (the views pass it), and a hover dims only the ribbons off the route (FL2, FL4). */
+   rest at 20% (lane G1, board #44: overlaps stay pastel; the views pass it), a hover lights its
+   route at 60% and dims only the ribbons off the route (FL2, FL4). */
 .flow-chart { display: block; max-width: 100%; height: auto; overflow: visible; }
 .flow-header { fill: #4c4459; font: 600 11px/1 var(--font-sans); letter-spacing: .14em; }
 .flow-label { fill: #2f273f; font: 400 13px/1 var(--font-sans); }

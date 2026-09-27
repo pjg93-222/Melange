@@ -149,8 +149,9 @@ test('FL1-FL6: the SLF 2023-2024 flow at 780 x 420 draws to scale, one line unde
   const heights = all(svg, /<rect class="flow-bar"[^>]*height="([\d.]+)"/g).map(match => Number(match[1]));
   assert.ok(Math.max(...heights) > 100 && heights.filter(height => height > 2).length >= heights.length / 2,
     `bars ${heights.join(',')}`);
-  assert.equal(all(svg, /<path class="flow-link[^"]*"[^>]*fill-opacity="0.28"/g).length, all(svg, /<path class="flow-link/g).length);
-  assert.equal(chart.VIEW_OPACITY, 0.28);
+  // Lane G1 (board #44): the views rest at 20% (was 28%) so ribbons that overlap stay pastel.
+  assert.equal(all(svg, /<path class="flow-link[^"]*"[^>]*fill-opacity="0.2"/g).length, all(svg, /<path class="flow-link/g).length);
+  assert.equal(chart.VIEW_OPACITY, 0.2);
   const result = layout.layout(body, {width: 780, height: 420});
   // No node draws more than one line under its label.
   for (const node of result.nodes.filter(item => !item.stub)) {
@@ -226,4 +227,101 @@ test('FL8: board #46, the first stage labelled left of its bars and the stages s
     assert.match(own, /<text class="flow-label" x="([\d.]+)" y="[\d.]+" text-anchor="end">/, node.id);
     assert.equal(Number(/<text class="flow-label" x="([\d.]+)"/.exec(own)[1]), xs[0] - 8, `${node.id}: right-aligned 8 px left of its bar`);
   }
+});
+
+/* ------------------------------------------------------- lanes G1/G1b (#44) */
+test('lane G1: a hover in a committee flow lights the hovered side of the root\u2019s pool, not every donor', () => {
+  const result = layout.layout(FAIRSHAKE);
+  const root = result.nodes.find(node => node.root && !node.stub);
+  const moreno = result.links.find(link => link.source === 'committee:C00836221' && link.target === 'candidate:S4OH00192:support');
+  const whole = layout.route(result, moreno.id), lit = chart.traced(result, moreno.id);
+  const intoRoot = result.links.filter(link => link.target === root.id);
+  assert.ok(intoRoot.length >= 5 && intoRoot.every(link => whole.links.has(link.id)), 'the whole route still reaches every donor');
+  assert.ok(intoRoot.every(link => !lit.links.has(link.id)), 'no ribbon into the root is lit for a candidate\u2019s route');
+  const feeder = result.links.find(link => link.source === root.id && link.target === 'committee:C00836221');
+  assert.ok(lit.links.has(moreno.id) && lit.links.has(feeder.id), 'FAIRSHAKE -> Defend American Jobs -> Moreno is lit');
+  assert.ok(lit.nodes.has(root.id) && lit.nodes.has('committee:C00836221') && !lit.nodes.has('donor:COINBASE'));
+  for (const id of lit.links) assert.ok(whole.links.has(id), 'the lit ribbons are part of the route');
+  // A donor's ribbon lights its way into the pool, not what the pool paid out.
+  const coinbase = result.links.find(link => link.source === 'donor:COINBASE' && link.target === root.id);
+  const up = chart.traced(result, coinbase.id);
+  assert.ok(up.links.has(coinbase.id));
+  assert.ok(![...up.links].some(id => result.links.find(link => link.id === id).source === root.id), 'nothing out of the root');
+  // The root itself, and a flow without a root (the industry flow), light the whole route as before.
+  const sorted = set => [...set].sort();
+  assert.deepEqual(sorted(chart.traced(result, root.id).links), sorted(layout.route(result, root.id).links));
+  const industry = contract.examples.find(example => example.producer === 'crypto-2024-industry' && example.status === 200).body;
+  const drawn = layout.layout(industry);
+  for (const link of drawn.links) assert.deepEqual(sorted(chart.traced(drawn, link.id).links), sorted(layout.route(drawn, link.id).links));
+});
+
+test('lanes G1/G1b: the tooltip takes the nearest spot 4 px clear of all text, never the point, inside the drawing', () => {
+  const meets = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+  const grown = (item, by) => ({x: item.x - by, y: item.y - by, w: item.w + 2 * by, h: item.h + 2 * by});
+  const under = (spot, width, height, x, y) => x > spot.left - 6 && x < spot.left + width + 6 && y > spot.top - 6 && y < spot.top + height + 6;
+  // A column of labels right of the point, a header band along the top.
+  const labels = [0, 1, 2, 3, 4].map(at => ({x: 220, y: 100 + at * 40, w: 150, h: 14}));
+  const text = [...labels, {x: 0, y: 0, w: 800, h: 20}];
+  const spot = chart.placeTip({x: 200, y: 140, width: 300, height: 90, room: 800, top: 4, bottom: 600, obstacles: text});
+  assert.equal(spot.cover, 0, 'a spot that covers no text exists and is taken');
+  // Not only off the words: 4 px of clear space around every one of them (G1b's margin). With no margin
+  // the same sweep sits flush under the last label (top 274); the margin is what moves it, to the pixel (278).
+  for (const item of text) assert.ok(!meets({x: spot.left, y: spot.top, w: 300, h: 90}, grown(item, 4)), JSON.stringify(item));
+  const flush = chart.placeTip({x: 200, y: 140, width: 300, height: 90, room: 800, top: 4, bottom: 600, obstacles: text, margin: 0});
+  assert.ok(flush.cover === 0 && flush.top === 274 && spot.top === 278, `flush ${JSON.stringify(flush)}, kept clear ${JSON.stringify(spot)}`);
+  assert.ok(!under(spot, 300, 90, 200, 140), 'not over the point');
+  assert.ok(spot.left >= 4 && spot.left + 300 <= 796 && spot.top >= 4 && spot.top + 90 <= 596, 'inside the drawing');
+  // No clear spot near the point (a clear one 400 px off): the tooltip stays by the point, not across the drawing.
+  const gapTo = (spot, width, height, x, y) => Math.hypot(Math.max(0, spot.left - x, x - spot.left - width), Math.max(0, spot.top - y, y - spot.top - height));
+  const wall = Array.from({length: 30}, (_, at) => ({x: 0, y: at * 20, w: 700, h: 14}));
+  const near = chart.placeTip({x: 300, y: 300, width: 80, height: 40, room: 1000, top: 4, bottom: 600, obstacles: wall});
+  assert.ok(near.cover > 0 && gapTo(near, 80, 40, 300, 300) <= 16, `by the point, over the wall: ${JSON.stringify(near)}`);
+  // With words everywhere near it, the tooltip covers other labels rather than the hovered route's own or a header.
+  for (const kind of ['route', 'header']) {
+    const bands = [{x: 0, y: 0, w: 1000, h: 288, kind}, {x: 0, y: 312, w: 1000, h: 288, kind: 'text'}];
+    const spared = chart.placeTip({x: 400, y: 300, width: 100, height: 40, room: 1000, top: 4, bottom: 600, obstacles: bands});
+    assert.ok(spared.cover > 0 && !meets({x: spared.left, y: spared.top, w: 100, h: 40}, grown(bands[0], 4)) && gapTo(spared, 100, 40, 400, 300) <= 16,
+      `${kind} spared: ${JSON.stringify(spared)}`);
+    // The same two bands, both plain labels: a label touched counts whole, so the tooltip takes one band, not the
+    // 16 px between them (which would touch both) - above the point, by it, as the board sets it.
+    const plain = chart.placeTip({x: 400, y: 300, width: 100, height: 40, room: 1000, top: 4, bottom: 600,
+      obstacles: bands.map(band => Object.assign({}, band, {kind: 'text'}))});
+    assert.ok(plain.top + 40 <= 300 && plain.cover > 0 && !meets({x: plain.left, y: plain.top, w: 100, h: 40}, grown(bands[1], 4))
+      && gapTo(plain, 100, 40, 400, 300) <= 16, `plain labels: ${JSON.stringify(plain)}`);
+  }
+  // Open room above: the tooltip sits above the point, near it, as on board #44.
+  const open = chart.placeTip({x: 400, y: 300, width: 200, height: 60, room: 800, top: 4, bottom: 600, obstacles: []});
+  assert.ok(open.top + 60 <= 300 && 300 - (open.top + 60) <= 16, `above the point: ${JSON.stringify(open)}`);
+  // It never reaches above `top` (the title and subtitle sit above the drawing).
+  const low = chart.placeTip({x: 400, y: 230, width: 200, height: 60, room: 800, top: 200, bottom: 600, obstacles: []});
+  assert.ok(low.top >= 200 && !under(low, 200, 60, 400, 230), JSON.stringify(low));
+  // A bar is avoided when a clean spot is as near; text never loses to a bar.
+  const bar = {x: 380, y: 200, w: 12, h: 300, soft: 0.1};
+  const beside = chart.placeTip({x: 395, y: 330, width: 200, height: 60, room: 800, top: 4, bottom: 600, obstacles: [bar]});
+  assert.ok(!meets({x: beside.left, y: beside.top, w: 200, h: 60}, bar), JSON.stringify(beside));
+  // Text everywhere: still a spot, off the point, inside the drawing and near the point; its cover is the words it
+  // covers (each box with its 4 px margin), and no spot the sweep weighs is cheaper (distance + a hundredth of the
+  // whole of every label it touches).
+  const crowded = Array.from({length: 48}, (_, at) => ({x: (at % 8) * 100, y: Math.floor(at / 8) * 100, w: 90, h: 14}));
+  const packed = chart.placeTip({x: 390, y: 250, width: 280, height: 100, room: 800, top: 4, bottom: 600, obstacles: crowded});
+  assert.ok(packed.left >= 4 && packed.top >= 4 && packed.left + 280 <= 796 && !under(packed, 280, 100, 390, 250), JSON.stringify(packed));
+  const cover = (left, top) => crowded.map(item => grown(item, 4)).reduce((sum, item) => {
+    const w = Math.min(left + 280, item.x + item.w) - Math.max(left, item.x), h = Math.min(top + 100, item.y + item.h) - Math.max(top, item.y);
+    return sum + (w > 0 && h > 0 ? w * h : 0);
+  }, 0);
+  assert.equal(packed.cover, cover(packed.left, packed.top));
+  const touched = (left, top) => crowded.map(item => grown(item, 4)).filter(item => meets({x: left, y: top, w: 280, h: 100}, item))
+    .reduce((sum, item) => sum + item.w * item.h, 0);
+  const price = (left, top) => gapTo({left, top}, 280, 100, 390, 250) + (top + 100 <= 250 ? 0 : 3) + 0.01 * touched(left, top);
+  for (const [left, top] of [[404, 138], [96, 138], [404, 264], [96, 264]])
+    assert.ok(price(packed.left, packed.top) <= price(left, top) + 1e-9, `the old spot ${left},${top} is cheaper`);
+  assert.ok(gapTo(packed, 280, 100, 390, 250) <= 40, `by the point: ${JSON.stringify(packed)}`);
+  // The lit route's ribbon (soft samples, a px per px^2): with free space on both sides of the point, the tooltip
+  // takes a side the traced ribbon does not run through - not above, the board's side, where the ribbon is.
+  const ribbon = Array.from({length: 30}, (_, at) => ({x: 300 + at * 10, y: 220 + at * 0.5, w: 6, h: 6, soft: 1}));
+  const offRoute = chart.placeTip({x: 400, y: 260, width: 160, height: 50, room: 800, top: 4, bottom: 600, obstacles: ribbon});
+  assert.ok(offRoute.top + 50 > 260 && !ribbon.some(sample => meets({x: offRoute.left, y: offRoute.top, w: 160, h: 50}, sample))
+    && gapTo(offRoute, 160, 50, 400, 260) <= 16, `by the point, clear of the lit ribbon above it: ${JSON.stringify(offRoute)}`);
+  const noRibbon = chart.placeTip({x: 400, y: 260, width: 160, height: 50, room: 800, top: 4, bottom: 600, obstacles: []});
+  assert.ok(noRibbon.top + 50 <= 260, `without it, above: ${JSON.stringify(noRibbon)}`);
 });

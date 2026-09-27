@@ -36,8 +36,9 @@ test('conciseTitle: a dimension on an axis reads "<Measure> by <Dimension>, by <
     'Selected amount by Contribution month, by Party');
   assert.equal(core.conciseTitle({yMeasures: ['Selected amount'], axisDims: ['Party'], colorDim: 'Party'}),
     'Selected amount by Party', 'Colour already on an axis is not said twice');
+  // Lane G1 (#52): a measure takes its shorter name in the title (was "... and Distinct reported donor identities by ...").
   assert.equal(core.conciseTitle({yMeasures: ['Selected amount', 'Distinct reported donor identities'], axisDims: ['Contribution year']}),
-    'Selected amount and Distinct reported donor identities by Contribution year', 'a dual axis names both measures (#52)');
+    'Selected amount and Donor identities by Contribution year', 'a dual axis names both measures (#52)');
   assert.equal(core.conciseTitle({yMeasures: ['A', 'B', 'C'], axisDims: ['Year', 'Party']}), 'A, B and C by Year and Party');
 });
 

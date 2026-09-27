@@ -3,8 +3,9 @@
  * One rendering path. svgString() turns a flow-layout.js result into SVG markup (pure,
  * so node:test reads exactly what the page draws); mount() puts it in a host and wires
  * the reader's hands with delegated listeners:
- *  - hover (or keyboard focus) lights one whole route upstream and downstream and fades
- *    the rest;
+ *  - hover (or keyboard focus) lights its route upstream and downstream and fades the
+ *    rest; in a committee's flow the route stops at the root's pool (traced: pooled money
+ *    is not traced money), so a candidate's route never lights every donor;
  *  - click re-roots on a committee (options.onReroot) and opens a candidate
  *    (options.onCandidate: the downstream drawer);
  *  - a tooltip gives the amount, its share of the stage, the rows behind it and the FEC
@@ -14,15 +15,21 @@
  * Ribbon colour: Source | Target | Outcome | Gradient. Gradient is an SVG linearGradient
  * per ribbon, userSpaceOnUse from the source's right edge to the target's left edge: the
  * source colour blends into the target colour. Default opacity 40%; the PAC evidence and
- * Graph views rest at VIEW_OPACITY, 28% (boards #44/#45, lane F2a FL2). Colours come only
- * from MentatTheme.categorical. Pooled money is never coloured by an original donor: a
- * ribbon takes the colour of the committee it leaves (or its outcome), never a donor's.
+ * Graph views rest at VIEW_OPACITY, 20% (boards #44/#45, lanes G1/G1b: lane F2a's 28% made
+ * ribbons that overlap read as solid colour), and a hover lights its route at 60% (flow.css).
+ * Colours come only from MentatTheme.categorical. Pooled money is never coloured by an
+ * original donor: a ribbon takes the colour of the committee it leaves (or its outcome),
+ * never a donor's.
  *
  * Labels (lane F2a): beside the bars, 12-13 px, no halo; each node's label is drawn at the
  * level of detail the layout chose (flow-layout.js), cut at a word with an ellipsis and an
  * amount kept whole; every word the drawing leaves out is in the tooltip and the node's
- * accessible name. The tooltip is compact and sits by the hovered point, flipping so it
- * never covers the column headers or the title above the drawing.
+ * accessible name. The tooltip is compact and sits by the hovered point in the free space
+ * around it (lanes G1/G1b, placeTip): the nearest spot at least 4 px clear of every label,
+ * column header and legend, never over the point, and never above the drawing (the title
+ * and subtitle sit there), and off the lit route's ribbons where it can; where a dense
+ * drawing leaves no such spot near the point, it stays by the point and spares the headers
+ * and the hovered route's own words and ribbons.
  *
  * CSP (style-src 'self'): no style attributes and no <style>; presentation attributes and
  * classes only, and the tooltip is placed through the CSSOM.
@@ -36,7 +43,7 @@
     '#a09eea', '#d88766', '#509ecd'];
   const PARTY_RING = {R: '#83333e', D: '#509ecd'};
   const MODES = ['gradient', 'source', 'target', 'outcome'];
-  const VIEW_OPACITY = 0.28;
+  const VIEW_OPACITY = 0.2;
   const HEADER_SIZE = 11, HEADER_SPACING = 0.14;     // flow.css .flow-header: 11px, letter-spacing .14em
   const ELLIPSIS = '…';
   const MONEY_TAIL = /\s(\$[\d.,]+[MK]?)$/;
@@ -351,6 +358,111 @@
     return {title: nodeTitle(node), lines, url: fec(node.fec_url || ''), urlText: node.kind === 'candidate' ? 'Candidate on FEC' : 'Committee on FEC'};
   }
 
+  /* -------------------------------------------------------------- the trace */
+  // Lane G1 (board #44): what a hover lights. flow-layout.js route() is the whole route, upstream and
+  // downstream, and in a committee's flow it crosses the root committee's pool. The side of the pool
+  // the hovered ribbon or node is not on stays out of the light: Defend American Jobs -> Moreno lights
+  // FAIRSHAKE -> Defend American Jobs -> Moreno, not every donor into FAIRSHAKE (pooled money is not
+  // traced money, and a whole column of donor ribbons lit at 60% read as solid colour, not the board's
+  // pastel). Hovering the root itself, or any flow without a root (the industry flow, a worksheet's),
+  // lights the whole route as before.
+  function traced(result, start) {
+    const lit = layoutApi().route(result, start);
+    const root = result.nodes.find(node => node.root && !node.stub);
+    if (!root) return lit;
+    const byId = new Map(result.nodes.map(node => [node.id, node]));
+    const linkById = new Map(result.links.map(link => [link.id, link]));
+    const stageOf = id => (byId.get(id) || {}).stage;
+    // Money arriving at the root (or before it), and money leaving it (or after it).
+    const upstream = link => link.target === root.id || stageOf(link.target) < root.stage;
+    const downstream = link => link.source === root.id || stageOf(link.source) > root.stage;
+    const link = linkById.get(start);
+    const node = link ? null : byId.get(start);
+    const side = link ? (upstream(link) ? -1 : downstream(link) ? 1 : 0)
+      : !node || node.id === root.id ? 0 : Math.sign(node.stage - root.stage);
+    if (!side) return lit;
+    const links = new Set([...lit.links].filter(id => {
+      const item = linkById.get(id);
+      return !item || !(side > 0 ? upstream(item) : downstream(item));
+    }));
+    const nodes = new Set([...lit.nodes].filter(id => {
+      const item = byId.get(id);
+      return !item || item.id === root.id || (side > 0 ? item.stage >= root.stage : item.stage <= root.stage);
+    }));
+    return {nodes, links};
+  }
+
+  /* ----------------------------------------------------------- the tooltip spot */
+  // Lanes G1/G1b (board #44): where the tooltip goes - in free space near the point (x, y). Spots are
+  // swept about the point (above it, below it, beside it and up to `reach` px farther out) inside
+  // [4, room - width - 4] x [top, bottom - height - 4]; none covers the point or comes within 6 px of it
+  // (the pointer must reach the ribbons, not the tooltip). Every text obstacle - label, amount, column
+  // header, legend - is grown by `margin` (4 px) so the tooltip never sits flush against words. A spot
+  // clear of all of them wins: the nearest (its distance from the point plus a small cost for any bar it
+  // covers - an obstacle with `soft` set, that many px of distance per covered px^2 - and 3 px when it is
+  // not above the point, as the board sets the tooltip above the route). Where no spot near the point is
+  // clear (a dense drawing leaves no room the tooltip's size), it stays by the point and covers what
+  // matters least. A label it touches counts whole (a label cut in half is as unread as one hidden, so
+  // the tooltip's edges fall between labels): a column header or a label of the hovered route (kind
+  // 'header' or 'route') costs a px of distance per px^2, any other label a hundredth of that (a whole
+  // label, about 6000 px^2 with its margin, is worth 60 px of distance).
+  const TIP_FALLBACK = {header: 1, route: 1, text: 0.01};
+  function placeTip(spec) {
+    const x = Number(spec.x) || 0, y = Number(spec.y) || 0;
+    const width = Math.max(1, Number(spec.width) || 1), height = Math.max(1, Number(spec.height) || 1);
+    const gap = spec.gap == null ? 12 : Number(spec.gap), reach = spec.reach == null ? 160 : Number(spec.reach);
+    const margin = spec.margin == null ? 4 : Math.max(0, Number(spec.margin) || 0);
+    const minTop = spec.top == null ? 4 : Number(spec.top);
+    const maxLeft = Math.max(4, (spec.room == null ? x + 14 + width + 4 : Number(spec.room)) - width - 4);
+    const maxTop = Math.max(minTop, (spec.bottom == null ? y + gap + height + 4 : Number(spec.bottom)) - height - 4);
+    const obstacles = (spec.obstacles || []).filter(item => item && item.w > 0 && item.h > 0)
+      .map(item => item.soft ? item : {x: item.x - margin, y: item.y - margin, w: item.w + 2 * margin, h: item.h + 2 * margin,
+        kind: TIP_FALLBACK[item.kind] ? item.kind : 'text'});
+    const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
+    const covers = (left, top) => {
+      const out = {text: 0, soft: 0, weighted: 0};
+      for (const item of obstacles) {
+        const w = Math.min(left + width, item.x + item.w) - Math.max(left, item.x);
+        if (w <= 0) continue;
+        const h = Math.min(top + height, item.y + item.h) - Math.max(top, item.y);
+        if (h <= 0) continue;
+        if (item.soft) out.soft += w * h * item.soft;
+        else { out.text += w * h; out.weighted += item.w * item.h * TIP_FALLBACK[item.kind]; }
+      }
+      return out;
+    };
+    let clear = null, fallback = null;
+    const seen = new Set();
+    const consider = (rawLeft, rawTop) => {
+      const left = Math.round(clamp(rawLeft, 4, maxLeft)), top = Math.round(clamp(rawTop, minTop, maxTop));
+      const key = left + ',' + top;
+      if (seen.has(key)) return;
+      seen.add(key);
+      if (x > left - 6 && x < left + width + 6 && y > top - 6 && y < top + height + 6) return;
+      const dx = x < left ? left - x : x > left + width ? x - left - width : 0;
+      const dy = y < top ? top - y : y > top + height ? y - top - height : 0;
+      const cover = covers(left, top);
+      const cost = Math.hypot(dx, dy) + cover.soft + (top + height <= y ? 0 : 3);
+      if (cover.text <= 0) { if (!clear || cost < clear.cost) clear = {left, top, cover: 0, cost}; return; }
+      const price = cost + cover.weighted;
+      if (!fallback || price < fallback.price) fallback = {left, top, cover: cover.text, price};
+    };
+    // The four spots the tooltip took before lane G1, then the sweep about the point.
+    for (const [left, top] of [[x + 14, y - gap - height], [x - 14 - width, y - gap - height], [x + 14, y + 14], [x - 14 - width, y + 14]])
+      consider(left, top);
+    for (let top = y - gap - height - reach; top <= y + gap + reach; top += 6)
+      for (let left = x - 14 - width - reach; left <= x + 14 + reach; left += 8) consider(left, top);
+    // The sweep's 8 x 6 px grid, refined to the pixel about the spot it chose: the edges settle in the
+    // gaps between labels, and a clear spot comes as near the point as it can.
+    const chosen = clear || fallback;
+    if (chosen)
+      for (let top = chosen.top - 6; top <= chosen.top + 6; top += 1)
+        for (let left = chosen.left - 8; left <= chosen.left + 8; left += 1) consider(left, top);
+    const best = clear || fallback;
+    return best ? {left: best.left, top: best.top, cover: best.cover}
+      : {left: clamp(x + 14, 4, maxLeft), top: clamp(y + 14, minTop, maxTop), cover: null};
+  }
+
   /* ------------------------------------------------------------------ mount */
   let mounted = 0;
   function mount(host, payload, options) {
@@ -378,40 +490,67 @@
       const svg = host.querySelector('svg.flow-chart');
       if (!svg) return;
       if (!start) { svg.classList.remove('is-tracing'); for (const item of svg.querySelectorAll('.is-lit')) item.classList.remove('is-lit'); return; }
-      const lit = layoutApi().route(state.context.result, start);
+      const lit = traced(state.context.result, start);
       svg.classList.add('is-tracing');
       for (const path of svg.querySelectorAll('.flow-link')) path.classList.toggle('is-lit', lit.links.has(path.dataset.link));
       for (const group of svg.querySelectorAll('.flow-node')) group.classList.toggle('is-lit', lit.nodes.has(group.dataset.node));
     }
 
-    // FL5: the tooltip sits by the hovered point (by a focused node's bar), above it when there
-    // is room below the column headers, else below it; right of it, else left. It never reaches
-    // up over the headers, and the title and subtitle sit above the drawing.
+    // FL5, lanes G1/G1b (board #44): the tooltip sits by the hovered point (by a focused node's bar)
+    // in the free space around it: placeTip weighs spots about the point by what they would cover - a
+    // label, a column header, a legend (each with 4 px to spare), a bar, the lit route's ribbons - and takes
+    // the nearest spot that covers no words; where none is near, it stays by the point and spares the
+    // headers and the words and ribbons of the route the hover lit (light() has marked it). It never
+    // reaches above the drawing (the title and subtitle sit above it) and keeps to the part of the drawing
+    // on screen.
     function place(anchor, point) {
       const box = host.getBoundingClientRect();
       const scrollX = host.scrollLeft || 0, scrollY = host.scrollTop || 0;
-      let x, y, below;
-      if (point) { x = point.x - box.left; y = point.y - box.top; below = 14; }
-      else {
-        const bar = (anchor.querySelector && anchor.querySelector('.flow-bar')) || anchor;
-        const at = bar.getBoundingClientRect();
-        x = at.right - box.left; y = at.top - box.top + Math.min(at.height / 2, 14); below = Math.max(at.height / 2, 8) + 6;
-      }
       const svg = host.querySelector('svg.flow-chart');
-      const bands = svg ? [...svg.querySelectorAll('.flow-header, .flow-legend-label, .flow-legend-swatch')] : [];
-      const floor = Math.max(4, ...bands.map(item => item.getBoundingClientRect().bottom - box.top + 6));
+      const rectOf = (item, soft, kind) => {
+        const at = item.getBoundingClientRect();
+        return {x: at.left - box.left, y: at.top - box.top, w: at.width, h: at.height, soft, kind};
+      };
+      const words = item => rectOf(item, 0, item.classList.contains('flow-header') ? 'header'
+        : item.closest('.flow-node.is-lit') ? 'route' : 'text');
+      const obstacles = svg ? [
+        ...[...svg.querySelectorAll('.flow-label, .flow-amount, .flow-subline, .flow-header, .flow-legend-label, .flow-legend-swatch, .flow-party')]
+          .map(words),
+        ...[...svg.querySelectorAll('.flow-bar')].map(item => rectOf(item, 0.1))] : [];
+      // The lit route's ribbons, sampled along both long edges and the middle: a spot that would hide the
+      // route the reader is tracing costs a px of distance per px^2 of the samples it covers. They are not
+      // words, so a spot over them still counts as free space.
+      const View = host.ownerDocument.defaultView;
+      for (const path of svg && View && View.DOMPoint ? svg.querySelectorAll('.flow-link.is-lit') : []) {
+        const length = typeof path.getTotalLength === 'function' ? path.getTotalLength() : 0;
+        const matrix = length && typeof path.getScreenCTM === 'function' ? path.getScreenCTM() : null;
+        if (!matrix) continue;
+        for (let step = 0; step <= 12; step += 1) {
+          const a = path.getPointAtLength(length * step / 24), b = path.getPointAtLength(length * (1 - step / 24));
+          for (const p of [a, b, {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2}]) {
+            const at = new View.DOMPoint(p.x, p.y).matrixTransform(matrix);
+            obstacles.push({x: at.x - box.left - 3, y: at.y - box.top - 3, w: 6, h: 6, soft: 1});
+          }
+        }
+      }
+      let x, y;
+      if (point) { x = point.x - box.left; y = point.y - box.top; }
+      else {
+        const bar = rectOf((anchor.querySelector && anchor.querySelector('.flow-bar')) || anchor, 0, 'route');
+        x = bar.x + bar.w; y = bar.y + Math.min(bar.h / 2, 14);
+        obstacles.push(bar);
+      }
       const width = tip.offsetWidth, height = tip.offsetHeight;
       const room = host.clientWidth || box.width;
-      const bottom = Math.max(host.clientHeight || box.height, floor + height);
-      let top = y - 12 - height;
-      if (top < floor) top = y + below;
-      if (top + height > bottom - 4 && y - 12 - height >= floor) top = y - 12 - height;
-      let left = x + 14;
-      if (left + width > room - 4) left = x - 14 - width;
-      left = Math.max(4, Math.min(left, room - width - 4));
+      const tall = Math.max(host.clientHeight || box.height, height + 8);
+      const view = host.ownerDocument.defaultView;
+      const top = Math.max(4, 4 - box.top);
+      const onScreen = view && view.innerHeight ? view.innerHeight - box.top : tall;
+      const bottom = Math.min(tall, Math.max(onScreen, top + height + 8));
+      const spot = placeTip({x, y, width, height, room, top, bottom, obstacles});
       tip.style.transform = 'none';
-      tip.style.left = `${Math.round(left + scrollX)}px`;
-      tip.style.top = `${Math.round(Math.max(floor, top) + scrollY)}px`;
+      tip.style.left = `${Math.round(spot.left + scrollX)}px`;
+      tip.style.top = `${Math.round(spot.top + scrollY)}px`;
     }
 
     function show(target, anchor, point) {
@@ -616,7 +755,9 @@
   }
 
   const module_short = short, module_full = full;
-  const api = {svgString, mount, describe, short, full, footnote, fitHeading, fitLine, MODES, VIEW_OPACITY};
+  const api = {svgString, mount, describe, short, full, footnote, fitHeading, fitLine, MODES, VIEW_OPACITY,
+    // Lane G1 (board #44): what a hover lights, and where its tooltip goes.
+    traced, placeTip};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MentatFlowChart = api;
 })(typeof globalThis === 'undefined' ? this : globalThis);

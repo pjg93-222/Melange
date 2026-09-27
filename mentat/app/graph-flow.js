@@ -211,7 +211,7 @@
     const height = Math.max(420, Math.min(820, Math.round(root.innerHeight - Math.max(top, 0) - 70)));
     const width = Math.max(640, Math.floor(canvas.clientWidth || 1100));
     if (state.chart) state.chart.destroy();
-    // FL1/FL2: bars to scale in any height (the plot grows before a label is dropped), ribbons at 28%.
+    // FL1/FL2: bars to scale in any height (the plot grows before a label is dropped), ribbons at 20% (lane G1).
     state.chart = chartApi.mount(canvas, payload, {width, height, grow: true, opacity: chartApi.VIEW_OPACITY,
       ribbons: state.ribbons,
       title: $('graph-flow-heading').textContent,

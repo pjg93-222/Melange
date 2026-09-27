@@ -358,7 +358,7 @@ test('[flow] at 18px no two labels in a column meet', () => {
 /* ------------------------------------------------------ negative controls */
 function sabotaged(replace) {
   const file = path.join(__dirname, '..', 'studio-flow.js');
-  let source = fs.readFileSync(file, 'utf8');
+  let source = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
   for (const [from, to] of replace) { assert.ok(source.includes(from), 'the sabotage finds its line'); source = source.replace(from, to); }
   const module = {exports: {}};
   vm.runInNewContext(source, {module, require: name => require(path.join(__dirname, '..', name)), globalThis: {}, console});
@@ -408,4 +408,27 @@ test('[flow] studio_api: the Flow example is what the producers write, and every
   assert.deepEqual(config.stages.map(stage => stage.column), [4, 6, 10, 9]);
   assert.deepEqual([config.measure.column, config.measure.aggregation, config.colour.column], [8, 'sum', 4]);
   assert.deepEqual(config.options, {ribbons: 'source', order: 'value', opacity: 35, groupAfter: 8});
+});
+
+/* ------------------------------------------------------- lanes G1/G1b (#46) */
+test('[flow] lane G1: the automatic title is board #46\u2019s - whose money, by stage', () => {
+  const amount = {name: 'Analysis Amount', aggregation: 'sum'};
+  const crypto = {reportName: 'Crypto Industry Spending Overview.xlsx', sheet: '2025-2026'};
+  assert.equal(studioFlow.titleOf(crypto, amount, 'money'), 'Crypto money by stage');
+  assert.equal(studioFlow.titleOf({reportName: 'Credit Union Industry Spending Overview.xlsx'}, amount, 'money'), 'Credit Union money by stage');
+  assert.equal(studioFlow.titleOf({industry: 'Community Banks', reportName: 'Other.xlsx'}, amount, 'money'), 'Community Banks money by stage',
+    'the industry a source names comes first');
+  // Lane G1b: a file name that leads with no industry is no subject (the subtitle names the file already).
+  for (const reportName of ['FAIRSHAKE network.xlsx', 'Giving.xlsx', 'workbook.xlsx', 'Industry Overview.xlsx'])
+    assert.equal(studioFlow.titleOf({reportName}, amount, 'money'), 'Money by stage', reportName);
+  assert.equal(studioFlow.titleOf({}, amount, 'money'), 'Money by stage');
+  // A flow sized by anything but money names its measure: a sum by its field, a count by its function.
+  assert.equal(studioFlow.titleOf(crypto, null, 'number'), 'Crypto: Row count by stage');
+  assert.equal(studioFlow.titleOf(crypto, {name: 'Transaction Count', aggregation: 'sum'}, 'number'), 'Crypto: Transaction Count by stage');
+  assert.equal(studioFlow.titleOf(crypto, {name: 'Recipient', aggregation: 'count'}, 'number'), 'Crypto: COUNT(Recipient) by stage');
+  // This suite's compiled worksheet flow (Size SUM(Analysis Amount)) is a money flow and takes the board's words.
+  const config = compile(baseSheet()).config;
+  assert.equal(built(baseSheet()).payload.unit, 'money');
+  assert.equal(studioFlow.titleOf(crypto, config.measure, 'money'), 'Crypto money by stage');
+  assert.ok(!/SUM\(|· Flow/.test(studioFlow.titleOf(crypto, amount, 'money')), 'no SUM( and no mark name in the title');
 });

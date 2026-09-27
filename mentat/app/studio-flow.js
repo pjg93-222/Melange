@@ -63,6 +63,32 @@
   const measureWords = measure => !measure ? 'Row count' : `${AGG_SHORT[measure.aggregation] || 'SUM'}(${measure.name})`;
   const pillWords = pill => `${AGG_SHORT[pill.aggregation] || 'SUM'}(${pill.name})`;
 
+  /* -------------------------------------------------------------- the title */
+  // Lanes G1/G1b (board #46): the automatic title in the board's words - whose money, by stage
+  // ("Crypto money by stage"). The subject is the industry the source names, or the industry a
+  // report's file name leads with ("Crypto Industry Spending Overview.xlsx" -> Crypto); any other file
+  // name is no subject (the subtitle names the file already), and the title says "Money by stage". A
+  // flow sized by anything but money names its measure ("Crypto: Gift count by stage"). The subtitle
+  // keeps the detail (the source, the measure, the stages and the grouping), and the status line keeps
+  // the SUM(...) the drawing reconciles to, unchanged.
+  function subjectOf(source) {
+    const given = source || {};
+    const industry = String(given.industry || '').trim();
+    if (industry) return industry;
+    const name = String(given.reportName || '').trim().replace(/\.(xlsx|xlsm|xls|csv)$/i, '').trim();
+    const lead = /^(.+?)\s+industry\b/i.exec(name);
+    return lead ? lead[1].trim() : '';
+  }
+  // The measure in the fewest words: a sum is its field ("Analysis Amount"); a count keeps its function
+  // ("COUNT(Recipient)"); a flow with no measure counts rows.
+  const sizeName = measure => !measure ? 'Row count'
+    : !measure.aggregation || measure.aggregation === 'sum' ? measure.name : measureWords(measure);
+  function titleOf(source, measure, unit) {
+    const subject = subjectOf(source);
+    if (unit === 'money') return subject ? `${subject} money by stage` : 'Money by stage';
+    return (subject ? `${subject}: ` : '') + `${sizeName(measure)} by stage`;
+  }
+
   /* ------------------------------------------------------------- statistics */
   // Label and Tooltip measures are read per node or ribbon over its rows, never added across
   // a stage, so every aggregation the pill can hold is honest here.
@@ -398,10 +424,10 @@
     const format = formats(payload.unit);
     const options = config.options || {};
     const sizeWords = measureWords(config.measure);
-    const title = `${sizeWords} by stage · Flow`;
+    const title = titleOf(context.source, config.measure, payload.unit);
     const chain = config.stages.map(stage => stage.name).join(' → ');
     node('title').textContent = title;
-    node('subtitle').textContent = [context.subtitle, chain,
+    node('subtitle').textContent = [context.subtitle, sizeName(config.measure), chain,
       options.groupAfter ? `top ${options.groupAfter} per stage` : 'every member'].filter(Boolean).join(' · ');
     const source = context.source || {};
     const filterText = (config.filters || []).map(f => `${((data.columns || [])[f.column] || {}).name || 'field'} ${f.op} ${f.value}`).join('; ');
@@ -622,6 +648,8 @@
   }
 
   const api = {build, render, decorate, options, tableRows, formats, shortNumber, statOf, MISSING, TEXT,
+    // Lane G1 (board #46): the automatic title.
+    titleOf, subjectOf,
     __test: {recolourer, legendItems, neededHeight}};
   if (inNode) module.exports = api;
   root.MentatStudioFlow = api;

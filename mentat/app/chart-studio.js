@@ -3084,6 +3084,56 @@
     if (short !== full) heading.title = full; else heading.removeAttribute('title');
     return short;
   }
+  // Lane G1 (boards #46, #50, #52, 2026-09-27): the card's one-line title steps down from its stylesheet
+  // size (24px at the boards' width) a pixel at a time to 18px while it is wider than its box, as the Flow
+  // headings do (flow-chart.js fitHeading); only then does it end in an ellipsis, and a title still cut
+  // carries its words as its tooltip unless it has one already (the compiled title, a map's sources).
+  // Every writer of the title is covered: a MutationObserver refits after any change of its words, a
+  // ResizeObserver after any change of its width, and the fonts' arrival refits once more (a serif face
+  // measured before it loaded). The size is set through the CSSOM (the console's CSP refuses a style
+  // attribute); the line height stays the stylesheet's, so nothing below the title moves.
+  const TITLE_FLOOR = 18;
+  function titleOverflows(heading) {
+    const range = document.createRange();
+    range.selectNodeContents(heading);
+    const style = getComputedStyle(heading);
+    const room = heading.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
+    return range.getBoundingClientRect().width > room - 0.5;
+  }
+  function fitTitle() {
+    const heading = el('title');
+    if (!heading || typeof getComputedStyle !== 'function') return;
+    if (heading.dataset.fitTitle != null) {
+      if (heading.getAttribute('title') === heading.dataset.fitTitle) heading.removeAttribute('title');
+      delete heading.dataset.fitTitle;
+    }
+    heading.style.fontSize = '';
+    if (!heading.textContent || !heading.clientWidth || getComputedStyle(heading).whiteSpace !== 'nowrap') return;
+    let size = parseFloat(getComputedStyle(heading).fontSize) || 24;
+    while (size > TITLE_FLOOR && titleOverflows(heading)) {
+      size -= 1;
+      heading.style.fontSize = size + 'px';
+    }
+    if (titleOverflows(heading) && !heading.getAttribute('title')) {
+      heading.title = heading.textContent;
+      heading.dataset.fitTitle = heading.textContent;
+    }
+  }
+  function watchTitle() {
+    const heading = el('title');
+    if (!heading || heading.__fitWatch) return;
+    heading.__fitWatch = true;
+    let queued = false;
+    const later = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; fitTitle(); });
+    };
+    if (typeof MutationObserver === 'function') new MutationObserver(() => fitTitle()).observe(heading, {childList: true, characterData: true, subtree: true});
+    if (typeof ResizeObserver === 'function') new ResizeObserver(later).observe(heading);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(later);
+    later();
+  }
   // Lane F2b (#50, #51): a scatter or a line on the Studio's canvas is drawn as the boards' chart card -
   // its legends in a column at the plot's right, labels that never sit on one another (the extremes
   // first), each coloured line named at its end, no panel title under the card's own, and, on the
@@ -3107,6 +3157,9 @@
     const drawnWidth = fit === 'standard' && !chartRoomy() ? Math.min(1000, box.width) : box.width;
     const height = fit === 'entire' ? Math.min(box.height, window.innerHeight - 430) : box.height;
     if (drawnWidth > 0 && height > 120) { out.plotHeight = Math.floor((height - 6) * 1000 / drawnWidth); canvas.__plotBox = Object.assign({}, box, plotLayout()); }
+    // Lane G1b (#51): the clear space round a value label, in the drawing's units, that is 2px on screen at the
+    // width the 1000 units are drawn (contribution-plot.js holds it to 4..6 units).
+    if (drawnWidth > 0) out.labelGap = Math.round(200000 / drawnWidth) / 100;
     return out;
   }
   function roomFit(canvas) {
@@ -4968,6 +5021,69 @@
     const change = el('scope-change');
     if (mapScope) { if (change.__sourceTitle == null) change.__sourceTitle = change.title; change.title = mapScope.title; }
     else if (change.__sourceTitle != null) { change.title = change.__sourceTitle; change.__sourceTitle = null; }
+    renderDataSources();
+  }
+
+  // Lanes G1/G1b (board #47, 2026-09-27): a sheet that reads more than one source lists them at the top of
+  // the Data pane, one row each - a swatch in the colour its first layer draws, its name and what kind of
+  // source it is ("Crypto · published workbook", "PAC evidence · FAIRSHAKE · Spent 2023–2024"; core.
+  // sheetSources). Only a map's layers read sources of their own; a sheet of one source shows no list.
+  // The list sits above the field search (under the Data | Map layers switch when a map shows it); the
+  // Map layers side of the pane (map-studio.js) hides it with the rest of the Data side and brings it
+  // back with it (its data-map-hidden mark).
+  function renderDataSources() {
+    const pane = document.getElementById('studio-pane-data');
+    if (!pane) return;
+    const rows = verified() && core.sheetSources ? core.sheetSources(sheet(), globalThis.MentatMapLayers, contributions.BASIS, columns()) : [];
+    const want = rows.length > 1;
+    let section = el('data-sources');
+    if (!section && !want) return;
+    if (!section) {
+      section = document.createElement('section');
+      section.id = 'studio-data-sources';
+      section.className = 'studio-data-sources';
+      section.setAttribute('aria-labelledby', 'studio-data-sources-title');
+      const heading = document.createElement('h3');
+      heading.id = 'studio-data-sources-title';
+      heading.textContent = 'Data sources';
+      const list = document.createElement('ul');
+      list.className = 'studio-data-source-list';
+      section.append(heading, list);
+      // buildFromMenu wraps the search in a .studio-search-row; before either, else after the side switch.
+      const search = pane.querySelector(':scope > .studio-search-row, :scope > .studio-search');
+      const after = pane.querySelector(':scope > .studio-map-pane') || pane.querySelector(':scope > .studio-side-switch');
+      if (search) pane.insertBefore(section, search);
+      else if (after) after.after(section);
+      else pane.prepend(section);
+    }
+    section.querySelector('.studio-data-source-list').replaceChildren(...rows.map(row => {
+      const item = document.createElement('li');
+      item.className = 'studio-data-source';
+      item.title = row.title;
+      const swatch = document.createElement('span');
+      swatch.className = 'studio-data-source-swatch';
+      swatch.setAttribute('aria-hidden', 'true');
+      swatch.style.backgroundColor = row.colour;
+      const words = document.createElement('span');
+      words.className = 'studio-data-source-words';
+      const name = document.createElement('span');
+      name.className = 'studio-data-source-name';
+      name.textContent = row.name;
+      const kind = document.createElement('span');
+      kind.className = 'studio-data-source-kind';
+      kind.textContent = ' \u00b7 ' + row.kind;
+      words.append(name, kind);
+      item.append(swatch, words);
+      return item;
+    }));
+    const mapSide = !!pane.querySelector(':scope > .studio-side-switch #studio-side-map[aria-selected="true"]');
+    if (mapSide) {
+      section.hidden = true;
+      if (want) section.dataset.mapHidden = '1'; else delete section.dataset.mapHidden;
+    } else {
+      section.hidden = !want;
+      delete section.dataset.mapHidden;
+    }
   }
 
   // Canvas only hides the builder surfaces; the control that does it never
@@ -5723,6 +5839,7 @@
   // other pill, the mark and the analysis (census B-S27); with no state field
   // placed it joins Columns, and a sheet with no measure gets Selected amount.
   if(el('destination'))el('destination').onchange=()=>{const id=el('destination').value;if(!id)return;const at=columns().findIndex(f=>f.id===id),amount=columns().findIndex(f=>f.id==='amount');if(at<0){failure('Regenerate this workbook to create its destination fields.');return;}const geo=['recipient_state','represented_state','state'];commit(()=>{let swapped=false;for(const zone of ['columns','rows'])sheet()[zone]=core.shelf(sheet()[zone]).map(p=>{if(!swapped&&geo.includes(columns()[p.column]?.id)){swapped=true;return {column:at,aggregation:'sum'};}return p;});if(!swapped)sheet().columns=[...core.shelf(sheet().columns),{column:at,aggregation:'sum'}];if(amount>=0&&![...core.shelf(sheet().columns),...core.shelf(sheet().rows)].some(p=>columns()[p.column]?.role==='measure'))sheet().rows=[...core.shelf(sheet().rows),{column:amount,aggregation:'sum'}];});};
+  watchTitle();
   renderAll();
   activate();
 })();
