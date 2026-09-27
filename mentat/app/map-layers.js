@@ -310,6 +310,16 @@
     return ['color', 'size', 'label', 'detail', 'tooltip', ...(markOf(card) === 'shape' ? ['shape'] : [])];
   }
   const HATCH_COLOUR_REASON = 'A hatch draws every place this layer holds the same way; its amount is in the tooltip, so Colour does not apply. Choose Solid colour under Pattern to colour it.';
+  // What a layer draws, in one word (#53: a hexbin layer's card reads "Hexbin"): a Filled
+  // layer at a hexagon level is Tableau's hexbin; every other layer is its mark.
+  const markSummary = card => markOf(card) === 'filled-map' && card && isHex(card.geography) ? 'Hexbin' : markName(markOf(card));
+  // The level a layer is aggregated by, as the Aggregate by popover names it ("Hexbin, 25 mi").
+  function aggregateLabel(card) {
+    const id = aggregateOf(card);
+    if (id === 'hexbin') return 'Hexbin, ' + ((card && isHex(card.geography) ? card.geography.slice(3) : '25')) + ' mi';
+    if (id === 'state' && card && card.geography !== 'state') return levelLabel(card.geography);
+    return (AGGREGATE_BY.find(entry => entry.id === id) || {label: levelLabel(card && card.geography)}).label;
+  }
   function encodingSupport(card) {
     const mark = markOf(card), out = {};
     for (const zone of markRows(card)) {
@@ -317,8 +327,15 @@
       const reason = table.all || table[mark] || '';
       out[zone] = reason || true;
     }
+    // Detail names the level this layer is drawn at (a hexbin says Hexbin, never a state map).
+    if (out.detail !== true) out.detail = 'A layer’s level of detail is its geography (here ' + aggregateLabel(card) + '): choose it under Aggregate by.';
     if (mark === 'filled-map' && card && plain(card.map) && PATTERN_IDS.includes(card.map.pattern)) out.color = HATCH_COLOUR_REASON;
     return out;
+  }
+  // The greyed row's short words (Chart Studio shows them in the empty drop zone).
+  function reasonShort(card, zone) {
+    if (zone === 'detail') return 'Set by Aggregate by: ' + aggregateLabel(card);
+    return 'Not drawn for ' + markSummary(card);
   }
   const SIZE_MEANS = {density: 'Size sets the density radius.', circle: 'Size sets each circle’s area by its measure.',
     shape: 'Size sets each shape’s area by its measure.', text: 'Size sets the label size.', line: 'Size sets the line width.'};
@@ -843,28 +860,54 @@
     for (let i = 0; i < grid.length; i += 1) if (grid[i] > max) max = grid[i];
     return {grid, columns, rows, cell: step, max};
   }
-  // RGBA for a density grid. Intensity (1-100) is how soon a place reaches
-  // the ramp's top (kept apart from the layer's opacity, as Tableau keeps it);
-  // low density fades to transparent, so the plain base shows through and the
-  // whole country is never tinted (#48's Don't copy).
+  // RGBA for a density grid: hotspots glow (#47, #48). The grid - the
+  // measure-weighted kernel density - is left as it is; only its drawing
+  // follows a gamma transfer against the view's peak (a monotone curve, so the
+  // order of places never changes): a metro a hundredth of the peak still
+  // glows, overlapping hotspots build up to the ramp's gold core, and every
+  // hotspot keeps a gradient - a gold core in a purple halo that fades out into
+  // the plain base - rather than a flat disc. Intensity (1-100) is the curve's
+  // lift: how soon a place reaches the core (kept apart from the layer's
+  // opacity, as Tableau keeps it). Density below the cut-off stays transparent,
+  // so the whole country is never tinted (#48's Don't copy).
+  const DENSITY_CUT = 0.06;
+  const densityGamma = intensity => 1 - 0.9 * Math.max(1, Math.min(100, intensity || DEFAULT_INTENSITY)) / 100;
+  const densityAlpha = t => Math.min(1, Math.pow((t - DENSITY_CUT) / (1 - DENSITY_CUT), 0.8) * 1.25);
   function densityPixels(density, stops, intensity, opacity) {
     const {grid, max} = density;
     const out = new Uint8ClampedArray(grid.length * 4);
     if (!(max > 0)) return out;
-    const saturate = max * Math.max(0.02, 1.05 - (Math.max(1, Math.min(100, intensity || DEFAULT_INTENSITY)) / 100));
+    const gamma = densityGamma(intensity);
     const parsed = stops.map(hex => [1, 3, 5].map(at => parseInt(hex.slice(at, at + 2), 16)));
     const alphaScale = Math.max(0, Math.min(1, opacity == null ? 1 : opacity));
+    // The halo starts at the ramp's purple (its second stop), as the boards draw it.
+    const span = parsed.length - 1, start = parsed.length > 2 ? 1 / span : 0;
     for (let i = 0; i < grid.length; i += 1) {
       const v = grid[i];
       if (!(v > 0)) continue;
-      const t = Math.min(1, v / saturate);
-      if (t < 0.02) continue;
-      const span = parsed.length - 1, slot = Math.min(span - 1, Math.floor(t * span)), f = t * span - slot;
+      const t = Math.pow(v / max, gamma);
+      if (t < DENSITY_CUT) continue;
+      const position = Math.min(1, start + (1 - start) * t);
+      const slot = Math.min(span - 1, Math.floor(position * span)), f = position * span - slot;
       const a = parsed[slot], b = parsed[slot + 1];
       out[i * 4] = a[0] + (b[0] - a[0]) * f;
       out[i * 4 + 1] = a[1] + (b[1] - a[1]) * f;
       out[i * 4 + 2] = a[2] + (b[2] - a[2]) * f;
-      out[i * 4 + 3] = 255 * alphaScale * Math.min(1, Math.pow(t, 0.75) * 1.15);
+      out[i * 4 + 3] = 255 * alphaScale * densityAlpha(t);
+    }
+    return out;
+  }
+  // The same curve for the street map's heatmap, whose density MapLibre accumulates
+  // itself: the colour stops of 'heatmap-color', [density, colour, ...], placed where
+  // the gamma puts them, so its hotspots glow as the boundary map's do.
+  function densityColourStops(stops, intensity) {
+    const gamma = densityGamma(intensity), span = stops.length - 1, start = stops.length > 2 ? 1 / span : 0;
+    const out = [0, 'rgba(0,0,0,0)'];
+    for (let k = 0; k <= 5; k += 1) {
+      const t = DENSITY_CUT + (1 - DENSITY_CUT) * k / 5;
+      const hex = colourAt(stops, Math.min(1, start + (1 - start) * t));
+      const rgb = [1, 3, 5].map(at => parseInt(hex.slice(at, at + 2), 16));
+      out.push(Math.max(1e-4, Math.pow(t, 1 / gamma)), 'rgba(' + rgb.join(',') + ',' + densityAlpha(t).toFixed(3) + ')');
     }
     return out;
   }
@@ -957,11 +1000,11 @@
     STANCES, PATTERN_IDS, HATCH_INK,
     isLayerCard, mapLayersOn, sourceFault, cardMapFault, layerFault, mapSettingsFault, settingsOf, writeSettings,
     newLayerCard, nextLayerId, sourceKey, sourceLabel, paneLabel, sourceBadge, cycleLabel, layerName,
-    markRows, encodingSupport, SIZE_MEANS, measureField,
+    markRows, encodingSupport, markSummary, aggregateLabel, reasonShort, SIZE_MEANS, measureField,
     FRAME, regionOf, projectFrame, albers5070, hexAxial, hexId, createLookup, primary,
     rowsFromContributions, rowsFromEvidence, aggregate, locatedLine, amountLine,
     rampStops, colourAt, scaleFor, mix, slotColour, REVERSAL, styleColour, compileLayer, money, fullMoney, legendRange,
-    densityGrid, densityPixels, controlRows, statusLine, subtitleOf, evidenceLayers, evidencePresets, EVIDENCE_LEVEL,
+    densityGrid, densityPixels, densityColourStops, DENSITY_CUT, controlRows, statusLine, subtitleOf, evidenceLayers, evidencePresets, EVIDENCE_LEVEL,
     EVIDENCE_WORD, OPPOSITION_LAYERS};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MentatMapLayers = api;

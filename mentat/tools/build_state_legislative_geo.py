@@ -7,6 +7,7 @@ never reaches a network. It reads the two Census cartographic files already in
     sld/upper/<ST>.json   one file per state, upper chamber (sldu)
     sld/lower/<ST>.json   one file per state, lower chamber (sldl)
     sld/index.json        which states each chamber has, counts and sizes
+                          (LF sizes: the same on a CRLF checkout and an LF export)
     zcta_sld.json         ZIP -> (upper GEOID, lower GEOID)
 
     python mentat/tools/build_state_legislative_geo.py
@@ -64,7 +65,7 @@ omits a district is worse than a large file. This tool therefore runs the same
 ``simplify`` at ``--min-step`` 0.1 px, which is the finest step the shipped
 one-decimal precision can express and loses no district in either chamber.
 The cost is measured, not guessed: the largest file is then Texas' lower
-chamber at 384,934 bytes, inside the 600 KB per-file budget, and the two
+chamber at 384,933 bytes (LF), inside the 600 KB per-file budget, and the two
 chambers together are 12.2 MB. ``--min-step 0.25`` cuts that to 6.7 MB and
 drops 8 Alaska lower and 2 Alaska upper districts; 0.5 cuts it to 4.1 MB and
 drops 40 (34 lower, 6 upper).
@@ -120,6 +121,18 @@ VINTAGE = '2024'
 DEFAULT_MIN_STEP = 0.1
 BASIS = ('ZCTA internal point in district polygon; a ZIP that straddles districts is '
          'assigned to the one containing its internal point')
+
+
+def lf_size(path):
+    """The file's size with LF line endings: the bytes git stores for it.
+
+    build_district_geo.write_json writes text, which a Windows checkout ends
+    with CRLF, and a clean LF export (git archive, eol=lf) one byte shorter per
+    line. sld/index.json records this size, so it describes the file the same
+    way on both (lane F2c, 2026-09-26; before, it recorded the on-disk CRLF
+    size and test_state_legislative_geo failed on every LF export).
+    """
+    return len(Path(path).read_bytes().replace(b'\r\n', b'\n'))
 
 
 def closed(rings):
@@ -332,7 +345,7 @@ def build(cache_dir, out_dir, min_step=DEFAULT_MIN_STEP, log=print):
                     continue
                 payload, target, notes = build_state_file(
                     chamber, stusps, statefp, entries, placements, out_dir)
-                size = target.stat().st_size
+                size = lf_size(target)
                 states[stusps] = {'file': f'sld/{chamber}/{stusps}.json',
                                   'districts': len(payload['districts']),
                                   'bytes': size, 'region': payload['region'],

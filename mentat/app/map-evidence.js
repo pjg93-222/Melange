@@ -14,7 +14,10 @@
        borders;
      - the Layers button (#48) opens the Layer control (#55): an eye and a
        selection pointer per layer, the heat's Intensity and Radius, and Add
-       data - another industry or another committee drawn on the same map;
+       data - another industry or another committee drawn on the same map.
+       The button is the last of #55's view toolbar, a column on the map's
+       left (search, zoom in, zoom out, home, layers), and the control opens
+       beside it; the legend card under the map folds away from its own toggle;
      - "Open in Chart Studio" (#55) hands those exact cards to Chart Studio as
        a new map sheet (map-studio.js openHandoff).
    Every toggle here is view state (D-039: no storage key); nothing is saved
@@ -36,7 +39,7 @@
   // fill, whose places this map selects; its pointer in the Layer control turns it on.
   function stateFor(key) {
     if (!panes.has(key)) panes.set(key, {hidden: new Set(), locked: new Set(['hatch']), heat: {on: false, radius: 18, intensity: L.DEFAULT_INTENSITY},
-      extra: [], compiled: new Map(), open: false, position: null, bordersOff: false, oppositionTicket: 0});
+      extra: [], compiled: new Map(), open: false, position: null, bordersOff: false, oppositionTicket: 0, legendFolded: false});
     return panes.get(key);
   }
   const keyOf = pane => pane && (pane.key || [pane.source, pane.id, pane.committee].join(':'));
@@ -67,7 +70,7 @@
     if (!inner || !inner.svg) return;
     const view = stateFor(keyOf(pane));
     view.pane = pane; view.mapState = mapState; view.drawing = drawing; view.host = host;
-    placeButton(host);
+    placeToolbar(host);
     const layers = inner.layers;
     const after = (group, name) => {
       let node = inner.viewport.querySelector(':scope > g.' + name);
@@ -80,11 +83,37 @@
     drawOpposition(hatchGroup, inner, mapState, view).catch(error => { hatchGroup.dataset.error = error.message; });
     drawExtras(extraGroup, inner, mapState, view).catch(() => {});
     applyVisibility(inner, view);
-    inner.onSettle = () => { drawHeat(heatGroup, inner, view); rescale(inner); addHeatLegend(inner, view); addOppositionLegend(inner, view); };
+    inner.onSettle = () => {
+      drawHeat(heatGroup, inner, view); rescale(inner); addHeatLegend(inner, view); addOppositionLegend(inner, view); foldLegend(inner, view);
+      placeToolbar(view.host);   // its zoom buttons follow the toolbar row's after a zoom
+    };
     drawHeat(heatGroup, inner, view);
     addHeatLegend(inner, view);
     addOppositionLegend(inner, view);
+    foldLegend(inner, view);
     renderControl(inner, pane, mapState, view);
+  }
+
+  // The legend card under the map (MP1): its first control folds its groups away and
+  // back (view state, kept per pane while the page is open). The card is remade on every
+  // repaint (evidence-map.js updateHeat), so the toggle is put back each time.
+  function foldLegend(inner, view) {
+    const card = inner.plot.querySelector('.map-legend-card');
+    if (!card) return;
+    let toggle = card.querySelector(':scope > .ev-legend-toggle');
+    if (!toggle) {
+      toggle = el('button', 'ev-legend-toggle');
+      toggle.type = 'button';
+      toggle.append(E.icon('chevron'), el('span', 'ev-legend-toggle-text', 'Legend'));
+      toggle.addEventListener('click', event => { event.stopPropagation(); view.legendFolded = !view.legendFolded; foldLegend(inner, view); });
+      card.prepend(toggle);
+    }
+    const folded = !!view.legendFolded;
+    card.classList.toggle('is-folded', folded);
+    toggle.setAttribute('aria-expanded', String(!folded));
+    toggle.title = folded ? 'Show the legend' : 'Hide the legend';
+    toggle.setAttribute('aria-label', folded ? 'Show the legend' : 'Hide the legend');
+    for (const group of card.querySelectorAll(':scope > .map-legend-group')) group.hidden = folded;
   }
 
   function applyVisibility(inner, view) {
@@ -161,6 +190,7 @@
     const compiled = view.compiled.get('hatch');
     if (!compiled || view.hidden.has('hatch') || !view.mapState || view.mapState.direction !== 'spent') return;
     const group = el('div', 'map-legend-group ev-oppose-legend');
+    group.hidden = !!view.legendFolded;
     group.append(el('span', 'map-legend-title', 'Opposition'));
     const row = el('div', 'ev-oppose-row');
     row.append(el('i', 'mm-legend-hatch'), el('span', 'map-legend-values', compiled.legend.located));
@@ -206,6 +236,7 @@
     if (existing) existing.remove();
     if (!isOn(view, 'heat') || view.mapState.direction !== 'raised') return;
     const group = el('div', 'map-legend-group ev-heat-legend');
+    group.hidden = !!view.legendFolded;
     group.append(el('span', 'map-legend-title', 'Heat: donor amount'));
     const ramp = el('div', 'ev-heat-ramp');
     ramp.style.backgroundImage = 'linear-gradient(90deg,' + L.rampStops('heat').join(',') + ')';
@@ -397,15 +428,54 @@
     slider('Radius', 'radius', 4, 60, ' px');
     return box;
   }
-  // The Layers toggle sits on the map (top right), as #55 puts it in the map's own
-  // toolbar: board 6's toolbar row keeps its width, one row at 1600 with the search
-  // placeholder whole. evidence.js renders it in that row each time; it moves here.
-  function placeButton(host) {
-    const button = document.getElementById('evidence-map-layers');
-    if (!button || !host || button.parentNode === host) return;
-    for (const old of host.querySelectorAll(':scope > .map-layers-button')) old.remove();
+  // #55's view toolbar: a column on the map's left - find, zoom in, zoom out, home and
+  // the Layers toggle - with the Layer control opening beside it. Board 6's toolbar row
+  // keeps its own zoom, Reset view and search; these buttons work those same controls,
+  // so the two can never disagree. evidence.js renders the Layers toggle in the toolbar
+  // row each time; it moves here, its word kept for screen readers.
+  const TOOL_ICONS = {search: 'search', 'zoom-in': 'plus', 'zoom-out': 'minus', home: 'home'};
+  function placeToolbar(host) {
+    if (!host) return;
     host.classList.add('ev-has-layers');
-    host.append(button);
+    let bar = host.querySelector(':scope > .ev-toolbar');
+    if (!bar) {
+      bar = el('div', 'ev-toolbar');
+      bar.setAttribute('role', 'toolbar');
+      bar.setAttribute('aria-label', 'Map');
+      bar.setAttribute('aria-orientation', 'vertical');
+      const tool = (id, label, target, act) => {
+        const node = el('button', 'ev-tool');
+        node.type = 'button'; node.dataset.tool = id;
+        node.setAttribute('aria-label', label); node.title = label;
+        node.append(E.icon(TOOL_ICONS[id]));
+        node.addEventListener('click', event => {
+          event.stopPropagation();
+          const control = document.getElementById(target);
+          if (control && !control.disabled) act(control);
+        });
+        return node;
+      };
+      // Named apart from the toolbar row's own controls, so each name is one control.
+      bar.append(
+        tool('search', 'Find a place on the map', 'evidence-map-search', input => { input.focus(); input.select(); }),
+        tool('zoom-in', 'Zoom the map in', 'evidence-map-zoom-in', control => control.click()),
+        tool('zoom-out', 'Zoom the map out', 'evidence-map-zoom-out', control => control.click()),
+        tool('home', 'Back to the whole map', 'evidence-map-reset', control => control.click()));
+      host.append(bar);
+    }
+    // The zoom buttons follow the toolbar row's (out is off at the whole map, in at the closest zoom).
+    for (const [id, target] of [['zoom-in', 'evidence-map-zoom-in'], ['zoom-out', 'evidence-map-zoom-out']]) {
+      const source = document.getElementById(target), mine = bar.querySelector(`[data-tool="${id}"]`);
+      if (source && mine) mine.disabled = !!source.disabled;
+    }
+    const button = document.getElementById('evidence-map-layers');
+    if (!button || button.parentNode === bar) return;
+    for (const old of host.querySelectorAll('.map-layers-button')) if (old !== button) old.remove();
+    for (const text of [...button.childNodes]) {
+      if (text.nodeType === 3 && text.textContent.trim()) text.replaceWith(el('span', 'ev-tool-label', text.textContent.trim()));
+    }
+    button.classList.add('ev-tool');
+    bar.append(button);
   }
   function syncButton(view) {
     const button = document.getElementById('evidence-map-layers');

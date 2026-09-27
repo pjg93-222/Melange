@@ -140,12 +140,16 @@ class BuiltIndexTests(unittest.TestCase):
         self.assertEqual(self.index['vintage'], sld.VINTAGE)
 
     def test_every_state_the_index_lists_has_the_file_and_the_size_it_claims(self):
+        # Sizes are LF sizes (the bytes git stores), so this holds on a CRLF checkout
+        # and on an LF export alike (lane F2c, 2026-09-26: the index recorded the
+        # CRLF-checkout size and an eol=lf export failed here by 1 byte per file).
         for chamber, entry in self.index['chambers'].items():
             self.assertEqual(len(entry['states']), entry['files'], chamber)
             for state, info in entry['states'].items():
                 path = GEO / info['file']
                 self.assertTrue(path.is_file(), info['file'])
-                self.assertEqual(path.stat().st_size, info['bytes'], info['file'])
+                self.assertEqual(sld.lf_size(path), info['bytes'], info['file'])
+                self.assertEqual(len(path.read_bytes().replace(b'\r\n', b'\n')), info['bytes'], info['file'])
                 payload = json.loads(path.read_text(encoding='utf-8'))
                 self.assertEqual(len(payload['districts']), info['districts'], info['file'])
                 self.assertEqual(payload['state'], state)

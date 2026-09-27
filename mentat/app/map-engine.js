@@ -7,9 +7,11 @@
      draws them with MapLibre over the offline street tiles.
    Either way this module owns what surrounds the drawing and is the same for
    both: the Layer control (a floating, draggable list with an eye and a
-   selection pointer per layer), the legends (one per visible layer, stacked in
-   the lower left), the view toolbar, map search, the scale bar and the
-   "Add a marks layer" drop target.
+   selection pointer per layer, beside the view toolbar), the legends (one
+   compact card per visible layer, in a band BELOW the drawing, so a legend
+   never covers the map or its Alaska and Hawaii insets; the band collapses),
+   the view toolbar, map search, the scale bar and the "Add a marks layer"
+   drop target.
 
    Draw order is card order: the first card draws on top. A Density layer is a
    canvas kernel density drawn UNDER the SVG marks and over the base (build
@@ -128,7 +130,8 @@
     hand: '<path d="M5.5 8V3.8a1 1 0 0 1 2 0V8m0-.5V2.8a1 1 0 0 1 2 0V8m0-.2V4a1 1 0 0 1 2 0v5.5c0 2.8-1.8 4.5-4.2 4.5-1.8 0-2.8-.9-3.8-2.5L2.3 8.6a1 1 0 0 1 1.6-1.2L5.5 9"/>',
     layers: '<path d="M8 2 1.5 5.5 8 9l6.5-3.5z"/><path d="M1.5 8.2 8 11.7l6.5-3.5M1.5 10.9 8 14.4l6.5-3.5"/>',
     grip: '<circle cx="6" cy="4" r=".9"/><circle cx="10" cy="4" r=".9"/><circle cx="6" cy="8" r=".9"/><circle cx="10" cy="8" r=".9"/><circle cx="6" cy="12" r=".9"/><circle cx="10" cy="12" r=".9"/>',
-    close: '<path d="M4 4l8 8M12 4l-8 8"/>'};
+    close: '<path d="M4 4l8 8M12 4l-8 8"/>',
+    chevron: '<path d="M4.5 6.5 8 10l3.5-3.5"/>'};
   function icon(name) {
     const svg = svgEl('svg', {viewBox: '0 0 16 16', 'aria-hidden': 'true', focusable: 'false', class: 'mm-icon'});
     const holder = document.createElementNS(NS, 'g');
@@ -232,7 +235,9 @@
     stage.append(streets);
     const overlay = el('div', 'mm-overlay');
     const tooltip = el('div', 'mm-tooltip'); tooltip.hidden = true; tooltip.setAttribute('role', 'status');
+    // The legends' band sits under the drawing (the frame's second row), never over it.
     const legends = el('div', 'mm-legends');
+    legends.setAttribute('role', 'group'); legends.setAttribute('aria-label', 'Legends');
     const scale = el('div', 'mm-scale');
     const toolbar = el('div', 'mm-toolbar'); toolbar.setAttribute('role', 'toolbar'); toolbar.setAttribute('aria-label', 'Map');
     // Its own id: a Board can show several maps, each with its control and its toolbar button pointing at it.
@@ -240,12 +245,12 @@
     const drop = el('div', 'mm-drop'); drop.hidden = true;
     const banner = el('div', 'mm-banner'); banner.hidden = true; banner.setAttribute('role', 'status');
     const search = el('form', 'mm-search'); search.hidden = true;
-    overlay.append(toolbar, search, control, legends, scale, banner, drop, tooltip);
-    frame.append(stage, overlay);
+    overlay.append(toolbar, search, control, scale, banner, drop, tooltip);
+    frame.append(stage, overlay, legends);
     host.append(frame);
     const state = {host, frame, stage, baseSvg, canvas, marksSvg, groups, streets, overlay, tooltip, legends, scale, toolbar,
       control, drop, banner, search, callbacks, view: [0, 0, FRAME_W, FRAME_H], geometry: {}, drawToken: 0, densityTimer: 0,
-      controlOpen: null, controlPosition: null, renderer: 'albers', streetsHandle: null};
+      controlOpen: null, controlPosition: null, legendsCollapsed: false, renderer: 'albers', streetsHandle: null};
     state.handle = {
       update: model => { state.model = model; return update(state); },
       getView: () => ({x: state.view[0], y: state.view[1], width: state.view[2], height: state.view[3], scale: FRAME_W / state.view[2]}),
@@ -563,7 +568,8 @@
   }
   function flyTo(state, box) {
     if (state.renderer === 'streets' && state.streetsHandle) { state.streetsHandle.reset(); return; }
-    const pad = 0.08;
+    // A thin margin: the map fills its card (MP4); the legends have their own band below it.
+    const pad = 0.025;
     let width = Math.max(FRAME_W / MAX_ZOOM, (box[2] - box[0]) * (1 + pad * 2));
     let height = Math.max(width * FRAME_H / FRAME_W, (box[3] - box[1]) * (1 + pad * 2));
     width = height * FRAME_W / FRAME_H;
@@ -832,51 +838,65 @@
     panel.addEventListener('pointerup', up);
     event.preventDefault();
   }
-  // One legend card per visible layer, stacked in the lower left (#47, #48,
-  // #54): ramp or swatch, its range, and how many rows it could place.
+  // One compact legend card per visible layer (#47, #48, #54), in the band
+  // under the drawing: the layer's name on the first line; its ramp (with its
+  // range at the two ends) or its swatch on the second, ending with how many
+  // rows it could place. The band's first control folds the cards away (view state).
   function renderLegends(state) {
     const model = state.model;
     const host = state.legends;
     host.replaceChildren();
-    if (model.legends === false) return;
+    if (model.legends === false) { host.hidden = true; return; }
     const layers = (model.layers || []).filter(layer => shown(model, layer));
     const cards = [];
     for (const layer of [...(model.dataLayer ? [model.dataLayer] : []), ...layers]) {
       const legend = layer.legend;
       if (!legend || !layer.items.length && layer.mark !== 'density') continue;
-      const card = el('div', 'mm-legend');
+      const card = el('div', 'mm-legend mm-legend--' + legend.kind);
       card.dataset.layer = layer.id;
       card.append(el('span', 'mm-legend-title', legend.title));
+      let row;
       if (legend.kind === 'ramp' || legend.kind === 'density') {
         const bar = el('div', 'mm-legend-ramp' + (legend.kind === 'density' ? ' is-density' : ''));
         bar.style.backgroundImage = 'linear-gradient(90deg,' + legend.stops.join(',') + ')';
-        card.append(bar);
         const range = legend.kind === 'density' ? ['low', 'high'] : L.legendRange(legend);
-        const values = el('div', 'mm-legend-values');
-        values.append(el('span', '', range[0]), el('span', '', range[1]));
-        card.append(values);
+        row = el('div', 'mm-legend-values');
+        row.append(el('span', 'mm-legend-low', range[0]), bar, el('span', 'mm-legend-high', range[1]));
       } else if (legend.kind === 'pattern') {
         // The hatch itself (#55's legend: "Opposition" beside its hatch).
-        const row = el('div', 'mm-legend-swatch');
+        row = el('div', 'mm-legend-swatch');
         row.append(el('i', 'mm-legend-hatch'), el('span', '', legend.note || layer.name));
-        card.append(row);
       } else {
-        const row = el('div', 'mm-legend-swatch');
+        row = el('div', 'mm-legend-swatch');
         const dot = el('i', 'mm-legend-dot');
         dot.style.backgroundColor = legend.swatch || '#327a7a';
         row.append(dot, el('span', '', legend.sizeMeasure ? 'Size: ' + legend.sizeMeasure : layer.name));
-        card.append(row);
       }
+      card.append(row);
+      let listedText = '';
       if (legend.located) {
         const located = el('span', 'mm-legend-located', legend.located);
         // A layer that counts dollars (one side of Spent) lists dollars, not rows.
         const listed = (legend.unplaced || []).map(entry => (legend.count === 'amount' ? money(entry.amount) : count(entry.rows)) + ' ' + entry.reason).join('; ');
-        if (listed) located.title = 'Listed, not placed: ' + listed;
-        card.append(located);
+        if (listed) { located.title = 'Listed, not placed: ' + listed; listedText = ' Listed, not placed: ' + listed + '.'; }
+        row.append(located);
       }
+      card.title = legend.title + (legend.located ? ' · ' + legend.located + '.' : '') + listedText;
       cards.push(card);
     }
-    host.append(...cards);
+    host.hidden = !cards.length;
+    if (!cards.length) return;
+    const collapsed = !!state.legendsCollapsed;
+    const toggle = el('button', 'mm-legend-toggle');
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+    toggle.setAttribute('aria-label', (collapsed ? 'Show the legends (' : 'Hide the legends (') + cards.length + ')');
+    toggle.title = collapsed ? 'Show the legends' : 'Hide the legends';
+    toggle.append(icon('chevron'), el('span', 'mm-legend-toggle-text', collapsed ? 'Legends · ' + cards.length : 'Legend'));
+    toggle.addEventListener('click', event => { event.stopPropagation(); state.legendsCollapsed = !state.legendsCollapsed; renderLegends(state); });
+    host.classList.toggle('is-collapsed', collapsed);
+    for (const card of cards) card.hidden = collapsed;
+    host.append(toggle, ...cards);
   }
 
   function renderScale(state) {
@@ -1087,9 +1107,9 @@
     for (const hidden of drawing.querySelectorAll('[style*="display: none"]')) hidden.remove();
     const unit = view[2] / 1000;
     let y = view[1] + view[3] - 8 * unit;
-    for (const card of [...state.legends.children].reverse()) {
+    for (const card of [...state.legends.querySelectorAll(':scope > .mm-legend')].reverse()) {
       const title = card.querySelector('.mm-legend-title');
-      const values = [...card.querySelectorAll('.mm-legend-values span')].map(node => node.textContent);
+      const values = [...card.querySelectorAll('.mm-legend-low, .mm-legend-high')].map(node => node.textContent);
       const located = card.querySelector('.mm-legend-located');
       const group = svgEl('g', {class: 'mm-export-legend'});
       const text = (value, x, dy, weight) => { const node = svgEl('text', {x, y: y + dy, 'font-size': 11 * unit, fill: '#2c2a28', 'font-weight': weight || 400, 'font-family': 'Arial, sans-serif'}); node.textContent = value; group.append(node); };

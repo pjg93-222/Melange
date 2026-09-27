@@ -132,7 +132,10 @@ function addHatch(map) {
 }
 
 export async function render(host, model, hooks, previous) {
-  if (previous) previous.destroy();
+  // A redraw of the same layers (a restyle, the washout, a card's colour) keeps the reader's view, as the
+  // boundary map keeps it; a new set of layers is fitted afresh. The previous map stays up until the new
+  // one is about to replace it, so a move made meanwhile is the view that is kept.
+  const signature = (model.layers || []).map(layer => [layer.id, layer.sourceKey, layer.level, layer.zoomExtent].join(':')).join('|');
   ensureCss();
   const pmtiles = await ensurePmtiles();
   if (!protocolAdded) {
@@ -153,12 +156,25 @@ export async function render(host, model, hooks, previous) {
   }
   const lookup = L.createLookup(getJson);
   await lookup.ready([]);
+  let kept = null;
+  if (previous) {
+    try { if (previous.signature === signature && typeof previous.camera === 'function') kept = previous.camera(); } catch (error) { kept = null; }
+    previous.destroy();
+  }
   host.replaceChildren();
   const container = document.createElement('div');
   container.className = 'mm-streets-map';
   host.append(container);
-  const map = new maplibregl.Map({container, style, attributionControl: false, bounds: [EXTRACT[0], EXTRACT[1], EXTRACT[2], EXTRACT[3]],
-    maxZoom: 18, minZoom: 2, dragRotate: false, pitchWithRotate: false, touchPitch: false, cooperativeGestures: false});
+  const camera = kept ? {center: kept.center, zoom: kept.zoom} : {bounds: [EXTRACT[0], EXTRACT[1], EXTRACT[2], EXTRACT[3]]};
+  const map = new maplibregl.Map(Object.assign({container, style, attributionControl: false,
+    maxZoom: 18, minZoom: 2, dragRotate: false, pitchWithRotate: false, touchPitch: false, cooperativeGestures: false}, camera));
+  // Where the camera stood when the map was made: a reader (or a script) who moves the map while its
+  // style loads and its layers are added is not thrown back by the fit at the end.
+  const started = {center: map.getCenter(), zoom: map.getZoom()};
+  const movedSinceStart = () => {
+    const now = map.getCenter();
+    return Math.abs(now.lng - started.center.lng) > 1e-7 || Math.abs(now.lat - started.center.lat) > 1e-7 || Math.abs(map.getZoom() - started.zoom) > 1e-7;
+  };
   // The instance on its own container (no global): what a browser check reads (lane P real client).
   container.__maplibre = map;
   map.addControl(new maplibregl.AttributionControl({compact: false, customAttribution: ATTRIBUTION}), 'bottom-right');
@@ -168,7 +184,11 @@ export async function render(host, model, hooks, previous) {
 
   const layerIds = new Map();           // card id -> MapLibre layer ids
   const itemsById = new Map();          // card id -> Map(feature id -> item)
-  let firstDataLayer = null, extent = null, missing = [];
+  // A per-state layer whose places reach states the street extract has no geometry for:
+  // {layer, words, boxes} - the boxes of the features it DID draw, so the note shows only
+  // where none of them is in view (MP2: the New York and New Jersey ZIP areas do draw).
+  let firstDataLayer = null, extent = null;
+  const partial = [];
   // Washout: a white wash between the street tiles and the data layers.
   if (settings.washout > 0) {
     map.addSource('mm-washout', {type: 'geojson', data: {type: 'Feature', properties: {},
@@ -212,11 +232,12 @@ export async function render(host, model, hooks, previous) {
       if (layer.mark === 'density') {
         const stops = layer.ramp;
         const intensity = 0.2 + (layer.intensity / 100) * 2.3;
+        // The boundary map's curve (map-layers.js densityColourStops): a purple halo round a gold
+        // core, the low end transparent, so its hotspots glow here as they do there (MP5).
         map.addLayer({id: sourceId + '-heat', type: 'heatmap', source: sourceId,
           paint: {'heatmap-weight': ['get', 'w'], 'heatmap-radius': layer.radius, 'heatmap-intensity': intensity,
             'heatmap-opacity': layer.opacity,
-            'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], 0, 'rgba(0,0,0,0)', 0.12, stops[0],
-              0.35, stops[1], 0.6, stops[2], 0.82, stops[3], 1, stops[4]]}});
+            'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], ...L.densityColourStops(stops, layer.intensity)]}});
         ids.push(sourceId + '-heat');
       } else if (layer.mark === 'text') {
         map.addLayer({id: sourceId + '-label', type: 'symbol', source: sourceId,
@@ -235,7 +256,10 @@ export async function render(host, model, hooks, previous) {
       const states = [...new Set(layer.items.map(item => item.statefp ? uspsOfFips(item.statefp) : /^[A-Z]{2}/.test(String(item.id)) ? String(item.id).slice(0, 2) : '').filter(Boolean))];
       const perState = L.PER_STATE_LEVELS.includes(layer.level);
       const drawable = perState ? states.filter(usps => metro.includes(usps)) : states;
-      if (perState && drawable.length < states.length) missing.push(layer.name + ' (' + L.levelLabel(layer.level).replace(/^[A-Z](?=[a-z])/, letter => letter.toLowerCase()) + ' geometry for the street map exists for New Jersey and New York only)');
+      const note = perState && drawable.length < states.length
+        ? {layer, words: layer.name + ' (' + L.levelLabel(layer.level).replace(/^[A-Z](?=[a-z])/, letter => letter.toLowerCase()) + ' geometry for the street map exists for New Jersey and New York only)', boxes: []}
+        : null;
+      if (note) partial.push(note);
       const raw = await featuresFor(layer.level, layer.congress || settings.congress || '119', drawable);
       const keyOf = feature => {
         const id = String(feature.properties.id);
@@ -251,6 +275,8 @@ export async function render(host, model, hooks, previous) {
         features.push({type: 'Feature', properties, geometry: feature.geometry});
         const centre = centreOf(feature.geometry);
         if (centre) centres.push({type: 'Feature', properties, geometry: {type: 'Point', coordinates: centre}});
+        // The place's centre stands for it in the "Not drawn here" check: no second walk over its rings.
+        if (note && centre) note.boxes.push([centre[0], centre[1], centre[0], centre[1]]);
       }
       if (layer.mark === 'filled-map' || layer.mark === 'line') {
         map.addSource(sourceId, {type: 'geojson', data: {type: 'FeatureCollection', features}, promoteId: 'id'});
@@ -290,8 +316,10 @@ export async function render(host, model, hooks, previous) {
     layerIds.set(layer.id, ids);
   }
 
+  let recheck = null;                   // the banner's check, once it exists (below)
   const handle = {
-    map, layerIds,
+    map, layerIds, signature,
+    camera() { const centre = map.getCenter(); return {center: [centre.lng, centre.lat], zoom: map.getZoom()}; },
     destroy() { try { map.remove(); } catch (error) { /* already gone */ } host.replaceChildren(); },
     zoom(factor) { map.easeTo({zoom: map.getZoom() + Math.log2(factor), duration: 200}); },
     reset() { fit(); },
@@ -300,15 +328,23 @@ export async function render(host, model, hooks, previous) {
         const visible = layer.visible && !(view && view.hidden && view.hidden.has(layer.id));
         for (const id of layerIds.get(layer.id) || []) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
       }
+      // A layer shown or hidden in the Layer control changes what "Not drawn here" names.
+      if (recheck) recheck();
     }};
   const fit = () => {
     if (extent && extent[2] - extent[0] < 60) map.fitBounds([[extent[0], extent[1]], [extent[2], extent[3]]], {padding: 36, maxZoom: 13, duration: 0});
     else map.fitBounds([[EXTRACT[0], EXTRACT[1]], [EXTRACT[2], EXTRACT[3]]], {padding: 12, duration: 0});
   };
-  fit();
+  // The first view fits the layers - unless this redraw kept the reader's view, or the map was moved while
+  // its layers were being added. Home (reset) always fits.
+  if (!kept && !movedSinceStart()) fit();
   handle.setLayerState(model.viewState);
   // Outside the offline extract there are no streets: say so and offer the
-  // Boundaries map, which draws the whole country.
+  // Boundaries map, which draws the whole country. A per-state layer whose
+  // places reach states the street map has no geometry for is named "Not drawn
+  // here" only while none of the features it did draw is in view (MP2: in the
+  // New York view its New York and New Jersey ZIP areas draw, so nothing is
+  // missing there); a layer the reader has hidden is not named at all.
   const check = () => {
     const bounds = map.getBounds();
     const box = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
@@ -317,11 +353,15 @@ export async function render(host, model, hooks, previous) {
       && center.lat >= EXTRACT[1] - 0.5 && center.lat <= EXTRACT[3] + 0.5;
     const notes = [];
     if (!covered) notes.push('No street data for this area');
+    const view = model.viewState || {};
+    const missing = partial.filter(entry => entry.layer.visible && !(view.hidden && view.hidden.has && view.hidden.has(entry.layer.id))
+      && !entry.boxes.some(found => intersects(found, box))).map(entry => entry.words);
     if (missing.length) notes.push('Not drawn here: ' + missing.join('; '));
     if (notes.length && hooks.onBanner) hooks.onBanner(notes.join('. ') + '.', !covered && model.onBoundaries ? {label: 'Show Boundaries', run: model.onBoundaries} : null);
     else if (hooks.onBanner) hooks.onBanner('', null);
     if (hooks.onView) hooks.onView({zoom: map.getZoom(), metersPerPixel: 40075016.686 * Math.cos(center.lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 9)});
   };
+  recheck = check;
   map.on('moveend', check);
   check();
   const interactive = () => [...layerIds.entries()].filter(([id]) => {

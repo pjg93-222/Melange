@@ -1843,10 +1843,28 @@
     if (/^[A-Z]{2}-SEN$/.test(key)) return `${key.slice(0, 2)} · Senate`;
     return focus.label || key;
   }
+  /* MP11 (lane F2c, 2026-09-26): the notes above the map are one line - their first
+     sentence - with the whole text under Details, as the boards set secondary
+     information. Nothing is dropped: the network's scope, the missing snapshots, the
+     date rule (F12), the carryover and the located/unlocated gap all stay, whole, in
+     .map-message. A note of one short sentence stays a line of its own. */
+  function mapMessageHtml(state) {
+    const text = String(state.message || '').trim();
+    const first = (text.match(/^[\s\S]*?[.!?](?=\s|$)/) || [text])[0];
+    if (first.length >= text.length && text.length <= 160) return `<p class="muted map-message">${escapeHtml(text)}</p>`;
+    return `<details class="map-message-details"${state.messageOpen ? ' open=""' : ''}><summary class="map-message-line">`
+      + `<span class="map-message-summary">${escapeHtml(first)}</span><span class="map-message-more">Details</span></summary>`
+      + `<p class="muted map-message">${escapeHtml(text)}</p></details>`;
+  }
+  const wiredMessages = new WeakSet();
+
   function mapHeadHtml(pane, state) {
     const place = Boolean(state.focus && !state.compare);
     const overline = place ? pane.name : `${pane.industry || 'Imported file'} · ${pane.sourceKind}`;
-    const title = place ? placeTitle(state.focus) : pane.name;
+    // MP12 (#55): Spent drawn from the PAC's saved downstream network is titled "<PAC> network".
+    const network = state.direction === 'spent' && Boolean(state.body) && state.body.direction !== 'raised'
+      && state.body.spend_basis === 'consolidated_saved_network';
+    const title = place ? placeTitle(state.focus) : pane.name + (network ? ' network' : '');
     return `<div class="pane-title">
         <div class="map-overline">${escapeHtml(overline)}</div>
         <h2 title="${escapeHtml(pane.name)} · ${escapeHtml(pane.committee)}">${escapeHtml(title)}</h2>
@@ -2501,8 +2519,13 @@
     // 7 and M13 draw no line between the toolbar and the map (R06-05).
     render(host.querySelector('.map-note-host'),
       (state.note ? `<p class="map-note sr-only">${escapeHtml(state.note)}</p>` : '')
-      + (state.message ? `<p class="muted map-message">${escapeHtml(state.message)}</p>` : '')
+      + (state.message ? mapMessageHtml(state) : '')
       + (state.searchMessage ? `<p class="muted map-search-message">${escapeHtml(state.searchMessage)}</p>` : ''));
+    const messageDetails = host.querySelector('.map-message-details');
+    if (messageDetails && !wiredMessages.has(messageDetails)) {
+      wiredMessages.add(messageDetails);
+      messageDetails.addEventListener('toggle', () => { const shown = panes.has(mapPane) ? mapStateFor(mapPane) : null; if (shown) shown.messageOpen = messageDetails.open; });
+    }
     render(host.querySelector('.map-trail'), trailHtml(state));
     render(host.querySelector('.map-ranked'), state.compare ? mapChangesHtml(pane, state) : mapRankedHtml(pane, state));
     render(host.querySelector('.map-pins'),mapPinsHtml(state));

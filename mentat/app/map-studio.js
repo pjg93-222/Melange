@@ -56,6 +56,8 @@
     density: [['circle', {cx: 8, cy: 8, r: 1.6}], ['circle', {cx: 8, cy: 8, r: 4}], ['circle', {cx: 8, cy: 8, r: 6.2, 'stroke-dasharray': '1.6 1.6'}]],
     text: [['path', {d: 'M3 3.5h10M8 3.5v10'}]],
     line: [['path', {d: 'M2.5 12.5 6.5 5l3.5 5 3.5-6.5'}]],
+    hexbin: [['path', {d: 'M8 2.2 13 5.1v5.8L8 13.8 3 10.9V5.1z'}]],
+    info: [['circle', {cx: 8, cy: 8, r: 6}], ['path', {d: 'M8 7.2v4M8 4.9v.1'}]],
     automatic: [['circle', {cx: 8, cy: 8, r: 5.5}], ['path', {d: 'M2.5 8h11'}]]};
   const icon = name => svg(ICON[name] || ICON.automatic);
 
@@ -237,14 +239,19 @@
     if (surface.__mapTicket !== ticket) return;
     const title = titleOf(sheet, compiled.layers);
     node('title').textContent = title;
+    // A map's title stays on one line (map.css); the whole of it is in the heading's tooltip
+    // (sync() takes the tooltip away again when the sheet is not a map).
+    node('title').title = title;
+    node('title').dataset.mapTitle = title;
     // The canvas is this map's now: a render of the previous sheet that went stale never clears
     // the busy mark it set (which fades the canvas), so the map clears it once its layers are read.
     canvas.removeAttribute('aria-busy');
     node('subtitle').textContent = L.subtitleOf(compiled.layers);
     view.title = title;
     view.scope = compiled.layers.map(layer => layer.name + ' (' + L.sourceLabel(layer.source) + ', ' + L.levelLabel(layer.level) + '; ' + (layer.legend.located || 'no rows') + ')').join('; ');
+    // The view toolbar is a column on the map's left, and the Layer control opens beside it (#49, #55).
     const model = {layers: compiled.layers, dataLayer: compiled.dataLayer, settings: compiled.settings, viewState: viewStateFor(sheet),
-      toolbar: 'right', controlOpen: false,   // Tableau's Layer control opens from the view toolbar; it starts closed so it never covers the map
+      toolbar: 'left', controlOpen: false,   // Tableau's Layer control opens from the view toolbar; it starts closed so it never covers the map
       onBoundaries: () => setSettings({background: 'boundaries'}, 'Showing the Boundaries map, which draws the whole country.')};
     const callbacks = {
       onSelect: (layerId, key, item) => { hooks.status((item ? L.fullMoney(item.amount) + ' · ' : '') + key + ' · ' + ((compiled.layers.find(layer => layer.id === layerId) || {}).name || '')); },
@@ -303,9 +310,12 @@
     eye.title = card.visible !== false ? 'Control layer visibility: shown' : 'Control layer visibility: hidden';
     eye.append(icon(card.visible !== false ? 'eye' : 'eyeOff'));
     eye.addEventListener('click', () => commitCards(list => { list[index].visible = list[index].visible === false; }));
-    const mark = el('span', 'studio-layer-mark'); mark.append(icon(L.markOf(card))); mark.title = L.markName(L.markOf(card));
+    // A Filled layer at a hexagon level reads Hexbin (#53), by its icon and its word.
+    const summary = L.markSummary(card);
+    const mark = el('span', 'studio-layer-mark'); mark.append(icon(summary === 'Hexbin' ? 'hexbin' : L.markOf(card))); mark.title = summary;
     const name = el('button', 'studio-layer-name', displayName(card));
     name.type = 'button';
+    name.title = displayName(card) + ' · ' + summary + ' · ' + L.sourceLabel(card.source);
     name.setAttribute('aria-expanded', String(open));
     name.addEventListener('click', () => { if (!open) { hooks.setExpanded(index); hooks.renderAll(); } });
     name.addEventListener('dblclick', () => rename(item, index));
@@ -326,7 +336,9 @@
       typeRow.append(el('span', '', 'Mark type'));
       const select = el('select');
       select.id = 'studio-layer-type';
-      for (const [id, label] of MARK_OPTIONS()) select.append(new Option(label, id));
+      // On a hexagon level the Filled mark is the hexbin, and the menu says so.
+      const hex = L.isHex(card.geography);
+      for (const [id, label] of MARK_OPTIONS()) select.append(new Option(hex && id === 'filled-map' ? 'Hexbin' : label, id));
       select.value = L.MARK_IDS.includes(card.type) ? card.type : 'automatic';
       select.addEventListener('change', () => commitCards(list => { list[index].type = select.value; keepPatternValid(list[index]); }));
       typeRow.append(select);
@@ -665,11 +677,24 @@
     mapPane.hidden = sidePane !== 'map';
     if (sidePane === 'map') renderMapPane(mapPane);
   }
+  // A row's helper note, as an info mark (#54: one line per item). The words are the
+  // row's tooltip, and screen readers read them with the row.
+  function infoMark(note) {
+    const mark = el('span', 'studio-map-info');
+    mark.title = note;
+    mark.append(icon('info'), el('span', 'sr-only', note));
+    return mark;
+  }
+  function paneHeading(text, note) {
+    const head = el('h4', '', text);
+    if (note) head.append(infoMark(note));
+    return head;
+  }
   function renderMapPane(host) {
     const sheet = hooks.sheet(), settings = L.settingsOf(sheet);
     const streets = settings.background === 'streets';
     const parts = [];
-    parts.push(el('h4', '', 'Background'));
+    parts.push(paneHeading('Background', 'Nothing here is a layer: this is the backdrop the layers draw over.'));
     const styleRow = el('label', 'studio-map-row');
     styleRow.append(el('span', '', 'Style'));
     const style = el('select'); style.id = 'studio-map-style';
@@ -701,15 +726,15 @@
         if (box.checked) next.add(layer.id); else next.delete(layer.id);
         setSettings({base: L.BASE_IDS.filter(id => next.has(id))});
       });
-      const text = el('span', '', layer.label);
+      const text = el('span', 'studio-map-label', layer.label);
       row.append(box, text);
-      if (reason) row.title = reason;
+      // One line per layer: a zoom gate or an unavailable renderer is an info mark with its words.
       const gated = streets ? layer.zoom : layer.scale;
-      if (!reason && gated) { const note = el('small', '', 'shows when zoomed in'); text.append(note); }
-      if (reason) { const note = el('small', '', reason); text.append(note); }
+      const note = reason || (gated ? 'shows when zoomed in' : '');
+      if (note) { row.title = layer.label + ': ' + note; row.append(infoMark(note)); }
       parts.push(row);
     }
-    parts.push(el('h4', '', 'Data layer'));
+    parts.push(paneHeading('Data layer', 'A measure drawn as a translucent choropleth under every layer.'));
     const measures = fields().filter(field => ['amount', 'records', 'contributors'].includes(field.id));
     const dataRow = (label, id, options, value, apply) => {
       const row = el('label', 'studio-map-row');
@@ -734,10 +759,12 @@
       const row = el('label', 'studio-map-check');
       const box = el('input'); box.type = 'checkbox'; box.dataset.option = key; box.checked = settings.options[key] !== false;
       box.addEventListener('change', () => setSettings({options: Object.assign({}, L.settingsOf(hooks.sheet()).options, {[key]: box.checked})}));
-      row.append(box, el('span', '', L.OPTION_LABELS[key]));
+      row.append(box, el('span', 'studio-map-label', L.OPTION_LABELS[key]));
       if (key === 'scale') {
+        // Short choices so "Show map scale" keeps its words on the pane's one line; the select is named Units.
         const units = el('select', 'studio-map-units'); units.id = 'studio-map-units';
-        units.append(new Option('Units: U.S.', 'us'), new Option('Units: Metric', 'metric'));
+        units.setAttribute('aria-label', 'Map scale units'); units.title = 'Map scale units';
+        units.append(new Option('U.S.', 'us'), new Option('Metric', 'metric'));
         units.value = settings.options.units === 'metric' ? 'metric' : 'us';
         units.addEventListener('change', () => setSettings({options: Object.assign({}, L.settingsOf(hooks.sheet()).options, {units: units.value})}));
         units.addEventListener('click', event => event.preventDefault());
@@ -745,7 +772,6 @@
       }
       parts.push(row);
     }
-    parts.push(el('p', 'studio-note', 'Nothing here is a layer: this is the backdrop the layers draw over.'));
     host.replaceChildren(...parts);
   }
 
@@ -772,7 +798,10 @@
     button.type = 'button'; button.id = 'studio-map-geography';
     button.setAttribute('aria-haspopup', 'dialog'); button.setAttribute('aria-expanded', 'false');
     button.append(icon('globe'), document.createTextNode('Geography'));
-    button.title = 'Aggregate the open layer by ZIP, county, district, hexagon, density or points';
+    // Which layer the row sets is said in the button's tooltip, not as words in the row (#49, #53).
+    const which = card ? displayName(card) + ' · ' + L.sourceLabel(card.source) : '';
+    button.title = (which ? 'The open layer, ' + which + ': ' : '') + 'aggregate it by ZIP, county, district, hexagon, density or points';
+    row.setAttribute('aria-label', 'Geography of the open layer' + (which ? ', ' + which : ''));
     button.addEventListener('click', () => aggregatePopover(button));
     const strip = el('div', 'studio-map-levels');
     const current = L.aggregateOf(card);
@@ -784,8 +813,7 @@
       choice.addEventListener('click', () => setAggregate(id, geography));
       strip.append(choice);
     }
-    const note = el('span', 'studio-map-geo-note', card ? displayName(card) + ' · ' + L.sourceLabel(card.source) : '');
-    row.replaceChildren(button, strip, note);
+    row.replaceChildren(button, strip);
   }
   function setAggregate(id, geography, sizeMiles) {
     const open = openIndex();
@@ -803,14 +831,106 @@
       keepPatternValid(card);
     }, 'The open layer is aggregated by ' + (L.AGGREGATE_BY.find(item => item.id === id) || {label: id}).label.toLowerCase() + '.');
   }
-  // #53: six thumbnails, the hexagon size, and what cannot be placed.
-  const THUMB = {
-    zip: [['circle', {cx: 20, cy: 22, r: 3, fill: '#327a7a'}], ['circle', {cx: 34, cy: 30, r: 5, fill: '#327a7a'}], ['circle', {cx: 52, cy: 18, r: 4, fill: '#7cbfb7'}], ['circle', {cx: 70, cy: 36, r: 6, fill: '#327a7a'}], ['circle', {cx: 86, cy: 24, r: 3, fill: '#7cbfb7'}]],
-    county: [['path', {d: 'M8 10h30v18H8zM38 10h28v22H38zM66 10h30v16H66zM8 28h30v24H8zM38 32h28v20H38zM66 26h30v26H66z', fill: '#b9ddd8', stroke: '#ffffff'}]],
-    district: [['path', {d: 'M8 10h44v20H8zM52 10h44v28H52zM8 30h44v22H8zM52 38h44v14H52z', fill: '#7cbfb7', stroke: '#ffffff'}]],
-    hexbin: [['path', {d: 'M20 16l8-5 8 5v9l-8 5-8-5zM36 16l8-5 8 5v9l-8 5-8-5zM28 30l8-5 8 5v9l-8 5-8-5zM52 16l8-5 8 5v9l-8 5-8-5zM44 30l8-5 8 5v9l-8 5-8-5z', fill: '#4c9e95', stroke: '#ffffff'}]],
-    density: [['circle', {cx: 36, cy: 30, r: 16, fill: '#8b6984', 'fill-opacity': '.55'}], ['circle', {cx: 36, cy: 30, r: 7, fill: '#eca91c', 'fill-opacity': '.8'}], ['circle', {cx: 72, cy: 24, r: 10, fill: '#8b6984', 'fill-opacity': '.5'}]],
-    points: [['circle', {cx: 18, cy: 20, r: 1.8, fill: '#327a7a'}], ['circle', {cx: 30, cy: 34, r: 1.8, fill: '#327a7a'}], ['circle', {cx: 44, cy: 26, r: 1.8, fill: '#327a7a'}], ['circle', {cx: 58, cy: 40, r: 1.8, fill: '#327a7a'}], ['circle', {cx: 72, cy: 22, r: 1.8, fill: '#327a7a'}], ['circle', {cx: 86, cy: 34, r: 1.8, fill: '#327a7a'}]]};
+  // #53's six tiles, each a mini-map of the country in its own aggregation, drawn from the
+  // geo v2 files the map itself reads (state, county and district shapes, the 50-mile
+  // hexagons; county centres for the ZIP, point and density tiles) once per page, in the
+  // theme's teal ramp and the density's heat ramp. Tract is not a tile: no source carries
+  // street addresses today, and the strip's greyed Tract button says so.
+  const AGGREGATE_TILES = [['zip', 'ZIP code'], ['county', 'County'], ['district', 'Congressional district'],
+    ['hexbin', 'Hexbin'], ['density', 'Density'], ['points', 'Points']];
+  const THUMB_W = 84, THUMB_H = 48, THUMB_DENSITY = 2;
+  const thumbs = new Map();   // tile id -> Promise<canvas>
+  function hashOf(value) {
+    let h = 2166136261;
+    const text = String(value);
+    for (let i = 0; i < text.length; i += 1) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return (h >>> 0) / 4294967295;
+  }
+  function thumbFor(id) {
+    if (!thumbs.has(id)) {
+      const made = drawThumb(id);
+      thumbs.set(id, made);
+      made.catch(() => thumbs.delete(id));
+    }
+    return thumbs.get(id);
+  }
+  async function drawThumb(id) {
+    const canvas = document.createElement('canvas');
+    canvas.width = THUMB_W * THUMB_DENSITY; canvas.height = THUMB_H * THUMB_DENSITY;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('no canvas');
+    // The 975x610 frame fitted into the tile, as the map fits it: lower 48 and the insets.
+    const k = Math.min(canvas.width / E.FRAME_W, canvas.height / E.FRAME_H);
+    const ox = (canvas.width - E.FRAME_W * k) / 2, oy = (canvas.height - E.FRAME_H * k) / 2, px = 1 / k;
+    const teal = L.rampStops('teal');
+    const shade = value => L.colourAt(teal, 0.1 + 0.82 * value);
+    const dark = id === 'density';
+    const states = await E.albersFeatures('state');
+    const land = new Path2D();
+    for (const shape of Object.values(states)) if (shape && shape.path) land.addPath(new Path2D(shape.path));
+    if (dark) { context.fillStyle = '#3d2f60'; context.fillRect(0, 0, canvas.width, canvas.height); }
+    context.setTransform(k, 0, 0, k, ox, oy);
+    context.fillStyle = dark ? '#4e3f78' : '#e6efed';
+    context.fill(land);
+    const centres = async () => Object.values(await E.albersFeatures('county')).map(shape => shape && shape.anchor).filter(Boolean);
+    const shapes = async (level, curve) => {
+      const found = await E.albersFeatures(level, {congress: '119'});
+      context.lineWidth = 0.45 * px;
+      context.strokeStyle = 'rgba(255,255,255,0.9)';
+      for (const [key, shape] of Object.entries(found)) {
+        if (!shape || !shape.path) continue;
+        const path = new Path2D(shape.path);
+        context.fillStyle = shade(Math.pow(hashOf(key), curve));
+        context.fill(path);
+        context.stroke(path);
+      }
+    };
+    if (id === 'county') await shapes('county', 1.5);
+    else if (id === 'district') await shapes('cd', 1.2);
+    else if (id === 'hexbin') await shapes('hex50', 1.7);
+    else if (id === 'zip') {
+      for (const [x, y] of await centres()) {
+        context.fillStyle = shade(Math.pow(hashOf(x.toFixed(1) + ',' + y.toFixed(1)), 1.3));
+        context.fillRect(x - 1.2 * px, y - 1.2 * px, 2.4 * px, 2.4 * px);
+      }
+    } else if (id === 'points') {
+      context.fillStyle = teal[3];
+      let at = 0;
+      for (const [x, y] of await centres()) {
+        if ((at += 1) % 3) continue;
+        context.beginPath(); context.arc(x, y, 1.1 * px, 0, 2 * Math.PI); context.fill();
+      }
+    } else if (dark) {
+      // The Density mark itself at tile size: county centres of equal weight, the heat ramp.
+      context.setTransform(1, 0, 0, 1, 0, 0);
+      const points = (await centres()).map(([x, y]) => ({x: ox + x * k, y: oy + y * k, weight: 1}));
+      const grid = L.densityGrid(points, canvas.width, canvas.height, 9, 1);
+      const glow = document.createElement('canvas');
+      glow.width = grid.columns; glow.height = grid.rows;
+      glow.getContext('2d').putImageData(new ImageData(L.densityPixels(grid, L.rampStops('heat'), 45, 1), grid.columns, grid.rows), 0, 0);
+      context.drawImage(glow, 0, 0);
+    }
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    return canvas;
+  }
+  // Beside the shelf row, over the Inspector, so it never covers the map (#53); below the
+  // Geography button when the window is too narrow for that.
+  const AGGREGATE_WIDTH = [236, 280];   // the popover's narrowest and widest (px)
+  function placeAggregate(pop, anchor) {
+    const shelves = $('shelves');
+    const row = (shelves || anchor).getBoundingClientRect(), rect = anchor.getBoundingClientRect();
+    const beside = row.right + 8, room = window.innerWidth - 8 - beside;
+    const fits = room >= AGGREGATE_WIDTH[0];
+    pop.style.width = (fits ? Math.min(AGGREGATE_WIDTH[1], room) : AGGREGATE_WIDTH[1]) + 'px';
+    const box = pop.getBoundingClientRect();
+    let left, top;
+    if (fits) { left = beside; top = rect.top; }
+    else { left = Math.max(8, Math.min(window.innerWidth - 8 - box.width, row.right - box.width)); top = rect.bottom + 6; }
+    top = Math.max(8, Math.min(top, window.innerHeight - 8 - box.height));
+    pop.style.left = (left + window.scrollX) + 'px';
+    pop.style.top = (top + window.scrollY) + 'px';
+    pop.dataset.placed = fits ? 'beside' : 'below';
+  }
   async function aggregatePopover(anchor) {
     closeMenus();
     for (const node of document.querySelectorAll('.studio-map-aggregate')) node.remove();
@@ -821,15 +941,21 @@
     pop.append(el('h4', '', 'Aggregate by'));
     const tiles = el('div', 'studio-map-tiles');
     const current = L.aggregateOf(card);
-    for (const [id, label] of [['zip', 'ZIP code'], ['county', 'County'], ['district', 'Congressional district'], ['tract', 'Census tract'], ['hexbin', 'Hexbin'], ['density', 'Density'], ['points', 'Points']]) {
+    for (const [id, label] of AGGREGATE_TILES) {
       const tile = el('button', 'studio-map-tile');
       tile.type = 'button'; tile.dataset.kind = id; tile.dataset.aggregate = id;
       tile.setAttribute('aria-pressed', String(current === id));
-      tile.append(svg(THUMB[id] || THUMB.county, '0 0 104 62'), el('span', '', label));
-      // Tracts need a street address per row; neither source offers one here (the strip says why too).
-      if (id === 'tract') { tile.disabled = true; tile.title = tractReason(card); }
+      const thumb = el('canvas', 'studio-map-thumb');
+      thumb.width = THUMB_W * THUMB_DENSITY; thumb.height = THUMB_H * THUMB_DENSITY;
+      thumb.setAttribute('aria-hidden', 'true');
+      thumbFor(id).then(drawn => {
+        const context = thumb.getContext('2d');
+        if (context) context.drawImage(drawn, 0, 0);
+        tile.classList.add('has-thumb');
+      }).catch(() => { /* the tile keeps its plain box and its word */ });
+      tile.append(thumb, el('span', 'studio-map-tile-label', label));
       if (current === id) tile.append(el('span', 'studio-map-tick', '✓'));
-      tile.addEventListener('click', () => { pop.remove(); setAggregate(id); });
+      tile.addEventListener('click', () => { close(); setAggregate(id); });
       tiles.append(tile);
     }
     pop.append(tiles);
@@ -840,18 +966,22 @@
     size.value = String(Math.max(0, sizes.indexOf(chosen)));
     const out = el('output', '', chosen + ' mi');
     size.addEventListener('input', () => { out.textContent = sizes[Number(size.value)] + ' mi'; });
-    size.addEventListener('change', () => { pop.remove(); setAggregate('hexbin', null, sizes[Number(size.value)]); });
+    size.addEventListener('change', () => { close(); setAggregate('hexbin', null, sizes[Number(size.value)]); });
     hexRow.append(size, out);
     pop.append(hexRow);
     const note = el('p', 'studio-map-note', 'ZIP centres from the Census gazetteer; rows without the place a level needs are listed, not placed.');
     pop.append(note);
     document.body.append(pop);
-    const rect = anchor.getBoundingClientRect();
-    pop.style.left = Math.max(8, Math.min(window.innerWidth - 470, rect.left + window.scrollX)) + 'px';
-    pop.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    placeAggregate(pop, anchor);
     anchor.setAttribute('aria-expanded', 'true');
-    const dismiss = event => { if (!pop.contains(event.target) && event.target !== anchor) { pop.remove(); anchor.setAttribute('aria-expanded', 'false'); document.removeEventListener('mousedown', dismiss); } };
-    setTimeout(() => document.addEventListener('mousedown', dismiss), 0);
+    // Closing takes its document listeners with it (a tile, the size slider, a click outside or Escape).
+    function close() {
+      pop.remove(); anchor.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('mousedown', dismiss); document.removeEventListener('keydown', escape);
+    }
+    const dismiss = event => { if (!pop.contains(event.target) && event.target !== anchor) close(); };
+    const escape = event => { if (event.key === 'Escape' && pop.isConnected) { close(); anchor.focus(); } };
+    setTimeout(() => { if (pop.isConnected) { document.addEventListener('mousedown', dismiss); document.addEventListener('keydown', escape); } }, 0);
     // The listed count, from the layer as drawn (#53: "312 rows without a ZIP are listed, not placed").
     try {
       const data = await layerRows(card, hooks.sheet());
@@ -959,6 +1089,24 @@
     if (legacy && on) legacy.hidden = true;
     const list = $('mark-cards');
     if (list && !on) { list.classList.remove('studio-layer-list'); list.removeAttribute('aria-label'); }
+    // Only the tooltip this module set is taken away (a chart's own tooltip is its renderer's).
+    const title = $('title');
+    if (title && !on && 'mapTitle' in title.dataset) {
+      if (title.getAttribute('title') === title.dataset.mapTitle) title.removeAttribute('title');
+      delete title.dataset.mapTitle;
+    }
+    if (on) layerReasons();
+  }
+  // The open layer's greyed encoding rows say what the layer is (#53: a hexbin says Hexbin,
+  // and Detail says it is set under Aggregate by), not the chart mark the sheet had before.
+  // Runs after renderMarkRows, which sync() always follows (chart-studio.js renderShelves).
+  function layerReasons() {
+    const card = cardsOf(hooks.sheet())[openIndex()];
+    if (!card) return;
+    for (const zone of L.markRows(card)) {
+      const drop = $(zone);
+      if (drop && drop.dataset.reasonShort) drop.dataset.reasonShort = L.reasonShort(card, zone);
+    }
   }
   function init(given) {
     if (hooks) { hooks = given; return; }
