@@ -20,6 +20,13 @@
  *    y = y0 + (y1 - y0) / (1 + e^-T)) is an option. Each ribbon carries the geometry of its
  *    source-to-target gradient (userSpaceOnUse from the source's right edge to the
  *    target's left edge).
+ *  - The scale never gives way to the labels (lane F2a, FL1). Bars are drawn to one scale
+ *    that is at least barShare of the scale at which the fullest column fills the plot;
+ *    labels fit around them, shedding detail smallest node first: the one line under the
+ *    name (FL6), then the name's second line, then the amount's own line (it moves beside
+ *    the name), and only then the label itself, whose words stay in the tooltip. Before
+ *    2026-09-26 the labels' room was a hard floor, and at a 420 px plot a column whose
+ *    labels alone overfilled it drove the one scale to zero: 2 px bars, no ribbons.
  */
 (function (root) {
   'use strict';
@@ -94,17 +101,63 @@
     return lines;
   }
 
-  // A label's words in at most two lines of the room it has (the renderer passes
-  // MentatTheme.wrapText; the estimate is for node:test, which has no canvas).
-  function estimateWrap(text, width, size) {
-    const room = Math.max(4, Math.floor(width / (size * 0.56)));
+  // The one line a node shows under its name and amount (FL6): what it holds when it holds
+  // donated assets (board #44's first line), else its largest addition, word for word as
+  // sublines() writes it (other donors, cash from before this window, back from, not counted,
+  // returned to, passed on to). Every line stays in the node's tooltip and its accessible name:
+  // none is dropped, only moved off the drawing.
+  function secondary(node, lines, stubs, stubValue) {
+    if (!lines.length) return '';
+    if ((node.balance === 'unspent' || node.kind === 'donor') && (node.held || 0) > 0) return lines[0];
+    let best = null;
+    for (const stub of stubs) {
+      if (stub.attach !== node.id) continue;
+      const line = `${stub.label} ${short(stubValue(stub))}`;
+      if (lines.includes(line) && (!best || stubValue(stub) > best.value)) best = {line, value: stubValue(stub)};
+    }
+    return best ? best.line : lines[0];
+  }
+
+  // Width of a text at a size in px: the page's measured fitter (MentatTheme.measureText,
+  // passed by the renderer) or, in node:test, the renderer's own 0.56 em per character.
+  const estimateWidth = (text, size) => String(text).length * size * 0.56;
+
+  // A label's words in lines of the room it has, breaking between words only: a word longer
+  // than the room keeps its own line and the renderer ends it with an ellipsis (FL3).
+  function wordWrap(text, width, size, measure) {
     const lines = [];
     let line = '';
     for (const word of String(text).split(/\s+/).filter(Boolean)) {
-      if (line && (line + ' ' + word).length > room) { lines.push(line); line = word; } else line = line ? line + ' ' + word : word;
+      const next = line ? line + ' ' + word : word;
+      if (line && measure(next, size) > width) { lines.push(line); line = word; } else line = next;
     }
     if (line) lines.push(line);
     return lines.length ? lines : [''];
+  }
+
+  // At most `count` lines: the words that do not fit join the last line, which the renderer
+  // fits to the room with an ellipsis (the full name is the node's tooltip title).
+  function clampLines(lines, count) {
+    if (lines.length <= count) return lines.slice();
+    return lines.slice(0, Math.max(count, 1) - 1).concat([lines.slice(Math.max(count, 1) - 1).join(' ')]);
+  }
+
+  // A node's label at each level of detail, richest first. Level 0: the name in up to
+  // labelLines lines, the amount, the one secondary line; 1: without the secondary line;
+  // 2: the name in one line; 3: the name with the amount beside it, one line; 4: no label
+  // (the bar's tooltip still says it all). `block` is the height each takes.
+  function labelLevels(node, room, opts, measure) {
+    const words = wordWrap(labelText(node), room, opts.labelSize, measure);
+    const named = clampLines(words, Math.max(1, opts.labelLines));
+    const one = clampLines(words, 1);
+    const amount = opts.amounts !== false ? opts.labelLine : 0;
+    const sub = node.subline ? opts.subLine : 0;
+    return [
+      {name: named, amount: 'line', sub: !!node.subline, block: named.length * opts.labelLine + amount + sub},
+      {name: named, amount: 'line', sub: false, block: named.length * opts.labelLine + amount},
+      {name: one, amount: 'line', sub: false, block: opts.labelLine + amount},
+      {name: one, amount: 'inline', sub: false, block: opts.labelLine},
+      {name: [], amount: 'none', sub: false, block: 0}];
   }
 
   function labelText(node) {
@@ -380,10 +433,13 @@
   }
 
   /* ----------------------------------------------------------------- layout */
-  const DEFAULTS = {width: 1100, height: 520, nodeWidth: 14, minPadding: 14, maxPadding: 64, stubLength: 56,
-    labelWidth: 230, labelLine: 16, labelSize: 13.5, labelLines: 2, top: 0, minShare: MIN_SHARE, order: 'value',
-    curve: 'cubic',
-    margin: {top: 34, right: 8, bottom: 10, left: 8}};
+  // barShare: the bars' floor, as a share of the fill scale (FL1). grow: a view that can scroll
+  // lets the plot grow (up to maxGrow times) before any label is left to its tooltip.
+  // firstLabels 'left' puts the first column's labels left of its bars in firstLabelWidth (#46).
+  const DEFAULTS = {width: 1100, height: 520, nodeWidth: 12, minPadding: 10, maxPadding: 56, stubLength: 56,
+    labelWidth: 230, labelLine: 16, subLine: 14, labelSize: 13, labelLines: 2, top: 0, minShare: MIN_SHARE,
+    order: 'value', curve: 'cubic', barShare: 0.5, grow: false, maxGrow: 4, firstLabels: 'right', firstLabelWidth: 0,
+    amounts: true, margin: {top: 34, right: 8, bottom: 10, left: 8}};
 
   function layout(payload, options) {
     const opts = Object.assign({}, DEFAULTS, options || {});
@@ -397,15 +453,16 @@
     if (opts.top) ({nodes, links} = group(nodes, links, opts.top, opts.minShare));
     const byId = measure(nodes, links);
     const count = Math.max(stages.length, 1 + Math.max(0, ...nodes.map(node => node.stage)));
-    const innerWidth = opts.width - opts.margin.left - opts.margin.right - opts.labelWidth;
+    const left = opts.firstLabels === 'left' ? Math.max(0, Number(opts.firstLabelWidth) || 0) : 0;
+    const innerWidth = opts.width - opts.margin.left - opts.margin.right - opts.labelWidth - left;
     const step = count > 1 ? (innerWidth - opts.nodeWidth) / (count - 1) : 0;
     const columns = [];
     for (let index = 0; index < count; index += 1) {
       const stage = stages[index] || {index, key: `stage${index}`, label: ''};
-      columns.push({index, key: stage.key, label: stage.label, x: opts.margin.left + index * step, nodes: []});
+      columns.push({index, key: stage.key, label: stage.label, x: opts.margin.left + left + index * step, nodes: []});
     }
     for (const node of nodes) if (!node.stub) columns[node.stage].nodes.push(node);
-    const available = opts.height - opts.margin.top - opts.margin.bottom;
+    const plot = Math.max(0, opts.height - opts.margin.top - opts.margin.bottom);
     const stubList = nodes.filter(node => node.stub);
     const stubCents = new Map();
     for (const link of links) {
@@ -413,56 +470,115 @@
       if (byId.get(link.target).stub) stubCents.set(link.target, (stubCents.get(link.target) || 0) + link.cents);
     }
     const stubValue = stub => dollars(stubCents.get(stub.id) || 0);
-    // Each node reserves room for its label block (name, amount, the lines beneath), so
-    // labels never run into the next node's; the one scale is the largest that fits.
-    const wrap = typeof opts.wrap === 'function' ? opts.wrap : estimateWrap;
+    const measureText = typeof opts.measure === 'function' ? opts.measure : estimateWidth;
     columns.forEach((column, at) => {
       const next = columns[at + 1];
-      column.labelWidth = Math.max(40, (next ? next.x : opts.width - opts.margin.right) - column.x - opts.nodeWidth - 16);
+      column.labelSide = at === 0 && left ? 'left' : 'right';
+      column.labelWidth = column.labelSide === 'left' ? Math.max(40, left - 8)
+        : Math.max(40, (next ? next.x : opts.width - opts.margin.right) - column.x - opts.nodeWidth - 16);
     });
     for (const node of nodes) {
       node.value = dollars(valueOf(node));
       node.value_in = dollars(node.vin);
       node.sublines = node.stub ? [] : sublines(node, stubList, stubValue);
+      node.subline = node.stub ? '' : secondary(node, node.sublines, stubList, stubValue);
       const room = node.stub ? 0 : columns[node.stage].labelWidth - (node.kind === 'candidate' && node.party ? 16 : 0);
-      node.label_text = node.stub ? [] : wrap(labelText(node), room, opts.labelSize).slice(0, opts.labelLines);
-      node.block = (node.label_text.length + 1 + node.sublines.length) * opts.labelLine;
+      node.levels = node.stub ? null : labelLevels(node, room, opts, measureText);
     }
-    const required = (column, k) => column.nodes.reduce((sum, node) => sum + Math.max(valueOf(node) * k, node.block), 0)
-      + opts.minPadding * Math.max(column.nodes.length - 1, 0);
-    let scale = Infinity;               // px per cent, one scale for every width
+    // FL1. The gaps between nodes take at most 35% of the plot, so bars always keep the rest.
+    const gapOf = (column, height) => {
+      const gaps = Math.max(column.nodes.length - 1, 0);
+      return gaps ? Math.min(opts.minPadding, height * 0.35 / gaps) : 0;
+    };
+    const need = (column, k, levels, gap) => column.nodes.reduce((sum, node, at) =>
+      sum + Math.max(valueOf(node) * k, node.levels[levels[at]].block), 0) + gap * Math.max(column.nodes.length - 1, 0);
+    // The fill scale: the fullest column's bars fill the plot asked for, less its gaps. A plot
+    // that grows (grow) gives its labels more room; its bars keep this scale.
+    let fill = Infinity;
     for (const column of columns) {
       const total = column.nodes.reduce((sum, node) => sum + valueOf(node), 0);
-      if (!total) continue;
-      let low = 0, high = available / total;
-      if (required(column, high) <= available) { scale = Math.min(scale, high); continue; }
-      for (let step = 0; step < 40; step += 1) {
-        const middle = (low + high) / 2;
-        if (required(column, middle) <= available) low = middle; else high = middle;
-      }
-      scale = Math.min(scale, low);
+      if (total) fill = Math.min(fill, Math.max(0, plot - gapOf(column, plot) * Math.max(column.nodes.length - 1, 0)) / total);
     }
-    if (!Number.isFinite(scale)) scale = 0;
-    for (const column of columns) {
+    function plan(height) {
+      if (!Number.isFinite(fill)) return {scale: 0, levels: columns.map(column => column.nodes.map(() => 0)), hidden: 0};
+      // The largest scale at which every label fits whole; the bars never go below barShare of fill.
+      let whole = fill;
+      for (const column of columns) {
+        if (!column.nodes.length) continue;
+        const rich = column.nodes.map(() => 0), gap = gapOf(column, height);
+        if (need(column, fill, rich, gap) <= height) continue;
+        if (need(column, 0, rich, gap) > height) { whole = 0; continue; }
+        let low = 0, high = fill;
+        for (let round = 0; round < 40; round += 1) {
+          const middle = (low + high) / 2;
+          if (need(column, middle, rich, gap) <= height) low = middle; else high = middle;
+        }
+        whole = Math.min(whole, low);
+      }
+      const scale = Math.max(whole, Math.min(1, Math.max(0, Number(opts.barShare) || 0)) * fill);
+      // Where the labels still overfill a column, they shed detail level by level, smallest node
+      // first, and only a label taller than its own bar (a bar that holds its label costs no room).
+      let hidden = 0;
+      const levels = columns.map(column => {
+        const chosen = column.nodes.map(() => 0), gap = gapOf(column, height);
+        const order = column.nodes.map((node, at) => at)
+          .sort((a, b) => valueOf(column.nodes[a]) - valueOf(column.nodes[b]) || a - b);
+        for (let level = 0; level < 4 && need(column, scale, chosen, gap) > height + 1e-9; level += 1) {
+          for (const at of order) {
+            const node = column.nodes[at];
+            if (chosen[at] !== level || node.levels[level].block <= valueOf(node) * scale) continue;
+            chosen[at] = level + 1;
+            if (need(column, scale, chosen, gap) <= height + 1e-9) break;
+          }
+        }
+        hidden += chosen.filter(level => level === 4).length;
+        return chosen;
+      });
+      return {scale, levels, hidden};
+    }
+    let available = plot;
+    let chosen = plan(available);
+    if (opts.grow) {
+      const most = plot * Math.max(1, Number(opts.maxGrow) || 1);
+      while (chosen.hidden && available < most) {
+        available = Math.min(most, available * 1.15);
+        chosen = plan(available);
+      }
+    }
+    const scale = chosen.scale;          // px per cent, one scale for every width
+    columns.forEach((column, index) => {
+      const levelOf = new Map(column.nodes.map((node, at) => [node.id, chosen.levels[index][at]]));
       column.nodes = sortColumn(column.nodes, opts.order);
       const heights = column.nodes.map(node => valueOf(node) * scale);
-      const slots = column.nodes.map((node, at) => Math.max(heights[at], node.block));
+      const labels = column.nodes.map(node => node.levels[levelOf.get(node.id)]);
+      const slots = column.nodes.map((node, at) => Math.max(heights[at], labels[at].block));
       const used = slots.reduce((sum, height) => sum + height, 0);
       const gaps = Math.max(column.nodes.length - 1, 0);
-      const padding = gaps ? Math.min(opts.maxPadding, Math.max(opts.minPadding, (available - used) / gaps)) : 0;
+      const gap = gapOf(column, available);
+      const padding = gaps ? Math.min(Math.max(opts.maxPadding, gap), Math.max(gap, (available - used) / gaps)) : 0;
       const block = used + padding * gaps;
       let y = opts.margin.top + Math.max(0, (available - block) / 2);
-      const next = columns[column.index + 1];
       column.nodes.forEach((node, at) => {
+        const label = labels[at];
         node.x0 = column.x;
         node.x1 = column.x + opts.nodeWidth;
         node.y0 = y;
         node.y1 = y + heights[at];
         node.order = at;
         node.label_width = column.labelWidth;
+        node.label_side = column.labelSide;
+        node.label_level = levelOf.get(node.id);
+        node.label_text = label.name;
+        node.label_amount = opts.amounts === false && label.amount !== 'none' ? 'none' : label.amount;
+        node.subline_shown = label.sub ? node.subline : '';
+        node.block = label.block;
+        // The label sits at the middle of a bar taller than it, else at the top of its slot.
+        node.label_y = y + Math.max(0, (heights[at] - label.block) / 2);
+        node.label_lines = label.name.length + (node.label_amount === 'line' ? 1 : 0) + (label.sub ? 1 : 0);
+        delete node.levels;
         y += slots[at] + padding;
       });
-    }
+    });
     // Stubs sit beside the node they attach to; their end is placed with the ribbon below.
     const stubs = nodes.filter(node => node.stub);
     for (const stub of stubs) {
@@ -517,16 +633,11 @@
         .reduce((sum, link) => sum + link.cents, 0);
       node.amount = amountOf(node, dollars(fromStubs));
     }
-    // Labels to the right of each bar, at the top of the node's slot (which holds them).
-    for (const column of columns) {
-      for (const node of column.nodes) {
-        node.label_y = node.y0;
-        node.label_lines = node.label_text.length + 1 + node.sublines.length;
-      }
-    }
     const totals = columns.map(column => dollars(column.nodes.reduce((sum, node) => sum + valueOf(node), 0)));
     columns.forEach((column, at) => { column.total = totals[at]; column.ids = column.nodes.map(node => node.id); delete column.nodes; });
-    return {width: opts.width, height: opts.height, scale: scale * 100, columns, nodes, links, stubs,
+    // A plot that grew (grow) is taller than asked; the drawing is as tall as its plot.
+    return {width: opts.width, height: opts.height + (available - plot), scale: scale * 100, columns, nodes, links, stubs,
+      plot: available, hidden_labels: chosen.hidden,
       options: {curve: opts.curve, top: opts.top, order: opts.order, nodeWidth: opts.nodeWidth, stubLength: opts.stubLength}};
   }
 

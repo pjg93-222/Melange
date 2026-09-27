@@ -119,3 +119,111 @@ test('carryover (b): a carried-over committee\u2019s tooltip says where its gate
     {result: layout.layout(FIXTURE, {width: 1200, height: 560}), format: {short: chart.short, full: chart.full}}, FIXTURE).lines;
   assert.ok(!before.some(line => /start of the cycle/.test(line)), 'a committee reached in the cycle says nothing of it');
 });
+
+/* ------------------------------------------------------- lane F2a (FL2-FL8) */
+const SHAPES = require('./flow-shapes.corpus.js');
+const close = (a, b, message) => assert.ok(Math.abs(a - b) < 1e-6, `${message}: ${a} vs ${b}`);
+const texts = (svg, name) => all(svg, new RegExp(`<text class="${name}"[^>]*>([^<]*)`, 'g')).map(match => match[1]);
+const estimate = (text, size) => String(text).length * size * 0.56;
+const fitNode = (text, width, size, suffix) => {
+  const tail = suffix == null ? '' : String(suffix);
+  const room = Math.floor(width / (size * 0.56)) - tail.length;
+  return String(text).length <= room ? String(text) + tail : String(text).slice(0, Math.max(1, room - 1)).trimEnd() + '…' + tail;
+};
+
+test('FL3: a line is cut between words with an ellipsis, and an amount at its end is kept whole', () => {
+  const line = 'Cash from before this window $1.3M';
+  assert.equal(chart.fitLine(line, 400, 11.5, fitNode, estimate), line, 'room enough: as it is');
+  const cut = chart.fitLine(line, 150, 11.5, fitNode, estimate);
+  assert.match(cut, /^Cash from( before)?… \$1\.3M$/, cut);
+  assert.ok(estimate(cut, 11.5) <= 150);
+  assert.equal(chart.fitLine('Amalgamated Bank', 400, 13, fitNode, estimate), 'Amalgamated Bank');
+  assert.equal(chart.fitLine('Coinbase Commerce (exchange)', 150, 13, fitNode, estimate), 'Coinbase Commerce…');
+  // One word longer than the room: the fitter's cut, still with an ellipsis.
+  assert.match(chart.fitLine('Supercalifragilisticexpialidocious', 60, 13, fitNode, estimate), /…$/);
+});
+
+test('FL1-FL6: the SLF 2023-2024 flow at 780 x 420 draws to scale, one line under a label, the rest in the tooltip', () => {
+  const body = SHAPES.slf2024;
+  const svg = chart.svgString(body, {width: 780, height: 420, palette: PALETTE, opacity: chart.VIEW_OPACITY});
+  const heights = all(svg, /<rect class="flow-bar"[^>]*height="([\d.]+)"/g).map(match => Number(match[1]));
+  assert.ok(Math.max(...heights) > 100 && heights.filter(height => height > 2).length >= heights.length / 2,
+    `bars ${heights.join(',')}`);
+  assert.equal(all(svg, /<path class="flow-link[^"]*"[^>]*fill-opacity="0.28"/g).length, all(svg, /<path class="flow-link/g).length);
+  assert.equal(chart.VIEW_OPACITY, 0.28);
+  const result = layout.layout(body, {width: 780, height: 420});
+  // No node draws more than one line under its label.
+  for (const node of result.nodes.filter(item => !item.stub)) {
+    const group = svg.slice(svg.indexOf(`data-node="${node.id.replace(/&/g, '&amp;').replace(/'/g, '&#39;')}"`));
+    const own = group.slice(0, group.indexOf('</g>'));
+    assert.ok((own.match(/class="flow-subline"/g) || []).length <= 1, node.id);
+  }
+  // The root's three "back from" lines: the first drawn, the other two in its tooltip, all three in its name.
+  const root = result.nodes.find(node => node.id === 'committee:C00571703');
+  const context = {result, colours: layout.colours(result, PALETTE, '#a39b92'), format: {short: chart.short, full: chart.full}};
+  const said = chart.describe({node: root}, context, body).lines;
+  for (const line of root.sublines) assert.ok(said.includes(line) || line === root.subline_shown, line);
+  assert.deepEqual(root.sublines.filter(line => line.startsWith('back from ') && !said.includes(line)), [root.subline_shown],
+    'the one back-from line not in the tooltip is the one drawn');
+  const name = svg.match(/data-node="committee:C00571703"[^>]*aria-label="([^"]*)"/)[1];
+  for (const line of root.sublines) assert.ok(name.includes(line.replace(/'/g, '&#39;')), line);
+  // A committee whose addition lines were shed: every one of them is in its tooltip.
+  const crossroads = result.nodes.find(node => node.label === 'American Crossroads');
+  const lines = chart.describe({node: crossroads}, context, body).lines;
+  for (const line of crossroads.sublines) assert.ok(lines.includes(line) || line === crossroads.subline_shown, line);
+});
+
+test('FL3: no halo; the header that cannot fit is cut between words and keeps its words in a title', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'flow.css'), 'utf8');
+  assert.ok(!/paint-order/.test(css), 'labels carry no white halo');
+  const svg = chart.svgString(SHAPES.slf2024, {width: 780, height: 420, palette: PALETTE});
+  const headers = texts(svg, 'flow-header');
+  assert.ok(headers.includes('RECEIVED FROM') && headers.includes('LANDED ON'));
+  const cut = headers.find(text => text.startsWith('SENATE'));
+  assert.ok(cut !== 'SENATE LEADERSHIP FUND' ? /…$/.test(cut) && svg.includes('<title>SENATE LEADERSHIP FUND</title>') : true, cut);
+  for (const text of headers) assert.ok(!/[A-Z]…/.test(text) || text.endsWith('…'), text);
+});
+
+test('FL3: no knocked-out box and no halo behind a label; bars and labels are never masked', () => {
+  const svg = chart.svgString(FAIRSHAKE, {width: 1100, height: 520, palette: PALETTE, idPrefix: 'm'});
+  assert.ok(svg.includes('<g class="flow-links">'), 'the ribbons are painted as they are');
+  assert.ok(!/<mask|<filter| mask=| filter=/.test(svg), 'no mask or filter anywhere');
+  assert.ok(!/<text class="flow-(label|amount|subline)"[^>]*stroke/.test(svg), 'no stroke on any label');
+});
+
+test('FL2/FL4: the ribbons rest translucent; a hover dims only ribbons and leaves labels at 85% or more', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'flow.css'), 'utf8');
+  const opacity = selector => {
+    const rule = css.split('}').find(block => block.includes(selector + ' {') || block.includes(selector + '{'));
+    const match = rule && /(?:fill-)?opacity:\s*([\d.]+)/.exec(rule.slice(rule.indexOf('{')));
+    return match ? Number(match[1]) : null;
+  };
+  assert.equal(opacity('.flow-chart.is-tracing .flow-link:not(.is-lit)'), 0.12);
+  assert.equal(opacity('.flow-chart.is-tracing .flow-link.is-lit'), 0.6);
+  const labels = opacity('.flow-chart.is-tracing .flow-node:not(.is-lit) text');
+  assert.ok(labels === null || labels >= 0.85, `labels off the route at ${labels}`);
+  assert.equal(opacity('.flow-chart.is-tracing .flow-node:not(.is-lit)'), null, 'no rule fades a whole node');
+});
+
+test('FL8: board #46, the first stage labelled left of its bars and the stages spread over the whole width', () => {
+  const body = SHAPES.crypto2026;
+  const options = {width: 900, height: 480, headers: false, labelSize: 13, labelLine: 16, labelLines: 1, minPadding: 8,
+    nodeWidth: 10, firstLabels: 'left', firstLabelWidth: 150, labelWidth: 170, margin: {top: 8, right: 4, bottom: 10, left: 4},
+    palette: PALETTE, idPrefix: 's'};
+  const result = layout.layout(body, options);
+  const xs = result.columns.map(column => column.x);
+  assert.equal(xs[0], 4 + 150, 'the first stage starts after its labels');
+  const steps = xs.slice(1).map((x, at) => x - xs[at]);
+  for (const step of steps) close(step, steps[0], 'even stage spacing');
+  close(xs[xs.length - 1] + 10 + 170, 900 - 4, 'the last stage and its labels reach the right edge');
+  const first = result.columns[0].ids.map(id => result.nodes.find(node => node.id === id));
+  assert.ok(first.every(node => node.label_side === 'left' && node.x1 - node.x0 === 10));
+  const svg = chart.svgString(body, options);
+  for (const node of first) {
+    const group = svg.slice(svg.indexOf(`data-node="${node.id}"`));
+    const own = group.slice(0, group.indexOf('</g>'));
+    if (node.label_level === 4) continue;
+    assert.match(own, /<text class="flow-label" x="([\d.]+)" y="[\d.]+" text-anchor="end">/, node.id);
+    assert.equal(Number(/<text class="flow-label" x="([\d.]+)"/.exec(own)[1]), xs[0] - 8, `${node.id}: right-aligned 8 px left of its bar`);
+  }
+});

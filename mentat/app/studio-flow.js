@@ -8,9 +8,11 @@
  * join one "Other" node. The layout and the drawing are the PAC evidence Flow's own
  * (flow-layout.js, flow-chart.js); only the words differ: worksheet rows, not filings.
  *
- * render() draws a Studio surface (its text is 18px: workspace-polish.css draws chart-canvas
- * text at 18px, so every label is measured at 18px); decorate() turns Columns into the
- * Stages shelf; options() is the Marks card's Flow options block; tableRows() is the CSV.
+ * render() draws a Studio surface at board #46's size (lane F2a): 13px labels (flow.css sets
+ * the Flow drawing's text to 13px over the canvas's 18px, and every label is measured at 13px),
+ * about 10px nodes, the first stage's labels right-aligned left of its bars, and the stages
+ * spread evenly over the whole width; decorate() turns Columns into the Stages shelf;
+ * options() is the Marks card's Flow options block; tableRows() is the CSV.
  *
  * Colours come only from MentatTheme.categorical. CSP: no style attributes and no <style>;
  * the tooltip and the options are placed through classes and the CSSOM.
@@ -25,9 +27,11 @@
 
   const MISSING = '(Missing)';
   const OTHER = '\u0000other';        // a grouped member inside build(); never a worksheet value
-  const TEXT = 18;                    // workspace-polish.css: #view-chart-studio .studio-canvas svg text
-  const LINE = 22;
+  const TEXT = 13;                    // flow.css: #view-chart-studio .studio-canvas svg.flow-chart .flow-label
+  const LINE = 16;
+  const SUB_TEXT = 11.5, SUB_LINE = 14;
   const PADDING = 8;
+  const NODE_WIDTH = 10;
   // flow-layout.js deals stage-one members these slots of the twelve; a Colour field that is
   // not a stage takes the same order, so its members never borrow an outcome's slot.
   const KEY_SLOTS = [2, 3, 4, 6, 9, 10, 11, 5];
@@ -334,11 +338,24 @@
     return top + 12 + most * LINE * 2 + Math.max(0, most - 1) * PADDING;
   }
 
+  // A label's width at the drawing's size (MentatTheme.measureText in the page).
+  function textWidth(text) {
+    const theme = root.MentatTheme;
+    return theme && typeof theme.measureText === 'function' ? theme.measureText(String(text), TEXT) : String(text).length * TEXT * 0.56;
+  }
+
+  // The room right of the last stage's bars and (board #46) left of the first stage's: each as
+  // wide as its longest name needs, within a share of the drawing, so the stages between them
+  // spread evenly over the rest of the width.
   function lastColumnRoom(payload, width) {
     const last = payload.stages.length - 1;
-    const longest = payload.nodes.filter(node => node.stage === last)
-      .reduce((most, node) => Math.max(most, String(node.label).length), 8);
-    return Math.round(Math.min(width * 0.3, Math.max(170, longest * TEXT * 0.56 + 30)));
+    const longest = payload.nodes.filter(node => node.stage === last).reduce((most, node) => Math.max(most, textWidth(node.label)), 0);
+    return Math.round(Math.min(width * 0.26, Math.max(120, longest + 30)));
+  }
+
+  function firstColumnRoom(payload, width) {
+    const longest = payload.nodes.filter(node => node.stage === 0).reduce((most, node) => Math.max(most, textWidth(node.label)), 0);
+    return Math.round(Math.min(width * 0.24, Math.max(90, longest + 18)));
   }
 
   function exportCopy(svg) {
@@ -412,8 +429,9 @@
       width, height, ribbons: options.ribbons === 'outcome' ? 'source' : options.ribbons || 'source',
       opacity: (Number.isFinite(Number(options.opacity)) ? Number(options.opacity) : 40) / 100,
       order: options.order === 'alphabetical' ? 'alpha' : 'value', headers: false,
-      labelSize: TEXT, subSize: TEXT, labelLine: LINE, subLine: LINE, labelLines: 1, minPadding: PADDING,
-      labelWidth: lastColumnRoom(payload, width), margin: {top, right: 8, bottom: 10, left: 8},
+      labelSize: TEXT, subSize: SUB_TEXT, labelLine: LINE, subLine: SUB_LINE, labelLines: 2, minPadding: PADDING,
+      nodeWidth: NODE_WIDTH, firstLabels: 'left', firstLabelWidth: firstColumnRoom(payload, width), grow: true,
+      labelWidth: lastColumnRoom(payload, width), margin: {top, right: 4, bottom: 10, left: 4},
       amounts: context.showLabels !== false, format, recolour: recolourer(built),
       legend: legend.items, legendTitle: legend.title, title: `${title}: ${chain}`});
     if (mounted) mounted.set(canvas, handle);
@@ -421,8 +439,10 @@
     if (svg) {
       svg.__mentatExport = () => exportCopy(svg);
       // The Studio redraws a drawing fitted to its box when the box changes; one taller than
-      // its box scrolls, drawn again when the canvas is resized.
-      if (fit && height <= boxHeight) { svg.setAttribute('data-fit', ''); svg.__fit = {box: fit}; }
+      // its box (a plot that grew so no label is dropped, too) scrolls, drawn again when the
+      // canvas is resized.
+      const drawn = handle.result().height;
+      if (fit && drawn <= boxHeight) { svg.setAttribute('data-fit', ''); svg.__fit = {box: fit}; }
       else if (view.primary) canvas.dataset.pieFit = 'wanted';
     }
     node('note').textContent = notes.join(' ') || `${source.reportName || ''} / ${data.sheet} · ${totals.selected.toLocaleString('en-US')} rows selected`;

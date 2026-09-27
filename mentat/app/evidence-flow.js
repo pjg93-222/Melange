@@ -56,7 +56,7 @@
     <p id="evidence-flow-reroot" class="flow-reroot" hidden></p>
     <div id="evidence-flow-status" class="flow-status" role="status" hidden></div>
     <div id="evidence-flow-canvas" class="flow-canvas"></div>
-    <p id="evidence-flow-foot" class="flow-foot"></p>
+    <div id="evidence-flow-foot" class="flow-foot"></div>
   </section>
   <aside class="card flow-rail" aria-labelledby="evidence-flow-rail-title">
     <h3 id="evidence-flow-rail-title" class="flow-rail-title">Largest routes</h3>
@@ -193,6 +193,8 @@
     $('evidence-flow').removeAttribute('aria-busy');
     if (response.status === 409 && body.reason === 'no_estimate_bundle') {
       clearChart();
+      // The line under the heading names what was asked for, not the flow drawn before it.
+      $('evidence-flow-sub').textContent = [cycleLabel(state.cycle), 'attributed estimate'].filter(Boolean).join(' · ');
       status(body.error, 'Show reported activity');
       return;
     }
@@ -276,12 +278,19 @@
     const payload = state.payload;
     heading(payload);
     rail(payload);
-    $('evidence-flow-foot').textContent = (payload.notes || []).map(note => note.text).join(' · ');
+    const chartApi = root.MentatFlowChart;
+    // FL7: one footnote line, every note in full under Details.
+    chartApi.footnote($('evidence-flow-foot'), payload.notes || []);
+    // FL10: the heading on one line.
+    chartApi.fitHeading($('evidence-flow-heading'));
     const canvas = $('evidence-flow-canvas');
     const top = canvas.getBoundingClientRect().top;
     const height = Math.max(420, Math.min(820, Math.round(root.innerHeight - Math.max(top, 0) - 70)));
     const width = Math.max(640, Math.floor(canvas.clientWidth || 1000));
-    const options = {width, height, ribbons: state.ribbons, top: 0, title: $('evidence-flow-heading').textContent,
+    // FL1/FL2: bars drawn to scale in any height (the plot grows before a label is dropped),
+    // ribbons at the boards' resting opacity.
+    const options = {width, height, grow: true, opacity: chartApi.VIEW_OPACITY, ribbons: state.ribbons, top: 0,
+      title: $('evidence-flow-heading').textContent,
       onReroot: committee => {
         state.stack.push({committee: state.committee, snapshot: state.snapshot, label: payload.root.label});
         state.committee = committee;
@@ -290,7 +299,7 @@
       },
       onCandidate: node => state.onView && state.onView('rows', {query: node.candidate_id || node.label})};
     if (state.chart) state.chart.destroy();
-    state.chart = root.MentatFlowChart.mount(canvas, payload, options);
+    state.chart = chartApi.mount(canvas, payload, options);
   }
 
   function open(detail) {

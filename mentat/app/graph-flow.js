@@ -47,7 +47,7 @@
   <p id="graph-flow-reroot" class="flow-reroot" hidden></p>
   <div id="graph-flow-status" class="flow-status" role="status" hidden></div>
   <div id="graph-flow-canvas" class="flow-canvas"></div>
-  <p id="graph-flow-foot" class="flow-foot"></p>
+  <div id="graph-flow-foot" class="flow-foot"></div>
 </section>`;
 
   const $ = id => doc.getElementById(id);
@@ -58,6 +58,9 @@
   };
   const cycleLabel = cycle => (cycle ? `${Number(cycle) - 1}–${cycle}` : '');
   const possessive = name => (/s$/i.test(name) ? `${name}’` : `${name}’s`);
+  const basisWords = basis => (basis === 'attributed'
+    ? "Attributed estimate: each committee's spending is split by its donors' shares"
+    : "Reported activity: each committee's own spending, not traced to a company");
 
   function graphSelect(name) { return $(`graph-${name}`); }
 
@@ -157,6 +160,8 @@
     if (!state || ticket !== state.ticket) return;
     if (response.status === 409 && ['no_estimate_bundle', 'estimate_not_drawn'].includes(body.reason)) {
       clear();
+      // The line under the heading names the basis asked for, not the flow drawn before it.
+      $('graph-flow-sub').textContent = [basisWords(state.basis), cycleLabel(state.cycle)].filter(Boolean).join(' · ');
       status(body.error, 'Show reported activity');
       return;
     }
@@ -179,11 +184,8 @@
     $('graph-flow-heading').textContent = payload.root.kind === 'industry'
       ? `Where ${String(industry).toLowerCase()} money went, ${steps} steps`
       : `Where ${possessive(payload.root.label)} money came from, and where it went`;
-    const basis = payload.basis === 'attributed'
-      ? "Attributed estimate: each committee's spending is split by its donors' shares"
-      : "Reported activity: each committee's own spending, not traced to a company";
     const through = payload.coverage && payload.coverage.through ? `filings through ${day(payload.coverage.through)}` : '';
-    $('graph-flow-sub').textContent = [basis, cycleLabel(payload.cycle), through].filter(Boolean).join(' · ');
+    $('graph-flow-sub').textContent = [basisWords(payload.basis), cycleLabel(payload.cycle), through].filter(Boolean).join(' · ');
     const reroot = $('graph-flow-reroot');
     reroot.replaceChildren();
     reroot.hidden = !state.stack.length;
@@ -200,13 +202,18 @@
   function draw() {
     const payload = state.payload;
     heading(payload);
-    $('graph-flow-foot').textContent = (payload.notes || []).map(note => note.text).join(' · ');
+    const chartApi = root.MentatFlowChart;
+    // FL7: one footnote line, every note in full under Details; FL10: the heading on one line.
+    chartApi.footnote($('graph-flow-foot'), payload.notes || []);
+    chartApi.fitHeading($('graph-flow-heading'));
     const canvas = $('graph-flow-canvas');
     const top = canvas.getBoundingClientRect().top;
     const height = Math.max(420, Math.min(820, Math.round(root.innerHeight - Math.max(top, 0) - 70)));
     const width = Math.max(640, Math.floor(canvas.clientWidth || 1100));
     if (state.chart) state.chart.destroy();
-    state.chart = root.MentatFlowChart.mount(canvas, payload, {width, height, ribbons: state.ribbons,
+    // FL1/FL2: bars to scale in any height (the plot grows before a label is dropped), ribbons at 28%.
+    state.chart = chartApi.mount(canvas, payload, {width, height, grow: true, opacity: chartApi.VIEW_OPACITY,
+      ribbons: state.ribbons,
       title: $('graph-flow-heading').textContent,
       onReroot: committee => {
         state.stack.push({committee: state.committee, label: payload.root.kind === 'industry'

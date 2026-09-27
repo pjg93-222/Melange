@@ -23,29 +23,44 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 .flow-badge:empty { display: none; }
 .flow-back { flex: none; }
 
-.flow-controls { display: flex; align-items: flex-end; gap: 22px; flex-wrap: wrap; padding: 14px 18px; }
-.flow-control { display: grid; gap: 6px; min-width: 150px; color: #4c4459; font: 500 13px/1 var(--font-sans); }
-.flow-control--cycle { min-width: 170px; }
-.flow-control select { height: 36px; min-width: 100%; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px;
-  background: white; color: var(--acu-plum); font: 500 14px/1 var(--font-sans); }
-.flow-controls .segmented { height: 36px; }
-.flow-controls .segmented > button { padding: 0 16px; font-size: 14px; }
+/* Lane F2a (FL9): the controls at the boards' density, in one row from 1280 px up (Top and
+   Colour by inline); below that they may wrap. */
+.flow-controls { display: flex; align-items: flex-end; gap: 10px 14px; flex-wrap: wrap; padding: 10px 16px; }
+.flow-control { display: grid; flex: 0 1 auto; gap: 5px; min-width: 0; color: #4c4459; font: 500 12px/1 var(--font-sans); }
+.flow-control--cycle { min-width: 112px; }
+.flow-control select { height: 32px; width: 100%; min-width: 0; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px;
+  background: white; color: var(--acu-plum); font: 500 13px/1 var(--font-sans); }
+.flow-controls .segmented { flex: none; height: 32px; }
+.flow-controls .segmented > button { padding: 0 11px; font-size: 13px; }
+@media (min-width: 1280px) { .flow-controls { flex-wrap: nowrap; } }
 /* Gold once per screen: the selected Flow segment (B19's selected pane view). */
 .flow-views.segmented > [aria-pressed=true] { background: var(--acu-gold); color: var(--acu-plum); font-weight: 600; }
 .flow-basis.segmented > [aria-pressed=true] { background: var(--acu-plum); color: white; }
 
 .flow-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 23%); gap: 14px; align-items: start; }
 .flow-card { min-width: 0; padding: 18px 20px 12px; }
-.flow-heading { margin: 0; color: var(--acu-plum); font: 600 30px/1.15 var(--font-serif); }
-.flow-sub { margin: 6px 0 0; color: var(--muted); font: 400 15px/1.35 var(--font-sans); }
+/* FL10: one line; flow-chart.js fitHeading steps a long title down to 20px, then ends it with an
+   ellipsis and puts the full words in its title. */
+.flow-heading { margin: 0; overflow: hidden; color: var(--acu-plum); font: 600 28px/1.2 var(--font-serif);
+  white-space: nowrap; text-overflow: ellipsis; }
+.flow-sub { margin: 6px 0 0; color: var(--muted); font: 400 13.5px/1.35 var(--font-sans); }
 .flow-reroot { margin: 8px 0 0; color: #4c4459; font: 400 13px/1.3 var(--font-sans); }
 .flow-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0 0; padding: 12px 14px;
   border: 1px solid var(--line); border-radius: 8px; background: #fbf8f5; color: #3c3449; font: 400 14px/1.4 var(--font-sans); }
 .flow-status[hidden] { display: none; }
 .flow-canvas { position: relative; min-width: 0; margin-top: 10px; }
-.flow-foot { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted);
-  font: 400 12px/1.45 var(--font-sans); }
+/* FL7: one footnote line, board style, with a Details disclosure listing every note in full. */
+.flow-foot { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px;
+  margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--line); color: var(--muted);
+  font: 400 11.5px/1.45 var(--font-sans); }
 .flow-foot:empty { display: none; }
+.flow-foot-line { min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.flow-foot-toggle { height: auto; min-height: 0; padding: 0; border: 0; border-radius: 0; background: none;
+  color: var(--acu-purple); font: 500 11.5px/1.45 var(--font-sans); cursor: pointer; }
+.flow-foot-toggle:hover, .flow-foot-toggle:focus-visible { text-decoration: underline; }
+.flow-foot-toggle[hidden], .flow-foot-list[hidden] { display: none; }
+.flow-foot-list { grid-column: 1 / -1; margin: 6px 0 0; padding-left: 18px; }
+.flow-foot-list li + li { margin-top: 2px; }
 
 .flow-rail { padding: 18px 18px 10px; }
 .flow-rail-title { margin: 0 0 10px; color: var(--acu-plum); font: 600 28px/1.15 var(--font-serif); }
@@ -61,33 +76,38 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 .flow-route-fill--contribution { background: var(--acu-purple); }
 .flow-route-amount { grid-area: amount; color: #2f273f; font: 500 14px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
 
-/* The Sankey. */
+/* The Sankey. Lane F2a: labels beside the bars at 12-13px with no halo (FL3); the ribbons
+   rest at 28% (the views pass it), and a hover dims only the ribbons off the route (FL2, FL4). */
 .flow-chart { display: block; max-width: 100%; height: auto; overflow: visible; }
 .flow-header { fill: #4c4459; font: 600 11px/1 var(--font-sans); letter-spacing: .14em; }
-.flow-label { fill: #2f273f; font: 400 13.5px/1 var(--font-sans); }
+.flow-label { fill: #2f273f; font: 400 13px/1 var(--font-sans); }
 .flow-node--root .flow-label { font-weight: 600; }
-.flow-amount { fill: #6b6376; font: 400 13px/1 var(--font-sans); }
+.flow-amount { fill: #6b6376; font: 400 12px/1 var(--font-sans); }
 .flow-subline { fill: #7f7888; font: 400 11.5px/1 var(--font-sans); }
-.flow-label, .flow-amount, .flow-subline { paint-order: stroke; stroke: #ffffff; stroke-width: 3px;
-  stroke-linejoin: round; }
 .flow-link { transition: fill-opacity .12s ease; }
 .flow-link--unverified { stroke: #83333e; stroke-width: .8; stroke-dasharray: 3 3; }
 .flow-node { cursor: pointer; outline: none; }
 .flow-node--donor, .flow-node--balance { cursor: default; }
 .flow-node:focus-visible .flow-bar { stroke: var(--acu-plum); stroke-width: 2; }
-.flow-chart.is-tracing .flow-link:not(.is-lit) { fill-opacity: .07; }
-.flow-chart.is-tracing .flow-link.is-lit { fill-opacity: .62; }
-.flow-chart.is-tracing .flow-node:not(.is-lit) { opacity: .32; }
-.flow-tooltip { position: absolute; z-index: 5; display: grid; gap: 3px; max-width: 320px; padding: 9px 12px;
-  border: 1px solid var(--line); border-radius: 8px; background: white; box-shadow: 0 6px 18px rgba(52, 38, 73, .14);
-  color: #2f273f; font: 400 12px/1.4 var(--font-sans); pointer-events: auto; }
+.flow-chart.is-tracing .flow-link:not(.is-lit) { fill-opacity: .12; }
+.flow-chart.is-tracing .flow-link.is-lit { fill-opacity: .6; }
+.flow-chart.is-tracing .flow-node:not(.is-lit) text { opacity: .9; }
+/* FL5: compact, 12px; flow-chart.js places it by the hovered point, clear of the headers. */
+.flow-tooltip { position: absolute; z-index: 5; display: grid; gap: 1px; max-width: 300px; padding: 6px 9px;
+  border: 1px solid var(--line); border-radius: 6px; background: white; box-shadow: 0 4px 14px rgba(52, 38, 73, .14);
+  color: #2f273f; font: 400 12px/1.35 var(--font-sans); pointer-events: auto; }
 .flow-tooltip[hidden] { display: none; }
 .flow-tooltip strong { font-weight: 600; }
 .flow-tooltip span:nth-of-type(2) { color: #327a7a; }
 .flow-tooltip a { color: var(--acu-purple); }
 
-/* Chart Studio's Flow mark (board #46): the Stages shelf, the Flow options, the legend. The
-   drawing's text is 18px there (workspace-polish.css), and studio-flow.js measures it so. */
+/* Chart Studio's Flow mark (board #46): the Stages shelf, the Flow options, the legend. Lane
+   F2a: the drawing's text is the board's 13px over the canvas's 18px (workspace-polish.css), and
+   studio-flow.js measures it so. */
+#view-chart-studio .studio-canvas svg.flow-chart .flow-label { font-size: 13px; }
+#view-chart-studio .studio-canvas svg.flow-chart .flow-amount { font-size: 12px; }
+#view-chart-studio .studio-canvas svg.flow-chart .flow-subline { font-size: 11.5px; }
+#view-chart-studio .studio-canvas svg.flow-chart .flow-legend-label { font-size: 12.5px; }
 #view-chart-studio .studio-shelf.studio-shelf--flow-hidden { display: none; }
 #view-chart-studio .studio-shelf:has(> .studio-drop--stages) { height: auto; min-height: 30px; padding-top: 2px;
   padding-bottom: 2px; }
@@ -115,7 +135,7 @@ body[data-view] #view-evidence.flow-open > .evidence-layout { display: none; }
 .studio-flow-note:empty { display: none; }
 
 @media (max-width: 1500px) {
-  .flow-heading { font-size: 26px; }
+  .flow-heading { font-size: 25px; }
   .flow-rail-title { font-size: 24px; }
 }
 @media (max-width: 1100px) {

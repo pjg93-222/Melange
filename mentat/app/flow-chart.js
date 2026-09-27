@@ -13,9 +13,16 @@
  *
  * Ribbon colour: Source | Target | Outcome | Gradient. Gradient is an SVG linearGradient
  * per ribbon, userSpaceOnUse from the source's right edge to the target's left edge: the
- * source colour blends into the target colour. Default opacity 40%. Colours come only
+ * source colour blends into the target colour. Default opacity 40%; the PAC evidence and
+ * Graph views rest at VIEW_OPACITY, 28% (boards #44/#45, lane F2a FL2). Colours come only
  * from MentatTheme.categorical. Pooled money is never coloured by an original donor: a
  * ribbon takes the colour of the committee it leaves (or its outcome), never a donor's.
+ *
+ * Labels (lane F2a): beside the bars, 12-13 px, no halo; each node's label is drawn at the
+ * level of detail the layout chose (flow-layout.js), cut at a word with an ellipsis and an
+ * amount kept whole; every word the drawing leaves out is in the tooltip and the node's
+ * accessible name. The tooltip is compact and sits by the hovered point, flipping so it
+ * never covers the column headers or the title above the drawing.
  *
  * CSP (style-src 'self'): no style attributes and no <style>; presentation attributes and
  * classes only, and the tooltip is placed through the CSSOM.
@@ -29,6 +36,10 @@
     '#a09eea', '#d88766', '#509ecd'];
   const PARTY_RING = {R: '#83333e', D: '#509ecd'};
   const MODES = ['gradient', 'source', 'target', 'outcome'];
+  const VIEW_OPACITY = 0.28;
+  const HEADER_SIZE = 11, HEADER_SPACING = 0.14;     // flow.css .flow-header: 11px, letter-spacing .14em
+  const ELLIPSIS = '…';
+  const MONEY_TAIL = /\s(\$[\d.,]+[MK]?)$/;
 
   const escape = value => String(value == null ? '' : value).replace(/[&<>"']/g, character =>
     ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[character]));
@@ -54,15 +65,57 @@
   const HELD = {bitcoin: 'bitcoin', 'USD coin': 'USD coin', ether: 'ether', tether: 'tether', solana: 'solana', stock: 'stock'};
   const heldWords = kinds => (kinds || []).map(kind => HELD[kind] || kind).join(' and ') || 'donated assets';
 
-  // Text fitted to the room before the next column (MentatTheme.fitText in the page).
+  // Text fitted to the room before the next column (MentatTheme.fitText in the page); the
+  // suffix is kept whole (an amount).
   function fitter(options) {
     const theme = root.MentatTheme;
     if (options.fit) return options.fit;
-    if (theme && typeof theme.fitText === 'function') return (text, width, size) => theme.fitText(text, width, size);
-    return (text, width, size) => {
-      const room = Math.floor(width / (size * 0.56));
-      return String(text).length <= room ? String(text) : String(text).slice(0, Math.max(1, room - 1)).trimEnd() + '\u2026';
+    if (theme && typeof theme.fitText === 'function')
+      return (text, width, size, suffix) => theme.fitText(text, width, size, undefined, suffix);
+    return (text, width, size, suffix) => {
+      const tail = suffix == null ? '' : String(suffix);
+      const room = Math.floor(width / (size * 0.56)) - tail.length;
+      return String(text).length <= room ? String(text) + tail
+        : String(text).slice(0, Math.max(1, room - 1)).trimEnd() + ELLIPSIS + tail;
     };
+  }
+
+  // A text's width in px (MentatTheme.measureText in the page, else the fitter's estimate).
+  function measurer(options) {
+    const theme = root.MentatTheme;
+    if (options.measure) return options.measure;
+    if (theme && typeof theme.measureText === 'function') return (text, size) => theme.measureText(text, size);
+    return (text, size) => String(text).length * size * 0.56;
+  }
+
+  // One line fitted to its room, cut between words with an ellipsis (FL3); a trailing amount
+  // ("Other donors $85.2M") is kept whole, and only a single word too long for the room is cut
+  // inside it, by the fitter, still with an ellipsis.
+  function fitLine(text, room, size, fit, measure) {
+    const value = String(text == null ? '' : text);
+    if (measure(value, size) <= room) return value;
+    const money = MONEY_TAIL.exec(value);
+    const head = money ? value.slice(0, money.index) : value;
+    const tail = money ? ' ' + money[1] : '';
+    const words = head.split(' ');
+    for (let count = words.length - 1; count >= 1; count -= 1) {
+      const shown = words.slice(0, count).join(' ').replace(/[\s,\u00b7:;(]+$/, '') + ELLIPSIS + tail;
+      if (measure(shown, size) <= room) return shown;
+    }
+    return fit(head, room, size, tail);
+  }
+
+  // A column header in the room before the next column, cut between words (its letter-spacing
+  // counted); the full words go in a <title>.
+  function fitHeader(text, room, fit, measure) {
+    const width = value => measure(value, HEADER_SIZE) + HEADER_SPACING * HEADER_SIZE * value.length;
+    if (width(text) <= room) return text;
+    const words = text.split(' ');
+    for (let count = words.length - 1; count >= 1; count -= 1) {
+      const shown = words.slice(0, count).join(' ') + ELLIPSIS;
+      if (width(shown) <= room) return shown;
+    }
+    return fit(text, room / (1 + HEADER_SPACING / 0.56), HEADER_SIZE);
   }
 
   function nodeTitle(node) {
@@ -73,9 +126,8 @@
 
   function prepare(payload, options) {
     const api = layoutApi();
-    const theme = root.MentatTheme;
-    if (!options.wrap && theme && typeof theme.wrapText === 'function')
-      options = Object.assign({}, options, {wrap: (text, width, size) => theme.wrapText(text, width, size)});
+    // The layout wraps names between words with the page's measured widths (FL3).
+    if (!options.measure) options = Object.assign({}, options, {measure: measurer(options)});
     const result = api.layout(payload, options);
     const colours = api.colours(result, options.palette || palette(), options.neutral || NEUTRAL);
     // Chart Studio (#46): a worksheet flow deals its own colours after the palette's
@@ -101,13 +153,15 @@
   /* ----------------------------------------------------------------- markup */
   function svgString(payload, options) {
     options = Object.assign({ribbons: 'gradient', opacity: 0.4, width: 1100, height: 520, headers: true,
-      labelSize: 13.5, subSize: 11.5, labelLine: 16, subLine: 15, amounts: true}, options || {});
+      labelSize: 13, subSize: 11.5, labelLine: 16, subLine: 14, amounts: true}, options || {});
     const mode = MODES.includes(options.ribbons) ? options.ribbons : 'gradient';
     const prefix = String(options.idPrefix || 'flow').replace(/[^A-Za-z0-9_-]/g, '');
     const context = prepare(payload, options);
     const {result, colours, format} = context;
     const fit = fitter(options);
+    const measure = measurer(options);
     const byId = new Map(result.nodes.map(node => [node.id, node]));
+    const labels = nodeMarkup(result, options, {colours, format, fit, measure, prefix});
     const parts = [];
     parts.push(`<svg xmlns="http://www.w3.org/2000/svg" class="flow-chart" viewBox="0 0 ${f(result.width)} ${f(result.height)}"`
       + ` width="${f(result.width)}" height="${f(result.height)}" role="group" aria-label="${escape(options.title || 'Flow of money')}">`);
@@ -128,8 +182,13 @@
     parts.push('</defs>');
     if (options.headers) {
       parts.push('<g class="flow-headers" aria-hidden="true">');
-      for (const column of result.columns)
-        parts.push(`<text class="flow-header" x="${f(column.x)}" y="14">${escape(String(column.label || '').toUpperCase())}</text>`);
+      result.columns.forEach((column, at) => {
+        const words = String(column.label || '').toUpperCase();
+        const next = result.columns[at + 1];
+        const shown = fitHeader(words, (next ? next.x : result.width - 8) - column.x - 12, fit, measure);
+        const text = `<text class="flow-header" x="${f(column.x)}" y="14">${escape(shown)}</text>`;
+        parts.push(shown === words ? text : `<g class="flow-header-cut"><title>${escape(words)}</title>${text}</g>`);
+      });
       parts.push('</g>');
     }
     if (Array.isArray(options.legend) && options.legend.length) {
@@ -140,6 +199,8 @@
       }
       parts.push('</g>');
     }
+    // Labels are drawn over the translucent ribbons as they are, with no halo and no knocked-out
+    // box behind them (boards #44 and #46; a knock-out read as a halo in the round-1 captures).
     parts.push('<g class="flow-links">');
     result.links.forEach((link, index) => {
       const source = byId.get(link.source), target = byId.get(link.target);
@@ -152,6 +213,16 @@
         + ` d="${link.path}" fill="${fill}" fill-opacity="${options.opacity}"/>`);
     });
     parts.push('</g><g class="flow-nodes">');
+    parts.push(...labels.parts);
+    parts.push('</g></svg>');
+    return parts.join('');
+  }
+
+  // Each node's bar and label, the label at the level of detail the layout chose.
+  function nodeMarkup(result, options, tools) {
+    const {colours, format, fit, measure, prefix} = tools;
+    const amountSize = options.amountSize || 12;
+    const parts = [];
     const first = result.columns.flatMap(column => column.ids)[0];
     for (const node of result.nodes) {
       if (node.stub) continue;
@@ -159,34 +230,57 @@
       const hatched = node.kind === 'balance' && ['unspent', 'kept', 'uncounted', 'untraced', 'unreported'].includes(node.balance);
       const height = Math.max(node.y1 - node.y0, 2);
       const label = nodeTitle(node);
-      const aria = `${label}, ${format.full(node.value)}`;
+      // The accessible name says everything the label may leave to the tooltip (FL6).
+      const said = (node.sublines || []).length ? `; ${node.sublines.join('; ')}` : '';
+      const aria = `${label}, ${format.full(node.value)}${said}`;
       parts.push(`<g class="flow-node flow-node--${node.kind}${node.root ? ' flow-node--root' : ''}" data-node="${escape(node.id)}"`
         + ` tabindex="${node.id === first ? 0 : -1}" role="button" aria-label="${escape(aria)}">`);
       parts.push(`<rect class="flow-bar" x="${f(node.x0)}" y="${f(node.y0)}" width="${f(node.x1 - node.x0)}" height="${f(height)}"`
         + ` fill="${hatched ? `url(#${prefix}-hatch)` : colour}"${hatched ? ` stroke="${NEUTRAL}" stroke-width="1"` : ''}/>`);
-      let x = node.x1 + 8;
-      const y = node.label_y + Math.round(options.labelSize * 0.89);
-      if (node.kind === 'candidate' && PARTY_RING[node.party]) {
-        parts.push(`<circle class="flow-party" cx="${f(x + 5)}" cy="${f(y - 4)}" r="4.5" fill="none" stroke="${PARTY_RING[node.party]}"`
-          + ' stroke-width="2"/>');
-        x += 16;
+      const lines = Array.isArray(node.label_text) ? node.label_text : [node.label];
+      if (node.label_level !== 4 && lines.length) {
+        // Beside the bar: to its right, or (the Studio's first column, #46) to its left, right-aligned.
+        const left = node.label_side === 'left';
+        const anchor = left ? ' text-anchor="end"' : '';
+        let x = left ? node.x0 - 8 : node.x1 + 8;
+        const y = node.label_y + Math.round(options.labelSize * 0.89);
+        if (!left && node.kind === 'candidate' && PARTY_RING[node.party]) {
+          parts.push(`<circle class="flow-party" cx="${f(x + 5)}" cy="${f(y - 4)}" r="4.5" fill="none" stroke="${PARTY_RING[node.party]}"`
+            + ' stroke-width="2"/>');
+          x += 16;
+        }
+        const room = (node.label_width || 180) - (left ? 0 : x - node.x1 - 8);
+        // The Studio's Labels toggle takes the amounts off; a Label measure prints its own text.
+        const amount = options.amounts === false ? ''
+          : node.amount_text != null ? String(node.amount_text) : format.short(node.amount ?? node.value);
+        const inline = node.label_amount === 'inline' && amount;
+        lines.forEach((line, at) => {
+          const last = at === lines.length - 1;
+          if (inline && last) {
+            // One line: the name, then its amount beside it.
+            const beside = measure(amount, amountSize) + 6;
+            const shown = fitLine(line, room - beside, options.labelSize, fit, measure);
+            parts.push(`<text class="flow-label" x="${f(x)}" y="${f(y + at * options.labelLine)}"${anchor}>`
+              + `${escape(shown)}<tspan class="flow-amount" dx="6">${escape(amount)}</tspan></text>`);
+          } else {
+            const shown = fitLine(line, room, options.labelSize, fit, measure);
+            parts.push(`<text class="flow-label" x="${f(x)}" y="${f(y + at * options.labelLine)}"${anchor}>${escape(shown)}</text>`);
+          }
+        });
+        let below = y + lines.length * options.labelLine;
+        if (amount && node.label_amount === 'line') {
+          parts.push(`<text class="flow-amount" x="${f(x)}" y="${f(below)}"${anchor}>${escape(amount)}</text>`);
+          below += options.subLine;
+        } else below += options.subLine - options.labelLine;
+        // At most one short line under the label (FL6); the rest is in the tooltip.
+        if (node.subline_shown) {
+          const shown = fitLine(node.subline_shown, room, options.subSize, fit, measure);
+          parts.push(`<text class="flow-subline" x="${f(x)}" y="${f(below)}"${anchor}>${escape(shown)}</text>`);
+        }
       }
-      const room = (node.label_width || 180) - (x - node.x1 - 8);
-      const lines = node.label_text && node.label_text.length ? node.label_text : [node.label];
-      lines.forEach((line, at) => parts.push(`<text class="flow-label" x="${f(x)}" y="${f(y + at * options.labelLine)}">`
-        + `${escape(fit(line, room, options.labelSize))}</text>`));
-      const below = y + lines.length * options.labelLine;
-      // The Studio's Labels toggle takes the amounts off; a Label measure prints its own text.
-      if (options.amounts !== false)
-        parts.push(`<text class="flow-amount" x="${f(x)}" y="${f(below)}">`
-          + `${escape(node.amount_text != null ? node.amount_text : format.short(node.amount ?? node.value))}</text>`);
-      (node.sublines || []).forEach((line, at) =>
-        parts.push(`<text class="flow-subline" x="${f(x)}" y="${f(below + options.labelLine + at * options.subLine)}">`
-          + `${escape(fit(line, room, options.subSize))}</text>`));
       parts.push('</g>');
     }
-    parts.push('</g></svg>');
-    return parts.join('');
+    return {parts};
   }
 
   /* ---------------------------------------------------------------- tooltip */
@@ -243,6 +337,8 @@
     if (node.bucket === 'other') lines.push(`${node.member_count} grouped: ` + (node.members || []).slice(0, 4)
       .map(member => `${member.label} ${short(member.value)}`).join(', ') + (node.member_count > 4 ? ', …' : ''));
     if (node.name_as_filed && node.name_as_filed !== node.label) lines.push(`As filed: ${node.name_as_filed}`);
+    // The lines the drawing leaves off (FL6: one line under a label at most): here, every one.
+    for (const line of node.sublines || []) if (line !== node.subline_shown) lines.push(line);
     for (const line of node.details || []) lines.push(line);
     if (node.unreached) lines.push(`Not collected (${String(node.unreached).replace(/_/g, ' ')}); not traced past it`);
     // Carryover (b), in the measurement's words: the gate the previous cycle's transfers opened.
@@ -288,7 +384,37 @@
       for (const group of svg.querySelectorAll('.flow-node')) group.classList.toggle('is-lit', lit.nodes.has(group.dataset.node));
     }
 
-    function show(target, anchor) {
+    // FL5: the tooltip sits by the hovered point (by a focused node's bar), above it when there
+    // is room below the column headers, else below it; right of it, else left. It never reaches
+    // up over the headers, and the title and subtitle sit above the drawing.
+    function place(anchor, point) {
+      const box = host.getBoundingClientRect();
+      const scrollX = host.scrollLeft || 0, scrollY = host.scrollTop || 0;
+      let x, y, below;
+      if (point) { x = point.x - box.left; y = point.y - box.top; below = 14; }
+      else {
+        const bar = (anchor.querySelector && anchor.querySelector('.flow-bar')) || anchor;
+        const at = bar.getBoundingClientRect();
+        x = at.right - box.left; y = at.top - box.top + Math.min(at.height / 2, 14); below = Math.max(at.height / 2, 8) + 6;
+      }
+      const svg = host.querySelector('svg.flow-chart');
+      const bands = svg ? [...svg.querySelectorAll('.flow-header, .flow-legend-label, .flow-legend-swatch')] : [];
+      const floor = Math.max(4, ...bands.map(item => item.getBoundingClientRect().bottom - box.top + 6));
+      const width = tip.offsetWidth, height = tip.offsetHeight;
+      const room = host.clientWidth || box.width;
+      const bottom = Math.max(host.clientHeight || box.height, floor + height);
+      let top = y - 12 - height;
+      if (top < floor) top = y + below;
+      if (top + height > bottom - 4 && y - 12 - height >= floor) top = y - 12 - height;
+      let left = x + 14;
+      if (left + width > room - 4) left = x - 14 - width;
+      left = Math.max(4, Math.min(left, room - width - 4));
+      tip.style.transform = 'none';
+      tip.style.left = `${Math.round(left + scrollX)}px`;
+      tip.style.top = `${Math.round(Math.max(floor, top) + scrollY)}px`;
+    }
+
+    function show(target, anchor, point) {
       const text = describe(target, state.context, state.payload);
       tip.replaceChildren();
       const title = host.ownerDocument.createElement('strong');
@@ -306,14 +432,10 @@
         tip.appendChild(link);
       }
       tip.hidden = false;
-      const box = host.getBoundingClientRect(), at = anchor.getBoundingClientRect();
-      const left = Math.min(Math.max(8, at.left - box.left + at.width / 2 - 150), Math.max(8, box.width - 316));
-      tip.style.left = `${Math.round(left)}px`;
-      tip.style.top = `${Math.round(Math.max(4, at.top - box.top - 12))}px`;
-      tip.style.transform = 'translateY(-100%)';
+      place(anchor, point);
     }
 
-    function hide() { tip.hidden = true; }
+    function hide() { tip.hidden = true; state.shown = null; }
 
     function targetOf(element) {
       const group = element.closest('.flow-node');
@@ -357,11 +479,18 @@
     const over = event => {
       const target = targetOf(event.target);
       if (!target || (!target.node && !target.link)) return;
-      light(target.node ? target.node.id : target.link.id);
-      show(target, target.element);
+      const id = target.node ? target.node.id : target.link.id;
+      // Moving between a node's bar and its words keeps the tooltip where it is.
+      if (state.shown === id && !tip.hidden) return;
+      light(id);
+      // By the pointer, for a ribbon or a node alike (keyboard focus places it by the bar).
+      show(target, target.element, Number.isFinite(event.clientX) ? {x: event.clientX, y: event.clientY} : null);
+      state.shown = id;
     };
+    // Moving onto the tooltip keeps it (its FEC link can be clicked); leaving it for the page hides it.
     const out = event => {
-      if (event.relatedTarget && host.contains(event.relatedTarget) && targetOf(event.relatedTarget)) return;
+      const next = event.relatedTarget;
+      if (next && host.contains(next) && (targetOf(next) || tip.contains(next))) return;
       light(null); hide();
     };
     const click = event => {
@@ -407,8 +536,87 @@
     };
   }
 
+  /* ------------------------------------------------------------- the foot */
+  // FL7: the notes under a Flow as the boards set them, one grey line, with a Details
+  // disclosure that lists every note in full (F2, F4, F12, pooled money, crypto counted once:
+  // none is dropped). The line ends with an ellipsis where it runs out of room.
+  let footSerial = 0;
+  function footnote(host, notes) {
+    const doc = host.ownerDocument;
+    const texts = (notes || []).map(note => (typeof note === 'string' ? note : (note && note.text) || '')).filter(Boolean);
+    host.replaceChildren();
+    if (!texts.length) return {line: null, toggle: null, list: null};
+    footSerial += 1;
+    const line = doc.createElement('p');
+    line.className = 'flow-foot-line';
+    line.textContent = texts.join(' · ');
+    const list = doc.createElement('ul');
+    list.className = 'flow-foot-list';
+    list.id = `flow-foot-list-${footSerial}`;
+    list.hidden = true;
+    for (const text of texts) {
+      const item = doc.createElement('li');
+      item.textContent = text;
+      list.appendChild(item);
+    }
+    const toggle = doc.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'flow-foot-toggle';
+    toggle.textContent = 'Details';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', list.id);
+    toggle.addEventListener('click', () => {
+      const open = list.hidden;
+      list.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.textContent = open ? 'Hide details' : 'Details';
+    });
+    host.append(line, toggle, list);
+    // One short note that fits needs no disclosure; anything more is listed under Details.
+    toggle.hidden = texts.length < 2 && !(line.scrollWidth > line.clientWidth + 1);
+    return {line, toggle, list};
+  }
+
+  // FL10: a Flow heading on one line: its stylesheet size, stepped down to 20 px while it
+  // overflows, then cut with an ellipsis and the full words in its title. The size is set
+  // through the CSSOM (the console's CSP refuses a style attribute).
+  // Whether a one-line heading's words are wider than its box, to the subpixel (scrollWidth is
+  // rounded, and an overflow of half a pixel is enough for the ellipsis to show).
+  function overflows(element) {
+    const doc = element.ownerDocument;
+    if (doc && typeof doc.createRange === 'function') {
+      const range = doc.createRange();
+      range.selectNodeContents(element);
+      const style = getComputedStyle(element);
+      const room = element.clientWidth - (parseFloat(style.paddingLeft) || 0) - (parseFloat(style.paddingRight) || 0);
+      return range.getBoundingClientRect().width > room - 0.5;
+    }
+    return element.scrollWidth > element.clientWidth;
+  }
+
+  function fitHeading(element, least) {
+    if (!element || typeof getComputedStyle !== 'function') return;
+    element.style.fontSize = '';
+    element.removeAttribute('title');
+    if (!element.clientWidth) return;
+    let size = parseFloat(getComputedStyle(element).fontSize) || 26;
+    const floor = least || 20;
+    while (overflows(element) && size > floor) {
+      size -= 1;
+      element.style.fontSize = `${size}px`;
+    }
+    if (overflows(element)) element.title = element.textContent;
+    // Measured before the serif face arrived, the fit is done again once it has (a heading fitted
+    // in the fallback face overflowed in the real one: round-1 capture, Democrats Serve).
+    const fonts = element.ownerDocument && element.ownerDocument.fonts;
+    if (fonts && fonts.status !== 'loaded' && !element.__flowFitPending) {
+      element.__flowFitPending = true;
+      fonts.ready.then(() => { element.__flowFitPending = false; fitHeading(element, least); });
+    }
+  }
+
   const module_short = short, module_full = full;
-  const api = {svgString, mount, describe, short, full, MODES};
+  const api = {svgString, mount, describe, short, full, footnote, fitHeading, fitLine, MODES, VIEW_OPACITY};
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MentatFlowChart = api;
 })(typeof globalThis === 'undefined' ? this : globalThis);

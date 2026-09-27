@@ -322,3 +322,123 @@ test('colours come from the theme palette only', () => {
   const outcome = flow.outcomes(result, colour);
   assert.equal(outcome.get('committee:C00836221'), palette[0]);   // its largest ribbon lands on a supported candidate
 });
+
+/* ------------------------------------------------ lane F2a: small plots (FL1) */
+// The payload shapes that collapsed at the boards' size (1344x760: a 780 x 420 px chart), and
+// board #44's FAIRSHAKE, which drew and still must.
+const SHAPES = Object.assign({}, require('./flow-shapes.corpus.js'), {fairshake2024: FAIRSHAKE});
+const COLLAPSED = ['slf2022', 'slf2024', 'democrats_serve2024', 'crypto2026'];
+const BOARD = {width: 780, height: 420, top: 0};
+const PLOT = 420 - 34 - 10;
+
+// What FL1 asks of a drawing: one scale above zero, bars their money times that scale, the
+// fullest column's bars at least 35% of the plot, 90% of the money in ribbons 1 px wide or
+// more, and labels that neither meet nor leave the drawing, with none left to the tooltip.
+function smallPlotProblems(result) {
+  const problems = [];
+  const scale = result.scale / 100;
+  if (!(scale > 0)) problems.push('the scale is zero: every bar is drawn at its 2 px floor');
+  const drawn = result.nodes.filter(node => !node.stub);
+  for (const node of drawn)
+    if (Math.abs((node.y1 - node.y0) - Math.max(cents(node.value_in), cents(node.value_out)) * scale) > 1e-6)
+      problems.push(`${node.id} is not its money times the scale`);
+  const bars = result.columns.map(column => column.ids.reduce((sum, id) => sum + nodeOf(result, id).y1 - nodeOf(result, id).y0, 0));
+  if (Math.max(...bars) < 0.35 * PLOT) problems.push(`the fullest column's bars take ${Math.max(...bars).toFixed(1)} of ${PLOT} px`);
+  const ribbons = result.links.filter(link => nodeOf(result, link.target).stub !== 'before_gate');
+  const money = ribbons.reduce((sum, link) => sum + link.cents, 0);
+  const shown = ribbons.filter(link => link.width >= 1).reduce((sum, link) => sum + link.cents, 0);
+  if (shown < 0.9 * money) problems.push(`${(shown / money * 100).toFixed(1)}% of the money is in ribbons 1 px wide or more`);
+  for (const column of result.columns) {
+    const nodes = column.ids.map(id => nodeOf(result, id)).sort((a, b) => a.label_y - b.label_y);
+    for (let at = 1; at < nodes.length; at += 1)
+      if (nodes[at].label_y < nodes[at - 1].label_y + nodes[at - 1].block - 0.01) problems.push(`${nodes[at].id}'s label meets the one above`);
+    for (const node of nodes) if (node.label_y + node.block > result.height + 0.01) problems.push(`${node.id}'s label leaves the drawing`);
+  }
+  if (result.hidden_labels) problems.push(`${result.hidden_labels} label(s) left to the tooltip`);
+  return problems;
+}
+
+test('FL1: at a 420 px plot every bar is to scale and the ribbons show, on the shapes that collapsed', () => {
+  for (const [name, body] of Object.entries(SHAPES)) {
+    const result = flow.layout(body, BOARD);
+    assert.deepEqual(smallPlotProblems(result), [], name);
+    assert.equal(result.height, 420, `${name}: drawn in the plot it was given`);
+    // Proportional bars in one column: heights in the ratio of their money.
+    const column = result.columns.find(item => item.ids.length > 2);
+    const [a, b] = column.ids.map(id => nodeOf(result, id)).filter(node => node.value > 0);
+    close((a.y1 - a.y0) / (b.y1 - b.y0), a.value / b.value, `${name}: ${a.label} to ${b.label}`);
+    // Conservation still holds: a node's ribbons stack to its bar.
+    for (const node of result.nodes.filter(item => !item.stub)) {
+      const out = result.links.filter(link => link.source === node.id);
+      if (out.length) close(out.reduce((sum, link) => sum + link.width, 0), node.value_out * 100 * result.scale / 100, `${name} ${node.id} out`);
+    }
+  }
+});
+
+test('FL1 negative control: with the bars’ floor off (labels first, the rule before 2026-09-26) the same shapes fail', () => {
+  for (const name of COLLAPSED) {
+    const problems = smallPlotProblems(flow.layout(SHAPES[name], Object.assign({barShare: 0}, BOARD)));
+    assert.ok(problems.length, `${name}: the checks have teeth`);
+  }
+  for (const name of ['slf2022', 'slf2024', 'democrats_serve2024'])
+    assert.equal(flow.layout(SHAPES[name], Object.assign({barShare: 0}, BOARD)).scale, 0, `${name}: the collapse, reproduced`);
+});
+
+test('FL1: labels shed detail smallest node first, and a scrollable view grows before one is dropped', () => {
+  const result = flow.layout(SHAPES.slf2024, BOARD);
+  const passed = result.columns[2].ids.map(id => nodeOf(result, id));
+  const own = passed.find(node => node.bucket === 'own_ads');
+  assert.equal(own.label_level, 0, 'a bar that holds its label keeps all of it');
+  const shed = passed.filter(node => node.label_level > 0);
+  assert.ok(shed.length, 'the short plot sheds some detail');
+  for (const node of passed) assert.ok(node.label_level < 4, `${node.label} keeps a label`);
+  // Of two labels taller than their bars, the larger node's says at least as much.
+  const overflows = node => node.y1 - node.y0 < node.block;
+  for (const node of passed) for (const other of passed)
+    if (node.value > other.value && overflows(node) && overflows(other))
+      assert.ok(node.label_level <= other.label_level, `${node.label} vs ${other.label}`);
+  // Every node drawn: 40 committees in one column overfill 420 px even at one line each; grow lets it scroll.
+  const tall = flow.layout(SHAPES.slf2024, {width: 780, height: 420, top: 0, grow: true});
+  assert.equal(tall.height, 420, 'Top 8 needs no growth');
+  const many = JSON.parse(JSON.stringify(SHAPES.slf2024));
+  for (let index = 0; index < 40; index += 1) {
+    many.nodes.push({id: `committee:X${index}`, stage: 2, label: `Committee number ${index}`, kind: 'committee', value_in: 1000, value_out: 0});
+    many.links.push({source: 'committee:C00571703', target: `committee:X${index}`, kind: 'transfer', value: 1000, rows: 1});
+  }
+  const cramped = flow.layout(many, BOARD);
+  assert.ok(cramped.hidden_labels > 0, 'a fixed 420 px plot must leave some labels to the tooltip');
+  assert.ok(cramped.scale > 0, 'but never the bars');
+  const grown = flow.layout(many, Object.assign({grow: true}, BOARD));
+  assert.equal(grown.hidden_labels, 0, 'grown, every node keeps a label');
+  assert.ok(grown.height > 420 && grown.height <= 420 + PLOT * 3 + 1, `grown to ${grown.height}`);
+});
+
+test('FL3/FL6: names break between words; one line under a label, every other line kept', () => {
+  const result = flow.layout(SHAPES.slf2024, {width: 1231, height: 712, top: 0});
+  const root = nodeOf(result, 'committee:C00571703');
+  assert.equal(root.sublines.filter(line => line.startsWith('back from ')).length, 3);
+  // The line drawn is the largest addition (what a node holds comes first), word for word.
+  for (const node of result.nodes.filter(item => !item.stub && item.sublines.length)) {
+    assert.ok(node.sublines.includes(node.subline), node.id);
+    if ((node.held || 0) > 0) continue;
+    const amounts = result.stubs.filter(stub => stub.attach === node.id)
+      .filter(stub => node.sublines.includes(`${stub.label} ${flow.short(stub.value)}`)).map(stub => stub.value);
+    if (amounts.length) assert.ok(node.subline.endsWith(flow.short(Math.max(...amounts))), `${node.id}: ${node.subline}`);
+  }
+  const crypto = flow.layout(SHAPES.crypto2026, BOARD);
+  const slfPac = crypto.nodes.find(node => node.label === 'SLF PAC');
+  assert.ok(slfPac.sublines.some(line => /^back from /.test(line)), 'it has a small loop line too');
+  assert.match(slfPac.subline, /^Other donors \$251\.6M$/, 'the largest addition, not the first listed');
+  assert.match(root.subline, /^back from American Crossroads \$1\.3M$/);
+  for (const node of result.nodes.filter(item => !item.stub)) {
+    assert.ok(!node.subline_shown || node.subline_shown === node.subline, node.id);
+    const words = (node.kind === 'candidate' && !node.outcome && node.direction ? `${node.label} · ${node.direction}` : node.label).split(/\s+/);
+    for (const line of node.label_text) for (const word of line.split(/\s+/)) assert.ok(words.includes(word), `${node.id}: "${word}" is a whole word`);
+  }
+  // A name longer than its lines keeps its words: the rest joins the last line (the renderer adds the ellipsis).
+  const long = JSON.parse(JSON.stringify(FIXTURE));
+  long.nodes.find(node => node.id === 'donor:ACME CORP').label = 'The Extraordinarily Long Named Political Action Committee For Testing';
+  const cut = flow.layout(long, {width: 700, height: 560}).nodes.find(node => node.id === 'donor:ACME CORP');
+  assert.equal(cut.label_text.length, 2);
+  assert.equal(cut.label_text.join(' '), 'The Extraordinarily Long Named Political Action Committee For Testing');
+});
