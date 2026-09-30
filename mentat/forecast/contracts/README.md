@@ -114,4 +114,4 @@ the sha256 of the workbook file now published in the report directory.
     `status: unavailable` with a `reason` for industries without a Melange-LDA sector (P&C).
   * Every measure has `status` ready | unavailable (+ `reason`); a consumer never reads numbers from an unavailable block.
 * Cross-field invariants (`contract.py::check_anchor_invariants`): cut dates strictly increasing and ending on `coverage_end`; `to_house_senate` equals the House +
-  Senate parts; `all_recipients` equals its parts; thin-base flags agree with the dollars; `single_pac` agrees with the committee list; partial LDA totals equal their quarters.
+  Senate parts; `all_recipients` equals its parts; thin-base flags agree with the dollars; `single_pac` agrees with the committee list; partial LDA totals equal their quarters. Each industry's anchor cycle (`current_cycle - 2`) has a CPI multiplier (a missing one must never read as 1.0); a ready LDA block carries both series over the same complete years.
