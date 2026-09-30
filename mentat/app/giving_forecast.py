@@ -325,12 +325,14 @@ CONTRACT_DIR = Path(__file__).resolve().parents[1] / 'forecast' / 'contracts'
 SEATS_TEXT = 'Seat forecasts are evidence only ("no signal"); the calculator uses expected control.'
 
 
+@lru_cache(maxsize=1)
 def _contract():
-    import importlib
-    import sys
-    if str(CONTRACT_DIR) not in sys.path:
-        sys.path.insert(0, str(CONTRACT_DIR))
-    return importlib.import_module('contract')
+    """The shared contract module, loaded by path so no other module called `contract` on sys.path can stand in for it."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('giving_forecast_contract', CONTRACT_DIR / 'contract.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def anchor_path():
@@ -544,7 +546,8 @@ def _v2_pac(ctx, assumptions, cycle):
         if block['status'] != 'ready':
             out['measures'].append(measure | dict(status='unavailable', reason=block['reason']))
             continue
-        level = block['cycles'][str(ctx['anchor_cycle'])]['to_house_senate'] if mid == 'pac_to_candidates' else block['cycles'].get(str(ctx['anchor_cycle']))
+        row_a = block['cycles'].get(str(ctx['anchor_cycle']))
+        level = (row_a or {}).get('to_house_senate') if mid == 'pac_to_candidates' else row_a
         if level is None:
             out['measures'].append(measure | dict(status='unavailable', reason='The snapshot has no ' + str(ctx['anchor_cycle']) + ' level for this measure.'))
             continue
