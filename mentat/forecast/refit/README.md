@@ -113,7 +113,7 @@ Rscript run_refit.R --rollback <model_version>
   `WAITING_FOR_DATA` (exit 0, success event, `DATA_REQUEST.md`), never as a failure; the packet lists the gaps.
 * **Gates** (`R/rf_gates.R`): G0 environment, G1 inputs, G2 parity (the parity suite, in the same run), G3 panels, G4 sample adequacy (WARN, capability withheld with a stated reason),
   G5 stability (HOLD), **G6 hard backtest gate: no existing industry's calculator-path leave-one-election-out MAE may exceed the published calculator's (new <= published + 1e-9)** (HOLD),
-  G7 bundle schema and completeness (FAIL), G8 consumer smoke (HOLD until `MENTAT_G8_CMD` names a v2-capable calculator command), G9 beats last-period naive (WARN only).
+  G7 bundle schema and completeness (FAIL), G8 consumer smoke (`tools/g8_consumer_smoke.py`: the console's calculator `mentat/app/giving_forecast.py` loads the staged bundle and projects every offered industry; the command defaults to that script when `mentat/app` sits beside the pipeline, `MENTAT_G8_CMD` overrides it; HOLD when no calculator is reachable, as on a pod snapshot that carries `mentat/forecast` only), G9 beats last-period naive (WARN only).
   Decision: any FAIL, else any HOLD, else PUBLISH.
 * **Publish** (`R/rf_publish.R`): only on PUBLISH. Under the lock (`<runtime>/refit.lock`, stale after 6 h with a dead owner): stage, re-validate and hash-check the bundle, rename it into place as
   `giving-models-v2.json` with its receipt, archive the pair under `<runtime>/published/<model_version>/`, then switch the pointer `giving-models-current.json` atomically. v1 stays where it is;
@@ -127,4 +127,5 @@ Rscript run_refit.R --rollback <model_version>
 ## Not built
 
 The IEM `max_contract_trade_age_days` column (no bundle number depends on it); the `lobby_differenced_controls` evidence regression; an R port of the LobbyView raw builder; the Python
-consumer and the anchor snapshot builder (other lanes). Gate G8 stays HOLD until the v2 calculator exists.
+consumer and the anchor snapshot builder (other lanes). Gate G8 runs the consumer where it is reachable; on the pod it holds (the snapshot has no `mentat/app`), so run the smoke
+locally against the pod-built bundle: `python mentat/forecast/refit/tools/g8_consumer_smoke.py <giving-models-v2.json>` (`tests/test_g8_smoke.py` is its own test).

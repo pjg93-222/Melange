@@ -189,7 +189,7 @@ rf_review_packet <- function(res, dir, b_random = RF$B_RANDOM) {
 # publish = "auto" publishes when every gate allows it (decision PUBLISH); "never" stops at the packet.
 rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id = NULL, runs_dir = rf_runs_dir(), run_tests = TRUE, b_random = RF$B_RANDOM,
                          reg = rf_read_registry(), models = rf_read_models(), manifest = rf_read_manifest(), published_path = NULL, publish_dir = rf_publish_dir(),
-                         consumer_cmd = Sys.getenv("MENTAT_G8_CMD", unset = "")) {
+                         consumer_cmd = rf_g8_default_cmd()) {
   publish <- match.arg(publish)
   started <- rf_now_utc()
   run_id <- run_id %||% paste0("refit-", format(Sys.time(), "%Y%m%dT%H%M%SZ", tz = "UTC"))

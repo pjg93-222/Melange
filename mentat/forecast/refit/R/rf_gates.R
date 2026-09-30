@@ -156,10 +156,21 @@ rf_gate_bundle <- function(bundle, reg, schema_path = rf_schema_default_path()) 
   .rf_gate("G7 bundle", if (length(problems)) "FAIL" else "PASS", if (length(problems)) paste(utils::head(problems, 6), collapse = "; ") else "schema-valid, all numbers finite, every calculator industry has a capability or a reason per model")
 }
 
-# The staged bundle is loaded by the v2-capable calculator: the command in MENTAT_G8_CMD runs with MENTAT_GIVING_MODELS set to the path
-# (for example `python -m pytest mentat/tests/test_giving_forecast.py`); exit status 0 = PASS. Without a command: HOLD.
-rf_gate_consumer <- function(bundle_path, cmd = Sys.getenv("MENTAT_G8_CMD", unset = "")) {
-  if (!nzchar(cmd)) return(.rf_gate("G8 consumer smoke", "HOLD", "no v2-capable calculator configured (MENTAT_G8_CMD unset): HOLD until the v2 calculator exists"))
+# The command that runs the consumer smoke: MENTAT_G8_CMD when set, else the pipeline's own tools/g8_consumer_smoke.py when the console's calculator
+# (mentat/app/giving_forecast.py) is next to the pipeline (a pod snapshot carries mentat/forecast only, so there it is "" and G8 holds).
+rf_g8_default_cmd <- function() {
+  env <- Sys.getenv("MENTAT_G8_CMD", unset = "")
+  if (nzchar(env)) return(env)
+  script <- file.path(rf_home(), "tools", "g8_consumer_smoke.py")
+  app <- file.path(dirname(dirname(rf_home())), "app", "giving_forecast.py")
+  py <- Sys.which("python"); if (!nzchar(py)) py <- Sys.which("python3")
+  if (file.exists(script) && file.exists(app) && nzchar(py)) sprintf("%s %s", shQuote(normalizePath(py, winslash = "/")), shQuote(normalizePath(script, winslash = "/"))) else ""
+}
+
+# The staged bundle is loaded by the v2-capable calculator: the command runs with MENTAT_GIVING_MODELS set to the path (MENTAT_G8_CMD, or the default
+# above: tools/g8_consumer_smoke.py, which loads the bundle through giving_forecast and projects every offered industry); exit status 0 = PASS. Without a command: HOLD.
+rf_gate_consumer <- function(bundle_path, cmd = rf_g8_default_cmd()) {
+  if (!nzchar(cmd)) return(.rf_gate("G8 consumer smoke", "HOLD", "no v2-capable calculator reachable (MENTAT_G8_CMD unset and mentat/app/giving_forecast.py not beside the pipeline): HOLD until the v2 calculator exists"))
   out <- suppressWarnings(system2("bash", c("-c", shQuote(cmd)), env = paste0("MENTAT_GIVING_MODELS=", bundle_path), stdout = TRUE, stderr = TRUE))
   st <- attr(out, "status") %||% 0L
   .rf_gate("G8 consumer smoke", if (st == 0L) "PASS" else "HOLD", sprintf("exit status %d: %s", st, paste(utils::tail(out, 2), collapse = " | ")))
@@ -185,7 +196,7 @@ rf_gate_naive <- function(v) {
 rf_decision <- function(gates) if (any(gates$status == "FAIL")) "FAIL" else if (any(gates$status == "HOLD")) "HOLD" else "PUBLISH"
 
 # All gates of a refit. `base` = data.frame of G0-G3 (from the run). -> list(gates, g4, g5, g6)
-rf_gates <- function(v, bundle, published = NULL, base = NULL, bundle_path = NULL, consumer_cmd = Sys.getenv("MENTAT_G8_CMD", unset = "")) {
+rf_gates <- function(v, bundle, published = NULL, base = NULL, bundle_path = NULL, consumer_cmd = rf_g8_default_cmd()) {
   g4 <- v$adequacy %||% rf_gate_adequacy(v$ctx)
   g5 <- rf_gate_stability(v, bundle, published)
   g6 <- rf_gate_nondegradation(v, published)

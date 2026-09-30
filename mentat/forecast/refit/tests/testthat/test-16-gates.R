@@ -138,3 +138,13 @@ test_that("all gates of today's refit: HOLD because G6 (House banks, previous-cy
   expect_identical(b2$gates$decision, "HOLD")
   expect_identical(rf_validate_bundle(b2), character(0))
 })
+
+test_that("the default G8 command is MENTAT_G8_CMD when set, else the smoke script when the console's calculator sits beside the pipeline", {
+  withr_env <- Sys.getenv("MENTAT_G8_CMD", unset = NA)
+  on.exit(if (is.na(withr_env)) Sys.unsetenv("MENTAT_G8_CMD") else Sys.setenv(MENTAT_G8_CMD = withr_env), add = TRUE)
+  Sys.setenv(MENTAT_G8_CMD = "exit 0"); expect_identical(rf_g8_default_cmd(), "exit 0")
+  Sys.unsetenv("MENTAT_G8_CMD")
+  app <- file.path(dirname(dirname(rf_home())), "app", "giving_forecast.py")
+  if (file.exists(app) && nzchar(Sys.which("python"))) expect_match(rf_g8_default_cmd(), "g8_consumer_smoke.py", fixed = TRUE)
+  else expect_identical(rf_g8_default_cmd(), "")        # a pod snapshot carries mentat/forecast only: G8 holds there, with the reason stated
+})
