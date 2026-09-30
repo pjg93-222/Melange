@@ -289,7 +289,7 @@ fi_os_fetch_run <- function(plan, cfg, frozen_codes, frt = fi_frt_dir(), transpo
         if (cls$kind == "retry") { halt("block", paste0(cls$reason, "_after_retry"), cur, r); return(res) }
         if (cls$kind == "redirect") {
           loc <- r$headers[["location"]] %||% ""
-          target <- if (grepl("^https?://", loc)) loc else if (startsWith(loc, "/")) paste0(FI_OS_BASE, loc) else ""
+          target <- if (grepl("^https?://", loc)) loc else if (startsWith(loc, "//")) "" else if (startsWith(loc, "/")) paste0(FI_OS_BASE, loc) else ""   # "//host/x" names another host
           if (!nzchar(target) || !startsWith(target, paste0(FI_OS_BASE, "/"))) { halt("block", "redirect_off_site", cur, r); return(res) }
           if (grepl("login|sign[_-]?in|/users/|/account", sub("^https?://[^/]+", "", target), ignore.case = TRUE)) { halt("block", "redirect_to_login", cur, r); return(res) }
           hops <- hops + 1L

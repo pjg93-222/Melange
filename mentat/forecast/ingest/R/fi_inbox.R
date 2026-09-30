@@ -15,7 +15,7 @@ fi_classify_file <- function(path) {
     return(if ("xl/workbook.xml" %in% members) "xlsx" else "zip")
   }
   if (any(head == as.raw(0L))) return("unsupported")
-  txt <- tolower(rawToChar(head[head != as.raw(0L)]))
+  txt <- tolower(iconv(rawToChar(head[head != as.raw(0L)]), from = "latin1", to = "UTF-8", sub = "byte"))   # bulk files are Latin-1
   if (grepl("<html|<!doctype html|<table", txt)) return("html")
   "text"
 }

@@ -202,9 +202,9 @@ fi_os_write_envelope <- function(env, path) rf_write_json_atomic(env, path)
 
 # Tidy rows of an envelope (FEEDS_SPEC 7.2). Each returns a data.frame (possibly zero rows).
 fi_os_tidy_totals <- function(env, industry_id) {
-  tb <- Filter(function(t) length(t$rows) > 0L && identical(unlist(t$rows[[1]])[1], "Election Cycle"), env$tables)
+  tb <- Filter(function(t) length(t$rows) > 0L && identical(as.character(unlist(t$rows[[1]]))[1], "Election Cycle"), env$tables)
   if (!length(tb)) return(NULL)
-  m <- do.call(rbind, lapply(tb[[1]]$rows[-1], function(r) unlist(r)[1:9]))
+  m <- do.call(rbind, lapply(tb[[1]]$rows[-1], function(r) as.character(unlist(r))[1:9]))
   a <- apply(m[, 2:7, drop = FALSE], 2, rf_money_int)
   data.frame(industry_id = industry_id, os_code = env$os_code, cycle = as.integer(m[, 1]), total = a[, 1], individuals = a[, 2], pacs = a[, 3],
              outside = a[, 4], democrats = a[, 5], republicans = a[, 6], pct_dem = fi_num(sub("%", "", m[, 8], fixed = TRUE)),
@@ -217,7 +217,7 @@ fi_os_tidy_candidates <- function(env, industry_id) {
   chamber <- switch(env$kind, candidates_H = "H", candidates_S = "S", presidential = "P")
   rows <- env$source_tables[[1]]$rows[-1]
   if (!length(rows)) return(NULL)
-  m <- do.call(rbind, lapply(rows, unlist))
+  m <- do.call(rbind, lapply(rows, function(r) as.character(unlist(r))))
   if (chamber == "P") {
     label <- m[, 2]; state <- NA_character_; amt <- rf_money_int(m[, 4])
   } else {

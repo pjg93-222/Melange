@@ -74,7 +74,8 @@ fi_os_calibrate <- function(dir, feeds, cycles = seq(2012L, 2024L, 2L), roots = 
     ok_all <- TRUE
     for (cd in codes) {
       pg <- pages[[cd]]
-      if (is.null(pg$totals)) next
+      # the frozen captures are the only yardstick: a missing one is an error, never a silent pass
+      if (is.null(pg$totals)) stop("fi_os_calibrate: the frozen totals capture of calibration code ", cd, " is missing; calibration cannot run", call. = FALSE)
       cyc <- intersect(cycles, pg$totals$cycle)
       b <- build(dir, cd, rc, cyc, industry_id = cd)
       bt <- if (is.null(b$totals)) data.frame(cycle = integer(), pac = numeric()) else data.frame(cycle = b$totals$cycle, pac = b$totals$pacs)

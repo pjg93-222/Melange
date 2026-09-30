@@ -113,3 +113,12 @@ test_that("a full ibisworld run leaves every inbox file byte-identical and in pl
   expect_length(chk, 1L)
   expect_equal(chk[[1]]$failures, 0L)
 })
+
+test_that("Latin-1 text (the bulk-data encoding) classifies as text, and saved HTML as html", {
+  d <- local_ingest_env()
+  p <- file.path(d$root, "pacs24.txt"); write_latin1(p, c("|2024|,|Caf\u00e9 Co|,500"))
+  expect_equal(fi_classify_file(p), "text")
+  h <- file.path(d$root, "page.dat"); writeLines("<!DOCTYPE html><html><body><table></table></body></html>", h)
+  expect_equal(fi_classify_file(h), "html")
+  expect_equal(fi_classify_file(file.path(d$root, "missing.bin")), "unsupported")
+})
