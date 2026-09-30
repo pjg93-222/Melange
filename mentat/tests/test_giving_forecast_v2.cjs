@@ -134,6 +134,55 @@ test('a share shows both bases side by side with the pp change, both intervals a
   assert.match(all, /Materiality test toward the expected advantaged party: Democrats/);
 });
 
+test('each chamber\'s share names its anchor and the recorded reason: same phase for House, previous cycle for Senate', () => {
+  const {t} = session();
+  const run = DATA.runs.banks_same_phase_house;
+  const house = flat(t.shareCellV2(run.horizons[0].shares.House, true, 'House'));
+  assert.match(house, /\[gf-detail\] Anchor: Mentat 2021–2022 \(same phase\)\./);
+  assert.match(house, /\[gf-detail\] same_phase chosen: its MAE is 20% \(LOEO\) and 30% \(chronological\) below previous_cycle/);
+  assert.match(house, /2021–2022 Mentat share 38\.75% → 48\.59% \(\+9\.84 pp\)/);               // the share follows the anchor, not "previous"
+  assert.match(house, /2021–2022 House control input: 86\.09 \(the value the model was fitted on for that cycle\)/);
+  assert.doesNotMatch(house, /2023–2024|polymarket|days of the/);
+  const next = flat(t.shareCellV2(run.horizons[1].shares.House, false, 'House'));
+  assert.match(next, /Anchor: Mentat 2023–2024 \(same phase\)\./);
+  assert.match(next, /2024 House control input: 44\.92 \(polymarket January–June, 131\/182 days\)/);
+  const senate = flat(t.shareCellV2(run.horizons[0].shares.Senate, true, 'Senate'));
+  assert.match(senate, /\[gf-detail\] Anchor: Mentat 2023–2024 \(previous cycle\)\./);
+  assert.match(senate, /previous_cycle kept: same_phase does not beat it by 5% in every design/);
+  assert.match(senate, /2023–2024 Mentat share/);
+  assert.doesNotMatch(senate, /same phase\)/);
+});
+
+test('a previous-cycle share names its anchor too, also before the inputs are entered; a withheld share does not', () => {
+  const {t} = session();
+  assert.match(flat(t.shareCellV2(horizon('banks', 0).shares.House, true, 'House')), /Anchor: Mentat 2023–2024 \(previous cycle\)\./);
+  assert.match(flat(t.shareCellV2(horizon('banks', 1).shares.House, false, 'House')), /Anchor: Mentat 2023–2024 \(previous cycle\)\./);
+  const blank = flat(t.shareCellV2(horizon('banks_blank', 0).shares.House, true, 'House'));
+  assert.match(blank, /Enter House current-control assumption, House control score\.\n\[gf-detail\] Anchor: Mentat 2023–2024 \(previous cycle\)\./);
+  assert.doesNotMatch(flat(t.shareCellV2(horizon('property_casualty', 0).shares.House, true, 'House')), /Anchor:/);
+});
+
+test('the coverage note says each candidate mix names its own anchor only when one uses the same phase', () => {
+  const same = session();
+  same.t.render(DATA.runs.banks_same_phase_house);
+  assert.match(flat(same.els['gf-results']), /Anchor cycle 2023–2024\. Each candidate mix names its own anchor\./);
+  const prev = session();
+  prev.t.render(DATA.runs.banks);
+  assert.doesNotMatch(flat(prev.els['gf-results']), /names its own anchor/);
+});
+
+test('the historical example says which candidate mix does not reduce to the Mentat level', () => {
+  const {t, els} = session();
+  const catalog = JSON.parse(JSON.stringify(DATA.catalog));
+  t.buildInputs();
+  t.historicalExample();
+  assert.match(els['gf-status'].textContent, /so the projection equals the Mentat level\. Change them/);
+  catalog.share_models.control_House.anchors.commercial_banks.anchor = 'same_phase';
+  t.setCatalog(catalog);
+  t.historicalExample();
+  assert.match(els['gf-status'].textContent, /equals the Mentat level \(except the 2026 House candidate mix, anchored on Mentat 2021–2022, the cycle of the same phase\)\./);
+});
+
 test('thin bases are flagged per basis and budget_inconsistent is flagged, not clipped', () => {
   const {t} = session('credit_unions');
   const house = flat(t.shareCellV2(horizon('credit_unions', 0).shares.House, true, 'House'));

@@ -386,12 +386,19 @@
     if (b.observed) detail(col, `Observed through ${b.observed.through}: R ${money(b.observed.R)} · D ${money(b.observed.D)}.`);
     return col;
   }
+  // The share anchor the model package chose for this industry and chamber (previous cycle or same phase), with its recorded reason.
+  function anchorLine(cell, s) {
+    if (!s.anchor_label || s.status === 'withheld') return;
+    detail(cell, `Anchor: ${s.anchor_label}.`);
+    if (s.anchor_reason) detail(cell, s.anchor_reason);
+  }
   function shareCellV2(s, current, chamber) {
     const cell = node('td');
-    if (s.status !== 'ready') { detail(cell, s.reason || 'Enter the control inputs.'); detail(cell, slopeText({label: s.slope_label}, s.ordinary_p)); return cell; }
+    if (s.status !== 'ready') { detail(cell, s.reason || 'Enter the control inputs.'); anchorLine(cell, s); detail(cell, slopeText({label: s.slope_label}, s.ordinary_p)); return cell; }
     cell.append(pair(s.bases.map(b => basisColumn(b, s, current, chamber))));
+    anchorLine(cell, s);
     const input = s.anchor_input;
-    detail(cell, `${period(s.anchor_cycle)} ${chamber} control input: ${number(input.p_rep * 100)} (${input.market} January–June, ${input.days}/${input.expected_days} days).`);
+    detail(cell, `${period(s.anchor_cycle)} ${chamber} control input: ${number(input.p_rep * 100)} (${input.source === 'model_history' ? 'the value the model was fitted on for that cycle' : `${input.market} January–June, ${input.days}/${input.expected_days} days`}).`);
     if (input.partial_window) flag(cell, `${input.days}/${input.expected_days} days of the ${s.anchor_cycle} window exist (from ${input.first_day}). ${input.note || ''}`);
     detail(cell, `Change in R share: ${signed(s.change_pp)} pp on each basis. Political-input change alone: ${signed(s.political_change_pp)} pp; ${s.slope_label} ordinary p = ${pvalue(s.ordinary_p)}.`);
     detail(cell, `Political-effect interval: ${signed(s.political_low_pp)} to ${signed(s.political_high_pp)} pp.`);
@@ -456,7 +463,7 @@
     }
     table.append(body); wrap.append(table); section.append(wrap);
     const a = data.anchors;
-    section.append(node('p', `Mentat anchors: ${a.dataset} (${a.workbook}), collected ${a.collection_date}; observed through ${a.coverage_end}${a.coverage_reason ? ' (cut back from ' + a.rule_coverage_end + ': ' + a.coverage_reason + ')' : ''}; the remainder starts the next day. Anchor cycle ${period(a.anchor_cycle)}.`, 'gf-notice'));
+    section.append(node('p', `Mentat anchors: ${a.dataset} (${a.workbook}), collected ${a.collection_date}; observed through ${a.coverage_end}${a.coverage_reason ? ' (cut back from ' + a.rule_coverage_end + ': ' + a.coverage_reason + ')' : ''}; the remainder starts the next day. Anchor cycle ${period(a.anchor_cycle)}.${data.horizons.some(h => chambers.some(c => h.shares[c] && h.shares[c].anchor === 'same_phase')) ? ' Each candidate mix names its own anchor.' : ''}`, 'gf-notice'));
     for (const text of a.flags) section.append(node('p', text, 'gf-notice'));
     section.append(node('p', `Assumptions: ${data.assumption_source}. Dated ${data.assumption_date}; giving cutoff ${data.as_of}.`, 'gf-notice'));
     for (const text of data.notices) section.append(node('p', text, 'gf-notice'));
@@ -510,7 +517,9 @@
       if (inputs) for (const chamber of chambers) { $(`gf-${end}-${chamber}-political`).value = inputs[chamber].p_rep * 100; $(`gf-${end}-${chamber}-majority`).value = inputs.current_control[chamber]; }
     }
     $('gf-source').value = 'Anchor-cycle growth and control example (no change from the Mentat previous cycle); not current expectations.'; $('gf-source-date').value = $('gf-date').value;
-    message('Anchor-cycle values loaded as an example: growth and control as in ' + period(anchorCycle) + ', so the projection equals the Mentat level. Change them to explore.');
+    const samePhase = chambers.filter(chamber => catalog.share_models['control_' + chamber]?.anchors?.[sector.id]?.anchor === 'same_phase');
+    message('Anchor-cycle values loaded as an example: growth and control as in ' + period(anchorCycle) + ', so the projection equals the Mentat level' +
+            (samePhase.length ? ' (except the ' + current + ' ' + samePhase.join(' and ') + ' candidate mix, anchored on Mentat ' + period(current - 4) + ', the cycle of the same phase)' : '') + '. Change them to explore.');
   }
   function savedOutlookV2() {
     const snapshot = catalog.saved_outlook, current = cycle();
