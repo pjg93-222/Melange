@@ -172,6 +172,52 @@ def apply_mutation(document, mutation):
     return out
 
 
+# --- model bundle invariants (cross-field rules a schema cannot express) ---------------------------------------------------
+def check_model_invariants(bundle, tolerance=1e-9):
+    """Cross-field rules of a schema-valid model bundle (the anchor auto-pick of owner ruling 2026-09-30). Returns a list of problems (empty = consistent).
+
+    * every industry with the control capability has an `anchors` entry in each share model, and every entry names a known industry;
+    * `prediction.industries[id]` repeats the residual block of the anchor the entry chose (the consumer reads only that block);
+    * `same_phase_gain` is 1 - MAE(same_phase) / MAE(previous_cycle) per design;
+    * the choice follows the rule: same_phase only when it beats previous_cycle by `min_gain` in every design (and previous_cycle otherwise).
+    """
+    problems = []
+    for model_id, model in bundle['share_models'].items():
+        anchors, chosen_blocks = model['anchors'], model['prediction']['industries']
+        for ident, industry in bundle['industries'].items():
+            if industry['capabilities']['control'] and ident not in anchors:
+                problems.append('share_models.' + model_id + '.anchors: no entry for ' + ident + ', which has the control capability')
+        for ident, entry in anchors.items():
+            tag = 'share_models.' + model_id + '.anchors.' + ident
+            if ident not in bundle['industries']:
+                problems.append(tag + ': not an industry of the bundle')
+                continue
+            block = entry['prediction'][entry['anchor']]
+            if chosen_blocks.get(ident) is None:
+                problems.append(tag + ': no prediction.industries block for the chosen anchor')
+            else:
+                for key in ('sigma2', 'pairs', 'df', 'critical_95'):
+                    if abs(chosen_blocks[ident][key] - block[key]) > tolerance * max(1.0, abs(block[key])):
+                        problems.append(tag + ': prediction.industries[' + ident + '].' + key + ' is not the ' + entry['anchor'] + ' block')
+            back, gains = entry['backtest'], entry['backtest']['same_phase_gain']
+            for design in ('loeo', 'chrono'):
+                prev, same = back['previous_cycle'][design + '_mae'], back['same_phase'][design + '_mae']
+                expected = None if prev is None or same is None or prev <= 0 else 1 - same / prev
+                if (expected is None) != (gains[design] is None) or (expected is not None and abs(expected - gains[design]) > 1e-6):
+                    problems.append(tag + ': same_phase_gain.' + design + ' does not follow from the two MAEs')
+            wins = all(gains[d] is not None and gains[d] >= entry['min_gain'] - 1e-12 for d in ('loeo', 'chrono'))
+            if entry['anchor'] == 'same_phase' and not wins:
+                problems.append(tag + ': same_phase chosen without beating previous_cycle by min_gain in every design')
+            if entry['anchor'] == 'previous_cycle' and wins:
+                problems.append(tag + ': previous_cycle kept although same_phase beats it by min_gain in every design')
+    return problems
+
+
+def validate_model(instance):
+    """Schema problems of a model bundle, else its cross-field problems."""
+    return validate_kind(instance, 'models') or check_model_invariants(instance)
+
+
 # --- anchor snapshot invariants (cross-field rules a schema cannot express) ----------------------------------------------
 def _sum_dr(block):
     return sum(block[k] for k in ('D', 'R', 'other'))

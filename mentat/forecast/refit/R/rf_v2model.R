@@ -105,15 +105,17 @@ rf_share_change <- function(block, dx) {
   c(pp = pp, coef_low = pp - ch, coef_high = pp + ch, pred_low = pp - ph[1], pred_high = pp + ph[2])
 }
 
-# Anchored-step residual of a share model under the previous-cycle anchor (pairs (t-2, t) of every industry), pooled slope.
-rf_share_prediction <- function(spec) {
+# Anchored-step residual of a share model, pooled slope. anchor = "previous_cycle" (pairs (t-2, t) of every industry; the default anchor) or
+# "same_phase_strict" (pairs (t-4, t): the calculator's same-phase anchor is always a full four years back).
+rf_share_prediction <- function(spec, anchor = c("previous_cycle", "same_phase_strict")) {
+  anchor <- match.arg(anchor)
   d <- spec$d
   d$sector <- factor(d$sector)
   pp <- rf_partial_pool(spec, d)
   slopes <- stats::setNames(rep(pp$pooled$beta, nlevels(d$sector)), levels(d$sector))
   fo <- rf_offset_fit(d, spec, slopes)
-  sg <- rf_step_sigma2(spec, d, slopes, fo, anchor = "previous_cycle")
-  list(method = "anchored_step_residual", anchor = "previous_cycle", sigma2 = sg$sigma2, pairs = sg$pairs, df = sg$df, critical_95 = sg$critical_95)
+  sg <- rf_step_sigma2(spec, d, slopes, fo, anchor = anchor)
+  list(method = "anchored_step_residual", anchor = anchor, sigma2 = sg$sigma2, pairs = sg$pairs, df = sg$df, critical_95 = sg$critical_95)
 }
 
 # ---- lobbying: the log refit ---------------------------------------------------------------------------------------------------

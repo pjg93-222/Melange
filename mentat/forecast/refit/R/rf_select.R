@@ -83,3 +83,69 @@ rf_selection_table <- function(selections) {
     t
   }))
 }
+
+# ---- anchor auto-pick (owner ruling 2026-09-30) ------------------------------------------------------------------------------------------
+#
+# The share models carry their change from Mentat's previous cycle by default. For each share model x industry x chamber the previous-cycle
+# anchor is backtested against the same-phase anchor (no leakage, both designs, the slope rule the auto-pick chose for that chamber) and the
+# default is replaced only when same-phase beats it by at least RF$RULE_MIN_GAIN (5%) in EVERY design. Ties and folds whose same-phase
+# reference falls back to the previous cycle (no cycle four years earlier) count as they are: identical predictions, identical errors.
+# The slope rule is chosen first (under the default anchor); the anchor second (under that rule).
+RF_ANCHORS <- c("previous_cycle", "same_phase")
+RF_ANCHOR_PATH <- c(previous_cycle = "prevchg", same_phase = "calc")       # the backtest path of each anchor
+
+# prev / same: MAE under the previous-cycle / same-phase anchor, named by design. -> list(anchor, gain, wins, reason)
+rf_choose_anchor <- function(prev, same, min_gain = RF$RULE_MIN_GAIN, tol = RF$RULE_TIE_TOL) {
+  designs <- names(prev)
+  gain <- stats::setNames(ifelse(is.finite(prev) & prev > 0 & is.finite(same), 1 - same / prev, NA_real_), designs)
+  wins <- stats::setNames(!is.na(gain) & same < prev - tol & same <= prev * (1 - min_gain) + tol, designs)
+  fmt <- function(ds) if (is.na(gain[[ds]])) sprintf("%s n/a", ds) else sprintf("%s %+.1f%%", ds, 100 * gain[[ds]])
+  what <- paste(vapply(designs, fmt, ""), collapse = ", ")
+  if (length(wins) && all(wins)) {
+    return(list(anchor = "same_phase", gain = gain, wins = wins,
+                reason = sprintf("same_phase beats previous_cycle by %g%% or more in every design (%s)", 100 * min_gain, what)))
+  }
+  list(anchor = "previous_cycle", gain = gain, wins = wins,
+       reason = sprintf("previous_cycle kept: same_phase does not beat it by %g%% in every design (%s; positive = same_phase better)", 100 * min_gain, what))
+}
+
+# Per-industry count of backtest rows (n_<industry>) of a cell.
+.rf_cell_n <- function(bt, term, base, design, path, rule) {
+  r <- bt[bt$term == term & bt$base == base & bt$design == design & bt$path == path & bt$rule == rule, ]
+  if (!nrow(r)) return(integer())
+  cols <- grep("^n_", names(r), value = TRUE)
+  stats::setNames(as.integer(unlist(r[1, cols])), sub("^n_", "", cols))
+}
+
+# The anchor of every share model x industry. `bt` = the backtest cells (rf_backtest_metrics rows of both designs, both paths, control
+# models "selected" base), `selection` = rf_select_rules() output (the rule per chamber), `sectors` = industries of the share panels.
+# -> list(entries = list(control_House = list(<industry> = entry), ...), table = one row per chamber x industry x design)
+rf_select_anchors <- function(bt, selection, sectors, min_gain = RF$RULE_MIN_GAIN, designs = c("loeo", "chrono")) {
+  entries <- list(); rows <- list()
+  for (id in c("control_House", "control_Senate")) {
+    rule <- selection[[id]]$reported_rule
+    mae <- function(ds, anchor) .rf_cell_mae(bt, id, "selected", ds, RF_ANCHOR_PATH[[anchor]], rule)
+    cnt <- function(ds, anchor) .rf_cell_n(bt, id, "selected", ds, RF_ANCHOR_PATH[[anchor]], rule)
+    entries[[id]] <- list()
+    for (s in sectors[[id]]) {
+      pick <- function(anchor) stats::setNames(vapply(designs, function(ds) { m <- mae(ds, anchor); if (s %in% names(m)) unname(m[[s]]) else NA_real_ }, 0), designs)
+      npick <- function(anchor) stats::setNames(vapply(designs, function(ds) { m <- cnt(ds, anchor); if (s %in% names(m)) unname(m[[s]]) else 0L }, 0L), designs)
+      prev <- pick("previous_cycle"); same <- pick("same_phase")
+      ch <- rf_choose_anchor(prev, same, min_gain)
+      entries[[id]][[s]] <- list(anchor = ch$anchor, rule = rule, reason = ch$reason, gain = ch$gain, wins = ch$wins, min_gain = min_gain,
+                                 mae = list(previous_cycle = prev, same_phase = same), n = list(previous_cycle = npick("previous_cycle"), same_phase = npick("same_phase")))
+      for (ds in designs) rows[[length(rows) + 1L]] <- data.frame(term = id, industry = s, rule = rule, design = ds, n = npick("previous_cycle")[[ds]],
+        MAE_previous_cycle = prev[[ds]], MAE_same_phase = same[[ds]], same_phase_gain = ch$gain[[ds]], beats_margin = ch$wins[[ds]], choice = ch$anchor, stringsAsFactors = FALSE)
+    }
+  }
+  list(entries = entries, table = do.call(rbind, rows))
+}
+
+# The backtest path the calculator follows for one industry of a share model, given the anchor entries.
+rf_anchor_path_of <- function(anchors, id, industry) RF_ANCHOR_PATH[[anchors$entries[[id]][[industry]]$anchor %||% "previous_cycle"]]
+
+# Per-industry MAE of a share model's calculator path under each industry's chosen anchor (named numeric by industry).
+rf_chosen_anchor_mae <- function(bt, anchors, id, design, rule, base = "selected") {
+  sectors <- names(anchors$entries[[id]])
+  stats::setNames(vapply(sectors, function(s) { m <- .rf_cell_mae(bt, id, base, design, rf_anchor_path_of(anchors, id, s), rule); if (s %in% names(m)) unname(m[[s]]) else NA_real_ }, 0), sectors)
+}

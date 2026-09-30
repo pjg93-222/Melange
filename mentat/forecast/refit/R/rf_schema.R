@@ -83,9 +83,41 @@ rf_schema_check <- function(x, node, root, path = "$") {
 rf_canonical_json <- function(b) jsonlite::fromJSON(as.character(jsonlite::toJSON(b, auto_unbox = TRUE, digits = NA, null = "null", na = "null")), simplifyVector = FALSE)
 
 # Validate an already parsed JSON value (no round trip: NaN / Inf survive and are rejected).
+# Cross-field rules of a schema-valid bundle (a port of contracts/contract.py check_model_invariants: the anchor auto-pick of the 2026-09-30 ruling).
+rf_model_invariants <- function(b, tolerance = 1e-9) {
+  problems <- character()
+  for (mid in names(b$share_models)) {
+    m <- b$share_models[[mid]]
+    anchors <- m$anchors; chosen <- m$prediction$industries
+    for (id in names(b$industries)) if (isTRUE(b$industries[[id]]$capabilities$control) && is.null(anchors[[id]]))
+      problems <- c(problems, sprintf("share_models.%s.anchors: no entry for %s, which has the control capability", mid, id))
+    for (id in names(anchors)) {
+      e <- anchors[[id]]; tag <- sprintf("share_models.%s.anchors.%s", mid, id)
+      if (is.null(b$industries[[id]])) { problems <- c(problems, sprintf("%s: not an industry of the bundle", tag)); next }
+      blk <- e$prediction[[e$anchor]]
+      if (is.null(chosen[[id]])) problems <- c(problems, sprintf("%s: no prediction.industries block for the chosen anchor", tag))
+      else for (k in c("sigma2", "pairs", "df", "critical_95"))
+        if (abs(chosen[[id]][[k]] - blk[[k]]) > tolerance * max(1, abs(blk[[k]]))) problems <- c(problems, sprintf("%s: prediction.industries[%s].%s is not the %s block", tag, id, k, e$anchor))
+      bt <- e$backtest; g <- bt$same_phase_gain
+      for (ds in c("loeo", "chrono")) {
+        prev <- bt$previous_cycle[[paste0(ds, "_mae")]]; same <- bt$same_phase[[paste0(ds, "_mae")]]
+        expected <- if (is.null(prev) || is.null(same) || prev <= 0) NULL else 1 - same / prev
+        if (is.null(expected) != is.null(g[[ds]]) || (!is.null(expected) && abs(expected - g[[ds]]) > 1e-6))
+          problems <- c(problems, sprintf("%s: same_phase_gain.%s does not follow from the two MAEs", tag, ds))
+      }
+      wins <- all(vapply(c("loeo", "chrono"), function(ds) !is.null(g[[ds]]) && g[[ds]] >= e$min_gain - 1e-12, logical(1)))
+      if (identical(e$anchor, "same_phase") && !wins) problems <- c(problems, sprintf("%s: same_phase chosen without beating previous_cycle by min_gain in every design", tag))
+      if (identical(e$anchor, "previous_cycle") && wins) problems <- c(problems, sprintf("%s: previous_cycle kept although same_phase beats it by min_gain in every design", tag))
+    }
+  }
+  problems
+}
+
+# Schema problems of a parsed bundle, else its cross-field problems (the shared contract: schema + invariants).
 rf_validate_parsed <- function(x, schema_path = rf_schema_default_path()) {
   schema <- jsonlite::fromJSON(schema_path, simplifyVector = FALSE)
-  rf_schema_check(x, schema, schema)
+  problems <- rf_schema_check(x, schema, schema)
+  if (length(problems)) problems else rf_model_invariants(x)
 }
 
 # Validate a bundle (in-memory list or parsed JSON) against the contract schema. -> character() of problems; empty = valid.

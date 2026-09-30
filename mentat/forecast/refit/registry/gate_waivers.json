@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "note": "Owner waivers of G6 (hard backtest gate) cells. A listed cell that fails is WAIVED, not HOLD; every other cell stays strict. show_warning false: the cell is not shown in the review packet's warning list or on the card; every waiver is still listed in the receipt's waiver section.",
+  "waivers": [
+    {
+      "gate": "G6",
+      "cell": "lobby / commercial_banks",
+      "term": "lobby",
+      "industry": "commercial_banks",
+      "reason": "owner ruling: keep log refit",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": false
+    }
+  ]
+}

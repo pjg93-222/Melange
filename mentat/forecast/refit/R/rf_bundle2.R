@@ -45,7 +45,8 @@ rf_v2_context <- function(ctx, run_id = "unit", packages = NULL, built_at_utc = 
   for (ch in c("House", "Senate")) {
     id <- paste0("control_", ch)
     sp <- specs[[paste0(id, ".selected")]]
-    shares[[id]] <- list(block = vm$share_models[[id]], rule = selection[[id]]$reported_rule, pp = rf_partial_pool(sp, sp$d), prediction = rf_share_prediction(sp), spec = sp)
+    shares[[id]] <- list(block = vm$share_models[[id]], rule = selection[[id]]$reported_rule, pp = rf_partial_pool(sp, sp$d), prediction = rf_share_prediction(sp),
+                         prediction_same_phase = rf_share_prediction(sp, "same_phase_strict"), spec = sp)
   }
   lob <- ctx$lobby$diffs
   lob_log_fit <- rf_lobby_log_fit(lob)
@@ -71,9 +72,10 @@ rf_v2_context <- function(ctx, run_id = "unit", packages = NULL, built_at_utc = 
   lg_pred <- rf_lobby_log_backtest(lob)
   cells[[length(cells) + 1L]] <- rf_backtest_metrics(lg_pred)
   backtests <- rf_rbind_fill(cells)
+  anchors <- rf_select_anchors(backtests, selection, lapply(shares, function(s) levels(factor(s$spec$d$sector))), min_gain)
   raw <- ctx$inputs[ctx$inputs$purpose == "raw", ]
   input_hash <- substr(rf_sha256_of_strings(raw$actual), 1, 8)
-  list(ctx = ctx, specs = specs, selection = selection, pac = pac, shares = shares, lobby_pp = lob_pp, lobby_log_fit = lob_log_fit, lobby_log = lob_log,
+  list(ctx = ctx, specs = specs, selection = selection, anchors = anchors, pac = pac, shares = shares, lobby_pp = lob_pp, lobby_log_fit = lob_log_fit, lobby_log = lob_log,
        evidence = ev, sign = sign, backtests = backtests, lobby_log_pred = lg_pred, run_id = run_id, packages = packages, built_at_utc = built_at_utc,
        model_version = sprintf("refit-%s-%s", format(as.Date(substr(built_at_utc, 1, 10)), "%Y%m%d"), input_hash), input_hash = input_hash, min_gain = min_gain,
        adequacy = NULL)
@@ -148,18 +150,31 @@ rf_v2_share_model <- function(v, ch) {
     of <- pp$offset_fit; V <- stats::vcov(of)
     offset <- list(terms = as.list(rf_bundle_terms(of, "__none__")), beta = as.list(unname(stats::coef(of))), covariance = lapply(seq_len(nrow(V)), function(i) as.list(unname(V[i, ]))))
   }
-  pred_ind <- stats::setNames(lapply(secs, function(x) list(sigma2 = s$prediction$sigma2, pairs = s$prediction$pairs, df = s$prediction$df, critical_95 = s$prediction$critical_95)), secs)
+  block <- function(p) list(sigma2 = p$sigma2, pairs = as.integer(p$pairs), df = as.integer(p$df), critical_95 = p$critical_95)
+  nn <- function(x) if (is.na(x)) NULL else x
+  backtest_of <- function(e, anchor) { m <- e$mae[[anchor]]; n <- e$n[[anchor]]
+    x <- list(loeo_mae = nn(m[["loeo"]]), chrono_mae = nn(m[["chrono"]]), loeo_n = as.integer(n[["loeo"]]), chrono_n = as.integer(n[["chrono"]]))
+    for (k in c("loeo_mae", "chrono_mae")) if (is.null(x[[k]])) x[k] <- list(NULL)
+    x }
+  entry_of <- function(x) { e <- v$anchors$entries[[id]][[x]]
+    gain <- list(loeo = nn(e$gain[["loeo"]]), chrono = nn(e$gain[["chrono"]])); for (k in names(gain)) if (is.null(gain[[k]])) gain[k] <- list(NULL)
+    list(anchor = e$anchor, default = "previous_cycle", slope_rule = e$rule, min_gain = e$min_gain, reason = e$reason,
+         backtest = list(previous_cycle = backtest_of(e, "previous_cycle"), same_phase = backtest_of(e, "same_phase"), same_phase_gain = gain),
+         prediction = list(previous_cycle = block(s$prediction), same_phase = block(s$prediction_same_phase))) }
+  anchors <- stats::setNames(lapply(secs, entry_of), secs)
+  pred_ind <- stats::setNames(lapply(secs, function(x) if (identical(anchors[[x]]$anchor, "same_phase")) anchors[[x]]$prediction$same_phase else anchors[[x]]$prediction$previous_cycle), secs)
   ev <- rf_evidence_record(v$evidence[[id]])
   ev$selection_repeated_p <- v$ctx$stepwise$selected$selection_repeated_p[v$ctx$stepwise$selected$case == paste0("control__", ch, "__pooled__RShare")]
-  ev$calculator_path <- "prevchg"
-  ev$calculator_path_loeo_mae_by_industry <- .rf_mae_record(v$backtests, id, "selected", "loeo", "prevchg", rule)
+  ev$calculator_path <- "by_industry"
+  ev$anchor_by_industry <- lapply(anchors, function(a) a$anchor)
+  ev$calculator_path_loeo_mae_by_industry <- as.list(rf_chosen_anchor_mae(v$backtests, v$anchors, id, "loeo", rule))
   ev$sign_consistency <- list(leave_one_election_out = v$sign[[id]]$loeo$share)
   ev$rule_selection <- rf_v2_rule_selection(v$selection[[id]])
   formula <- if (ch == "House") "RShare ~ sector + RMajNow + Forecast + G_prior + Pres" else "RShare ~ sector + RMajNow + Forecast + G_prior"
   list(id = id, signal = "control", chamber = ch, calculator = TRUE, specification = b$specification, formula = formula, terms = b$terms, beta = b$beta, covariance = b$covariance,
        ordinary_p = b$ordinary_p, critical_95 = b$critical_95, residual_df = b$residual_df, n = b$n, adjusted_r2 = b$adjusted_r2, residual_sd = b$residual_sd,
        training_cycles = b$training_cycles, history = b$history, slope_rule = rule, slope_rule_reason = v$selection[[id]]$reason, tau2 = pp$tau2, application = application,
-       slopes = rows, offset = offset, anchor_rule = "previous_cycle",
+       slopes = rows, offset = offset, anchor_rule = "by_industry", anchors = anchors,
        prediction = list(method = "anchored_step_residual", industries = pred_ind), evidence = ev)
 }
 
@@ -271,7 +286,9 @@ rf_v2_anchor_contract <- function() {
                   measures = list(list(id = "pac_to_candidates", anchor = "pac_to_candidates.cycles[A].to_house_senate",
                                        label = "Roster companies' PACs: own giving to House and Senate candidates (FEC committee-to-candidate, D-049)"),
                                   list(id = "general_giving", anchor = "general_giving.cycles[A]", label = "Mentat general giving (included receipt amount, all channels)"))),
-       share = list(models = list("control_House", "control_Senate"), change = "pp", anchor_cycle_rule = "previous_cycle",
+       share = list(models = list("control_House", "control_Senate"), change = "pp", anchor_cycle_rule = "by_industry_chamber",
+                    anchor_options = list(list(id = "previous_cycle", cycle_offset = 2L, chained = TRUE, label = "Mentat's previous cycle; the next cycle is chained through the open cycle"),
+                                          list(id = "same_phase", cycle_offset = 4L, chained = FALSE, label = "Mentat's cycle of the same phase (presidential or midterm); one step each, no chaining")),
                     bases = list(list(id = "employee_candidate", anchor = "candidate_receipts.cycles[A]", label = "Employees' included giving to candidate committees"),
                                  list(id = "pac_candidate", anchor = "pac_to_candidates.cycles[A]", label = "Roster PACs' own giving to candidates")),
                     remainder_total_rule = "projected measure x previous-cycle candidate share of that measure"),

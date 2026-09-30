@@ -138,6 +138,7 @@ rf_review_packet <- function(res, dir, b_random = RF$B_RANDOM) {
   put("regressions.txt", c(txt, lg))
   csv("backtests.csv", v$backtests)
   csv("rule_selection.csv", rf_selection_table(v$selection))
+  csv("anchor_selection.csv", v$anchors$table)
   dl <- do.call(rbind, lapply(names(b$pac_model$slopes), function(id) { s <- b$pac_model$slopes[[id]]
     data.frame(term = "pac", industry = id, own_beta = s$own_beta, own_se = s$own_se, own_p = s$own_p, dl_weight = s$dl_weight, dl_beta = s$dl_beta, applied_rule = s$applied$rule,
                applied_beta = s$applied$beta, applied_se = s$applied$se, df = s$applied$df, stringsAsFactors = FALSE) }))
@@ -153,14 +154,18 @@ rf_review_packet <- function(res, dir, b_random = RF$B_RANDOM) {
   gaps <- do.call(rbind, lapply(names(ind), function(id) data.frame(industry = id, offered = ind[[id]]$calculator, pac = ind[[id]]$capabilities$pac, control = ind[[id]]$capabilities$control,
     lobbying = ind[[id]]$capabilities$lobbying, withheld = paste(sprintf("%s: %s", names(ind[[id]]$withheld), unlist(ind[[id]]$withheld)), collapse = "; "), stringsAsFactors = FALSE)))
   pi <- b$political_inputs$anchor_cycles$`2024`; so <- b$saved_outlook$control
+  g6tab <- res$gates$g6$table; g6tab$status <- ifelse(g6tab$ok, "ok", ifelse(g6tab$waived, "WAIVED", "HOLD")); g6tab <- g6tab[, c("term", "industry", "new_MAE", "published_MAE", "status")]
+  w6 <- res$gates$g6$waivers; shown <- w6[w6$applied & w6$show_warning, , drop = FALSE]
   md <- c(
     sprintf("# Giving Forecast refit: review packet (%s)", b$model_version), "",
     sprintf("Run `%s`, built %s, previous model `%s`.", b$producer$run_id, b$built_at_utc, b$previous_model_version %||% "none"), "",
     sprintf("## Decision: %s", res$gates$decision), "", .rf_md_table(gates[, c("gate", "status", "detail")]), "",
     "## Rule selection (auto-pick: a rule must beat the pooled slope by 5% in every design)", "", .rf_md_table(rf_selection_table(v$selection)[, c("selection_term", "design", "rule", "n", "folds", "MAE", "RMSE", "units", "choice", "reported_rule")]), "",
+    "## Anchor selection (share models: previous-cycle default; same-phase only if it beats it by 5% in every design)", "", .rf_md_table(v$anchors$table), "",
     "## Slopes by industry (PAC)", "", .rf_md_table(dl), "",
-    "## Backtests and the published calculator (G6)", "", .rf_md_table(res$gates$g6$table), "",
+    "## Backtests and the published calculator (G6)", "", .rf_md_table(g6tab), "",
     sprintf("G6 baseline: %s.", res$gates$g6$baseline), "",
+    if (nrow(shown)) c("## Owner waivers shown as warnings", "", .rf_md_table(shown[, c("cell", "reason", "owner", "date", "new_MAE", "published_MAE")]), "") else NULL,
     "## Calculator paths against last-period naive", "", .rf_md_table(v$backtests[v$backtests$rule %in% c("R0", "R1", "R2") & v$backtests$design %in% c("loeo", "rolling") & v$backtests$path %in% c("prevchg", "calc"),
                                                                                   c("term", "base", "design", "path", "rule", "n", "MAE", "units", "beats_naive", "coverage_95")]), "",
     "## Lobbying log refit", "",
@@ -260,6 +265,9 @@ rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id =
     run <- list(run_id = run_id, mode = "refit", started_utc = started, inputs = inputs, packages = pkgs, gates = res_g$gates, parity = parity, decision = res_g$decision)
     receipt <- rf_receipt(run, bundle_path)
     receipt$rule_selection <- lapply(v$selection, function(s) list(reported_rule = s$reported_rule, reason = s$reason))
+    receipt$anchor_selection <- lapply(v$anchors$entries, function(ch) lapply(ch, function(e) list(anchor = e$anchor, slope_rule = e$rule, reason = e$reason)))
+    w6 <- res_g$g6$waivers                                                   # every owner waiver on the list, applied or not, whether or not it is shown as a warning
+    receipt$waivers <- lapply(seq_len(nrow(w6)), function(i) as.list(w6[i, ]))
     receipt$waiting_for_data <- lapply(waiting, function(w) w$missing)
     pub <- list(status = "not_requested")
     if (publish == "auto") {

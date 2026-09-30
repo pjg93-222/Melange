@@ -38,6 +38,7 @@ class ContractTests(unittest.TestCase):
 
     def test_the_bundle_example_validates(self):
         self.assertEqual(contract.validate_kind(contract.example('models'), 'models'), [])
+        self.assertEqual(contract.check_model_invariants(contract.example('models')), [])
 
     @staticmethod
     def _accepted_controls(validator, target='models'):
@@ -53,7 +54,34 @@ class ContractTests(unittest.TestCase):
 
     def test_every_bundle_negative_control_fails_validation(self):
         self.assertGreaterEqual(len([c for c in contract.negative_controls() if c['target'] == 'models']), 10)
-        self.assertEqual(self._accepted_controls(lambda doc: contract.validate_kind(doc, 'models')), [])
+        self.assertEqual(self._accepted_controls(contract.validate_model), [])
+
+    def test_a_schema_only_validator_misses_the_model_invariant_controls(self):
+        missed = self._accepted_controls(lambda doc: contract.validate_kind(doc, 'models'))
+        kinds = {c['id']: c['kind'] for c in contract.negative_controls() if c['target'] == 'models'}
+        self.assertEqual(sorted(missed), sorted(i for i, k in kinds.items() if k == 'invariant'))
+        self.assertGreaterEqual(len(missed), 3)
+
+    def test_the_anchor_selection_rule_is_an_invariant(self):
+        import copy
+        base = contract.example('models')
+        entry = lambda doc: doc['share_models']['control_House']['anchors']['commercial_banks']
+        # same_phase chosen although it does not win in every design (the example's chrono gain is negative for banks House)
+        doc = copy.deepcopy(base)
+        entry(doc)['anchor'] = 'same_phase'
+        doc['share_models']['control_House']['prediction']['industries']['commercial_banks'] = dict(entry(doc)['prediction']['same_phase'])
+        self.assertTrue(any('same_phase chosen without beating' in p for p in contract.check_model_invariants(doc)))
+        # previous_cycle kept although same_phase wins in both designs
+        doc = copy.deepcopy(base)
+        a = entry(doc)
+        a['backtest']['same_phase'].update(loeo_mae=a['backtest']['previous_cycle']['loeo_mae'] * 0.5, chrono_mae=a['backtest']['previous_cycle']['chrono_mae'] * 0.5)
+        a['backtest']['same_phase_gain'] = dict(loeo=0.5, chrono=0.5)
+        self.assertTrue(any('previous_cycle kept although' in p for p in contract.check_model_invariants(doc)))
+        # ...and the consistent flip is accepted
+        a['anchor'] = 'same_phase'
+        doc['share_models']['control_House']['prediction']['industries']['commercial_banks'] = dict(a['prediction']['same_phase'])
+        self.assertEqual(contract.check_model_invariants(doc), [])
+        self.assertEqual(contract.validate_kind(doc, 'models'), [])
 
     def test_a_validator_that_accepts_everything_is_caught_by_the_negative_controls(self):
         # Negative control of the negative controls: a permissive validator must be reported, control by control.

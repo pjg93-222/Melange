@@ -10,7 +10,7 @@ model_controls <- function() Filter(function(c) identical(c$target, "models"), r
 test_that("the shared contract files are present and the schema stays inside the agreed keyword subset", {
   for (f in c("giving-models-v2.schema.json", "giving-models-v2.example.json", "negative-controls.json", "README.md"))
     expect_true(file.exists(file.path(rf_contracts_dir(), f)), info = f)
-  expect_gte(length(model_controls()), 16L)        # B01-B16; keywords outside the subset make the validator stop (test below)
+  expect_gte(length(model_controls()), 23L)        # B01-B23; keywords outside the subset make the validator stop (test below)
 })
 
 test_that("the validator accepts the contract example", {
@@ -117,12 +117,12 @@ test_that("PAC model: the auto-pick chose own slopes; the applied slope, its df,
   expect_true(all(c("ordinary_p", "HC1_p", "CR2_sector_p", "wild_webb_sector_p") %in% names(pm$evidence)))
 })
 
-test_that("share models: pooled slope (R0, tau2 = 0), previous-cycle anchor, no offset, per-industry own slopes kept as evidence", {
+test_that("share models: pooled slope (R0, tau2 = 0), per-industry anchors (default previous-cycle), no offset, per-industry own slopes kept as evidence", {
   b <- test_bundle2()
   for (ch in c("House", "Senate")) {
     m <- b$share_models[[paste0("control_", ch)]]
     expect_identical(m$slope_rule, "R0"); expect_identical(m$application, "pooled"); expect_null(m$offset)
-    expect_identical(m$anchor_rule, "previous_cycle"); expect_identical(m$tau2, 0)
+    expect_identical(m$anchor_rule, "by_industry"); expect_identical(m$tau2, 0)
     expect_identical(unlist(m$terms)[1], "Intercept")
     expect_true("Forecast" %in% unlist(m$terms))
     s <- m$slopes$commercial_banks
@@ -226,4 +226,59 @@ test_that("an empty withheld map is written as an object, never an array (caught
   expect_identical(jsonlite::toJSON(b$industries$commercial_banks$withheld, auto_unbox = TRUE), jsonlite::toJSON(stats::setNames(list(), character(0)), auto_unbox = TRUE))
   bad <- b; bad$industries$commercial_banks$withheld <- list()
   expect_true(any(grepl("withheld", rf_validate_bundle(bad))))
+})
+
+# ---- the anchor auto-pick in the bundle (owner ruling 2026-09-30) ----------------------------------------------------------------------
+
+test_that("every share industry carries its chosen anchor, both anchors' backtest MAEs and residual blocks; prediction.industries repeats the chosen block", {
+  b <- test_bundle2()
+  expect_identical(b$anchor_contract$share$anchor_cycle_rule, "by_industry_chamber")
+  expect_identical(vapply(b$anchor_contract$share$anchor_options, function(o) o$id, ""), c("previous_cycle", "same_phase"))
+  for (ch in c("House", "Senate")) {
+    m <- b$share_models[[paste0("control_", ch)]]
+    expect_setequal(names(m$anchors), names(m$prediction$industries))
+    for (id in names(m$anchors)) {
+      a <- m$anchors[[id]]
+      expect_true(a$anchor %in% c("previous_cycle", "same_phase")); expect_identical(a$default, "previous_cycle"); expect_equal(a$min_gain, 0.05)
+      expect_identical(a$slope_rule, m$slope_rule)
+      chosen <- a$prediction[[a$anchor]]
+      expect_equal(m$prediction$industries[[id]][c("sigma2", "pairs", "df", "critical_95")], chosen[c("sigma2", "pairs", "df", "critical_95")], info = paste(ch, id))
+      expect_identical(a$prediction$previous_cycle$pairs, 15L)                   # pairs (t-2, t): 5 per industry
+      expect_identical(a$prediction$same_phase$pairs, 12L)                       # pairs (t-4, t): 4 per industry (2016<-2012 ... 2022<-2018), never the fallback
+      expect_equal(a$prediction$same_phase$critical_95, qt(0.975, 11), tolerance = 1e-12)
+      expect_equal(a$backtest$same_phase_gain$loeo, 1 - a$backtest$same_phase$loeo_mae / a$backtest$previous_cycle$loeo_mae, tolerance = 1e-12)
+      expect_identical(a$backtest$previous_cycle$loeo_n, 5L); expect_identical(a$backtest$previous_cycle$chrono_n, 2L)
+    }
+  }
+})
+
+test_that("today's anchor table: banks House favours same-phase in leave-one-election-out (-32%) but not chronologically, so the default previous-cycle stays everywhere", {
+  b <- test_bundle2()
+  h <- b$share_models$control_House$anchors$commercial_banks
+  expect_equal(h$backtest$previous_cycle$loeo_mae, 1.5439, tolerance = 1e-3); expect_equal(h$backtest$same_phase$loeo_mae, 1.0535, tolerance = 1e-3)
+  expect_equal(h$backtest$previous_cycle$chrono_mae, 5.082, tolerance = 1e-3); expect_equal(h$backtest$same_phase$chrono_mae, 5.958, tolerance = 1e-3)
+  expect_equal(h$backtest$same_phase_gain$loeo, 0.3177, tolerance = 1e-3); expect_lt(h$backtest$same_phase_gain$chrono, 0)
+  expect_identical(h$anchor, "previous_cycle"); expect_match(h$reason, "previous_cycle kept")
+  for (ch in c("House", "Senate")) for (a in b$share_models[[paste0("control_", ch)]]$anchors) expect_identical(a$anchor, "previous_cycle")
+  # the per-industry calculator-path MAE G6 compares is that of the chosen anchor
+  expect_equal(b$share_models$control_House$evidence$calculator_path_loeo_mae_by_industry$commercial_banks, 1.5439, tolerance = 1e-3)
+  expect_identical(b$share_models$control_House$evidence$calculator_path, "by_industry")
+})
+
+test_that("the cross-field invariants reject a bundle whose chosen anchor breaks the selection rule, and accept the consistent flip", {
+  parsed <- rf_canonical_json(test_bundle2())
+  flip <- parsed
+  flip$share_models$control_House$anchors$commercial_banks$anchor <- "same_phase"
+  flip$share_models$control_House$prediction$industries$commercial_banks <- flip$share_models$control_House$anchors$commercial_banks$prediction$same_phase
+  expect_true(any(grepl("same_phase chosen without beating", rf_validate_parsed(flip))))
+  a <- parsed$share_models$control_House$anchors$commercial_banks
+  win <- parsed                                                                   # same-phase wins in both designs but previous-cycle is kept
+  w <- win$share_models$control_House$anchors$commercial_banks
+  w$backtest$same_phase$loeo_mae <- a$backtest$previous_cycle$loeo_mae * 0.5; w$backtest$same_phase$chrono_mae <- a$backtest$previous_cycle$chrono_mae * 0.5
+  w$backtest$same_phase_gain <- list(loeo = 0.5, chrono = 0.5)
+  win$share_models$control_House$anchors$commercial_banks <- w
+  expect_true(any(grepl("previous_cycle kept although", rf_validate_parsed(win))))
+  w$anchor <- "same_phase"; win$share_models$control_House$anchors$commercial_banks <- w
+  win$share_models$control_House$prediction$industries$commercial_banks <- w$prediction$same_phase
+  expect_identical(rf_validate_parsed(win), character(0))
 })

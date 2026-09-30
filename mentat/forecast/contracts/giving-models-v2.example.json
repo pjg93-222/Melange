@@ -51,7 +51,21 @@
         "control_Senate"
       ],
       "change": "pp",
-      "anchor_cycle_rule": "previous_cycle",
+      "anchor_cycle_rule": "by_industry_chamber",
+      "anchor_options": [
+        {
+          "id": "previous_cycle",
+          "cycle_offset": 2,
+          "chained": true,
+          "label": "Mentat's previous cycle; the next cycle is chained through the open cycle"
+        },
+        {
+          "id": "same_phase",
+          "cycle_offset": 4,
+          "chained": false,
+          "label": "Mentat's cycle of the same phase (presidential or midterm); one step each, no chaining"
+        }
+      ],
       "bases": [
         {
           "id": "employee_candidate",
@@ -1110,7 +1124,126 @@
         }
       },
       "offset": null,
-      "anchor_rule": "previous_cycle",
+      "anchor_rule": "by_industry",
+      "anchors": {
+        "commercial_banks": {
+          "anchor": "previous_cycle",
+          "default": "previous_cycle",
+          "slope_rule": "R0",
+          "min_gain": 0.05,
+          "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+          "backtest": {
+            "previous_cycle": {
+              "loeo_mae": 1.544,
+              "chrono_mae": 5.082,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase": {
+              "loeo_mae": 1.053,
+              "chrono_mae": 5.958,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase_gain": {
+              "loeo": 0.3180051813471503,
+              "chrono": -0.17237308146399055
+            }
+          },
+          "prediction": {
+            "previous_cycle": {
+              "sigma2": 0.0002285336254552925,
+              "pairs": 15,
+              "df": 14,
+              "critical_95": 2.144786687917804
+            },
+            "same_phase": {
+              "sigma2": 0.0002285336254552925,
+              "pairs": 12,
+              "df": 11,
+              "critical_95": 2.200985159
+            }
+          }
+        },
+        "credit_unions": {
+          "anchor": "previous_cycle",
+          "default": "previous_cycle",
+          "slope_rule": "R0",
+          "min_gain": 0.05,
+          "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+          "backtest": {
+            "previous_cycle": {
+              "loeo_mae": 1.477,
+              "chrono_mae": 6.365,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase": {
+              "loeo_mae": 1.522,
+              "chrono_mae": 4.573,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase_gain": {
+              "loeo": -0.030467163168584888,
+              "chrono": 0.28153967007069913
+            }
+          },
+          "prediction": {
+            "previous_cycle": {
+              "sigma2": 0.0002285336254552925,
+              "pairs": 15,
+              "df": 14,
+              "critical_95": 2.144786687917804
+            },
+            "same_phase": {
+              "sigma2": 0.0002285336254552925,
+              "pairs": 12,
+              "df": 11,
+              "critical_95": 2.200985159
+            }
+          }
+        },
+        "auto_light_duty_manufacturing": {
+          "anchor": "previous_cycle",
+          "default": "previous_cycle",
+          "slope_rule": "R0",
+          "min_gain": 0.05,
+          "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+          "backtest": {
+            "previous_cycle": {
+              "loeo_mae": 0.852,
+              "chrono_mae": 5.951,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase": {
+              "loeo_mae": 1.338,
+              "chrono_mae": 5.438,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase_gain": {
+              "loeo": -0.5704225352112677,
+              "chrono": 0.08620399932784406
+            }
+          },
+          "prediction": {
+            "previous_cycle": {
+              "sigma2": 0.0002285336254552925,
+              "pairs": 15,
+              "df": 14,
+              "critical_95": 2.144786687917804
+            },
+            "same_phase": {
+              "sigma2": 0.0002285336254552925,
+              "pairs": 12,
+              "df": 11,
+              "critical_95": 2.200985159
+            }
+          }
+        }
+      },
       "prediction": {
         "method": "anchored_step_residual",
         "industries": {
@@ -1485,7 +1618,126 @@
         }
       },
       "offset": null,
-      "anchor_rule": "previous_cycle",
+      "anchor_rule": "by_industry",
+      "anchors": {
+        "commercial_banks": {
+          "anchor": "previous_cycle",
+          "default": "previous_cycle",
+          "slope_rule": "R0",
+          "min_gain": 0.05,
+          "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+          "backtest": {
+            "previous_cycle": {
+              "loeo_mae": 5.285,
+              "chrono_mae": 4.543,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase": {
+              "loeo_mae": 6.528,
+              "chrono_mae": 5.029,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase_gain": {
+              "loeo": -0.23519394512771985,
+              "chrono": -0.10697776799471703
+            }
+          },
+          "prediction": {
+            "previous_cycle": {
+              "sigma2": 0.003564790842118616,
+              "pairs": 15,
+              "df": 14,
+              "critical_95": 2.144786687917804
+            },
+            "same_phase": {
+              "sigma2": 0.003564790842118616,
+              "pairs": 12,
+              "df": 11,
+              "critical_95": 2.200985159
+            }
+          }
+        },
+        "credit_unions": {
+          "anchor": "previous_cycle",
+          "default": "previous_cycle",
+          "slope_rule": "R0",
+          "min_gain": 0.05,
+          "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+          "backtest": {
+            "previous_cycle": {
+              "loeo_mae": 6.912,
+              "chrono_mae": 9.564,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase": {
+              "loeo_mae": 8.308,
+              "chrono_mae": 10.502,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase_gain": {
+              "loeo": -0.20196759259259256,
+              "chrono": -0.09807611877875377
+            }
+          },
+          "prediction": {
+            "previous_cycle": {
+              "sigma2": 0.003564790842118616,
+              "pairs": 15,
+              "df": 14,
+              "critical_95": 2.144786687917804
+            },
+            "same_phase": {
+              "sigma2": 0.003564790842118616,
+              "pairs": 12,
+              "df": 11,
+              "critical_95": 2.200985159
+            }
+          }
+        },
+        "auto_light_duty_manufacturing": {
+          "anchor": "previous_cycle",
+          "default": "previous_cycle",
+          "slope_rule": "R0",
+          "min_gain": 0.05,
+          "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+          "backtest": {
+            "previous_cycle": {
+              "loeo_mae": 1.853,
+              "chrono_mae": 2.164,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase": {
+              "loeo_mae": 3.516,
+              "chrono_mae": 4.705,
+              "loeo_n": 5,
+              "chrono_n": 2
+            },
+            "same_phase_gain": {
+              "loeo": -0.8974635725849973,
+              "chrono": -1.1742144177449165
+            }
+          },
+          "prediction": {
+            "previous_cycle": {
+              "sigma2": 0.003564790842118616,
+              "pairs": 15,
+              "df": 14,
+              "critical_95": 2.144786687917804
+            },
+            "same_phase": {
+              "sigma2": 0.003564790842118616,
+              "pairs": 12,
+              "df": 11,
+              "critical_95": 2.200985159
+            }
+          }
+        }
+      },
       "prediction": {
         "method": "anchored_step_residual",
         "industries": {

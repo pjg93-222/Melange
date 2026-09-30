@@ -177,7 +177,8 @@
               "const": "pp"
             },
             "anchor_cycle_rule": {
-              "const": "previous_cycle"
+              "const": "by_industry_chamber",
+              "description": "Each industry x chamber names its anchor in share_models.*.anchors; the default is previous_cycle."
             },
             "bases": {
               "type": "array",
@@ -208,12 +209,47 @@
             },
             "remainder_total_rule": {
               "type": "string"
+            },
+            "anchor_options": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "enum": [
+                      "previous_cycle",
+                      "same_phase"
+                    ]
+                  },
+                  "cycle_offset": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "description": "Mentat anchor cycle = target cycle - cycle_offset"
+                  },
+                  "chained": {
+                    "type": "boolean",
+                    "description": "true when the next cycle is projected through the open cycle (steps = 2)"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "cycle_offset",
+                  "chained",
+                  "label"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [
             "models",
             "change",
             "anchor_cycle_rule",
+            "anchor_options",
             "bases",
             "remainder_total_rule"
           ],
@@ -1612,7 +1648,16 @@
           "additionalProperties": false
         },
         "anchor_rule": {
-          "const": "previous_cycle"
+          "const": "by_industry",
+          "description": "The anchor is chosen per industry and chamber (anchors[id].anchor); previous_cycle is the default."
+        },
+        "anchors": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/anchor_choice"
+          },
+          "minProperties": 1,
+          "description": "One entry per industry that has the control capability."
         },
         "prediction": {
           "$ref": "#/$defs/prediction"
@@ -1649,6 +1694,7 @@
         "slopes",
         "offset",
         "anchor_rule",
+        "anchors",
         "prediction",
         "evidence"
       ],
@@ -1860,6 +1906,142 @@
         "notes"
       ],
       "additionalProperties": false
+    },
+    "anchor_backtest": {
+      "type": "object",
+      "properties": {
+        "loeo_mae": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "chrono_mae": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "loeo_n": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "chrono_n": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "loeo_mae",
+        "chrono_mae",
+        "loeo_n",
+        "chrono_n"
+      ],
+      "additionalProperties": false,
+      "description": "Mean absolute error in share percentage points of the calculator path under this anchor, for this industry and chamber: leave-one-election-out and chronological backtests (no leakage), applied slope rule."
+    },
+    "anchor_choice": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "enum": [
+            "previous_cycle",
+            "same_phase"
+          ],
+          "description": "The anchor the calculator uses for this industry and chamber. previous_cycle: Mentat's cycle A = open cycle - 2, the next cycle chained (steps = 2). same_phase: Mentat's cycle of the same phase (open cycle - 4 for the open cycle, open cycle - 2 for the next one), one step each."
+        },
+        "default": {
+          "const": "previous_cycle"
+        },
+        "slope_rule": {
+          "enum": [
+            "R0",
+            "R1",
+            "R2"
+          ],
+          "description": "The slope rule both anchors were backtested under (the rule the auto-pick chose for this chamber)."
+        },
+        "min_gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "RF$RULE_MIN_GAIN: same_phase is chosen only when its MAE is at least this fraction below previous_cycle in every backtest design."
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backtest": {
+          "type": "object",
+          "properties": {
+            "previous_cycle": {
+              "$ref": "#/$defs/anchor_backtest"
+            },
+            "same_phase": {
+              "$ref": "#/$defs/anchor_backtest"
+            },
+            "same_phase_gain": {
+              "type": "object",
+              "properties": {
+                "loeo": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "chrono": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "loeo",
+                "chrono"
+              ],
+              "additionalProperties": false,
+              "description": "1 - MAE(same_phase) / MAE(previous_cycle) per design; positive = same_phase is better."
+            }
+          },
+          "required": [
+            "previous_cycle",
+            "same_phase",
+            "same_phase_gain"
+          ],
+          "additionalProperties": false
+        },
+        "prediction": {
+          "type": "object",
+          "properties": {
+            "previous_cycle": {
+              "$ref": "#/$defs/step_residual"
+            },
+            "same_phase": {
+              "$ref": "#/$defs/step_residual"
+            }
+          },
+          "required": [
+            "previous_cycle",
+            "same_phase"
+          ],
+          "additionalProperties": false,
+          "description": "The anchored-step residual block of each anchor (previous_cycle: pairs (t-2, t); same_phase: pairs (t-4, t)). share_models.*.prediction.industries[id] repeats the chosen one."
+        }
+      },
+      "required": [
+        "anchor",
+        "default",
+        "slope_rule",
+        "min_gain",
+        "reason",
+        "backtest",
+        "prediction"
+      ],
+      "additionalProperties": false,
+      "description": "Owner ruling 2026-09-30: the anchor of each share model x industry x chamber is auto-picked by backtest; same_phase replaces the default previous_cycle only when it beats it by min_gain in every design."
     }
   }
 }

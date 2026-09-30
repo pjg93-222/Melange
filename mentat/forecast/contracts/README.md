@@ -60,10 +60,23 @@ Top level: `schema_version` (2), `model_version`, `built_on`, `built_at_utc`, `p
     `exp(b dG +/- crit * sqrt(dG^2 se^2 + steps * sigma2))`, `steps` = cycles from the anchor (1; 2 for a chained next cycle).
 * **`share_models.control_House|control_Senate`**: v1 keys (`terms beta covariance ordinary_p critical_95 residual_df n adjusted_r2 residual_sd
   training_cycles history specification id signal chamber`) plus `formula`, `slope_rule(_reason)`, `tau2`, `slopes`, `prediction` (same shape;
-  pairs are the **previous-cycle** steps (t-2, t), full dx over the non-industry terms), `anchor_rule` (`previous_cycle`, NOT v1's same-phase),
+  `prediction.industries[id]` repeats the residual block of the anchor the industry's `anchors` entry chose; pairs are (t-2, t) for `previous_cycle` and
+  (t-4, t) for `same_phase`, full dx over the non-industry terms), `anchor_rule` (`by_industry`: each industry x chamber names its anchor in `anchors`;
+  the default is `previous_cycle`, NOT v1's same-phase), `anchors`,
   `calculator: true`, `evidence`, and `application`: `pooled` = use the top-level pooled fit; `offset` = non-focal terms from `offset`
   {terms, beta, covariance}, focal Forecast slope from `slopes[id].applied` (variance `dx_o V_o dx_o + dF^2 se^2`). `offset` is null when pooled.
   Only the two control models live here: seats and the `*_industry` variants move to `evidence_models` with `calculator: false`.
+  * **`anchors[id]`** (owner ruling 2026-09-30, anchor auto-pick): `anchor` (`previous_cycle` | `same_phase`, what the calculator uses), `default` (`previous_cycle`),
+    `slope_rule` (the rule both anchors were backtested under), `min_gain` (0.05), `reason`, `backtest` (`previous_cycle` / `same_phase`: `loeo_mae`, `chrono_mae`,
+    `loeo_n`, `chrono_n` in share pp, and `same_phase_gain {loeo, chrono}` = 1 - MAE(same_phase)/MAE(previous_cycle)), and `prediction` (`previous_cycle` and `same_phase`
+    residual blocks). The anchor is chosen per industry and chamber by no-leakage backtests in both designs: `same_phase` replaces the default only when it beats
+    `previous_cycle` by `min_gain` in EVERY design. **`previous_cycle`**: Mentat's cycle A = open cycle - 2 (2024) for both horizons, the next cycle chained (steps = 2).
+    **`same_phase`**: Mentat's cycle of the same phase, target - 4 (2026 -> 2022, 2028 -> 2024), one step each and no chaining; its anchor-cycle inputs come from
+    `political_inputs.anchor_cycles` when the cycle is listed (2024) and otherwise from the share model's history row (2022). The anchor snapshot already carries the 2022,
+    2024 and 2026 cycles of every candidate measure. PAC and lobbying keep their anchors. `anchor_contract.share.anchor_options` lists the two anchors the consumer must
+    implement (`cycle_offset`, `chained`). Cross-field rules a schema cannot say live in `contract.py::check_model_invariants` (`validate_model` = schema + invariants; the R
+    writer has the same check in `rf_schema.R`): every industry with the control capability has an entry; `prediction.industries[id]` equals the chosen anchor's block;
+    the recorded gain follows from the two MAEs; the choice follows the rule.
 * **`lobby_model`**: v1 dollar fields kept as evidence; `log_refit` is what the calculator applies: `formula dly ~ dg + factor(year)`,
   `unit`, `beta se ordinary_p critical_95 residual_df n`, `slope_rule`, `slopes[id]` (as above, `applied` per industry), `prediction.industries[id]`
   (F.4: one pooled residual variance over 71 pairs repeated per industry, `critical_95 = qt(.975, 70)`), `provenance`.
@@ -79,7 +92,8 @@ Top level: `schema_version` (2), `model_version`, `built_on`, `built_at_utc`, `p
 
 ### Deviations from phase-1 SPEC 3.12 that the R writer must follow (owner rulings of 2026-09-30)
 
-1. `share_models.*.anchor_rule` is `previous_cycle` (SPEC said `same_phase_latest`); the step residual for shares uses (t-2, t) pairs.
+1. `share_models.*.anchor_rule` is `by_industry` with the default anchor `previous_cycle` (SPEC said `same_phase_latest`); the step residual for shares uses (t-2, t) pairs
+   under `previous_cycle` and (t-4, t) pairs under `same_phase`.
 2. `saved_outlook.control.*.value` is the **Polymarket** Jan-Jun 2026 score (SPEC: the Kalshi/Polymarket equal weight 19.03 / 56.40); the equal weight is a sensitivity.
 3. `pac_model.slopes[id].applied` (and the same in `share_models`, `lobby_model.log_refit`) carries the rule the auto-pick chose; own slope = R1.
 4. `lobby_model.log_refit` is required (the lobbying calculator is relative).

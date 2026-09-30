@@ -74,13 +74,15 @@ rf_roots <- function() {
     SGSD = "C:/Users/pgoff/Mentat/sector_growth_study/data",
     SGSA = "C:/Users/pgoff/Mentat/sector_growth_study/archive/session_d613b40c_scratchpad",
     ZIPC = "C:/Users/pgoff/Downloads/House_Senate_Control_Forecasts_CSV.zip",
-    RLIBX = file.path(loo, "work/lobbying_followup/Rlib")
+    RLIBX = file.path(loo, "work/lobbying_followup/Rlib"),
+    INGEST = "C:/Users/pgoff/AppData/Local/Mentat/forecast/ingest/runs",        # OpenSecrets page captures of the feeds ingest (F09 for property and casualty)
+    RFDATA = "C:/Users/pgoff/AppData/Local/Mentat/forecast/refit/data"          # derived raw inputs of this pipeline (tools/make_pc_ibis_current.R)
   )
   umbrella <- trimws(Sys.getenv("RF_INPUT_ROOT", unset = ""))
   if (nzchar(umbrella)) {
     d <- list(LOO = file.path(umbrella, "LOO"), CHE = file.path(umbrella, "CHE"), SGSD = file.path(umbrella, "SGSD"),
               SGSA = file.path(umbrella, "SGSA"), ZIPC = file.path(umbrella, "House_Senate_Control_Forecasts_CSV.zip"),
-              RLIBX = file.path(umbrella, "RLIBX"))
+              RLIBX = file.path(umbrella, "RLIBX"), INGEST = file.path(umbrella, "INGEST"), RFDATA = file.path(umbrella, "RFDATA"))
   }
   d$BUNDLE_V1 <- file.path(dirname(dirname(rf_home())), "app", "data", "giving-models-v1.json")
   for (k in names(d)) d[[k]] <- rf_env_path(paste0("RF_ROOT_", k), d[[k]])

@@ -97,3 +97,44 @@ test_that("the selection table and choice are deterministic (negative control)",
   expect_identical(a$table, b$table)
   expect_identical(a$choice, b$choice)
 })
+
+# ---- anchor auto-pick (owner ruling 2026-09-30) -------------------------------------------------------------------------------------
+
+test_that("rf_choose_anchor: same-phase only when it beats previous-cycle by the margin in EVERY design", {
+  ch <- function(prev, same, ...) rf_choose_anchor(c(loeo = prev[1], chrono = prev[2]), c(loeo = same[1], chrono = same[2]), ...)
+  expect_identical(ch(c(1.544, 5.082), c(1.053, 5.958))$anchor, "previous_cycle")      # banks House today: wins loeo (-32%), loses chrono
+  expect_identical(ch(c(1.544, 5.082), c(1.053, 4.500))$anchor, "same_phase")          # wins both (-32%, -11%)
+  expect_identical(ch(c(10, 10), c(9.5, 9.5))$anchor, "same_phase")                    # exactly 5% better: clears (<=)
+  expect_identical(ch(c(10, 10), c(9.51, 9.0))$anchor, "previous_cycle")               # 4.9% in one design: does not clear
+  expect_identical(ch(c(10, 10), c(10, 10))$anchor, "previous_cycle")                  # a tie keeps the default
+  expect_identical(ch(c(10, 10), c(9, 9), min_gain = 0)$anchor, "same_phase")          # min_gain 0: strictly lower in every design
+  expect_identical(ch(c(10, 10), c(9, NA))$anchor, "previous_cycle")                   # a design without a same-phase backtest cannot prove a win
+  r <- ch(c(1.544, 5.082), c(1.053, 5.958))
+  expect_equal(unname(r$gain), c(0.3177, -0.1724), tolerance = 1e-3); expect_identical(unname(r$wins), c(TRUE, FALSE))
+  expect_match(r$reason, "previous_cycle kept"); expect_match(r$reason, "loeo +31.8%", fixed = TRUE)
+  expect_match(ch(c(10, 10), c(9, 9))$reason, "same_phase beats previous_cycle by 5%")
+})
+
+test_that("rf_select_anchors picks per industry and chamber from the backtest cells, under the chosen slope rule", {
+  v <- test_v2()
+  a <- v$anchors
+  expect_setequal(names(a$entries), c("control_House", "control_Senate"))
+  expect_setequal(names(a$entries$control_House), c("auto_light_duty_manufacturing", "commercial_banks", "credit_unions"))
+  tb <- a$table
+  expect_equal(nrow(tb), 2L * 3L * 2L)                                                 # chambers x industries x designs
+  expect_true(all(tb$rule == "R0"))                                                    # the rule the auto-pick chose for both chambers today
+  row <- function(term, ind, ds) tb[tb$term == term & tb$industry == ind & tb$design == ds, ]
+  expect_equal(row("control_House", "commercial_banks", "loeo")$MAE_same_phase, 1.0535, tolerance = 1e-3)
+  expect_equal(row("control_House", "commercial_banks", "loeo")$MAE_previous_cycle, 1.5439, tolerance = 1e-3)
+  expect_equal(row("control_House", "credit_unions", "chrono")$MAE_same_phase, 4.573, tolerance = 1e-3)   # same-phase wins chrono for credit unions,
+  expect_equal(row("control_House", "credit_unions", "loeo")$MAE_same_phase, 1.522, tolerance = 1e-3)      # but loses leave-one-election-out: stays previous
+  expect_true(all(tb$choice == "previous_cycle"))
+  # a different margin changes the outcome only where both designs clear it: none do today even at min_gain = 0
+  a0 <- rf_select_anchors(v$backtests, v$selection, lapply(v$shares, function(s) levels(factor(s$spec$d$sector))), min_gain = 0)
+  expect_true(all(a0$table$choice == "previous_cycle"))
+  # the per-industry calculator-path MAE follows the chosen anchor
+  m <- rf_chosen_anchor_mae(v$backtests, a, "control_House", "loeo", "R0")
+  expect_equal(m[["commercial_banks"]], 1.5439, tolerance = 1e-3)
+  forced <- a; forced$entries$control_House$commercial_banks$anchor <- "same_phase"
+  expect_equal(rf_chosen_anchor_mae(v$backtests, forced, "control_House", "loeo", "R0")[["commercial_banks"]], 1.0535, tolerance = 1e-3)
+})

@@ -6,7 +6,8 @@
 #   G5 stability         no pooled focal slope and no existing industry's slope flips sign versus the published bundle; leave-one-out
 #                        sign consistency >= 80% for every calculator focal term.                                            HOLD
 #   G6 non-degradation   HARD backtest gate: no existing industry's calculator-path leave-one-election-out MAE may exceed the published
-#                        bundle's on the common folds (new <= published + 1e-9).                                              HOLD
+#                        bundle's on the common folds (new <= published + 1e-9), each share industry under the anchor the auto-pick chose.
+#                        A cell on the owner waiver list (registry/gate_waivers.json) is WAIVED, not HOLD; every other cell stays strict.  HOLD
 #   G7 bundle            schema-valid, every number finite, every calculator industry has a capability or a stated reason per model. FAIL
 #   G8 consumer smoke    the v2-capable Python calculator loads the staged bundle (MENTAT_G8_CMD); HOLD until it exists.
 #   G9 vs naive          a calculator path that does not beat last-cycle naive is a WARNING only.
@@ -114,15 +115,34 @@ rf_published_baseline <- function(v, published = NULL) {
        source = "v1 calculator recomputed on the same folds (pooled slope, same-phase anchor, calc path)")
 }
 
-# -> list(table = data.frame(term, industry, new_MAE, published_MAE, ok), gate)
-rf_gate_nondegradation <- function(v, published = NULL, existing = NULL, slack = RF_G6_SLACK) {
+# The owner waiver list (registry/gate_waivers.json): cells of G6 the owner has ruled on. A waived cell is WAIVED, not HOLD; everything else
+# stays strict. -> data.frame(gate, cell, term, industry, reason, owner, date, show_warning); zero rows when the file is absent.
+rf_read_waivers <- function(path = file.path(rf_home(), "registry", "gate_waivers.json")) {
+  empty <- data.frame(gate = character(), cell = character(), term = character(), industry = character(), reason = character(), owner = character(), date = character(),
+                      show_warning = logical(), stringsAsFactors = FALSE)
+  if (!file.exists(path)) return(empty)
+  w <- rf_read_json(path)$waivers
+  if (!length(w)) return(empty)
+  do.call(rbind, lapply(w, function(x) {
+    need <- c("cell", "term", "industry", "reason", "owner", "date", "show_warning")
+    miss <- setdiff(need, names(x))
+    if (length(miss)) stop(sprintf("gate_waivers.json: waiver '%s' lacks %s", x$cell %||% "?", paste(miss, collapse = ", ")), call. = FALSE)
+    if (!isTRUE(x$show_warning) && !identical(x$show_warning, FALSE)) stop("gate_waivers.json: show_warning must be true or false", call. = FALSE)
+    data.frame(gate = x$gate %||% "G6", cell = x$cell, term = x$term, industry = x$industry, reason = x$reason, owner = x$owner, date = x$date, show_warning = x$show_warning, stringsAsFactors = FALSE)
+  }))
+}
+
+# -> list(table = data.frame(term, industry, new_MAE, published_MAE, ok, waived), waivers = the listed waivers with whether each applied, gate)
+#    A failing cell listed in `waivers` is WAIVED (waived = TRUE, ok stays FALSE); the gate is HOLD while any other cell fails, WARN when every failing cell
+#    is waived and at least one waiver has show_warning, else PASS.
+rf_gate_nondegradation <- function(v, published = NULL, existing = NULL, slack = RF_G6_SLACK, waivers = rf_read_waivers()) {
   ctx <- v$ctx
   base <- rf_published_baseline(v, published)
   bt <- v$backtests
   rule <- c(pac = v$selection$pac$reported_rule, control_House = v$selection$control_House$reported_rule, control_Senate = v$selection$control_Senate$reported_rule)
+  chosen <- function(id) if (!is.null(v$anchors)) rf_chosen_anchor_mae(bt, v$anchors, id, "loeo", rule[[id]]) else .rf_cell_mae(bt, id, "selected", "loeo", "prevchg", rule[[id]])
   new <- list(pac = .rf_cell_mae(bt, "pac", "bundle", "loeo", "prevchg", rule[["pac"]]),
-              control_House = .rf_cell_mae(bt, "control_House", "selected", "loeo", "prevchg", rule[["control_House"]]),
-              control_Senate = .rf_cell_mae(bt, "control_Senate", "selected", "loeo", "prevchg", rule[["control_Senate"]]),
+              control_House = chosen("control_House"), control_Senate = chosen("control_Senate"),
               lobby = .rf_cell_mae(bt, "lobby", "log", "rolling", "calc", "R0"))
   existing <- existing %||% (if (!is.null(published)) names(published$industries) else names(ctx$reg$industries)[vapply(ctx$reg$industries, function(i) i$status == "fitted", logical(1))])
   study <- stats::setNames(vapply(ctx$reg$industries, function(i) i$lobbyview$study_sector %||% NA_character_, ""), names(ctx$reg$industries))
@@ -135,11 +155,20 @@ rf_gate_nondegradation <- function(v, published = NULL, existing = NULL, slack =
     rows[[length(rows) + 1L]] <- data.frame(term = term, industry = id, new_MAE = a, published_MAE = b, ok = a <= b + slack, stringsAsFactors = FALSE)
   }
   tab <- do.call(rbind, rows)
-  bad <- tab[!tab$ok, ]
-  list(table = tab, baseline = base$source,
-       gate = .rf_gate("G6 non-degradation", if (nrow(bad)) "HOLD" else "PASS",
-                       if (nrow(bad)) paste(sprintf("%s / %s: new %.3f > published %.3f", bad$term, bad$industry, bad$new_MAE, bad$published_MAE), collapse = "; ")
-                       else sprintf("%d existing industry-term cells no worse than the published calculator (%s)", nrow(tab), base$source)))
+  w <- waivers[waivers$gate == "G6", , drop = FALSE]
+  tab$waived <- !tab$ok & paste(tab$term, tab$industry) %in% paste(w$term, w$industry)
+  w$applied <- paste(w$term, w$industry) %in% paste(tab$term[tab$waived], tab$industry[tab$waived])
+  w$new_MAE <- tab$new_MAE[match(paste(w$term, w$industry), paste(tab$term, tab$industry))]
+  w$published_MAE <- tab$published_MAE[match(paste(w$term, w$industry), paste(tab$term, tab$industry))]
+  bad <- tab[!tab$ok & !tab$waived, ]
+  shown <- w[w$applied & w$show_warning, ]
+  status <- if (nrow(bad)) "HOLD" else if (nrow(shown)) "WARN" else "PASS"
+  detail <- if (nrow(bad)) paste(sprintf("%s / %s: new %.3f > published %.3f", bad$term, bad$industry, bad$new_MAE, bad$published_MAE), collapse = "; ")
+            else if (nrow(shown)) sprintf("%d cells no worse than the published calculator (%s); waived by the owner: %s", sum(tab$ok), base$source,
+                                          paste(sprintf("%s (%s)", shown$cell, shown$reason), collapse = "; "))
+            else sprintf("%d existing industry-term cells no worse than the published calculator (%s)", sum(tab$ok), base$source)
+  if (nrow(bad) && nrow(shown)) detail <- paste0(detail, "; also waived: ", paste(shown$cell, collapse = "; "))
+  list(table = tab, waivers = w, baseline = base$source, gate = .rf_gate("G6 non-degradation", status, detail))
 }
 
 # ---- G7, G8, G9 ------------------------------------------------------------------------------------------------------------------
@@ -179,8 +208,9 @@ rf_gate_consumer <- function(bundle_path, cmd = rf_g8_default_cmd()) {
 rf_gate_naive <- function(v) {
   bt <- v$backtests
   rule <- c(pac = v$selection$pac$reported_rule, control_House = v$selection$control_House$reported_rule, control_Senate = v$selection$control_Senate$reported_rule)
-  cells <- list(pac = c("pac", "bundle", "loeo", "prevchg", rule[["pac"]]), control_House = c("control_House", "selected", "loeo", "prevchg", rule[["control_House"]]),
-                control_Senate = c("control_Senate", "selected", "loeo", "prevchg", rule[["control_Senate"]]), lobby_log = c("lobby", "log", "rolling", "calc", "R0"))
+  path_of <- function(id) if (!is.null(v$anchors) && all(vapply(v$anchors$entries[[id]], function(e) identical(e$anchor, "same_phase"), logical(1)))) "calc" else "prevchg"
+  cells <- list(pac = c("pac", "bundle", "loeo", "prevchg", rule[["pac"]]), control_House = c("control_House", "selected", "loeo", path_of("control_House"), rule[["control_House"]]),
+                control_Senate = c("control_Senate", "selected", "loeo", path_of("control_Senate"), rule[["control_Senate"]]), lobby_log = c("lobby", "log", "rolling", "calc", "R0"))
   lose <- character()
   for (nm in names(cells)) {
     c <- cells[[nm]]

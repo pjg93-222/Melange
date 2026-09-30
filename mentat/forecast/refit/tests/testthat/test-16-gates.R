@@ -71,7 +71,43 @@ test_that("G6 is the hard backtest gate: PAC improves for every existing industr
   expect_false(h$ok)
   expect_identical(g6$gate$status, "HOLD")
   expect_match(g6$gate$detail, "control_House / commercial_banks")
+  expect_false(grepl("lobby / commercial_banks", g6$gate$detail))                  # waived by the owner (registry/gate_waivers.json): not a HOLD cell
+  lb <- tab[tab$term == "lobby" & tab$industry == "commercial_banks", ]
+  expect_false(lb$ok); expect_true(lb$waived); expect_false(h$waived)
   expect_match(g6$baseline, "v1 calculator recomputed")
+})
+
+test_that("G6 waivers: a listed cell is WAIVED (not HOLD), every other cell stays strict, show_warning decides whether the gate speaks", {
+  v <- test_v2()
+  w0 <- rf_read_waivers()
+  expect_identical(w0$cell, "lobby / commercial_banks"); expect_identical(w0$owner, "Paul Goff"); expect_identical(w0$date, "2026-09-30")
+  expect_identical(w0$reason, "owner ruling: keep log refit"); expect_false(w0$show_warning)
+  none <- rf_gate_nondegradation(v, published_v1(), waivers = w0[0, ])
+  expect_match(none$gate$detail, "lobby / commercial_banks")                        # without the list both cells hold
+  expect_false(any(none$table$waived))
+  one <- rf_gate_nondegradation(v, published_v1(), waivers = w0)
+  expect_identical(one$gate$status, "HOLD"); expect_match(one$gate$detail, "control_House / commercial_banks"); expect_false(grepl("lobby / commercial_banks", one$gate$detail))
+  expect_true(one$waivers$applied)
+  both <- rbind(w0, transform(w0, cell = "control_House / commercial_banks", term = "control_House", industry = "commercial_banks", reason = "test"))
+  quiet <- rf_gate_nondegradation(v, published_v1(), waivers = both)
+  expect_identical(quiet$gate$status, "PASS"); expect_false(grepl("waived", quiet$gate$detail))       # show_warning false on both: the gate is silent
+  expect_identical(nrow(quiet$waivers), 2L); expect_true(all(quiet$waivers$applied))                   # ...but both are still listed
+  loud <- both; loud$show_warning[2] <- TRUE
+  warned <- rf_gate_nondegradation(v, published_v1(), waivers = loud)
+  expect_identical(warned$gate$status, "WARN"); expect_match(warned$gate$detail, "control_House / commercial_banks (test)", fixed = TRUE); expect_false(grepl("lobby / commercial_banks", warned$gate$detail))
+  # a waiver whose cell no longer fails is listed as not applied
+  pac <- transform(w0, cell = "pac / commercial_banks", term = "pac", industry = "commercial_banks")
+  un <- rf_gate_nondegradation(v, published_v1(), waivers = pac)
+  expect_false(un$waivers$applied); expect_identical(un$gate$status, "HOLD")
+})
+
+test_that("the waiver file is validated: a waiver without its reason, owner or date is an error", {
+  f <- file.path(tempdir(), "w.json")
+  writeLines('{"waivers": [{"cell": "lobby / x", "term": "lobby", "industry": "x", "owner": "Paul Goff", "date": "2026-09-30", "show_warning": false}]}', f)
+  expect_error(rf_read_waivers(f), "lacks reason")
+  writeLines('{"waivers": [{"cell": "a", "term": "lobby", "industry": "x", "reason": "r", "owner": "o", "date": "d", "show_warning": "no"}]}', f)
+  expect_error(rf_read_waivers(f), "show_warning")
+  expect_equal(nrow(rf_read_waivers(file.path(tempdir(), "missing.json"))), 0L)
 })
 
 test_that("G6 passes when the refit equals the published calculator within 1e-9 and fails a hair above it (boundary controls)", {
