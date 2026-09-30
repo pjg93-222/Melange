@@ -234,43 +234,45 @@ fi_parse_args <- function(args) {
     rec$extra$code_verification <- list(verified = FALSE, issues = list(why), evidence = res$stopped$evidence)
   }
   written <- list()
-  if (!length(envs)) {
-    patch <- list(industries = stats::setNames(list(list(opensecrets = list(code_status = feeds$industries[[ids[1]]]$opensecrets$code_status %||% "unverified_recall", verification_attempt = list(
-      run_id = ctx$run_id, utc = rf_now_utc(), url = plan$url[1], outcome = if (is.null(verification)) "page not delivered" else "no page accepted",
-      reason = if (!is.null(res$stopped)) res$stopped$reason else NULL, http = res$stopped$evidence$http, location = res$stopped$evidence$headers$location)))), ids[1]))
-    pr <- fi_write_proposals(ctx$run_dir, list(), patch, "No page was accepted; the code stays unverified. Nothing here changes a registry.")
-    fi_receipt_output(rec, pr$inputs, 0L, role = "proposed_inputs"); fi_receipt_output(rec, pr$registry_patch, NA_integer_, role = "proposed_registry_patch")
+  if (length(envs)) written <- .fi_write_os_outputs(ctx, envs, feeds)
+  # Proposals (never applied). The totals page of a code that is already captured stays the frozen capture: proposed by reference, never
+  # re-fetched or copied. Fetched pages are proposed by their run-relative paths. With no page accepted the patch still records the baseline
+  # code, its scope caveat and the verification attempt (from this run, or from the fetch_state.json stop an earlier run left).
+  cfg0 <- feeds$industries[[ids[1]]]
+  code <- cfg0$opensecrets$codes[[1]]
+  okc <- !is.null(verification) && verification$verified
+  complete <- length(envs) > 0L && length(envs) == nrow(plan) && is.null(res$stopped)
+  anchor <- cfg0$opensecrets$totals_cycle_anchor %||% max(unlist(cfg0$opensecrets$cycles_required))
+  frozen_totals <- if (!is.null(inv)) inv[inv$code == code & inv$cycle == anchor & inv$kind == "totals", , drop = FALSE] else NULL
+  have_frozen_totals <- !is.null(frozen_totals) && nrow(frozen_totals) > 0L
+  totals_path <- if (have_frozen_totals) paste0("{LOO}/", frozen_totals$file[1]) else file.path(ctx$run_dir, "outputs", "os", sprintf("%s_%d_totals.json", code, anchor))
+  ent <- if (length(written)) fi_manifest_os(written, NULL, fi_code_sha256(), run_dir = ctx$run_dir) else list()
+  if (have_frozen_totals) {
+    ent <- c(list(list(role = sprintf("os_totals:%s", ids[1]), path = totals_path, sha256 = frozen_totals$sha256[1], pinned = TRUE, purpose = "raw", vintage = frozen_totals$retrieved_utc[1],
+                       supplied_by = "frozen baseline capture of 2026-09-27 (not re-fetched)")), ent)
   }
-  if (length(envs)) {
-    written <- .fi_write_os_outputs(ctx, envs, feeds)
-    cmap <- fi_code_map(feeds)
-    ent <- fi_manifest_os(written, NULL, fi_code_sha256(), run_dir = ctx$run_dir)
-    okc <- !is.null(verification) && verification$verified
-    cfg0 <- feeds$industries[[ids[1]]]
-    code <- cfg0$opensecrets$codes[[1]]
-    complete <- length(envs) == nrow(plan) && is.null(res$stopped)
-    # the totals page of a code that is already captured stays the frozen capture: proposed by reference, never re-fetched or copied
-    anchor <- cfg0$opensecrets$totals_cycle_anchor %||% max(unlist(cfg0$opensecrets$cycles_required))
-    frozen_totals <- if (!is.null(inv)) inv[inv$code == code & inv$cycle == anchor & inv$kind == "totals", , drop = FALSE] else NULL
-    totals_path <- if (!is.null(frozen_totals) && nrow(frozen_totals)) paste0("{LOO}/", frozen_totals$file[1]) else file.path(ctx$run_dir, "outputs", "os", sprintf("%s_%d_totals.json", code, anchor))
-    if (!is.null(frozen_totals) && nrow(frozen_totals)) {
-      ent <- c(list(list(role = sprintf("os_totals:%s", ids[1]), path = totals_path, sha256 = frozen_totals$sha256[1], pinned = TRUE, purpose = "raw", vintage = frozen_totals$retrieved_utc[1],
-                         supplied_by = "frozen baseline capture of 2026-09-27 (not re-fetched)")), ent)
-    }
-    patch <- list(industries = stats::setNames(list(list(opensecrets = c(
-      list(code_status = cfg0$opensecrets$code_status %||% "unverified_recall",
-           page_verification = if (okc) list(heading = verification$heading, parent = verification$parent, verified_utc = rf_now_utc(), run_id = ctx$run_id) else NULL,
-           baseline_scope_caveat = cfg0$opensecrets$baseline_scope_caveat %||% cfg0$opensecrets$scope_caveat),
-      if (complete) list(totals = totals_path,
-                         recipients = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_{cycle}_candidates_{chamber}.json", code)),
-                         presidential = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_{cycle}_presidential.json", code)),
-                         recipients_run_relative = sprintf("outputs/os/%s_{cycle}_candidates_{chamber}.json", code),
-                         presidential_run_relative = sprintf("outputs/os/%s_{cycle}_presidential.json", code), status = "supplied")))), ids[1]))
-    pr <- fi_write_proposals(ctx$run_dir, ent, patch, "OpenSecrets fetched pages; the refit registry patch sets the capture paths only when every planned page was accepted.")
-    fi_receipt_output(rec, pr$inputs, length(ent), role = "proposed_inputs"); fi_receipt_output(rec, pr$registry_patch, NA_integer_, role = "proposed_registry_patch")
-    gb$event("feeds.manifest.proposed", "succeeded", "manifest", sprintf("proposed %d manifest entries", length(ent)), "", list(entries = length(ent)))
-    for (nm in names(written)) fi_current_update(paste0("os:", nm), written[[nm]], ctx$run_id)
-  }
+  st0 <- fi_fetch_state_read(fi_frt_dir())
+  ev0 <- res$stopped$evidence %||% st0$evidence
+  attempt <- if (!length(envs)) list(run_id = ctx$run_id, utc = rf_now_utc(), url = plan$url[1], outcome = if (is.null(verification)) "page not delivered" else "no page accepted",
+                                     reason = res$stopped$reason %||% st0$reason, http = ev0$http, location = ev0$headers$location, cf_mitigated = ev0$headers$`cf-mitigated`,
+                                     stop_recorded_utc = if (isTRUE(st0$stopped)) st0$utc else NULL) else NULL
+  patch <- list(industries = stats::setNames(list(list(opensecrets = c(
+    list(codes = as.list(unlist(cfg0$opensecrets$codes)), level = cfg0$opensecrets$level %||% "industry", code_status = cfg0$opensecrets$code_status %||% "unverified_recall",
+         baseline_scope_caveat = cfg0$opensecrets$baseline_scope_caveat %||% cfg0$opensecrets$scope_caveat,
+         page_verification = if (okc) list(heading = verification$heading, parent = verification$parent, verified_utc = rf_now_utc(), run_id = ctx$run_id) else NULL,
+         verification_attempt = attempt),
+    if (complete) list(totals = totals_path,
+                       recipients = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_{cycle}_candidates_{chamber}.json", code)),
+                       presidential = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_{cycle}_presidential.json", code)),
+                       recipients_run_relative = sprintf("outputs/os/%s_{cycle}_candidates_{chamber}.json", code),
+                       presidential_run_relative = sprintf("outputs/os/%s_{cycle}_presidential.json", code), status = "supplied")
+    else list(totals = if (have_frozen_totals) totals_path else NULL, recipients = NULL, presidential = NULL, status = "missing",
+              reason = sprintf("%s recipient and presidential pages are not all captured yet (%d of %d planned pages accepted%s)", code, length(envs), nrow(plan),
+                               if (!is.null(res$stopped)) paste0("; stopped: ", res$stopped$reason) else ""))))), ids[1]))
+  pr <- fi_write_proposals(ctx$run_dir, ent, patch, "OpenSecrets fetched pages; the refit registry patch sets the recipient and presidential capture paths only when every planned page was accepted.")
+  fi_receipt_output(rec, pr$inputs, length(ent), role = "proposed_inputs"); fi_receipt_output(rec, pr$registry_patch, NA_integer_, role = "proposed_registry_patch")
+  gb$event("feeds.manifest.proposed", "succeeded", "manifest", sprintf("proposed %d manifest entries", length(ent)), "", list(entries = length(ent)))
+  for (nm in names(written)) fi_current_update(paste0("os:", nm), written[[nm]], ctx$run_id)
   n_ok <- length(envs)
   if (!is.null(res$stopped)) {
     msg <- if (identical(res$stopped$kind, "block") || identical(res$stopped$kind, "gate")) FI_OS_STOP_MESSAGE else paste("opensecrets-fetch stopped:", res$stopped$reason)

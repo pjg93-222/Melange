@@ -84,7 +84,7 @@ candidate recipients and the presidential recipients for 2012-2024 (21 pages) ar
 
 ### Frozen captures
 
-"Frozen" means the existing captures are never re-fetched or overwritten. `registryrozen_os_pages.json` lists every captured page (code,
+"Frozen" means the existing captures are never re-fetched or overwritten. `registry\frozen_os_pages.json` lists every captured page (code,
 cycle, kind, file, sha256; no content; regenerate with `tools\make_frozen_inventory.R`). The fetcher plans only pages the inventory does not
 hold, refuses any page it does hold, and closes the fully captured codes (F03, F05, T2100) altogether. A registry that names an inventory
 that is missing stops the run rather than fetching blind.

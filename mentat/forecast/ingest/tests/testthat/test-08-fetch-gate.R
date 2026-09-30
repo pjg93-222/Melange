@@ -289,7 +289,7 @@ test_that("END TO END: a block mid-run keeps the pages already accepted, marks t
   expect_true("feeds.fetch.stop" %in% ev); expect_equal(tail(ev, 1), "feeds.run.fail")
   # no partial registry patch: the capture paths are proposed only when every planned page was accepted
   pr <- jsonlite::fromJSON(file.path(r$run_dir, "proposed_registry_patch.json"), simplifyVector = FALSE)$patch$industries$widgets$opensecrets
-  expect_null(pr$totals); expect_null(pr$status)
+  expect_null(pr$totals); expect_equal(pr$status, "missing"); expect_match(pr$reason, "not all captured")
 })
 
 test_that("a dry run plans the pages and makes no request", {

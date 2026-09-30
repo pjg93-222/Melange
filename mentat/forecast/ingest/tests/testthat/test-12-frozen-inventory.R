@@ -147,3 +147,28 @@ test_that("a recipient page of F09 verifies: the heading 'Insurance Recipients' 
   expect_true(grepl(f$industries$property_casualty$opensecrets$expect$catname_regex, "Insurance", ignore.case = TRUE, perl = TRUE))
   expect_false(grepl(f$industries$property_casualty$opensecrets$expect$catname_regex, "Life Insurance", ignore.case = TRUE, perl = TRUE))
 })
+
+test_that("a challenged run still proposes the baseline: frozen totals by reference, recipient pages missing, the attempt with its Cloudflare evidence; a later gate-closed run repeats it from fetch_state.json without a request", {
+  d <- local_ingest_env()
+  ip <- write_inv(file.path(d$root, "inv.json"), list(list("Z9900", 2014L, "totals")))
+  f <- feeds_inv(ip); f$industries$widgets$opensecrets$baseline_scope_caveat <- "synthetic baseline caveat"; f$industries$widgets$opensecrets$code_status <- "owner_ruling_synthetic"
+  w <- make_world(function(url) if (grepl("robots", url)) resp(200, ROBOTS_2026, list(), "text/plain") else
+    resp(403, "<html><title>Just a moment...</title></html>", list(`cf-mitigated` = "challenge", `cf-ray` = "abc-IAD", `set-cookie` = "x=y")))
+  r <- fi_run("opensecrets-fetch", industry = "widgets", run_id = "blk-1", feeds = f, events_dir = d$glassbox, verbose = FALSE, transport = w$transport, clock = w$clock, sleep = w$sleep)
+  expect_equal(r$status, "stopped"); expect_equal(r$stop_reason, "cf_mitigated_header")
+  pi <- jsonlite::fromJSON(file.path(r$run_dir, "proposed_inputs.json"), simplifyVector = FALSE)
+  expect_equal(vapply(pi$inputs, function(e) e$role, ""), "os_totals:widgets")
+  expect_match(pi$inputs[[1]]$path, "^\\{LOO\\}/outputs/x/Z9900_2014_totals.json$")
+  pr <- jsonlite::fromJSON(file.path(r$run_dir, "proposed_registry_patch.json"), simplifyVector = FALSE)$patch$industries$widgets$opensecrets
+  expect_equal(unlist(pr$codes), "Z9900"); expect_equal(pr$code_status, "owner_ruling_synthetic"); expect_equal(pr$baseline_scope_caveat, "synthetic baseline caveat")
+  expect_match(pr$totals, "\\{LOO\\}"); expect_null(pr$recipients); expect_equal(pr$status, "missing"); expect_match(pr$reason, "0 of 6 planned pages accepted; stopped: cf_mitigated_header")
+  expect_equal(pr$verification_attempt$http, 403L); expect_equal(pr$verification_attempt$cf_mitigated, "challenge")
+  expect_false(grepl("x=y", paste(readLines(file.path(r$run_dir, "proposed_registry_patch.json")), collapse = ""), fixed = TRUE))
+  # the next run: the gate is closed (sticky flag), zero requests, and the proposals still carry the recorded attempt
+  n <- length(w$calls)
+  r2 <- fi_run("opensecrets-fetch", industry = "widgets", run_id = "blk-2", feeds = f, events_dir = d$glassbox, verbose = FALSE, transport = w$transport, clock = w$clock, sleep = w$sleep)
+  expect_equal(length(w$calls), n); expect_equal(r2$status, "stopped")
+  pr2 <- jsonlite::fromJSON(file.path(r2$run_dir, "proposed_registry_patch.json"), simplifyVector = FALSE)$patch$industries$widgets$opensecrets
+  expect_equal(pr2$verification_attempt$http, 403L); expect_equal(pr2$verification_attempt$cf_mitigated, "challenge"); expect_false(is.null(pr2$verification_attempt$stop_recorded_utc))
+  expect_equal(pr2$status, "missing")
+})
