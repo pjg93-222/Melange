@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "note": "Per-industry feed configuration of the Giving Forecast ingest (OpenSecrets and IBISWorld). The ingest never edits this file or the refit registry: code verification results and calibration outcomes are written as proposed_registry_patch.json next to the run receipt, and the owner applies them.",
+  "packages": { "pdftools": "3.9.0", "qpdf": "1.4.1", "xml2": "1.5.2", "data.table": "1.18.4", "curl": "7.1.0", "jsonlite": "2.0.0", "readxl": "1.5.0" },
+  "opensecrets_frozen": {
+    "codes": ["F03", "F05", "T2100", "F09"],
+    "note": "The 63 recipient captures and the totals pages of these codes (taken 2026-09-27) are kept permanently as the frozen historical baseline. The feeds only add data (new industries, later cycles); they never overwrite, re-fetch or re-derive these captures."
+  },
+  "opensecrets_fetch": {
+    "permission": {
+      "kind": "owner_attestation",
+      "who": "Paul Goff",
+      "date": "2026-09-30",
+      "basis": "owner states explicit permission from OpenSecrets",
+      "evidence_file": null,
+      "recorded_by": "ingest build of 2026-09-30, on the owner ruling relayed by the orchestrator; OpenSecrets' own grant was not seen by the builder"
+    },
+    "user_agent_contact": "operator Paul Goff, Melange Systems",
+    "allowed_hosts": ["www.opensecrets.org"],
+    "url_patterns": ["^https://www\\.opensecrets\\.org/industries/(totals|summary|recips|indus)\\?"],
+    "min_interval_s": 4,
+    "min_interval_floor_s": 3,
+    "max_requests_per_run": 25,
+    "request_timeout_s": 60,
+    "terms_sha256_reviewed": null,
+    "terms_note": "The terms page is not fetched on each run: the owner holds OpenSecrets' explicit permission. Set terms_sha256_reviewed to a hash to make every run compare the live terms page against it."
+  },
+  "industries": {
+    "property_casualty": {
+      "opensecrets": {
+        "codes": ["F3400"],
+        "code_status": "unverified_recall",
+        "expect": { "catname_regex": "property\\s*(&|and)\\s*casualty", "catorder": "F09", "parent_industry_name": "Insurance" },
+        "scope_caveat": "OpenSecrets assigns one primary category to each organisation, so a multi-line insurer coded to another category (for example generic Insurance, F09) is not in F3400; F3400 can undercount the property and casualty political footprint.",
+        "route": "fetch",
+        "routes_allowed": ["fetch", "bulk", "manual_save"],
+        "cycles_required": [2012, 2014, 2016, 2018, 2020, 2022, 2024],
+        "cycles_recommended": [2008, 2010],
+        "totals_cycle_anchor": 2024,
+        "calibration_codes": ["F03", "F05", "T2100", "F09"],
+        "recipe_version": null
+      },
+      "ibisworld": {
+        "code": "52412",
+        "titles": ["Property, Casualty and Direct Insurance in the US", "Direct Insurance (except Life, Health and Medical) Carriers in the US"],
+        "study_sector": "property_casualty",
+        "actual_vintage_policy": "single_latest_vintage",
+        "actual_min_edition": "2025-01",
+        "actual_first_year": 2006,
+        "predicted_rule": "direct",
+        "predicted_targets": [2008, 2026],
+        "scope_qualification": "IBISWorld52412 direct property/casualty and other direct insurance carriers; includes industry revenue beyond written premiums."
+      },
+      "status": "pilot"
+    }
+  },
+  "bulk_recipes": [
+    {
+      "version": "v1",
+      "note": "First recipe of FEEDS_SPEC 4.2: candidate recipients from individual gifts to N-prefixed recipients plus direct PAC gifts (DI = D); negative amounts (refunds) are kept. Not used for any number until fi_os_calibrate accepts it.",
+      "individuals": { "recipient_prefix": "N", "exclude_types": [] },
+      "pacs": { "di": ["D"] },
+      "totals": { "pacs_di": ["D"], "individuals_recipient_prefix": "N" }
+    }
+  ]
+}
