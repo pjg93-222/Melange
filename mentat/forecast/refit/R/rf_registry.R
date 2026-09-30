@@ -1,0 +1,75 @@
+# The industry registry (registry/industries.json) and the frozen model specifications (registry/models.json).
+# The registry says which raw inputs exist for each industry; a model is fitted for an industry only when its inputs
+# are present, and the withheld reason is stated (never guessed, never silent).
+
+rf_read_registry <- function(path = file.path(rf_home(), "registry", "industries.json")) {
+  reg <- rf_read_json(path)
+  reg$industries <- stats::setNames(reg$industries, vapply(reg$industries, function(i) i$id, ""))
+  reg
+}
+
+rf_read_models <- function(path = file.path(rf_home(), "registry", "models.json")) {
+  m <- rf_read_json(path)
+  m$models <- stats::setNames(m$models, vapply(m$models, function(x) x$id, ""))
+  m
+}
+
+# Problems found in the registry; character(0) means valid.
+rf_validate_registry <- function(reg) {
+  ind <- reg$industries
+  out <- character()
+  ids <- vapply(ind, function(i) i$id, "")
+  if (anyDuplicated(ids)) out <- c(out, paste("duplicate ids:", paste(ids[duplicated(ids)], collapse = ", ")))
+  for (i in ind) {
+    os <- i$opensecrets
+    for (k in c("recipients", "presidential")) {
+      p <- os[[k]]
+      if (!is.null(p) && !grepl("{cycle}", p, fixed = TRUE)) out <- c(out, sprintf("%s: opensecrets.%s has no {cycle}", i$id, k))
+    }
+    if (!is.null(os$recipients) && !grepl("{chamber}", os$recipients, fixed = TRUE)) out <- c(out, sprintf("%s: opensecrets.recipients has no {chamber}", i$id))
+    for (m in c("pac", "control", "lobbying")) {
+      v <- i$models[[m]]
+      if (!is.logical(v) || length(v) != 1L || is.na(v)) out <- c(out, sprintf("%s: models.%s is not boolean", i$id, m))
+    }
+    if (!is.logical(i$calculator) || length(i$calculator) != 1L) out <- c(out, sprintf("%s: calculator is not boolean", i$id))
+    else if (isTRUE(i$calculator) && !any(unlist(i$models))) out <- c(out, sprintf("%s: calculator industry with no model", i$id))
+    if (identical(i$status, "declined") && any(unlist(i$models))) out <- c(out, sprintf("%s: declined industry with a model", i$id))
+    if (identical(i$status, "declined") && !nzchar(i$reason %||% "")) out <- c(out, sprintf("%s: declined industry without a reason", i$id))
+  }
+  out
+}
+
+# Why an industry has no `model` ("pac", "control", "lobbying"), or NA when it has everything that model needs.
+rf_withheld_reason <- function(i, model) {
+  if (!isTRUE(i$models[[model]])) return(i$reason %||% paste0("model '", model, "' is not configured for this industry"))
+  if (model %in% c("pac", "control")) {
+    os <- i$opensecrets
+    if (is.null(os$totals) || (model == "control" && (is.null(os$recipients) || is.null(os$presidential)))) {
+      return(os$reason %||% paste0("OpenSecrets ", paste(unlist(os$codes), collapse = "/"), " capture not supplied"))
+    }
+    if (is.null(i$ibisworld$actual_sector)) return("no IBISWorld actual-revenue series")
+  }
+  if (model == "lobbying" && (is.null(i$lobbyview$study_sector) || identical(i$ibisworld$predicted_rule, "none"))) {
+    return("no LobbyView / predicted-growth series")
+  }
+  NA_character_
+}
+
+# Ids of the industries whose inputs exist for `model`.
+rf_capable <- function(reg, model) {
+  ids <- names(reg$industries)
+  ids[vapply(reg$industries, function(i) is.na(rf_withheld_reason(i, model)), logical(1))]
+}
+
+# OpenSecrets code -> industry id map of the industries that have totals.
+rf_code_map <- function(reg) {
+  ids <- rf_capable(reg, "pac")
+  stats::setNames(ids, vapply(ids, function(id) reg$industries[[id]]$opensecrets$codes[[1]], ""))
+}
+
+# Expand "{cycle}" / "{chamber}" in a pattern.
+rf_fill <- function(pattern, cycle = NULL, chamber = NULL) {
+  if (!is.null(cycle)) pattern <- gsub("{cycle}", cycle, pattern, fixed = TRUE)
+  if (!is.null(chamber)) pattern <- gsub("{chamber}", chamber, pattern, fixed = TRUE)
+  pattern
+}
