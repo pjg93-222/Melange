@@ -69,6 +69,20 @@ for (r in refs) add(paste0("parity_ref:", basename(r)), r, purpose = "parity_ref
                     supplied_by = "Codex 2026-09-26/27 lanes; hashed in giving-models-v1.json sources (interpretable_effects.csv and analyze.py were read by the v1 builder but not listed there)")
 add("v1_bundle", "{BUNDLE_V1}", purpose = "parity_ref", vintage = "giving-models-v1.json, model_version 2026-09-27-association-v1",
     supplied_by = "mentat/app/data (committed in Mentat 7287dbb50)")
+# Property and casualty (owner ruling 2026-09-30): OpenSecrets F09 (all insurance, scope caveat in the registry). The totals are the frozen baseline capture of
+# 2026-09-27; the 21 recipient and presidential pages were fetched by the feeds ingest (run local-f09-proposals-20260930) and are read from its run folder.
+# The 2024 current-year row comes from the 2024-11 IBISWorld edition (tools/make_pc_ibis_current.R): IBISWorld's current-year ESTIMATE, single vintage.
+PCO <- "{INGEST}/local-f09-proposals-20260930/outputs/os"
+add("os_totals:property_casualty", sprintf("%s/F09_2024_totals.json", OSB), vintage = "OpenSecrets capture 2026-09-27 (frozen baseline)",
+    supplied_by = "frozen baseline capture of 2026-09-27 (not re-fetched)")
+for (cy in cycles) {
+  for (ch in c("H", "S")) add(sprintf("os_recipients:property_casualty:%d:%s", cy, ch), sprintf("%s/F09_%d_candidates_%s.json", PCO, cy, ch),
+                               vintage = "OpenSecrets F09 page fetched 2026-09-30 (run local-f09-proposals-20260930)", supplied_by = "giving-forecast-ingest")
+  add(sprintf("os_presidential:property_casualty:%d", cy), sprintf("%s/F09_%d_presidential.json", PCO, cy),
+      vintage = "OpenSecrets F09 page fetched 2026-09-30 (run local-f09-proposals-20260930)", supplied_by = "giving-forecast-ingest")
+}
+add("ibis_actual_current:property_casualty", "{RFDATA}/ibis_pc_2024_11_current_year.csv", vintage = "IBISWorld 52412 edition 2024-11, current-year (2024) ESTIMATE",
+    supplied_by = "tools/make_pc_ibis_current.R (feeds ingester parser on the 2024-11 edition, sha256 f484c65f...)")
 rf_write_json_atomic(list(schema_version = 1L, note = "Raw-input manifest. A pinned input whose sha256 changes FAILS gate G1 until this file is regenerated for a new vintage. purpose 'parity_ref' files are Codex design files the pipeline rebuilds and compares against; they are never model inputs.",
                           inputs = entries), file.path(.RF_HOME, "registry", "inputs.json"))
 cat(sprintf("Wrote %d manifest entries\n", length(entries)))

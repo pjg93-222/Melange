@@ -26,6 +26,15 @@ rf_gate_panels <- function(ctx) {
 
 # G2: run the parity test files in a testthat run and count expectations. `filter` is a regex over the test file names.
 rf_parity_suite <- function(filter = "^(01|02|03|04|05|06|07|08|08b|10)-") {
+  # The test helper redirects RF_RUNTIME, RF_GLASSBOX_DIR and other settings into
+  # its sandbox. Restore the complete caller environment even if a helper errors:
+  # a real refit's subsequent publication mutex and archive must remain persistent.
+  caller_env <- Sys.getenv()
+  on.exit({
+    added <- setdiff(names(Sys.getenv()), names(caller_env))
+    if (length(added)) Sys.unsetenv(added)
+    do.call(Sys.setenv, as.list(caller_env))
+  }, add = TRUE)
   res <- testthat::test_dir(file.path(rf_home(), "tests", "testthat"), filter = filter, stop_on_failure = FALSE, reporter = "silent")
   df <- as.data.frame(res)
   list(files = length(unique(df$file)), tests = nrow(df), expectations = sum(df$nb), failed = sum(df$failed), errors = sum(df$error),
@@ -98,6 +107,7 @@ rf_run_parity <- function(run_id = NULL, runs_dir = rf_runs_dir(), run_tests = T
     if (g1$status != "PASS") stop("G1 failed: ", g1$detail)
 
     gb$stage_start("panels")
+    reg <- rf_frozen_registry(reg)                       # parity is judged on the frozen v1 sample (pilot industries are not in it)
     ctx <- rf_build_panels(inputs, reg)
     ctx$inputs <- inputs; ctx$reg <- reg; ctx$models <- models
     g3 <- rf_gate_panels(ctx)

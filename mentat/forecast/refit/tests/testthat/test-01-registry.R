@@ -13,18 +13,34 @@ test_that("the shipped registry is valid and carries the six fitted industries a
   }
 })
 
-test_that("capabilities follow the inputs that exist, and a missing OpenSecrets capture is a stated reason", {
-  expect_setequal(rf_capable(RF_TEST_REG, "pac"), c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing"))
-  expect_setequal(rf_capable(RF_TEST_REG, "control"), c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing"))
-  expect_setequal(rf_capable(RF_TEST_REG, "lobbying"),
-                  c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing", "life_insurance", "telecom", "property_casualty"))
+test_that("capabilities follow the inputs that exist: the frozen v1 sample has three industries, property and casualty (F09) is a ready pilot", {
+  fr <- rf_frozen_registry(RF_TEST_REG)
+  three <- c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing")
+  expect_setequal(rf_capable(fr, "pac"), three); expect_setequal(rf_capable(fr, "control"), three)
+  expect_setequal(rf_capable(RF_TEST_REG, "pac"), c(three, "property_casualty"))          # F09 supplied, the 2024-11 IBISWorld edition is its one vintage
+  expect_setequal(rf_capable(RF_TEST_REG, "lobbying"), c(three, "life_insurance", "telecom", "property_casualty"))
+  expect_setequal(rf_capable(fr, "lobbying"), rf_capable(RF_TEST_REG, "lobbying"))         # the lobbying panel is LobbyView's: pilots keep it
   pc <- RF_TEST_REG$industries$property_casualty
-  expect_identical(rf_withheld_reason(pc, "pac"), "OpenSecrets F3400 capture not supplied")
-  expect_identical(rf_withheld_reason(pc, "control"), "OpenSecrets F3400 capture not supplied")
-  expect_true(is.na(rf_withheld_reason(pc, "lobbying")))
+  expect_true(is.na(rf_withheld_reason(pc, "pac"))); expect_true(is.na(rf_withheld_reason(pc, "control"))); expect_true(is.na(rf_withheld_reason(pc, "lobbying")))
+  expect_identical(unlist(pc$opensecrets$codes), "F09"); expect_identical(pc$opensecrets$code_status, "owner_ruling_f09_all_insurance")
+  expect_match(pc$opensecrets$baseline_scope_caveat, "F09 = all insurance; Mentat P&C roster and IBISWorld 52412 are P&C only")
+  expect_length(pc$caveats, 1L); expect_match(pc$ibisworld$actual_current_year$caveat, "current-year estimate from the 2024-11 edition; replaced automatically when a 2025\\+ edition is ingested")
   # the OpenSecrets code -> id map used by the panel builders
-  expect_identical(rf_code_map(RF_TEST_REG),
-                   c(F03 = "commercial_banks", F05 = "credit_unions", T2100 = "auto_light_duty_manufacturing"))
+  expect_identical(rf_code_map(fr), c(F03 = "commercial_banks", F05 = "credit_unions", T2100 = "auto_light_duty_manufacturing"))
+  expect_identical(rf_code_map(RF_TEST_REG), c(F03 = "commercial_banks", F05 = "credit_unions", T2100 = "auto_light_duty_manufacturing", F09 = "property_casualty"))
+})
+
+test_that("a ready pilot joins the v2 sample; without its 2024 growth it waits for data", {
+  inp <- test_inputs()
+  expect_identical(rf_ready_pilots(RF_TEST_REG, inp), "property_casualty")
+  v2 <- rf_v2_registry(RF_TEST_REG, inp)
+  expect_setequal(rf_capable(v2, "pac"), c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing", "property_casualty"))
+  no_est <- inp[inp$role != "ibis_actual_current:property_casualty", ]
+  expect_identical(rf_ready_pilots(RF_TEST_REG, no_est), character(0))                      # workbook 07 ends 2023: the 2024 cycle needs the estimate row
+  st <- rf_agent_data_status(RF_TEST_REG, "property_casualty", no_est)
+  expect_false(st$ready); expect_match(st$missing[[1]]$detail, "revenue ends before the 2024 cycle")
+  expect_identical(names(rf_v2_registry(RF_TEST_REG, no_est)$industries), names(RF_TEST_REG$industries))
+  expect_setequal(rf_capable(rf_v2_registry(RF_TEST_REG, no_est), "pac"), c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing"))
 })
 
 test_that("registry validation catches a duplicate id, a pattern without {cycle}, and a calculator industry with no model", {

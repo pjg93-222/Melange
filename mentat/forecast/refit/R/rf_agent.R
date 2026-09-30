@@ -107,7 +107,7 @@ rf_agent_data_status <- function(reg, id, inputs = NULL) {
   ib <- i$ibisworld
   if (is.null(ib$actual_sector)) add("IBISWorld actual revenue", "no workbook-07 sector mapped")
   else if (!is.null(inputs) && "ibis_actual" %in% inputs$role) {
-    g <- tryCatch(rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = ib$actual_sector), error = function(e) NULL)
+    g <- tryCatch(rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = ib$actual_sector, supplement = rf_growth_supplement(inputs, id)), error = function(e) NULL)
     ok <- if (is.null(g)) NULL else g[!is.na(g$cycle_revenue_growth_pct) & !is.na(g$prior_cycle_revenue_growth_pct), ]
     if (is.null(ok) || !nrow(ok)) add("IBISWorld actual revenue", sprintf("no cycle growth for sector '%s' in workbook 07", ib$actual_sector))
     else if (!(2024 %in% ok$cycle_end)) add("IBISWorld actual revenue", sprintf("revenue ends before the 2024 cycle (latest cycle with growth: %d); a 2025+ vintage covering 2006-2024 is needed (%s)", max(ok$cycle_end), ib$vintage_note %||% ""))
@@ -227,12 +227,15 @@ rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id =
       return(list(run_id = run_id, dir = dir, decision = "WAITING_FOR_DATA", waiting = waiting, gates = NULL))
     }
     gb$stage_start("panels")
-    ctx <- rf_parity_context(inputs, reg, models)
-    ctx$manifest <- manifest
-    g3 <- rf_gate_panels(ctx)
-    gb$stage_finish("panels", g3$detail); gb$gate("G3 panel validity", g3$status, g3$detail); say("panels, fits and stepwise grid built; G3 ", g3$status)
+    ctx0 <- rf_parity_context(inputs, rf_frozen_registry(reg), models)        # the frozen v1 sample: parity gates and the G6 baseline
+    ctx0$manifest <- manifest
+    g3 <- rf_gate_panels(ctx0)
+    pilots <- rf_ready_pilots(reg, inputs)
+    ctx <- if (length(pilots)) { x <- rf_parity_context(inputs, rf_v2_registry(reg, inputs), models); x$manifest <- manifest; x } else ctx0   # + ready pilots (property and casualty)
+    gb$stage_finish("panels", g3$detail); gb$gate("G3 panel validity", g3$status, g3$detail)
+    say("panels, fits and stepwise grid built; G3 ", g3$status, if (length(pilots)) paste0("; pilot industries in the v2 sample: ", paste(pilots, collapse = ", ")) else "")
     gb$stage_start("models")
-    v <- rf_v2_context(ctx, run_id = run_id, packages = pkgs, b_random = b_random)
+    v <- rf_v2_context(ctx, run_id = run_id, packages = pkgs, b_random = b_random, frozen_ctx = if (length(pilots)) ctx0 else NULL)
     v$adequacy <- rf_gate_adequacy(ctx)
     gb$stage_finish("models", sprintf("rule selection: %s", paste(sprintf("%s=%s", names(v$selection), vapply(v$selection, function(s) s$reported_rule, "")), collapse = ", "))); say("v2 models built")
     published <- if (!is.null(published_path)) jsonlite::fromJSON(published_path, simplifyVector = FALSE) else {
@@ -245,14 +248,14 @@ rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id =
     gb$stage_finish("parity", g2$detail, status = if (g2$status == "PASS") "succeeded" else "failed"); gb$gate("G2 parity", g2$status, g2$detail)
     base <- rbind(g0, g1, g2, g3)
     gb$stage_start("gates")
-    b1 <- rf_bundle_v2(v)
+    b1 <- rf_bundle_v2(v, previous_model_version = published$model_version)
     staged <- file.path(dir, "bundle", "giving-models-v2.staged.json")
     rf_write_json_atomic(b1, staged)
     res_g <- rf_gates(v, b1, published = published, base = base, bundle_path = staged, consumer_cmd = consumer_cmd)
     for (k in seq_len(nrow(res_g$gates))) if (!(substr(res_g$gates$gate[k], 1, 2) %in% c("G0", "G1", "G2", "G3"))) gb$gate(res_g$gates$gate[k], res_g$gates$status[k], res_g$gates$detail[k])
-    bundle <- rf_bundle_v2(v, res_g$gates)
+    bundle <- rf_bundle_v2(v, res_g$gates, previous_model_version = published$model_version)
     g7 <- rf_gate_bundle(bundle, reg)                                     # the finalized bundle (with its gate summary) must validate too
-    if (g7$status != "PASS") { res_g$gates$status[substr(res_g$gates$gate, 1, 2) == "G7"] <- "FAIL"; res_g$gates$detail[substr(res_g$gates$gate, 1, 2) == "G7"] <- g7$detail; res_g$decision <- rf_decision(res_g$gates); bundle <- rf_bundle_v2(v, res_g$gates) }
+    if (g7$status != "PASS") { res_g$gates$status[substr(res_g$gates$gate, 1, 2) == "G7"] <- "FAIL"; res_g$gates$detail[substr(res_g$gates$gate, 1, 2) == "G7"] <- g7$detail; res_g$decision <- rf_decision(res_g$gates); bundle <- rf_bundle_v2(v, res_g$gates, previous_model_version = published$model_version) }
     unlink(staged)
     bundle_path <- file.path(dir, "bundle", "giving-models-v2.json")
     rf_write_json_atomic(bundle, bundle_path)
@@ -274,7 +277,7 @@ rf_run_refit <- function(industry = NULL, publish = c("auto", "never"), run_id =
       gb$stage_start("publish")
       pub <- rf_publish(bundle, res_g$gates, receipt, dir = publish_dir, gb = gb)
       gb$stage_finish("publish", pub$status, status = if (pub$status == "published") "succeeded" else "failed"); say("publish: ", pub$status)
-      if (pub$status == "published") receipt$published_to <- list(list(dir = publish_dir, file = basename(pub$file), sha256 = pub$sha256))
+      if (pub$status == "published") receipt$published_to <- list(list(dir = publish_dir, file = pub$pointer$active, sha256 = pub$sha256))
     }
     rf_write_json_atomic(receipt, file.path(dir, "receipt.json"))
     rf_write_lines(log, file.path(dir, "log.txt"))

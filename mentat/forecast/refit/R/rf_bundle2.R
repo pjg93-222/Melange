@@ -35,7 +35,10 @@ rf_fold_sign_consistency <- function(m, d, var, key) {
 
 # Everything the v2 bundle and its gates need, built from the parity context (panels, fits, stepwise grid). `b_random` = draws of the
 # random wild-bootstrap blocks (full production 99,999).
-rf_v2_context <- function(ctx, run_id = "unit", packages = NULL, built_at_utc = rf_now_utc(), b_random = RF$B_RANDOM, min_gain = RF$RULE_MIN_GAIN) {
+#
+# `frozen_ctx`: when the v2 sample holds pilot industries beyond the frozen v1 sample, the context of the frozen sample. The v1 calculator the gates compare against
+# (G6 baseline) was fitted on the frozen sample, so its per-industry backtest MAE is recomputed there (`baseline_backtests`), never on the extended sample.
+rf_v2_context <- function(ctx, run_id = "unit", packages = NULL, built_at_utc = rf_now_utc(), b_random = RF$B_RANDOM, min_gain = RF$RULE_MIN_GAIN, frozen_ctx = NULL) {
   ms <- ctx$models$models
   specs <- rf_backtest_specs(ctx)
   selection <- rf_select_rules(specs, min_gain = min_gain)
@@ -73,12 +76,27 @@ rf_v2_context <- function(ctx, run_id = "unit", packages = NULL, built_at_utc = 
   cells[[length(cells) + 1L]] <- rf_backtest_metrics(lg_pred)
   backtests <- rf_rbind_fill(cells)
   anchors <- rf_select_anchors(backtests, selection, lapply(shares, function(s) levels(factor(s$spec$d$sector))), min_gain)
+  baseline_bt <- NULL
+  if (!is.null(frozen_ctx)) {
+    fs <- rf_backtest_specs(frozen_ctx)
+    bl <- list(rf_backtest_metrics(rf_backtest(fs$pac, fs$pac$d, "loeo", rules = "R0")),
+               rf_backtest_metrics(rf_backtest(fs$control_House.selected, fs$control_House.selected$d, "loeo", rules = "R0")),
+               rf_backtest_metrics(rf_backtest(fs$control_Senate.selected, fs$control_Senate.selected$d, "loeo", rules = "R0")),
+               rf_backtest_metrics(rf_backtest(fs$lobby, fs$lobby$d, "rolling", rules = "R0")))
+    baseline_bt <- rf_rbind_fill(bl)
+  }
   raw <- ctx$inputs[ctx$inputs$purpose == "raw", ]
   input_hash <- substr(rf_sha256_of_strings(raw$actual), 1, 8)
-  list(ctx = ctx, specs = specs, selection = selection, anchors = anchors, pac = pac, shares = shares, lobby_pp = lob_pp, lobby_log_fit = lob_log_fit, lobby_log = lob_log,
+  list(ctx = ctx, frozen_ctx = frozen_ctx, baseline_backtests = baseline_bt, specs = specs, selection = selection, anchors = anchors, pac = pac, shares = shares, lobby_pp = lob_pp, lobby_log_fit = lob_log_fit, lobby_log = lob_log,
        evidence = ev, sign = sign, backtests = backtests, lobby_log_pred = lg_pred, run_id = run_id, packages = packages, built_at_utc = built_at_utc,
-       model_version = sprintf("refit-%s-%s", format(as.Date(substr(built_at_utc, 1, 10)), "%Y%m%d"), input_hash), input_hash = input_hash, min_gain = min_gain,
+       model_version = rf_model_version(input_hash, run_id, built_at_utc, rf_code_sha256()), input_hash = input_hash, min_gain = min_gain,
        adequacy = NULL)
+}
+
+# Different builds of the same input vintage need distinct immutable publication identities.
+rf_model_version <- function(input_hash, run_id, built_at_utc, code_sha256) {
+  build_hash <- substr(rf_sha256_of_strings(c(run_id, built_at_utc, code_sha256)), 1, 12)
+  sprintf("refit-%s-%s-%s", format(as.Date(substr(built_at_utc, 1, 10)), "%Y%m%d"), input_hash, build_hash)
 }
 
 # ---- blocks ---------------------------------------------------------------------------------------------------------------------------
@@ -110,6 +128,14 @@ rf_v2_industries <- function(v) {
       scope = if (length(i$opensecrets$codes)) sprintf("OpenSecrets %s whole-industry accounting; separate from company/subindustry report scopes", i$opensecrets$codes[[1]]) else "no OpenSecrets capture",
       capabilities = caps, withheld = withheld, growth_scaling_cycles = as.list(as.integer(g$cycle_end)),
       lobbying_history = lapply(seq_len(nrow(lh)), function(k) list(year = as.integer(lh$year[k]), lobbying_real_2025_million = lh$y[k], predicted_growth_pct = lh$g[k])))
+    cav <- as.list(unlist(i$caveats %||% list()))            # scope caveats of the registry (property and casualty: OpenSecrets F09 = all insurance)
+    est <- attr(p, "estimates")
+    if (!is.null(est) && id %in% est$sector) {                # IBISWorld current-year estimates that entered this industry's growth series
+      yrs <- sort(est$year[est$sector == id])
+      txt <- i$ibisworld$actual_current_year$caveat %||% sprintf("%s revenue is IBISWorld's current-year estimate; replaced automatically when a later edition is ingested.", paste(yrs, collapse = ", "))
+      cav <- c(cav, list(txt))
+    }
+    if (length(cav)) ind$caveats <- cav
     if (length(i$opensecrets$codes)) ind$code <- i$opensecrets$codes[[1]] else ind["code"] <- list(NULL)
     if (!is.null(i$mentat_key)) ind$mentat_key <- i$mentat_key else ind["mentat_key"] <- list(NULL)
     if (!is.null(i$ibisworld$code)) ind$ibisworld_code <- i$ibisworld$code else ind["ibisworld_code"] <- list(NULL)

@@ -443,6 +443,14 @@
               ],
               "additionalProperties": false
             }
+          },
+          "caveats": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Scope and data caveats the console shows with the industry (OpenSecrets F09 = all insurance for property and casualty; IBISWorld current-year estimates). Optional: absent when there are none."
           }
         },
         "required": [

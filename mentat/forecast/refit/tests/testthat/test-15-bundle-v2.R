@@ -70,7 +70,7 @@ test_that("the writer refuses NaN and a seat model in share_models before it rea
 test_that("header, inputs and sources: model version, producer, deflator, interval labels and the pinned raw inputs", {
   b <- test_bundle2()
   expect_identical(b$schema_version, 2L)
-  expect_match(b$model_version, "^refit-20260930-[0-9a-f]{8}$")
+  expect_match(b$model_version, "^refit-20260930-[0-9a-f]{8}-[0-9a-f]{12}$")
   expect_identical(b$previous_model_version, "2026-09-27-association-v1")
   expect_identical(b$producer$pipeline, "giving-forecast-refit")
   expect_match(b$producer$code_sha256, "^[0-9a-f]{64}$")
@@ -177,7 +177,7 @@ test_that("political inputs and saved outlook: Polymarket to Polymarket, the par
   expect_identical(so$House$current_control, 1L); expect_identical(so$Senate$current_control, 1L)
 })
 
-test_that("industries: banks and credit unions are offered, auto stays in estimation, property and casualty is withheld with its reason", {
+test_that("industries: banks and credit unions are offered, auto stays in estimation, the frozen v1 estimation sample excludes the ready property and casualty pilot", {
   ind <- test_bundle2()$industries
   expect_true(ind$commercial_banks$calculator && ind$credit_unions$calculator)
   expect_false(ind$auto_light_duty_manufacturing$calculator)
@@ -185,7 +185,7 @@ test_that("industries: banks and credit unions are offered, auto stays in estima
   expect_identical(ind$commercial_banks$mentat_key, "banking")
   expect_false(is.null(ind$property_casualty))
   expect_false(ind$property_casualty$capabilities$pac); expect_false(ind$property_casualty$capabilities$control)
-  expect_identical(ind$property_casualty$withheld$pac, "OpenSecrets F3400 capture not supplied")
+  expect_identical(ind$property_casualty$withheld$pac, "model 'pac' is not configured for this industry")
   expect_true(ind$property_casualty$capabilities$lobbying)
   expect_length(ind$property_casualty$history, 0L)
   expect_null(ind$life_insurance)
@@ -281,4 +281,16 @@ test_that("the cross-field invariants reject a bundle whose chosen anchor breaks
   w$anchor <- "same_phase"; win$share_models$control_House$anchors$commercial_banks <- w
   win$share_models$control_House$prediction$industries$commercial_banks <- w$prediction$same_phase
   expect_identical(rf_validate_parsed(win), character(0))
+})
+
+
+test_that("publication identities distinguish same-day rebuilds without changing the input vintage", {
+  args <- list(input_hash = "01234567", run_id = "run-a", built_at_utc = "2026-09-30T12:00:00Z", code_sha256 = strrep("a", 64))
+  first <- do.call(rf_model_version, args)
+  expect_identical(first, do.call(rf_model_version, args))
+  for (field in c("run_id", "built_at_utc", "code_sha256")) {
+    changed <- args
+    changed[[field]] <- switch(field, run_id = "run-b", built_at_utc = "2026-09-30T12:00:01Z", code_sha256 = strrep("b", 64))
+    expect_false(identical(first, do.call(rf_model_version, changed)), info = field)
+  }
 })

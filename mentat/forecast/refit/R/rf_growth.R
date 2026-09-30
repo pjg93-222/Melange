@@ -29,12 +29,29 @@ rf_cycle_multiplier <- function(cpi, cycle_end, base_year = RF$BASE_YEAR) {
 #   growth(t)  = (cycle(t) / cycle(t-2) - 1) * 100 ; prior(t) = growth(t-2)          cycles 2008 ... 2024
 # -> sector, cycle_end, cycle_total_million, cycle_revenue_growth_pct, prior_cycle_revenue_growth_pct, price_basis,
 #    report_vintage, source_url, ibisworld_code
-rf_cycle_growth <- function(actual_xlsx, sectors = NULL, cycles = seq(2008, 2024, 2)) {
+#
+# `supplement` = 07-shaped rows of a current-year ESTIMATE (property and casualty 2024, IBISWorld 52412 edition 2024-11; owner ruling 2026-09-30). A supplement row is
+# used only for a (sector, year) that workbook 07 does not hold, and only from the SAME report vintage as that sector's series (vintages are never spliced): the day a later
+# edition puts the year in the main series the estimate drops out. attr "estimates" lists the supplement rows that were used.
+rf_cycle_growth <- function(actual_xlsx, sectors = NULL, cycles = seq(2008, 2024, 2), supplement = NULL) {
   g <- rf_read_xlsx(actual_xlsx, "data")
   need <- c("sector", "year", "revenue_million_constant_2026_usd", "revenue_million_report_price_basis", "status")
   if (!all(need %in% names(g))) rf_raise("PanelError", paste("workbook 07 lacks columns:", paste(setdiff(need, names(g)), collapse = ", ")))
   if (!all(g$status == "observed")) rf_raise("PanelError", "workbook 07 has rows whose status is not 'observed'")
   if (!is.null(sectors)) g <- g[g$sector %in% sectors, ]
+  used <- NULL
+  if (!is.null(supplement) && nrow(supplement)) {
+    sp <- supplement[supplement$sector %in% unique(g$sector) & !(paste(supplement$sector, supplement$year) %in% paste(g$sector, g$year)), , drop = FALSE]
+    for (s in unique(sp$sector)) {
+      main <- unique(g$report_vintage[g$sector == s]); mine <- unique(sp$report_vintage[sp$sector == s])
+      if (length(main) != 1L || !identical(main, mine)) rf_raise("PanelError", sprintf("the estimate row of %s is from vintage %s but its series is %s: editions are never spliced", s, paste(mine, collapse = "/"), paste(main, collapse = "/")))
+    }
+    if (nrow(sp)) {
+      cols <- intersect(names(g), names(sp))
+      g <- rf_rbind_fill(list(g, sp[, cols, drop = FALSE]))
+      used <- sp[, intersect(c("sector", "year", "report_vintage", "value_type", "source_pdf_sha256"), names(sp)), drop = FALSE]
+    }
+  }
   out <- lapply(split(g, g$sector), function(q) {
     lvl <- ifelse(is.na(q$revenue_million_constant_2026_usd), q$revenue_million_report_price_basis, q$revenue_million_constant_2026_usd)
     at <- function(y) { v <- lvl[q$year == y]; if (length(v) == 1L) v else NA_real_ }
@@ -49,6 +66,18 @@ rf_cycle_growth <- function(actual_xlsx, sectors = NULL, cycles = seq(2008, 2024
   out <- do.call(rbind, out)
   rownames(out) <- NULL
   attr(out, "inputs") <- list(actual = actual_xlsx)
+  attr(out, "estimates") <- used
+  out
+}
+
+# The 07-shaped estimate rows of the manifest (roles "ibis_actual_current:<industry>"), for the industries of `ids`. NULL when there are none.
+rf_growth_supplement <- function(inputs, ids) {
+  roles <- paste0("ibis_actual_current:", ids)
+  roles <- roles[roles %in% inputs$role]
+  if (!length(roles)) return(NULL)
+  rows <- lapply(roles, function(r) utils::read.csv(rf_input_path(inputs, r), stringsAsFactors = FALSE, na.strings = c("", "NA"), colClasses = c(ibisworld_code = "character", report_vintage = "character")))
+  out <- rf_rbind_fill(rows)
+  attr(out, "roles") <- roles
   out
 }
 

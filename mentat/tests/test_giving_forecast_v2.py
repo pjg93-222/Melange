@@ -945,8 +945,26 @@ class RenderFixtureTests(unittest.TestCase):
         if os.environ.get('UPDATE_GIVING_FORECAST_GOLDEN'):
             GOLDEN.parent.mkdir(exist_ok=True)
             GOLDEN.write_text(json.dumps(payload, indent=1, sort_keys=True) + '\n', encoding='utf-8', newline='\n')
-        self.assertEqual(payload, json.loads(GOLDEN.read_text(encoding='utf-8')),
-                         'giving_forecast_v2_render.json is stale; regenerate it with UPDATE_GIVING_FORECAST_GOLDEN=1')
+        # Platform libm implementations can differ in their final floating-point bits.
+        # Preserve the authored fixture, all structure, and every nonnumeric value exactly.
+        def compare(actual, expected, path='$'):
+            if isinstance(expected, dict):
+                self.assertIsInstance(actual, dict, path)
+                self.assertEqual(actual.keys(), expected.keys(), path)
+                for key in expected:
+                    compare(actual[key], expected[key], path + '.' + key)
+            elif isinstance(expected, list):
+                self.assertIsInstance(actual, list, path)
+                self.assertEqual(len(actual), len(expected), path)
+                for index, (value, reference) in enumerate(zip(actual, expected)):
+                    compare(value, reference, path + '[' + str(index) + ']')
+            elif type(expected) in (int, float) and type(actual) in (int, float):
+                self.assertTrue(math.isclose(actual, expected, rel_tol=1e-14, abs_tol=1e-12),
+                                f'{path}: {actual!r} != {expected!r}')
+            else:
+                self.assertEqual(type(actual), type(expected), path)
+                self.assertEqual(actual, expected, path)
+        compare(payload, json.loads(GOLDEN.read_text(encoding='utf-8')))
 
 
 if __name__ == '__main__':

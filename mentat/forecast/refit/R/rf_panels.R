@@ -10,8 +10,10 @@ rf_pac_panel <- function(reg, inputs) {
   cpi <- rf_cpi(rf_input_path(inputs, "cpi"))
   ids <- rf_capable(reg, "pac")
   actual <- vapply(ids, function(id) reg$industries[[id]]$ibisworld$actual_sector, "")
-  growth <- rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = actual)
-  used <- c("cpi", "ibis_actual")
+  supp <- rf_growth_supplement(inputs, ids)
+  growth <- rf_cycle_growth(rf_input_path(inputs, "ibis_actual"), sectors = actual, supplement = supp)
+  estimates <- attr(growth, "estimates")
+  used <- c("cpi", "ibis_actual", if (!is.null(estimates)) attr(supp, "roles"))
   parts <- lapply(ids, function(id) {
     role <- paste0("os_totals:", id)
     used <<- c(used, role)
@@ -37,6 +39,7 @@ rf_pac_panel <- function(reg, inputs) {
   p$presidential_cycle <- as.integer(p$cycle_end %% 4 == 0)
   rownames(p) <- NULL
   attr(p, "scaling") <- sc
+  attr(p, "estimates") <- estimates              # growth rows that are IBISWorld current-year estimates (property and casualty 2024), or NULL
   attr(p, "inputs") <- rf_input_records(inputs, used)
   attr(p, "checks") <- rf_panel_checks(p, "pac")
   p

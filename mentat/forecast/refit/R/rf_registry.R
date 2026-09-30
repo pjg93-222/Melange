@@ -73,3 +73,29 @@ rf_fill <- function(pattern, cycle = NULL, chamber = NULL) {
   if (!is.null(chamber)) pattern <- gsub("{chamber}", chamber, pattern, fixed = TRUE)
   pattern
 }
+
+# The FROZEN view of the registry: only industries whose status is "fitted" estimate the PAC and control models. The v1 parity targets (Codex design
+# files, the frozen bundle) were built on that sample, so every parity gate (G2, G3) and the G6 baseline of the published v1 calculator run on it.
+# Pilot industries keep their lobbying flag (the lobbying panel is LobbyView's and already holds every sector).
+rf_frozen_registry <- function(reg) {
+  for (id in names(reg$industries)) {
+    i <- reg$industries[[id]]
+    if (!identical(i$status, "fitted")) { i$models$pac <- FALSE; i$models$control <- FALSE; reg$industries[[id]] <- i }
+  }
+  reg
+}
+
+# Pilot industries whose PAC and control inputs are all present: they join the estimation sample of the v2 refit (the gates decide whether the result
+# may publish). -> character ids. An industry that still waits for data stays out and is reported as WAITING_FOR_DATA.
+rf_ready_pilots <- function(reg, inputs) {
+  ids <- names(reg$industries)[vapply(reg$industries, function(i) identical(i$status, "pilot") && isTRUE(i$models$pac) && isTRUE(i$models$control), logical(1))]
+  Filter(function(id) rf_agent_data_status(reg, id, inputs)$ready, ids)
+}
+
+# The v2 estimation registry: the frozen sample plus the ready pilots.
+rf_v2_registry <- function(reg, inputs) {
+  pil <- rf_ready_pilots(reg, inputs)
+  frozen <- rf_frozen_registry(reg)
+  for (id in pil) frozen$industries[[id]] <- reg$industries[[id]]
+  frozen
+}

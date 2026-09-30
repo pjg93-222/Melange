@@ -58,7 +58,8 @@ test_that("G5 fails a flipped slope and a low sign consistency (negative control
 
 test_that("G6 is the hard backtest gate: PAC improves for every existing industry, and the previous-cycle House share anchor is worse for banks", {
   v <- test_v2()
-  g6 <- rf_gate_nondegradation(v, published_v1())
+  waivers <- rf_read_waivers()
+  g6 <- rf_gate_nondegradation(v, published_v1(), waivers = waivers[waivers$term == "lobby", ])
   tab <- g6$table
   pac <- tab[tab$term == "pac", ]
   expect_equal(nrow(pac), 3L)
@@ -79,7 +80,10 @@ test_that("G6 is the hard backtest gate: PAC improves for every existing industr
 
 test_that("G6 waivers: a listed cell is WAIVED (not HOLD), every other cell stays strict, show_warning decides whether the gate speaks", {
   v <- test_v2()
-  w0 <- rf_read_waivers()
+  registered <- rf_read_waivers()
+  expect_setequal(registered$cell, c("lobby / commercial_banks", "control_House / commercial_banks", "control_House / credit_unions", "control_House / auto_light_duty_manufacturing"))
+  expect_true(all(registered$show_warning[registered$term == "control_House"]))
+  w0 <- registered[registered$term == "lobby", ]
   expect_identical(w0$cell, "lobby / commercial_banks"); expect_identical(w0$owner, "Paul Goff"); expect_identical(w0$date, "2026-09-30")
   expect_identical(w0$reason, "owner ruling: keep log refit"); expect_false(w0$show_warning)
   none <- rf_gate_nondegradation(v, published_v1(), waivers = w0[0, ])
@@ -160,13 +164,13 @@ test_that("decision: any FAIL is FAIL, else any HOLD is HOLD, else PUBLISH; WARN
   expect_identical(rf_decision(mk("HOLD", "FAIL", "PASS")), "FAIL")
 })
 
-test_that("all gates of today's refit: HOLD because G6 (House banks, previous-cycle share anchor) and G8 (no v2 calculator) hold; nothing FAILs", {
+test_that("all gates of today's refit: HOLD because G8 is deliberately absent; owner-waived G6 degradations remain visible as WARN; nothing FAILs", {
   v <- test_v2(); b <- test_bundle2()
   base <- data.frame(gate = c("G0 environment", "G1 inputs", "G2 parity", "G3 panel validity"), status = "PASS", detail = "", stringsAsFactors = FALSE)
   g <- rf_gates(v, b, published = published_v1(), base = base, bundle_path = NULL, consumer_cmd = "")
   expect_identical(g$decision, "HOLD")
   st <- stats::setNames(g$gates$status, substr(g$gates$gate, 1, 2))
-  expect_identical(st[["G4"]], "WARN"); expect_identical(st[["G5"]], "PASS"); expect_identical(st[["G6"]], "HOLD")
+  expect_identical(st[["G4"]], "WARN"); expect_identical(st[["G5"]], "PASS"); expect_identical(st[["G6"]], "WARN")
   expect_identical(st[["G7"]], "PASS"); expect_identical(st[["G8"]], "HOLD")
   expect_false(any(g$gates$status == "FAIL"))
   # the finalized bundle carries its own gate summary and still validates against the contract

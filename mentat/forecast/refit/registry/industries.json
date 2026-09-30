@@ -93,10 +93,11 @@
       "mentat_key": "property_casualty_insurance",
       "mentat_workbook": "Property & Casualty Insurance Industry Spending Overview.xlsx",
       "calculator": true,
-      "opensecrets": { "codes": ["F3400"], "level": "category", "name": "Property & casualty insurance", "totals": null, "recipients": null, "presidential": null, "status": "missing", "reason": "OpenSecrets F3400 capture not supplied" },
-      "ibisworld": { "code": "52412", "actual_sector": "property_casualty", "predicted_study_sector": "property_casualty", "predicted_rule": "direct", "vintage_note": "07 = 2024-11 vintage only; ends 2023" },
+      "opensecrets": { "codes": ["F09"], "level": "industry", "name": "Insurance (OpenSecrets F09: life, health, brokers and property & casualty together)", "code_status": "owner_ruling_f09_all_insurance", "baseline_scope_caveat": "OpenSecrets baseline F09 = all insurance; Mentat P&C roster and IBISWorld 52412 are P&C only.", "page_verification": {"heading": "Insurance", "parent": null, "verified_utc": "2026-09-30T18:37:00Z", "run_id": "local-f09-proposals-20260930"}, "totals": "{LOO}/outputs/opensecrets_baseline/direct_sources/F09_2024_totals.json", "recipients": "{INGEST}/local-f09-proposals-20260930/outputs/os/F09_{cycle}_candidates_{chamber}.json", "presidential": "{INGEST}/local-f09-proposals-20260930/outputs/os/F09_{cycle}_presidential.json", "status": "supplied", "superseded_candidate": { "code": "F3400", "name": "Property & casualty insurance", "status": "not_published_as_page_and_unverified" } },
+      "ibisworld": { "code": "52412", "actual_sector": "property_casualty", "predicted_study_sector": "property_casualty", "predicted_rule": "direct", "vintage_note": "single vintage: the 2024-11 edition (workbook 07 holds 2006-2023; its 2024 row is IBISWorld's current-year ESTIMATE, added from ibis_actual_current:property_casualty and replaced automatically when a 2025+ edition puts 2024 in the main series)", "actual_current_year": { "role": "ibis_actual_current:property_casualty", "year": 2024, "kind": "current-year estimate", "caveat": "P&C 2024 revenue is IBISWorld's current-year estimate from the 2024-11 edition; replaced automatically when a 2025+ edition is ingested." } },
       "lobbyview": { "study_sector": "property_casualty", "confidence": ["naics"], "naics": ["52412", "524126", "524127", "524128"] },
       "models": { "pac": true, "control": true, "lobbying": true },
+      "caveats": ["OpenSecrets baseline F09 = all insurance; Mentat P&C roster and IBISWorld 52412 are P&C only."],
       "status": "pilot"
     },
     {

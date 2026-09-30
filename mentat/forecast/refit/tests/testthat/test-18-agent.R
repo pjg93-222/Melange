@@ -74,16 +74,27 @@ test_that("Paul's real report directory (when reachable) holds no industry the r
   expect_equal(sum(det$status == "new"), 0L)
 })
 
+# Missing-data behavior is tested with deliberately absent inputs; the shipped F09 pilot is now ready.
+missing_pc_registry <- function() {
+  reg <- RF_TEST_REG
+  pc <- reg$industries$property_casualty
+  pc$opensecrets$totals <- NULL; pc$opensecrets$recipients <- NULL; pc$opensecrets$presidential <- NULL
+  pc$opensecrets$reason <- "OpenSecrets F09 capture not supplied"
+  reg$industries$property_casualty <- pc
+  reg
+}
+
 test_that("property and casualty insurance reports 'waiting for data' with the exact missing items, and banks are ready", {
-  reg <- test_ctx()$reg; inp <- test_inputs()
+  reg <- missing_pc_registry(); inp <- test_inputs()
+  inp <- inp[inp$role != "ibis_actual_current:property_casualty", ]
   pc <- rf_agent_data_status(reg, "property_casualty", inp)
   expect_false(pc$ready)
   items <- vapply(pc$missing, function(m) m$item, "")
   expect_true(all(c("OpenSecrets totals", "OpenSecrets recipients and presidential lists", "IBISWorld actual revenue") %in% items))
   d <- stats::setNames(vapply(pc$missing, function(m) m$detail, ""), items)
-  expect_identical(d[["OpenSecrets totals"]], "OpenSecrets F3400 capture not supplied")
+  expect_identical(d[["OpenSecrets totals"]], "OpenSecrets F09 capture not supplied")
   expect_match(d[["IBISWorld actual revenue"]], "revenue ends before the 2024 cycle \\(latest cycle with growth: 2022\\)")
-  expect_true(pc$models$lobbying); expect_false(pc$models$pac)
+  expect_true(pc$models$lobbying); expect_false(pc$ready)
   for (id in c("commercial_banks", "credit_unions", "auto_light_duty_manufacturing")) expect_true(rf_agent_data_status(reg, id, inp)$ready, info = id)
 })
 
@@ -92,14 +103,14 @@ test_that("a refit requested for property and casualty ends WAITING_FOR_DATA cle
   gb <- file.path(tempdir(), "gb_wait"); unlink(gb, recursive = TRUE)
   old <- Sys.getenv("RF_GLASSBOX_DIR"); on.exit(Sys.setenv(RF_GLASSBOX_DIR = old), add = TRUE); Sys.setenv(RF_GLASSBOX_DIR = gb)
   pdir <- file.path(tempdir(), "pub_wait"); dir.create(pdir, showWarnings = FALSE)
-  r <- rf_run_refit(industry = "property_casualty", publish = "auto", run_id = "w1", runs_dir = runs, run_tests = FALSE, publish_dir = pdir)
+  r <- rf_run_refit(industry = "property_casualty", publish = "auto", run_id = "w1", runs_dir = runs, run_tests = FALSE, publish_dir = pdir, reg = missing_pc_registry())
   expect_identical(r$decision, "WAITING_FOR_DATA")
   d <- file.path(runs, "w1")
   expect_true(file.exists(file.path(d, "DATA_REQUEST.md"))); expect_true(file.exists(file.path(d, "waiting.json")))
   expect_false(dir.exists(file.path(d, "bundle"))); expect_false(file.exists(file.path(d, "receipt.json")))
   expect_length(list.files(pdir), 0L)
   req <- readLines(file.path(d, "DATA_REQUEST.md"), warn = FALSE)
-  expect_true(any(grepl("OpenSecrets F3400 capture not supplied", req, fixed = TRUE)))
+  expect_true(any(grepl("OpenSecrets F09 capture not supplied", req, fixed = TRUE)))
   ev <- events_of(gb)
   fin <- Filter(function(e) e$kind == "run.finish", ev)
   expect_length(fin, 1L); expect_identical(fin[[1]]$status, "succeeded"); expect_match(fin[[1]]$summary, "waiting for data: property_casualty")
@@ -113,10 +124,19 @@ test_that("a refit run on the real inputs: gates, review packet, receipt with pl
   pdir <- file.path(tempdir(), "pub_refit"); unlink(pdir, recursive = TRUE); dir.create(pdir)
   file.copy(rf_roots()$BUNDLE_V1, file.path(pdir, "giving-models-v1.json"))
   v1_hash <- rf_sha256(file.path(pdir, "giving-models-v1.json"))
+  # A repeat refit must name the pointer-selected v2 predecessor, not the frozen v1.
+  previous <- test_bundle2()
+  previous_hash <- rf_write_json_atomic(previous, file.path(pdir, "giving-models-v2.json"))
+  .rf_write_pointer(list(schema_version = 1L, active = "giving-models-v2.json", sha256 = previous_hash,
+                         model_version = previous$model_version, model_schema_version = 2L), pdir)
+  pointer_hash <- rf_sha256(rf_pointer_path(pdir))
+  before_files <- list.files(pdir)
   r <- rf_run_refit(publish = "auto", run_id = "r1", runs_dir = runs, run_tests = FALSE, b_random = 999L, publish_dir = pdir, consumer_cmd = "")
-  expect_identical(r$decision, "HOLD")                                         # G6 (previous-cycle House share anchor, banks) and G8 (no v2 calculator yet)
+  expect_identical(r$decision, "HOLD")                                         # Deliberately absent G8 consumer command holds publication; all other gates remain enforced.
   expect_identical(r$published$status, "not_published")
-  expect_identical(list.files(pdir), "giving-models-v1.json"); expect_identical(rf_sha256(file.path(pdir, "giving-models-v1.json")), v1_hash)
+  expect_identical(list.files(pdir), before_files); expect_identical(rf_sha256(file.path(pdir, "giving-models-v1.json")), v1_hash)
+  expect_identical(rf_sha256(file.path(pdir, "giving-models-v2.json")), previous_hash)
+  expect_identical(rf_sha256(rf_pointer_path(pdir)), pointer_hash)
   d <- file.path(runs, "r1")
   expect_true(all(c("bundle/giving-models-v2.json", "receipt.json", "log.txt", "review/REVIEW.md", "review/regressions.txt", "review/backtests.csv", "review/rule_selection.csv",
                     "review/dl_slopes.csv", "review/robustness_pvalues.csv", "review/bundle_diff.csv", "review/gates.json", "review/inputs.csv", "review/g6_nondegradation.csv") %in% list.files(d, recursive = TRUE)))
@@ -124,18 +144,23 @@ test_that("a refit run on the real inputs: gates, review packet, receipt with pl
   b <- jsonlite::fromJSON(file.path(d, "bundle", "giving-models-v2.json"), simplifyVector = FALSE)
   expect_identical(rf_validate_parsed(b), character(0))
   expect_identical(b$gates$decision, "HOLD")
-  expect_true(any(vapply(b$gates$checks, function(c) c$gate == "G6 non-degradation" && c$status == "HOLD", logical(1))))
+  expect_identical(b$previous_model_version, previous$model_version)
+  expect_true(any(vapply(b$gates$checks, function(c) c$gate == "G8 consumer smoke" && c$status == "HOLD", logical(1))))
   # receipt: platform statement, gates, rule selection, hashes
   rc <- jsonlite::fromJSON(file.path(d, "receipt.json"), simplifyVector = FALSE)
   expect_identical(rc$decision, "HOLD"); expect_identical(rc$mode, "refit")
   expect_true(all(c("R_version", "blas", "lapack", "platform", "cores") %in% names(rc$platform)))
   expect_identical(vapply(rc$rule_selection, function(s) s$reported_rule, ""), c(pac = "R1", control_House = "R0", control_Senate = "R0", lobby = "R0"))
   expect_identical(rc$bundle_sha256, rf_sha256(file.path(d, "bundle", "giving-models-v2.json")))
-  expect_true(any(vapply(rc$waiting_for_data, function(x) TRUE, logical(1))))   # property and casualty, reported beside the run
+  expect_length(rc$waiting_for_data, 0L)   # F09 captures and the 2024 estimate make the pilot ready
   # the packet: decision, gates, rule selection, slopes, inputs, platform; real summary(lm()) blocks incl. the lobbying log refit
   md <- readLines(file.path(d, "review", "REVIEW.md"), warn = FALSE)
   expect_true(any(grepl("## Decision: HOLD", md, fixed = TRUE))); expect_true(any(grepl("Rule selection", md))); expect_true(any(grepl("## Platform", md)))
-  expect_true(any(grepl("Waiting for data", md)) && any(grepl("OpenSecrets F3400 capture not supplied", md, fixed = TRUE)))
+  expect_false(any(grepl("OpenSecrets F09 capture not supplied", md, fixed = TRUE)))
+  expect_true(r$bundle$industries$property_casualty$capabilities$pac)
+  expect_true(r$bundle$industries$property_casualty$capabilities$control)
+  expect_length(r$bundle$industries$property_casualty$caveats, 2L)
+  expect_true(any(grepl("current-year estimate", unlist(r$bundle$industries$property_casualty$caveats), fixed = TRUE)))
   txt <- readLines(file.path(d, "review", "regressions.txt"), warn = FALSE)
   expect_true(any(grepl("MODEL lobby_log", txt, fixed = TRUE))); expect_true(any(grepl("data = lobbying_log_all71", txt, fixed = TRUE)))
   expect_gt(sum(grepl("^Coefficients:", txt)), 10L)

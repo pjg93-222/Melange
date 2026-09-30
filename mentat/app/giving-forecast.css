@@ -85,6 +85,7 @@
   .gf-comparison .gf-table th,.gf-comparison .gf-table td{display:block;width:100%;border:0;padding:8px 0}
   .gf-comparison .gf-table td::before{content:attr(data-horizon);display:block;font-size:12px;font-weight:600;color:var(--acu-purple);margin-bottom:8px}
   .gf-comparison .gf-table tbody th{font-size:20px}
+  .giving-forecast .gf-comparison .gf-table th:first-child{width:100%}
   .giving-forecast.gf-v2 .gf-settings{grid-template-columns:1fr}
   .gf-pair{grid-template-columns:1fr}
 }

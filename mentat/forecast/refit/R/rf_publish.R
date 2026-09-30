@@ -2,7 +2,8 @@
 # touches git, never overwrites v1 (the v1 file stays where it is and stays the rollback target).
 #
 #   <publish dir>/giving-models-v1.json               the frozen v1 bundle (kept)
-#   <publish dir>/giving-models-v2.json               the published v2 bundle
+#   <publish dir>/giving-models-v2.json               compatibility copy of the published v2 bundle
+#   <publish dir>/versions/<sha256>/                 immutable bundle and receipt selected by the pointer
 #   <publish dir>/giving-models-v2.receipt.json       its receipt
 #   <publish dir>/giving-models-current.json          the pointer the console follows: {active, sha256, model_version, previous: {...}}
 #   <runtime>/published/<model_version>/              archive of every publish: bundle, receipt and the pointer as it was before the switch
@@ -13,7 +14,11 @@
 
 rf_publish_dir <- function() rf_env_path("RF_PUBLISH_DIR", file.path(dirname(dirname(rf_home())), "app", "data"))
 rf_pointer_path <- function(dir = rf_publish_dir()) file.path(dir, "giving-models-current.json")
-rf_archive_dir <- function(model_version) file.path(rf_runtime(), "published", model_version)
+rf_archive_dir <- function(model_version) {
+  if (!is.character(model_version) || length(model_version) != 1L || is.na(model_version) || !grepl("^[A-Za-z0-9][A-Za-z0-9._-]*$", model_version))
+    stop("invalid model_version for publication archive", call. = FALSE)
+  file.path(rf_runtime(), "published", model_version)
+}
 rf_lock_path <- function() file.path(rf_runtime(), "refit.lock")
 
 rf_pid_alive <- function(pid) {
@@ -44,22 +49,78 @@ rf_lock_acquire <- function(stale_hours = 6, path = rf_lock_path()) {
 
 rf_lock_release <- function(path = rf_lock_path()) { unlink(path, recursive = TRUE); invisible(!dir.exists(path)) }
 
-# The pointer file's content, or a pointer derived from the kept v1 file when none has been written yet.
+# Pointer readers and writers use the same selected bytes. Legacy installs without a pointer
+# prefer v2 when present, matching the Python consumer. A malformed pointer never falls back.
 rf_read_pointer <- function(dir = rf_publish_dir()) {
   p <- rf_pointer_path(dir)
-  if (file.exists(p)) return(jsonlite::fromJSON(p, simplifyVector = FALSE))
-  v1 <- file.path(dir, "giving-models-v1.json")
-  if (!file.exists(v1)) return(NULL)
-  list(schema_version = 1L, active = "giving-models-v1.json", sha256 = rf_sha256(v1), model_version = jsonlite::fromJSON(v1, simplifyVector = FALSE)$model_version,
-       switched_at_utc = NA_character_, previous = NULL)
+  if (file.exists(p)) {
+    ptr <- jsonlite::fromJSON(p, simplifyVector = FALSE)
+    .rf_validate_pointer(ptr, dir)
+    return(ptr)
+  }
+  for (name in c("giving-models-v2.json", "giving-models-v1.json")) {
+    path <- file.path(dir, name)
+    if (!file.exists(path)) next
+    bundle <- jsonlite::fromJSON(path, simplifyVector = FALSE)
+    ptr <- list(schema_version = 1L, active = name, sha256 = rf_sha256(path), model_version = bundle$model_version,
+                model_schema_version = bundle$schema_version, switched_at_utc = NA_character_, previous = NULL)
+    .rf_validate_pointer(ptr, dir)
+    return(ptr)
+  }
+  NULL
+}
+
+.rf_validate_pointer <- function(ptr, dir) {
+  scalar <- function(x) is.character(x) && length(x) == 1L && !is.na(x) && nzchar(x)
+  if (!is.list(ptr) || !identical(ptr$schema_version, 1L)) stop("invalid publication pointer schema", call. = FALSE)
+  if (!scalar(ptr$active) || !grepl("^(versions/[0-9a-f]{64}/)?giving-models-v[12]\\.json$", ptr$active)) stop("invalid publication pointer active path", call. = FALSE)
+  if (!scalar(ptr$sha256) || !grepl("^[0-9a-f]{64}$", ptr$sha256) || !scalar(ptr$model_version)) stop("invalid publication pointer identity", call. = FALSE)
+  target <- file.path(dir, ptr$active)
+  if (!file.exists(target)) stop("publication pointer target is missing", call. = FALSE)
+  root <- paste0(normalizePath(dir, winslash = "/", mustWork = TRUE), "/")
+  if (!startsWith(normalizePath(target, winslash = "/", mustWork = TRUE), root)) stop("publication pointer target escapes model directory", call. = FALSE)
+  if (!identical(rf_sha256(target), ptr$sha256)) stop("publication pointer SHA-256 mismatch", call. = FALSE)
+  bundle <- jsonlite::fromJSON(target, simplifyVector = FALSE)
+  expected <- as.integer(sub(".*-v([12])\\.json$", "\\1", ptr$active))
+  if (!identical(bundle$model_version, ptr$model_version) || !identical(bundle$schema_version, expected) ||
+      (!is.null(ptr$model_schema_version) && !identical(ptr$model_schema_version, expected))) stop("publication pointer model identity mismatch", call. = FALSE)
+  if (expected == 2L && length(rf_validate_parsed(bundle))) stop("publication pointer bundle fails contract", call. = FALSE)
+  invisible(bundle)
 }
 
 .rf_write_pointer <- function(ptr, dir) {
   ptr <- ptr[!vapply(ptr, is.null, logical(1))]
+  .rf_validate_pointer(ptr, dir)
   rf_write_json_atomic(ptr, rf_pointer_path(dir))
 }
 
-# Publish a gated bundle. `receipt` = the run receipt (list). Returns list(status, ...): "published" or "not_published" (with the reason).
+# Never replace published bytes. Copy into a sibling temporary file, verify, then rename.
+.rf_copy_immutable <- function(source, target) {
+  sha <- rf_sha256(source)
+  if (file.exists(target)) {
+    if (!identical(rf_sha256(target), sha)) stop("immutable publication file already has different bytes: ", target, call. = FALSE)
+    return(invisible(sha))
+  }
+  dir.create(dirname(target), recursive = TRUE, showWarnings = FALSE)
+  tmp <- tempfile(pattern = ".publish-", tmpdir = dirname(target))
+  on.exit(unlink(tmp), add = TRUE)
+  if (!file.copy(source, tmp) || !identical(rf_sha256(tmp), sha) || !file.rename(tmp, target))
+    stop("could not install immutable publication file: ", target, call. = FALSE)
+  invisible(sha)
+}
+
+# Fixed-name files are compatibility copies only; pointer-aware readers never select them
+# during a v2 publication. Update them only after the atomic commit, and report copy errors
+# without falsely claiming that a successful pointer switch failed.
+.rf_compatibility_copy <- function(source, target) {
+  tryCatch({
+    tmp <- tempfile(pattern = ".compat-", tmpdir = dirname(target))
+    on.exit(unlink(tmp), add = TRUE)
+    if (!file.copy(source, tmp) || !identical(rf_sha256(tmp), rf_sha256(source)) || !file.rename(tmp, target)) stop("copy failed")
+    NULL
+  }, error = function(e) paste("compatibility copy unchanged:", basename(target), conditionMessage(e)))
+}
+
 rf_publish <- function(bundle, gates, receipt = list(), dir = rf_publish_dir(), gb = NULL) {
   decision <- rf_decision(gates)
   mv <- bundle$model_version
@@ -70,64 +131,80 @@ rf_publish <- function(bundle, gates, receipt = list(), dir = rf_publish_dir(), 
   }
   problems <- rf_validate_bundle(bundle)
   if (length(problems)) stop("rf_publish: bundle fails the contract schema: ", paste(utils::head(problems, 3), collapse = "; "), call. = FALSE)
+  arch <- rf_archive_dir(mv)
   lock <- rf_lock_acquire()
   on.exit(rf_lock_release(lock$path), add = TRUE)
   note("publish.start", "running", sprintf("publishing %s", mv), if (lock$broke_stale) "a stale lock was broken" else "")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
-  file_name <- sprintf("giving-models-v%d.json", bundle$schema_version)
-  receipt_name <- sub("\\.json$", ".receipt.json", file_name)
   before <- rf_read_pointer(dir)
-  # stage + verify: the bundle is written under a temporary name, re-read, re-validated, hash-compared, then renamed into place
-  tmp <- file.path(dir, paste0(file_name, ".", paste(sample(c(0:9, letters[1:6]), 12, TRUE), collapse = ""), ".tmp"))
+  name <- sprintf("giving-models-v%d.json", bundle$schema_version)
+  receipt_name <- sub("\\.json$", ".receipt.json", name)
+  tmp <- tempfile(pattern = ".publish-", tmpdir = dir)
+  on.exit(unlink(tmp), add = TRUE)
   sha <- rf_write_json_atomic(bundle, tmp)
-  back <- jsonlite::fromJSON(tmp, simplifyVector = FALSE)
-  if (length(rf_validate_parsed(back)) || !identical(rf_sha256(tmp), sha)) { unlink(tmp); stop("rf_publish: staged bundle did not verify", call. = FALSE) }
-  target <- file.path(dir, file_name)
-  ok <- FALSE
-  for (k in seq_len(40L)) { if (suppressWarnings(file.rename(tmp, target))) { ok <- TRUE; break }; Sys.sleep(stats::runif(1, 0.05, 0.25)) }   # the console may hold the file briefly
-  if (!ok) { unlink(tmp); stop("rf_publish: could not replace ", target, call. = FALSE) }
-  rsha <- rf_write_json_atomic(c(receipt, list(published_to = list(dir = dir, file = file_name, sha256 = sha, model_version = mv), decision = decision)), file.path(dir, receipt_name))
-  arch <- rf_archive_dir(mv)
-  dir.create(arch, recursive = TRUE, showWarnings = FALSE)
-  file.copy(target, file.path(arch, file_name), overwrite = TRUE); file.copy(file.path(dir, receipt_name), file.path(arch, receipt_name), overwrite = TRUE)
-  if (!is.null(before)) rf_write_json_atomic(before, file.path(arch, "pointer-before.json"))
-  ptr <- list(schema_version = 1L, active = file_name, sha256 = sha, model_version = mv, switched_at_utc = rf_now_utc(),
+  if (length(rf_validate_parsed(jsonlite::fromJSON(tmp, simplifyVector = FALSE))) || !identical(rf_sha256(tmp), sha)) stop("rf_publish: staged bundle did not verify", call. = FALSE)
+  # A model version is an identity, not a mutable archive directory.
+  archive_bundle <- file.path(arch, name)
+  if (file.exists(archive_bundle) && !identical(rf_sha256(archive_bundle), sha)) stop("rf_publish: model_version already identifies different bytes", call. = FALSE)
+  active <- paste("versions", sha, name, sep = "/")
+  target <- file.path(dir, active)
+  .rf_copy_immutable(tmp, target)
+  .rf_copy_immutable(tmp, archive_bundle)
+  receipt$published_to <- list(dir = dir, file = active, sha256 = sha, model_version = mv)
+  receipt$decision <- decision
+  # The archived first receipt remains paired with this exact bundle on repeated publishes.
+  archive_receipt <- file.path(arch, receipt_name)
+  if (!file.exists(archive_receipt)) rf_write_json_atomic(receipt, archive_receipt)
+  if (!identical(jsonlite::fromJSON(archive_receipt, simplifyVector = FALSE)$published_to$sha256, sha)) stop("rf_publish: archive receipt SHA-256 mismatch", call. = FALSE)
+  version_receipt <- file.path(dirname(target), receipt_name)
+  .rf_copy_immutable(archive_receipt, version_receipt)
+  rsha <- rf_sha256(version_receipt)
+  if (!is.null(before) && !file.exists(file.path(arch, "pointer-before.json"))) rf_write_json_atomic(before, file.path(arch, "pointer-before.json"))
+  ptr <- list(schema_version = 1L, active = active, sha256 = sha, model_version = mv, model_schema_version = bundle$schema_version, switched_at_utc = rf_now_utc(),
               previous = if (!is.null(before)) list(active = before$active, sha256 = before$sha256, model_version = before$model_version) else NULL)
-  .rf_write_pointer(ptr, dir)                                   # the atomic switch: the console follows the pointer
-  note("publish.done", "succeeded", sprintf("published %s -> %s", mv, file_name), sha)
-  list(status = "published", decision = decision, model_version = mv, file = target, sha256 = sha, receipt_sha256 = rsha, pointer = ptr, archive = arch, broke_stale = lock$broke_stale)
+  .rf_write_pointer(ptr, dir)  # the only operation that changes the active model
+  warnings <- Filter(Negate(is.null), list(.rf_compatibility_copy(target, file.path(dir, name)), .rf_compatibility_copy(version_receipt, file.path(dir, receipt_name))))
+  note("publish.done", "succeeded", sprintf("published %s -> %s", mv, active), paste(c(sha, unlist(warnings)), collapse = "; "))
+  list(status = "published", decision = decision, model_version = mv, file = target, sha256 = sha, receipt_sha256 = rsha, pointer = ptr, archive = arch,
+       broke_stale = lock$broke_stale, warnings = warnings)
 }
 
-# Restore an earlier state: make `model_version` the active bundle again. An archived publish is restored from <runtime>/published/<mv>/;
-# the kept v1 file is restored by its model_version. The pointer switch is atomic; the bundle files being replaced stay in their archives.
+# Restore archived, validated immutable bytes, or the retained v1. The previous active target
+# is never overwritten; only the pointer changes, so in-flight readers can finish safely.
 rf_rollback <- function(model_version, dir = rf_publish_dir(), gb = NULL) {
   note <- function(kind, status, summary, detail = "") if (!is.null(gb)) gb$emit_event(kind, status, "rollback", summary, detail)
+  arch <- rf_archive_dir(model_version)
   lock <- rf_lock_acquire()
   on.exit(rf_lock_release(lock$path), add = TRUE)
   before <- rf_read_pointer(dir)
-  arch <- rf_archive_dir(model_version)
   v1 <- file.path(dir, "giving-models-v1.json")
-  if (dir.exists(arch) && length(list.files(arch, pattern = "^giving-models-v[0-9]+\\.json$"))) {
-    file_name <- list.files(arch, pattern = "^giving-models-v[0-9]+\\.json$")[1]
-    target <- file.path(dir, file_name)
-    if (!file.exists(target) || !identical(rf_sha256(target), rf_sha256(file.path(arch, file_name)))) {
-      tmp <- paste0(target, ".", paste(sample(c(0:9, letters[1:6]), 12, TRUE), collapse = ""), ".tmp")
-      file.copy(file.path(arch, file_name), tmp, overwrite = TRUE)
-      if (!suppressWarnings(file.rename(tmp, target))) { unlink(tmp); stop("rf_rollback: could not restore ", target, call. = FALSE) }
-      rf <- sub("\\.json$", ".receipt.json", file_name)
-      if (file.exists(file.path(arch, rf))) file.copy(file.path(arch, rf), file.path(dir, rf), overwrite = TRUE)
-    }
-    sha <- rf_sha256(target)
+  copies <- list()
+  if (dir.exists(arch) && length(list.files(arch, pattern = "^giving-models-v2\\.json$"))) {
+    name <- "giving-models-v2.json"
+    archived <- file.path(arch, name)
+    bundle <- jsonlite::fromJSON(archived, simplifyVector = FALSE)
+    if (!identical(bundle$model_version, model_version) || length(rf_validate_parsed(bundle))) stop("rf_rollback: archived bundle fails identity or contract", call. = FALSE)
+    sha <- rf_sha256(archived)
+    receipt_name <- sub("\\.json$", ".receipt.json", name)
+    archive_receipt <- file.path(arch, receipt_name)
+    if (!file.exists(archive_receipt) || !identical(jsonlite::fromJSON(archive_receipt, simplifyVector = FALSE)$published_to$sha256, sha))
+      stop("rf_rollback: archive receipt SHA-256 mismatch", call. = FALSE)
+    active <- paste("versions", sha, name, sep = "/")
+    target <- file.path(dir, active)
+    .rf_copy_immutable(archived, target)
+    version_receipt <- file.path(dirname(target), receipt_name)
+    .rf_copy_immutable(archive_receipt, version_receipt)
+    copies <- list(c(target, file.path(dir, name)), c(version_receipt, file.path(dir, receipt_name)))
+    schema <- 2L
   } else if (file.exists(v1) && identical(jsonlite::fromJSON(v1, simplifyVector = FALSE)$model_version, model_version)) {
-    file_name <- "giving-models-v1.json"; sha <- rf_sha256(v1)
-  } else {
-    stop("rf_rollback: no archived publish and no kept bundle for model_version ", model_version, call. = FALSE)
-  }
-  ptr <- list(schema_version = 1L, active = file_name, sha256 = sha, model_version = model_version, switched_at_utc = rf_now_utc(),
+    active <- "giving-models-v1.json"; sha <- rf_sha256(v1); schema <- 1L
+  } else stop("rf_rollback: no archived publish and no kept bundle for model_version ", model_version, call. = FALSE)
+  ptr <- list(schema_version = 1L, active = active, sha256 = sha, model_version = model_version, model_schema_version = schema, switched_at_utc = rf_now_utc(),
               previous = if (!is.null(before)) list(active = before$active, sha256 = before$sha256, model_version = before$model_version) else NULL, rolled_back = TRUE)
   .rf_write_pointer(ptr, dir)
-  note("rollback.done", "succeeded", sprintf("rolled back to %s (%s)", model_version, file_name), sha)
-  list(status = "rolled_back", model_version = model_version, file = file_name, sha256 = sha, pointer = ptr)
+  warnings <- Filter(Negate(is.null), lapply(copies, function(pair) .rf_compatibility_copy(pair[1], pair[2])))
+  note("rollback.done", "succeeded", sprintf("rolled back to %s (%s)", model_version, active), sha)
+  list(status = "rolled_back", model_version = model_version, file = active, sha256 = sha, pointer = ptr, warnings = warnings)
 }
 
 # Tolerance-based comparison of two parsed bundles (e.g. a pod-built and a Windows-built one): every numeric leaf within rel_tol (abs_tol near zero),

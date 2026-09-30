@@ -16,6 +16,7 @@ import hashlib
 import json
 import math
 import os
+import re
 from pathlib import Path
 
 MODEL_FILE = Path(__file__).parent / 'data' / 'giving-models-v1.json'
@@ -24,11 +25,14 @@ CHAMBERS = ('House', 'Senate')
 
 
 @lru_cache(maxsize=4)
-def _load(path, stamp, size):
+def _load(path, stamp, size, expected_sha256=None):
     raw = Path(path).read_bytes()
+    actual_sha256 = hashlib.sha256(raw).hexdigest()
+    if expected_sha256 is not None and actual_sha256 != expected_sha256:
+        raise ValueError("The active forecast model package does not match its published SHA-256.")
     out = json.loads(raw)
-    version = out.get('schema_version')
-    if version not in (1, 2):
+    version = out.get('schema_version') if isinstance(out, dict) else None
+    if type(version) is not int or version not in (1, 2):
         raise ValueError('Unsupported forecast model package. Rebuild the reviewed model package.')
     if version == 2:
         problems = _contract().validate_model(out)                   # schema, then the cross-field invariants (the anchor auto-pick)
@@ -36,22 +40,57 @@ def _load(path, stamp, size):
             problems = _v2_contract_problems(out)
         if problems:
             raise ValueError('The forecast model package does not satisfy its contract (' + '; '.join(problems[:3]) + '). Rebuild the reviewed model package.')
-    out['sha256'] = hashlib.sha256(raw).hexdigest()
+    out['sha256'] = actual_sha256
     return out
 
 
-def model_path():
-    """MENTAT_GIVING_MODELS (the refit's consumer smoke test), else the schema-2 bundle when it exists, else the schema-1 bundle."""
+def _model_selection():
+    """Read the atomic publication pointer once; an explicit smoke-test override wins."""
     override = os.environ.get('MENTAT_GIVING_MODELS', '').strip()
     if override:
-        return Path(override)
-    return MODEL_FILE_V2 if MODEL_FILE_V2.is_file() else MODEL_FILE
+        return Path(override), None
+    pointer_path = MODEL_FILE.parent / 'giving-models-current.json'
+    if not pointer_path.exists():
+        return (MODEL_FILE_V2 if MODEL_FILE_V2.is_file() else MODEL_FILE), None
+    try:
+        pointer = json.loads(pointer_path.read_text(encoding='utf-8'))
+    except (OSError, ValueError) as error:
+        raise ValueError('The forecast publication pointer cannot be read.') from error
+    if not isinstance(pointer, dict) or type(pointer.get('schema_version')) is not int or pointer['schema_version'] != 1:
+        raise ValueError('Unsupported forecast publication pointer schema.')
+    active = pointer.get('active')
+    if not isinstance(active, str) or not re.fullmatch(r'(?:versions/[0-9a-f]{64}/)?giving-models-v[12]\.json', active):
+        raise ValueError('The forecast publication pointer has an invalid active path.')
+    if not isinstance(pointer.get('sha256'), str) or not re.fullmatch(r'[0-9a-f]{64}', pointer['sha256']):
+        raise ValueError('The forecast publication pointer has an invalid SHA-256.')
+    if not isinstance(pointer.get('model_version'), str) or not pointer['model_version'].strip():
+        raise ValueError('The forecast publication pointer has no model version.')
+    expected_schema = int(active[-6])
+    if 'model_schema_version' in pointer and (type(pointer['model_schema_version']) is not int or pointer['model_schema_version'] != expected_schema):
+        raise ValueError('The forecast publication pointer has an inconsistent model schema.')
+    target = (MODEL_FILE.parent / active).resolve()
+    if not target.is_relative_to(MODEL_FILE.parent.resolve()):
+        raise ValueError('The forecast publication pointer escapes the model directory.')
+    if not target.is_file():
+        raise ValueError('The active forecast model package is missing.')
+    return target, pointer
+
+
+def model_path():
+    """Explicit override, published pointer, or legacy v2/v1 discovery when no pointer exists."""
+    return _model_selection()[0]
 
 
 def models():
-    path = model_path()
+    path, pointer = _model_selection()
     stat = path.stat()
-    return _load(str(path), stat.st_mtime_ns, stat.st_size)
+    bundle = _load(str(path), stat.st_mtime_ns, stat.st_size, pointer['sha256'] if pointer else None)
+    if pointer:
+        if bundle.get('model_version') != pointer['model_version']:
+            raise ValueError('The active forecast model version does not match its publication pointer.')
+        if bundle.get('schema_version') != int(pointer['active'][-6]):
+            raise ValueError('The active forecast model schema does not match its publication pointer.')
+    return bundle
 
 
 def _date(value, label):
@@ -974,4 +1013,5 @@ def _project_v2(request, b):
                        notices=['Levels come from Mentat\'s own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.',
                                 'PAC, candidate-share and lobbying amounts are separate accounts and must not be added. The two lobbying series are never summed.',
                                 'Observed amounts run to the Mentat coverage end (declared by rule) and the remainder starts the day after; rows dated later stay in the remainder.',
-                                'Historical associations and scenario inputs are not validated future-giving predictions; the prediction interval adds the residual variance of the anchored step.'])
+                                'Historical associations and scenario inputs are not validated future-giving predictions; the prediction interval adds the residual variance of the anchored step.']
+                       + list(industry.get('caveats', [])))

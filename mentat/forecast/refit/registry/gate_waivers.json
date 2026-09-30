@@ -11,6 +11,36 @@
       "owner": "Paul Goff",
       "date": "2026-09-30",
       "show_warning": false
+    },
+    {
+      "gate": "G6",
+      "cell": "control_House / commercial_banks",
+      "term": "control_House",
+      "industry": "commercial_banks",
+      "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": true
+    },
+    {
+      "gate": "G6",
+      "cell": "control_House / credit_unions",
+      "term": "control_House",
+      "industry": "credit_unions",
+      "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": true
+    },
+    {
+      "gate": "G6",
+      "cell": "control_House / auto_light_duty_manufacturing",
+      "term": "control_House",
+      "industry": "auto_light_duty_manufacturing",
+      "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": true
     }
   ]
 }

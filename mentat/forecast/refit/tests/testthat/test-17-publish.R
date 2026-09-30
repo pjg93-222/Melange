@@ -21,7 +21,8 @@ test_that("a publish writes giving-models-v2.json, its receipt and an atomic poi
   expect_identical(rf_sha256(file.path(d, "giving-models-v2.json")), r$sha256)
   expect_identical(rf_sha256(file.path(d, "giving-models-v1.json")), v1_before)
   ptr <- jsonlite::fromJSON(file.path(d, "giving-models-current.json"), simplifyVector = FALSE)
-  expect_identical(ptr$active, "giving-models-v2.json"); expect_identical(ptr$sha256, r$sha256); expect_identical(ptr$model_version, b$model_version)
+  expect_identical(ptr$active, paste0("versions/", r$sha256, "/giving-models-v2.json")); expect_identical(ptr$sha256, r$sha256); expect_identical(ptr$model_version, b$model_version)
+  expect_identical(rf_sha256(file.path(d, ptr$active)), r$sha256)
   expect_identical(ptr$previous$active, "giving-models-v1.json"); expect_identical(ptr$previous$model_version, "2026-09-27-association-v1")
   expect_identical(rf_validate_parsed(jsonlite::fromJSON(file.path(d, "giving-models-v2.json"), simplifyVector = FALSE)), character(0))
   rc <- jsonlite::fromJSON(file.path(d, "giving-models-v2.receipt.json"), simplifyVector = FALSE)
@@ -120,4 +121,52 @@ test_that("the platform statement names R, BLAS, LAPACK, the platform and the wo
   expect_true(all(c("R_version", "platform", "blas", "lapack", "cores", "node", "note") %in% names(pi)))
   expect_match(pi$R_version, "^R version")
   expect_gte(pi$cores, 1L)
+})
+
+
+test_that("publication preserves old immutable bytes through a failed switch and a repeated v2 publish", {
+  b <- test_bundle2(); b2 <- second_bundle(b); d <- fresh_publish_dir("pub_atomic")
+  first <- rf_publish(b, pass_gates(), dir = d)
+  pointer_before <- readBin(rf_pointer_path(d), "raw", n = file.info(rf_pointer_path(d))$size)
+  old_path <- file.path(d, first$pointer$active)
+  old_bytes <- readBin(old_path, "raw", n = file.info(old_path)$size)
+  alias_before <- rf_sha256(file.path(d, "giving-models-v2.json"))
+  real_switch <- .rf_write_pointer
+  assign(".rf_write_pointer", function(...) stop("injected switch failure"), envir = environment(rf_publish))
+  tryCatch(expect_error(rf_publish(b2, pass_gates(), dir = d), "injected switch failure"),
+           finally = assign(".rf_write_pointer", real_switch, envir = environment(rf_publish)))
+  expect_identical(readBin(rf_pointer_path(d), "raw", n = file.info(rf_pointer_path(d))$size), pointer_before)
+  expect_identical(rf_sha256(file.path(d, "giving-models-v2.json")), alias_before)
+  expect_identical(readBin(old_path, "raw", n = file.info(old_path)$size), old_bytes)
+  expect_false(dir.exists(rf_lock_path()))
+  next_publish <- rf_publish(b2, pass_gates(), dir = d)
+  expect_false(identical(first$pointer$active, next_publish$pointer$active))
+  expect_identical(rf_sha256(old_path), first$sha256)
+  expect_identical(rf_read_pointer(d)$model_version, b2$model_version)
+})
+
+test_that("a model version cannot be reused for changed bundle bytes", {
+  b <- test_bundle2(); d <- fresh_publish_dir("pub_collision")
+  first <- rf_publish(b, pass_gates(), dir = d)
+  b$built_at_utc <- "2026-10-02T12:00:00Z"
+  expect_error(rf_publish(b, pass_gates(), dir = d), "model_version already identifies different bytes")
+  expect_identical(rf_read_pointer(d)$sha256, first$sha256)
+})
+
+test_that("pointer readers reject corruption and agree with legacy consumer discovery", {
+  b <- test_bundle2(); d <- fresh_publish_dir("pub_pointer")
+  rf_write_json_atomic(b, file.path(d, "giving-models-v2.json"))
+  expect_identical(rf_read_pointer(d)$active, "giving-models-v2.json")
+  first <- rf_publish(b, pass_gates(), dir = d)
+  bad <- first$pointer; bad$sha256 <- paste(rep("0", 64), collapse = "")
+  rf_write_json_atomic(bad, rf_pointer_path(d))
+  expect_error(rf_read_pointer(d), "SHA-256 mismatch")
+  bad <- first$pointer; bad$active <- "../giving-models-v2.json"
+  rf_write_json_atomic(bad, rf_pointer_path(d))
+  expect_error(rf_read_pointer(d), "active path")
+  bad <- first$pointer; bad$model_version <- "wrong"
+  rf_write_json_atomic(bad, rf_pointer_path(d))
+  expect_error(rf_read_pointer(d), "model identity mismatch")
+  .rf_write_pointer(first$pointer, d)
+  expect_identical(rf_read_pointer(d)$model_version, b$model_version)
 })

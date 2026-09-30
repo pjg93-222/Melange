@@ -102,7 +102,7 @@ rf_gate_stability <- function(v, bundle, published = NULL, min_share = RF_G5_MIN
 # The currently published calculator's per-industry MAE. For v1 (no backtests in the bundle): the v1 calculator (pooled slope, same-phase
 # anchor, calc path) on the same folds and scaling. For a v2 bundle with backtests: its recorded MAE_by_industry of the published rule/path.
 rf_published_baseline <- function(v, published = NULL) {
-  bt <- v$backtests
+  bt <- v$baseline_backtests %||% v$backtests      # the frozen sample's backtests when the v2 sample holds pilot industries
   pe <- published$pac_model$evidence$calculator_path_loeo_mae_by_industry
   if (!is.null(published) && !is.null(pe)) {                     # a v2 bundle records the MAE of the path it publishes
     g <- function(x) unlist(x %||% list())
@@ -112,7 +112,8 @@ rf_published_baseline <- function(v, published = NULL) {
   }
   list(pac = .rf_cell_mae(bt, "pac", "bundle", "loeo", "calc", "R0"), control_House = .rf_cell_mae(bt, "control_House", "selected", "loeo", "calc", "R0"),
        control_Senate = .rf_cell_mae(bt, "control_Senate", "selected", "loeo", "calc", "R0"), lobby = .rf_cell_mae(bt, "lobby", "bundle", "rolling", "calc", "R0"),
-       source = "v1 calculator recomputed on the same folds (pooled slope, same-phase anchor, calc path)")
+       source = if (!is.null(v$baseline_backtests)) "v1 calculator recomputed on the same folds of the frozen v1 sample (pooled slope, same-phase anchor, calc path)"
+                else "v1 calculator recomputed on the same folds (pooled slope, same-phase anchor, calc path)")
 }
 
 # The owner waiver list (registry/gate_waivers.json): cells of G6 the owner has ruled on. A waived cell is WAIVED, not HOLD; everything else

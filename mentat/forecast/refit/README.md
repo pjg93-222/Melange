@@ -43,12 +43,12 @@ machine with a threaded BLAS so a matrix product cannot differ in its last bits 
 
 ## Inputs
 
-`registry/inputs.json` pins 98 files by sha256 (OpenSecrets captures, FEC candidate masters, IBISWorld / CPI / control / LobbyView
+`registry/inputs.json` pins 121 files by sha256 (OpenSecrets captures, FEC candidate masters, IBISWorld / CPI / control / LobbyView
 workbooks, the IEM zip, the four 2026 daily market files, and the Codex design files as **parity references only**). Aliases
 resolve through `R/rf_config.R`. On first sight each file is copied into `<RUNTIME>/raw/<sha256>/<name>` and read from there, so
 a Downloads / Temp clean-up cannot break a refit. A pinned file whose hash changes fails gate G1 until the manifest is regenerated.
-`registry/industries.json` lists the six fitted industries and four declined ones (with reasons); property and casualty is a pilot
-entry whose OpenSecrets F3400 capture is withheld with the reason "OpenSecrets F3400 capture not supplied".
+`registry/industries.json` lists the six fitted industries and four declined ones (with reasons); property and casualty is a ready pilot using the owner-approved F09 (all-insurance) baseline. Its scope caveat and
+2024-11 current-year revenue estimate are explicit; F3400 is retained only as a superseded, unavailable page candidate.
 `registry/models.json` holds the frozen specifications and the package version pins.
 
 ## What a parity run does
@@ -95,7 +95,7 @@ in Python, plus the numbers of ADDENDUM section F.
 * PAC: the auto-pick (`rf_select_rule`, a non-pooled rule must beat the pooled slope by 5% in every design) chose own slopes (R1). `pac_model.slopes[id].applied` is the slope the
   calculator uses; `prediction.industries[id]` holds each industry's anchored-step residual (pairs (t-2, t)); `evidence` (open object) records the rule-selection table and the
   calculator-path leave-one-election-out MAE per industry, which a later refit's G6 compares against.
-* Shares: pooled slope (R0) and the previous-cycle anchor; Polymarket-to-Polymarket control inputs (`political_inputs` 2024, `saved_outlook` 2026, Kalshi and the equal weight kept as sensitivities).
+* Shares: pooled slope (R0); the anchor is selected per industry and chamber, using same-phase only after a >=5% win over previous-cycle in both validation designs; Polymarket-to-Polymarket control inputs (`political_inputs` 2024, `saved_outlook` 2026, Kalshi and the equal weight kept as sensitivities).
 * Lobbying: `lobby_model.log_refit` (`dly ~ dg + factor(year)`, -0.811% per point, p 0.029), the dollar model kept as evidence.
 * Seats are evidence only (`evidence_models`, `calculator: false`). `pac_complete` and the lobbying differenced-controls regressions stay in `regressions.txt`: the contract's evidence model requires a chamber.
 
@@ -109,15 +109,17 @@ Rscript run_refit.R --rollback <model_version>
 * **Watcher** (`rf_agent_detect`): lists `* Industry Spending Overview.xlsx` in the report directory (mentat/config/report-directory.json, or `RF_REPORT_DIR`), reads each workbook's
   export receipt (`<name>.audit/audit-manifest.json`) read-only, compares with the registry and with what it saw last (`<runtime>/agent/seen.json`). A workbook the registry does not know is queued
   once (`<runtime>/agent/queue/<slug>.json`) with a `DATA_REQUEST.md` and a registry stub; declined industries are not re-flagged.
-* **Waiting for data**: an industry whose inputs are missing (property and casualty: OpenSecrets F3400 captures, and IBISWorld revenue that ends before the 2024 cycle) ends as
-  `WAITING_FOR_DATA` (exit 0, success event, `DATA_REQUEST.md`), never as a failure; the packet lists the gaps.
+* **Waiting for data**: an industry whose inputs are missing ends as
+  `WAITING_FOR_DATA` (exit 0, success event, `DATA_REQUEST.md`), never as a failure; the packet lists the gaps. The supplied P&C pilot is now ready; negative tests deliberately remove its inputs.
 * **Gates** (`R/rf_gates.R`): G0 environment, G1 inputs, G2 parity (the parity suite, in the same run), G3 panels, G4 sample adequacy (WARN, capability withheld with a stated reason),
   G5 stability (HOLD), **G6 hard backtest gate: no existing industry's calculator-path leave-one-election-out MAE may exceed the published calculator's (new <= published + 1e-9)** (HOLD),
   G7 bundle schema and completeness (FAIL), G8 consumer smoke (`tools/g8_consumer_smoke.py`: the console's calculator `mentat/app/giving_forecast.py` loads the staged bundle and projects every offered industry; the command defaults to that script when `mentat/app` sits beside the pipeline, `MENTAT_G8_CMD` overrides it; HOLD when no calculator is reachable, as on a pod snapshot that carries `mentat/forecast` only), G9 beats last-period naive (WARN only).
   Decision: any FAIL, else any HOLD, else PUBLISH.
-* **Publish** (`R/rf_publish.R`): only on PUBLISH. Under the lock (`<runtime>/refit.lock`, stale after 6 h with a dead owner): stage, re-validate and hash-check the bundle, rename it into place as
-  `giving-models-v2.json` with its receipt, archive the pair under `<runtime>/published/<model_version>/`, then switch the pointer `giving-models-current.json` atomically. v1 stays where it is;
-  nothing is committed. `RF_PUBLISH_DIR` (default `mentat/app/data`) names the target. `--rollback <model_version>` restores an archived publish or the kept v1.
+* **Publish** (`R/rf_publish.R`): only on PUBLISH. Under the refit lock, write and validate immutable files under
+  `versions/<bundle-sha256>/`, archive the bundle and receipt, then atomically switch `giving-models-current.json`.
+  The Python consumer and R baseline reader both validate and honor this pointer. A pointer failure preserves the prior active version.
+  Compatibility copies are updated only after the switch. v1 stays available for rollback; a version name cannot be reused with different bytes.
+  `RF_PUBLISH_DIR` (default `mentat/app/data`) names the target. No Git commit is made by the publisher.
 * **Review packet** (`<run>/review/`): `REVIEW.md` (decision, gate table, rule-selection table, slopes, G6 table, log refit, data gaps, 2026 inputs, platform), `regressions.txt` (real
   `summary(lm())` blocks plus the robustness block of every model, including the lobbying log refit), backtests, rule selection, robustness p-values, G4/G5/G6 tables, bundle diff, inputs.
 * **Glass Box**: run.start, stage.start/finish per stage, gate.result per gate, publish.start/done/hold, run.finish or a failure event.
@@ -126,6 +128,21 @@ Rscript run_refit.R --rollback <model_version>
 
 ## Not built
 
-The IEM `max_contract_trade_age_days` column (no bundle number depends on it); the `lobby_differenced_controls` evidence regression; an R port of the LobbyView raw builder; the Python
-consumer and the anchor snapshot builder (other lanes). Gate G8 runs the consumer where it is reachable; on the pod it holds (the snapshot has no `mentat/app`), so run the smoke
-locally against the pod-built bundle: `python mentat/forecast/refit/tools/g8_consumer_smoke.py <giving-models-v2.json>` (`tests/test_g8_smoke.py` is its own test).
+The IEM `max_contract_trade_age_days` column (no bundle number depends on it), the `lobby_differenced_controls` evidence regression, and an R port of the LobbyView raw builder.
+The Python consumer and anchor builder are present in sibling app/anchors folders. Copy that source alongside the refit for G8 to run in the pod: `python mentat/forecast/refit/tools/g8_consumer_smoke.py <giving-models-v2.json>` (`tests/test_g8_smoke.py` is its own test).
+
+## Completed pod refit (2026-09-30)
+
+`pod-final-20260930` correctly held publication because House-share LOEO MAE rose from
+1.053 to 1.550 for banks, 1.522 to 1.836 for credit unions, and 1.338 to 1.766 for auto.
+Paul explicitly authorized: "Waive these three cells and publish". The registry now contains
+those three visible House warnings plus the pre-existing quiet banks-lobbying waiver.
+Every other G6 cell retains the original no-degradation requirement; the initial HOLD receipt
+is retained. G4 warns about withheld auto lobbying; G9 warns that the log-lobbying refit
+(MAE 4.050) does not beat naive (3.936).
+
+The refit was published in the RunPod after those explicit waivers. See the final run receipt
+and `giving-models-current.json` for the active immutable version and SHA256. The actual
+Python consumer and Chromium were exercised using real aggregate anchors and measured
+current workbook hashes. Missing or stale anchors refuse projection. Local console restart
+and Windows scheduled-task registration remain dormant under the owner's pod-only instruction.

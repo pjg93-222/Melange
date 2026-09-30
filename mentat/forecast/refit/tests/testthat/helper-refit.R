@@ -36,7 +36,7 @@ memo <- function(key, expr) {
 # Inputs resolved (hash-checked, vaulted) once.
 test_inputs <- function() memo("inputs", rf_resolve_inputs(RF_TEST_MANIFEST))
 # The whole parity build (panels, fits, stepwise grid, evidence...) once.
-test_ctx <- function() memo("ctx", rf_parity_context(test_inputs(), RF_TEST_REG, RF_TEST_MODELS))
+test_ctx <- function() memo("ctx", rf_parity_context(test_inputs(), rf_frozen_registry(RF_TEST_REG), RF_TEST_MODELS))   # the frozen v1 sample (parity)
 
 # Backtest specs (tailoring.R's eight term/base cells) once.
 test_specs <- function() memo("specs", rf_backtest_specs(test_ctx()))
