@@ -22,6 +22,16 @@ if (Test-Path -LiteralPath $localDataSetting) {
     $env:LOCALAPPDATA = $savedLocalData
   }
 }
+# A configured pod console owns all backend work. Failure must never fall through to local Python.
+$remoteProfile = Join-Path $env:LOCALAPPDATA 'Mentat\remote-console.json'
+if (Test-Path -LiteralPath $remoteProfile) {
+  if (-not (Test-Path -LiteralPath $remoteProfile -PathType Leaf)) { throw 'The remote Mentat profile is not a file. No local backend was started.' }
+  $remoteModule = Join-Path $PSScriptRoot 'remote-console.psm1'
+  if (-not (Test-Path -LiteralPath $remoteModule -PathType Leaf)) { throw 'The remote Mentat launcher module is missing. No local backend was started.' }
+  Import-Module $remoteModule -Force
+  Start-MentatRemoteConsole -ProfilePath $remoteProfile -NoBrowser:$NoBrowser -AppWindow:$AppWindow
+  exit 0
+}
 $projectPath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 function Get-MentatCodeTreeHash([string]$Folder) {
   # Must match server.py tree_sha256(code_files()): every *.py beside server.py,
