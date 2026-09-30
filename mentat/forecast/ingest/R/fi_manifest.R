@@ -28,7 +28,9 @@ fi_manifest_ibis <- function(editions, outputs, code_sha) {
 #   (for example pulled back from a compute pod) and the absolute path then names the machine that ran.
 fi_manifest_os <- function(envelope_files, industry_id = NULL, code_sha = NULL, run_dir = NULL) {
   lapply(names(envelope_files), function(role) {
-    e <- .fi_manifest_entry(role, envelope_files[[role]], "raw", TRUE, code_sha256 = NULL)
+    # the vintage of a fetched or saved page is its retrieval time, read from the envelope
+    vint <- tryCatch(jsonlite::fromJSON(envelope_files[[role]], simplifyVector = FALSE)$retrieved_utc %||% "", error = function(e) "")
+    e <- .fi_manifest_entry(role, envelope_files[[role]], "raw", TRUE, vintage = if (is.character(vint) && length(vint) == 1L) vint else "", code_sha256 = NULL)
     if (!is.null(run_dir)) {
       rd <- normalizePath(run_dir, winslash = "/", mustWork = FALSE); p <- normalizePath(envelope_files[[role]], winslash = "/", mustWork = FALSE)
       if (startsWith(p, paste0(rd, "/"))) e$path_run_relative <- substring(p, nchar(rd) + 2L)

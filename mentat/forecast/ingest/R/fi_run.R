@@ -109,7 +109,9 @@ fi_parse_args <- function(args) {
   for (e in envs) {
     path <- file.path(od, fi_os_envelope_name(e$code, e$cycle, e$kind))
     fi_os_write_envelope(e$env, path)
-    fi_receipt_output(rec, path, NA_integer_, role = e$role)
+    # rows parsed from the page: the data table's rows without its header
+    tb <- if (e$kind == "totals") Filter(function(t) length(t$rows) > 0L && identical(as.character(unlist(t$rows[[1]]))[1], "Election Cycle"), e$env$tables) else e$env$source_tables
+    fi_receipt_output(rec, path, if (length(tb)) length(tb[[1]]$rows) - 1L else NA_integer_, role = e$role)
     written[[e$role]] <- path
     id <- unname(cmap[e$code])
     if (e$kind == "totals") tot[[length(tot) + 1L]] <- fi_os_tidy_totals(e$env, id) else cand[[length(cand) + 1L]] <- fi_os_tidy_candidates(e$env, id)

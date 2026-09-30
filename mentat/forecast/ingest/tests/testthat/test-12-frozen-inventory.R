@@ -173,3 +173,20 @@ test_that("a challenged run still proposes the baseline: frozen totals by refere
   expect_equal(pr2$verification_attempt$http, 403L); expect_equal(pr2$verification_attempt$cf_mitigated, "challenge"); expect_false(is.null(pr2$verification_attempt$stop_recorded_utc))
   expect_equal(pr2$status, "missing")
 })
+
+test_that("the receipt records the parsed row count of every page (data rows, header excluded)", {
+  d <- local_ingest_env(); w <- make_world()
+  r <- fi_run("opensecrets-fetch", industry = "widgets", run_id = "rows-ok", feeds = synth_feeds(), events_dir = d$glassbox, verbose = FALSE, transport = w$transport, clock = w$clock, sleep = w$sleep)
+  rc <- jsonlite::fromJSON(r$receipt$path, simplifyVector = FALSE)
+  rows <- stats::setNames(vapply(rc$outputs, function(o) o$rows %||% NA_integer_, 0L), vapply(rc$outputs, function(o) basename(o$path), ""))
+  expect_equal(rows[["Z9900_2014_candidates_H.json"]], 6L); expect_equal(rows[["Z9900_2012_candidates_S.json"]], 6L)
+  expect_equal(rows[["Z9900_2012_presidential.json"]], 3L); expect_equal(rows[["Z9900_2014_totals.json"]], 2L)
+})
+
+test_that("proposed inputs of fetched pages carry the page's retrieval time as their vintage", {
+  d <- local_ingest_env(); w <- make_world()
+  r <- fi_run("opensecrets-fetch", industry = "widgets", run_id = "vint-ok", feeds = synth_feeds(), events_dir = d$glassbox, verbose = FALSE, transport = w$transport, clock = w$clock, sleep = w$sleep)
+  pi <- jsonlite::fromJSON(file.path(r$run_dir, "proposed_inputs.json"), simplifyVector = FALSE)
+  v <- vapply(pi$inputs, function(e) e$vintage, "")
+  expect_true(all(grepl("^[0-9]{4}-[0-9]{2}-[0-9]{2}T", v)))
+})
