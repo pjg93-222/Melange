@@ -32,6 +32,8 @@
     {"id": "A13", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "candidate_receipts", "thin_base", "2024", "House"], "why": "a thin-base flag agrees with its dollars and the threshold", "value": true},
     {"id": "A14", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "general_giving", "observed", 0, "through"], "why": "observed cuts are strictly increasing", "value": "2030-01-31"},
     {"id": "A15", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "general_giving", "observed"], "why": "a ready measure carries observed cuts", "value": []},
-    {"id": "A16", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "lda", "series", "income_total", "partial", "total"], "why": "a partial LDA total equals its quarters", "value": 1}
+    {"id": "A16", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "lda", "series", "income_total", "partial", "total"], "why": "a partial LDA total equals its quarters", "value": 1},
+    {"id": "A17", "target": "anchors", "kind": "invariant", "op": "delete", "path": ["cpi", "multipliers", "2024"], "why": "the anchor cycle needs a CPI multiplier: a missing one must never read as 1.0"},
+    {"id": "A18", "target": "anchors", "kind": "invariant", "op": "delete", "path": ["industries", "<industry>", "lda", "series", "expenses_total"], "why": "both LDA series are required (never one series alone)"}
   ]
 }

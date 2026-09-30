@@ -403,6 +403,9 @@ def _anchor_industry(industry_id):
     published = _published_workbook_sha256(entry['mentat']['workbook'])
     if published is None:
         raise AnchorProblem('anchor_unavailable', 'The published ' + entry['mentat']['workbook'] + ' is not readable, so the anchors cannot be checked against it.')
+    if str(entry['coverage']['current_cycle'] - 2) not in snapshot['cpi']['multipliers']:
+        raise AnchorProblem('anchor_unavailable', 'The anchor snapshot has no CPI multiplier for the ' + _period(entry['coverage']['current_cycle'] - 2) +
+                            ' anchor cycle, so its levels cannot be put in 2025 dollars. Rebuild the anchors with a CPI file that covers it.')
     if published != entry['mentat']['workbook_sha256']:
         raise AnchorProblem('anchor_stale', 'The Mentat anchors were built from an earlier version of ' + entry['mentat']['workbook'] +
                             ' (anchor sha256 ' + entry['mentat']['workbook_sha256'][:8] + ', published ' + published[:8] + '). Rebuild the anchors.')
@@ -418,6 +421,9 @@ def _v2_contract_problems(b):
         problems.append('share bases')
     if {m['id'] for m in c['lobbying']['series']} != SUPPORTED_CONTRACT['lobbying_series']:
         problems.append('lobbying series')
+    for model_id, model in b['share_models'].items():
+        if 'Forecast' not in model['terms']:
+            problems.append(model_id + ' has no Forecast term')
     return problems
 
 
@@ -508,6 +514,17 @@ def _window(ctx, cycle):
     return 'window', None
 
 
+def _cut_through(ctx):
+    """The observed cut every measure of this industry shares on the as-of date (the first ready measure names it)."""
+    for key in ('general_giving', 'candidate_receipts', 'pac_to_candidates'):
+        block = ctx['snap'][key]
+        if block['status'] == 'ready':
+            cut = _effective_cut(block['observed'], ctx['as_of'], ctx['coverage_end'])
+            if cut:
+                return cut['through']
+    return None
+
+
 def _next_day(iso):
     return (date.fromisoformat(iso) + timedelta(days=1)).isoformat()
 
@@ -567,10 +584,12 @@ def _v2_pac(ctx, assumptions, cycle):
                 measure.update(remainder_status='no_observed', remainder_reason='The as-of date precedes the first observed Mentat month-end.')
             else:
                 observed = cut['amount'] if mid == 'general_giving' else cut['to_house_senate']
-                measure.update(observed=dict(through=cut['through'], amount_nominal=observed, face_value=ctx['face_value']), remainder_starts=_next_day(cut['through']),
+                observed_real = observed * ctx['open_multiplier']
+                measure.update(observed=dict(through=cut['through'], amount_nominal=observed, amount_real_2025=observed_real, face_value=ctx['face_value']),
+                               remainder_starts=_next_day(cut['through']),
                                **_remainder(values['projected_cycle_real_2025'],
                                             dict(remaining_coefficient_low=values['cycle_coefficient_low'], remaining_coefficient_high=values['cycle_coefficient_high'],
-                                                 remaining_prediction_low=values['cycle_prediction_low'], remaining_prediction_high=values['cycle_prediction_high']), observed))
+                                                 remaining_prediction_low=values['cycle_prediction_low'], remaining_prediction_high=values['cycle_prediction_high']), observed_real))
         out['measures'].append(measure)
     return out
 
@@ -694,7 +713,7 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
         totals = _v2_basis_totals(ctx, pac, chamber)
         for bid, basis in bases.items():
             if basis['status'] == 'ready':
-                basis.update(_v2_share_remainder(ctx, chamber, basis['projected_cycle_R_share'], totals.get(bid), bid))
+                basis.update(_v2_share_remainder(ctx, chamber, basis['projected_cycle_R_share'], totals.get(bid), bid, growth is not None))
         comb = _v2_combined(ctx, chamber, bases, totals, effect)
         out['combined_reference'] = comb
     return out
@@ -736,15 +755,18 @@ def _split(share, total, observed_d, observed_r):
                 projected_remaining_R_real_2025=remaining_r, projected_remaining_D_real_2025=remaining_d)
 
 
-def _v2_share_remainder(ctx, chamber, share, total, bid):
+def _v2_share_remainder(ctx, chamber, share, total, bid, growth_given):
     if total is None:
-        return dict(remainder_status='needs_inputs', remainder_reason='Enter cycle revenue growth to project the two-party total this share divides.')
+        reason = ('Enter cycle revenue growth to project the two-party total this share divides.' if not growth_given else
+                  'The projected two-party total needs a ready projection of the measure it divides, and the snapshot has none for this basis.')
+        return dict(remainder_status='needs_inputs', remainder_reason=reason)
     seen = _observed_dr(ctx, chamber, bid)
     if seen is None:
         return dict(remainder_status='no_observed', remainder_reason='The as-of date precedes the first observed Mentat month-end.')
     through, d, r = seen
-    return dict(projected_total_real_2025=total, observed=dict(through=through, D=d, R=r, face_value=ctx['face_value']), remainder_starts=_next_day(through),
-                **_split(share, total, d, r))
+    m = ctx['open_multiplier']
+    return dict(projected_total_real_2025=total, observed=dict(through=through, D=d, R=r, D_real_2025=d * m, R_real_2025=r * m, face_value=ctx['face_value']),
+                remainder_starts=_next_day(through), **_split(share, total, d * m, r * m))
 
 
 def _v2_combined(ctx, chamber, bases, totals, effect):
@@ -761,8 +783,10 @@ def _v2_combined(ctx, chamber, bases, totals, effect):
                status='ready' if 0 <= share <= 1 else 'outside_share_range', note='Reference only (open point S1): employee and PAC candidate giving pooled into one base.')
     if out['status'] == 'ready':
         total = totals['employee_candidate'] + totals['pac_candidate']
-        out.update(projected_total_real_2025=total, observed=dict(through=seen_e[0], D=seen_e[1] + seen_p[1], R=seen_e[2] + seen_p[2], face_value=ctx['face_value']),
-                   **_split(share, total, seen_e[1] + seen_p[1], seen_e[2] + seen_p[2]))
+        m = ctx['open_multiplier']
+        d_all, r_all = seen_e[1] + seen_p[1], seen_e[2] + seen_p[2]
+        out.update(projected_total_real_2025=total, observed=dict(through=seen_e[0], D=d_all, R=r_all, D_real_2025=d_all * m, R_real_2025=r_all * m, face_value=ctx['face_value']),
+                   **_split(share, total, d_all * m, r_all * m))
     return out
 
 
@@ -858,10 +882,11 @@ def _project_v2(request, b):
     except AnchorProblem as problem:
         return head | dict(status=problem.status, reason=str(problem), horizons=[], notices=[str(problem)])
     open_cycle = entry['coverage']['current_cycle']
-    multiplier = snapshot['cpi']['multipliers'].get(str(open_cycle - 2))
+    multiplier = snapshot['cpi']['multipliers'][str(open_cycle - 2)]
+    open_multiplier = snapshot['cpi']['multipliers'].get(str(open_cycle))
     ctx = dict(b=b, industry=industry, snap=entry, as_of=as_of, current=current, open_cycle=open_cycle, anchor_cycle=open_cycle - 2,
-               coverage_end=entry['coverage']['coverage_end'], threshold=snapshot['thin_base_threshold_usd'], multiplier=multiplier or 1.,
-               face_value=str(open_cycle) not in snapshot['cpi']['multipliers'])
+               coverage_end=entry['coverage']['coverage_end'], threshold=snapshot['thin_base_threshold_usd'], multiplier=multiplier,
+               open_multiplier=open_multiplier or 1., face_value=open_multiplier is None)
     changes_all = {}
     for cycle in (current, current + 2):
         changes_all.update(_mapping(_mapping(horizons.get(str(cycle)), str(cycle) + ' assumptions').get('annual_forecast_changes'), 'Annual growth-forecast changes'))
@@ -876,8 +901,7 @@ def _project_v2(request, b):
         growth = _number(a.get('growth_pct'), 'Cycle revenue growth', -99.9, 500)
         pac = _v2_pac(ctx, a, cycle)
         wstatus, _reason = _window(ctx, cycle)
-        cut = _effective_cut(entry['general_giving']['observed'], as_of, ctx['coverage_end'])
-        through = cut['through'] if cut and wstatus == 'window' else None
+        through = _cut_through(ctx) if wstatus == 'window' else None
         result = dict(cycle=cycle, period=_period(cycle), horizon='current_remainder' if cycle == current else 'next_complete',
                       starts=(_next_day(through) if through else (((as_of + timedelta(days=1)).isoformat() if as_of < date(cycle, 12, 31) else None)
                                                                    if cycle == current else f'{cycle - 1}-01-01')),

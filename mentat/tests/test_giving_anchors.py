@@ -302,6 +302,36 @@ class BuilderTests(unittest.TestCase):
         self.assertIn('property_casualty', snap['unavailable'])
         self.assertIn('not in the report directory', snap['unavailable']['property_casualty'])
 
+    def test_a_missing_lda_file_is_named_not_reported_as_missing_rows(self):
+        (self.world.base / 'sector_spend.csv').unlink()
+        self.world.options['lda_csv'] = self.world.base / 'sector_spend.csv'
+        snap, _ = self.world.build()
+        lda = snap['industries']['commercial_banks']['lda']
+        self.assertEqual(lda['status'], 'unavailable')
+        self.assertIn('sector_spend.csv was not found', lda['reason'])
+        self.assertEqual(bga.validate_snapshot(snap), [])
+
+    def test_a_partial_build_keeps_the_other_industries_of_the_published_snapshot(self):
+        old = {'schema_version': 1, 'kind': 'giving-anchors', 'industries': {'a': {'v': 'old a'}, 'b': {'v': 'old b'}}, 'unavailable': {'c': 'no index', 'b': 'stale reason'}}
+        new = {'schema_version': 1, 'kind': 'giving-anchors', 'industries': {'b': {'v': 'new b'}}, 'unavailable': {'d': 'new reason'}}
+        with tempfile.TemporaryDirectory() as out:
+            path = Path(out) / 'published.json'
+            path.write_text(json.dumps(old))
+            merged = bga.merge_with_published(new, path, ['b', 'd'])
+            self.assertEqual(merged['industries'], {'a': {'v': 'old a'}, 'b': {'v': 'new b'}})
+            self.assertEqual(merged['unavailable'], {'c': 'no index', 'd': 'new reason'})
+            self.assertEqual(bga.merge_with_published(new, Path(out) / 'absent.json', ['b']), new)       # nothing published yet: the partial build stands alone
+
+    def test_a_partial_build_does_not_drop_an_industry_reported_unavailable_by_the_full_build(self):
+        with tempfile.TemporaryDirectory() as out, patch.dict(os.environ, {'ANCHORS_GLASSBOX_DIR': str(Path(out) / 'gb')}):
+            args = list(self._run(out))
+            _final, _receipt, full = bga.run_build(*args)
+            self.assertIn('property_casualty', full['unavailable'])
+            args[2] = ['commercial_banks']
+            final, _receipt, partial = bga.run_build(*args)
+            self.assertEqual(json.loads(final.read_text(encoding='utf-8'))['unavailable'], full['unavailable'])
+            self.assertEqual(list(partial['industries']), ['commercial_banks'])
+
     def test_an_industry_with_no_lda_sector_or_roster_is_unavailable_per_measure(self):
         self.world.registry['industries'][0].update(lda_sector=None, pac_roster=[])
         snap, _ = self.world.build()
@@ -421,6 +451,17 @@ class BuilderTests(unittest.TestCase):
 
 
 class PartsTests(unittest.TestCase):
+    def test_an_undated_fec_row_is_in_the_cycle_total_and_in_no_observed_cut(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'itpas2.txt'
+            write_text(path, [pas2_line('C00000001', '24K', 1000, 'H2AA00001', '', 'U1', 1, 9001),             # no usable date
+                              pas2_line('C00000001', '24K', 200, 'H2AA00001', '03152026', 'U2', 1, 9002)])
+            out = fec_pas2.aggregate_file(path, '26', {('H2AA00001', '26'): 'DEM'}, {'C00000001': ['x']}, {'x': ['2026-02-28', '2026-03-31']})['x']
+            self.assertEqual(out['totals']['all_recipients'], 120000)
+            self.assertEqual(out['cuts']['2026-02-28']['all_recipients'], 0)
+            self.assertEqual(out['cuts']['2026-03-31']['all_recipients'], 20000)
+            self.assertEqual(out['undated_cents'], 100000)
+
     def test_coverage_end_is_the_last_quarter_whose_report_deadline_passed(self):
         cases = {'2026-09-09': '2026-06-30', '2026-07-28': '2026-06-30', '2026-07-14': '2026-03-31', '2026-07-15': '2026-06-30',
                  '2026-10-14': '2026-06-30', '2026-10-15': '2026-09-30', '2027-01-14': '2026-09-30', '2027-01-15': '2026-12-31', '2026-04-15': '2026-03-31'}

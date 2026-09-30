@@ -96,7 +96,10 @@ def aggregate_file(path, yy, parties, membership, cuts_by_industry=None):
         for industry in membership[row['cmte_id']]:
             block = out.setdefault(industry, {'totals': blank_block(), 'cuts': {cut: blank_block() for cut in cuts_by_industry.get(industry, ())}, 'max_date': '', 'lines': lines,
                                               'kept_rows': len(rows)})
-            targets = [block['totals']] + [b for cut, b in block['cuts'].items() if row['date'] <= cut]
+            # A row with no usable date is part of the cycle total but of no observed cut: its day is unknown, never "before every cut".
+            targets = [block['totals']] + [b for cut, b in block['cuts'].items() if row['date'] and row['date'] <= cut]
+            if not row['date']:
+                block['undated_cents'] = block.get('undated_cents', 0) + row['amount_cents']
             for target in targets:
                 target['all_recipients'] += row['amount_cents']
                 if office in ('H', 'S'):

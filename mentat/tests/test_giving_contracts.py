@@ -73,7 +73,7 @@ class ContractTests(unittest.TestCase):
 
     def test_every_anchor_negative_control_fails_validation_or_the_invariants(self):
         self.assertEqual(self._accepted_controls(self._anchor_validator, 'anchors'), [])
-        self.assertEqual(len([c for c in contract.negative_controls() if c['target'] == 'anchors']), 16)
+        self.assertEqual(len([c for c in contract.negative_controls() if c['target'] == 'anchors']), 18)
 
     def test_a_schema_only_validator_misses_the_invariant_controls(self):
         # The invariant controls are schema-valid by design: only the cross-field checks catch them.

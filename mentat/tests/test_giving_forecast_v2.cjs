@@ -17,7 +17,7 @@ function el(tag) {
     append(...c) { this.children.push(...c); }, replaceChildren(...c) { this.children = c; }, setAttribute() {}, addEventListener() {}, after() {}, firstChild: {}};
 }
 
-function load() {
+function load(fetchImpl = () => {}) {
   const els = {};
   // Elements register under their id when it is set, so a value written through the input field() returns is the one getElementById reads.
   const create = tag => { const e = el(tag); let id = ''; Object.defineProperty(e, 'id', {get: () => id, set: v => { id = v; els[v] = e; }}); return e; };
@@ -25,8 +25,8 @@ function load() {
   let src = fs.readFileSync(SOURCE, 'utf8');
   assert.match(src, /\}\)\(\);\s*$/, 'unexpected file ending');
   src = src.replace(/\}\)\(\);\s*$/, `globalThis.__t={isV2,configureForSchema,pacCell,shareCell,lobbyCell,pacCellV2,shareCellV2,lobbyCellV2,render,renderV2,renderRefusal,renderEvidence,renderEvidenceV2,
-    getRequest,getRequestV2,buildInputs,historicalExample,anchorNote,setCatalog:c=>{catalog=c;},industry};\n})();\n`);
-  const ctx = vm.createContext({document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout, fetch: () => {}, AbortController, Object, JSON, Array, Date});
+    getRequest,getRequestV2,buildInputs,historicalExample,anchorNote,calculate,setCatalog:c=>{catalog=c;},industry};\n})();\n`);
+  const ctx = vm.createContext({document, Intl, Number, Math, String, console, URL: {}, Blob: function () {}, setTimeout, fetch: fetchImpl, AbortController, Object, JSON, Array, Date});
   vm.runInContext(src, ctx, {filename: SOURCE});
   return {t: ctx.__t, els, document};
 }
@@ -40,8 +40,8 @@ function texts(node, acc = []) {
 const flat = node => texts(node).join('\n');
 const horizon = (run, index) => DATA.runs[run].horizons[index];
 
-function session(sector = 'commercial_banks') {
-  const s = load();
+function session(sector = 'commercial_banks', fetchImpl) {
+  const s = load(fetchImpl);
   s.els['gf-industry'] = Object.assign(el('select'), {value: sector});
   s.els['gf-date'] = Object.assign(el('input'), {value: '2026-09-30'});
   s.t.setCatalog(DATA.catalog);
@@ -184,6 +184,23 @@ test('an anchor_stale response renders a refusal with the reason, not numbers', 
   assert.match(all, /Rebuild the anchors/);
   assert.match(all, /refuses rather than mix old levels with a new report/);
   assert.doesNotMatch(all, /Remainder from/);
+});
+
+test('a refusal is reported as not calculated: no success message and no export', async () => {
+  const reply = data => () => Promise.resolve({ok: true, status: 200, headers: {get: () => 'application/json'}, json: () => Promise.resolve(data)});
+  const stale = session('commercial_banks', reply(DATA.runs.banks_stale));
+  stale.t.buildInputs();
+  await stale.t.calculate();
+  assert.equal(stale.els['gf-export'].disabled, true);
+  assert.match(stale.els['gf-status'].textContent, /Rebuild the anchors/);
+  assert.doesNotMatch(stale.els['gf-status'].textContent, /calculated/);
+  assert.equal(stale.els['gf-status'].classList.contains('gf-error'), true);
+  assert.equal(stale.els['gf-calculate'].disabled, false);
+  const fine = session('commercial_banks', reply(DATA.runs.banks));
+  fine.t.buildInputs();
+  await fine.t.calculate();
+  assert.equal(fine.els['gf-export'].disabled, false);
+  assert.match(fine.els['gf-status'].textContent, /Both horizons calculated/);
 });
 
 test('the full render shows the four outcome rows, the coverage note and the notices', () => {

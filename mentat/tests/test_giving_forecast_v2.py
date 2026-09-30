@@ -538,6 +538,61 @@ class ContractAndRefusalTests(unittest.TestCase):
             json.dumps(catalog, allow_nan=False)
 
 
+class ReviewFixTests(unittest.TestCase):
+    def test_a_missing_anchor_cycle_cpi_multiplier_refuses_instead_of_reading_as_1_0(self):
+        anchors = contract.example('anchors')
+        del anchors['cpi']['multipliers']['2024']
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, anchors=anchors):
+            out = gf.project(scenario(BANKS))
+            self.assertEqual(out['status'], 'anchor_unavailable')
+            self.assertEqual(out['horizons'], [])
+        # defence in depth: the calculator's own guard, for a snapshot that somehow reached it
+        ok = contract.example('anchors')
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, anchors=ok):
+            snapshot = gf.anchors()
+            broken = copy.deepcopy(snapshot)
+            del broken['cpi']['multipliers']['2024']
+            with patch.object(gf, 'anchors', lambda: broken), self.assertRaisesRegex(gf.AnchorProblem, 'no CPI multiplier'):
+                gf._anchor_industry(BANKS)
+
+    def test_once_the_open_cycle_has_a_cpi_the_observed_amounts_are_deflated_and_no_longer_face_value(self):
+        anchors = contract.example('anchors')
+        anchors['cpi']['multipliers']['2026'] = 1.02
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, anchors=anchors):
+            out = gf.project(scenario(BANKS))
+        base = run(scenario(BANKS))
+        g = next(m for m in out['horizons'][0]['pac']['measures'] if m['id'] == 'general_giving')
+        g0 = next(m for m in base['horizons'][0]['pac']['measures'] if m['id'] == 'general_giving')
+        self.assertIs(g['observed']['face_value'], False)
+        self.assertIs(g0['observed']['face_value'], True)
+        self.assertAlmostEqual(g['observed']['amount_real_2025'], g['observed']['amount_nominal'] * 1.02, places=6)
+        self.assertAlmostEqual(g['projected_remaining'], g['projected_cycle_real_2025'] - g['observed']['amount_nominal'] * 1.02, places=4)
+        self.assertAlmostEqual(g0['observed']['amount_real_2025'], g0['observed']['amount_nominal'], places=6)
+        self.assertFalse(out['anchors']['face_value_current_cycle'])
+        bank = out['horizons'][0]['shares']['Senate']['bases'][0]
+        self.assertAlmostEqual(bank['observed']['R_real_2025'], bank['observed']['R'] * 1.02, places=6)
+
+    def test_the_horizon_start_follows_whichever_measure_is_ready_and_the_reason_names_the_real_gap(self):
+        anchors = contract.example('anchors')
+        i = anchors['industries'][BANKS]
+        i['general_giving'].update(status='unavailable', reason='test', cycles={}, by_funding_source={}, observed=[])
+        i['status']['general_giving'] = 'unavailable'
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, anchors=anchors):
+            out = gf.project(scenario(BANKS))
+        h = out['horizons'][0]
+        self.assertEqual((h['starts'], h['coverage_through']), ('2026-07-01', '2026-06-30'))
+        employee = next(b for b in h['shares']['House']['bases'] if b['id'] == 'employee_candidate')
+        self.assertEqual(employee['remainder_status'], 'needs_inputs')
+        self.assertNotIn('Enter cycle revenue growth', employee['remainder_reason'])
+        self.assertIn('needs a ready projection', employee['remainder_reason'])
+
+    def test_a_share_model_without_a_forecast_term_is_refused_by_the_loader(self):
+        bundle = contract.example('models')
+        bundle['share_models']['control_House']['terms'] = [t for t in bundle['share_models']['control_House']['terms'] if t != 'Forecast']
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=bundle), self.assertRaisesRegex(ValueError, 'no Forecast term'):
+            gf.models()
+
+
 class UnusualButValidAnchorTests(unittest.TestCase):
     """Schema-valid snapshots with missing pieces answer with a status or a reason, never a crash and never a zero."""
 

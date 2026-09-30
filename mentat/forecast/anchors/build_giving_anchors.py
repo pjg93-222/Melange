@@ -238,8 +238,14 @@ def build_pac(group, root, open_cycle, sides, threshold):
             'inputs': [{'role': f['role'], 'file': f['file'], 'sha256': f['sha256'], 'fec_last_modified': f['fec_last_modified']} for f in inputs],
             'cycles': by_cycle, 'file_through': through, 'observed': observed,
             'thin_base': _thin({cy: row for cy, row in by_cycle.items()}, threshold)}
+        found = []
         if missing:
-            notes[ident] = 'Roster committee(s) absent from the FEC committee masters: ' + ', '.join(missing)
+            found.append('Roster committee(s) absent from the FEC committee masters: ' + ', '.join(missing))
+        undated = sum((results[c].get(ident) or {}).get('undated_cents', 0) for c in cycles)
+        if undated:
+            found.append(f'${format(dollars(undated), ",.2f")} of counted FEC rows carry no usable date: they are in the cycle totals and in no observed cut.')
+        if found:
+            notes[ident] = ' '.join(found)
     return out, notes
 
 
@@ -252,6 +258,9 @@ def unavailable_pac(reason):
 # LDA
 # ---------------------------------------------------------------------------------------------------------------------------------
 def build_lda(spec, rows, lda_path, lda_sha):
+    if spec.get('lda_sector') and rows is None:
+        return {'status': 'unavailable', 'reason': 'The Melange LDA output ' + lda_path.name + ' was not found.', 'sector': spec['lda_sector'], 'label': None,
+                'source_file': None, 'source_sha256': None, 'through': None, 'series': {}, 'note': lda_reader.NOTE}
     if not spec.get('lda_sector'):
         return {'status': 'unavailable', 'reason': LDA_UNAVAILABLE, 'sector': None, 'label': None, 'source_file': None, 'source_sha256': None,
                 'through': None, 'series': {}, 'note': lda_reader.NOTE}
@@ -311,7 +320,7 @@ def build_snapshot(project_root, registry, options):
     controls_sha = ms.sha256_file(options['controls'])
     inputs.append({'role': 'cpi', 'path': str(options['controls']), 'sha256': controls_sha})
     lda_path = Path(options['lda_csv'])
-    lda_rows = lda_reader.read_sector_rows(lda_path) if lda_path.is_file() else []
+    lda_rows = lda_reader.read_sector_rows(lda_path) if lda_path.is_file() else None
     lda_sha = ms.sha256_file(lda_path) if lda_path.is_file() else None
     if lda_sha:
         inputs.append({'role': 'lda', 'path': str(lda_path), 'sha256': lda_sha})
@@ -388,6 +397,22 @@ def build_snapshot(project_root, registry, options):
     return snapshot, inputs
 
 
+def merge_with_published(snapshot, published_path, only):
+    """A partial build (--industry) replaces only the industries it built: the others keep the anchors of the published snapshot, so one flag
+    cannot wipe them. No valid published snapshot means the partial build stands alone."""
+    try:
+        old = read_json(published_path)
+    except (OSError, ValueError):
+        return snapshot
+    if old.get('schema_version') != 1 or old.get('kind') != 'giving-anchors':
+        return snapshot
+    industries = {k: v for k, v in old['industries'].items() if k not in only}
+    industries.update(snapshot['industries'])
+    unavailable = {k: v for k, v in old.get('unavailable', {}).items() if k not in only and k not in industries}
+    unavailable.update({k: v for k, v in snapshot['unavailable'].items() if k not in industries})
+    return {**snapshot, 'industries': industries, 'unavailable': unavailable}
+
+
 def validate_snapshot(snapshot):
     problems = contract.validate_kind(snapshot, 'anchors')
     if not problems:
@@ -447,6 +472,8 @@ def run_build(project_root, output_dir=None, only=None, registry_path=None, fec=
         options = dict(report_dir=Path(report_dir) if report_dir else report_directory(project_root), fec_root=fec_root(project_root, fec),
                        lda_csv=lda_csv or default_lda_csv(), controls=Path(controls) if controls else default_controls(project_root), only=only, run=run)
         snapshot, inputs = build_snapshot(project_root, registry, options)
+        if only:
+            snapshot = merge_with_published(snapshot, output_dir / SNAPSHOT_NAME, only)
         run.stage_start('validate', 'Validating against the shared schema and invariants')
         problems = validate_snapshot(snapshot) if snapshot['industries'] else ['no industry could be anchored: ' + json.dumps(snapshot['unavailable'])]
         if problems:

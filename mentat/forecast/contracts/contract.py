@@ -184,6 +184,8 @@ def check_anchor_invariants(snapshot, tolerance=0.011):
     for ident, ind in snapshot['industries'].items():
         tag = 'industries.' + ident
         cov = ind['coverage']
+        if str(cov['current_cycle'] - 2) not in snapshot['cpi']['multipliers']:
+            problems.append(tag + '.coverage: no CPI multiplier for the anchor cycle ' + str(cov['current_cycle'] - 2))
         if cov['coverage_end'] > cov['rule_coverage_end']:
             problems.append(tag + '.coverage: coverage_end is later than the rule coverage end')
         if cov['coverage_end'] > cov['collection_date']:
@@ -229,6 +231,10 @@ def check_anchor_invariants(snapshot, tolerance=0.011):
                         problems.append(tag + '.' + label + '.thin_base.' + cyc + '.' + chamber + ': flag disagrees with the D+R total and the threshold')
         lda = ind['lda']
         if lda['status'] == 'ready':
+            if set(lda['series']) != {'income_total', 'expenses_total'}:
+                problems.append(tag + '.lda.series: both income_total and expenses_total are required')
+            elif set(lda['series']['income_total']['annual']) != set(lda['series']['expenses_total']['annual']):
+                problems.append(tag + '.lda.series: the two series must cover the same complete years')
             for sid, series in lda['series'].items():
                 partial = series['partial']
                 if partial is not None and abs(sum(partial['quarters'].values()) - partial['total']) > tolerance:

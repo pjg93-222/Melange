@@ -205,7 +205,9 @@
     result=null; $('gf-results').replaceChildren(); $('gf-results').setAttribute('aria-busy','true');message('Calculating both horizons…');
     try {
       const data=await api('/api/forecast/project',getRequest(),requestController.signal);
-      if(rev!==generation)return;result=data;render(data);$('gf-export').disabled=false;
+      if(rev!==generation)return;result=data;render(data);
+      if(data.status && data.status!=='ready'){message(data.reason || 'The forecast was not calculated.',true);return;}
+      $('gf-export').disabled=false;
       message('Both horizons calculated. Missing inputs are shown beside the affected outcome.');
     } catch(error) {if(error.name!=='AbortError' && rev===generation)message(error.message,true);}
     finally {if(rev===generation){$('gf-calculate').disabled=false;$('gf-results').setAttribute('aria-busy','false');}}
@@ -548,7 +550,7 @@
   });
   $('gf-form').addEventListener('submit',calculate);
   $('gf-form').addEventListener('input',invalidate);
-  $('gf-industry').addEventListener('change',()=>{buildInputs();renderEvidence();$('gf-source').value='';$('gf-source-date').value='';invalidate();message('Industry changed. Enter assumptions and observed amounts for this whole-industry scope.');});
+  $('gf-industry').addEventListener('change',()=>{buildInputs();renderEvidence();$('gf-source').value='';$('gf-source-date').value='';invalidate();message(isV2()?'Industry changed. Enter your assumptions; Mentat supplies the observed amounts.':'Industry changed. Enter assumptions and observed amounts for this whole-industry scope.');});
   $('gf-signal').addEventListener('change',()=>{
     const seats=$('gf-signal').value==='seats';
     for(const end of [cycle(),cycle()+2])for(const chamber of chambers){const input=$(`gf-${end}-${chamber}-political`);input.value='';input.min=seats?(chamber==='House'?-435:-100):0;input.max=seats?(chamber==='House'?435:100):100;input.parentNode.firstChild.textContent=chamber+(seats?' expected R seat gain':' R control score');$(input.id+'-help').textContent=seats?'Net seats gained by Republicans; losses are negative.':'0–100, on the historical IEM score scale.';}
