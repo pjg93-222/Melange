@@ -69,10 +69,21 @@ function Test-MentatRemoteState($Profile, $Health, $Catalog) {
         Assert-MentatRemote ([string]$Health.$name -cmatch '^[0-9a-f]{64}$') ('Invalid remote build hash ' + $name + '.')
     }
     Assert-MentatRemote ($Health.code_sha256 -ceq $Health.on_disk_code_sha256_now -and $Health.assets_sha256 -ceq $Health.on_disk_assets_sha256_now) 'The pod process has stale code or interface assets.'
-    foreach ($name in @('schema_version','model_version','model_sha256')) {
-        Assert-MentatRemote (@($Catalog.PSObject.Properties.Name) -contains $name) ('Forecast catalog omitted ' + $name + '.')
+    $catalogNames=@($Catalog.PSObject.Properties.Name)
+    foreach ($name in @('model_version','model_sha256')) {
+        Assert-MentatRemote ($catalogNames -contains $name) ('Forecast catalog omitted ' + $name + '.')
     }
-    Assert-MentatRemote ($Catalog.schema_version -eq 2 -and [string]$Catalog.model_version -match '^[^\r\n]{1,160}$' -and [string]$Catalog.model_sha256 -cmatch '^[0-9a-f]{64}$') 'A valid published forecast v2 is unavailable.'
+    Assert-MentatRemote ([string]$Catalog.model_version -match '^[^\r\n]{1,160}$' -and [string]$Catalog.model_sha256 -cmatch '^[0-9a-f]{64}$') 'A valid published forecast identity is unavailable.'
+    # The production v1 rollback catalog predates the schema_version field.
+    $schema='1'
+    if ($catalogNames -contains 'schema_version') { $schema=[string]$Catalog.schema_version }
+    Assert-MentatRemote ($schema -cmatch '^[12]$') 'Unsupported forecast catalog schema.'
+    if ($schema -eq '1') {
+        foreach ($name in @('built_on','currency','industries','share_models','pac_model','lobby_model','evidence','industry_slopes','validation_metrics','sources')) {
+            Assert-MentatRemote ($catalogNames -contains $name) ('Legacy forecast catalog omitted ' + $name + '.')
+            Assert-MentatRemote ($null -ne $Catalog.$name) ('Legacy forecast catalog has no ' + $name + '.')
+        }
+    }
 }
 
 function Get-MentatTunnelListeners([int]$Port) {

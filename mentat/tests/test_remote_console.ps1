@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$ModulePath=(Join-Path $PSScriptRoot '../app/remote-console.psm1'), [switch]$LivePod)
+param([string]$ModulePath=(Join-Path $PSScriptRoot '../app/remote-console.psm1'), [switch]$LivePod, [string]$LegacyCatalogPath)
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
 Import-Module $ModulePath -Force
@@ -29,8 +29,23 @@ try {
   $copy=$health|ConvertTo-Json|ConvertFrom-Json;$copy.($case[0])=$case[1]
   Must-Fail {& $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $copy $catalog} $case[2] ('health rejects '+$case[0])
  }
- $badCatalog=$catalog|ConvertTo-Json|ConvertFrom-Json;$badCatalog.schema_version=1
- Must-Fail {& $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $health $badCatalog} 'forecast v2' 'legacy forecast cannot masquerade as activated v2'
+ $legacy=[pscustomobject]@{model_version='giving-v1';model_sha256=('d'*64);built_on='2026-09-30';currency='USD';industries=@();share_models=[pscustomobject]@{};pac_model=[pscustomobject]@{};lobby_model=[pscustomobject]@{};evidence=@();industry_slopes=@();validation_metrics=@();sources=@()}
+ & $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $health $legacy
+ Check $true 'legacy v1 catalog without schema accepts authoritative-pointer rollback'
+ $explicitLegacy=$legacy|ConvertTo-Json -Depth 5|ConvertFrom-Json;$explicitLegacy|Add-Member NoteProperty schema_version 1
+ & $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $health $explicitLegacy
+ Check $true 'explicit supported v1 catalog accepted'
+ $badCatalog=$catalog|ConvertTo-Json|ConvertFrom-Json;$badCatalog.schema_version=3
+ Must-Fail {& $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $health $badCatalog} 'Unsupported forecast catalog schema' 'unknown forecast schema fails closed'
+ $badLegacy=$legacy|ConvertTo-Json -Depth 5|ConvertFrom-Json;$badLegacy.PSObject.Properties.Remove('pac_model')
+ Must-Fail {& $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $health $badLegacy} 'omitted pac_model' 'legacy catalog requires production model blocks'
+ $badLegacy=$legacy|ConvertTo-Json -Depth 5|ConvertFrom-Json;$badLegacy.model_sha256=''
+ Must-Fail {& $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $health $badLegacy} 'forecast identity' 'legacy catalog requires valid model hash'
+ if($LegacyCatalogPath) {
+  $actualLegacy=Get-Content -LiteralPath $LegacyCatalogPath -Raw|ConvertFrom-Json
+  & $module {param($p,$h,$c) Test-MentatRemoteState $p $h $c} $profile $health $actualLegacy
+  Check $true 'actual consumer-generated v1 rollback catalog passes without pointer changes'
+ }
  if($LivePod) {
   & $module {param($p) $h=Get-MentatRemoteJson 'http://127.0.0.1:8808/api/health';$c=Get-MentatRemoteJson 'http://127.0.0.1:8808/api/forecast/catalog';Test-MentatRemoteState $p $h $c} $profile
   Check $true 'real full pod server health and published catalog pass transport contract'
