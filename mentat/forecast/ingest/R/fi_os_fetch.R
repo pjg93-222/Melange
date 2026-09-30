@@ -290,7 +290,15 @@ fi_os_fetch_run <- function(plan, cfg, frozen_codes, frt = fi_frt_dir(), transpo
         if (cls$kind == "redirect") {
           loc <- r$headers[["location"]] %||% ""
           target <- if (grepl("^https?://", loc)) loc else if (startsWith(loc, "//")) "" else if (startsWith(loc, "/")) paste0(FI_OS_BASE, loc) else ""   # "//host/x" names another host
-          if (!nzchar(target) || !startsWith(target, paste0(FI_OS_BASE, "/"))) { halt("block", "redirect_off_site", cur, r); return(res) }
+          if (!nzchar(target) || !startsWith(target, paste0(FI_OS_BASE, "/"))) {
+            # The same organisation's other host (for example the apex domain) is not a block: the site answered, and its answer is
+            # where it sends a page that does not exist. The run still stops (the host is not on the allow list) but sets no sticky flag.
+            thost <- tolower(sub("^https?://([^/:]+).*$", "\\1", target))
+            if (nzchar(target) && (thost == "opensecrets.org" || endsWith(thost, ".opensecrets.org"))) {
+              halt("error", paste0("redirect_to_other_opensecrets_host:", target), cur, r); return(res)
+            }
+            halt("block", "redirect_off_site", cur, r); return(res)
+          }
           if (grepl("login|sign[_-]?in|/users/|/account", sub("^https?://[^/]+", "", target), ignore.case = TRUE)) { halt("block", "redirect_to_login", cur, r); return(res) }
           hops <- hops + 1L
           if (hops > 3L) { halt("error", "too_many_redirects", cur, r); return(res) }

@@ -357,3 +357,23 @@ test_that("the plan for the real P&C entry is the 22 pages of the spec: one tota
   expect_equal(f$opensecrets_fetch$permission$basis, "owner states explicit permission from OpenSecrets")
   expect_equal(f$opensecrets_fetch$min_interval_s, 4)
 })
+
+test_that("a redirect of the code's page to the organisation's apex host (the site's answer for a page that does not exist) stops the run, leaves the code unverified, and is not recorded as a block", {
+  d <- local_ingest_env()
+  w <- make_world(function(url) if (grepl("robots", url)) resp(200, ROBOTS_2026, list(), "text/plain") else resp(302, "<html><body>You are being redirected.</body></html>", list(location = "http://opensecrets.org/industries", `set-cookie` = "s=1")))
+  out <- capture.output(r <- fi_run("opensecrets-fetch", industry = "widgets", run_id = "fx-apex", feeds = synth_feeds(), events_dir = d$glassbox, verbose = TRUE,
+                                    transport = w$transport, clock = w$clock, sleep = w$sleep))
+  expect_equal(r$status, "stopped"); expect_equal(r$exit_code, 3L)
+  expect_match(r$stop_reason, "^redirect_to_other_opensecrets_host:http://opensecrets.org/industries")
+  expect_length(w$calls, 2L)                                                                 # robots.txt and the one page; no second try, no follow
+  expect_false(isTRUE(fi_fetch_state_read(d$frt)$stopped))                                   # not a bot block: no sticky flag
+  expect_false(any(grepl("blocked or challenged", out, fixed = TRUE)))
+  rc <- jsonlite::fromJSON(r$receipt$path, simplifyVector = FALSE)
+  ver <- Filter(function(z) grepl("verified from the site", z$name), rc$checks)
+  expect_length(ver, 1L); expect_equal(ver[[1]]$failures, 1L); expect_match(ver[[1]]$detail, "not verified")
+  expect_false(rc$extra$code_verification$verified)
+  expect_equal(rc$extra$fetch$stopped$evidence$http, 302L)
+  pr <- jsonlite::fromJSON(file.path(r$run_dir, "proposed_registry_patch.json"), simplifyVector = FALSE)$patch$industries$widgets$opensecrets
+  expect_equal(pr$code_status, "unverified_recall"); expect_equal(pr$verification_attempt$http, 302L); expect_equal(pr$verification_attempt$location, "http://opensecrets.org/industries")
+  expect_false(dir.exists(file.path(r$run_dir, "outputs", "os")))
+})

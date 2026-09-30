@@ -211,7 +211,21 @@ fi_parse_args <- function(args) {
                          refresh = ctx$refresh, on_page = on_page)
   fi_receipt_network(rec, res$network)
   rec$extra$fetch <- list(requests = res$requests, pages = res$pages, stopped = res$stopped, user_agent = res$gate$user_agent)
+  if (is.null(verification)) {
+    # the page that would verify the code was never delivered: the code stays unverified and no data for it is used
+    why <- if (!is.null(res$stopped)) res$stopped$reason else "no page was delivered"
+    fi_receipt_check(rec, sprintf("OpenSecrets code %s verified from the site's own page", plan$code[1]), 1L, 1L, paste("not verified: the page that would verify it was not delivered -", why))
+    fi_receipt_decision(rec, sprintf("code %s NOT VERIFIED: %s", plan$code[1], why))
+    rec$extra$code_verification <- list(verified = FALSE, issues = list(why), evidence = res$stopped$evidence)
+  }
   written <- list()
+  if (!length(envs)) {
+    patch <- list(industries = stats::setNames(list(list(opensecrets = list(code_status = "unverified_recall", verification_attempt = list(
+      run_id = ctx$run_id, utc = rf_now_utc(), url = plan$url[1], outcome = if (is.null(verification)) "page not delivered" else "no page accepted",
+      reason = if (!is.null(res$stopped)) res$stopped$reason else NULL, http = res$stopped$evidence$http, location = res$stopped$evidence$headers$location)))), ids[1]))
+    pr <- fi_write_proposals(ctx$run_dir, list(), patch, "No page was accepted; the code stays unverified. Nothing here changes a registry.")
+    fi_receipt_output(rec, pr$inputs, 0L, role = "proposed_inputs"); fi_receipt_output(rec, pr$registry_patch, NA_integer_, role = "proposed_registry_patch")
+  }
   if (length(envs)) {
     written <- .fi_write_os_outputs(ctx, envs, feeds)
     cmap <- fi_code_map(feeds)

@@ -109,3 +109,29 @@ test_that("the replaced vintage is recorded when a newer edition arrives", {
   expect_equal(rc$extra$replaced_vintage, "2020-02")
   expect_true(any(grepl("replaces the whole 2020-02 history", unlist(rc$decisions), fixed = TRUE)))
 })
+
+test_that("fi_load_feed: an accepted feed reads back typed; a changed output or a missing vault input fails with rerun_ingest; a changed code hash means re-derive for IBISWorld feeds", {
+  d <- local_ingest_env()
+  r <- run_ok(d, "rc-load")
+  f <- fi_load_feed("feed:ibis_predicted_growth")
+  expect_true(f$ok); expect_equal(f$action, "use"); expect_equal(f$run_id, "rc-load")
+  expect_true(is.numeric(f$data$collected_forecast_growth_pct)); expect_true(is.numeric(f$data$year)); expect_equal(nrow(f$data), 16L)
+  expect_true(all(f$checks$failures == 0L))
+  a <- fi_load_feed("ibis_actual_growth"); expect_true(a$ok); expect_true(is.numeric(a$data$revenue_million_report_price_basis))
+  expect_false(fi_load_feed("nope")$ok)
+  # a different code hash (another version of the ingest) on an IBISWorld feed: cheap re-derive
+  c2 <- fi_load_feed("ibis_predicted_growth", code_sha = "0000")
+  expect_false(c2$ok); expect_equal(c2$action, "rederive"); expect_match(c2$reason, "code changed")
+  # a tampered output: rerun
+  p <- f$path; txt <- readLines(p); writeLines(c(txt, ""), p, useBytes = TRUE)
+  t <- fi_load_feed("ibis_predicted_growth"); expect_false(t$ok); expect_equal(t$action, "rerun_ingest"); expect_match(t$reason, "output changed")
+  # a missing raw input: rerun
+  run_ok2 <- fi_run("ibisworld", run_id = "rc-load2", feeds = synth_feeds(), events_dir = d$glassbox, verbose = FALSE)
+  unlink(rf_vault_dir(), recursive = TRUE)
+  m <- fi_load_feed("ibis_predicted_growth"); expect_false(m$ok); expect_equal(m$action, "rerun_ingest"); expect_match(m$reason, "raw input")
+})
+
+test_that("fi_load_feed with nothing accepted yet says so", {
+  d <- local_ingest_env()
+  x <- fi_load_feed("ibis_predicted_growth"); expect_false(x$ok); expect_match(x$reason, "no current.json")
+})
