@@ -538,6 +538,75 @@ class ContractAndRefusalTests(unittest.TestCase):
             json.dumps(catalog, allow_nan=False)
 
 
+class UnusualButValidAnchorTests(unittest.TestCase):
+    """Schema-valid snapshots with missing pieces answer with a status or a reason, never a crash and never a zero."""
+
+    def with_anchors(self, edit):
+        anchors = contract.example('anchors')
+        edit(anchors['industries'][BANKS])
+        self.assertEqual(contract.validate_kind(anchors, 'anchors') or contract.check_anchor_invariants(anchors), [])     # the variant is a legal snapshot
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, anchors=anchors):
+            out = gf.project(scenario(BANKS))
+            json.dumps(out, allow_nan=False)
+            return out['horizons'][0]
+
+    def test_a_missing_anchor_cycle_of_candidate_receipts_makes_the_share_bases_unavailable(self):
+        def edit(i):
+            i['candidate_receipts']['cycles'].pop('2024')
+            i['candidate_receipts']['thin_base'].pop('2024')
+        h = self.with_anchors(edit)
+        basis = next(b for b in h['shares']['House']['bases'] if b['id'] == 'employee_candidate')
+        self.assertEqual(basis['status'], 'unavailable')
+        self.assertIn('anchor cycle', basis['reason'])
+        self.assertEqual(next(b for b in h['shares']['House']['bases'] if b['id'] == 'pac_candidate')['status'], 'ready')
+        self.assertIsNone(h['shares']['House']['combined_reference'])
+
+    def test_an_unavailable_pac_block_leaves_general_giving_and_the_employee_basis(self):
+        def edit(i):
+            i['pac_to_candidates'].update(status='unavailable', reason='roster not resolved', committee_count=0, single_pac=False, committees=[], inputs=[],
+                                          cycles={}, file_through={}, observed=[], thin_base={})
+            i['status']['pac_to_candidates'] = 'unavailable'
+        h = self.with_anchors(edit)
+        measures = {m['id']: m for m in h['pac']['measures']}
+        self.assertEqual(measures['pac_to_candidates']['status'], 'unavailable')
+        self.assertEqual(measures['pac_to_candidates']['reason'], 'roster not resolved')
+        self.assertEqual(measures['general_giving']['status'], 'ready')
+        bases = {b['id']: b for b in h['shares']['Senate']['bases']}
+        self.assertEqual(bases['pac_candidate']['status'], 'unavailable')
+        self.assertIn(bases['employee_candidate']['remainder_status'], ('ready', 'budget_inconsistent'))
+
+    def test_a_partial_year_absent_from_the_lda_means_no_observed_quarters_and_no_remainder(self):
+        def edit(i):
+            for s in i['lda']['series'].values():
+                s['partial'] = None
+        s = self.with_anchors(edit)['lobbying']['rows'][0]['series'][0]
+        self.assertNotIn('observed', s)
+        self.assertNotIn('projected_remaining', s)
+        self.assertGreater(s['projected'], 0)
+
+    def test_a_two_party_base_of_zero_has_no_share_to_carry_over(self):
+        def edit(i):
+            for chamber in ('House', 'Senate'):
+                i['candidate_receipts']['cycles']['2024'][chamber].update(D=0.0, R=0.0, other=0.0)
+            i['candidate_receipts']['thin_base']['2024'] = {'House': True, 'Senate': True}
+        h = self.with_anchors(edit)
+        basis = next(b for b in h['shares']['House']['bases'] if b['id'] == 'employee_candidate')
+        self.assertEqual(basis['status'], 'unavailable')
+
+    def test_the_last_day_of_the_cycle_has_no_remainder_window(self):
+        class YearEnd(date):
+            @classmethod
+            def today(cls):
+                return cls(2026, 12, 31)
+        with tempfile.TemporaryDirectory() as tmp, World(tmp), patch.object(gf, 'date', YearEnd):
+            out = gf.project(scenario(BANKS, as_of='2026-12-31'))
+        h = out['horizons'][0]
+        self.assertIsNone(h['starts'])
+        self.assertEqual(h['pac']['measures'][0]['remainder_status'], 'cycle_closed')
+        self.assertEqual(h['shares']['House']['bases'][0]['remainder_status'], 'cycle_closed')
+        self.assertEqual(h['lobbying']['rows'][0]['series'][0]['remainder_status'], 'ready')       # Melange LDA's Q3 + Q4 are not filed yet: that remainder stands
+
+
 class RenderFixtureTests(unittest.TestCase):
     """The golden payload the browser harness (test_giving_forecast_v2.cjs) renders: pinned to the calculator so the two cannot drift."""
 

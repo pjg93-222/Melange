@@ -706,13 +706,15 @@ def _v2_basis_totals(ctx, pac, chamber):
     a = str(ctx['anchor_cycle'])
     out = {}
     general, cand = measures.get('general_giving'), ctx['snap']['candidate_receipts']
-    if general and cand['status'] == 'ready' and ctx['snap']['general_giving']['cycles'].get(a):
-        part = cand['cycles'][a][chamber]
-        out['employee_candidate'] = general['projected_cycle_real_2025'] * (part['D'] + part['R']) / ctx['snap']['general_giving']['cycles'][a]
+    general_level = ctx['snap']['general_giving']['cycles'].get(a)
+    cand_part = cand['cycles'].get(a, {}).get(chamber) if cand['status'] == 'ready' else None
+    if general and general_level and cand_part:
+        out['employee_candidate'] = general['projected_cycle_real_2025'] * (cand_part['D'] + cand_part['R']) / general_level
     pac_measure, block = measures.get('pac_to_candidates'), ctx['snap']['pac_to_candidates']
-    if pac_measure and block['status'] == 'ready' and block['cycles'][a]['to_house_senate']:
-        part = block['cycles'][a][chamber]
-        out['pac_candidate'] = pac_measure['projected_cycle_real_2025'] * (part['D'] + part['R']) / block['cycles'][a]['to_house_senate']
+    pac_row = block['cycles'].get(a) if block['status'] == 'ready' else None
+    if pac_measure and pac_row and pac_row['to_house_senate']:
+        part = pac_row[chamber]
+        out['pac_candidate'] = pac_measure['projected_cycle_real_2025'] * (part['D'] + part['R']) / pac_row['to_house_senate']
     return out
 
 
