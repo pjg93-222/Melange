@@ -68,18 +68,26 @@ The 18 property and casualty editions on this machine (2006-12 to 2024-11) repro
 
 ## 3. OpenSecrets
 
-### 3.1 Property and casualty code F3400: NOT VERIFIED, and not reachable by the page fetcher
+### 3.1 Property and casualty baseline: F09 (all Insurance), by owner ruling
 
-The registry expects P&C to be OpenSecrets category **F3400** ("Property & casualty insurance", under F09 Insurance). That code comes
-from recall and is unverified. On 2026-09-30 the owner-permitted fetcher asked for the F3400 totals page and the site answered
-`302 Found` with `Location: http://opensecrets.org/industries`: the site sends you to its interest-group index, which is what it does for
-a page that does not exist. The public interest-group list captured on 2026-09-27 (222 links) also has no F3400 and no other insurance
-code than F09. So the public pages do not publish F3400 as an interest group, and the code cannot be verified from a site page. It can
-be verified from `CRP_Categories.txt` (the bulk-data category file), and its data can only come from the bulk files. The run stopped
-after two requests (robots.txt and that one page); no data for F3400 was used.
+The OpenSecrets baseline for property and casualty insurance is **F09 (Insurance)**, from its public industry pages, by the owner's ruling of
+2026-09-30, knowing that F09 also covers life, health and brokers. Every receipt carries the caveat: *OpenSecrets baseline F09 = all insurance;
+Mentat P&C roster and IBISWorld 52412 are P&C only.*
 
-OpenSecrets gives each organisation one primary category. Multi-line insurers coded elsewhere (for example generic Insurance, F09) are
-not in F3400, so F3400 can undercount the property and casualty political footprint. The receipt says so.
+The earlier candidate, category F3400 ("Property & casualty insurance"), is not published as an interest-group page: on 2026-09-30 the
+fetcher asked for its totals page and the site answered `302 Found` to `http://opensecrets.org/industries` (the interest-group index, the
+site's answer for a page that does not exist), and the public list captured on 2026-09-27 has no F3400 and no insurance code other than F09.
+It was never verified and no data for it was used. It is kept in the registry as `superseded_candidate`.
+
+What the 2026-09-27 captures already hold for F09 is the totals page (all cycles 1990-2024) and the summary page. The House and Senate
+candidate recipients and the presidential recipients for 2012-2024 (21 pages) are the pages the fetcher adds.
+
+### Frozen captures
+
+"Frozen" means the existing captures are never re-fetched or overwritten. `registryrozen_os_pages.json` lists every captured page (code,
+cycle, kind, file, sha256; no content; regenerate with `tools\make_frozen_inventory.R`). The fetcher plans only pages the inventory does not
+hold, refuses any page it does hold, and closes the fully captured codes (F03, F05, T2100) altogether. A registry that names an inventory
+that is missing stops the run rather than fetching blind.
 
 ### 3.2 The page fetcher (`--feed opensecrets-fetch`)
 
@@ -89,8 +97,8 @@ deliberately polite:
 - a descriptive User-Agent naming the tool and its operator (no e-mail address; set `MENTAT_OS_CONTACT` to add a contact of your choice)
 - one request per 4 seconds at most (never faster than 3 s), one connection, no cookies kept, no proxy
 - `robots.txt` first, obeyed; a content-addressed cache so each URL is fetched once (`--refresh` to fetch again)
-- only the URLs the registry lists for the industry; the frozen baseline codes (F03, F05, T2100, F09) are never fetched
-- the code is verified from the first page (canonical code, heading, parent industry) before any other page is requested
+- only the URLs the registry lists for the industry and the frozen inventory does not hold (see "Frozen captures")
+- the page is checked first (canonical code, heading, breadcrumb) and the run stops if it is not the industry the registry expects
 
 **It never tries to get past a block.** A Cloudflare challenge (403 "Just a moment", a `cf-mitigated` header, a captcha body),
 401/407/429/503, a redirect off the site or to a login page, a non-HTML answer or a page that is not OpenSecrets stops the run at once.

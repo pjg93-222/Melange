@@ -91,3 +91,71 @@ fi_os_calibrate <- function(dir, feeds, cycles = seq(2012L, 2024L, 2L), roots = 
   num <- if (!is.null(tb)) unlist(tb[, intersect(c("pac_rel_delta", "dem_H", "rep_H", "dem_S", "rep_S"), names(tb))]) else numeric()
   list(accepted = accepted, table = tb, passed = !is.null(accepted), max_delta = if (length(num) && any(is.finite(num))) max(num[is.finite(num)]) else NA_real_)
 }
+
+# ---- the frozen page inventory --------------------------------------------------------------------------------------------------------------
+# "Frozen" means the existing captures of 2026-09-27 (the 63 recipient captures, the totals and summary pages) are never re-fetched or
+# overwritten. It does not mean a code is off limits: a page of an industry that no capture holds may be fetched. The inventory lists every
+# captured page (code, cycle, kind), its file, sha256 and retrieval time, so the fetcher can plan only the missing pages and refuse the
+# captured ones. It holds no page content. It is generated from the capture folders by tools/make_frozen_inventory.R.
+
+FI_CAPTURE_DIRS <- c(baseline = "outputs/opensecrets_baseline/direct_sources", partisanship = "outputs/opensecrets_partisanship/direct_sources")
+
+# Page kind of a capture file stem ("F09_2024_totals" -> totals); probes and index pages keep their own kinds.
+.fi_capture_kind <- function(tail) {
+  if (tail %in% c("totals", "summary", "presidential", "candidates_H", "candidates_S")) return(tail)
+  if (tail == "recips") return("recips")
+  if (tail == "house_candidates") return("house_candidates")
+  NA_character_
+}
+
+# Scan the capture folders under `root` (the LOO root). -> data.frame(code, cycle, kind, group, file, sha256, url, retrieved_utc), sorted.
+fi_os_scan_captures <- function(root = rf_roots()$LOO) {
+  rows <- list()
+  for (g in names(FI_CAPTURE_DIRS)) {
+    d <- file.path(root, FI_CAPTURE_DIRS[[g]])
+    for (f in sort(list.files(d, pattern = "\\.json$", full.names = TRUE))) {
+      m <- regmatches(basename(f), regexec("^([A-Z][0-9]{2,4})_([0-9]{4})_(.+)\\.json$", basename(f)))[[1]]
+      if (length(m) != 4L) next
+      kind <- .fi_capture_kind(m[4])
+      if (is.na(kind)) next
+      j <- tryCatch(jsonlite::fromJSON(f, simplifyVector = FALSE), error = function(e) NULL)
+      rows[[length(rows) + 1L]] <- data.frame(code = m[2], cycle = as.integer(m[3]), kind = kind, group = g, file = file.path(FI_CAPTURE_DIRS[[g]], basename(f)),
+                                              sha256 = rf_sha256(f), url = j$url %||% NA_character_, retrieved_utc = j$retrieved_utc %||% NA_character_, stringsAsFactors = FALSE)
+    }
+  }
+  out <- if (length(rows)) do.call(rbind, rows) else NULL
+  if (!is.null(out)) out <- out[order(out$group, out$code, out$cycle, out$kind, out$file), ]
+  rownames(out) <- NULL
+  out
+}
+
+fi_os_inventory_path <- function(feeds = NULL) {
+  rel <- feeds$opensecrets_frozen$inventory %||% "registry/frozen_os_pages.json"
+  if (grepl("^([A-Za-z]:)?[/\\]", rel)) rel else file.path(fi_home(), rel)      # an absolute path is used as given (tests)
+}
+
+# Read the committed inventory. NULL when the registry names none; an error when it names one that is missing or unreadable (the gate must
+# fail closed: without the inventory a captured page could be fetched again).
+fi_os_frozen_inventory <- function(feeds) {
+  if (is.null(feeds$opensecrets_frozen$inventory)) return(NULL)
+  p <- fi_os_inventory_path(feeds)
+  if (!file.exists(p)) stop("fi_os_frozen_inventory: the registry names the frozen page inventory ", feeds$opensecrets_frozen$inventory, " but it is missing", call. = FALSE)
+  j <- jsonlite::fromJSON(p, simplifyVector = FALSE)
+  rows <- lapply(j$pages, function(z) data.frame(code = z$code, cycle = as.integer(z$cycle), kind = z$kind, group = z$group %||% NA_character_, file = z$file %||% NA_character_,
+                                                  sha256 = z$sha256 %||% NA_character_, url = z$url %||% NA_character_, retrieved_utc = z$retrieved_utc %||% NA_character_, stringsAsFactors = FALSE))
+  out <- do.call(rbind, rows)
+  attr(out, "generated") <- j$generated_from
+  out
+}
+
+fi_os_write_inventory <- function(inv, path, generated_from = "") {
+  rf_write_json_atomic(list(schema_version = 1L, note = paste("Every page of the 2026-09-27 OpenSecrets captures (code, cycle, kind, file, sha256). No page content.",
+                                                              "These pages are never re-fetched or overwritten; pages missing from them may be fetched."),
+                            generated_from = generated_from, pages = lapply(seq_len(nrow(inv)), function(i) as.list(inv[i, ]))), path)
+}
+
+# Is the page (code, cycle, kind) in the inventory?
+fi_os_in_inventory <- function(inv, code, cycle, kind) {
+  if (is.null(inv) || !nrow(inv)) return(rep(FALSE, length(code)))
+  paste(code, cycle, kind) %in% paste(inv$code, inv$cycle, inv$kind)
+}

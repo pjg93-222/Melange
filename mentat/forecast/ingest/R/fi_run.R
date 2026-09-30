@@ -168,12 +168,19 @@ fi_parse_args <- function(args) {
   ids <- ids[vapply(ids, function(i) "fetch" %in% unlist(feeds$industries[[i]]$opensecrets$routes_allowed), NA)]
   if (!length(ids)) return(list(status = "failed", message = "opensecrets-fetch: no industry with the fetch route in the registry"))
   cfg <- feeds$opensecrets_fetch; frozen <- unlist(feeds$opensecrets_frozen$codes)
-  plan <- do.call(rbind, lapply(ids, function(i) cbind(fi_os_fetch_plan(feeds, i), industry = i, stringsAsFactors = FALSE)))
-  rec$extra$plan <- list(industries = as.list(ids), pages = nrow(plan), permission = cfg$permission)
+  inv <- fi_os_frozen_inventory(feeds)                                   # NULL when the registry names none; an error when the named file is missing
+  plans <- lapply(ids, function(i) fi_os_fetch_plan(feeds, i, inventory = inv))
+  plan <- do.call(rbind, lapply(seq_along(ids), function(k) if (nrow(plans[[k]])) cbind(plans[[k]], industry = ids[k], stringsAsFactors = FALSE) else NULL))
+  expected <- do.call(rbind, lapply(plans, function(p) attr(p, "expected")))
+  present <- do.call(rbind, lapply(plans, function(p) attr(p, "present")))
+  rec$extra$plan <- list(industries = as.list(ids), expected_pages = nrow(expected), already_captured = nrow(present), pages_to_fetch = if (is.null(plan)) 0L else nrow(plan), permission = cfg$permission)
+  fi_receipt_decision(rec, sprintf("inventory: %d expected page(s) for %s; %d already in the frozen captures (%s); %d to fetch", nrow(expected), paste(ids, collapse = ", "), nrow(present),
+                                   if (nrow(present)) paste(sprintf("%s %d %s", present$code, present$cycle, present$kind), collapse = ", ") else "none", if (is.null(plan)) 0L else nrow(plan)))
+  if (is.null(plan)) return(list(status = "ok", message = "opensecrets-fetch: every expected page is already in the frozen captures; nothing to fetch"))
   if (ctx$dry_run) {
     gb$event("feeds.fetch.gate", "succeeded", "fetch-gate", "dry run: no request is made", "", list(decision = "dry-run", reason = "no network in a dry run"))
-    .fi_say("opensecrets-fetch (dry run): would fetch ", nrow(plan), " page(s) for ", paste(ids, collapse = ", "), "; first: ", plan$url[1])
-    return(list(status = "ok", message = sprintf("opensecrets-fetch: dry run, %d page(s) planned, no request made", nrow(plan))))
+    .fi_say("opensecrets-fetch (dry run): would fetch ", nrow(plan), " page(s) for ", paste(ids, collapse = ", "), " (", nrow(present), " already captured); first: ", plan$url[1])
+    return(list(status = "ok", message = sprintf("opensecrets-fetch: dry run, %d page(s) planned (%d already captured), no request made", nrow(plan), nrow(present))))
   }
   ind_of <- stats::setNames(plan$industry, plan$url)
   expect <- feeds$industries[[ids[1]]]$opensecrets$expect
@@ -208,9 +215,17 @@ fi_parse_args <- function(args) {
     NULL
   }
   res <- fi_os_fetch_run(plan, cfg, frozen, frt = fi_frt_dir(), transport = ctx$transport, clock = ctx$clock, sleep = ctx$sleep, emit = gb$event, contact = ctx$contact,
-                         refresh = ctx$refresh, on_page = on_page)
+                         refresh = ctx$refresh, on_page = on_page, inventory = inv)
   fi_receipt_network(rec, res$network)
   rec$extra$fetch <- list(requests = res$requests, pages = res$pages, stopped = res$stopped, user_agent = res$gate$user_agent)
+  # present versus fetched versus blocked, one row per expected page
+  st_of <- stats::setNames(res$pages$status, res$pages$url)
+  if (!is.null(res$stopped) && !is.na(res$stopped$url %||% NA_character_) && res$stopped$url %in% names(st_of))
+    st_of[[res$stopped$url]] <- if (identical(res$stopped$kind, "block")) "blocked" else "stopped_not_delivered"
+  inv_table <- data.frame(url = expected$url, code = expected$code, cycle = expected$cycle, kind = expected$kind,
+                          status = ifelse(expected$url %in% names(st_of), unname(st_of[expected$url]), "present_in_frozen_captures"), stringsAsFactors = FALSE)
+  rec$extra$inventory_table <- inv_table
+  fi_receipt_decision(rec, paste("inventory result:", paste(sprintf("%s %d", names(table(inv_table$status)), as.integer(table(inv_table$status))), collapse = ", ")))
   if (is.null(verification)) {
     # the page that would verify the code was never delivered: the code stays unverified and no data for it is used
     why <- if (!is.null(res$stopped)) res$stopped$reason else "no page was delivered"
@@ -220,7 +235,7 @@ fi_parse_args <- function(args) {
   }
   written <- list()
   if (!length(envs)) {
-    patch <- list(industries = stats::setNames(list(list(opensecrets = list(code_status = "unverified_recall", verification_attempt = list(
+    patch <- list(industries = stats::setNames(list(list(opensecrets = list(code_status = feeds$industries[[ids[1]]]$opensecrets$code_status %||% "unverified_recall", verification_attempt = list(
       run_id = ctx$run_id, utc = rf_now_utc(), url = plan$url[1], outcome = if (is.null(verification)) "page not delivered" else "no page accepted",
       reason = if (!is.null(res$stopped)) res$stopped$reason else NULL, http = res$stopped$evidence$http, location = res$stopped$evidence$headers$location)))), ids[1]))
     pr <- fi_write_proposals(ctx$run_dir, list(), patch, "No page was accepted; the code stays unverified. Nothing here changes a registry.")
@@ -229,24 +244,33 @@ fi_parse_args <- function(args) {
   if (length(envs)) {
     written <- .fi_write_os_outputs(ctx, envs, feeds)
     cmap <- fi_code_map(feeds)
-    ent <- fi_manifest_os(written, NULL, fi_code_sha256())
+    ent <- fi_manifest_os(written, NULL, fi_code_sha256(), run_dir = ctx$run_dir)
     okc <- !is.null(verification) && verification$verified
     cfg0 <- feeds$industries[[ids[1]]]
     code <- cfg0$opensecrets$codes[[1]]
     complete <- length(envs) == nrow(plan) && is.null(res$stopped)
+    # the totals page of a code that is already captured stays the frozen capture: proposed by reference, never re-fetched or copied
+    anchor <- cfg0$opensecrets$totals_cycle_anchor %||% max(unlist(cfg0$opensecrets$cycles_required))
+    frozen_totals <- if (!is.null(inv)) inv[inv$code == code & inv$cycle == anchor & inv$kind == "totals", , drop = FALSE] else NULL
+    totals_path <- if (!is.null(frozen_totals) && nrow(frozen_totals)) paste0("{LOO}/", frozen_totals$file[1]) else file.path(ctx$run_dir, "outputs", "os", sprintf("%s_%d_totals.json", code, anchor))
+    if (!is.null(frozen_totals) && nrow(frozen_totals)) {
+      ent <- c(list(list(role = sprintf("os_totals:%s", ids[1]), path = totals_path, sha256 = frozen_totals$sha256[1], pinned = TRUE, purpose = "raw", vintage = frozen_totals$retrieved_utc[1],
+                         supplied_by = "frozen baseline capture of 2026-09-27 (not re-fetched)")), ent)
+    }
     patch <- list(industries = stats::setNames(list(list(opensecrets = c(
-      list(code_status = if (okc) "verified_site_page" else "unverified_recall",
-           code_verification = if (okc) list(heading = verification$heading, parent = verification$parent, verified_utc = rf_now_utc(), run_id = ctx$run_id) else NULL),
-      if (complete) list(totals = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_%d_totals.json", code, cfg0$opensecrets$totals_cycle_anchor)),
+      list(code_status = cfg0$opensecrets$code_status %||% "unverified_recall",
+           page_verification = if (okc) list(heading = verification$heading, parent = verification$parent, verified_utc = rf_now_utc(), run_id = ctx$run_id) else NULL,
+           baseline_scope_caveat = cfg0$opensecrets$baseline_scope_caveat %||% cfg0$opensecrets$scope_caveat),
+      if (complete) list(totals = totals_path,
                          recipients = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_{cycle}_candidates_{chamber}.json", code)),
-                         presidential = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_{cycle}_presidential.json", code)), status = "supplied")))), ids[1]))
+                         presidential = file.path(ctx$run_dir, "outputs", "os", sprintf("%s_{cycle}_presidential.json", code)),
+                         recipients_run_relative = sprintf("outputs/os/%s_{cycle}_candidates_{chamber}.json", code),
+                         presidential_run_relative = sprintf("outputs/os/%s_{cycle}_presidential.json", code), status = "supplied")))), ids[1]))
     pr <- fi_write_proposals(ctx$run_dir, ent, patch, "OpenSecrets fetched pages; the refit registry patch sets the capture paths only when every planned page was accepted.")
     fi_receipt_output(rec, pr$inputs, length(ent), role = "proposed_inputs"); fi_receipt_output(rec, pr$registry_patch, NA_integer_, role = "proposed_registry_patch")
     gb$event("feeds.manifest.proposed", "succeeded", "manifest", sprintf("proposed %d manifest entries", length(ent)), "", list(entries = length(ent)))
     for (nm in names(written)) fi_current_update(paste0("os:", nm), written[[nm]], ctx$run_id)
   }
-  rec$extra$scope_caveat <- feeds$industries[[ids[1]]]$opensecrets$scope_caveat
-  fi_receipt_decision(rec, paste("scope:", feeds$industries[[ids[1]]]$opensecrets$scope_caveat))
   n_ok <- length(envs)
   if (!is.null(res$stopped)) {
     msg <- if (identical(res$stopped$kind, "block") || identical(res$stopped$kind, "gate")) FI_OS_STOP_MESSAGE else paste("opensecrets-fetch stopped:", res$stopped$reason)
@@ -300,6 +324,15 @@ fi_parse_args <- function(args) {
   list(status = "ok", message = sprintf("opensecrets: recipe %s passed calibration", cal$accepted))
 }
 
+# The baseline scope caveat of each industry (registry opensecrets.baseline_scope_caveat, else scope_caveat), optionally for one industry.
+.fi_scope_caveats <- function(feeds, industry = NULL) {
+  ids <- names(feeds$industries)
+  if (!is.null(industry)) ids <- intersect(ids, industry)
+  out <- list()
+  for (id in ids) { t <- feeds$industries[[id]]$opensecrets$baseline_scope_caveat %||% feeds$industries[[id]]$opensecrets$scope_caveat; if (!is.null(t)) out[[id]] <- t }
+  out
+}
+
 # ---- the dispatcher --------------------------------------------------------------------------------------------------------------------
 
 # Run one feed. Transport, clock and sleep are injectable for tests; contact overrides MENTAT_OS_CONTACT.
@@ -314,6 +347,10 @@ fi_run <- function(feed, industry = NULL, dry_run = FALSE, run_id = NULL, refres
   gb <- fi_gb_run(run_id, events_dir)
   rec <- fi_receipt_new(run_id, feed, if (dry_run) "dry-run" else "run", industry %||% "", fi_inbox_dir())
   gb$start(feed, industry %||% "", fi_inbox_dir(), if (dry_run) "dry-run" else "run")
+  # the scope of each industry's baseline is stated in every receipt of a run that could touch it
+  cav <- .fi_scope_caveats(feeds, industry)
+  for (id in names(cav)) fi_receipt_decision(rec, sprintf("scope (%s): %s", id, cav[[id]]))
+  rec$extra$scope_caveats <- cav
   ctx <- list(feeds = feeds, rec = rec, gb = gb, run_id = run_id, run_dir = run_dir, dry_run = dry_run, industry = industry, transport = transport, clock = clock,
               sleep = sleep, contact = contact, refresh = refresh)
   out <- tryCatch({

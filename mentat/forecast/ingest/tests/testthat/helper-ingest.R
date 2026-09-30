@@ -242,3 +242,46 @@ find_pinned <- function(sha256, name, candidates = character()) {
   for (p in c(vault, candidates)) if (length(p) && file.exists(p) && identical(unname(tools::sha256sum(p)), sha256)) return(p)
   NULL
 }
+
+# ---- fake OpenSecrets world for the fetcher tests (shared by test-08 and test-12) ------------------------------------------------------------------
+
+ROBOTS_2026 <- paste("User-Agent: *", "Disallow: /widgets/", "Disallow: /export_data", "Disallow: /admin", "Disallow: /api", "Disallow: /400", "Disallow: /404",
+                     "Disallow: /406", "Disallow: /422", "Disallow: /500", "Disallow: /503", "Disallow: /504", "Disallow: /donate", "Disallow: /donate/thank-you", "",
+                     "User-agent: PiplBot", "Disallow: /", "", "User-agent: GPTBot", "Disallow: /", sep = "\n")
+
+resp <- function(status = 200L, body = "", headers = list(), ctype = "text/html; charset=utf-8") {
+  h <- c(list(`content-type` = ctype), headers)
+  list(status = as.integer(status), headers = h, body = if (is.raw(body)) body else charToRaw(enc2utf8(body)), url = "")
+}
+
+CRUMBS_OK <- list(c("Home", "/"), c("Interest Groups", "/industries"), c("Synthetic Sector", "/industries/indus?ind=Z"), c("Synthetic Parent", "/industries/indus?ind=Z99"),
+                  c("Widget Makers", "/industries/indus?ind=Z9900"))
+
+serve_page <- function(url, heading = "Widget &amp; Gadget Makers Summary", crumbs = CRUMBS_OK) {
+  t <- fi_os_target_from_url(url)
+  rows <- switch(t$kind, totals = synth_totals_rows(), candidates_H = synth_candidate_rows(6, "H"), candidates_S = synth_candidate_rows(6, "S"), presidential = synth_presidential_rows())
+  resp(200, synth_os_html(rows, heading = heading, canonical = url, crumbs = crumbs))
+}
+
+# A fake world: clock, transport (records calls with the time of each), sleep.
+make_world <- function(handler = NULL, latency = 0.3) {
+  w <- new.env(parent = emptyenv())
+  w$t <- 1000; w$calls <- list(); w$sleeps <- numeric()
+  w$handler <- handler %||% function(url) if (grepl("/robots.txt$", url)) resp(200, ROBOTS_2026, list(`cache-control` = "public, max-age=86400"), "text/plain") else serve_page(url)
+  w$transport <- function(url, user_agent, timeout_s) {
+    w$calls[[length(w$calls) + 1L]] <- list(url = url, ua = user_agent, t = w$t, timeout = timeout_s)
+    w$t <- w$t + latency
+    w$handler(url)
+  }
+  w$clock <- function() w$t
+  w$sleep <- function(s) { w$sleeps <- c(w$sleeps, s); w$t <- w$t + s }
+  w
+}
+
+fetch_args <- function(feeds, w, frt, ...) {
+  list(plan = fi_os_fetch_plan(feeds, "widgets"), cfg = feeds$opensecrets_fetch, frozen_codes = unlist(feeds$opensecrets_frozen$codes), frt = frt,
+       transport = w$transport, clock = w$clock, sleep = w$sleep, ...)
+}
+run_fetch <- function(feeds, w, frt, ...) do.call(fi_os_fetch_run, fetch_args(feeds, w, frt, ...))
+calls_to <- function(w, pattern) sum(vapply(w$calls, function(z) grepl(pattern, z$url), NA))
+

@@ -103,7 +103,9 @@ fi_os_cache_dir <- function(url, frt = fi_frt_dir()) file.path(frt, "os_cache", 
 
 # The URLs the fetcher may request for an industry: the pages of FEEDS_SPEC 2.2 - one totals page, then House / Senate / presidential
 # recipients per required cycle - for the codes of the registry entry. -> data.frame(url, code, cycle, kind, role)
-fi_os_fetch_plan <- function(feeds, industry_id, cycles = NULL) {
+#   inventory  the frozen page inventory (fi_os_frozen_inventory): pages already captured are left out of the plan (and kept in attr "present"),
+#              so only the missing pages are ever requested
+fi_os_fetch_plan <- function(feeds, industry_id, cycles = NULL, inventory = NULL) {
   ind <- feeds$industries[[industry_id]]
   if (is.null(ind)) stop("fi_os_fetch_plan: industry not in the feeds registry: ", industry_id, call. = FALSE)
   code <- ind$opensecrets$codes[[1]]
@@ -115,7 +117,13 @@ fi_os_fetch_plan <- function(feeds, industry_id, cycles = NULL) {
     role <- if (k == "presidential") sprintf("os_presidential:%s:%d", industry_id, cy) else sprintf("os_recipients:%s:%d:%s", industry_id, cy, substr(k, 12, 12))
     rows[[length(rows) + 1L]] <- data.frame(url = fi_os_url(code, cy, k), code = code, cycle = as.integer(cy), kind = k, role = role, stringsAsFactors = FALSE)
   }
-  do.call(rbind, rows)
+  full <- do.call(rbind, rows)
+  have <- fi_os_in_inventory(inventory, full$code, full$cycle, full$kind)
+  out <- full[!have, , drop = FALSE]
+  rownames(out) <- NULL
+  attr(out, "present") <- full[have, , drop = FALSE]
+  attr(out, "expected") <- full
+  out
 }
 
 fi_os_user_agent <- function(cfg, contact = NULL) {
@@ -126,7 +134,7 @@ fi_os_user_agent <- function(cfg, contact = NULL) {
 
 # The gate. Every condition must hold before any request is made (zero transport calls otherwise).
 # -> list(ok, reason, user_agent)
-fi_os_fetch_gate <- function(cfg, plan, frozen_codes, frt = fi_frt_dir(), contact = NULL) {
+fi_os_fetch_gate <- function(cfg, plan, frozen_codes, frt = fi_frt_dir(), contact = NULL, inventory = NULL) {
   stop_with <- function(why) list(ok = FALSE, reason = why, user_agent = NA_character_)
   perm <- cfg$permission
   need <- c("kind", "who", "date", "basis")
@@ -142,8 +150,10 @@ fi_os_fetch_gate <- function(cfg, plan, frozen_codes, frt = fi_frt_dir(), contac
     host <- sub("^https?://([^/]+).*$", "\\1", u)
     if (!(host %in% hosts)) return(stop_with(paste("URL host not allowed:", u)))
     if (!any(vapply(patterns, function(p) grepl(p, u, perl = TRUE), NA))) return(stop_with(paste("URL does not match an allowed pattern:", u)))
-    code <- fi_os_target_from_url(u)$code
-    if (!is.na(code) && code %in% frozen_codes) return(stop_with(paste("code", code, "belongs to the frozen baseline and is never re-fetched:", u)))
+    tg <- fi_os_target_from_url(u)
+    if (!is.na(tg$code) && tg$code %in% frozen_codes) return(stop_with(paste("code", tg$code, "belongs to the frozen baseline and is never re-fetched:", u)))
+    if (!is.na(tg$code) && !is.na(tg$cycle) && !is.na(tg$kind) && fi_os_in_inventory(inventory, tg$code, tg$cycle, tg$kind))
+      return(stop_with(paste("this page is in the frozen capture inventory and is never re-fetched:", u)))
   }
   list(ok = TRUE, reason = "permission attested, contact set, not stopped, every URL allowed", user_agent = ua)
 }
@@ -185,9 +195,9 @@ fi_redact_headers <- function(h) { h <- h %||% list(); h[setdiff(names(h), FI_RE
 #   on_page      function(page) called after each accepted page; returning list(stop = TRUE, reason = ...) ends the run
 # -> list(pages (one row per planned URL), stopped (NULL or list(kind, reason, url, evidence)), requests, network (receipt entries), html (list by url))
 fi_os_fetch_run <- function(plan, cfg, frozen_codes, frt = fi_frt_dir(), transport = fi_curl_transport, clock = function() as.numeric(Sys.time()),
-                            sleep = Sys.sleep, emit = NULL, contact = NULL, refresh = FALSE, on_page = NULL) {
+                            sleep = Sys.sleep, emit = NULL, contact = NULL, refresh = FALSE, on_page = NULL, inventory = NULL) {
   say <- function(kind, status, stage, summary, detail = "", metadata = NULL) if (is.function(emit)) emit(kind, status, stage, summary, detail, metadata)
-  gate <- fi_os_fetch_gate(cfg, plan, frozen_codes, frt, contact)
+  gate <- fi_os_fetch_gate(cfg, plan, frozen_codes, frt, contact, inventory)
   say("feeds.fetch.gate", if (gate$ok) "succeeded" else "failed", "fetch-gate", paste("fetch gate:", if (gate$ok) "open" else "closed"), gate$reason,
       list(decision = if (gate$ok) "open" else "stop", reason = gate$reason))
   pages <- data.frame(url = plan$url, role = plan$role, status = "not_attempted", http = NA_integer_, bytes = NA_real_, sha256 = NA_character_,

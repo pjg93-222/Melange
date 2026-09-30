@@ -2,46 +2,6 @@
 # and a test fails if it is called when it must not be. A fake clock drives the rate limiter. The 2026-09-30 robots.txt is used as a
 # fixture (plain robots rules, not page content).
 
-ROBOTS_2026 <- paste("User-Agent: *", "Disallow: /widgets/", "Disallow: /export_data", "Disallow: /admin", "Disallow: /api", "Disallow: /400", "Disallow: /404",
-                     "Disallow: /406", "Disallow: /422", "Disallow: /500", "Disallow: /503", "Disallow: /504", "Disallow: /donate", "Disallow: /donate/thank-you", "",
-                     "User-agent: PiplBot", "Disallow: /", "", "User-agent: GPTBot", "Disallow: /", sep = "\n")
-
-resp <- function(status = 200L, body = "", headers = list(), ctype = "text/html; charset=utf-8") {
-  h <- c(list(`content-type` = ctype), headers)
-  list(status = as.integer(status), headers = h, body = if (is.raw(body)) body else charToRaw(enc2utf8(body)), url = "")
-}
-
-CRUMBS_OK <- list(c("Home", "/"), c("Interest Groups", "/industries"), c("Synthetic Sector", "/industries/indus?ind=Z"), c("Synthetic Parent", "/industries/indus?ind=Z99"),
-                  c("Widget Makers", "/industries/indus?ind=Z9900"))
-
-serve_page <- function(url, heading = "Widget &amp; Gadget Makers Summary", crumbs = CRUMBS_OK) {
-  t <- fi_os_target_from_url(url)
-  rows <- switch(t$kind, totals = synth_totals_rows(), candidates_H = synth_candidate_rows(6, "H"), candidates_S = synth_candidate_rows(6, "S"), presidential = synth_presidential_rows())
-  resp(200, synth_os_html(rows, heading = heading, canonical = url, crumbs = crumbs))
-}
-
-# A fake world: clock, transport (records calls with the time of each), sleep.
-make_world <- function(handler = NULL, latency = 0.3) {
-  w <- new.env(parent = emptyenv())
-  w$t <- 1000; w$calls <- list(); w$sleeps <- numeric()
-  w$handler <- handler %||% function(url) if (grepl("/robots.txt$", url)) resp(200, ROBOTS_2026, list(`cache-control` = "public, max-age=86400"), "text/plain") else serve_page(url)
-  w$transport <- function(url, user_agent, timeout_s) {
-    w$calls[[length(w$calls) + 1L]] <- list(url = url, ua = user_agent, t = w$t, timeout = timeout_s)
-    w$t <- w$t + latency
-    w$handler(url)
-  }
-  w$clock <- function() w$t
-  w$sleep <- function(s) { w$sleeps <- c(w$sleeps, s); w$t <- w$t + s }
-  w
-}
-
-fetch_args <- function(feeds, w, frt, ...) {
-  list(plan = fi_os_fetch_plan(feeds, "widgets"), cfg = feeds$opensecrets_fetch, frozen_codes = unlist(feeds$opensecrets_frozen$codes), frt = frt,
-       transport = w$transport, clock = w$clock, sleep = w$sleep, ...)
-}
-run_fetch <- function(feeds, w, frt, ...) do.call(fi_os_fetch_run, fetch_args(feeds, w, frt, ...))
-calls_to <- function(w, pattern) sum(vapply(w$calls, function(z) grepl(pattern, z$url), NA))
-
 test_that("GATE: no permission attestation -> STOP with zero transport calls", {
   d <- local_ingest_env(); w <- make_world()
   f <- synth_feeds(); f$opensecrets_fetch$permission <- NULL
@@ -288,7 +248,7 @@ test_that("END TO END (fake transport): verification of the code comes first, th
   inp <- Filter(function(z) z$kind == "html", rc$inputs); expect_length(inp, 7L)
   for (z in inp) { expect_true(file.exists(z$vault_path)); expect_equal(unname(tools::sha256sum(z$vault_path)), z$sha256) }
   pr <- jsonlite::fromJSON(file.path(r$run_dir, "proposed_registry_patch.json"), simplifyVector = FALSE)$patch$industries$widgets$opensecrets
-  expect_equal(pr$code_status, "verified_site_page"); expect_equal(pr$status, "supplied")
+  expect_equal(pr$page_verification$heading, "Widget & Gadget Makers"); expect_equal(pr$status, "supplied")
   expect_match(pr$recipients, "Z9900_{cycle}_candidates_{chamber}.json", fixed = TRUE)
   k <- vapply(read_events(d$glassbox), function(e) e$kind, "")
   expect_true(all(c("feeds.fetch.gate", "feeds.fetch.request", "feeds.manifest.proposed", "feeds.run.done") %in% k)); expect_false("feeds.fetch.stop" %in% k)
@@ -340,19 +300,17 @@ test_that("a dry run plans the pages and makes no request", {
   expect_true(any(grepl("would fetch 7 page", out)))
 })
 
-test_that("the plan for the real P&C entry is the 22 pages of the spec: one totals page then H, S and presidential for each cycle 2012-2024", {
+test_that("the plan for the real P&C entry with no inventory is 22 pages: one totals page then H, S and presidential for each cycle 2012-2024", {
   f <- fi_read_feeds()
   p <- fi_os_fetch_plan(f, "property_casualty")
   expect_equal(nrow(p), 22L)
-  expect_equal(p$url[1], "https://www.opensecrets.org/industries/totals?cycle=2024&ind=F3400")
+  expect_equal(p$url[1], "https://www.opensecrets.org/industries/totals?cycle=2024&ind=F09")
   expect_equal(sum(p$kind == "candidates_H"), 7L); expect_equal(sum(p$kind == "candidates_S"), 7L); expect_equal(sum(p$kind == "presidential"), 7L)
   expect_equal(sort(unique(p$cycle[p$kind != "totals"])), seq(2012L, 2024L, 2L))
-  g <- fi_os_fetch_gate(f$opensecrets_fetch, p, unlist(f$opensecrets_frozen$codes), frt = tempfile())
+  g <- fi_os_fetch_gate(f$opensecrets_fetch, p[p$kind != "totals", ], unlist(f$opensecrets_frozen$codes), frt = tempfile(), inventory = fi_os_frozen_inventory(f))
   expect_true(g$ok)
   expect_match(g$user_agent, "^Mentat-Giving-Forecast/.* \\(research data fetcher; operator Paul Goff, Melange Systems\\)$")
   expect_false(grepl("@", g$user_agent))                                                   # no e-mail address goes into a request header
-  # the frozen baseline codes are not in the plan and could not be added
-  expect_false(any(grepl("F03|F05|T2100|F09", p$url)))
   expect_equal(f$opensecrets_fetch$permission$who, "Paul Goff"); expect_equal(f$opensecrets_fetch$permission$date, "2026-09-30")
   expect_equal(f$opensecrets_fetch$permission$basis, "owner states explicit permission from OpenSecrets")
   expect_equal(f$opensecrets_fetch$min_interval_s, 4)

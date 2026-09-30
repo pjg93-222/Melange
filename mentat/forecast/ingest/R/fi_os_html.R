@@ -238,7 +238,7 @@ fi_os_verify_category_page <- function(meta, code, name_regex, parent_code = NUL
   canon <- gsub("&amp;", "&", meta$canonical %||% "", fixed = TRUE)
   pcode <- fi_os_target_from_url(canon)$code
   if (is.na(pcode) || !identical(pcode, code)) issues <- c(issues, sprintf("canonical_code_is_%s_not_%s", if (is.na(pcode)) "missing" else pcode, code))
-  heading <- sub("\\s+Summary$", "", meta$h1 %||% "")
+  heading <- sub("\\s+(Summary|Recipients)$", "", meta$h1 %||% "")      # totals pages say "Summary", recipient pages "Recipients"
   heading <- gsub("&amp;", "&", heading, fixed = TRUE)
   if (!nzchar(heading) || !grepl(name_regex, heading, ignore.case = TRUE, perl = TRUE)) issues <- c(issues, sprintf("heading_'%s'_does_not_match_expected_name", heading))
   parent <- NA_character_

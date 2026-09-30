@@ -24,8 +24,17 @@ fi_manifest_ibis <- function(editions, outputs, code_sha) {
 }
 
 # Entries for OpenSecrets envelopes written under outputs/os (roles of SPEC 3.5).
-fi_manifest_os <- function(envelope_files, industry_id, code_sha) {
-  lapply(names(envelope_files), function(role) .fi_manifest_entry(role, envelope_files[[role]], "raw", TRUE, code_sha256 = NULL))
+#   run_dir: when given, each entry also carries path_run_relative (the path inside the run folder), because a run folder can be moved
+#   (for example pulled back from a compute pod) and the absolute path then names the machine that ran.
+fi_manifest_os <- function(envelope_files, industry_id = NULL, code_sha = NULL, run_dir = NULL) {
+  lapply(names(envelope_files), function(role) {
+    e <- .fi_manifest_entry(role, envelope_files[[role]], "raw", TRUE, code_sha256 = NULL)
+    if (!is.null(run_dir)) {
+      rd <- normalizePath(run_dir, winslash = "/", mustWork = FALSE); p <- normalizePath(envelope_files[[role]], winslash = "/", mustWork = FALSE)
+      if (startsWith(p, paste0(rd, "/"))) e$path_run_relative <- substring(p, nchar(rd) + 2L)
+    }
+    e
+  })
 }
 
 fi_write_proposals <- function(run_dir, entries, registry_patch, note = "") {
