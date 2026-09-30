@@ -41,6 +41,7 @@ v1_bundle <- function() memo("v1", jsonlite::fromJSON(rf_input_path(test_inputs(
 
 # max |a - b| over paired numeric vectors (NA-aware: NA must match NA).
 max_abs <- function(a, b) {
+  a <- unname(a); b <- unname(b)
   stopifnot(length(a) == length(b))
   if (!identical(is.na(a), is.na(b))) return(Inf)
   ok <- !is.na(a)

@@ -16,15 +16,13 @@ rf_read_json <- function(path) jsonlite::fromJSON(path, simplifyVector = FALSE)
 
 # A CSV member of a zip archive, read as text (deduplication is the caller's business).
 rf_read_zip_csv <- function(zip_path, member) {
-  con <- unz(zip_path, member)
-  on.exit(close(con))
-  utils::read.csv(con, stringsAsFactors = FALSE)
+  utils::read.csv(unz(zip_path, member), stringsAsFactors = FALSE)   # read.csv opens and closes the connection itself
 }
 
 rf_read_zip_lines <- function(zip_path, member) {
   con <- unz(zip_path, member)
   on.exit(close(con))
-  readLines(con, warn = FALSE, encoding = "UTF-8")
+  readLines(con, warn = FALSE, encoding = "UTF-8")   # readLines leaves an unopened connection allocated, so it is closed here
 }
 
 rf_now_utc <- function() format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
@@ -94,6 +92,12 @@ rf_raise <- function(class, msg) stop(rf_condition(class, msg))
 
 # Money text of OpenSecrets tables: "$1,234", "($5)" is not used there, U+2212 is a minus sign.
 rf_money_int <- function(s) as.numeric(gsub("[$, ]", "", gsub("−", "-", s)))
+
+# rbind of data frames with different columns: missing columns are filled with NA (the union keeps first-seen order).
+rf_rbind_fill <- function(parts) {
+  cols <- unique(unlist(lapply(parts, names)))
+  do.call(rbind, lapply(parts, function(x) { x[setdiff(cols, names(x))] <- NA; x[cols] }))
+}
 
 # Sort key of a set of sector ids: alphabetical, reference level first (Python sorted()).
 rf_sorted <- function(x) sort(unique(x), method = "radix")
