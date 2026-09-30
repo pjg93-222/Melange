@@ -244,6 +244,7 @@ test('the evidence panel reads the bundle: applied slopes per industry, seats as
   const all = flat(els['gf-evidence-content']);
   assert.match(all, /3 growth\/PAC industries, 2012–2024; control\/share samples end in 2022 and seat\/share samples in 2024/);
   assert.match(all, /PAC amount · Commercial banks/);
+  assert.match(all, /PAC amount · Auto manufacturers/);                  // not offered, but still in the estimation: its applied slope is listed under its label
   assert.match(all, /industry-specific slope \(applied\)/);
   assert.match(all, /71 annual pairs across 6 industries; pooled slope/);
   assert.match(all, /seats \(no signal\)/);
