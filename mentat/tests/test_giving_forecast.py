@@ -3,6 +3,7 @@ import copy
 from datetime import date
 import json
 import math
+import os
 from pathlib import Path
 import sys
 import unittest
@@ -38,6 +39,8 @@ def scenario(sector='credit_unions', signal='control', varying=False):
 class GivingForecastTests(unittest.TestCase):
     def setUp(self):
         self.clock = patch.object(gf, 'date', Today); self.clock.start(); self.addCleanup(self.clock.stop)
+        # These are the schema-1 invariants: pin the v1 bundle so they keep running once a schema-2 bundle is published beside it.
+        self.pin = patch.dict(os.environ, {'MENTAT_GIVING_MODELS': str(gf.MODEL_FILE)}); self.pin.start(); self.addCleanup(self.pin.stop)
 
     def test_frozen_models_reproduce_reviewed_ordinary_coefficients(self):
         b = gf.models()
