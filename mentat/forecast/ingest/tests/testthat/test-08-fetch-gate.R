@@ -377,3 +377,16 @@ test_that("a redirect of the code's page to the organisation's apex host (the si
   expect_equal(pr$code_status, "unverified_recall"); expect_equal(pr$verification_attempt$http, 302L); expect_equal(pr$verification_attempt$location, "http://opensecrets.org/industries")
   expect_false(dir.exists(file.path(r$run_dir, "outputs", "os")))
 })
+
+test_that("block evidence keeps the status and headers but drops the client's IP address and session cookie", {
+  d <- local_ingest_env()
+  w <- make_world(function(url) if (grepl("robots", url)) resp(200, ROBOTS_2026, list(), "text/plain") else
+    resp(403, "<html><title>Just a moment...</title></html>", list(`set-cookie` = "_s=secret", `cf-connecting-ip` = "203.0.113.9", `x-forwarded-for` = "203.0.113.9", `cf-ray` = "abc-IAD", server = "cloudflare")))
+  r <- run_fetch(synth_feeds(), w, d$frt)
+  h <- r$stopped$evidence$headers
+  expect_true(all(c("cf-ray", "server", "content-type") %in% names(h)))
+  expect_false(any(c("set-cookie", "cf-connecting-ip", "x-forwarded-for") %in% names(h)))
+  txt <- paste(readLines(fi_fetch_state_path(d$frt), warn = FALSE), collapse = "\n")
+  expect_false(grepl("203.0.113.9", txt, fixed = TRUE)); expect_false(grepl("_s=secret", txt, fixed = TRUE))
+  expect_equal(names(fi_redact_headers(NULL)), NULL)
+})

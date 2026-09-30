@@ -169,6 +169,11 @@ fi_os_classify_response <- function(resp, redirects_ok = FALSE) {
 
 .fi_header_text <- function(h) paste(paste0(names(h), ": ", vapply(h, function(v) paste(unlist(v), collapse = ", "), "")), collapse = "\n")
 
+# Headers kept as block evidence, minus the ones that carry the owner's own address or a session token (the site echoes the client's
+# IP address, and issues a session cookie; neither belongs in a receipt that may be pasted into a report).
+FI_REDACTED_HEADERS <- c("set-cookie", "cookie", "cf-connecting-ip", "cf-connecting-ipv6", "x-forwarded-for", "x-real-ip", "true-client-ip", "x-request-id")
+fi_redact_headers <- function(h) { h <- h %||% list(); h[setdiff(names(h), FI_REDACTED_HEADERS)] }
+
 # ---- the run ------------------------------------------------------------------------------------------------------------
 
 # Fetch the planned pages politely.
@@ -200,7 +205,7 @@ fi_os_fetch_run <- function(plan, cfg, frozen_codes, frt = fi_frt_dir(), transpo
     say("feeds.fetch.request", "succeeded", "fetch", sprintf("%s %s", if (cache_hit) "cache hit" else paste("HTTP", http), url), "", list(url = url, http = http, bytes = bytes, cache_hit = cache_hit))
   }
   halt <- function(kind, reason, url, resp = NULL) {
-    ev <- if (!is.null(resp)) list(http = resp$status, headers = resp$headers, body_excerpt = substr(tryCatch(iconv(rawToChar(resp$body[resp$body != as.raw(0L)][seq_len(min(1500L, sum(resp$body != as.raw(0L))))]), "UTF-8", "UTF-8", sub = " "), error = function(e) ""), 1, 1500)) else NULL
+    ev <- if (!is.null(resp)) list(http = resp$status, headers = fi_redact_headers(resp$headers), body_excerpt = substr(tryCatch(iconv(rawToChar(resp$body[resp$body != as.raw(0L)][seq_len(min(1500L, sum(resp$body != as.raw(0L))))]), "UTF-8", "UTF-8", sub = " "), error = function(e) ""), 1, 1500)) else NULL
     if (kind == "block") fi_fetch_state_stop(reason, url, ev, frt)
     record(url, if (!is.null(resp)) resp$status else NA_integer_, if (!is.null(resp)) length(resp$body) else NA_integer_, FALSE, reason)
     say("feeds.fetch.stop", "failed", "fetch", paste("fetch stopped:", reason), url, list(reason = reason, url = url))
