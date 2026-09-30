@@ -34,7 +34,8 @@ rf_pmap <- function(X, FUN, cores = rf_cores()) {
   if (cores <= 1L || n <= 1L) return(lapply(X, FUN))
   k <- min(cores, n)
   if (.Platform$OS.type == "unix") {
-    res <- parallel::mclapply(X, wrapped, mc.cores = k, mc.preschedule = FALSE, mc.set.seed = FALSE)
+    # mclapply warns when a unit errors; the error itself is detected below and stops the map with its message
+    res <- suppressWarnings(parallel::mclapply(X, wrapped, mc.cores = k, mc.preschedule = FALSE, mc.set.seed = FALSE))
   } else {
     cl <- parallel::makeCluster(k)
     on.exit(parallel::stopCluster(cl), add = TRUE)

@@ -8,7 +8,7 @@ rf_lm <- function(formula, data, label) {
   env <- new.env(parent = globalenv())
   assign(label, data, envir = env)
   f <- if (is.character(formula)) stats::as.formula(formula, env = env) else formula
-  eval(bquote(stats::lm(.(f), data = .(as.name(label)))), envir = env)
+  eval(bquote(lm(.(f), data = .(as.name(label)))), envir = env)   # `lm`, not `stats::lm`, so the printed Call reads as in R
 }
 
 # Sector as a factor with sorted (reference-first) levels.

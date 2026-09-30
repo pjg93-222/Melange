@@ -61,10 +61,25 @@ test_that("packages load at the pinned versions from the vendored library, and t
   expect_identical(RF_TEST_PKGS$version[RF_TEST_PKGS$package == "sandwich"], "3.1-3")
   expect_true(all(normalizePath(RF_TEST_PKGS$lib[RF_TEST_PKGS$package %in% c("clubSandwich", "sandwich")], winslash = "/") == rf_rlib_dir()))
   ver <- rf_verify_rlib()
-  expect_gt(nrow(ver), 4L)
-  expect_true(all(ver$ok))
+  expect_gt(nrow(ver), 1L)
+  expect_true(all(ver$ok))                                       # recorded platform: every file hash; otherwise the version only
+  expect_true(all(ver$status %in% c("ok", "unrecorded_platform")))
+  expect_true(all(c("clubSandwich", "sandwich") %in% ver$package))
   # negative control: a wrong pin is refused, never silently accepted
   expect_error(rf_load_packages(required = "jsonlite", pins = list(jsonlite = "0.0.1")), "pins")
+})
+
+test_that("the package manifest detects a tampered vendored file (negative control)", {
+  tmp <- file.path(tempdir(), "rlib_tamper"); unlink(tmp, recursive = TRUE); dir.create(tmp)
+  file.copy(file.path(rf_rlib_dir(), "sandwich"), tmp, recursive = TRUE)
+  man <- file.path(tempdir(), "rlib_tamper_manifest.json"); unlink(man)
+  rf_record_rlib_platform(target = tmp, packages = "sandwich", manifest_path = man)
+  expect_true(all(rf_verify_rlib(tmp, man)$ok))
+  f <- file.path(tmp, "sandwich", "R", "sandwich.rdx")
+  b <- readBin(f, "raw", file.size(f)); b[5] <- as.raw(bitwXor(as.integer(b[5]), 1L)); writeBin(b, f)
+  v <- rf_verify_rlib(tmp, man)
+  expect_identical(v$status[v$file == "R/sandwich.rdx"], "mismatch")
+  expect_false(all(v$ok))
 })
 
 test_that("rf_rng.R is the byte copy of the SGS numpy-stream port", {

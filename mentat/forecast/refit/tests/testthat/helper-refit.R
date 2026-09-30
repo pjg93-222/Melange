@@ -14,7 +14,9 @@ RF_TEST_RLIB <- rf_rlib_dir()
 # the ~1 minute it takes to copy ~100 input files into a fresh temp folder.
 RF_TEST_TMP <- rf_env_path("RF_TEST_RUNTIME", file.path(tempdir(), "rf_test_runtime"))
 dir.create(RF_TEST_TMP, recursive = TRUE, showWarnings = FALSE)
-Sys.setenv(REFIT_CORES = "1", RF_RLIB = RF_TEST_RLIB, RF_RUNTIME = RF_TEST_TMP, RF_GLASSBOX_DIR = file.path(tempdir(), "rf_test_glassbox"))
+# Serial unless the caller sets REFIT_CORES (the pod runs set it; a parallel run is bit-identical to a serial one, see test-13).
+if (!nzchar(Sys.getenv("REFIT_CORES", unset = ""))) Sys.setenv(REFIT_CORES = "1")
+Sys.setenv(RF_RLIB = RF_TEST_RLIB, RF_RUNTIME = RF_TEST_TMP, RF_GLASSBOX_DIR = file.path(tempdir(), "rf_test_glassbox"))
 rf_source_all(.RF_HOME)
 
 # The pipeline-owned Rlib is created once (copy from the Codex Rlib + manifest); later runs only verify it.

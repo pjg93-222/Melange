@@ -6,6 +6,8 @@
 #   RF_RUNTIME       runtime folder (raw vault, Rlib, runs); default %LOCALAPPDATA%\Mentat\forecast\refit, or
 #                    <MENTAT_DATA_ROOT>\forecast\refit when MENTAT_DATA_ROOT is set (as mentat/R/paths.R does)
 #   RF_RLIB          vendored package library (default <RUNTIME>\Rlib)
+#   REFIT_OUT        folder the run outputs go to (default <RUNTIME>; the pod sets it so outputs are pulled back)
+#   REFIT_CORES      worker count of the parallel batteries (see rf_parallel.R; 1 = serial)
 #   RF_GLASSBOX_DIR  Glass Box event folder (default C:\Users\pgoff\.claude\glassbox\events)
 #   RF_INPUT_ROOT    one folder that mirrors every pinned raw-input root (for another machine, e.g. a compute pod):
 #                    <root>/LOO, <root>/CHE, <root>/SGSD, <root>/SGSA, <root>/RLIBX and
@@ -25,7 +27,7 @@ rf_env_path <- function(name, default) {
 RF_MODULES <- c("rf_config.R", "rf_rng.R", "rf_io.R", "rf_parallel.R", "rf_glassbox.R", "rf_packages.R", "rf_registry.R", "rf_inputs.R",
                 "rf_growth.R", "rf_opensecrets.R", "rf_political.R", "rf_lobbying.R", "rf_panels.R", "rf_fit.R",
                 "rf_stepwise.R", "rf_robust.R", "rf_pool.R", "rf_intervals.R", "rf_backtest.R", "rf_select.R",
-                "rf_report.R", "rf_bundle.R", "rf_run.R")
+                "rf_report.R", "rf_bundle.R", "rf_run.R", "rf_parity.R")
 
 rf_source_all <- function(home = rf_home()) {
   for (m in RF_MODULES) {
@@ -55,6 +57,9 @@ rf_runtime_default <- function() {
 # Resolved at call time (not at load time) so a test can change the environment variables between runs.
 rf_runtime <- function() normalizePath(rf_env_path("RF_RUNTIME", rf_runtime_default()), winslash = "/", mustWork = FALSE)
 rf_rlib_dir <- function() normalizePath(rf_env_path("RF_RLIB", file.path(rf_runtime(), "Rlib")), winslash = "/", mustWork = FALSE)
+# Where run folders (panels, fits, review packet, receipt) are written: REFIT_OUT when set (the pod pulls that folder back), else the runtime.
+rf_runs_dir <- function() file.path(normalizePath(rf_env_path("REFIT_OUT", rf_runtime()), winslash = "/", mustWork = FALSE), "runs")
+
 rf_glassbox_dir <- function() {
   default <- if (nzchar(trimws(Sys.getenv("LOCALAPPDATA", unset = "")))) "C:/Users/pgoff/.claude/glassbox/events"
              else file.path(Sys.getenv("HOME"), ".claude", "glassbox", "events")

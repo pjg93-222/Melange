@@ -18,8 +18,24 @@ rf_rlib_hash_tree <- function(pkg_dir) {
   stats::setNames(unname(out), rel[ok])
 }
 
-# Copy the vendored packages from `source` into `target` once. An existing copy is never overwritten: it must match
-# the manifest (created here if there is none yet). Returns the verification table.
+RF_PLATFORM <- function() R.version$platform
+
+# The manifest entry of one package on the current platform (NULL when not recorded).
+.rf_man_entry <- function(man, p) man[[p]]$platforms[[RF_PLATFORM()]]
+
+.rf_rlib_record <- function(target, packages, manifest_path, merge_into = NULL) {
+  man <- merge_into %||% list(schema_version = 2L, note = "sha256 of the vendored package files per R platform (R.version$platform); RUNTIME/Rlib is outside git. A platform without an entry is reported as unrecorded (version still checked); record it with tools/record_rlib_manifest.R.", packages = list())
+  for (p in packages) {
+    d <- read.dcf(file.path(target, p, "DESCRIPTION"), c("Version", "Built"))
+    man$packages[[p]]$version <- unname(d[1, "Version"])
+    man$packages[[p]]$platforms[[RF_PLATFORM()]] <- list(built = unname(d[1, "Built"]), files = as.list(rf_rlib_hash_tree(file.path(target, p))))
+  }
+  rf_write_json_atomic(man, manifest_path)
+  invisible(man)
+}
+
+# Copy the vendored packages from `source` into `target` once (when `target` lacks them). An existing copy is never overwritten.
+# A missing manifest is created for the current platform. Returns the verification table.
 rf_setup_rlib <- function(source = rf_roots()$RLIBX, target = rf_rlib_dir(), packages = RF_VENDORED,
                           manifest_path = rf_rlib_manifest_path()) {
   dir.create(target, recursive = TRUE, showWarnings = FALSE)
@@ -32,27 +48,35 @@ rf_setup_rlib <- function(source = rf_roots()$RLIBX, target = rf_rlib_dir(), pac
       if (!all(ok)) stop("rf_setup_rlib: copying ", p, " failed", call. = FALSE)
     }
   }
-  if (!file.exists(manifest_path)) {
-    man <- lapply(stats::setNames(packages, packages), function(p) {
-      d <- read.dcf(file.path(target, p, "DESCRIPTION"), c("Version", "Built"))
-      list(version = unname(d[1, "Version"]), built = unname(d[1, "Built"]), files = as.list(rf_rlib_hash_tree(file.path(target, p))))
-    })
-    rf_write_json_atomic(list(schema_version = 1L, note = "sha256 of the vendored package files; RUNTIME/Rlib is outside git",
-                              packages = man), manifest_path)
-  }
+  if (!file.exists(manifest_path)) .rf_rlib_record(target, packages, manifest_path)
   rf_verify_rlib(target, manifest_path)
 }
 
+# Record the current platform's package hashes (used once per platform; the result is merged into registry/rlib_manifest.json).
+rf_record_rlib_platform <- function(target = rf_rlib_dir(), packages = RF_VENDORED, manifest_path = rf_rlib_manifest_path(), out_path = manifest_path) {
+  man <- if (file.exists(manifest_path)) jsonlite::fromJSON(manifest_path, simplifyVector = FALSE) else NULL
+  .rf_rlib_record(target, packages, out_path, merge_into = man)
+}
+
+# Verification table per recorded file: package, file, expected, actual, status in ok / mismatch / missing / unrecorded_platform,
+# and ok (TRUE when the file matches, or when the platform has no recorded hashes and only the version can be checked).
 rf_verify_rlib <- function(target = rf_rlib_dir(), manifest_path = rf_rlib_manifest_path()) {
   man <- jsonlite::fromJSON(manifest_path, simplifyVector = FALSE)$packages
   rows <- list()
   for (p in names(man)) {
+    ent <- .rf_man_entry(man, p)
     have <- if (dir.exists(file.path(target, p))) rf_rlib_hash_tree(file.path(target, p)) else character()
-    for (f in names(man[[p]]$files)) {
-      exp <- man[[p]]$files[[f]]
+    ver <- if (dir.exists(file.path(target, p))) unname(read.dcf(file.path(target, p, "DESCRIPTION"), "Version")[1, 1]) else NA_character_
+    if (is.null(ent)) {
+      rows[[length(rows) + 1L]] <- data.frame(package = p, file = "DESCRIPTION (Version)", expected = man[[p]]$version, actual = ver,
+                                              status = "unrecorded_platform", ok = identical(ver, man[[p]]$version), stringsAsFactors = FALSE)
+      next
+    }
+    for (f in names(ent$files)) {
+      exp <- ent$files[[f]]
       act <- if (f %in% names(have)) unname(have[[f]]) else NA_character_
-      rows[[length(rows) + 1L]] <- data.frame(package = p, file = f, expected = exp, actual = act, ok = identical(act, exp),
-                                              stringsAsFactors = FALSE)
+      st <- if (is.na(act)) "missing" else if (identical(act, exp)) "ok" else "mismatch"
+      rows[[length(rows) + 1L]] <- data.frame(package = p, file = f, expected = exp, actual = act, status = st, ok = st == "ok", stringsAsFactors = FALSE)
     }
   }
   do.call(rbind, rows)
