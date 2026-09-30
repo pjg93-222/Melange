@@ -10,9 +10,11 @@ source(file.path(.RF_HOME, "R", "rf_config.R"), encoding = "UTF-8")
 
 # Default (persistent) vendored library, then redirect everything else that writes into a per-process temp folder.
 RF_TEST_RLIB <- rf_rlib_dir()
-RF_TEST_TMP <- file.path(tempdir(), "rf_test_runtime")
+# RF_TEST_RUNTIME (optional) keeps the content-addressed raw vault between test runs (hash-verified on every use), which saves
+# the ~1 minute it takes to copy ~100 input files into a fresh temp folder.
+RF_TEST_TMP <- rf_env_path("RF_TEST_RUNTIME", file.path(tempdir(), "rf_test_runtime"))
 dir.create(RF_TEST_TMP, recursive = TRUE, showWarnings = FALSE)
-Sys.setenv(RF_RLIB = RF_TEST_RLIB, RF_RUNTIME = RF_TEST_TMP, RF_GLASSBOX_DIR = file.path(tempdir(), "rf_test_glassbox"))
+Sys.setenv(REFIT_CORES = "1", RF_RLIB = RF_TEST_RLIB, RF_RUNTIME = RF_TEST_TMP, RF_GLASSBOX_DIR = file.path(tempdir(), "rf_test_glassbox"))
 rf_source_all(.RF_HOME)
 
 # The pipeline-owned Rlib is created once (copy from the Codex Rlib + manifest); later runs only verify it.
@@ -33,6 +35,9 @@ memo <- function(key, expr) {
 test_inputs <- function() memo("inputs", rf_resolve_inputs(RF_TEST_MANIFEST))
 # The whole parity build (panels, fits, stepwise grid, evidence...) once.
 test_ctx <- function() memo("ctx", rf_parity_context(test_inputs(), RF_TEST_REG, RF_TEST_MODELS))
+
+# Backtest specs (tailoring.R's eight term/base cells) once.
+test_specs <- function() memo("specs", rf_backtest_specs(test_ctx()))
 
 # A Codex design file (parity reference) by name, read from the vault.
 ref_path <- function(name) rf_input_path(test_inputs(), paste0("parity_ref:", name))

@@ -50,8 +50,10 @@ rf_wcr <- function(X, y, cluster, k, weights = c("webb", "rademacher"), entropy 
     matrix(c(-1, 1)[(sgs_numpy_integers6(entropy, B * G) %% 2L) + 1L], nrow = B, ncol = G, byrow = TRUE)   # parity of the stream index: uniform on {-1, 1}
   }
   total <- nrow(V)
-  hits <- 0L
-  for (a in seq(1L, total, by = RF$CHUNK)) {
+  starts <- seq(1L, total, by = RF$CHUNK)
+  # blocks of draws are independent and their hit counts are integers: summing them in any order is exact, so the blocks run on
+  # parallel workers (REFIT_CORES) with a result identical to the serial run
+  counts <- rf_pmap(starts, function(a) {
     idx <- a:min(total, a + RF$CHUNK - 1L)
     W <- t(V[idx, , drop = FALSE])[cl, , drop = FALSE]
     Ys <- yr + ur * W
@@ -60,9 +62,10 @@ rf_wcr <- function(X, y, cluster, k, weights = c("webb", "rademacher"), entropy 
     se <- sqrt(cfac * colSums(rowsum(q * U, cl)^2))
     ts <- bk / se
     ts[!is.finite(ts)] <- Inf
-    hits <- hits + sum(abs(ts) >= abs(t0) * (1 - RF$TOL_T))
-  }
-  list(t = t0, se = se0, p = if (enumerated) hits / total else (1 + hits) / (total + 1), hits = as.integer(hits), draws = as.integer(total),
+    sum(abs(ts) >= abs(t0) * (1 - RF$TOL_T))
+  })
+  hits <- as.integer(sum(unlist(counts)))
+  list(t = t0, se = se0, p = if (enumerated) hits / total else (1 + hits) / (total + 1), hits = hits, draws = as.integer(total),
        enumerated = enumerated, G = G, weights = weights)
 }
 

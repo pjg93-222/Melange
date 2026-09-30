@@ -248,48 +248,48 @@ rf_validation_metrics <- function(case, predictions, outcome) {
 # Returns list(selected = selected_models.csv rows, effects = interpretable_effects.csv rows, industry_slopes, validation, stability).
 rf_stepwise_grid <- function(cases, entropy_root = c(RF$STEPWISE_SEED, RF$STEPWISE_TAG), draws = RF$B_SELECT) {
   ids <- unique(cases$case)
-  rows <- list(); val <- list(); stab <- list(); coefs <- list()
-  for (cs in ids) {
-    d <- cases[cases$case == cs, ]
-    meta <- d[1, c("case", "signal", "chamber", "scope", "outcome")]
-    y <- d[[meta$outcome]]
-    counter <- d$counter[1]
-    mm <- rf_matrices(d)
-    s <- rf_search(mm, y, log = TRUE)
-    if (is.na(s$mask)) stop("rf_stepwise_grid: no eligible base model for ", cs, call. = FALSE)
-    chosen <- s$mask
-    sel <- mm[[chosen + 1L]]; fs <- s$fits
-    aicc <- vapply(fs, function(f) f$AICc, 0)
-    best <- which.min(aicc) - 1L
-    sr <- rf_uncertainty(sel, y)
-    fc <- sr[sr$term == "Forecast", ]
-    boot <- rf_bootstrap_select(mm, y, chosen, c(entropy_root, counter), draws)
-    n <- nrow(d)
-    row <- data.frame(meta, n = n, elections = length(unique(d$cycle_end)), selected_mask = chosen, selected_terms = paste(sel$names, collapse = " + "),
-      forecast_selected = bitwAnd(chosen, 1L) > 0L, parameters = sel$p, residual_df = n - sel$p, AICc = fs[[chosen + 1L]]$AICc,
-      adjusted_R2 = fs[[chosen + 1L]]$adjR2, forced_only_AICc = fs[[1]]$AICc, full_model_AICc = fs[[16]]$AICc, full_model_rank = mm[[16]]$rank,
-      full_model_columns = mm[[16]]$p, full_model_residual_df = n - mm[[16]]$rank, full_model_adjusted_R2 = fs[[16]]$adjR2,
-      global_best_mask = best, stepwise_is_global_best = chosen == best,
-      forecast_estimate = if (nrow(fc)) fc$estimate else NA_real_, forecast_ordinary_p = if (nrow(fc)) fc$ordinary_p else NA_real_,
-      forecast_CR2_p = if (nrow(fc)) fc$CR2_p else NA_real_, forecast_CR2_low = if (nrow(fc)) fc$CR2_low else NA_real_,
-      forecast_CR2_high = if (nrow(fc)) fc$CR2_high else NA_real_, forecast_CR2_df = if (nrow(fc)) fc$CR2_df else NA_real_,
-      selection_repeated_p = boot$selection_repeated_p, null_residual_df = boot$null_residual_df, null_draws = boot$null_draws,
-      null_selection_rate = boot$null_selection_rate, observed_abs_CR1_t = boot$observed_abs_CR1_t, stringsAsFactors = FALSE)
-    rows[[length(rows) + 1L]] <- row
-    nested <- rf_nested_predictions(d, meta$outcome, cs)
-    val[[length(val) + 1L]] <- rf_validation_metrics(cs, nested$predictions, meta$outcome)
-    stab[[length(stab) + 1L]] <- nested$stability
-  }
-  sel <- do.call(rbind, rows)
+  # each case is independent and seeds its own stream from its counter, so cases run on parallel workers with identical results
+  per_case <- rf_pmap(ids, function(cs) .rf_grid_case(cs, cases, entropy_root, draws))
+  sel <- do.call(rbind, lapply(per_case, `[[`, "row"))
   rownames(sel) <- NULL
   sel$Holm_all_48 <- rf_holm(sel$selection_repeated_p)
   sel$Holm_outcome_family <- NA_real_
   share <- sel$outcome == "RShare"
   sel$Holm_outcome_family[share] <- rf_holm(sel$selection_repeated_p[share])
   sel$Holm_outcome_family[!share] <- rf_holm(sel$selection_repeated_p[!share])
-  validation <- do.call(rbind, val); rownames(validation) <- NULL
+  validation <- do.call(rbind, lapply(per_case, `[[`, "val")); rownames(validation) <- NULL
   list(selected = sel, effects = rf_effects(sel), industry_slopes = rf_industry_slopes(cases, sel), validation = validation,
-       stability = do.call(rbind, stab))
+       stability = do.call(rbind, lapply(per_case, `[[`, "stab")))
+}
+
+.rf_grid_case <- function(cs, cases, entropy_root, draws) {
+  d <- cases[cases$case == cs, ]
+  meta <- d[1, c("case", "signal", "chamber", "scope", "outcome")]
+  y <- d[[meta$outcome]]
+  counter <- d$counter[1]
+  mm <- rf_matrices(d)
+  s <- rf_search(mm, y, log = TRUE)
+  if (is.na(s$mask)) stop("rf_stepwise_grid: no eligible base model for ", cs, call. = FALSE)
+  chosen <- s$mask
+  sel <- mm[[chosen + 1L]]; fs <- s$fits
+  aicc <- vapply(fs, function(f) f$AICc, 0)
+  best <- which.min(aicc) - 1L
+  sr <- rf_uncertainty(sel, y)
+  fc <- sr[sr$term == "Forecast", ]
+  boot <- rf_bootstrap_select(mm, y, chosen, c(entropy_root, counter), draws)
+  n <- nrow(d)
+  row <- data.frame(meta, n = n, elections = length(unique(d$cycle_end)), selected_mask = chosen, selected_terms = paste(sel$names, collapse = " + "),
+    forecast_selected = bitwAnd(chosen, 1L) > 0L, parameters = sel$p, residual_df = n - sel$p, AICc = fs[[chosen + 1L]]$AICc,
+    adjusted_R2 = fs[[chosen + 1L]]$adjR2, forced_only_AICc = fs[[1]]$AICc, full_model_AICc = fs[[16]]$AICc, full_model_rank = mm[[16]]$rank,
+    full_model_columns = mm[[16]]$p, full_model_residual_df = n - mm[[16]]$rank, full_model_adjusted_R2 = fs[[16]]$adjR2,
+    global_best_mask = best, stepwise_is_global_best = chosen == best,
+    forecast_estimate = if (nrow(fc)) fc$estimate else NA_real_, forecast_ordinary_p = if (nrow(fc)) fc$ordinary_p else NA_real_,
+    forecast_CR2_p = if (nrow(fc)) fc$CR2_p else NA_real_, forecast_CR2_low = if (nrow(fc)) fc$CR2_low else NA_real_,
+    forecast_CR2_high = if (nrow(fc)) fc$CR2_high else NA_real_, forecast_CR2_df = if (nrow(fc)) fc$CR2_df else NA_real_,
+    selection_repeated_p = boot$selection_repeated_p, null_residual_df = boot$null_residual_df, null_draws = boot$null_draws,
+    null_selection_rate = boot$null_selection_rate, observed_abs_CR1_t = boot$observed_abs_CR1_t, stringsAsFactors = FALSE)
+  nested <- rf_nested_predictions(d, meta$outcome, cs)
+  list(row = row, val = rf_validation_metrics(cs, nested$predictions, meta$outcome), stab = nested$stability)
 }
 
 # extend.py: effects at the declared contrasts (+0.1 IEM = +10 score points, +10 House seats, +1 Senate seat).

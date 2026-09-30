@@ -22,7 +22,7 @@ rf_env_path <- function(name, default) {
 }
 
 # The module load order (rf_config.R and rf_rng.R first; the rest only call each other at run time).
-RF_MODULES <- c("rf_config.R", "rf_rng.R", "rf_io.R", "rf_glassbox.R", "rf_packages.R", "rf_registry.R", "rf_inputs.R",
+RF_MODULES <- c("rf_config.R", "rf_rng.R", "rf_io.R", "rf_parallel.R", "rf_glassbox.R", "rf_packages.R", "rf_registry.R", "rf_inputs.R",
                 "rf_growth.R", "rf_opensecrets.R", "rf_political.R", "rf_lobbying.R", "rf_panels.R", "rf_fit.R",
                 "rf_stepwise.R", "rf_robust.R", "rf_pool.R", "rf_intervals.R", "rf_backtest.R", "rf_select.R",
                 "rf_report.R", "rf_bundle.R", "rf_run.R")
@@ -119,6 +119,10 @@ RF <- list(
   TOL_AICC = 1e-9,                 # a model is accepted only if its AICc falls by more than this
   TOL_T = 1e-9,                    # relative slack of the "|t*| >= |t|" comparison (floating point)
   MIN_DF_OWN = 2L,                 # interaction fit needs this many residual df for its slopes, SEs and tau2
+  LOBBY_TARGETS = 2014:2023,       # rolling-origin targets of the lobbying backtest (train on years < T)
+  RULES = c("R0", "R1", "R2"),     # slope rules: pooled, own, DerSimonian-Laird blend toward the pooled slope
+  RULE_MIN_GAIN = 0,               # relative margin a rule must win by in a design to count as its clear winner (0 = literal rule)
+  RULE_TIE_TOL = 1e-9,             # MAEs within this are a tie
 
   OPTIONAL_TERMS = c("Forecast", "G_prior", "G_current", "Pres"),
 
