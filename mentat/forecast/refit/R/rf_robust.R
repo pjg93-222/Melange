@@ -50,11 +50,12 @@ rf_wcr <- function(X, y, cluster, k, weights = c("webb", "rademacher"), entropy 
     matrix(c(-1, 1)[(sgs_numpy_integers6(entropy, B * G) %% 2L) + 1L], nrow = B, ncol = G, byrow = TRUE)   # parity of the stream index: uniform on {-1, 1}
   }
   total <- nrow(V)
-  starts <- seq(1L, total, by = RF$CHUNK)
+  chunk <- RF$CHUNK                     # captured here: a worker must use the master's block size, not its own copy of RF
+  starts <- seq(1L, total, by = chunk)
   # blocks of draws are independent and their hit counts are integers: summing them in any order is exact, so the blocks run on
   # parallel workers (REFIT_CORES) with a result identical to the serial run
   counts <- rf_pmap(starts, function(a) {
-    idx <- a:min(total, a + RF$CHUNK - 1L)
+    idx <- a:min(total, a + chunk - 1L)
     W <- t(V[idx, , drop = FALSE])[cl, , drop = FALSE]
     Ys <- yr + ur * W
     bk <- colSums(q * Ys)
