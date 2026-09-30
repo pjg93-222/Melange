@@ -1,0 +1,3296 @@
+{
+ "run_id": "workbook05-v3-20260925",
+ "written_at": "2026-09-25T21:50:07Z",
+ "target": {
+  "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\05_industry_champions.xlsx",
+  "sha256": "d5c1c9206eb1955e5a24f51e063b5f58d56e2bd0b4d4bc46a6210b47c088e2cb",
+  "size_bytes": 1166504,
+  "sheets": {
+   "data": 532,
+   "dictionary": 359,
+   "sources": 84,
+   "coverage": 16,
+   "champions": 133,
+   "committee_sets": 740,
+   "ratings_used": 552,
+   "unmatched": 0,
+   "definitions": 43,
+   "pac_sets": 147,
+   "pac_transactions_used": 4793,
+   "pac_reconcile": 30
+  }
+ },
+ "superseded_v2": {
+  "folder": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\05_v2",
+  "workbook_sha256": "ae4954274705b2995d6fb028e1bb2f0f891eea363bc4686bea46c754f84e2aaa",
+  "receipt_sha256": "df1a5ae21bb4c9c104baa62c06c600d1f4048e5a1a9a54989aaf87b31ca156c6"
+ },
+ "ruling": "Coordinator 2026-09-25: champion money includes the industry PACs' contributions. Channels: (1) employee direct giving (v2), (2) company-PAC giving, (3) trade-association PAC giving (separate). Primary DV = 1 + 2; sensitivity = 1 + 2 + 3. Independent expenditures (24A/24E) are not contributions: excluded from the DV; 24E kept as a descriptive column.",
+ "pac_source_path": {
+  "used": "raw FEC pas2 (itpas2.txt 2022/2024/2026 from the active FEC inputs .cache\\repair-20260908-inputs, sha256 equal to source-manifest.json), streamed into a derived SQLite, D-049 applied in Python (build\\champions_v3\\d049.py) as Mentat's R pas2 parser does under count_latest (the policy D-049 applied: transfer index VERSION 4 / PAS2 parser 5)",
+  "why_not_transfer_index": "Mentat's fec_transfer_graph.py index (files transfer-index-v4c-* and transfer-edges.csv under fec_beneficiary\\oth22/24/26; VERSION 4, count_latest) is built from the oth file and keeps only 24G/24K cash transfers between committees: it has no CAND_ID and no 24Z (in-kind) or 24E (IE support) rows, so it cannot deliver the brief's CAND_ID matching, 24Z or the 24E column. The live code is now VERSION 5 (count_all); no v5 index exists, so its current reader would treat the v4 files as stale. Its published v4 edges were used as a cross-check of the 24K dollars (probe transfer_index_v4_crosscheck).",
+  "d049_on_these_rows": "Among the 38 candidate committees' 27563 pas2 rows, D-049 statuses: {'included': 27461, 'memo_only': 99, 'included_no_candidate_id': 3}. Rows with no CAND_ID stay countable only through a recipient-committee match (champion-matched: [('C00804179', 'C00896019', 2026, 2500.0)]).",
+  "refunds": "Netted by signed summation: negative 24K/24Z rows in the PAC's own pas2 filings (refunds/voids) are included rows and reduce the channel in the cycle filed. Refunds reported only by the recipient committee (oth 22Z) are not netted (probe recipient_reported_refunds_22Z).",
+  "matching": "A pas2 row is the champion's when its CAND_ID is one of the champion's FEC IDs or its recipient committee (OTHER_ID) is in the champion's committee_sets. Counted: recipient = an authorized committee that cycle (authorized), an authorized committee of another cycle with the champion's CAND_ID (authorized_other_cycle), or the champion's authorized committee with a CAND_ID absent from the YAML that the FEC candidate masters do not assign to another person (authorized_candidate_id_variant: Hinson S6IA00314, Donalds H0FL19205, Miller-Meeks H0IA02180, Flood H2NE01167, Ricketts S4NE00173/S6NE00173). Not counted: leadership / J-U committees, other committees. 24E by CAND_ID only."
+ },
+ "pac_sets": {
+  "rule": "Per industry, the union of the three cycles' PAC & Candidate Map rows (Recipient Category Company PAC -> company; Trade Association -> classified), plus Banking roster companies' connected PACs from verified_company_affiliations.json, plus the industry's own association from trade_committee_overrides.csv when its map lacks it (ICBA for community banks). pac_sets repeats the set per cycle with in_map_this_cycle.",
+  "sizes": {
+   "banking": {
+    "other_industry": 10,
+    "trade": 4,
+    "company": 18
+   },
+   "community_banks": {
+    "trade": 2,
+    "other_industry": 1,
+    "company": 1
+   },
+   "credit_union": {
+    "other_industry": 2,
+    "trade": 1,
+    "cross_industry": 1,
+    "company": 1
+   },
+   "crypto": {
+    "other_industry": 1,
+    "company": 3
+   },
+   "fintech": {
+    "company": 4
+   }
+  },
+  "excluded": [
+   {
+    "industry": "banking",
+    "committee_id": "C00000901",
+    "name": "BUILD POLITICAL ACTION COMMITTEE OF THE NATIONAL ASSOCIATION OF HOME BUILDERS (BUILDPAC)",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Construction)"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00004812",
+    "name": "MORTGAGE BANKERS ASSOCIATION POLITICAL ACTION COMMITTEE (MORPAC)",
+    "set": "other_industry",
+    "note": "Mortgage Bankers Association: mortgage-finance industry association, not this industry's own"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00053553",
+    "name": "NATIONAL RIFLE ASSOCIATION OF AMERICA POLITICAL VICTORY FUND",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Tobacco, alcohol, law, politics, gambling and firearms)"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00089458",
+    "name": "NATIONAL STONE, SAND & GRAVEL ASSOCIATION ROCKPAC",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Industry)"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00244863",
+    "name": "NATIONAL ROOFING CONTRACTORS ASSOCIATION ROOF PAC",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Construction)"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00259572",
+    "name": "AMERICAN CLEAN POWER ASSOCIATION CLEANPOWER PAC",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Energy)"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00336743",
+    "name": "ASIAN AMERICAN HOTEL OWNERS ASSOCIATION PAC (AAHOA PAC)",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Entertainment and leisure)"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00421982",
+    "name": "SOLAR ENERGY INDUSTRIES ASSOCIATION PAC (SOLARPAC)",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Energy)"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00431312",
+    "name": "SECURITIES INDUSTRY AND FINANCIAL MARKETS ASSOCIATION POLITICAL ACTION COMMITTEE",
+    "set": "other_industry",
+    "note": "Securities Industry and Financial Markets Association: securities industry association, not this industry's own"
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00480863",
+    "name": "NATIONAL SHOOTING SPORTS FOUNDATION, INC. POLITICAL ACTION COMMITTEE (NSSF PAC)",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Tobacco, alcohol, law, politics, gambling and firearms)"
+   },
+   {
+    "industry": "community_banks",
+    "committee_id": "C00004812",
+    "name": "MORTGAGE BANKERS ASSOCIATION POLITICAL ACTION COMMITTEE (MORPAC)",
+    "set": "other_industry",
+    "note": "Mortgage Bankers Association: mortgage-finance industry association, not this industry's own"
+   },
+   {
+    "industry": "credit_union",
+    "committee_id": "C00000901",
+    "name": "BUILD POLITICAL ACTION COMMITTEE OF THE NATIONAL ASSOCIATION OF HOME BUILDERS (BUILDPAC)",
+    "set": "other_industry",
+    "note": "another industry's association (register section: Construction)"
+   },
+   {
+    "industry": "credit_union",
+    "committee_id": "C00004812",
+    "name": "MORTGAGE BANKERS ASSOCIATION POLITICAL ACTION COMMITTEE (MORPAC)",
+    "set": "other_industry",
+    "note": "Mortgage Bankers Association: mortgage-finance industry association, not this industry's own"
+   },
+   {
+    "industry": "credit_union",
+    "committee_id": "C00082040",
+    "name": "CHAMBER OF COMMERCE OF THE UNITED STATES OF AMERICA PAC (US CHAMBER PAC)",
+    "set": "cross_industry",
+    "note": "United States Chamber of Commerce: represents businesses of every industry"
+   },
+   {
+    "industry": "crypto",
+    "committee_id": "C00004812",
+    "name": "MORTGAGE BANKERS ASSOCIATION POLITICAL ACTION COMMITTEE (MORPAC)",
+    "set": "other_industry",
+    "note": "Mortgage Bankers Association: mortgage-finance industry association, not this industry's own"
+   }
+  ],
+  "affiliations_check": [
+   {
+    "committee_id": "C00364778",
+    "company": "Bank of America NA",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00326595",
+    "company": "Capital One Bank NA",
+    "in_map": false,
+    "map_category": ""
+   },
+   {
+    "committee_id": "C00008474",
+    "company": "Citibank",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00350744",
+    "company": "Goldman Sachs Bank NA",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00128512",
+    "company": "JP Morgan Chase Bank NA",
+    "in_map": false,
+    "map_category": ""
+   },
+   {
+    "committee_id": "C00104299",
+    "company": "JP Morgan Chase Bank NA",
+    "in_map": false,
+    "map_category": ""
+   },
+   {
+    "committee_id": "C00337626",
+    "company": "Morgan Stanley Bank",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00035519",
+    "company": "PNC Bank NA",
+    "in_map": false,
+    "map_category": ""
+   },
+   {
+    "committee_id": "C00186064",
+    "company": "PNC Bank NA",
+    "in_map": false,
+    "map_category": ""
+   },
+   {
+    "committee_id": "C00386524",
+    "company": "Truist Bank",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00488882",
+    "company": "US Bank NA",
+    "in_map": false,
+    "map_category": ""
+   },
+   {
+    "committee_id": "C00034595",
+    "company": "Wells Fargo Bank NA",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00043489",
+    "company": "Bank of America NA",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00039305",
+    "company": "Citibank",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00009639",
+    "company": "Truist Bank",
+    "in_map": true,
+    "map_category": "Company PAC"
+   },
+   {
+    "committee_id": "C00018036",
+    "company": "US Bank NA",
+    "in_map": false,
+    "map_category": ""
+   }
+  ],
+  "trade_check": [
+   {
+    "industry": "credit_union",
+    "committee_id": "C00000901",
+    "override_names": [
+     "National Association of Home Builders"
+    ],
+    "register_section": "Construction",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "credit_union",
+    "committee_id": "C00082040",
+    "override_names": [
+     "United States Chamber of Commerce"
+    ],
+    "register_section": "Advertising, business, marketing",
+    "set": "cross_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "credit_union",
+    "committee_id": "C00007880",
+    "override_names": [
+     "America's Credit Unions"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "trade",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "credit_union",
+    "committee_id": "C00004812",
+    "override_names": [
+     "Mortgage Bankers Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00000901",
+    "override_names": [
+     "National Association of Home Builders"
+    ],
+    "register_section": "Construction",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00004812",
+    "override_names": [
+     "Mortgage Bankers Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00053553",
+    "override_names": [
+     "National Rifle Association of America"
+    ],
+    "register_section": "Tobacco, alcohol, law, politics, gambling and firearms",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00244863",
+    "override_names": [
+     "National Roofing Contractors Association"
+    ],
+    "register_section": "Construction",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00089458",
+    "override_names": [
+     "National Stone, Sand & Gravel Association"
+    ],
+    "register_section": "Industry",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00431312",
+    "override_names": [
+     "Securities Industry and Financial Markets Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00035535",
+    "override_names": [
+     "Consumer Bankers Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "trade",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00004275",
+    "override_names": [
+     "American Bankers Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "trade",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00336743",
+    "override_names": [
+     "Asian American Hotel Owners Association"
+    ],
+    "register_section": "Entertainment and leisure",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00421982",
+    "override_names": [
+     "Solar Energy Industries Association"
+    ],
+    "register_section": "Energy",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00259572",
+    "override_names": [
+     "American Clean Power Association"
+    ],
+    "register_section": "Energy",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00193177",
+    "override_names": [
+     "Bank Policy Institute"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "trade",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00717686",
+    "override_names": [
+     "Financial Services Forum"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "trade",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "banking",
+    "committee_id": "C00480863",
+    "override_names": [
+     "National Shooting Sports Foundation"
+    ],
+    "register_section": "Tobacco, alcohol, law, politics, gambling and firearms",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "community_banks",
+    "committee_id": "C00004275",
+    "override_names": [
+     "American Bankers Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "trade",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "community_banks",
+    "committee_id": "C00004812",
+    "override_names": [
+     "Mortgage Bankers Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "crypto",
+    "committee_id": "C00004812",
+    "override_names": [
+     "Mortgage Bankers Association"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "other_industry",
+    "override_id_agrees": true
+   },
+   {
+    "industry": "community_banks",
+    "committee_id": "C00032698",
+    "override_names": [
+     "Independent Community Bankers of America"
+    ],
+    "register_section": "Financial, insurance",
+    "set": "trade",
+    "override_id_agrees": true
+   }
+  ]
+ },
+ "coverage": [
+  {
+   "board": "credit_union",
+   "cycle": 2020,
+   "members": 50,
+   "up_for_election": 35,
+   "direct_giving_gt0": 0,
+   "pac_company_gt0": 0,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 0,
+   "industry_money_with_trade_gt0": 0,
+   "industry_money_primary_gt0_up_for_election": 0
+  },
+  {
+   "board": "credit_union",
+   "cycle": 2022,
+   "members": 50,
+   "up_for_election": 33,
+   "direct_giving_gt0": 4,
+   "pac_company_gt0": 2,
+   "pac_trade_gt0": 31,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 5,
+   "industry_money_with_trade_gt0": 32,
+   "industry_money_primary_gt0_up_for_election": 4
+  },
+  {
+   "board": "credit_union",
+   "cycle": 2024,
+   "members": 50,
+   "up_for_election": 28,
+   "direct_giving_gt0": 1,
+   "pac_company_gt0": 2,
+   "pac_trade_gt0": 37,
+   "pac_support_ie_gt0": 2,
+   "industry_money_primary_gt0": 2,
+   "industry_money_with_trade_gt0": 38,
+   "industry_money_primary_gt0_up_for_election": 1
+  },
+  {
+   "board": "credit_union",
+   "cycle": 2026,
+   "members": 50,
+   "up_for_election": 35,
+   "direct_giving_gt0": 2,
+   "pac_company_gt0": 2,
+   "pac_trade_gt0": 37,
+   "pac_support_ie_gt0": 1,
+   "industry_money_primary_gt0": 3,
+   "industry_money_with_trade_gt0": 38,
+   "industry_money_primary_gt0_up_for_election": 2
+  },
+  {
+   "board": "bank",
+   "cycle": 2020,
+   "members": 50,
+   "up_for_election": 37,
+   "direct_giving_gt0": 0,
+   "pac_company_gt0": 0,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 0,
+   "industry_money_with_trade_gt0": 0,
+   "industry_money_primary_gt0_up_for_election": 0
+  },
+  {
+   "board": "bank",
+   "cycle": 2022,
+   "members": 50,
+   "up_for_election": 33,
+   "direct_giving_gt0": 40,
+   "pac_company_gt0": 33,
+   "pac_trade_gt0": 30,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 44,
+   "industry_money_with_trade_gt0": 45,
+   "industry_money_primary_gt0_up_for_election": 31
+  },
+  {
+   "board": "bank",
+   "cycle": 2024,
+   "members": 50,
+   "up_for_election": 34,
+   "direct_giving_gt0": 36,
+   "pac_company_gt0": 35,
+   "pac_trade_gt0": 32,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 43,
+   "industry_money_with_trade_gt0": 46,
+   "industry_money_primary_gt0_up_for_election": 30
+  },
+  {
+   "board": "bank",
+   "cycle": 2026,
+   "members": 50,
+   "up_for_election": 30,
+   "direct_giving_gt0": 23,
+   "pac_company_gt0": 31,
+   "pac_trade_gt0": 31,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 36,
+   "industry_money_with_trade_gt0": 40,
+   "industry_money_primary_gt0_up_for_election": 24
+  },
+  {
+   "board": "crypto",
+   "cycle": 2020,
+   "members": 25,
+   "up_for_election": 15,
+   "direct_giving_gt0": 0,
+   "pac_company_gt0": 0,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 0,
+   "industry_money_with_trade_gt0": 0,
+   "industry_money_primary_gt0_up_for_election": 0
+  },
+  {
+   "board": "crypto",
+   "cycle": 2022,
+   "members": 25,
+   "up_for_election": 12,
+   "direct_giving_gt0": 5,
+   "pac_company_gt0": 10,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 12,
+   "industry_money_with_trade_gt0": 12,
+   "industry_money_primary_gt0_up_for_election": 8
+  },
+  {
+   "board": "crypto",
+   "cycle": 2024,
+   "members": 25,
+   "up_for_election": 15,
+   "direct_giving_gt0": 18,
+   "pac_company_gt0": 9,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 19,
+   "industry_money_with_trade_gt0": 19,
+   "industry_money_primary_gt0_up_for_election": 14
+  },
+  {
+   "board": "crypto",
+   "cycle": 2026,
+   "members": 25,
+   "up_for_election": 11,
+   "direct_giving_gt0": 17,
+   "pac_company_gt0": 12,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 19,
+   "industry_money_with_trade_gt0": 19,
+   "industry_money_primary_gt0_up_for_election": 11
+  },
+  {
+   "board": "fintech",
+   "cycle": 2020,
+   "members": 8,
+   "up_for_election": 7,
+   "direct_giving_gt0": 0,
+   "pac_company_gt0": 0,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 0,
+   "industry_money_with_trade_gt0": 0,
+   "industry_money_primary_gt0_up_for_election": 0
+  },
+  {
+   "board": "fintech",
+   "cycle": 2022,
+   "members": 8,
+   "up_for_election": 6,
+   "direct_giving_gt0": 1,
+   "pac_company_gt0": 2,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 3,
+   "industry_money_with_trade_gt0": 3,
+   "industry_money_primary_gt0_up_for_election": 2
+  },
+  {
+   "board": "fintech",
+   "cycle": 2024,
+   "members": 8,
+   "up_for_election": 7,
+   "direct_giving_gt0": 3,
+   "pac_company_gt0": 4,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 5,
+   "industry_money_with_trade_gt0": 5,
+   "industry_money_primary_gt0_up_for_election": 5
+  },
+  {
+   "board": "fintech",
+   "cycle": 2026,
+   "members": 8,
+   "up_for_election": 6,
+   "direct_giving_gt0": 2,
+   "pac_company_gt0": 2,
+   "pac_trade_gt0": 0,
+   "pac_support_ie_gt0": 0,
+   "industry_money_primary_gt0": 3,
+   "industry_money_with_trade_gt0": 3,
+   "industry_money_primary_gt0_up_for_election": 3
+  }
+ ],
+ "reconcile": [
+  {
+   "industry": "credit_union",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "company",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 13,
+   "pas2_contrib_all_recipients_nominal_usd": 36500.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00390633",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 36500.0,
+   "pas2_same_committees_nominal_usd": 36500.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "credit_union",
+   "board_members": 50,
+   "champions_with_pac_gt0": 2,
+   "champions_pac_nominal_usd": 15000.0,
+   "champions_share_of_industry_pct": 41.096,
+   "champions_with_primary_gt0": 5,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2022;downstream_credit_union;pac_sets_def"
+  },
+  {
+   "industry": "credit_union",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "trade",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 1055,
+   "pas2_contrib_all_recipients_nominal_usd": 2800500.0,
+   "pas2_negative_rows_netted": 69,
+   "pas2_negative_netted_nominal_usd": -202000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 1400135.0,
+   "mentat_downstream_committees": "C00007880",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 2800500.0,
+   "pas2_same_committees_nominal_usd": 2800500.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "credit_union",
+   "board_members": 50,
+   "champions_with_pac_gt0": 31,
+   "champions_pac_nominal_usd": 257000.0,
+   "champions_share_of_industry_pct": 9.177,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2022;downstream_credit_union;pac_sets_def"
+  },
+  {
+   "industry": "credit_union",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "company",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 22,
+   "pas2_contrib_all_recipients_nominal_usd": 80800.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00390633",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 80800.0,
+   "pas2_same_committees_nominal_usd": 80800.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "credit_union",
+   "board_members": 50,
+   "champions_with_pac_gt0": 2,
+   "champions_pac_nominal_usd": 12500.0,
+   "champions_share_of_industry_pct": 15.47,
+   "champions_with_primary_gt0": 2,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2024;downstream_credit_union;pac_sets_def"
+  },
+  {
+   "industry": "credit_union",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "trade",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 992,
+   "pas2_contrib_all_recipients_nominal_usd": 2480500.0,
+   "pas2_negative_rows_netted": 89,
+   "pas2_negative_netted_nominal_usd": -260000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 1799914.0,
+   "mentat_downstream_committees": "C00007880",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 2480500.0,
+   "pas2_same_committees_nominal_usd": 2480500.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "credit_union",
+   "board_members": 50,
+   "champions_with_pac_gt0": 37,
+   "champions_pac_nominal_usd": 274000.0,
+   "champions_share_of_industry_pct": 11.046,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2024;downstream_credit_union;pac_sets_def"
+  },
+  {
+   "industry": "credit_union",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "company",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 29,
+   "pas2_contrib_all_recipients_nominal_usd": 65500.0,
+   "pas2_negative_rows_netted": 3,
+   "pas2_negative_netted_nominal_usd": -7500.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00390633",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 54500.0,
+   "pas2_same_committees_nominal_usd": 65500.0,
+   "difference_pas2_minus_mentat_usd": 11000.0,
+   "difference_pct": 20.183,
+   "committees_not_in_mentat_sheet": null,
+   "board": "credit_union",
+   "board_members": 50,
+   "champions_with_pac_gt0": 2,
+   "champions_pac_nominal_usd": 15000.0,
+   "champions_share_of_industry_pct": 22.901,
+   "champions_with_primary_gt0": 3,
+   "status": "partial",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2026;downstream_credit_union;pac_sets_def"
+  },
+  {
+   "industry": "credit_union",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "trade",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 762,
+   "pas2_contrib_all_recipients_nominal_usd": 1728000.0,
+   "pas2_negative_rows_netted": 64,
+   "pas2_negative_netted_nominal_usd": -158500.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 799999.0,
+   "mentat_downstream_committees": "C00007880",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 1523500.0,
+   "pas2_same_committees_nominal_usd": 1728000.0,
+   "difference_pas2_minus_mentat_usd": 204500.0,
+   "difference_pct": 13.423,
+   "committees_not_in_mentat_sheet": null,
+   "board": "credit_union",
+   "board_members": 50,
+   "champions_with_pac_gt0": 37,
+   "champions_pac_nominal_usd": 216500.0,
+   "champions_share_of_industry_pct": 12.529,
+   "champions_with_primary_gt0": null,
+   "status": "partial",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2026;downstream_credit_union;pac_sets_def"
+  },
+  {
+   "industry": "banking",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "company",
+   "committees_in_set": 18,
+   "committees_with_pas2_rows": 13,
+   "pas2_contrib_rows_included": 2404,
+   "pas2_contrib_all_recipients_nominal_usd": 4910350.0,
+   "pas2_negative_rows_netted": 87,
+   "pas2_negative_netted_nominal_usd": -181500.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00008474;C00034595;C00035519;C00186064;C00300178;C00326595;C00337626;C00350744;C00364778;C00386524;C00488882",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 4338850.0,
+   "pas2_same_committees_nominal_usd": 4338850.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": "C00104299;C00142596",
+   "board": "bank",
+   "board_members": 50,
+   "champions_with_pac_gt0": 33,
+   "champions_pac_nominal_usd": 681000.0,
+   "champions_share_of_industry_pct": 13.869,
+   "champions_with_primary_gt0": 44,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2022;downstream_banking;pac_sets_def"
+  },
+  {
+   "industry": "banking",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "trade",
+   "committees_in_set": 4,
+   "committees_with_pas2_rows": 4,
+   "pas2_contrib_rows_included": 1026,
+   "pas2_contrib_all_recipients_nominal_usd": 2468000.0,
+   "pas2_negative_rows_netted": 36,
+   "pas2_negative_netted_nominal_usd": -94000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00004275;C00035535;C00193177;C00717686",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 2468000.0,
+   "pas2_same_committees_nominal_usd": 2468000.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "bank",
+   "board_members": 50,
+   "champions_with_pac_gt0": 30,
+   "champions_pac_nominal_usd": 256500.0,
+   "champions_share_of_industry_pct": 10.393,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2022;downstream_banking;pac_sets_def"
+  },
+  {
+   "industry": "banking",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "company",
+   "committees_in_set": 18,
+   "committees_with_pas2_rows": 13,
+   "pas2_contrib_rows_included": 2742,
+   "pas2_contrib_all_recipients_nominal_usd": 5692500.0,
+   "pas2_negative_rows_netted": 96,
+   "pas2_negative_netted_nominal_usd": -238500.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00008474;C00009639;C00034595;C00035519;C00104299;C00186064;C00300178;C00326595;C00337626;C00350744;C00364778;C00386524;C00488882",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 5692500.0,
+   "pas2_same_committees_nominal_usd": 5692500.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "bank",
+   "board_members": 50,
+   "champions_with_pac_gt0": 35,
+   "champions_pac_nominal_usd": 849500.0,
+   "champions_share_of_industry_pct": 14.923,
+   "champions_with_primary_gt0": 43,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2024;downstream_banking;pac_sets_def"
+  },
+  {
+   "industry": "banking",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "trade",
+   "committees_in_set": 4,
+   "committees_with_pas2_rows": 4,
+   "pas2_contrib_rows_included": 1354,
+   "pas2_contrib_all_recipients_nominal_usd": 2664150.0,
+   "pas2_negative_rows_netted": 51,
+   "pas2_negative_netted_nominal_usd": -117500.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00004275;C00035535;C00193177;C00717686",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 2664150.0,
+   "pas2_same_committees_nominal_usd": 2664150.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "bank",
+   "board_members": 50,
+   "champions_with_pac_gt0": 32,
+   "champions_pac_nominal_usd": 300650.0,
+   "champions_share_of_industry_pct": 11.285,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2024;downstream_banking;pac_sets_def"
+  },
+  {
+   "industry": "banking",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "company",
+   "committees_in_set": 18,
+   "committees_with_pas2_rows": 13,
+   "pas2_contrib_rows_included": 2230,
+   "pas2_contrib_all_recipients_nominal_usd": 4926500.0,
+   "pas2_negative_rows_netted": 68,
+   "pas2_negative_netted_nominal_usd": -170000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00008474;C00009639;C00034595;C00035519;C00104299;C00186064;C00300178;C00326595;C00337626;C00350744;C00364778;C00386524;C00488882",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 4926500.0,
+   "pas2_same_committees_nominal_usd": 4926500.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "bank",
+   "board_members": 50,
+   "champions_with_pac_gt0": 31,
+   "champions_pac_nominal_usd": 779000.0,
+   "champions_share_of_industry_pct": 15.812,
+   "champions_with_primary_gt0": 36,
+   "status": "partial",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2026;downstream_banking;pac_sets_def"
+  },
+  {
+   "industry": "banking",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "trade",
+   "committees_in_set": 4,
+   "committees_with_pas2_rows": 4,
+   "pas2_contrib_rows_included": 1234,
+   "pas2_contrib_all_recipients_nominal_usd": 2337000.0,
+   "pas2_negative_rows_netted": 76,
+   "pas2_negative_netted_nominal_usd": -168500.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00004275;C00035535;C00193177;C00717686",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 2337000.0,
+   "pas2_same_committees_nominal_usd": 2337000.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "bank",
+   "board_members": 50,
+   "champions_with_pac_gt0": 31,
+   "champions_pac_nominal_usd": 256000.0,
+   "champions_share_of_industry_pct": 10.954,
+   "champions_with_primary_gt0": null,
+   "status": "partial",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2026;downstream_banking;pac_sets_def"
+  },
+  {
+   "industry": "community_banks",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "company",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 1,
+   "pas2_contrib_all_recipients_nominal_usd": 5000.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": "C00451781",
+   "board": null,
+   "board_members": null,
+   "champions_with_pac_gt0": null,
+   "champions_pac_nominal_usd": null,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "no Mentat Downstream Activity row for these committees; community banks has no board (bank board sensitivity only)",
+   "source_id": "pas2_2022;downstream_community_banks;pac_sets_def"
+  },
+  {
+   "industry": "community_banks",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "trade",
+   "committees_in_set": 2,
+   "committees_with_pas2_rows": 2,
+   "pas2_contrib_rows_included": 1567,
+   "pas2_contrib_all_recipients_nominal_usd": 3082500.0,
+   "pas2_negative_rows_netted": 72,
+   "pas2_negative_netted_nominal_usd": -139000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00004275;C00032698",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 3082500.0,
+   "pas2_same_committees_nominal_usd": 3082500.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": null,
+   "board_members": null,
+   "champions_with_pac_gt0": null,
+   "champions_pac_nominal_usd": null,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date; community banks has no board (bank board sensitivity only)",
+   "source_id": "pas2_2022;downstream_community_banks;pac_sets_def"
+  },
+  {
+   "industry": "community_banks",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "company",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 0,
+   "pas2_contrib_rows_included": 0,
+   "pas2_contrib_all_recipients_nominal_usd": 0.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": null,
+   "board": null,
+   "board_members": null,
+   "champions_with_pac_gt0": null,
+   "champions_pac_nominal_usd": null,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "no Mentat Downstream Activity row for these committees; community banks has no board (bank board sensitivity only)",
+   "source_id": "pas2_2024;downstream_community_banks;pac_sets_def"
+  },
+  {
+   "industry": "community_banks",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "trade",
+   "committees_in_set": 2,
+   "committees_with_pas2_rows": 2,
+   "pas2_contrib_rows_included": 1821,
+   "pas2_contrib_all_recipients_nominal_usd": 3319650.0,
+   "pas2_negative_rows_netted": 65,
+   "pas2_negative_netted_nominal_usd": -138000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00004275;C00032698",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 3319650.0,
+   "pas2_same_committees_nominal_usd": 3319650.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": null,
+   "board_members": null,
+   "champions_with_pac_gt0": null,
+   "champions_pac_nominal_usd": null,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date; community banks has no board (bank board sensitivity only)",
+   "source_id": "pas2_2024;downstream_community_banks;pac_sets_def"
+  },
+  {
+   "industry": "community_banks",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "company",
+   "committees_in_set": 1,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 1,
+   "pas2_contrib_all_recipients_nominal_usd": 5000.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": "C00451781",
+   "board": null,
+   "board_members": null,
+   "champions_with_pac_gt0": null,
+   "champions_pac_nominal_usd": null,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "partial",
+   "note": "no Mentat Downstream Activity row for these committees; community banks has no board (bank board sensitivity only)",
+   "source_id": "pas2_2026;downstream_community_banks;pac_sets_def"
+  },
+  {
+   "industry": "community_banks",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "trade",
+   "committees_in_set": 2,
+   "committees_with_pas2_rows": 2,
+   "pas2_contrib_rows_included": 1465,
+   "pas2_contrib_all_recipients_nominal_usd": 2688000.0,
+   "pas2_negative_rows_netted": 84,
+   "pas2_negative_netted_nominal_usd": -184000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00004275;C00032698",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 2296300.0,
+   "pas2_same_committees_nominal_usd": 2688000.0,
+   "difference_pas2_minus_mentat_usd": 391700.0,
+   "difference_pct": 17.058,
+   "committees_not_in_mentat_sheet": null,
+   "board": null,
+   "board_members": null,
+   "champions_with_pac_gt0": null,
+   "champions_pac_nominal_usd": null,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "partial",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date; community banks has no board (bank board sensitivity only)",
+   "source_id": "pas2_2026;downstream_community_banks;pac_sets_def"
+  },
+  {
+   "industry": "crypto",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "company",
+   "committees_in_set": 3,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 25,
+   "pas2_contrib_all_recipients_nominal_usd": 50100.0,
+   "pas2_negative_rows_netted": 1,
+   "pas2_negative_netted_nominal_usd": -1500.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00804179",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 50100.0,
+   "pas2_same_committees_nominal_usd": 50100.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "crypto",
+   "board_members": 25,
+   "champions_with_pac_gt0": 10,
+   "champions_pac_nominal_usd": 20700.0,
+   "champions_share_of_industry_pct": 41.317,
+   "champions_with_primary_gt0": 12,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2022;downstream_crypto;pac_sets_def"
+  },
+  {
+   "industry": "crypto",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "trade",
+   "committees_in_set": 0,
+   "committees_with_pas2_rows": 0,
+   "pas2_contrib_rows_included": 0,
+   "pas2_contrib_all_recipients_nominal_usd": 0.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": null,
+   "board": "crypto",
+   "board_members": 25,
+   "champions_with_pac_gt0": 0,
+   "champions_pac_nominal_usd": 0.0,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "no Mentat Downstream Activity row for these committees",
+   "source_id": "pas2_2022;downstream_crypto;pac_sets_def"
+  },
+  {
+   "industry": "crypto",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "company",
+   "committees_in_set": 3,
+   "committees_with_pas2_rows": 2,
+   "pas2_contrib_rows_included": 70,
+   "pas2_contrib_all_recipients_nominal_usd": 87800.0,
+   "pas2_negative_rows_netted": 2,
+   "pas2_negative_netted_nominal_usd": -5000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00804179",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 65000.0,
+   "pas2_same_committees_nominal_usd": 65000.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": "C00845651",
+   "board": "crypto",
+   "board_members": 25,
+   "champions_with_pac_gt0": 9,
+   "champions_pac_nominal_usd": 21300.0,
+   "champions_share_of_industry_pct": 24.26,
+   "champions_with_primary_gt0": 19,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2024;downstream_crypto;pac_sets_def"
+  },
+  {
+   "industry": "crypto",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "trade",
+   "committees_in_set": 0,
+   "committees_with_pas2_rows": 0,
+   "pas2_contrib_rows_included": 0,
+   "pas2_contrib_all_recipients_nominal_usd": 0.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": null,
+   "board": "crypto",
+   "board_members": 25,
+   "champions_with_pac_gt0": 0,
+   "champions_pac_nominal_usd": 0.0,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "no Mentat Downstream Activity row for these committees",
+   "source_id": "pas2_2024;downstream_crypto;pac_sets_def"
+  },
+  {
+   "industry": "crypto",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "company",
+   "committees_in_set": 3,
+   "committees_with_pas2_rows": 2,
+   "pas2_contrib_rows_included": 79,
+   "pas2_contrib_all_recipients_nominal_usd": 99100.0,
+   "pas2_negative_rows_netted": 2,
+   "pas2_negative_netted_nominal_usd": -2900.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00804179",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 76000.0,
+   "pas2_same_committees_nominal_usd": 88100.0,
+   "difference_pas2_minus_mentat_usd": 12100.0,
+   "difference_pct": 15.921,
+   "committees_not_in_mentat_sheet": "C00845651",
+   "board": "crypto",
+   "board_members": 25,
+   "champions_with_pac_gt0": 12,
+   "champions_pac_nominal_usd": 23600.0,
+   "champions_share_of_industry_pct": 23.814,
+   "champions_with_primary_gt0": 19,
+   "status": "partial",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2026;downstream_crypto;pac_sets_def"
+  },
+  {
+   "industry": "crypto",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "trade",
+   "committees_in_set": 0,
+   "committees_with_pas2_rows": 0,
+   "pas2_contrib_rows_included": 0,
+   "pas2_contrib_all_recipients_nominal_usd": 0.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": null,
+   "board": "crypto",
+   "board_members": 25,
+   "champions_with_pac_gt0": 0,
+   "champions_pac_nominal_usd": 0.0,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "partial",
+   "note": "no Mentat Downstream Activity row for these committees",
+   "source_id": "pas2_2026;downstream_crypto;pac_sets_def"
+  },
+  {
+   "industry": "fintech",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "company",
+   "committees_in_set": 4,
+   "committees_with_pas2_rows": 1,
+   "pas2_contrib_rows_included": 12,
+   "pas2_contrib_all_recipients_nominal_usd": 23400.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00780304",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 23400.0,
+   "pas2_same_committees_nominal_usd": 23400.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "fintech",
+   "board_members": 8,
+   "champions_with_pac_gt0": 2,
+   "champions_pac_nominal_usd": 3500.0,
+   "champions_share_of_industry_pct": 14.957,
+   "champions_with_primary_gt0": 3,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2022;downstream_fintech;pac_sets_def"
+  },
+  {
+   "industry": "fintech",
+   "cycle": 2022,
+   "cycle_label": "2021-2022",
+   "channel": "trade",
+   "committees_in_set": 0,
+   "committees_with_pas2_rows": 0,
+   "pas2_contrib_rows_included": 0,
+   "pas2_contrib_all_recipients_nominal_usd": 0.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": null,
+   "board": "fintech",
+   "board_members": 8,
+   "champions_with_pac_gt0": 0,
+   "champions_pac_nominal_usd": 0.0,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "no Mentat Downstream Activity row for these committees",
+   "source_id": "pas2_2022;downstream_fintech;pac_sets_def"
+  },
+  {
+   "industry": "fintech",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "company",
+   "committees_in_set": 4,
+   "committees_with_pas2_rows": 2,
+   "pas2_contrib_rows_included": 48,
+   "pas2_contrib_all_recipients_nominal_usd": 111650.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00780304;C00883116",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 111650.0,
+   "pas2_same_committees_nominal_usd": 111650.0,
+   "difference_pas2_minus_mentat_usd": 0.0,
+   "difference_pct": 0.0,
+   "committees_not_in_mentat_sheet": null,
+   "board": "fintech",
+   "board_members": 8,
+   "champions_with_pac_gt0": 4,
+   "champions_pac_nominal_usd": 10500.0,
+   "champions_share_of_industry_pct": 9.404,
+   "champions_with_primary_gt0": 5,
+   "status": "observed",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2024;downstream_fintech;pac_sets_def"
+  },
+  {
+   "industry": "fintech",
+   "cycle": 2024,
+   "cycle_label": "2023-2024",
+   "channel": "trade",
+   "committees_in_set": 0,
+   "committees_with_pas2_rows": 0,
+   "pas2_contrib_rows_included": 0,
+   "pas2_contrib_all_recipients_nominal_usd": 0.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": null,
+   "board": "fintech",
+   "board_members": 8,
+   "champions_with_pac_gt0": 0,
+   "champions_pac_nominal_usd": 0.0,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "observed",
+   "note": "no Mentat Downstream Activity row for these committees",
+   "source_id": "pas2_2024;downstream_fintech;pac_sets_def"
+  },
+  {
+   "industry": "fintech",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "company",
+   "committees_in_set": 4,
+   "committees_with_pas2_rows": 3,
+   "pas2_contrib_rows_included": 88,
+   "pas2_contrib_all_recipients_nominal_usd": 216900.0,
+   "pas2_negative_rows_netted": 4,
+   "pas2_negative_netted_nominal_usd": -10000.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": "C00780304;C00883116;C00918235",
+   "mentat_downstream_net_included_24k_24z_nominal_usd": 209900.0,
+   "pas2_same_committees_nominal_usd": 216900.0,
+   "difference_pas2_minus_mentat_usd": 7000.0,
+   "difference_pct": 3.335,
+   "committees_not_in_mentat_sheet": null,
+   "board": "fintech",
+   "board_members": 8,
+   "champions_with_pac_gt0": 2,
+   "champions_pac_nominal_usd": 6800.0,
+   "champions_share_of_industry_pct": 3.135,
+   "champions_with_primary_gt0": 3,
+   "status": "partial",
+   "note": "Mentat total = the workbook's Downstream Activity sheet (Net Included Amount, 24K+24Z) for the same committees; it lists only committees funded by the industry's employees in that cycle and was built from the pas2 file of its own build date",
+   "source_id": "pas2_2026;downstream_fintech;pac_sets_def"
+  },
+  {
+   "industry": "fintech",
+   "cycle": 2026,
+   "cycle_label": "2025-2026",
+   "channel": "trade",
+   "committees_in_set": 0,
+   "committees_with_pas2_rows": 0,
+   "pas2_contrib_rows_included": 0,
+   "pas2_contrib_all_recipients_nominal_usd": 0.0,
+   "pas2_negative_rows_netted": 0,
+   "pas2_negative_netted_nominal_usd": 0.0,
+   "pas2_support_ie_all_candidates_nominal_usd": 0.0,
+   "mentat_downstream_committees": null,
+   "mentat_downstream_net_included_24k_24z_nominal_usd": null,
+   "pas2_same_committees_nominal_usd": null,
+   "difference_pas2_minus_mentat_usd": null,
+   "difference_pct": null,
+   "committees_not_in_mentat_sheet": null,
+   "board": "fintech",
+   "board_members": 8,
+   "champions_with_pac_gt0": 0,
+   "champions_pac_nominal_usd": 0.0,
+   "champions_share_of_industry_pct": null,
+   "champions_with_primary_gt0": null,
+   "status": "partial",
+   "note": "no Mentat Downstream Activity row for these committees",
+   "source_id": "pas2_2026;downstream_fintech;pac_sets_def"
+  }
+ ],
+ "checks": {
+  "stage": [
+   {
+    "check": "no <f> formula elements in any sheet XML",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "sheet set and order",
+    "ok": true,
+    "detail": "['data', 'dictionary', 'sources', 'coverage', 'champions', 'committee_sets', 'ratings_used', 'unmatched', 'definitions', 'pac_sets', 'pac_transactions_used', 'pac_reconcile']"
+   },
+   {
+    "check": "no formula-like text cells",
+    "ok": true,
+    "detail": "0"
+   },
+   {
+    "check": "data: key board+bioguide+cycle unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "champions: key board+bioguide unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "ratings_used: key board+bioguide+cycle+rater unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "unmatched: key board+bioguide+cycle unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "coverage: key board+cycle unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "definitions: key definition_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "sources: key source_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "dictionary: key sheet+column unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "committee_sets: key bioguide+cycle+committee_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_sets: key industry+cycle+committee_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_transactions_used: key cycle+line_no+bioguide unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_reconcile: key industry+cycle+channel unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "champions: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "ratings_used: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "unmatched: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "coverage: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "definitions: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "committee_sets: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_sets: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_transactions_used: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_reconcile: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "dictionary: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "sources: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "coverage: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "champions: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "committee_sets: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "ratings_used: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "unmatched: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "definitions: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "data: 532 rows = 133 board-members x 4 cycles",
+    "ok": true,
+    "detail": "532"
+   },
+   {
+    "check": "data: 2020 PAC channel missing (status missing, money blank)",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "data: pac_company/pac_trade giving == independent SQL over raw pas2 (memo excluded; authorized committees; amounts and rows)",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: bank+CB PAC giving == independent SQL (bank board)",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: pac_support_ie == independent SQL over raw pas2 24E by CAND_ID",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_transactions_used: counted rows sum to every data PAC column",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: primary = direct + company PAC; with_trade = primary + trade PAC (and bank+CB); every PAC/DV real_2025 == nominal x cpi",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "coverage: PAC and DV counts == data",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_reconcile: champions' totals == data",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_sets: cross_industry / other_industry committees never counted",
+    "ok": true,
+    "detail": "[]"
+   }
+  ],
+  "stage_failed": 0,
+  "installed": [
+   {
+    "check": "no <f> formula elements in any sheet XML",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "sheet set and order",
+    "ok": true,
+    "detail": "['data', 'dictionary', 'sources', 'coverage', 'champions', 'committee_sets', 'ratings_used', 'unmatched', 'definitions', 'pac_sets', 'pac_transactions_used', 'pac_reconcile']"
+   },
+   {
+    "check": "no formula-like text cells",
+    "ok": true,
+    "detail": "0"
+   },
+   {
+    "check": "data: key board+bioguide+cycle unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "champions: key board+bioguide unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "ratings_used: key board+bioguide+cycle+rater unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "unmatched: key board+bioguide+cycle unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "coverage: key board+cycle unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "definitions: key definition_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "sources: key source_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "dictionary: key sheet+column unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "committee_sets: key bioguide+cycle+committee_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_sets: key industry+cycle+committee_id unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_transactions_used: key cycle+line_no+bioguide unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_reconcile: key industry+cycle+channel unique",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "champions: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "ratings_used: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "unmatched: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "coverage: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "definitions: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "committee_sets: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_sets: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_transactions_used: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_reconcile: every source_id resolves",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "dictionary: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "sources: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "coverage: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "champions: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "committee_sets: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "ratings_used: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "unmatched: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "definitions: every v2 column and row kept unchanged",
+    "ok": true,
+    "detail": "([], [])"
+   },
+   {
+    "check": "data: 532 rows = 133 board-members x 4 cycles",
+    "ok": true,
+    "detail": "532"
+   },
+   {
+    "check": "data: 2020 PAC channel missing (status missing, money blank)",
+    "ok": true,
+    "detail": ""
+   },
+   {
+    "check": "data: pac_company/pac_trade giving == independent SQL over raw pas2 (memo excluded; authorized committees; amounts and rows)",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: bank+CB PAC giving == independent SQL (bank board)",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: pac_support_ie == independent SQL over raw pas2 24E by CAND_ID",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_transactions_used: counted rows sum to every data PAC column",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "data: primary = direct + company PAC; with_trade = primary + trade PAC (and bank+CB); every PAC/DV real_2025 == nominal x cpi",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "coverage: PAC and DV counts == data",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_reconcile: champions' totals == data",
+    "ok": true,
+    "detail": "[]"
+   },
+   {
+    "check": "pac_sets: cross_industry / other_industry committees never counted",
+    "ok": true,
+    "detail": "[]"
+   }
+  ],
+  "installed_failed": 0,
+  "installed_bytes_equal_stage": true
+ },
+ "negative_controls": {
+  "planted_pas2": [
+   {
+    "control": "planted duplicate AMENDED pas2 row (same identity, file_num+1, amendment A, new sub_id)",
+    "row": 2035,
+    "committee": "C00142596",
+    "cycle": 2022,
+    "champion": "C001113",
+    "base_usd": 2500.0,
+    "after_usd": 2500.0,
+    "original_status": "superseded_filing_version",
+    "planted_status": "included",
+    "passed": true
+   },
+   {
+    "control": "planted exact duplicate (same sub_id)",
+    "base_usd": 2500.0,
+    "after_usd": 2500.0,
+    "planted_status": "duplicate_sub_id",
+    "passed": true
+   },
+   {
+    "control": "teeth: genuinely different transaction reusing the same transaction id (amount and date differ) is counted",
+    "base_usd": 2500.0,
+    "after_usd": 5123.45,
+    "expected_usd": 5123.45,
+    "planted_status": "included",
+    "passed": true
+   }
+  ],
+  "tampered_workbook_failed_checks": [
+   "no <f> formula elements in any sheet XML",
+   "no formula-like text cells",
+   "pac_transactions_used: key cycle+line_no+bioguide unique",
+   "pac_transactions_used: every source_id resolves",
+   "data: every v2 column and row kept unchanged",
+   "data: pac_company/pac_trade giving == independent SQL over raw pas2 (memo excluded; authorized committees; amounts and rows)",
+   "pac_transactions_used: counted rows sum to every data PAC column",
+   "data: primary = direct + company PAC; with_trade = primary + trade PAC (and bank+CB); every PAC/DV real_2025 == nominal x cpi",
+   "pac_reconcile: champions' totals == data"
+  ]
+ },
+ "spot_check": [
+  {
+   "board": "bank",
+   "bioguide": "L000491",
+   "name": "Frank Lucas",
+   "cycle": 2024,
+   "up_for_election": 1,
+   "direct_giving_status": "observed",
+   "direct_giving_nominal_usd": 3300.0,
+   "pac_company_giving_nominal_usd": 54000.0,
+   "pac_company_giving_real_2025_usd": 56229.89193,
+   "pac_company_gifts": 26,
+   "pac_trade_giving_nominal_usd": 9150.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 57300.0,
+   "industry_money_primary_real_2025_usd": 59666.163104,
+   "industry_money_with_trade_nominal_usd": 66450.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": 54000.0,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": 16150.0,
+   "industry_money_primary_bank_plus_cb_nominal_usd": 57300.0,
+   "pac_committees_counted": "C00004275;C00008474;C00009639;C00104299;C00186064;C00300178;C00326595;C00337626;C00350744;C00364778;C00386524;C00488882",
+   "pac_status": "observed",
+   "pac_note": "pas2 2023-2024 (FEC bulk, downloaded 2026-09-08)"
+  },
+  {
+   "board": "bank",
+   "bioguide": "K000392",
+   "name": "David Kustoff",
+   "cycle": 2022,
+   "up_for_election": 1,
+   "direct_giving_status": "observed",
+   "direct_giving_nominal_usd": 500.0,
+   "pac_company_giving_nominal_usd": 17500.0,
+   "pac_company_giving_real_2025_usd": 20016.357598,
+   "pac_company_gifts": 8,
+   "pac_trade_giving_nominal_usd": 12500.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 18000.0,
+   "industry_money_primary_real_2025_usd": 20588.25353,
+   "industry_money_with_trade_nominal_usd": 30500.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": 17500.0,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": 20000.0,
+   "industry_money_primary_bank_plus_cb_nominal_usd": 18000.0,
+   "pac_committees_counted": "C00004275;C00008474;C00035535;C00300178;C00326595;C00386524;C00488882",
+   "pac_status": "observed",
+   "pac_note": "pas2 2021-2022 (FEC bulk, downloaded 2026-09-08)"
+  },
+  {
+   "board": "credit_union",
+   "bioguide": "K000397",
+   "name": "Young Kim",
+   "cycle": 2022,
+   "up_for_election": 1,
+   "direct_giving_status": "observed_zero",
+   "direct_giving_nominal_usd": 0.0,
+   "pac_company_giving_nominal_usd": 10000.0,
+   "pac_company_giving_real_2025_usd": 11437.918628,
+   "pac_company_gifts": 4,
+   "pac_trade_giving_nominal_usd": 7500.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 10000.0,
+   "industry_money_primary_real_2025_usd": 11437.918628,
+   "industry_money_with_trade_nominal_usd": 17500.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": null,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": null,
+   "industry_money_primary_bank_plus_cb_nominal_usd": null,
+   "pac_committees_counted": "C00007880;C00390633",
+   "pac_status": "observed",
+   "pac_note": "pas2 2021-2022 (FEC bulk, downloaded 2026-09-08)"
+  },
+  {
+   "board": "credit_union",
+   "bioguide": "L000599",
+   "name": "Michael Lawler",
+   "cycle": 2024,
+   "up_for_election": 1,
+   "direct_giving_status": "observed_zero",
+   "direct_giving_nominal_usd": 0.0,
+   "pac_company_giving_nominal_usd": 0.0,
+   "pac_company_giving_real_2025_usd": 0.0,
+   "pac_company_gifts": 0,
+   "pac_trade_giving_nominal_usd": 7500.0,
+   "pac_support_ie_nominal_usd": 399999.0,
+   "industry_money_primary_nominal_usd": 0.0,
+   "industry_money_primary_real_2025_usd": 0.0,
+   "industry_money_with_trade_nominal_usd": 7500.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": null,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": null,
+   "industry_money_primary_bank_plus_cb_nominal_usd": null,
+   "pac_committees_counted": "C00007880",
+   "pac_status": "observed",
+   "pac_note": "pas2 2023-2024 (FEC bulk, downloaded 2026-09-08)"
+  },
+  {
+   "board": "crypto",
+   "bioguide": "L000571",
+   "name": "Cynthia Lummis",
+   "cycle": 2026,
+   "up_for_election": 0,
+   "direct_giving_status": "observed",
+   "direct_giving_nominal_usd": 10500.0,
+   "pac_company_giving_nominal_usd": 2100.0,
+   "pac_company_giving_real_2025_usd": 2100.0,
+   "pac_company_gifts": 3,
+   "pac_trade_giving_nominal_usd": 0.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 12600.0,
+   "industry_money_primary_real_2025_usd": 12600.0,
+   "industry_money_with_trade_nominal_usd": 12600.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": null,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": null,
+   "industry_money_primary_bank_plus_cb_nominal_usd": null,
+   "pac_committees_counted": "C00804179",
+   "pac_status": "observed",
+   "pac_note": "pas2 2025-2026 is partial: FEC bulk file downloaded 2026-09-08 (last modified 2026-09-06)"
+  },
+  {
+   "board": "fintech",
+   "bioguide": "D000032",
+   "name": "Byron Donalds",
+   "cycle": 2024,
+   "up_for_election": 1,
+   "direct_giving_status": "observed",
+   "direct_giving_nominal_usd": 21000.0,
+   "pac_company_giving_nominal_usd": 5500.0,
+   "pac_company_giving_real_2025_usd": 5727.118623,
+   "pac_company_gifts": 2,
+   "pac_trade_giving_nominal_usd": 0.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 26500.0,
+   "industry_money_primary_real_2025_usd": 27594.298818,
+   "industry_money_with_trade_nominal_usd": 26500.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": null,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": null,
+   "industry_money_primary_bank_plus_cb_nominal_usd": null,
+   "pac_committees_counted": "C00780304",
+   "pac_status": "observed",
+   "pac_note": "pas2 2023-2024 (FEC bulk, downloaded 2026-09-08)"
+  },
+  {
+   "board": "crypto",
+   "bioguide": "A000382",
+   "name": "Angela Alsobrooks",
+   "cycle": 2022,
+   "up_for_election": 0,
+   "direct_giving_status": "no_authorized_committee",
+   "direct_giving_nominal_usd": 0.0,
+   "pac_company_giving_nominal_usd": 0.0,
+   "pac_company_giving_real_2025_usd": 0.0,
+   "pac_company_gifts": 0,
+   "pac_trade_giving_nominal_usd": 0.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 0.0,
+   "industry_money_primary_real_2025_usd": 0.0,
+   "industry_money_with_trade_nominal_usd": 0.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": null,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": null,
+   "industry_money_primary_bank_plus_cb_nominal_usd": null,
+   "pac_committees_counted": null,
+   "pac_status": "observed",
+   "pac_note": "pas2 2021-2022 (FEC bulk, downloaded 2026-09-08) | no authorized committee this cycle: PAC rows matched by CAND_ID only"
+  },
+  {
+   "board": "bank",
+   "bioguide": "R000612",
+   "name": "John Rose",
+   "cycle": 2026,
+   "up_for_election": 1,
+   "direct_giving_status": "observed_zero",
+   "direct_giving_nominal_usd": 0.0,
+   "pac_company_giving_nominal_usd": 0.0,
+   "pac_company_giving_real_2025_usd": 0.0,
+   "pac_company_gifts": 0,
+   "pac_trade_giving_nominal_usd": 0.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 0.0,
+   "industry_money_primary_real_2025_usd": 0.0,
+   "industry_money_with_trade_nominal_usd": 0.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": 0.0,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": 0.0,
+   "industry_money_primary_bank_plus_cb_nominal_usd": 0.0,
+   "pac_committees_counted": null,
+   "pac_status": "observed",
+   "pac_note": "pas2 2025-2026 is partial: FEC bulk file downloaded 2026-09-08 (last modified 2026-09-06)"
+  },
+  {
+   "board": "fintech",
+   "bioguide": "D000032",
+   "name": "Byron Donalds",
+   "cycle": 2020,
+   "up_for_election": 1,
+   "direct_giving_status": "missing",
+   "direct_giving_nominal_usd": null,
+   "pac_company_giving_nominal_usd": null,
+   "pac_company_giving_real_2025_usd": null,
+   "pac_company_gifts": null,
+   "pac_trade_giving_nominal_usd": null,
+   "pac_support_ie_nominal_usd": null,
+   "industry_money_primary_nominal_usd": null,
+   "industry_money_primary_real_2025_usd": null,
+   "industry_money_with_trade_nominal_usd": null,
+   "pac_company_giving_bank_plus_cb_nominal_usd": null,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": null,
+   "industry_money_primary_bank_plus_cb_nominal_usd": null,
+   "pac_committees_counted": null,
+   "pac_status": "missing",
+   "pac_note": "Mentat 2020 cycle pending: no 2019-2020 pas2 file in the active FEC inputs (pas222/224/226 only)"
+  },
+  {
+   "board": "credit_union",
+   "bioguide": "H001091",
+   "name": "Ashley Hinson",
+   "cycle": 2026,
+   "up_for_election": 0,
+   "direct_giving_status": "observed_zero",
+   "direct_giving_nominal_usd": 0.0,
+   "pac_company_giving_nominal_usd": 0.0,
+   "pac_company_giving_real_2025_usd": 0.0,
+   "pac_company_gifts": 0,
+   "pac_trade_giving_nominal_usd": 7500.0,
+   "pac_support_ie_nominal_usd": 0.0,
+   "industry_money_primary_nominal_usd": 0.0,
+   "industry_money_primary_real_2025_usd": 0.0,
+   "industry_money_with_trade_nominal_usd": 7500.0,
+   "pac_company_giving_bank_plus_cb_nominal_usd": null,
+   "pac_trade_giving_bank_plus_cb_nominal_usd": null,
+   "industry_money_primary_bank_plus_cb_nominal_usd": null,
+   "pac_committees_counted": "C00007880",
+   "pac_status": "observed",
+   "pac_note": "pas2 2025-2026 is partial: FEC bulk file downloaded 2026-09-08 (last modified 2026-09-06)"
+  }
+ ],
+ "probes": {
+  "transfer_index_v4_crosscheck": {
+   "note": "Counted 24K dollars (pas2, D-049) per PAC -> champion authorized committee pair vs Mentat's published transfer index VERSION 4 (count_latest) edges from oth (24G/24K, memo excluded). 24Z is not in the transfer index.",
+   "pairs": 2086,
+   "pairs_equal": 2084,
+   "by_cycle": {
+    "2022": {
+     "pas2_usd": 2988650.0,
+     "transfer_index_usd": 2988650.0,
+     "pairs_equal": 585,
+     "pairs": 585
+    },
+    "2024": {
+     "pas2_usd": 3845050.0,
+     "transfer_index_usd": 3845050.0,
+     "pairs_equal": 746,
+     "pairs": 746
+    },
+    "2026": {
+     "pas2_usd": 3531500.0,
+     "transfer_index_usd": 3536500.0,
+     "pairs_equal": 753,
+     "pairs": 755
+    }
+   },
+   "largest_differences": [
+    {
+     "cycle": 2026,
+     "pac": "C00004275",
+     "recipient": "C00896019",
+     "pas2_usd": 5000.0,
+     "transfer_index_usd": 7500.0
+    },
+    {
+     "cycle": 2026,
+     "pac": "C00004275",
+     "recipient": "C00600718",
+     "pas2_usd": 7500.0,
+     "transfer_index_usd": 10000.0
+    }
+   ]
+  },
+  "recipient_reported_refunds_22Z": {
+   "note": "oth 22Z rows filed by a champion's authorized committee refunding a counted industry PAC (company or trade) of the champion's board. 'mirrored' = the PAC's own pas2 filing carries a negative row of the same amount to the same committee (already netted). Unmirrored refunds are NOT netted (reported by the recipient in another file; netting them risks a double subtraction).",
+   "by_board_cycle": {
+    "bank 2022": {
+     "rows": 2,
+     "usd": 0.0,
+     "mirrored_rows": 1,
+     "mirrored_usd": 2500.0,
+     "unmirrored_rows": 1,
+     "unmirrored_usd": -2500.0
+    },
+    "bank 2024": {
+     "rows": 3,
+     "usd": 4000.0,
+     "mirrored_rows": 0,
+     "mirrored_usd": 0.0,
+     "unmirrored_rows": 3,
+     "unmirrored_usd": 4000.0
+    },
+    "bank 2026": {
+     "rows": 7,
+     "usd": 18000.0,
+     "mirrored_rows": 4,
+     "mirrored_usd": 13000.0,
+     "unmirrored_rows": 3,
+     "unmirrored_usd": 5000.0
+    },
+    "credit_union 2024": {
+     "rows": 1,
+     "usd": 5000.0,
+     "mirrored_rows": 1,
+     "mirrored_usd": 5000.0,
+     "unmirrored_rows": 0,
+     "unmirrored_usd": 0.0
+    },
+    "crypto 2022": {
+     "rows": 1,
+     "usd": 1500.0,
+     "mirrored_rows": 1,
+     "mirrored_usd": 1500.0,
+     "unmirrored_rows": 0,
+     "unmirrored_usd": 0.0
+    }
+   }
+  },
+  "literal_per_cycle_map_sets": {
+   "note": "Champions' company-PAC totals if the set were only the committees listed as Company PAC in THAT cycle's map (no union across cycles, no verified affiliations). Used: union + verified affiliations.",
+   "by_board_cycle": {
+    "bank 2022": {
+     "used_usd": 681000.0,
+     "literal_usd": 363500.0
+    },
+    "bank 2024": {
+     "used_usd": 849500.0,
+     "literal_usd": 457000.0
+    },
+    "bank 2026": {
+     "used_usd": 779000.0,
+     "literal_usd": 398000.0
+    },
+    "credit_union 2022": {
+     "used_usd": 15000.0,
+     "literal_usd": 15000.0
+    },
+    "credit_union 2024": {
+     "used_usd": 12500.0,
+     "literal_usd": 12500.0
+    },
+    "credit_union 2026": {
+     "used_usd": 15000.0,
+     "literal_usd": 15000.0
+    },
+    "crypto 2022": {
+     "used_usd": 20700.0,
+     "literal_usd": 20700.0
+    },
+    "crypto 2024": {
+     "used_usd": 21300.0,
+     "literal_usd": 9000.0
+    },
+    "crypto 2026": {
+     "used_usd": 23600.0,
+     "literal_usd": 23600.0
+    },
+    "fintech 2022": {
+     "used_usd": 3500.0,
+     "literal_usd": 3500.0
+    },
+    "fintech 2024": {
+     "used_usd": 10500.0,
+     "literal_usd": 10500.0
+    },
+    "fintech 2026": {
+     "used_usd": 6800.0,
+     "literal_usd": 6800.0
+    }
+   }
+  },
+  "excluded_trade_to_champions": {
+   "note": "Contributions (24K+24Z, D-049, to authorized committees) from map trade associations EXCLUDED from the trade channel, to the board's champions. Not in any money column.",
+   "committees": {
+    "C00000901": {
+     "set": "other_industry",
+     "name": "BUILD POLITICAL ACTION COMMITTEE OF THE NATIONAL ASSOCIATION OF HOME BUILDERS (BUILDPAC)"
+    },
+    "C00004812": {
+     "set": "other_industry",
+     "name": "MORTGAGE BANKERS ASSOCIATION POLITICAL ACTION COMMITTEE (MORPAC)"
+    },
+    "C00053553": {
+     "set": "other_industry",
+     "name": "NATIONAL RIFLE ASSOCIATION OF AMERICA POLITICAL VICTORY FUND"
+    },
+    "C00089458": {
+     "set": "other_industry",
+     "name": "NATIONAL STONE, SAND & GRAVEL ASSOCIATION ROCKPAC"
+    },
+    "C00244863": {
+     "set": "other_industry",
+     "name": "NATIONAL ROOFING CONTRACTORS ASSOCIATION ROOF PAC"
+    },
+    "C00259572": {
+     "set": "other_industry",
+     "name": "AMERICAN CLEAN POWER ASSOCIATION CLEANPOWER PAC"
+    },
+    "C00336743": {
+     "set": "other_industry",
+     "name": "ASIAN AMERICAN HOTEL OWNERS ASSOCIATION PAC (AAHOA PAC)"
+    },
+    "C00421982": {
+     "set": "other_industry",
+     "name": "SOLAR ENERGY INDUSTRIES ASSOCIATION PAC (SOLARPAC)"
+    },
+    "C00431312": {
+     "set": "other_industry",
+     "name": "SECURITIES INDUSTRY AND FINANCIAL MARKETS ASSOCIATION POLITICAL ACTION COMMITTEE"
+    },
+    "C00480863": {
+     "set": "other_industry",
+     "name": "NATIONAL SHOOTING SPORTS FOUNDATION, INC. POLITICAL ACTION COMMITTEE (NSSF PAC)"
+    },
+    "C00082040": {
+     "set": "cross_industry",
+     "name": "CHAMBER OF COMMERCE OF THE UNITED STATES OF AMERICA PAC (US CHAMBER PAC)"
+    }
+   },
+   "by_board_cycle": {
+    "bank 2022": {
+     "C00000901": 178500.0,
+     "C00004812": 163500.0,
+     "C00053553": 36900.0,
+     "C00089458": 82500.0,
+     "C00244863": 19500.0,
+     "C00259572": 20500.0,
+     "C00336743": 1000.0,
+     "C00421982": 30000.0,
+     "C00431312": 54500.0,
+     "C00480863": 41360.0
+    },
+    "bank 2024": {
+     "C00000901": 184000.0,
+     "C00004812": 160000.0,
+     "C00053553": 50300.0,
+     "C00089458": 120000.0,
+     "C00244863": 56000.0,
+     "C00259572": 54500.0,
+     "C00336743": 57500.0,
+     "C00421982": 2500.0,
+     "C00431312": 71500.0,
+     "C00480863": 63003.0
+    },
+    "bank 2026": {
+     "C00000901": 123500.0,
+     "C00004812": 158500.0,
+     "C00053553": 48950.0,
+     "C00089458": 121500.0,
+     "C00244863": 38500.0,
+     "C00259572": 21000.0,
+     "C00336743": 69000.0,
+     "C00421982": 9500.0,
+     "C00431312": 65500.0,
+     "C00480863": 74500.0
+    },
+    "credit_union 2022": {
+     "C00000901": 197000.0,
+     "C00004812": 240000.0,
+     "C00082040": 56500.0
+    },
+    "credit_union 2024": {
+     "C00000901": 196500.0,
+     "C00004812": 200500.0,
+     "C00082040": 33250.0
+    },
+    "credit_union 2026": {
+     "C00000901": 169000.0,
+     "C00004812": 354000.0,
+     "C00082040": 95500.0
+    },
+    "crypto 2022": {
+     "C00004812": 66000.0
+    },
+    "crypto 2024": {
+     "C00004812": 70500.0
+    },
+    "crypto 2026": {
+     "C00004812": 111000.0
+    }
+   }
+  },
+  "pac_to_champion_leadership_pacs_oth": {
+   "note": "24K rows in the raw oth file from counted industry PACs to a champion's leadership PAC (memo excluded; amendments NOT resolved; report only). pas2 has no such rows, so they are in no money column (like v2, leadership money is outside the DV).",
+   "by_board_cycle": {
+    "bank 2022": 442500.0,
+    "bank 2024": 598000.0,
+    "bank 2026": 425500.0,
+    "credit_union 2022": 110000.0,
+    "credit_union 2024": 212500.0,
+    "credit_union 2026": 132000.0,
+    "crypto 2024": 10000.0,
+    "crypto 2026": 15000.0,
+    "fintech 2024": 1000.0
+   }
+  },
+  "transaction_types": {
+   "industry_pac_rows": [
+    {
+     "cycle": 2022,
+     "type": "24A",
+     "d049_status": "included",
+     "rows": 46,
+     "usd": 1901249.0,
+     "use": "excluded"
+    },
+    {
+     "cycle": 2022,
+     "type": "24A",
+     "d049_status": "memo_only",
+     "rows": 2,
+     "usd": 40000.0,
+     "use": "excluded"
+    },
+    {
+     "cycle": 2022,
+     "type": "24E",
+     "d049_status": "included",
+     "rows": 645,
+     "usd": 5989307.0,
+     "use": "IE support (descriptive column only)"
+    },
+    {
+     "cycle": 2022,
+     "type": "24K",
+     "d049_status": "included",
+     "rows": 8495,
+     "usd": 17719873.0,
+     "use": "contribution (counted)"
+    },
+    {
+     "cycle": 2022,
+     "type": "24K",
+     "d049_status": "memo_only",
+     "rows": 17,
+     "usd": 25429.0,
+     "use": "contribution (counted)"
+    },
+    {
+     "cycle": 2022,
+     "type": "24Z",
+     "d049_status": "included",
+     "rows": 76,
+     "usd": 48850.0,
+     "use": "in-kind contribution (counted)"
+    },
+    {
+     "cycle": 2022,
+     "type": "24Z",
+     "d049_status": "memo_only",
+     "rows": 1,
+     "usd": 2429.0,
+     "use": "in-kind contribution (counted)"
+    },
+    {
+     "cycle": 2024,
+     "type": "24A",
+     "d049_status": "included",
+     "rows": 34,
+     "usd": 3806355.0,
+     "use": "excluded"
+    },
+    {
+     "cycle": 2024,
+     "type": "24A",
+     "d049_status": "memo_only",
+     "rows": 2,
+     "usd": 426.0,
+     "use": "excluded"
+    },
+    {
+     "cycle": 2024,
+     "type": "24E",
+     "d049_status": "included",
+     "rows": 591,
+     "usd": 8156640.0,
+     "use": "IE support (descriptive column only)"
+    },
+    {
+     "cycle": 2024,
+     "type": "24E",
+     "d049_status": "memo_only",
+     "rows": 14,
+     "usd": 4660.0,
+     "use": "IE support (descriptive column only)"
+    },
+    {
+     "cycle": 2024,
+     "type": "24K",
+     "d049_status": "included",
+     "rows": 9619,
+     "usd": 19770243.0,
+     "use": "contribution (counted)"
+    },
+    {
+     "cycle": 2024,
+     "type": "24K",
+     "d049_status": "memo_only",
+     "rows": 30,
+     "usd": 24799.0,
+     "use": "contribution (counted)"
+    },
+    {
+     "cycle": 2024,
+     "type": "24Z",
+     "d049_status": "included",
+     "rows": 97,
+     "usd": 49452.0,
+     "use": "in-kind contribution (counted)"
+    },
+    {
+     "cycle": 2026,
+     "type": "24E",
+     "d049_status": "included",
+     "rows": 7,
+     "usd": 805373.0,
+     "use": "IE support (descriptive column only)"
+    },
+    {
+     "cycle": 2026,
+     "type": "24E",
+     "d049_status": "memo_only",
+     "rows": 1,
+     "usd": 3634.0,
+     "use": "IE support (descriptive column only)"
+    },
+    {
+     "cycle": 2026,
+     "type": "24K",
+     "d049_status": "included",
+     "rows": 7824,
+     "usd": 16487297.0,
+     "use": "contribution (counted)"
+    },
+    {
+     "cycle": 2026,
+     "type": "24K",
+     "d049_status": "included_no_candidate_id",
+     "rows": 3,
+     "usd": 7500.0,
+     "use": "contribution (counted)"
+    },
+    {
+     "cycle": 2026,
+     "type": "24K",
+     "d049_status": "memo_only",
+     "rows": 32,
+     "usd": 38000.0,
+     "use": "contribution (counted)"
+    },
+    {
+     "cycle": 2026,
+     "type": "24Z",
+     "d049_status": "included",
+     "rows": 27,
+     "usd": 12255.0,
+     "use": "in-kind contribution (counted)"
+    }
+   ],
+   "whole_file": [
+    {
+     "cycle": 2022,
+     "type": "24A",
+     "rows": 16305,
+     "usd": 1535087025.0
+    },
+    {
+     "cycle": 2022,
+     "type": "24C",
+     "rows": 739,
+     "usd": 42630130.0
+    },
+    {
+     "cycle": 2022,
+     "type": "24E",
+     "rows": 61815,
+     "usd": 731840844.0
+    },
+    {
+     "cycle": 2022,
+     "type": "24F",
+     "rows": 4103,
+     "usd": 11347544.0
+    },
+    {
+     "cycle": 2022,
+     "type": "24K",
+     "rows": 663222,
+     "usd": 478280353.0
+    },
+    {
+     "cycle": 2022,
+     "type": "24N",
+     "rows": 425,
+     "usd": 898355.0
+    },
+    {
+     "cycle": 2022,
+     "type": "24R",
+     "rows": 8,
+     "usd": 11000.0
+    },
+    {
+     "cycle": 2022,
+     "type": "24Z",
+     "rows": 2438,
+     "usd": 1583342.0
+    },
+    {
+     "cycle": 2024,
+     "type": "24A",
+     "rows": 19243,
+     "usd": 2554991126.0
+    },
+    {
+     "cycle": 2024,
+     "type": "24C",
+     "rows": 1094,
+     "usd": 90575928.0
+    },
+    {
+     "cycle": 2024,
+     "type": "24E",
+     "rows": 58611,
+     "usd": 1942574823.0
+    },
+    {
+     "cycle": 2024,
+     "type": "24F",
+     "rows": 708,
+     "usd": 7101055.0
+    },
+    {
+     "cycle": 2024,
+     "type": "24K",
+     "rows": 621349,
+     "usd": 512548692.0
+    },
+    {
+     "cycle": 2024,
+     "type": "24N",
+     "rows": 91,
+     "usd": 56932.0
+    },
+    {
+     "cycle": 2024,
+     "type": "24Z",
+     "rows": 2501,
+     "usd": 1720572.0
+    },
+    {
+     "cycle": 2026,
+     "type": "24A",
+     "rows": 2916,
+     "usd": 229341637.0
+    },
+    {
+     "cycle": 2026,
+     "type": "24C",
+     "rows": 505,
+     "usd": 26879091.0
+    },
+    {
+     "cycle": 2026,
+     "type": "24E",
+     "rows": 12236,
+     "usd": 446041811.0
+    },
+    {
+     "cycle": 2026,
+     "type": "24F",
+     "rows": 63,
+     "usd": 1169594.0
+    },
+    {
+     "cycle": 2026,
+     "type": "24K",
+     "rows": 192004,
+     "usd": 407652361.0
+    },
+    {
+     "cycle": 2026,
+     "type": "24N",
+     "rows": 17,
+     "usd": 0.0
+    },
+    {
+     "cycle": 2026,
+     "type": "24Z",
+     "rows": 506,
+     "usd": 3959581.0
+    }
+   ]
+  },
+  "possible_omitted_trade_pacs": {
+   "note": "Report only, NOT added (the trade channel is the map's Trade Association rows + the industry's own association in trade_committee_overrides.csv): industry trade/advocacy PACs found in the FEC committee masters that no map lists as a Trade Association. NAFCU PAC (C00040659) is the largest (credit unions, 2022-2024). Each needs a ruling.",
+   "by_industry": {
+    "credit_union": [
+     {
+      "committee_id": "C00040659",
+      "name": "NATIONAL ASSOCIATION OF FEDERAL CREDIT UNIONS POLITICAL ACTION COMMITTEE / NAFCU/PAC / DBA NATIONAL ASSOCIATION OF FEDERALLY-INSURED CREDIT UNIONS",
+      "connected_org": "NATIONAL ASSOCIATION OF FEDERALLY-INSURED CREDIT UNIONS (NAFCU)",
+      "pas2_contrib_usd_by_cycle": {
+       "2022": 208576.0,
+       "2024": 195000.0
+      }
+     },
+     {
+      "committee_id": "C00890699",
+      "name": "DEFENDING CREDIT UNIONS PAC A PAC OF THE DEFENSE CREDIT UNION COUNCIL",
+      "connected_org": "DEFENSE CREDIT UNION COUNCIL",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00235929",
+      "name": "CALIFORNIA CREDIT UNION LEAGUE PAC - FEDERAL",
+      "connected_org": "CREDIT UNION FEDERAL LEGISLATIVE ACTION COMMITTEE (CULAC)",
+      "pas2_contrib_usd_by_cycle": {
+       "2024": -840.0,
+       "2026": -360.0
+      }
+     },
+     {
+      "committee_id": "C00109397",
+      "name": "CROSSSTATE CREDIT UNION ASSOCIATION POLITICAL ACTION COMMITTEE",
+      "connected_org": "CROSSSTATE CREDIT UNION ASSOCIATION",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00139600",
+      "name": "LEAGUE OF SOUTHEASTERN CREDIT UNIONS FEDERAL PAC",
+      "connected_org": "LEAGUE OF SOUTHEASTERN CREDIT UNIONS",
+      "pas2_contrib_usd_by_cycle": {
+       "2022": 5000.0
+      }
+     },
+     {
+      "committee_id": "C00349902",
+      "name": "OHIO CREDIT UNION LEAGUE POLITICAL ACTION COMMITTEE",
+      "connected_org": "OHIO CREDIT UNION LEAGUE",
+      "pas2_contrib_usd_by_cycle": {
+       "2022": 27500.0
+      }
+     },
+     {
+      "committee_id": "C00130831",
+      "name": "KENTUCKY CREDIT UNION LEAGUE MEMBERS POLITICAL ACTION COMMITTEE",
+      "connected_org": "KENTUCKY CREDIT UNION LEAGUE INC.",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00172858",
+      "name": "NEBRASKA CREDIT UNION LEAGUE POLITICAL ACTION COMMITTEE--(NCULPAC)",
+      "connected_org": "NEBRASKA CREDIT UNION LEAGUE INC",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00659672",
+      "name": "INDIANA CREDIT UNION LEAGUE PAC (INCULPAC)",
+      "connected_org": "CULAC THE PAC OF CREDIT UNION NATIONAL ASSOCIATION",
+      "pas2_contrib_usd_by_cycle": {
+       "2024": 5000.0
+      }
+     },
+     {
+      "committee_id": "C00139279",
+      "name": "MICHIGAN CREDIT UNION LEAGUE LEGISLATIVE ACTION FUND",
+      "connected_org": "CULAC (C0007880)",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00059907",
+      "name": "CAROLINAS CREDIT UNION LEAGUE CREDIT UNION DEFENSE FUND",
+      "connected_org": "CULAC THE PAC OF CREDIT UNION NATIONAL ASSOCIATION",
+      "pas2_contrib_usd_by_cycle": {}
+     }
+    ],
+    "crypto": [
+     {
+      "committee_id": "C00824896",
+      "name": "BLOCKCHAIN ASSOCIATION POLITICAL ACTION COMMITTEE (BA PAC)",
+      "connected_org": "BLOCKCHAIN ASSOCIATION",
+      "pas2_contrib_usd_by_cycle": {
+       "2024": 2500.0,
+       "2026": 25500.0
+      }
+     },
+     {
+      "committee_id": "C00567412",
+      "name": "CHAMBER OF DIGITAL COMMERCE POLITICAL ACTION COMMITTEE",
+      "connected_org": "CHAMBER OF DIGITAL COMMERCE",
+      "pas2_contrib_usd_by_cycle": {
+       "2022": 12820.0,
+       "2024": 15500.0,
+       "2026": 9500.0
+      }
+     },
+     {
+      "committee_id": "C00876631",
+      "name": "STAND WITH CRYPTO ALLIANCE, INC. POLITICAL ACTION COMMITTEE",
+      "connected_org": "STAND WITH CRYPTO ALLIANCE, INC.",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00736934",
+      "name": "AMERICAN BLOCKCHAIN & CRYPTOCURRENCY PAC",
+      "connected_org": "",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00789115",
+      "name": "DIGITAL ASSET PAC",
+      "connected_org": "NONE",
+      "pas2_contrib_usd_by_cycle": {}
+     }
+    ],
+    "fintech": [
+     {
+      "committee_id": "C00701425",
+      "name": "AMERICAN FINTECH COUNCIL POLITICAL ACTION COMMITTEE",
+      "connected_org": "AMERICAN FINTECH COUNCIL",
+      "pas2_contrib_usd_by_cycle": {}
+     },
+     {
+      "committee_id": "C00548198",
+      "name": "ELECTRONIC TRANSACTIONS ASSOCIATION POLITICAL ACTION COMMITTEE",
+      "connected_org": "ELECTRONIC TRANSACTIONS ASSOCIATION",
+      "pas2_contrib_usd_by_cycle": {
+       "2022": 1500.0,
+       "2024": 3250.0,
+       "2026": 17000.0
+      }
+     },
+     {
+      "committee_id": "C00780478",
+      "name": "FINTECH PAC",
+      "connected_org": "",
+      "pas2_contrib_usd_by_cycle": {}
+     }
+    ],
+    "community_banks": [],
+    "banking": []
+   }
+  },
+  "possible_omitted_company_pacs": {
+   "note": "Report only (after the four FEC-connected additions were made): committees in the FEC committee masters (cm22/24/26; type Q/N, designation B/U) whose connected organization or PAC name contains a roster company token, not in the industry's set, with pas2 contribution activity. Loose name match: H&R Block PAC (token BLOCK INC) is NOT the roster's Block/Cash App; nothing else remains.",
+   "by_industry": {
+    "fintech": [
+     {
+      "committee_id": "C00188177",
+      "name": "H&R BLOCK INC. POLITICAL ACTION COMMITTEE (BLOCKPAC)",
+      "connected_org": "",
+      "token": "BLOCK INC",
+      "pas2_rows": 510,
+      "pas2_usd_2022_2026": 937500.0
+     }
+    ],
+    "community_banks": [],
+    "banking": [],
+    "crypto": []
+   }
+  }
+ },
+ "sources": [
+  {
+   "source_id": "pas2_2022",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\pas222\\itpas2.txt",
+   "zip_member": null,
+   "sha256": "97d57e40bdfeb4b20041fb98a6d66f1ef65dbb78d789471feef0716bda27ecc2",
+   "size_bytes": 130894053,
+   "mtime": "2026-09-08T05:26:43Z",
+   "rows_read": 749055,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "FEC bulk pas2 (contributions from committees to candidates and independent expenditures) 2021-2022, from the active FEC inputs (inputs\\active_fec_sources.json); sha256 equals source-manifest.json: True; streamed line by line into a derived SQLite (build\\champions_v3\\work\\pas2_all.sqlite)"
+  },
+  {
+   "source_id": "pas2_2024",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\pas224\\itpas2.txt",
+   "zip_member": null,
+   "sha256": "4b4b9a41274d9b29d8d3dd78426ce39f3a838b8f98b4cbde0672d08ddaaa41b8",
+   "size_bytes": 122711206,
+   "mtime": "2026-09-08T05:26:46Z",
+   "rows_read": 703597,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "FEC bulk pas2 (contributions from committees to candidates and independent expenditures) 2023-2024, from the active FEC inputs (inputs\\active_fec_sources.json); sha256 equals source-manifest.json: True; streamed line by line into a derived SQLite (build\\champions_v3\\work\\pas2_all.sqlite)"
+  },
+  {
+   "source_id": "pas2_2026",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\pas226\\itpas2.txt",
+   "zip_member": null,
+   "sha256": "3b4c1c40362dad0ea57f67c618ce7260f3c03a493b9febcd0f89c8f3dc6ec4c0",
+   "size_bytes": 36380972,
+   "mtime": "2026-09-08T05:26:50Z",
+   "rows_read": 208247,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "FEC bulk pas2 (contributions from committees to candidates and independent expenditures) 2025-2026, from the active FEC inputs (inputs\\active_fec_sources.json); sha256 equals source-manifest.json: True; streamed line by line into a derived SQLite (build\\champions_v3\\work\\pas2_all.sqlite)"
+  },
+  {
+   "source_id": "pacmap_credit_union",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Credit Union Industry Spending Overview.xlsx",
+   "zip_member": "PAC & Candidate Map",
+   "sha256": "a6591d397b2bda66ab7827b686e240985dc3b41fa6c53aa486e1def9c764c674",
+   "size_bytes": 15113389,
+   "mtime": "2026-07-29T03:01:37Z",
+   "rows_read": 2353,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet PAC & Candidate Map (header row 5, all columns; extract build\\champions_v3\\work\\pacmap_credit_union.csv); Recipient Category 'Company PAC' -> company set, 'Trade Association' -> trade candidates; OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "downstream_credit_union",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Credit Union Industry Spending Overview.xlsx",
+   "zip_member": "Downstream Activity",
+   "sha256": "a6591d397b2bda66ab7827b686e240985dc3b41fa6c53aa486e1def9c764c674",
+   "size_bytes": 15113389,
+   "mtime": "2026-07-29T03:01:37Z",
+   "rows_read": 39462,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet Downstream Activity (Mentat's own pas2 committee-to-candidate activity; header row 5); rows of the PAC-set committees extracted (5631 of 39462) for the reconcile"
+  },
+  {
+   "source_id": "pacmap_banking",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Banking Industry Spending Overview.xlsx",
+   "zip_member": "PAC & Candidate Map",
+   "sha256": "842ba7a2312ffb03d969e8452c970b32f227fd09befcbf80f935a63c94e97bd3",
+   "size_bytes": 39994686,
+   "mtime": "2026-09-10T18:56:16Z",
+   "rows_read": 5941,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet PAC & Candidate Map (header row 5, all columns; extract build\\champions_v3\\work\\pacmap_banking.csv); Recipient Category 'Company PAC' -> company set, 'Trade Association' -> trade candidates; OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "downstream_banking",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Banking Industry Spending Overview.xlsx",
+   "zip_member": "Downstream Activity",
+   "sha256": "842ba7a2312ffb03d969e8452c970b32f227fd09befcbf80f935a63c94e97bd3",
+   "size_bytes": 39994686,
+   "mtime": "2026-09-10T18:56:16Z",
+   "rows_read": 135106,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet Downstream Activity (Mentat's own pas2 committee-to-candidate activity; header row 5); rows of the PAC-set committees extracted (10043 of 135106) for the reconcile"
+  },
+  {
+   "source_id": "pacmap_community_banks",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Community Banks Industry Spending Overview.xlsx",
+   "zip_member": "PAC & Candidate Map",
+   "sha256": "bbe7ee6a0f03957cddc3d14eddfb0f1c0cede0c0f6676f3a071d4817c1a8b348",
+   "size_bytes": 4682775,
+   "mtime": "2026-07-29T23:59:41Z",
+   "rows_read": 422,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet PAC & Candidate Map (header row 5, all columns; extract build\\champions_v3\\work\\pacmap_community_banks.csv); Recipient Category 'Company PAC' -> company set, 'Trade Association' -> trade candidates; OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "downstream_community_banks",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Community Banks Industry Spending Overview.xlsx",
+   "zip_member": "Downstream Activity",
+   "sha256": "bbe7ee6a0f03957cddc3d14eddfb0f1c0cede0c0f6676f3a071d4817c1a8b348",
+   "size_bytes": 4682775,
+   "mtime": "2026-07-29T23:59:41Z",
+   "rows_read": 10363,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet Downstream Activity (Mentat's own pas2 committee-to-candidate activity; header row 5); rows of the PAC-set committees extracted (2338 of 10363) for the reconcile"
+  },
+  {
+   "source_id": "pacmap_crypto",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Crypto Industry Spending Overview.xlsx",
+   "zip_member": "PAC & Candidate Map",
+   "sha256": "88ea228457b8499d1ec27eeaba967f61505bde842ae0ecfe35c30791c23d66f6",
+   "size_bytes": 5788519,
+   "mtime": "2026-07-31T19:18:31Z",
+   "rows_read": 919,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet PAC & Candidate Map (header row 5, all columns; extract build\\champions_v3\\work\\pacmap_crypto.csv); Recipient Category 'Company PAC' -> company set, 'Trade Association' -> trade candidates; OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "downstream_crypto",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Crypto Industry Spending Overview.xlsx",
+   "zip_member": "Downstream Activity",
+   "sha256": "88ea228457b8499d1ec27eeaba967f61505bde842ae0ecfe35c30791c23d66f6",
+   "size_bytes": 5788519,
+   "mtime": "2026-07-31T19:18:31Z",
+   "rows_read": 11107,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet Downstream Activity (Mentat's own pas2 committee-to-candidate activity; header row 5); rows of the PAC-set committees extracted (307 of 11107) for the reconcile"
+  },
+  {
+   "source_id": "pacmap_fintech",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Fintech Industry Spending Overview.xlsx",
+   "zip_member": "PAC & Candidate Map",
+   "sha256": "440296fad3606528e648db268cbefa194d5773e5e1992a1fcd57766ee94162af",
+   "size_bytes": 14211321,
+   "mtime": "2026-07-29T20:31:23Z",
+   "rows_read": 1778,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet PAC & Candidate Map (header row 5, all columns; extract build\\champions_v3\\work\\pacmap_fintech.csv); Recipient Category 'Company PAC' -> company set, 'Trade Association' -> trade candidates; OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "downstream_fintech",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Fintech Industry Spending Overview.xlsx",
+   "zip_member": "Downstream Activity",
+   "sha256": "440296fad3606528e648db268cbefa194d5773e5e1992a1fcd57766ee94162af",
+   "size_bytes": 14211321,
+   "mtime": "2026-07-29T20:31:23Z",
+   "rows_read": 33541,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "published workbook sheet Downstream Activity (Mentat's own pas2 committee-to-candidate activity; header row 5); rows of the PAC-set committees extracted (1001 of 33541) for the reconcile"
+  },
+  {
+   "source_id": "verified_company_affiliations",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\verified_company_affiliations.json",
+   "zip_member": null,
+   "sha256": "f1fd22a9a7c462c2661b9d87c6abbbe15cffccc9ba3cadc9de1eaa74f69d5880",
+   "size_bytes": 12875,
+   "mtime": "2026-09-18T18:36:56Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat verified company -> connected PAC records (Banking roster companies only); cross-check of the company set; 7 connected PACs absent from the Banking map added (JPMorgan x2, PNC x2, U.S. Bancorp x2, Capital One)"
+  },
+  {
+   "source_id": "trade_committee_overrides",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\trade_committee_overrides.csv",
+   "zip_member": null,
+   "sha256": "e8875e121edbcc62cbaffad3b9b51a160fbdd75942ddda310c6c16f181a45c23",
+   "size_bytes": 7199,
+   "mtime": "2026-07-27T17:09:41Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat trade association -> committee ID register; cross-check of the trade set committee IDs; ICBA (C00032698) added to the community banks trade set from it"
+  },
+  {
+   "source_id": "trade_register",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\Trade Associations.txt",
+   "zip_member": null,
+   "sha256": "7eb1343c1395e71562a85d9bd88c57c6eae70938305cd5c844c77a95e1304877",
+   "size_bytes": 13908,
+   "mtime": "2026-07-18T22:11:37Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat trade association register by sector section; section used to classify map trade associations (Financial, insurance vs other sectors)"
+  },
+  {
+   "source_id": "fec_transaction_types",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\fec_transaction_types.json",
+   "zip_member": null,
+   "sha256": "642a81f771571d0e65d920a6b647e2d0326e37fd46796ed501596be24908ac78",
+   "size_bytes": 4800,
+   "mtime": "2026-09-17T14:25:22Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat FEC transaction type code list (24K/24Z contributions; 24E/24A independent expenditures; 24/48-hour notice report types out of totals)"
+  },
+  {
+   "source_id": "code_d049_r",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\R\\fec_beneficiary.R",
+   "zip_member": null,
+   "sha256": "6a9d4d05df6a7c5c2cc26f4e596f420040533e3e66330547674527b3fcbfcf9a",
+   "size_bytes": 48170,
+   "mtime": "2026-09-24T06:45:31Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat R pas2 index (fec_build_pas2_index, lines 394-622): version key, identity key and the count_latest branch replicated in build\\champions_v3\\d049.py (D-049 as applied: transfer index VERSION 4, PAS2 parser 5, count_latest)"
+  },
+  {
+   "source_id": "code_transfer_graph",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\tools\\fec_transfer_graph.py",
+   "zip_member": null,
+   "sha256": "1d5d78414d46ddf508663d22d5faa202f16db0d0fe826083e294ffdef31209d9",
+   "size_bytes": 32404,
+   "mtime": "2026-09-21T00:50:58Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat transfer index builder (oth 24G/24K only; now VERSION 5 count_all); its v4c index files are committee-to-committee (no CAND_ID, no 24Z/24E), so the raw pas2 path was used; its published v4c edges were used as a cross-check"
+  },
+  {
+   "source_id": "transfer_edges_2022",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\oth22\\transfer-edges.csv",
+   "zip_member": null,
+   "sha256": "0c4b95836e076c61b78b1da4335650e227b0d445cc3bffbe0537176f6dd8589d",
+   "size_bytes": 260488886,
+   "mtime": "2026-09-19T07:23:54Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat published transfer index edges (VERSION 4, count_latest; transfer-info.json) for 2021-2022: cross-check of the champion-matched 24K dollars only"
+  },
+  {
+   "source_id": "transfer_edges_2024",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\oth24\\transfer-edges.csv",
+   "zip_member": null,
+   "sha256": "39cac9f7a2f070a189cfc1c0243d0b662cc19083f0a09e62cdafc1adf9375204",
+   "size_bytes": 230046975,
+   "mtime": "2026-09-19T07:27:44Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat published transfer index edges (VERSION 4, count_latest; transfer-info.json) for 2023-2024: cross-check of the champion-matched 24K dollars only"
+  },
+  {
+   "source_id": "transfer_edges_2026",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\oth26\\transfer-edges.csv",
+   "zip_member": null,
+   "sha256": "e84db87e5b6dd0c5932fc3bf600a2ac468c64fef2e38b271102033689796d168",
+   "size_bytes": 48376332,
+   "mtime": "2026-09-19T07:28:50Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "Mentat published transfer index edges (VERSION 4, count_latest; transfer-info.json) for 2025-2026: cross-check of the champion-matched 24K dollars only"
+  },
+  {
+   "source_id": "oth_2022",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\oth22\\itoth.txt",
+   "zip_member": null,
+   "sha256": "cbc3c772d6135496022cb03d7f4647d407f2f7bc1778657ab69b0ba0f79818f3",
+   "size_bytes": 936470750,
+   "mtime": "2026-09-08T05:26:52Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "FEC bulk oth 2021-2022 (report-only probe: refunds 22Z filed by champion committees to industry PACs; not in any money column); sha256 from source-receipt.json, not re-hashed"
+  },
+  {
+   "source_id": "oth_2024",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\oth24\\itoth.txt",
+   "zip_member": null,
+   "sha256": "51bb04a5107ef269baf852da3e643700dfb8490313c8a40bcbc43c04577d8745",
+   "size_bytes": 3284045258,
+   "mtime": "2026-09-08T05:28:41Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "FEC bulk oth 2023-2024 (report-only probe: refunds 22Z filed by champion committees to industry PACs; not in any money column); sha256 from source-receipt.json, not re-hashed"
+  },
+  {
+   "source_id": "oth_2026",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\oth26\\itoth.txt",
+   "zip_member": null,
+   "sha256": "bd7c830a92b025d309a44a4119902ec5e081c2a771a7c3b8f02eaefb6d6ab708",
+   "size_bytes": 1819024083,
+   "mtime": "2026-09-08T05:27:13Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "FEC bulk oth 2025-2026 (report-only probe: refunds 22Z filed by champion committees to industry PACs; not in any money column); sha256 from source-receipt.json, not re-hashed"
+  },
+  {
+   "source_id": "pac_sets_def",
+   "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\champions_v3\\pac_sets.py",
+   "zip_member": null,
+   "sha256": "0570c6ee6c4778fdd5c69be9b681b443c31b0e761d74eab195a0543a0ca9e01b",
+   "size_bytes": 10465,
+   "mtime": "2026-09-25T21:45:06Z",
+   "rows_read": null,
+   "read_at": "2026-09-25T21:46:53Z",
+   "note": "PAC set rules of this build (union of the three cycles' map rows per industry; classification of trade associations: industry_trade / cross_industry / other_industry) and d049.py / pac_build.py matching rules"
+  }
+ ],
+ "glassbox": {
+  "run_id": "workbook05-v3-20260925",
+  "lane": "claude",
+  "source": "sector-growth-build",
+  "run_start": "evt-20260925T2113372286870Z-0000025644"
+ },
+ "v2_receipt_carried": {
+  "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\05_v2\\build_receipt_05.json",
+  "note": "v2's receipt (committee sets, direct giving, toughness) is kept unchanged in the superseded folder; every v2 column and row is unchanged in this workbook (checked)."
+ }
+}

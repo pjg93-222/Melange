@@ -1,0 +1,3362 @@
+{
+  "run_id": "workbooks-build-20260925",
+  "receipt_written_at": "2026-09-25T19:28:27Z",
+  "built_at": "2026-09-25T19:28:06Z",
+  "target_root": "C:\\Users\\pgoff\\Mentat\\sector_growth_study",
+  "stage_root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study",
+  "scripts": {
+    "build_workbooks.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\build_workbooks.py",
+      "sha256": "34b48c419da62abbc54aa20629abf8fb4041f07fd811bbdfbbbc32c0bb894f89"
+    },
+    "install_workbooks.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\install_workbooks.py",
+      "sha256": "40ba7179994050d0e9764502f46f9da6ca34449a96c0fb29745125818e3874ea"
+    },
+    "verify_workbooks.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\verify_workbooks.py",
+      "sha256": "cb978477622ce1511e0001c81950afbfb6188ca4b050772ec8d933280b782abf"
+    },
+    "gb.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\gb.py",
+      "sha256": "a1c922899ffb7904d9161909c94aa7230538d19a2d5b04fcf479ef26db1c8851"
+    },
+    "precheck_relations.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\precheck_relations.py",
+      "sha256": "ab21d5019d6ea54ea1f48e01070c2cd886d68ac84d231032fe0feb83020a0215"
+    },
+    "negative_control.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\negative_control.py",
+      "sha256": "d9b41a725f6883cf89d7eca128cd4d2f4a1ce11308a88a35a34c635073ed2d92"
+    }
+  },
+  "files": [
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\README.md",
+      "relative_path": "README.md",
+      "sha256": "dbdafc52df34c629c0bab172d6d4682436b4ce8266c4a7501d3a32246bb12841",
+      "size_bytes": 6421
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\00_controls.xlsx",
+      "relative_path": "data/00_controls.xlsx",
+      "sha256": "253aaadd6912862df817f51c9d97225735b5f8a764cac64deca40f224d1ab80e",
+      "size_bytes": 10202,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 21,
+          "columns": 12
+        },
+        {
+          "name": "dictionary",
+          "rows": 22,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 2,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 1,
+          "columns": 22
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\01_lobbying_expenditures.xlsx",
+      "relative_path": "data/01_lobbying_expenditures.xlsx",
+      "sha256": "f06421a643d67fef687da2bcc85a5b7ad55d56f04fbc5259efa9d53890c67e35",
+      "size_bytes": 50665,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 100,
+          "columns": 58
+        },
+        {
+          "name": "quarterly",
+          "rows": 96,
+          "columns": 46
+        },
+        {
+          "name": "dictionary",
+          "rows": 117,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 4,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 24,
+          "columns": 32
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\02_election_forecasting.xlsx",
+      "relative_path": "data/02_election_forecasting.xlsx",
+      "sha256": "dd51787d565f241de18affdb6ddf417807c7f358a8e7fcbba604965e6143ccfe",
+      "size_bytes": 20566,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 36,
+          "columns": 11
+        },
+        {
+          "name": "seat_calls",
+          "rows": 24,
+          "columns": 14
+        },
+        {
+          "name": "current_2026",
+          "rows": 8,
+          "columns": 29
+        },
+        {
+          "name": "dictionary",
+          "rows": 66,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 7,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 10,
+          "columns": 28
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\03_actual_seat_gain.xlsx",
+      "relative_path": "data/03_actual_seat_gain.xlsx",
+      "sha256": "d7181b61556be66a6dd7f8e6de94bc72aecb5227614de5cbcb80a6d0e54b792a",
+      "size_bytes": 16767,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 30,
+          "columns": 28
+        },
+        {
+          "name": "current_control",
+          "rows": 38,
+          "columns": 8
+        },
+        {
+          "name": "dictionary",
+          "rows": 47,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 4,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 4,
+          "columns": 33
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\06_predicted_industry_growth.xlsx",
+      "relative_path": "data/06_predicted_industry_growth.xlsx",
+      "sha256": "5e38349c24e8ebb5fc37a067ea8c0d956572a5dffa50f5f64bd18ac47c4c2ac2",
+      "size_bytes": 20441,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 90,
+          "columns": 22
+        },
+        {
+          "name": "dictionary",
+          "rows": 32,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 1,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 5,
+          "columns": 19
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\07_actual_industry_growth.xlsx",
+      "relative_path": "data/07_actual_industry_growth.xlsx",
+      "sha256": "69d7cc131d7b585b00bb37c2864a3fd60eacc62c04007628a5fd599dcdb8745a",
+      "size_bytes": 13182,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 78,
+          "columns": 10
+        },
+        {
+          "name": "dictionary",
+          "rows": 20,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 1,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 4,
+          "columns": 21
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\sector_crosswalk.xlsx",
+      "relative_path": "data/sector_crosswalk.xlsx",
+      "sha256": "fda1c9fe78422efec7ba4e9ec2a2e71ebd9d98edb091048d20a925c12a98d8d5",
+      "size_bytes": 6618,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 9,
+          "columns": 7
+        },
+        {
+          "name": "dictionary",
+          "rows": 7,
+          "columns": 6
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "cpi_annual_2006_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\cpi_annual_2006_2025.csv",
+      "zip_member": null,
+      "sha256": "3ab2b1ece1b1c749b0595ca1912145bfd650cd25e75ea92e3e7dee3cea05c239",
+      "size_bytes": 3747,
+      "mtime": "2026-09-25T15:58:35Z",
+      "rows_read": 20
+    },
+    {
+      "source_id": "annual_controls_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\annual_controls_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "ad336dea332fecdd2bbafdc2077bfde746001a0a1e2a2fca5b2f8ba432cd9ab3",
+      "size_bytes": 1338,
+      "mtime": "2026-09-25T16:04:21Z",
+      "rows_read": 18
+    },
+    {
+      "source_id": "lda_sector_spend_csv",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\derived\\sector_spend\\sector_spend.csv",
+      "zip_member": null,
+      "sha256": "22d1ab59d1c9282ab34d58294ebc1379357d2a9c6cd85b305fb6c0fbe901a56c",
+      "size_bytes": 19421,
+      "mtime": "2026-08-06T21:23:14Z",
+      "rows_read": 120
+    },
+    {
+      "source_id": "lda_sector_spend_json",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\derived\\sector_spend\\sector_spend.json",
+      "zip_member": null,
+      "sha256": "ee62f5dff5e461248a408bbe77d49b90e80adc8ae939dd82ef6cb03fb6b6b2a5",
+      "size_bytes": 511783,
+      "mtime": "2026-08-06T21:23:14Z",
+      "rows_read": 24
+    },
+    {
+      "source_id": "lobbyview_adversary_spend",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\lobbyview\\derived\\lobbyview_adversary_spend.json",
+      "zip_member": null,
+      "sha256": "275ae558a1d6554eb252644c83e40959275d4443eed14a7e8d51bd326650fac9",
+      "size_bytes": 48555,
+      "mtime": "2026-08-01T03:33:02Z",
+      "rows_read": 76
+    },
+    {
+      "source_id": "iem_forecast_annual_conditional_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\forecast_annual_conditional_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "9cfc23f39f1642579e4b3e4ab1b86464ae6c3700c463ee04b660847c561d678f",
+      "size_bytes": 2172,
+      "mtime": "2026-09-25T16:01:16Z",
+      "rows_read": 36
+    },
+    {
+      "source_id": "hsc_zip",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": null,
+      "sha256": "852d894f3ef2d7fe0aa45e319013bf9a0f2388596759f66c71e06925663f67d2",
+      "size_bytes": 586840,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": null
+    },
+    {
+      "source_id": "hsc_predicted_house",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "predicted_house.csv",
+      "sha256": "d813ddc4983726fe1bb9996a718cd8b12ca9289038dd6671ad30778b66d5760d",
+      "size_bytes": 3312,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 12
+    },
+    {
+      "source_id": "hsc_predicted_senate",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "predicted_senate.csv",
+      "sha256": "f6aa9a163b122008b149df82f7d2e993630cc7e38dc9f58fcc7b1bbbd166cea0",
+      "size_bytes": 2840,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 12
+    },
+    {
+      "source_id": "hsc_current_2026_seat_predictions",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "current_2026_seat_predictions.csv",
+      "sha256": "c37ff0c09e5faee6d7b923c5b52b2139a2014a26af7981a93a47858e3742b5fc",
+      "size_bytes": 934,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 2
+    },
+    {
+      "source_id": "hsc_current_2026_control_probabilities",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "current_2026_control_probabilities.csv",
+      "sha256": "09194e082672d0e00e1c835b090214312e5721e4ccefcfbca02149f2bdb1cc9c",
+      "size_bytes": 903,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 2
+    },
+    {
+      "source_id": "hsc_current_2026_other_forecasts",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "current_2026_other_forecasts.csv",
+      "sha256": "47aa3443cf4e67451ad2066d36183464bc898e1e0d68658b1980610928d13f54",
+      "size_bytes": 351,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 4
+    },
+    {
+      "source_id": "hsc_seat_results",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "seat_results.csv",
+      "sha256": "a3cf85839620f7b413ecf1fe2732571eea81670f428d25e708e510319dcf0330",
+      "size_bytes": 4867,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 30
+    },
+    {
+      "source_id": "hsc_actual_seat_changes",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "actual_seat_changes.csv",
+      "sha256": "10eda788932236abccded5ed7c42c9526e953e50ad00797adc0dcd57ed0c5129",
+      "size_bytes": 830,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 12
+    },
+    {
+      "source_id": "actual_congress_control_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\actual_congress_control_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "858d32d14c5aba95f56bbde49b1a54ea6972e4a1162694939dd70a70d2a372d8",
+      "size_bytes": 2713,
+      "mtime": "2026-09-25T16:00:47Z",
+      "rows_read": 18
+    },
+    {
+      "source_id": "predicted_industry_growth_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\predicted_industry_growth_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "624a6735c6f2afdf88daf5d1546770cc782fc424fca3b41234727edd6d1e49be",
+      "size_bytes": 32855,
+      "mtime": "2026-09-25T19:02:17Z",
+      "rows_read": 90
+    },
+    {
+      "source_id": "industry_growth_ibisworld",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\industry_growth_ibisworld.csv",
+      "zip_member": null,
+      "sha256": "812df2f3e6941b4eabd7e4370bbd4a88614d3b1a761f48849d1030bc1b36bdd3",
+      "size_bytes": 12398,
+      "mtime": "2026-09-25T16:04:21Z",
+      "rows_read": 78
+    }
+  ],
+  "verification": {
+    "result": "PASS",
+    "checks_run": 412,
+    "checks_failed": 0,
+    "cells_compared": 16636,
+    "checks": [
+      {
+        "file": "sources",
+        "sheet": "cpi",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "annual_controls",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "iem",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "actual_congress_control",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "ibisworld",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "predicted_growth",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "lda_csv",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "hsc_predicted_house",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "hsc_predicted_senate",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "hsc_actual_seat_changes",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "hsc_seat_results",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "hsc_current_2026_seat_predictions",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "hsc_current_2026_control_probabilities",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sources",
+        "sheet": "hsc_current_2026_other_forecasts",
+        "check": "source rows have exactly the header's width",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "",
+        "check": "file exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\00_controls.xlsx"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "",
+        "check": "sheets == ['data', 'dictionary', 'sources', 'coverage']",
+        "result": "PASS",
+        "detail": "['data', 'dictionary', 'sources', 'coverage']"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "",
+        "check": "xlsx XML: no formulas, merges, styles, widths, filters, panes, comments, drawings",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['year', 'presidential_year', 'midterm_year', 'odd_year', 'cpi_annual_average']"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition']"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes']"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "coverage",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['key', 2006, 2007, 2008, 2009]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "coverage",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "coverage",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "coverage",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "",
+        "check": "file exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\01_lobbying_expenditures.xlsx"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "",
+        "check": "sheets == ['data', 'quarterly', 'dictionary', 'sources', 'coverage']",
+        "result": "PASS",
+        "detail": "['data', 'quarterly', 'dictionary', 'sources', 'coverage']"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "",
+        "check": "xlsx XML: no formulas, merges, styles, widths, filters, panes, comments, drawings",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source', 'sector', 'confidence', 'year', 'period']"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source', 'sector', 'year', 'period', 'lobby_income_nominal_usd']"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition']"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes']"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "coverage",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source', 'sector', 'confidence', 'period', 1999]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "coverage",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "coverage",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "coverage",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "",
+        "check": "file exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\02_election_forecasting.xlsx"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "",
+        "check": "sheets == ['data', 'seat_calls', 'current_2026', 'dictionary', 'sources', 'coverage']",
+        "result": "PASS",
+        "detail": "['data', 'seat_calls', 'current_2026', 'dictionary', 'sources', 'coverage']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "",
+        "check": "xlsx XML: no formulas, merges, styles, widths, filters, panes, comments, drawings",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['calendar_year', 'chamber', 'election_targeted', 'actual_rep_control', 'p_rep_conditional_named']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['chamber', 'election_year', 'pred_rep_net_change', 'pred_dem_net_change', 'proj_rep_seats']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['table', 'chamber', 'as_of', 'seats_lean_rep', 'tossups']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "coverage",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'table', 'chamber', 2002, 2003]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "coverage",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "coverage",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "coverage",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "",
+        "check": "file exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\03_actual_seat_gain.xlsx"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "",
+        "check": "sheets == ['data', 'current_control', 'dictionary', 'sources', 'coverage']",
+        "result": "PASS",
+        "detail": "['data', 'current_control', 'dictionary', 'sources', 'coverage']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "",
+        "check": "xlsx XML: no formulas, merges, styles, widths, filters, panes, comments, drawings",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['chamber', 'election_year', 'congress_elected', 'democratic_seats_after', 'republican_seats_after']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['calendar_year', 'chamber', 'dem_control', 'status', 'source_url']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "coverage",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'chamber', 1996, 1997, 1998]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "coverage",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "coverage",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "coverage",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "",
+        "check": "file exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\06_predicted_industry_growth.xlsx"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "",
+        "check": "sheets == ['data', 'dictionary', 'sources', 'coverage']",
+        "result": "PASS",
+        "detail": "['data', 'dictionary', 'sources', 'coverage']"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "",
+        "check": "xlsx XML: no formulas, merges, styles, widths, filters, panes, comments, drawings",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sector', 'year', 'predicted_growth_pct', 'collected_forecast_growth_pct', 'forecast_status']"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition']"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes']"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sector', 2008, 2009, 2010, 2011]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "",
+        "check": "file exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\07_actual_industry_growth.xlsx"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "",
+        "check": "sheets == ['data', 'dictionary', 'sources', 'coverage']",
+        "result": "PASS",
+        "detail": "['data', 'dictionary', 'sources', 'coverage']"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "",
+        "check": "xlsx XML: no formulas, merges, styles, widths, filters, panes, comments, drawings",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sector', 'year', 'revenue_million_constant_2026_usd', 'growth_same_year_pct', 'growth_previous_year_pct']"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition']"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes']"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sector', 2006, 2007, 2008, 2009]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "",
+        "check": "file exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\sector_crosswalk.xlsx"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "",
+        "check": "sheets == ['data', 'dictionary']",
+        "result": "PASS",
+        "detail": "['data', 'dictionary']"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "",
+        "check": "xlsx XML: no formulas, merges, styles, widths, filters, panes, comments, drawings",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['mentat_industry', 'mentat_workbook', 'ibisworld_growth_sector', 'growth_mapping', 'lda_lobbying_sector']"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "header cells non-empty and unique",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition']"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "no cells beyond the header width",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "no empty rows inside the table",
+        "result": "PASS",
+        "detail": "0 rows"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "no text cell starts with '='",
+        "result": "PASS",
+        "detail": "0"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "header == expected columns (12)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "key (year) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "row count == intended source rows (21)",
+        "result": "PASS",
+        "detail": "sheet has 21"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "cell census vs source: CPI csv + brief's election-year lists",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "brief's columns present in order",
+        "result": "PASS",
+        "detail": "['year', 'presidential_year', 'midterm_year', 'odd_year', 'cpi_annual_average', 'multiplier_to_2025_dollars', 'status', 'source_id']"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "header == source columns",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at']"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\Sector_Research_Source_Check_2026-09-25\\\\cpi_annual_2006_2025.csv' None"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 rows_read == 20",
+        "result": "PASS",
+        "detail": "sheet 20"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "annual_controls_2008_2025 path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\Sector_Research_Source_Check_2026-09-25\\\\annual_controls_2008_2025.csv' None"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "annual_controls_2008_2025 sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "annual_controls_2008_2025 rows_read == 18",
+        "result": "PASS",
+        "detail": "sheet 18"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "sources",
+        "check": "annual_controls_2008_2025 read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "data",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "header == dictionary columns",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition', 'source_ids']"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "(sheet, column) entries unique",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "every column of every sheet is defined, nothing extra",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "every entry has a type and a definition",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "dictionary",
+        "check": "every source_ids token resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "coverage",
+        "check": "header == key columns + years",
+        "result": "PASS",
+        "detail": "['key', 2006, 2007, 2008, 2009, 2010]"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "coverage",
+        "check": "one row per key (1)",
+        "result": "PASS",
+        "detail": "sheet 1 rows"
+      },
+      {
+        "file": "00_controls.xlsx",
+        "sheet": "coverage",
+        "check": "every cell == status of the table row (or missing / not_applicable)",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "header == expected columns (58)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "key (source+sector+confidence+year+period) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "row count == intended source rows (100)",
+        "result": "PASS",
+        "detail": "sheet has 100"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "cell census vs source: sector_spend.csv annual rows + every lobbyview sector/confidence/year",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "undifferentiated LobbyView amount never shares a row with LDA income/expenses",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "header == expected columns (46)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "key (sector+year+period) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "row count == intended source rows (96)",
+        "result": "PASS",
+        "detail": "sheet has 96"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "cell census vs source: sector_spend.csv quarterly rows",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "header == source columns",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at']"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_csv path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\AppData\\\\Local\\\\Melange\\\\lda_rebuild\\\\derived\\\\sector_spend\\\\sector_spend.csv' None"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_csv sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_csv rows_read == 120",
+        "result": "PASS",
+        "detail": "sheet 120"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_csv read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_json path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\AppData\\\\Local\\\\Melange\\\\lda_rebuild\\\\derived\\\\sector_spend\\\\sector_spend.json' None"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_json sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_json rows_read == 24",
+        "result": "PASS",
+        "detail": "sheet 24"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lda_sector_spend_json read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lobbyview_adversary_spend path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\AppData\\\\Local\\\\Melange\\\\lobbyview\\\\derived\\\\lobbyview_adversary_spend.json' None"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lobbyview_adversary_spend sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lobbyview_adversary_spend rows_read == 76",
+        "result": "PASS",
+        "detail": "sheet 76"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "lobbyview_adversary_spend read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\Sector_Research_Source_Check_2026-09-25\\\\cpi_annual_2006_2025.csv' None"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 rows_read == 20",
+        "result": "PASS",
+        "detail": "sheet 20"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "sources",
+        "check": "cpi_annual_2006_2025 read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "data",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "quarterly",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "header == dictionary columns",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition', 'source_ids']"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "(sheet, column) entries unique",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "every column of every sheet is defined, nothing extra",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "every entry has a type and a definition",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "dictionary",
+        "check": "every source_ids token resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "coverage",
+        "check": "header == key columns + years",
+        "result": "PASS",
+        "detail": "['source', 'sector', 'confidence', 'period', 1999, 2000]"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "coverage",
+        "check": "one row per key (24)",
+        "result": "PASS",
+        "detail": "sheet 24 rows"
+      },
+      {
+        "file": "01_lobbying_expenditures.xlsx",
+        "sheet": "coverage",
+        "check": "every cell == status of the table row (or missing / not_applicable)",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "header == expected columns (11)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "key (calendar_year+chamber) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "row count == intended source rows (36)",
+        "result": "PASS",
+        "detail": "sheet has 36"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "cell census vs source: forecast_annual_conditional_2008_2025.csv",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "brief's columns present in order",
+        "result": "PASS",
+        "detail": "['calendar_year', 'chamber', 'election_targeted', 'p_rep_conditional_named', 'p_dem_expected', 'days_used', 'first_price_date', 'last_price_date', 'status']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "predicted_house and predicted_senate share one header",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "header == expected columns (14)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "key (chamber+election_year) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "row count == intended source rows (24)",
+        "result": "PASS",
+        "detail": "sheet has 24"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "cell census vs source: predicted_house.csv + predicted_senate.csv, all columns",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "header == expected columns (29)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "key (table+chamber+forecaster) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "row count == intended source rows (8)",
+        "result": "PASS",
+        "detail": "sheet has 8"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "cell census vs source: the three current_2026_* members, each keeping its columns",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "header == source columns",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "iem_forecast_annual_conditional_2008_2025 path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\Sector_Research_Source_Check_2026-09-25\\\\forecast_annual_conditional_2008_2025.csv' None"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "iem_forecast_annual_conditional_2008_2025 sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "iem_forecast_annual_conditional_2008_2025 rows_read == 36",
+        "result": "PASS",
+        "detail": "sheet 36"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "iem_forecast_annual_conditional_2008_2025 read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' None"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip rows_read == None",
+        "result": "PASS",
+        "detail": "sheet None"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_house path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' 'predicted_house.csv'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_house sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_house rows_read == 12",
+        "result": "PASS",
+        "detail": "sheet 12"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_house read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_senate path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' 'predicted_senate.csv'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_senate sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_senate rows_read == 12",
+        "result": "PASS",
+        "detail": "sheet 12"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_predicted_senate read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_seat_predictions path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' 'current_2026_seat_predictions.csv'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_seat_predictions sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_seat_predictions rows_read == 2",
+        "result": "PASS",
+        "detail": "sheet 2"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_seat_predictions read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_control_probabilities path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' 'current_2026_control_probabilities.csv'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_control_probabilities sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_control_probabilities rows_read == 2",
+        "result": "PASS",
+        "detail": "sheet 2"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_control_probabilities read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_other_forecasts path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' 'current_2026_other_forecasts.csv'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_other_forecasts sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_other_forecasts rows_read == 4",
+        "result": "PASS",
+        "detail": "sheet 4"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "sources",
+        "check": "hsc_current_2026_other_forecasts read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "data",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "seat_calls",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "current_2026",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "header == dictionary columns",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition', 'source_ids']"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "(sheet, column) entries unique",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "every column of every sheet is defined, nothing extra",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "every entry has a type and a definition",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "dictionary",
+        "check": "every source_ids token resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "coverage",
+        "check": "header == key columns + years",
+        "result": "PASS",
+        "detail": "['sheet', 'table', 'chamber', 2002, 2003, 2004]"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "coverage",
+        "check": "one row per key (10)",
+        "result": "PASS",
+        "detail": "sheet 10 rows"
+      },
+      {
+        "file": "02_election_forecasting.xlsx",
+        "sheet": "coverage",
+        "check": "every cell == status of the table row (or missing / not_applicable)",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "actual_seat_changes has matching house_/senate_ fields",
+        "result": "PASS",
+        "detail": "['rep_seats_before', 'rep_seats_after', 'rep_net_change', 'dem_net_change', 'majority_before', 'majority_after', 'control_changed']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "header == expected columns (28)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "key (chamber+election_year) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "row count == intended source rows (30)",
+        "result": "PASS",
+        "detail": "sheet has 30"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "cell census vs source: seat_results.csv (all columns) + actual_seat_changes.csv matched on election year and chamber",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "header == expected columns (8)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "key (calendar_year+chamber) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "row count == intended source rows (38)",
+        "result": "PASS",
+        "detail": "sheet has 38"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "cell census vs source: actual_congress_control_2008_2025.csv + 2026 from seat_results 2024",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "header == source columns",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' None"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip rows_read == None",
+        "result": "PASS",
+        "detail": "sheet None"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_zip read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_seat_results path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' 'seat_results.csv'"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_seat_results sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_seat_results rows_read == 30",
+        "result": "PASS",
+        "detail": "sheet 30"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_seat_results read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_actual_seat_changes path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\House_Senate_Control_Forecasts_CSV.zip' 'actual_seat_changes.csv'"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_actual_seat_changes sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_actual_seat_changes rows_read == 12",
+        "result": "PASS",
+        "detail": "sheet 12"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "hsc_actual_seat_changes read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "actual_congress_control_2008_2025 path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\Sector_Research_Source_Check_2026-09-25\\\\actual_congress_control_2008_2025.csv' None"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "actual_congress_control_2008_2025 sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "actual_congress_control_2008_2025 rows_read == 18",
+        "result": "PASS",
+        "detail": "sheet 18"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "sources",
+        "check": "actual_congress_control_2008_2025 read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "data",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "current_control",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "header == dictionary columns",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition', 'source_ids']"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "(sheet, column) entries unique",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "every column of every sheet is defined, nothing extra",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "every entry has a type and a definition",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "dictionary",
+        "check": "every source_ids token resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "coverage",
+        "check": "header == key columns + years",
+        "result": "PASS",
+        "detail": "['sheet', 'chamber', 1996, 1997, 1998, 1999]"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "coverage",
+        "check": "one row per key (4)",
+        "result": "PASS",
+        "detail": "sheet 4 rows"
+      },
+      {
+        "file": "03_actual_seat_gain.xlsx",
+        "sheet": "coverage",
+        "check": "every cell == status of the table row (or missing / not_applicable)",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "header == expected columns (22)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "key (sector+year) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "row count == intended source rows (90)",
+        "result": "PASS",
+        "detail": "sheet has 90"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "cell census vs source: predicted_industry_growth_2008_2025.csv, every row and original column",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "verification_status is empty on every row",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "header == source columns",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at']"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "predicted_industry_growth_2008_2025 path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\Sector_Research_Source_Check_2026-09-25\\\\predicted_industry_growth_2008_2025.csv' None"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "predicted_industry_growth_2008_2025 sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "predicted_industry_growth_2008_2025 rows_read == 90",
+        "result": "PASS",
+        "detail": "sheet 90"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "predicted_industry_growth_2008_2025 read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "header == dictionary columns",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition', 'source_ids']"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "(sheet, column) entries unique",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "every column of every sheet is defined, nothing extra",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "every entry has a type and a definition",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "every source_ids token resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "header == key columns + years",
+        "result": "PASS",
+        "detail": "['sector', 2008, 2009, 2010, 2011, 2012]"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "one row per key (5)",
+        "result": "PASS",
+        "detail": "sheet 5 rows"
+      },
+      {
+        "file": "06_predicted_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "every cell == status of the table row (or missing / not_applicable)",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "header == expected columns (10)",
+        "result": "PASS",
+        "detail": "diff: []"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "key (sector+year) unique",
+        "result": "PASS",
+        "detail": "0 duplicates"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "row count == intended source rows (78)",
+        "result": "PASS",
+        "detail": "sheet has 78"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "row keys == source keys",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "census covers every column of every row",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "cell census vs source: industry_growth_ibisworld.csv, every row and column",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "status values in vocabulary",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "header == source columns",
+        "result": "PASS",
+        "detail": "['source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at']"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "industry_growth_ibisworld path is the known source",
+        "result": "PASS",
+        "detail": "'C:\\\\Users\\\\pgoff\\\\Downloads\\\\Sector_Research_Source_Check_2026-09-25\\\\industry_growth_ibisworld.csv' None"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "industry_growth_ibisworld sha256/size/mtime match the file now",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "industry_growth_ibisworld rows_read == 78",
+        "result": "PASS",
+        "detail": "sheet 78"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "sources",
+        "check": "industry_growth_ibisworld read_at is an ISO UTC timestamp",
+        "result": "PASS",
+        "detail": "'2026-09-25T19:28:05Z'"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "data",
+        "check": "every source_id resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "header == dictionary columns",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition', 'source_ids']"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "(sheet, column) entries unique",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "every column of every sheet is defined, nothing extra",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "every entry has a type and a definition",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "dictionary",
+        "check": "every source_ids token resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "header == key columns + years",
+        "result": "PASS",
+        "detail": "['sector', 2006, 2007, 2008, 2009, 2010]"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "one row per key (4)",
+        "result": "PASS",
+        "detail": "sheet 4 rows"
+      },
+      {
+        "file": "07_actual_industry_growth.xlsx",
+        "sheet": "coverage",
+        "check": "every cell == status of the table row (or missing / not_applicable)",
+        "result": "PASS",
+        "detail": "0 mismatches; first []"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "header == brief's columns + status",
+        "result": "PASS",
+        "detail": "['mentat_industry', 'mentat_workbook', 'ibisworld_growth_sector', 'growth_mapping', 'lda_lobbying_sector', 'note', 'status']"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "exactly the brief's 9 rows, in order, every cell",
+        "result": "PASS",
+        "detail": "first diff None"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "no cell holds a formula (no text starting with '=')",
+        "result": "PASS",
+        "detail": "0 cells"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "each column holds a single value type",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "status reads 'PROPOSED - awaiting Paul' on every row",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "header == dictionary columns",
+        "result": "PASS",
+        "detail": "['sheet', 'column', 'type', 'unit', 'definition', 'source_ids']"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "(sheet, column) entries unique",
+        "result": "PASS",
+        "detail": ""
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "every column of every sheet is defined, nothing extra",
+        "result": "PASS",
+        "detail": "missing [] extra []"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "every entry has a type and a definition",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "dictionary",
+        "check": "every source_ids token resolves to the sources sheet",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "sector_crosswalk.xlsx",
+        "sheet": "data",
+        "check": "growth and LDA sector values resolve to 07 and 01",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "README.md",
+        "sheet": "",
+        "check": "README exists",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\README.md"
+      },
+      {
+        "file": "README.md",
+        "sheet": "",
+        "check": "README names every file, the pending items and the purpose",
+        "result": "PASS",
+        "detail": "[]"
+      },
+      {
+        "file": "README.md",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      },
+      {
+        "file": "data/00_controls.xlsx",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      },
+      {
+        "file": "data/01_lobbying_expenditures.xlsx",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      },
+      {
+        "file": "data/02_election_forecasting.xlsx",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      },
+      {
+        "file": "data/03_actual_seat_gain.xlsx",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      },
+      {
+        "file": "data/06_predicted_industry_growth.xlsx",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      },
+      {
+        "file": "data/07_actual_industry_growth.xlsx",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      },
+      {
+        "file": "data/sector_crosswalk.xlsx",
+        "sheet": "",
+        "check": "bytes identical to the verified stage copy",
+        "result": "PASS",
+        "detail": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\build\\workbooks\\stage\\attempt_20260925T192805Z_23796\\sector_growth_study"
+      }
+    ]
+  },
+  "cross_checks": [
+    {
+      "check": "00 flags + CPI == annual_controls_2008_2025.csv (2008-2025)",
+      "result": "AGREE",
+      "detail": "[]"
+    },
+    {
+      "check": "sector_spend.csv == sector_spend.json (income, expenses, filings, organizations; 120 rows)",
+      "result": "AGREE",
+      "detail": "[]"
+    },
+    {
+      "check": "every lobbyview sector/confidence tier holds years",
+      "result": "DISAGREE",
+      "detail": "empty: credit_union/low"
+    },
+    {
+      "check": "02 p_dem_expected == annual_controls p_dem_*_conditional_named (10 dp)",
+      "result": "AGREE",
+      "detail": "[]"
+    },
+    {
+      "check": "seat_calls miss == actual_rep_net_change - pred_rep_net_change",
+      "result": "AGREE",
+      "detail": "[]"
+    },
+    {
+      "check": "seat_results agrees with actual_seat_changes on the 24 matched chamber-years",
+      "result": "DISAGREE",
+      "detail": "Senate|2002: majority_prev_congress=R vs senate_majority_before=D; flipped_vs_prev_congress=0.0 vs senate_control_changed=1"
+    },
+    {
+      "check": "current_control 2008-2025 == majority after the most recent election (the rule used for 2026)",
+      "result": "AGREE",
+      "detail": "0 of 36 differ: []"
+    },
+    {
+      "check": "current_control dem_control == 1 - IEM actual_rep_control (36 rows)",
+      "result": "AGREE",
+      "detail": "[]"
+    },
+    {
+      "check": "current_control dem_control == annual_controls house/senate_dem_control",
+      "result": "AGREE",
+      "detail": "[]"
+    },
+    {
+      "check": "06 main-model values (predicted_growth_pct present) == PREDICTED_GROWTH_README.md count",
+      "result": "AGREE",
+      "detail": "csv 53 main (by sector {'commercial_banks': 18, 'credit_unions': 18, 'life_insurance_annuities': 14, 'auto_light_duty_manufacturing': 3}); README says 53 main, credit unions 18; csv credit_unions 2024 forecast_status=ready price_basis='constant 2023 USD'"
+    },
+    {
+      "check": "crosswalk mentat_workbook files exist in C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files",
+      "result": "AGREE",
+      "detail": "absent: []"
+    }
+  ],
+  "source_oddities": [
+    "lobbyview_adversary_spend.json by_year.credit_union.low is present but empty (no rows)",
+    "current_2026_control_probabilities.csv as_of '2026-09-24/25' is not a single ISO date (kept verbatim)",
+    "03 Senate|2002: sources disagree: majority_prev_congress=R vs senate_majority_before=D; flipped_vs_prev_congress=0.0 vs senate_control_changed=1 (both kept as stated); seat_results notes for Senate 2000: control switched to Democrats on June 6, 2001",
+    "every lobbyview sector/confidence tier holds years: empty: credit_union/low",
+    "seat_results agrees with actual_seat_changes on the 24 matched chamber-years: Senate|2002: majority_prev_congress=R vs senate_majority_before=D; flipped_vs_prev_congress=0.0 vs senate_control_changed=1"
+  ],
+  "notes": [
+    "Numbers are written at full double precision: build_workbooks.py replaces openpyxl's '%.16g' number formatting with repr()/str() so every source value round-trips exactly; the cell census compares exact values.",
+    "The receipt does not list its own hash."
+  ]
+}

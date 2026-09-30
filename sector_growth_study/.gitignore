@@ -1,0 +1,24 @@
+# Study source and exact loaded inputs are versioned in this private repository.
+# Regenerable runs, scratch archives, caches and licensed raw captures stay outside Git.
+/archive/
+/results/
+/source_checks/
+/source-checks/
+**/__pycache__/
+*.pyc
+*.pyo
+*.log
+*.pdf
+*.html
+*.htm
+*.zip
+*.tar
+*.rds
+.Rhistory
+.RData
+.Rproj.user/
+
+# The parent repository ignores these formats globally; these are the reviewed inputs.
+!data/*.xlsx
+!build_receipt*.json
+!code/R/tests/testthat/fixtures/*.json

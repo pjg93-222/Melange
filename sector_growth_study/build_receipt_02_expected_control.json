@@ -1,0 +1,187 @@
+{
+  "run_id": "expected-control-20260925",
+  "written_at": "2026-09-25T22:28:10Z",
+  "ruling": "Paul, 2026-09-25: House_Senate_Control_Forecasts_CSV.zip holds expected control 2023-2026",
+  "target": {
+    "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\02_election_forecasting.xlsx",
+    "sha256": "96a64b2210b98376a11fe887fcadb012902f37310e7d8353e1e5517b8ff3268d",
+    "size_bytes": 25686,
+    "sha256_before": "2ec5fad6d8f42e258c8faf72098f7ca930947760551cfebd5fe31ddb2195ccc2",
+    "size_bytes_before": 22720,
+    "backup": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\superseded\\02_election_forecasting.xlsx"
+  },
+  "sheet_added": "expected_control_2023_2026",
+  "rows_added": 8,
+  "appended": {
+    "dictionary": 14,
+    "notes": 1,
+    "coverage": 2
+  },
+  "unchanged_sheets": [
+    "data",
+    "seat_calls",
+    "current_2026",
+    "sources"
+  ],
+  "sources": [
+    {
+      "source_id": "hsc_zip",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "sha256": "852d894f3ef2d7fe0aa45e319013bf9a0f2388596759f66c71e06925663f67d2",
+      "size_bytes": 586840,
+      "mtime": "2026-09-25T15:55:09Z",
+      "read": "in memory"
+    },
+    {
+      "source_id": "hsc_predicted_house",
+      "zip_member": "predicted_house.csv",
+      "sha256": "d813ddc4983726fe1bb9996a718cd8b12ca9289038dd6671ad30778b66d5760d",
+      "size_bytes": 3312,
+      "rows_read": 12
+    },
+    {
+      "source_id": "hsc_predicted_senate",
+      "zip_member": "predicted_senate.csv",
+      "sha256": "f6aa9a163b122008b149df82f7d2e993630cc7e38dc9f58fcc7b1bbbd166cea0",
+      "size_bytes": 2840,
+      "rows_read": 12
+    },
+    {
+      "source_id": "hsc_current_2026_control_probabilities",
+      "zip_member": "current_2026_control_probabilities.csv",
+      "sha256": "09194e082672d0e00e1c835b090214312e5721e4ccefcfbca02149f2bdb1cc9c",
+      "size_bytes": 903,
+      "rows_read": 2
+    }
+  ],
+  "rows": [
+    {
+      "calendar_year": 2023,
+      "chamber": "House",
+      "election_targeted": 2024,
+      "exp_dem": 1,
+      "method": "forecaster_final_call_binary",
+      "measured_on": "2024-11-04",
+      "flag": "measured Nov 2024, after the year",
+      "proj_dem_seats": 218.0,
+      "dem_control_threshold_seats": 218,
+      "p_rep_control": null,
+      "rule": "exp_dem = 1 if proj_dem_seats >= 218 else 0",
+      "source_note": "Sabato's Crystal Ball final pre-election call, election_year 2024: Sabato column (Nov. 4, 2024): \"D - 218 R - 217, 0 tossups\"",
+      "status": "observed",
+      "source_id": "hsc_predicted_house"
+    },
+    {
+      "calendar_year": 2023,
+      "chamber": "Senate",
+      "election_targeted": 2024,
+      "exp_dem": 0,
+      "method": "forecaster_final_call_binary",
+      "measured_on": "2024-11-04",
+      "flag": "measured Nov 2024, after the year",
+      "proj_dem_seats": 48.0,
+      "dem_control_threshold_seats": 51,
+      "p_rep_control": null,
+      "rule": "exp_dem = 1 if proj_dem_seats >= 51 else 0",
+      "source_note": "Sabato's Crystal Ball final pre-election call, election_year 2024: Nov. 4 final changes: \"Ohio Toss-up to Leans Republican; Texas Likely to Leans Republican\" (with WV and MT rated Republican pickups)",
+      "status": "observed",
+      "source_id": "hsc_predicted_senate"
+    },
+    {
+      "calendar_year": 2024,
+      "chamber": "House",
+      "election_targeted": 2024,
+      "exp_dem": 1,
+      "method": "forecaster_final_call_binary",
+      "measured_on": "2024-11-04",
+      "flag": null,
+      "proj_dem_seats": 218.0,
+      "dem_control_threshold_seats": 218,
+      "p_rep_control": null,
+      "rule": "exp_dem = 1 if proj_dem_seats >= 218 else 0",
+      "source_note": "Sabato's Crystal Ball final pre-election call, election_year 2024: Sabato column (Nov. 4, 2024): \"D - 218 R - 217, 0 tossups\"",
+      "status": "observed",
+      "source_id": "hsc_predicted_house"
+    },
+    {
+      "calendar_year": 2024,
+      "chamber": "Senate",
+      "election_targeted": 2024,
+      "exp_dem": 0,
+      "method": "forecaster_final_call_binary",
+      "measured_on": "2024-11-04",
+      "flag": null,
+      "proj_dem_seats": 48.0,
+      "dem_control_threshold_seats": 51,
+      "p_rep_control": null,
+      "rule": "exp_dem = 1 if proj_dem_seats >= 51 else 0",
+      "source_note": "Sabato's Crystal Ball final pre-election call, election_year 2024: Nov. 4 final changes: \"Ohio Toss-up to Leans Republican; Texas Likely to Leans Republican\" (with WV and MT rated Republican pickups)",
+      "status": "observed",
+      "source_id": "hsc_predicted_senate"
+    },
+    {
+      "calendar_year": 2025,
+      "chamber": "House",
+      "election_targeted": 2026,
+      "exp_dem": 0.9144455445544554,
+      "method": "market_snapshot",
+      "measured_on": "2026-09-24/25",
+      "flag": "measured Sep 2026, after the year",
+      "proj_dem_seats": null,
+      "dem_control_threshold_seats": null,
+      "p_rep_control": 0.0855544554455446,
+      "rule": "exp_dem = 1 - p_rep_control (normalized mean of Kalshi and Polymarket)",
+      "source_note": "Kalshi read Sept. 25; Polymarket from the Covers tracker (updated Sept. 24, 10:54 a.m. ET). Each market is normalized so its two prices sum to 1 before averaging.",
+      "status": "observed",
+      "source_id": "hsc_current_2026_control_probabilities"
+    },
+    {
+      "calendar_year": 2025,
+      "chamber": "Senate",
+      "election_targeted": 2026,
+      "exp_dem": 0.638627450980392,
+      "method": "market_snapshot",
+      "measured_on": "2026-09-24/25",
+      "flag": "measured Sep 2026, after the year",
+      "proj_dem_seats": null,
+      "dem_control_threshold_seats": null,
+      "p_rep_control": 0.361372549019608,
+      "rule": "exp_dem = 1 - p_rep_control (normalized mean of Kalshi and Polymarket)",
+      "source_note": "Kalshi read Sept. 25; Polymarket from the Covers tracker (updated Sept. 24, 10:54 a.m. ET). Prices move daily.",
+      "status": "observed",
+      "source_id": "hsc_current_2026_control_probabilities"
+    },
+    {
+      "calendar_year": 2026,
+      "chamber": "House",
+      "election_targeted": 2026,
+      "exp_dem": 0.9144455445544554,
+      "method": "market_snapshot",
+      "measured_on": "2026-09-24/25",
+      "flag": null,
+      "proj_dem_seats": null,
+      "dem_control_threshold_seats": null,
+      "p_rep_control": 0.0855544554455446,
+      "rule": "exp_dem = 1 - p_rep_control (normalized mean of Kalshi and Polymarket)",
+      "source_note": "Kalshi read Sept. 25; Polymarket from the Covers tracker (updated Sept. 24, 10:54 a.m. ET). Each market is normalized so its two prices sum to 1 before averaging.",
+      "status": "observed",
+      "source_id": "hsc_current_2026_control_probabilities"
+    },
+    {
+      "calendar_year": 2026,
+      "chamber": "Senate",
+      "election_targeted": 2026,
+      "exp_dem": 0.638627450980392,
+      "method": "market_snapshot",
+      "measured_on": "2026-09-24/25",
+      "flag": null,
+      "proj_dem_seats": null,
+      "dem_control_threshold_seats": null,
+      "p_rep_control": 0.361372549019608,
+      "rule": "exp_dem = 1 - p_rep_control (normalized mean of Kalshi and Polymarket)",
+      "source_note": "Kalshi read Sept. 25; Polymarket from the Covers tracker (updated Sept. 24, 10:54 a.m. ET). Prices move daily.",
+      "status": "observed",
+      "source_id": "hsc_current_2026_control_probabilities"
+    }
+  ]
+}

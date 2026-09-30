@@ -1,0 +1,4274 @@
+{
+ "run_id": "chamber-link-20260925",
+ "written_at": "2026-09-26T00:33:44Z",
+ "builder": "sector-growth chamber link, workbook 08 (Claude architect subagent, session d613b40c)",
+ "brief": "LINK the existing Mentat contribution rows (04's population) to the recipient's chamber; sheet sector_year_chamber + reconcile + notes + dictionary + sources; Paul: 'the Democratic share of giving by chamber; we should already have this in the Mentat data for each industry', 'We don't need to rebuild shit, all we have to do is link, finish it', 'authorize everything and stop making this so hard'",
+ "file": {
+  "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+  "sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+  "size_bytes": 607883,
+  "mtime": "2026-09-26T05:24:35Z"
+ },
+ "sheet_rows": {
+  "sector_year_chamber": 128,
+  "reconcile": 64,
+  "other_recipients": 64,
+  "committee_map": 5246,
+  "notes": 21,
+  "dictionary": 157,
+  "sources": 22,
+  "hill_committees_sector_year": 256,
+  "sector_year_chamber_with_hill": 128,
+  "hill_reconcile": 64
+ },
+ "outcome_definition": "general giving as Mentat defines it (same as 04): SUM(facts.receipt_cents)/100 where receipt_cents = Amount when Include in Analysis = 'Yes'; rows with receipt_cents != 0, refunds kept; all recipient categories",
+ "population_pin": {
+  "banking": {
+   "source_id": "idx_banking",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\bb2b2452b4fc14c827c6632ae8b1ecc47444ce835d6e44d6a7d885997424b7d0.sqlite",
+   "sha256": "cd044cea86bb7c72392e71f19f2e74284204c25d98419f9230abee1cce480e9f",
+   "sha256_04": null,
+   "sha256_matches_04": null,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 849399,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:10:34Z"
+  },
+  "credit_union": {
+   "source_id": "idx_credit_union",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\88e3f70252e75c3ebcbefab2096f39687b0f4874420f97f9b63f83e1e4d85bae.sqlite",
+   "sha256": "8ef1d494468869019db810e659a966ccdf9b73bd64216bd9d546a943cfe30619",
+   "sha256_04": "8ef1d494468869019db810e659a966ccdf9b73bd64216bd9d546a943cfe30619",
+   "sha256_matches_04": true,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 67169,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:10:38Z"
+  },
+  "crypto": {
+   "source_id": "idx_crypto",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\caaa897c7cbd0425354eedcee62c574a410591fd6bda8a9931f8580184e03844.sqlite",
+   "sha256": "c6f1ef6f050f0ecf00e4def0213ba35332baa506ab77ff7d0ec26ddbc460da5b",
+   "sha256_04": "c6f1ef6f050f0ecf00e4def0213ba35332baa506ab77ff7d0ec26ddbc460da5b",
+   "sha256_matches_04": true,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 14801,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:10:39Z"
+  },
+  "credit_arms": {
+   "source_id": "idx_credit_arms",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\ba38420fc8c51460f192df48c78542fe66fd650e7dc8eeb8910a1aa5a2c41234.sqlite",
+   "sha256": "f2d92efe0cec96a0ff2ae247f41a12247bd000029a199572933e4f2c488b4083",
+   "sha256_04": null,
+   "sha256_matches_04": null,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 434958,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:10:55Z"
+  },
+  "fintech": {
+   "source_id": "idx_fintech",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\2f9fa3df526b0f27a753943ed615240adf931be93f3223838752b517824ceb65.sqlite",
+   "sha256": "4667318c4993a1b69ea9ea55eddfed70f93d170970f4b7635b1dde4f3a384e76",
+   "sha256_04": "4667318c4993a1b69ea9ea55eddfed70f93d170970f4b7635b1dde4f3a384e76",
+   "sha256_matches_04": true,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 86270,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:11:01Z"
+  },
+  "property_casualty_insurance": {
+   "source_id": "idx_property_casualty_insurance",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\b9dabba3d54e6550f75fb0a8e4e5e8774ea6d7745d98e20585c5f498569ada34.sqlite",
+   "sha256": "d8d3b6db52d9ed9b2b8fdf337adcc51da6a7372745bb9c5467b8f7af32b41209",
+   "sha256_04": "d8d3b6db52d9ed9b2b8fdf337adcc51da6a7372745bb9c5467b8f7af32b41209",
+   "sha256_matches_04": true,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 360207,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:11:18Z"
+  },
+  "telecom": {
+   "source_id": "idx_telecom",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\6f7acaee8a6e8c5ac34e5d572094a078c85c68c46b1f990c022f3021d2dbc08c.sqlite",
+   "sha256": "9e14a596bba37b78c76f80b84867efececab325f4b12117cce8d9d2986bed794",
+   "sha256_04": null,
+   "sha256_matches_04": null,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 808066,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:11:57Z"
+  },
+  "community_banks": {
+   "source_id": "idx_community_banks",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763.sqlite",
+   "sha256": "df15235d957fbb44398e6858d4c53b4eac5595244dc9994f29447672db0cc448",
+   "sha256_04": "df15235d957fbb44398e6858d4c53b4eac5595244dc9994f29447672db0cc448",
+   "sha256_matches_04": true,
+   "size_mtime_equal_04": true,
+   "unchanged_across_read": true,
+   "rows_read": 4649,
+   "read_method": "in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written)",
+   "read_at": "2026-09-26T00:11:57Z"
+  }
+ },
+ "receipt04": {
+  "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_04.json",
+  "sha256": "10522aa29d2e5d760c81fcd04061290c69f8ac499e9f573c7104cfb031e1ef06",
+  "run_id": "workbook04-build-20260925b",
+  "file_sha256": "b0de2eda142a234df90282bab87ed465c271e470c80fb8510708cad0809bc406"
+ },
+ "rules": {
+  "chamber": "House/Senate = recipient committee linked by FEC ccl as principal (P) or authorized (A) committee of a candidate whose cn CAND_OFFICE is H/S, matched per FEC cycle (2021-2022 -> ccl22/cn22, 2023-2024 -> ccl24/cn24, 2025-2026 -> ccl26/cn26)",
+  "chamber_fallbacks": "no same-cycle ccl row: nearest other cycle with a ccl row decides (ties later) unless the same-cycle cm registers a non-candidate committee; a cycle linking it only D/J/U means not a candidate committee; no ccl row anywhere: cm CAND_ID of an H/S/P-type P/A committee; same-cycle cm type overrides a cross-cycle link of another office; office = candidate ID prefix where cn lacks the candidate",
+  "other_bucket": "not_house_senate_usd (sheet other_recipients) = presidential + party (cm type X/Y/Z incl. DCCC/NRCC/DSCC/NRSC) + pac (all other registered committees incl. super PACs, leadership PACs, JFCs, unauthorized committees, ActBlue/WinRed conduits) + unknown",
+  "party": "facts.party if D or R; else linked candidate's cn party (DEM/DFL -> D, REP -> R); else other (other_usd on the chamber row); dem_share = dem/(dem+rep)",
+  "real": "dem/rep_real_m = usd x 00_controls multiplier_to_2025_dollars / 1e6; blank 2026",
+  "naming": "the brief's 'other' bucket is not_house_senate_usd; sector_year_chamber.other_usd = chamber giving with party neither D nor R"
+ },
+ "reconcile": {
+  "summary": "64/64 MATCH",
+  "rows": [
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 77484726,
+    "senate_cents": 68502372,
+    "not_house_senate_cents": 558364694,
+    "sum_cents": 704351792,
+    "sheet04_cents": 704351792,
+    "index_cents": 704351792,
+    "sum_n_rows": 93960,
+    "sheet04_gifts": 93960,
+    "index_gifts": 93960
+   },
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 111628298,
+    "senate_cents": 106632715,
+    "not_house_senate_cents": 742633072,
+    "sum_cents": 960894085,
+    "sheet04_cents": 960894085,
+    "index_cents": 960894085,
+    "sum_n_rows": 121576,
+    "sheet04_gifts": 121576,
+    "index_gifts": 121576
+   },
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 62656632,
+    "senate_cents": 85203218,
+    "not_house_senate_cents": 493011879,
+    "sum_cents": 640871729,
+    "sheet04_cents": 640871729,
+    "index_cents": 640871729,
+    "sum_n_rows": 68515,
+    "sheet04_gifts": 68515,
+    "index_gifts": 68515
+   },
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 138061706,
+    "senate_cents": 71468942,
+    "not_house_senate_cents": 1760318039,
+    "sum_cents": 1969848687,
+    "sheet04_cents": 1969848687,
+    "index_cents": 1969848687,
+    "sum_n_rows": 190812,
+    "sheet04_gifts": 190812,
+    "index_gifts": 190812
+   },
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 70466017,
+    "senate_cents": 50194987,
+    "not_house_senate_cents": 486340665,
+    "sum_cents": 607001669,
+    "sheet04_cents": 607001669,
+    "index_cents": 607001669,
+    "sum_n_rows": 73713,
+    "sheet04_gifts": 73713,
+    "index_gifts": 73713
+   },
+   {
+    "mentat_industry": "banking",
+    "study_sector": "commercial_banks",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 58474952,
+    "senate_cents": 38029075,
+    "not_house_senate_cents": 496812416,
+    "sum_cents": 593316443,
+    "sheet04_cents": 593316443,
+    "index_cents": 593316443,
+    "sum_n_rows": 43994,
+    "sheet04_gifts": 43994,
+    "index_gifts": 43994
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 5109901,
+    "senate_cents": 402100,
+    "not_house_senate_cents": 8529827,
+    "sum_cents": 14041828,
+    "sheet04_cents": 14041828,
+    "index_cents": 14041828,
+    "sum_n_rows": 3035,
+    "sheet04_gifts": 3035,
+    "index_gifts": 3035
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 8772936,
+    "senate_cents": 2120500,
+    "not_house_senate_cents": 12007052,
+    "sum_cents": 22900488,
+    "sheet04_cents": 22900488,
+    "index_cents": 22900488,
+    "sum_n_rows": 4614,
+    "sheet04_gifts": 4614,
+    "index_gifts": 4614
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 2241801,
+    "senate_cents": 17173526,
+    "not_house_senate_cents": 8865532,
+    "sum_cents": 28280859,
+    "sheet04_cents": 28280859,
+    "index_cents": 28280859,
+    "sum_n_rows": 2893,
+    "sheet04_gifts": 2893,
+    "index_gifts": 2893
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 3270593,
+    "senate_cents": 2142541,
+    "not_house_senate_cents": 44214842,
+    "sum_cents": 49627976,
+    "sheet04_cents": 49627976,
+    "index_cents": 49627976,
+    "sum_n_rows": 11869,
+    "sheet04_gifts": 11869,
+    "index_gifts": 11869
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 5574354,
+    "senate_cents": 789100,
+    "not_house_senate_cents": 14010134,
+    "sum_cents": 20373588,
+    "sheet04_cents": 20373588,
+    "index_cents": 20373588,
+    "sum_n_rows": 3466,
+    "sheet04_gifts": 3466,
+    "index_gifts": 3466
+   },
+   {
+    "mentat_industry": "credit_union",
+    "study_sector": "credit_unions",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 776500,
+    "senate_cents": 376250,
+    "not_house_senate_cents": 5823076,
+    "sum_cents": 6975826,
+    "sheet04_cents": 6975826,
+    "index_cents": 6975826,
+    "sum_n_rows": 1642,
+    "sheet04_gifts": 1642,
+    "index_gifts": 1642
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 1149608,
+    "senate_cents": 22004158,
+    "not_house_senate_cents": 13454780,
+    "sum_cents": 36608546,
+    "sheet04_cents": 36608546,
+    "index_cents": 36608546,
+    "sum_n_rows": 238,
+    "sheet04_gifts": 238,
+    "index_gifts": 238
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 9562500,
+    "senate_cents": 17909415,
+    "not_house_senate_cents": 111546873,
+    "sum_cents": 139018788,
+    "sheet04_cents": 139018788,
+    "index_cents": 139018788,
+    "sum_n_rows": 818,
+    "sheet04_gifts": 818,
+    "index_gifts": 818
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 16366025,
+    "senate_cents": 15740935,
+    "not_house_senate_cents": 5763600400,
+    "sum_cents": 5795707360,
+    "sheet04_cents": 5795707360,
+    "index_cents": 5795707360,
+    "sum_n_rows": 851,
+    "sheet04_gifts": 851,
+    "index_gifts": 851
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 35646703,
+    "senate_cents": 20740301,
+    "not_house_senate_cents": 8694113481,
+    "sum_cents": 8750500485,
+    "sheet04_cents": 8750500485,
+    "index_cents": 8750500485,
+    "sum_n_rows": 2510,
+    "sheet04_gifts": 2510,
+    "index_gifts": 2510
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 41532903,
+    "senate_cents": 31196788,
+    "not_house_senate_cents": 9365208180,
+    "sum_cents": 9437937871,
+    "sheet04_cents": 9437937871,
+    "index_cents": 9437937871,
+    "sum_n_rows": 1267,
+    "sheet04_gifts": 1267,
+    "index_gifts": 1267
+   },
+   {
+    "mentat_industry": "crypto",
+    "study_sector": "crypto",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 21616431,
+    "senate_cents": 12889874,
+    "not_house_senate_cents": 800668962,
+    "sum_cents": 835175267,
+    "sheet04_cents": 835175267,
+    "index_cents": 835175267,
+    "sum_n_rows": 589,
+    "sheet04_gifts": 589,
+    "index_gifts": 589
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 6205211,
+    "senate_cents": 4352239,
+    "not_house_senate_cents": 496961428,
+    "sum_cents": 507518878,
+    "sheet04_cents": 507518878,
+    "index_cents": 507518878,
+    "sum_n_rows": 94773,
+    "sheet04_gifts": 94773,
+    "index_gifts": 94773
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 9997634,
+    "senate_cents": 7370724,
+    "not_house_senate_cents": 353010690,
+    "sum_cents": 370379048,
+    "sheet04_cents": 370379048,
+    "index_cents": 370379048,
+    "sum_n_rows": 75082,
+    "sheet04_gifts": 75082,
+    "index_gifts": 75082
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 5418294,
+    "senate_cents": 5998127,
+    "not_house_senate_cents": 408275569,
+    "sum_cents": 419691990,
+    "sheet04_cents": 419691990,
+    "index_cents": 419691990,
+    "sum_n_rows": 78424,
+    "sheet04_gifts": 78424,
+    "index_gifts": 78424
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 7308894,
+    "senate_cents": 9343443,
+    "not_house_senate_cents": 531408212,
+    "sum_cents": 548060549,
+    "sheet04_cents": 548060549,
+    "index_cents": 548060549,
+    "sum_n_rows": 94392,
+    "sheet04_gifts": 94392,
+    "index_gifts": 94392
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 11920888,
+    "senate_cents": 6063328,
+    "not_house_senate_cents": 439052593,
+    "sum_cents": 457036809,
+    "sheet04_cents": 457036809,
+    "index_cents": 457036809,
+    "sum_n_rows": 63478,
+    "sheet04_gifts": 63478,
+    "index_gifts": 63478
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "study_sector": "credit_arms",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 3195771,
+    "senate_cents": 2491484,
+    "not_house_senate_cents": 84869996,
+    "sum_cents": 90557251,
+    "sheet04_cents": 90557251,
+    "index_cents": 90557251,
+    "sum_n_rows": 10421,
+    "sheet04_gifts": 10421,
+    "index_gifts": 10421
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 5747208,
+    "senate_cents": 3574916,
+    "not_house_senate_cents": 58979741,
+    "sum_cents": 68301865,
+    "sheet04_cents": 68301865,
+    "index_cents": 68301865,
+    "sum_n_rows": 2776,
+    "sheet04_gifts": 2776,
+    "index_gifts": 2776
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 9678227,
+    "senate_cents": 20582933,
+    "not_house_senate_cents": 90592941,
+    "sum_cents": 120854101,
+    "sheet04_cents": 120854101,
+    "index_cents": 120854101,
+    "sum_n_rows": 4333,
+    "sheet04_gifts": 4333,
+    "index_gifts": 4333
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 12588073,
+    "senate_cents": 4519992,
+    "not_house_senate_cents": 67195698,
+    "sum_cents": 84303763,
+    "sheet04_cents": 84303763,
+    "index_cents": 84303763,
+    "sum_n_rows": 2260,
+    "sheet04_gifts": 2260,
+    "index_gifts": 2260
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 11806275,
+    "senate_cents": 13623255,
+    "not_house_senate_cents": 276219163,
+    "sum_cents": 301648693,
+    "sheet04_cents": 301648693,
+    "index_cents": 301648693,
+    "sum_n_rows": 10459,
+    "sheet04_gifts": 10459,
+    "index_gifts": 10459
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 22455081,
+    "senate_cents": 23005006,
+    "not_house_senate_cents": 151101092,
+    "sum_cents": 196561179,
+    "sheet04_cents": 196561179,
+    "index_cents": 196561179,
+    "sum_n_rows": 3327,
+    "sheet04_gifts": 3327,
+    "index_gifts": 3327
+   },
+   {
+    "mentat_industry": "fintech",
+    "study_sector": "fintech",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 19990103,
+    "senate_cents": 2251600,
+    "not_house_senate_cents": 186477827,
+    "sum_cents": 208719530,
+    "sheet04_cents": 208719530,
+    "index_cents": 208719530,
+    "sum_n_rows": 1746,
+    "sheet04_gifts": 1746,
+    "index_gifts": 1746
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 19803203,
+    "senate_cents": 11694457,
+    "not_house_senate_cents": 214633087,
+    "sum_cents": 246130747,
+    "sheet04_cents": 246130747,
+    "index_cents": 246130747,
+    "sum_n_rows": 43946,
+    "sheet04_gifts": 43946,
+    "index_gifts": 43946
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 20443898,
+    "senate_cents": 21168684,
+    "not_house_senate_cents": 236290637,
+    "sum_cents": 277903219,
+    "sheet04_cents": 277903219,
+    "index_cents": 277903219,
+    "sum_n_rows": 55484,
+    "sheet04_gifts": 55484,
+    "index_gifts": 55484
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 10817999,
+    "senate_cents": 9413880,
+    "not_house_senate_cents": 205125975,
+    "sum_cents": 225357854,
+    "sheet04_cents": 225357854,
+    "index_cents": 225357854,
+    "sum_n_rows": 29188,
+    "sheet04_gifts": 29188,
+    "index_gifts": 29188
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 16054375,
+    "senate_cents": 21230172,
+    "not_house_senate_cents": 523102141,
+    "sum_cents": 560386688,
+    "sheet04_cents": 560386688,
+    "index_cents": 560386688,
+    "sum_n_rows": 93310,
+    "sheet04_gifts": 93310,
+    "index_gifts": 93310
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 21236428,
+    "senate_cents": 10313676,
+    "not_house_senate_cents": 207335713,
+    "sum_cents": 238885817,
+    "sheet04_cents": 238885817,
+    "index_cents": 238885817,
+    "sum_n_rows": 39856,
+    "sheet04_gifts": 39856,
+    "index_gifts": 39856
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "study_sector": "property_casualty",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 12178976,
+    "senate_cents": 6051635,
+    "not_house_senate_cents": 101841623,
+    "sum_cents": 120072234,
+    "sheet04_cents": 120072234,
+    "index_cents": 120072234,
+    "sum_n_rows": 17055,
+    "sheet04_gifts": 17055,
+    "index_gifts": 17055
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 29947969,
+    "senate_cents": 50034687,
+    "not_house_senate_cents": 545893670,
+    "sum_cents": 625876326,
+    "sheet04_cents": 625876326,
+    "index_cents": 625876326,
+    "sum_n_rows": 77962,
+    "sheet04_gifts": 77962,
+    "index_gifts": 77962
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 63600903,
+    "senate_cents": 74475925,
+    "not_house_senate_cents": 482434221,
+    "sum_cents": 620511049,
+    "sheet04_cents": 620511049,
+    "index_cents": 620511049,
+    "sum_n_rows": 101840,
+    "sheet04_gifts": 101840,
+    "index_gifts": 101840
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 30237635,
+    "senate_cents": 64890468,
+    "not_house_senate_cents": 517781772,
+    "sum_cents": 612909875,
+    "sheet04_cents": 612909875,
+    "index_cents": 612909875,
+    "sum_n_rows": 66614,
+    "sheet04_gifts": 66614,
+    "index_gifts": 66614
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 47694660,
+    "senate_cents": 49780041,
+    "not_house_senate_cents": 1087430813,
+    "sum_cents": 1184905514,
+    "sheet04_cents": 1184905514,
+    "index_cents": 1184905514,
+    "sum_n_rows": 141485,
+    "sheet04_gifts": 141485,
+    "index_gifts": 141485
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 32329263,
+    "senate_cents": 38728986,
+    "not_house_senate_cents": 378349590,
+    "sum_cents": 449407839,
+    "sheet04_cents": 449407839,
+    "index_cents": 449407839,
+    "sum_n_rows": 71281,
+    "sheet04_gifts": 71281,
+    "index_gifts": 71281
+   },
+   {
+    "mentat_industry": "telecom",
+    "study_sector": "telecom",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 22530055,
+    "senate_cents": 26950632,
+    "not_house_senate_cents": 226720819,
+    "sum_cents": 276201506,
+    "sheet04_cents": 276201506,
+    "index_cents": 276201506,
+    "sum_n_rows": 46612,
+    "sheet04_gifts": 46612,
+    "index_gifts": 46612
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2019,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2020,
+    "result": "MATCH",
+    "status": "missing",
+    "sum_cents": null,
+    "sheet04_cents": null,
+    "index_cents": null
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2021,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 942700,
+    "senate_cents": 635365,
+    "not_house_senate_cents": 2786199,
+    "sum_cents": 4364264,
+    "sheet04_cents": 4364264,
+    "index_cents": 4364264,
+    "sum_n_rows": 540,
+    "sheet04_gifts": 540,
+    "index_gifts": 540
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2022,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 7052946,
+    "senate_cents": 2248289,
+    "not_house_senate_cents": 9210023,
+    "sum_cents": 18511258,
+    "sheet04_cents": 18511258,
+    "index_cents": 18511258,
+    "sum_n_rows": 804,
+    "sheet04_gifts": 804,
+    "index_gifts": 804
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2023,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 760001,
+    "senate_cents": 998229,
+    "not_house_senate_cents": 5646863,
+    "sum_cents": 7405093,
+    "sheet04_cents": 7405093,
+    "index_cents": 7405093,
+    "sum_n_rows": 455,
+    "sheet04_gifts": 455,
+    "index_gifts": 455
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2024,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 2758076,
+    "senate_cents": 1854089,
+    "not_house_senate_cents": 25928245,
+    "sum_cents": 30540410,
+    "sheet04_cents": 30540410,
+    "index_cents": 30540410,
+    "sum_n_rows": 1368,
+    "sheet04_gifts": 1368,
+    "index_gifts": 1368
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2025,
+    "result": "MATCH",
+    "status": "observed",
+    "house_cents": 5277501,
+    "senate_cents": 3097082,
+    "not_house_senate_cents": 9111986,
+    "sum_cents": 17486569,
+    "sheet04_cents": 17486569,
+    "index_cents": 17486569,
+    "sum_n_rows": 594,
+    "sheet04_gifts": 594,
+    "index_gifts": 594
+   },
+   {
+    "mentat_industry": "community_banks",
+    "study_sector": "community_banks",
+    "year": 2026,
+    "result": "MATCH",
+    "status": "partial",
+    "house_cents": 3208129,
+    "senate_cents": 953441,
+    "not_house_senate_cents": 3881434,
+    "sum_cents": 8043004,
+    "sheet04_cents": 8043004,
+    "index_cents": 8043004,
+    "sum_n_rows": 205,
+    "sheet04_gifts": 205,
+    "index_gifts": 205
+   }
+  ]
+ },
+ "coverage": {
+  "total_usd": 395119662.09,
+  "house_usd": 11435789.62,
+  "senate_usd": 10612135.82,
+  "not_house_senate_usd": 373071736.65,
+  "house_pct": 2.894,
+  "senate_pct": 2.686,
+  "not_house_senate_pct": 94.42,
+  "by_industry": {
+   "banking": {
+    "total_usd": 54762844.05,
+    "house_usd": 5187723.31,
+    "senate_usd": 4200313.09,
+    "not_house_senate_usd": 45374807.65,
+    "house_pct": 9.473,
+    "senate_pct": 7.67,
+    "not_house_senate_pct": 82.857
+   },
+   "credit_union": {
+    "total_usd": 1422005.65,
+    "house_usd": 257460.85,
+    "senate_usd": 230040.17,
+    "not_house_senate_usd": 934504.63,
+    "house_pct": 18.105,
+    "senate_pct": 16.177,
+    "not_house_senate_pct": 65.717
+   },
+   "crypto": {
+    "total_usd": 249949483.17,
+    "house_usd": 1258741.7,
+    "senate_usd": 1204814.71,
+    "not_house_senate_usd": 247485926.76,
+    "house_pct": 0.504,
+    "senate_pct": 0.482,
+    "not_house_senate_pct": 99.014
+   },
+   "credit_arms": {
+    "total_usd": 23932445.25,
+    "house_usd": 440466.92,
+    "senate_usd": 356193.45,
+    "not_house_senate_usd": 23135784.88,
+    "house_pct": 1.84,
+    "senate_pct": 1.488,
+    "not_house_senate_pct": 96.671
+   },
+   "fintech": {
+    "total_usd": 9803891.31,
+    "house_usd": 822649.67,
+    "senate_usd": 675577.02,
+    "not_house_senate_usd": 8305664.62,
+    "house_pct": 8.391,
+    "senate_pct": 6.891,
+    "not_house_senate_pct": 84.718
+   },
+   "property_casualty_insurance": {
+    "total_usd": 16687365.59,
+    "house_usd": 1005348.79,
+    "senate_usd": 798725.04,
+    "not_house_senate_usd": 14883291.76,
+    "house_pct": 6.025,
+    "senate_pct": 4.786,
+    "not_house_senate_pct": 89.189
+   },
+   "telecom": {
+    "total_usd": 37698121.09,
+    "house_usd": 2263404.85,
+    "senate_usd": 3048607.39,
+    "not_house_senate_usd": 32386108.85,
+    "house_pct": 6.004,
+    "senate_pct": 8.087,
+    "not_house_senate_pct": 85.909
+   },
+   "community_banks": {
+    "total_usd": 863505.98,
+    "house_usd": 199993.53,
+    "senate_usd": 97864.95,
+    "not_house_senate_usd": 565647.5,
+    "house_pct": 23.161,
+    "senate_pct": 11.333,
+    "not_house_senate_pct": 65.506
+   }
+  },
+  "not_house_senate_by_type_usd": {
+   "pac/super_pac": 192893963.63,
+   "pac/pac": 51684783.59,
+   "pac/hybrid_pac": 45804110.04,
+   "pac/conduit": 35930833.36,
+   "pac/joint_fundraising_committee": 21433255.16,
+   "party/party_committee_type_X": 8618947.98,
+   "party/party_committee_type_Y": 5161358.48,
+   "presidential/presidential_candidate_committee": 4121891.71,
+   "pac/leadership_pac": 2597903.4,
+   "party/hill_committee_NRSC": 2138005.67,
+   "party/hill_committee_DCCC": 1111513.1,
+   "party/hill_committee_NRCC": 787936.95,
+   "party/hill_committee_DSCC": 752333.58,
+   "pac/single_candidate_ie_committee": 18300.0,
+   "pac/unauthorized_candidate_type_H_committee": 10100.0,
+   "pac/unauthorized_candidate_type_S_committee": 6500.0
+  },
+  "link_rule_usd": {
+   "other/cm_type": 333019011.58,
+   "other/conduit_committee_id": 35930833.36,
+   "House/ccl_same_cycle": 11392095.37,
+   "Senate/ccl_same_cycle": 10586518.64,
+   "other/ccl_same_cycle": 4121866.71,
+   "House/ccl_other_cycle": 43694.25,
+   "Senate/ccl_other_cycle+same_cycle_committee_type": 16467.18,
+   "Senate/ccl_other_cycle": 8900.0,
+   "Senate/cm_cand_id_same_cycle": 250.0,
+   "other/ccl_other_cycle": 25.0
+  },
+  "committees": 5246,
+  "committees_house": 2342,
+  "committees_senate": 508,
+  "committees_other": 2396,
+  "unmapped_committees": [],
+  "party_source_usd": {
+   "House/facts/D": 7057669.7,
+   "Senate/facts/D": 5837949.04,
+   "Senate/facts/R": 4397181.14,
+   "House/facts/R": 4330990.76,
+   "Senate/none/other": 370408.13,
+   "House/none/other": 25170.84,
+   "House/candidate/R": 21450.54,
+   "Senate/candidate/D": 6077.0,
+   "Senate/candidate/R": 520.51,
+   "House/candidate/D": 507.78
+  },
+  "facts_vs_candidate_party_disagreement_usd": {},
+  "dem_share_blank_cells": [],
+  "link_flags_usd": {
+   "chamber_differs_from_candidate_office/Senate": 16467.18,
+   "office_from_candidate_id_prefix/House": 9971.01,
+   "office_from_candidate_id_prefix/other": 1257.59,
+   "same_cycle_committee_type_override/Senate": 16467.18
+  }
+ },
+ "coverage_summary": {
+  "total_usd": 395119662.09,
+  "house_usd": 11435789.62,
+  "senate_usd": 10612135.82,
+  "not_house_senate_usd": 373071736.65,
+  "house_pct": 2.894,
+  "senate_pct": 2.686,
+  "not_house_senate_pct": 94.42,
+  "by_industry_pct": {
+   "banking": [
+    9.473,
+    7.67,
+    82.857
+   ],
+   "credit_union": [
+    18.105,
+    16.177,
+    65.717
+   ],
+   "crypto": [
+    0.504,
+    0.482,
+    99.014
+   ],
+   "credit_arms": [
+    1.84,
+    1.488,
+    96.671
+   ],
+   "fintech": [
+    8.391,
+    6.891,
+    84.718
+   ],
+   "property_casualty_insurance": [
+    6.025,
+    4.786,
+    89.189
+   ],
+   "telecom": [
+    6.004,
+    8.087,
+    85.909
+   ],
+   "community_banks": [
+    23.161,
+    11.333,
+    65.506
+   ]
+  },
+  "unmapped_committees": []
+ },
+ "mentat_map_crosscheck": {
+  "source": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\build\\chamber\\work\\pacmap.sqlite",
+  "rows": 22056,
+  "workbook_bytes_equal_04_and_unchanged": {
+   "banking": true,
+   "credit_union": true,
+   "crypto": true,
+   "credit_arms": true,
+   "fintech": true,
+   "property_casualty_insurance": true,
+   "telecom": true,
+   "community_banks": true
+  },
+  "agree_usd": 395032704.65,
+  "differ_usd": 86957.44,
+  "not_in_map_usd": 0.0,
+  "agree_pct": 99.978,
+  "differences": [
+   {
+    "mentat_industry": "credit_union",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00636571",
+    "link_chamber": "Senate",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle+same_cycle_committee_type",
+    "usd": 16467.18
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00792283",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 9750.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00814400",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_same_cycle",
+    "usd": 9221.01
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00840165",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 8450.0
+   },
+   {
+    "mentat_industry": "crypto",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00840165",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 6600.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00775585",
+    "link_chamber": "Senate",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 6000.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2025-2026",
+    "committee_id": "C00907923",
+    "link_chamber": "other",
+    "mentat_map_chamber": "Senate",
+    "link_rule": "cm_type",
+    "usd": 4650.0
+   },
+   {
+    "mentat_industry": "fintech",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00909283",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 3000.0
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00775585",
+    "link_chamber": "Senate",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 2900.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00856831",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 2500.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00840165",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 2357.25
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00791293",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 2236.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00850420",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 2000.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00856831",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 1500.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00791293",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 1251.0
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "fec_cycle": "2025-2026",
+    "committee_id": "C00911396",
+    "link_chamber": "other",
+    "mentat_map_chamber": "House",
+    "link_rule": "cm_type",
+    "usd": 1250.0
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00791293",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 1000.0
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00798322",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_same_cycle",
+    "usd": 1000.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00850420",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 1000.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00814400",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_same_cycle",
+    "usd": 750.0
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00909283",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 500.0
+   },
+   {
+    "mentat_industry": "fintech",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00792283",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 500.0
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00791293",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 500.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2025-2026",
+    "committee_id": "C00916395",
+    "link_chamber": "other",
+    "mentat_map_chamber": "House",
+    "link_rule": "cm_type",
+    "usd": 500.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2021-2022",
+    "committee_id": "C00791293",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 250.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2025-2026",
+    "committee_id": "C00902288",
+    "link_chamber": "Senate",
+    "mentat_map_chamber": "other",
+    "link_rule": "cm_cand_id_same_cycle",
+    "usd": 250.0
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "fec_cycle": "2025-2026",
+    "committee_id": "C00937573",
+    "link_chamber": "other",
+    "mentat_map_chamber": "House",
+    "link_rule": "cm_type",
+    "usd": 250.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00909283",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 250.0
+   },
+   {
+    "mentat_industry": "banking",
+    "fec_cycle": "2023-2024",
+    "committee_id": "C00901975",
+    "link_chamber": "House",
+    "mentat_map_chamber": "other",
+    "link_rule": "ccl_other_cycle",
+    "usd": 50.0
+   },
+   {
+    "mentat_industry": "telecom",
+    "fec_cycle": "2025-2026",
+    "committee_id": "C00911396",
+    "link_chamber": "other",
+    "mentat_map_chamber": "House",
+    "link_rule": "cm_type",
+    "usd": 25.0
+   }
+  ]
+ },
+ "verification": {
+  "stage": {
+   "file": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\out\\stage_20260926T002448Z\\08_contributions_by_chamber.xlsx",
+   "sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+   "passed": 39,
+   "failed": 0
+  },
+  "installed": {
+   "file": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+   "sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+   "passed": 39,
+   "failed": 0,
+   "checks": [
+    {
+     "check": "no <f> formula elements in any sheet XML",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "no comments / drawings / external links / macros",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sheet names and order",
+     "ok": true,
+     "detail": "['sector_year_chamber', 'reconcile', 'other_recipients', 'committee_map', 'notes', 'dictionary', 'sources']"
+    },
+    {
+     "check": "sector_year_chamber: header",
+     "ok": true,
+     "detail": "('study_sector', 'year', 'chamber', 'dem_usd', 'rep_usd', 'other_usd', 'dem_real_m', 'rep_real_m', 'dem_share', 'n_rows', 'total_usd', 'dr_party_from_facts_usd', 'dr_party_from_candidate_usd', 'n_committees', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+    },
+    {
+     "check": "reconcile: header",
+     "ok": true,
+     "detail": "('study_sector', 'year', 'house_usd', 'senate_usd', 'not_house_senate_usd', 'sum_usd', 'sheet04_giving_usd', 'index_year_usd', 'difference_usd', 'house_n_rows', 'senate_n_rows', 'not_house_senate_n_rows', 'sum_n_rows', 'sheet04_gifts', 'result', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+    },
+    {
+     "check": "other_recipients: header",
+     "ok": true,
+     "detail": "('study_sector', 'year', 'not_house_senate_usd', 'presidential_usd', 'party_usd', 'pac_usd', 'unknown_usd', 'of_which_hill_committees_usd', 'of_which_actblue_usd', 'of_which_winred_usd', 'of_which_leadership_pacs_usd', 'of_which_joint_fundraising_usd', 'n_rows', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+    },
+    {
+     "check": "committee_map: header",
+     "ok": true,
+     "detail": "('fec_cycle', 'committee_id', 'committee_name', 'chamber', 'other_type', 'other_subtype', 'link_rule', 'link_source', 'cand_ids', 'cand_names', 'cand_office', 'cand_party', 'cand_party_dr', 'cm_committee_type', 'cm_designation', 'mentat_recipient_category', 'facts_party', 'usd', 'n_rows', 'study_sectors', 'mentat_map_chamber', 'note', 'source_id')"
+    },
+    {
+     "check": "notes: header",
+     "ok": true,
+     "detail": "('note_id', 'topic', 'note')"
+    },
+    {
+     "check": "dictionary: header",
+     "ok": true,
+     "detail": "('sheet', 'column', 'type', 'unit', 'definition', 'source_ids')"
+    },
+    {
+     "check": "sources: header",
+     "ok": true,
+     "detail": "('source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at', 'note')"
+    },
+    {
+     "check": "no formula-like text cells",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sector_year_chamber: key study_sector+year+chamber unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile: key study_sector+year unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "other_recipients: key study_sector+year unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_map: key fec_cycle+committee_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "notes: key note_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "dictionary: key sheet+column unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sources: key source_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "dictionary documents every column and nothing else",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "every source_id token resolves to the sources sheet",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "every table row of the three sector-year sheets names a source",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sources: every file exists with the recorded SHA-256 and size",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "04 workbook bytes equal build_receipt_04 file.sha256",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "sector_year_chamber: exactly 04's sector x year grid x {House, Senate} (128 rows)",
+     "ok": true,
+     "detail": 128
+    },
+    {
+     "check": "reconcile and other_recipients: exactly 04's 64 sector-years",
+     "ok": true,
+     "detail": "(64, 64)"
+    },
+    {
+     "check": "study_sector / mentat_industry / status / note as in 04 sector_year",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_map: every House/Senate committee has an FEC P/A link to a candidate of that office (raw ccl/cm/cn)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_map: no 'other' committee is linked P/A to a House/Senate candidate in its cycle (or, unlinked there, in the nearest linked cycle)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_map: cand_party_dr = cn party of the linked candidate(s) (DEM/DFL=D, REP=R)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_map: conduits ActBlue / WinRed and the four Hill committees are 'other'",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "every included facts row finds its (fec_cycle, committee_id) in committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "committee_map: usd and n_rows == row-level re-derivation, and no committee without rows",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sector_year_chamber: every money cell, n_rows and n_committees == row-level re-derivation (to the cent)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sector_year_chamber: dem/rep_real_m == usd x multiplier_to_2025_dollars / 1e6 (exact double); blank for 2026",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sector_year_chamber: dem_share == dem/(dem+rep) exactly; blank iff D+R <= 0",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "missing rows are blank in every value column",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "other_recipients: every cell == row-level re-derivation; not_house_senate = presidential + party + pac + unknown",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile: House + Senate + not_house_senate == 04 sector_year giving == index year total (to the cent, rows == gifts), recomputed from cells; every row MATCH",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile: the 16 sector-years 2019-2020 are both-missing MATCH",
+     "ok": true,
+     "detail": 16
+    }
+   ]
+  },
+  "negative_control": {
+   "tampered_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\out\\negctl_20260926T002825Z\\tampered_08.xlsx",
+   "tampers": [
+    "sector_year_chamber!dem_usd row 6 +0.01",
+    "sector_year_chamber!dem_real_m row 6 x (1 + 1e-12)",
+    "notes!note row 2 = formula '=1+1'",
+    "committee_map!chamber row 2 House -> other (C00636571)",
+    "other_recipients!source_id row 5 = 'bogus_source'"
+   ],
+   "failed_checks": [
+    "no <f> formula elements in any sheet XML",
+    "no formula-like text cells",
+    "every source_id token resolves to the sources sheet",
+    "committee_map: no 'other' committee is linked P/A to a House/Senate candidate in its cycle (or, unlinked there, in the nearest linked cycle)",
+    "sector_year_chamber: every money cell, n_rows and n_committees == row-level re-derivation (to the cent)",
+    "sector_year_chamber: dem/rep_real_m == usd x multiplier_to_2025_dollars / 1e6 (exact double); blank for 2026",
+    "sector_year_chamber: dem_share == dem/(dem+rep) exactly; blank iff D+R <= 0",
+    "other_recipients: every cell == row-level re-derivation; not_house_senate = presidential + party + pac + unknown"
+   ],
+   "n_failed": 8,
+   "n_checks": 39
+  },
+  "method": "verify_08.py shares no code with the build: it re-parses the raw FEC ccl/cn/cm files, re-reads 04 and 00_controls, re-reads every facts row of the pinned indexes (row level, immutable read-only) and re-derives every money cell from the rows plus the committee_map as published"
+ },
+ "install": {
+  "target": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+  "source_stage": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\out\\stage_20260926T002448Z\\08_contributions_by_chamber.xlsx",
+  "target_existed_before": false,
+  "free_before": 17081806848,
+  "stage_sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+  "installed_sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+  "bytes_equal": true,
+  "size": 563001,
+  "mtime_utc": "2026-09-26T00:24:49Z"
+ },
+ "sources": [
+  {
+   "source_id": "idx_banking",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\bb2b2452b4fc14c827c6632ae8b1ecc47444ce835d6e44d6a7d885997424b7d0.sqlite",
+   "zip_member": null,
+   "sha256": "cd044cea86bb7c72392e71f19f2e74284204c25d98419f9230abee1cce480e9f",
+   "size_bytes": 707866624,
+   "mtime": "2026-09-21T18:47:19Z",
+   "rows_read": 849399,
+   "read_at": "2026-09-26T00:10:34Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; 04 recorded no SHA-256 (file > 300 MiB)"
+  },
+  {
+   "source_id": "idx_credit_union",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\88e3f70252e75c3ebcbefab2096f39687b0f4874420f97f9b63f83e1e4d85bae.sqlite",
+   "zip_member": null,
+   "sha256": "8ef1d494468869019db810e659a966ccdf9b73bd64216bd9d546a943cfe30619",
+   "size_bytes": 56930304,
+   "mtime": "2026-09-21T14:39:37Z",
+   "rows_read": 67169,
+   "read_at": "2026-09-26T00:10:38Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; SHA-256 equal 04's"
+  },
+  {
+   "source_id": "idx_crypto",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\caaa897c7cbd0425354eedcee62c574a410591fd6bda8a9931f8580184e03844.sqlite",
+   "zip_member": null,
+   "sha256": "c6f1ef6f050f0ecf00e4def0213ba35332baa506ab77ff7d0ec26ddbc460da5b",
+   "size_bytes": 11689984,
+   "mtime": "2026-09-22T14:53:18Z",
+   "rows_read": 14801,
+   "read_at": "2026-09-26T00:10:39Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; SHA-256 equal 04's"
+  },
+  {
+   "source_id": "idx_credit_arms",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\ba38420fc8c51460f192df48c78542fe66fd650e7dc8eeb8910a1aa5a2c41234.sqlite",
+   "zip_member": null,
+   "sha256": "f2d92efe0cec96a0ff2ae247f41a12247bd000029a199572933e4f2c488b4083",
+   "size_bytes": 401338368,
+   "mtime": "2026-09-22T22:47:25Z",
+   "rows_read": 434958,
+   "read_at": "2026-09-26T00:10:55Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; 04 recorded no SHA-256 (file > 300 MiB)"
+  },
+  {
+   "source_id": "idx_fintech",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\2f9fa3df526b0f27a753943ed615240adf931be93f3223838752b517824ceb65.sqlite",
+   "zip_member": null,
+   "sha256": "4667318c4993a1b69ea9ea55eddfed70f93d170970f4b7635b1dde4f3a384e76",
+   "size_bytes": 68304896,
+   "mtime": "2026-09-22T22:48:35Z",
+   "rows_read": 86270,
+   "read_at": "2026-09-26T00:11:01Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; SHA-256 equal 04's"
+  },
+  {
+   "source_id": "idx_property_casualty_insurance",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\b9dabba3d54e6550f75fb0a8e4e5e8774ea6d7745d98e20585c5f498569ada34.sqlite",
+   "zip_member": null,
+   "sha256": "d8d3b6db52d9ed9b2b8fdf337adcc51da6a7372745bb9c5467b8f7af32b41209",
+   "size_bytes": 302358528,
+   "mtime": "2026-09-22T22:54:40Z",
+   "rows_read": 360207,
+   "read_at": "2026-09-26T00:11:18Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; SHA-256 equal 04's"
+  },
+  {
+   "source_id": "idx_telecom",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\6f7acaee8a6e8c5ac34e5d572094a078c85c68c46b1f990c022f3021d2dbc08c.sqlite",
+   "zip_member": null,
+   "sha256": "9e14a596bba37b78c76f80b84867efececab325f4b12117cce8d9d2986bed794",
+   "size_bytes": 676626432,
+   "mtime": "2026-09-22T15:50:15Z",
+   "rows_read": 808066,
+   "read_at": "2026-09-26T00:11:57Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; 04 recorded no SHA-256 (file > 300 MiB)"
+  },
+  {
+   "source_id": "idx_community_banks",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763.sqlite",
+   "zip_member": null,
+   "sha256": "df15235d957fbb44398e6858d4c53b4eac5595244dc9994f29447672db0cc448",
+   "size_bytes": 3899392,
+   "mtime": "2026-09-22T01:20:43Z",
+   "rows_read": 4649,
+   "read_at": "2026-09-26T00:11:57Z",
+   "note": "pinned analytics index named by build_receipt_04.json (table facts); in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); size and mtime equal 04's; SHA-256 equal 04's"
+  },
+  {
+   "source_id": "receipt04",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_04.json",
+   "zip_member": null,
+   "sha256": "10522aa29d2e5d760c81fcd04061290c69f8ac499e9f573c7104cfb031e1ef06",
+   "size_bytes": 68804,
+   "mtime": "2026-09-25T21:36:06Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T00:24:48Z",
+   "note": "04's build receipt (run workbook04-build-20260925b): names the pinned indexes"
+  },
+  {
+   "source_id": "wb04",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\04_campaign_spending.xlsx",
+   "zip_member": null,
+   "sha256": "b0de2eda142a234df90282bab87ed465c271e470c80fb8510708cad0809bc406",
+   "size_bytes": 434254,
+   "mtime": "2026-09-25T21:36:04Z",
+   "rows_read": 64,
+   "read_at": "2026-09-26T00:24:48Z",
+   "note": "04_campaign_spending.xlsx, sheet sector_year (study_sector names, status, notes, giving_nominal_usd, gifts); SHA-256 equals build_receipt_04.json file.sha256"
+  },
+  {
+   "source_id": "controls00",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\00_controls.xlsx",
+   "zip_member": null,
+   "sha256": "253aaadd6912862df817f51c9d97225735b5f8a764cac64deca40f224d1ab80e",
+   "size_bytes": 10202,
+   "mtime": "2026-09-25T19:28:18Z",
+   "rows_read": 21,
+   "read_at": "2026-09-26T00:24:48Z",
+   "note": "00_controls.xlsx, sheet data, multiplier_to_2025_dollars"
+  },
+  {
+   "source_id": "fec_active",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\active_fec_sources.json",
+   "zip_member": null,
+   "sha256": "7edde4e0f1156377a44d826706304d87984846ddd0ef9435becce46c281ab3a4",
+   "size_bytes": 137,
+   "mtime": "2026-09-08T05:40:44Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T00:24:48Z",
+   "note": "Mentat's active FEC input pointer: C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs (activated 2026-09-08T05:40:44.703145+00:00)"
+  },
+  {
+   "source_id": "fec_cn22",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn22\\cn.txt",
+   "zip_member": null,
+   "sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+   "size_bytes": 832005,
+   "mtime": "2026-09-08T05:26:41Z",
+   "rows_read": 8579,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk cn22 (https://www.fec.gov/files/bulk-downloads/2022/cn22.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38"
+  },
+  {
+   "source_id": "fec_ccl22",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\ccl22\\ccl.txt",
+   "zip_member": null,
+   "sha256": "0af21c2ee63f4adf5066c0c016d092c71b4baa07c7fa37c8d96ccc52bf51baa4",
+   "size_bytes": 315002,
+   "mtime": "2026-09-08T05:26:41Z",
+   "rows_read": 7683,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk ccl22 (https://www.fec.gov/files/bulk-downloads/2022/ccl22.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 0af21c2ee63f4adf5066c0c016d092c71b4baa07c7fa37c8d96ccc52bf51baa4"
+  },
+  {
+   "source_id": "fec_cm22",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_committee_master\\cm22\\cm.txt",
+   "zip_member": null,
+   "sha256": "8d15fae150f2975a58542a39571ff716e3cf1094309e113da928a66e7968d6e2",
+   "size_bytes": 2376312,
+   "mtime": "2026-09-08T05:26:41Z",
+   "rows_read": 19793,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk cm22 (https://www.fec.gov/files/bulk-downloads/2022/cm22.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 8d15fae150f2975a58542a39571ff716e3cf1094309e113da928a66e7968d6e2"
+  },
+  {
+   "source_id": "fec_cn24",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn24\\cn.txt",
+   "zip_member": null,
+   "sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+   "size_bytes": 952677,
+   "mtime": "2026-09-08T05:26:43Z",
+   "rows_read": 9798,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk cn24 (https://www.fec.gov/files/bulk-downloads/2024/cn24.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f"
+  },
+  {
+   "source_id": "fec_ccl24",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\ccl24\\ccl.txt",
+   "zip_member": null,
+   "sha256": "899bfbd4f3de02d11a105dbe4760771aaea0f16057084c5e169c3fa74981e2b4",
+   "size_bytes": 353375,
+   "mtime": "2026-09-08T05:26:44Z",
+   "rows_read": 8619,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk ccl24 (https://www.fec.gov/files/bulk-downloads/2024/ccl24.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 899bfbd4f3de02d11a105dbe4760771aaea0f16057084c5e169c3fa74981e2b4"
+  },
+  {
+   "source_id": "fec_cm24",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_committee_master\\cm24\\cm.txt",
+   "zip_member": null,
+   "sha256": "7f7abd31beaece86617a315b4908b9f7dfe9e839dc1fd8124032c224cea16be3",
+   "size_bytes": 2500798,
+   "mtime": "2026-09-08T05:26:42Z",
+   "rows_read": 20938,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk cm24 (https://www.fec.gov/files/bulk-downloads/2024/cm24.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 7f7abd31beaece86617a315b4908b9f7dfe9e839dc1fd8124032c224cea16be3"
+  },
+  {
+   "source_id": "fec_cn26",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn26\\cn.txt",
+   "zip_member": null,
+   "sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+   "size_bytes": 829444,
+   "mtime": "2026-09-08T05:26:48Z",
+   "rows_read": 8516,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk cn26 (https://www.fec.gov/files/bulk-downloads/2026/cn26.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740"
+  },
+  {
+   "source_id": "fec_ccl26",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\ccl26\\ccl.txt",
+   "zip_member": null,
+   "sha256": "c232ec05c4e41b5190e71798abe5c2dde4f2ccaf6376bdaad2e42005af117d5f",
+   "size_bytes": 330824,
+   "mtime": "2026-09-08T05:26:49Z",
+   "rows_read": 8069,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk ccl26 (https://www.fec.gov/files/bulk-downloads/2026/ccl26.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 c232ec05c4e41b5190e71798abe5c2dde4f2ccaf6376bdaad2e42005af117d5f"
+  },
+  {
+   "source_id": "fec_cm26",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_committee_master\\cm26\\cm.txt",
+   "zip_member": null,
+   "sha256": "fed8c68960b97d275ad90054ea643e6c8211a74e8e41d379b2e80024a51baf60",
+   "size_bytes": 2474528,
+   "mtime": "2026-09-08T05:26:47Z",
+   "rows_read": 20624,
+   "read_at": "2026-09-26T00:24:47Z",
+   "note": "FEC bulk cm26 (https://www.fec.gov/files/bulk-downloads/2026/cm26.zip), the active Mentat FEC input (inputs\\active_fec_sources.json); download receipt sha256 fed8c68960b97d275ad90054ea643e6c8211a74e8e41d379b2e80024a51baf60"
+  },
+  {
+   "source_id": "mentat_pac_map_extract",
+   "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\build\\chamber\\work\\pacmap.sqlite",
+   "zip_member": null,
+   "sha256": "3755d20237afc76b519dc4530c1e6df4a3d25143ef02b196c409d4a9e502483a",
+   "size_bytes": 4550656,
+   "mtime": "2026-09-25T22:55:04Z",
+   "rows_read": 22056,
+   "read_at": "2026-09-26T00:24:48Z",
+   "note": "cross-check only: 'PAC & Candidate Map' sheets of the 8 Industry Spending Overview workbooks, extracted by C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\build\\chamber\\extract_pacmap.py; each workbook's SHA-256 at extraction equals 04's wb_* SHA-256 (all 8 equal)"
+  }
+ ],
+ "fec_download_receipts": {
+  "fec_cn22": {
+   "cycle": 2022,
+   "family": "cn",
+   "url": "https://www.fec.gov/files/bulk-downloads/2022/cn22.zip",
+   "file": "cn.txt",
+   "sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+   "bytes": 832005,
+   "checked_at": "2026-09-08T05:40:08.006712+00:00",
+   "downloaded_at": "2026-09-08T05:26:41.312691+00:00",
+   "etag": "\"699c1f302614e408c14857c15c990cf1\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:13 GMT"
+  },
+  "fec_ccl22": {
+   "cycle": 2022,
+   "family": "ccl",
+   "url": "https://www.fec.gov/files/bulk-downloads/2022/ccl22.zip",
+   "file": "ccl.txt",
+   "sha256": "0af21c2ee63f4adf5066c0c016d092c71b4baa07c7fa37c8d96ccc52bf51baa4",
+   "bytes": 315002,
+   "checked_at": "2026-09-08T05:40:08.006712+00:00",
+   "downloaded_at": "2026-09-08T05:26:41.089777+00:00",
+   "etag": "\"3570f30a042fca6c4a3076191848ddb6\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:22 GMT"
+  },
+  "fec_cm22": {
+   "cycle": 2022,
+   "family": "cm",
+   "url": "https://www.fec.gov/files/bulk-downloads/2022/cm22.zip",
+   "file": "cm.txt",
+   "sha256": "8d15fae150f2975a58542a39571ff716e3cf1094309e113da928a66e7968d6e2",
+   "bytes": 2376312,
+   "checked_at": "2026-09-08T05:40:08.006712+00:00",
+   "downloaded_at": "2026-09-08T05:26:41.388031+00:00",
+   "etag": "\"403d27a830fe959470e2b3e89fe4c7fd\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:17 GMT"
+  },
+  "fec_cn24": {
+   "cycle": 2024,
+   "family": "cn",
+   "url": "https://www.fec.gov/files/bulk-downloads/2024/cn24.zip",
+   "file": "cn.txt",
+   "sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+   "bytes": 952677,
+   "checked_at": "2026-09-08T05:40:09.048843+00:00",
+   "downloaded_at": "2026-09-08T05:26:43.370226+00:00",
+   "etag": "\"e2963df72d1f5e45584a189a67063e90\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:14 GMT"
+  },
+  "fec_ccl24": {
+   "cycle": 2024,
+   "family": "ccl",
+   "url": "https://www.fec.gov/files/bulk-downloads/2024/ccl24.zip",
+   "file": "ccl.txt",
+   "sha256": "899bfbd4f3de02d11a105dbe4760771aaea0f16057084c5e169c3fa74981e2b4",
+   "bytes": 353375,
+   "checked_at": "2026-09-08T05:40:09.302957+00:00",
+   "downloaded_at": "2026-09-08T05:26:44.169432+00:00",
+   "etag": "\"776c5dc6a500cf711d40e6aa14163861\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:23 GMT"
+  },
+  "fec_cm24": {
+   "cycle": 2024,
+   "family": "cm",
+   "url": "https://www.fec.gov/files/bulk-downloads/2024/cm24.zip",
+   "file": "cm.txt",
+   "sha256": "7f7abd31beaece86617a315b4908b9f7dfe9e839dc1fd8124032c224cea16be3",
+   "bytes": 2500798,
+   "checked_at": "2026-09-08T05:40:08.520709+00:00",
+   "downloaded_at": "2026-09-08T05:26:42.240103+00:00",
+   "etag": "\"8390e151a31d81dd664b17642cca57ac\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:19 GMT"
+  },
+  "fec_cn26": {
+   "cycle": 2026,
+   "family": "cn",
+   "url": "https://www.fec.gov/files/bulk-downloads/2026/cn26.zip",
+   "file": "cn.txt",
+   "sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+   "bytes": 829444,
+   "checked_at": "2026-09-08T05:40:13.260239+00:00",
+   "downloaded_at": "2026-09-08T05:26:48.710464+00:00",
+   "etag": "\"0cfc3d29f14db629c1a3aa69b47b93a6\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:15 GMT"
+  },
+  "fec_ccl26": {
+   "cycle": 2026,
+   "family": "ccl",
+   "url": "https://www.fec.gov/files/bulk-downloads/2026/ccl26.zip",
+   "file": "ccl.txt",
+   "sha256": "c232ec05c4e41b5190e71798abe5c2dde4f2ccaf6376bdaad2e42005af117d5f",
+   "bytes": 330824,
+   "checked_at": "2026-09-08T05:40:13.280498+00:00",
+   "downloaded_at": "2026-09-08T05:26:49.376214+00:00",
+   "etag": "\"7da9190f6f569d5c5197ce433606bf71\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:24 GMT"
+  },
+  "fec_cm26": {
+   "cycle": 2026,
+   "family": "cm",
+   "url": "https://www.fec.gov/files/bulk-downloads/2026/cm26.zip",
+   "file": "cm.txt",
+   "sha256": "fed8c68960b97d275ad90054ea643e6c8211a74e8e41d379b2e80024a51baf60",
+   "bytes": 2474528,
+   "checked_at": "2026-09-08T05:40:10.290394+00:00",
+   "downloaded_at": "2026-09-08T05:26:47.878868+00:00",
+   "etag": "\"33225dbda105f17ac8d88af644fd6ac0\"",
+   "last_modified": "Mon, 07 Sep 2026 05:51:20 GMT"
+  }
+ },
+ "intermediates": {
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\out\\extract.json": "76175f20cf2ca9ce26e2ed0116f2ab865129c0f5a9c7fa83319c08f6aa0e07eb",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\out\\stage_20260926T002448Z\\build_facts.json": "79ad8a883833036b656b4af0a44ea085007cf0e064429434e01c3230a20dbe7d"
+ },
+ "scripts": {
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\gb.py": "abae50baaf45cb2b43f2ba105cb7b73e56d2f0716ca346e01d5f7508bd8858b1",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\link_extract.py": "09a2f327a58c95cd087ed42ebfd69b0f5832ebaf1ea184809d26a6b41aaa3ef2",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\link_fec.py": "d72ed2f408e45108c72d9fa0081948a39a4f2e1af3c5ead13911aafe5f1cc759",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\build_08.py": "1937a30cc50141efe81e9d1d603f2ce6638f89a662ed4e913b203903a6a9bce1",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\verify_08.py": "2220752a3392191411a4fdbdf1969d1492b04baa99971fa47c9ddd59b884d46c",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\negctl_08.py": "29375be9842b60bd872da0e36855b50f1acba59a3cc5f70bd2a56fbb0d104346",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\write_receipt.py": "303d42432ffb512cc350ab7a242646da392f7eb5b46cd5dc59e34e44e3f3aea4"
+ },
+ "exploration_scripts_not_part_of_the_build": {
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\explore_diffs.py": "55dc2e12fcf02d0644f1629afb016d527f4b1cf69fb13aaaec2b33ed30fda66a",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\explore_fallbacks.py": "d4812f73ec42db1a106c7ce0fa9d561e6d143fa894ee77bfbd1361991330e200",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\explore_link.py": "48487b9f68c1a8337c9fc18c161d7d9253bdd0afe92293e23ad6f2ad3fceb37b",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\explore_schema.py": "bd0b95ebb522458651792568ac66b2f2c56b892a7166e89623feaa15f8e24936",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\inspect_04_00.py": "4343679a31419a1af5c83045a5dab44a738df280828f8d990b1435ca8b222b52"
+ },
+ "study_folder_writes": [
+  "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+  "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_08_contributions_by_chamber.json"
+ ],
+ "decisions_recorded": [
+  "Population read straight from the 8 pinned indexes (in place, immutable read-only); the payload files 04 names were not read (04 used them only for employee_tier).",
+  "sector_year_chamber carries 04's full grid 2019-2026 (2019-2020 missing rows, 2026 partial), 8 sectors x 8 years x 2 chambers = 128 rows, status/note copied from 04.",
+  "The brief's 'other' bucket is named not_house_senate_usd (sheets other_recipients and reconcile); other_usd on sector_year_chamber is the chamber's non-D/R party giving. Reason: one name, one meaning.",
+  "Hill committees (DCCC, NRCC, DSCC, NRSC) and the ActBlue/WinRed conduits stay in the other bucket (party / pac), per the brief; they are shown as of-which columns.",
+  "Other-cycle linkage used only when the committee has no ccl row in its own cycle ($69,311.43 of chamber dollars); the same-cycle committee type overrides a cross-cycle link of another office (Katie Porter's committee, 2023-2024, $16,467.18 -> Senate).",
+  "Candidate office from the candidate ID's first letter where cn lacks the candidate ($11,228.60).",
+  "FEC-registered H/S-type committees designated J (joint fundraisers) or U (unauthorized) are pac, not unknown.",
+  "DFL (Minnesota Democratic-Farmer-Labor) counts as D."
+ ],
+ "gaps_and_risks": [
+  "Conduit legs: ActBlue $27,309,972.80 and WinRed $8,620,860.56 (all sectors, 2021-2026) are in not_house_senate_usd; their earmarked candidates are only in memo text, which this link does not read. Where the candidate committee's own itemized report carries the same gift it is already counted in its chamber (both rows are in 04's total); unitemized small-dollar earmarks reach a chamber only through the conduit leg, so they are not in the chamber rows.",
+  "Hill committee money (DCCC/NRCC/DSCC/NRSC) is chamber-directed but is party money by the brief's rule; see of_which_hill_committees_usd.",
+  "One committee changed linkage between Mentat's July workbooks and the 2026-09-07 ccl26: BUILD THE BARN PAC (C00907923, formerly WAHLS FOR IOWA) is an unauthorized hybrid PAC in the active files, so its 2025-2026 receipts are other (pac), where Mentat's older map said Senate.",
+  "2026 is partial (through each index's max transaction date); 2019-2020 missing (cycle 2020 not collected).",
+  "life_insurance and auto_manufacturing have no Mentat data (as in 04)."
+ ],
+ "previous_agent_reuse": "The stopped agent's scratch build (build\\chamber) used a different rule set (Hill committees counted in chambers, conduit memos resolved, a leadership class) and never installed. Reused: its PAC & Candidate Map extraction (pacmap.sqlite), only as a cross-check, after confirming each source workbook's SHA-256 equals 04's wb_* SHA-256. Not reused: its derived facts copy, classifier and conduit resolution.",
+ "glassbox_run_start_event": "evt-20260926T0004566162660Z-0000045384",
+ "receipt_note": "The receipt does not list its own hash.",
+ "rewritten_at": "2026-09-26T05:36:30Z",
+ "amendments": [
+  {
+   "run_id": "hill-add-20260926",
+   "at": "2026-09-26T05:36:30Z",
+   "by": "sector-growth chamber link lane (Claude architect subagent, session d613b40c), on the coordinator's follow-up",
+   "request": "Paul's hypothesis, verbatim: when a party is expected to take control, \"does that money shift more toward the party in favor to take control?\"; the chamber-directed party committees are part of that money: add hill_committees_sector_year (study_sector x year x committee: DCCC House D, NRCC House R, DSCC Senate D, NRSC Senate R; usd, real_m, n_rows, chamber, party) and sector_year_chamber_with_hill (same columns as sector_year_chamber, Hill money added, dem_share recomputed); reconcile both against the other_recipients party bucket; existing sheets bit-exact, append-only, verified cell by cell against a backup in NSP\\superseded",
+   "change": "appended three sheets after sources (hill_committees_sector_year 256 rows, sector_year_chamber_with_hill 128 rows, hill_reconcile 64 rows); appended 6 notes (n16-n21) and 59 dictionary rows; nothing else changed",
+   "method": "amend_08_hill.py copies every row of the 7 original sheets verbatim from the backup copy (openpyxl values; numbers written with the same repr() serializer as the base build) and computes the Hill rows from the same pinned population (out\\extract.json, sha256 checked against this receipt's intermediates); committee identity from raw cm22/cm24/cm26 (name, type Y, party DEM/REP); facts.party equals the committee's party on every Hill row",
+   "previous_file": {
+    "sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+    "size_bytes": 563001,
+    "mtime": "2026-09-26T00:24:49Z"
+   },
+   "previous_file_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\superseded\\08_pre_hill_20260926\\08_contributions_by_chamber.xlsx",
+   "previous_receipt_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\superseded\\08_pre_hill_20260926\\build_receipt_08_contributions_by_chamber.json",
+   "previous_receipt_sha256": "c5d96f0ffdafbc9a7fc1ab41a22bfbd948d16ba55fb37f23d43c0dd1c874e903",
+   "backup": {
+    "backup_dir": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\superseded\\08_pre_hill_20260926",
+    "workbook_src": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+    "workbook_src_sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+    "workbook_copy_sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+    "receipt_src_sha256": "c5d96f0ffdafbc9a7fc1ab41a22bfbd948d16ba55fb37f23d43c0dd1c874e903",
+    "receipt_copy_sha256": "c5d96f0ffdafbc9a7fc1ab41a22bfbd948d16ba55fb37f23d43c0dd1c874e903",
+    "at_utc": "2026-09-26T05:21:33Z"
+   },
+   "new_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+   "cell_by_cell_vs_backup": {
+    "installed": {
+     "amended_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+     "backup_sha256": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+     "sheet_order_ok": true,
+     "cells_compared_total": 126451,
+     "cells_differing_total": 0,
+     "ok": true
+    },
+    "installed_by_sheet": {
+     "sector_year_chamber": {
+      "rows_backup": 129,
+      "rows_amended": 129,
+      "appended_rows": 0,
+      "cells_compared": 2451,
+      "nonempty_cells_compared": 1987,
+      "cells_differing": 0,
+      "first_differences": [],
+      "ok": true
+     },
+     "reconcile": {
+      "rows_backup": 65,
+      "rows_amended": 65,
+      "appended_rows": 0,
+      "cells_compared": 1300,
+      "nonempty_cells_compared": 1068,
+      "cells_differing": 0,
+      "first_differences": [],
+      "ok": true
+     },
+     "other_recipients": {
+      "rows_backup": 65,
+      "rows_amended": 65,
+      "appended_rows": 0,
+      "cells_compared": 1170,
+      "nonempty_cells_compared": 954,
+      "cells_differing": 0,
+      "first_differences": [],
+      "ok": true
+     },
+     "committee_map": {
+      "rows_backup": 5247,
+      "rows_amended": 5247,
+      "appended_rows": 0,
+      "cells_compared": 120681,
+      "nonempty_cells_compared": 95587,
+      "cells_differing": 0,
+      "first_differences": [],
+      "ok": true
+     },
+     "notes": {
+      "rows_backup": 16,
+      "rows_amended": 22,
+      "appended_rows": 6,
+      "cells_compared": 48,
+      "nonempty_cells_compared": 48,
+      "cells_differing": 0,
+      "first_differences": [],
+      "ok": true
+     },
+     "dictionary": {
+      "rows_backup": 99,
+      "rows_amended": 158,
+      "appended_rows": 59,
+      "cells_compared": 594,
+      "nonempty_cells_compared": 514,
+      "cells_differing": 0,
+      "first_differences": [],
+      "ok": true
+     },
+     "sources": {
+      "rows_backup": 23,
+      "rows_amended": 23,
+      "appended_rows": 0,
+      "cells_compared": 207,
+      "nonempty_cells_compared": 183,
+      "cells_differing": 0,
+      "first_differences": [],
+      "ok": true
+     }
+    },
+    "stage": {
+     "amended_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+     "cells_compared_total": 126451,
+     "cells_differing_total": 0,
+     "ok": true
+    },
+    "rule": "same openpyxl data_type and value in every cell of each original sheet's used range, floats bit-exact (float.hex); only rows appended after the last original row of notes and dictionary; the 3 new sheets after the 7 originals"
+   },
+   "hill_reconcile": {
+    "summary": "64/64 MATCH",
+    "rows": [
+     {
+      "study_sector": "commercial_banks",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "commercial_banks",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "commercial_banks",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 16092096,
+      "other_recipients_hill_cents": 16092096,
+      "house_hill_cents": 7108676,
+      "senate_hill_cents": 8983420,
+      "house_share_base": 0.6060026591563349,
+      "house_share_with": 0.6024447391298909,
+      "senate_share_base": 0.5605908343491124,
+      "senate_share_with": 0.5328392746131307
+     },
+     {
+      "study_sector": "commercial_banks",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 53388080,
+      "other_recipients_hill_cents": 53388080,
+      "house_hill_cents": 31571588,
+      "senate_hill_cents": 21816492,
+      "house_share_base": 0.6091876415349946,
+      "house_share_with": 0.5234829972301359,
+      "senate_share_base": 0.511432282421967,
+      "senate_share_with": 0.48777649945760104
+     },
+     {
+      "study_sector": "commercial_banks",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 8083635,
+      "other_recipients_hill_cents": 8083635,
+      "house_hill_cents": 5051574,
+      "senate_hill_cents": 3032061,
+      "house_share_base": 0.6535276267604125,
+      "house_share_with": 0.6539727117627543,
+      "senate_share_base": 0.36267858064276615,
+      "senate_share_with": 0.36073130797311165
+     },
+     {
+      "study_sector": "commercial_banks",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 29654449,
+      "other_recipients_hill_cents": 29654449,
+      "house_hill_cents": 7957819,
+      "senate_hill_cents": 21696630,
+      "house_share_base": 0.6578050136985508,
+      "house_share_with": 0.671506300436256,
+      "senate_share_base": 0.6321339917495149,
+      "senate_share_with": 0.5591346358314454
+     },
+     {
+      "study_sector": "commercial_banks",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 13346763,
+      "other_recipients_hill_cents": 13346763,
+      "house_hill_cents": 1414987,
+      "senate_hill_cents": 11931776,
+      "house_share_base": 0.7482695758079008,
+      "house_share_with": 0.7451845973142647,
+      "senate_share_base": 0.6337335545432056,
+      "senate_share_with": 0.524908907483119
+     },
+     {
+      "study_sector": "commercial_banks",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 16735575,
+      "other_recipients_hill_cents": 16735575,
+      "house_hill_cents": 6758999,
+      "senate_hill_cents": 9976576,
+      "house_share_base": 0.7206510274617909,
+      "house_share_with": 0.6591046617543479,
+      "senate_share_base": 0.6327833129979985,
+      "senate_share_with": 0.5100089764277969
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 158039,
+      "other_recipients_hill_cents": 158039,
+      "house_hill_cents": 158039,
+      "senate_hill_cents": 0,
+      "house_share_base": 0.9364958342637166,
+      "house_share_with": 0.927383569288944,
+      "senate_share_base": 0.6011250319611353,
+      "senate_share_with": 0.6011250319611353
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 279000,
+      "other_recipients_hill_cents": 279000,
+      "house_hill_cents": 205250,
+      "senate_hill_cents": 73750,
+      "house_share_base": 0.8782197886773596,
+      "house_share_with": 0.8790824783536452,
+      "senate_share_base": 0.46748623504841463,
+      "senate_share_with": 0.46978973194836166
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 40440,
+      "other_recipients_hill_cents": 40440,
+      "house_hill_cents": 40440,
+      "senate_hill_cents": 0,
+      "house_share_base": 0.537828290735886,
+      "house_share_with": 0.539252427767269,
+      "senate_share_base": 0.9315610100686277,
+      "senate_share_with": 0.9315610100686277
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 120624,
+      "other_recipients_hill_cents": 120624,
+      "house_hill_cents": 38124,
+      "senate_hill_cents": 82500,
+      "house_share_base": 0.5740784622238231,
+      "house_share_with": 0.5780418814906201,
+      "senate_share_base": 0.7661904385714372,
+      "senate_share_with": 0.7705965726878156
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 146000,
+      "other_recipients_hill_cents": 146000,
+      "house_hill_cents": 7000,
+      "senate_hill_cents": 139000,
+      "house_share_base": 0.23280179256378902,
+      "house_share_with": 0.23250971349012808,
+      "senate_share_base": 0.4238156209987196,
+      "senate_share_with": 0.5108695652173914
+     },
+     {
+      "study_sector": "credit_unions",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 30000,
+      "other_recipients_hill_cents": 30000,
+      "house_hill_cents": 0,
+      "senate_hill_cents": 30000,
+      "house_share_base": 0.6109677419354839,
+      "house_share_with": 0.6109677419354839,
+      "senate_share_base": 1.0,
+      "senate_share_with": 1.0
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 100000,
+      "other_recipients_hill_cents": 100000,
+      "house_hill_cents": 100000,
+      "senate_hill_cents": 0,
+      "house_share_base": 0.9565069136610045,
+      "house_share_with": 0.9599874520649676,
+      "senate_share_base": 0.1673479515909928,
+      "senate_share_with": 0.1673479515909928
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 0,
+      "other_recipients_hill_cents": 0,
+      "house_hill_cents": 0,
+      "senate_hill_cents": 0,
+      "house_share_base": 0.5032679738562091,
+      "house_share_with": 0.5032679738562091,
+      "senate_share_base": 0.5863897268551445,
+      "senate_share_with": 0.5863897268551445
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 1340000,
+      "other_recipients_hill_cents": 1340000,
+      "house_hill_cents": 1340000,
+      "senate_hill_cents": 0,
+      "house_share_base": 0.4894285570259119,
+      "house_share_with": 0.48062735707195714,
+      "senate_share_base": 0.4461289416894015,
+      "senate_share_with": 0.4461289416894015
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 9710000,
+      "other_recipients_hill_cents": 9710000,
+      "house_hill_cents": 5290000,
+      "senate_hill_cents": 4420000,
+      "house_share_base": 0.6472127310062868,
+      "house_share_with": 0.6888928011618326,
+      "senate_share_base": 0.3095033311684195,
+      "senate_share_with": 0.41940899065645104
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 17286500,
+      "other_recipients_hill_cents": 17286500,
+      "house_hill_cents": 5930000,
+      "senate_hill_cents": 11356500,
+      "house_share_base": 0.4687777302732727,
+      "house_share_with": 0.5077586594313458,
+      "senate_share_base": 0.5835149863585225,
+      "senate_share_with": 0.5898637611002119
+     },
+     {
+      "study_sector": "crypto",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 18290000,
+      "other_recipients_hill_cents": 18290000,
+      "house_hill_cents": 8860000,
+      "senate_hill_cents": 9430000,
+      "house_share_base": 0.540858525628028,
+      "house_share_with": 0.5289802798759474,
+      "senate_share_base": 0.4150544838529841,
+      "senate_share_with": 0.4381745165765721
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 6713461,
+      "other_recipients_hill_cents": 6713461,
+      "house_hill_cents": 927065,
+      "senate_hill_cents": 5786396,
+      "house_share_base": 0.47681907996359835,
+      "house_share_with": 0.5003119621282183,
+      "senate_share_base": 0.4604941197256667,
+      "senate_share_with": 0.3330956184220645
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 2648024,
+      "other_recipients_hill_cents": 2648024,
+      "house_hill_cents": 854800,
+      "senate_hill_cents": 1793224,
+      "house_share_base": 0.8380932553197122,
+      "house_share_with": 0.8276925498356239,
+      "senate_share_base": 0.7876577039447393,
+      "senate_share_with": 0.7481752322493667
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 1601016,
+      "other_recipients_hill_cents": 1601016,
+      "house_hill_cents": 657562,
+      "senate_hill_cents": 943454,
+      "house_share_base": 0.551437039038487,
+      "house_share_with": 0.5977508354378379,
+      "senate_share_base": 0.8866887949534235,
+      "senate_share_with": 0.8141634790499902
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 2781430,
+      "other_recipients_hill_cents": 2781430,
+      "house_hill_cents": 1132515,
+      "senate_hill_cents": 1648915,
+      "house_share_base": 0.6518217393767101,
+      "house_share_with": 0.6810351210325196,
+      "senate_share_base": 0.7159758160183588,
+      "senate_share_with": 0.6486655880782232
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 1540991,
+      "other_recipients_hill_cents": 1540991,
+      "house_hill_cents": 548611,
+      "senate_hill_cents": 992380,
+      "house_share_base": 0.7859555429092195,
+      "house_share_with": 0.7797095937856043,
+      "senate_share_base": 0.5577535863179389,
+      "senate_share_with": 0.4922446945826448
+     },
+     {
+      "study_sector": "credit_arms",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 1618515,
+      "other_recipients_hill_cents": 1618515,
+      "house_hill_cents": 1212432,
+      "senate_hill_cents": 406083,
+      "house_share_base": 0.8224306434972969,
+      "house_share_with": 0.8344216452826696,
+      "senate_share_base": 0.6734633065204576,
+      "senate_share_with": 0.5878136002245398
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 22271723,
+      "other_recipients_hill_cents": 22271723,
+      "house_hill_cents": 3700000,
+      "senate_hill_cents": 18571723,
+      "house_share_base": 0.8385626551187986,
+      "house_share_with": 0.8964970391252103,
+      "senate_share_base": 0.7941583841263968,
+      "senate_share_with": 0.12765309956683066
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 29386032,
+      "other_recipients_hill_cents": 29386032,
+      "house_hill_cents": 179500,
+      "senate_hill_cents": 29206532,
+      "house_share_base": 0.6567445906707434,
+      "house_share_with": 0.6477327519414029,
+      "senate_share_base": 0.5814934715557422,
+      "senate_share_with": 0.2408316927578199
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 50000,
+      "other_recipients_hill_cents": 50000,
+      "house_hill_cents": 50000,
+      "senate_hill_cents": 0,
+      "house_share_base": 0.5108009780369084,
+      "house_share_with": 0.5127363958097092,
+      "senate_share_base": 0.5228296643883041,
+      "senate_share_with": 0.5228296643883041
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 10242500,
+      "other_recipients_hill_cents": 10242500,
+      "house_hill_cents": 8847500,
+      "senate_hill_cents": 1395000,
+      "house_share_base": 0.5570871813522998,
+      "house_share_with": 0.3178567258446614,
+      "senate_share_base": 0.5213559460159993,
+      "senate_share_with": 0.47852994157001444
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 1513306,
+      "other_recipients_hill_cents": 1513306,
+      "house_hill_cents": 800000,
+      "senate_hill_cents": 713306,
+      "house_share_base": 0.4275073987815983,
+      "house_share_with": 0.41279574377678724,
+      "senate_share_base": 0.3426781921783849,
+      "senate_share_with": 0.3386693129213096
+     },
+     {
+      "study_sector": "fintech",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 55114959,
+      "other_recipients_hill_cents": 55114959,
+      "house_hill_cents": 530000,
+      "senate_hill_cents": 54584959,
+      "house_share_base": 0.8674343999127968,
+      "house_share_with": 0.8464919986025411,
+      "senate_share_base": 0.6191926884996192,
+      "senate_share_with": 0.10229498151250664
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 4515829,
+      "other_recipients_hill_cents": 4515829,
+      "house_hill_cents": 2587529,
+      "senate_hill_cents": 1928300,
+      "house_share_base": 0.4910974249973603,
+      "house_share_with": 0.4712502476471069,
+      "senate_share_base": 0.5447211303957182,
+      "senate_share_with": 0.5142179984575158
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 5649481,
+      "other_recipients_hill_cents": 5649481,
+      "house_hill_cents": 3524043,
+      "senate_hill_cents": 2125438,
+      "house_share_base": 0.46280014701697303,
+      "house_share_with": 0.4367315907528311,
+      "senate_share_base": 0.561092935421932,
+      "senate_share_with": 0.5536637355201215
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 4850684,
+      "other_recipients_hill_cents": 4850684,
+      "house_hill_cents": 904805,
+      "senate_hill_cents": 3945879,
+      "house_share_base": 0.6034295251829844,
+      "house_share_with": 0.6017075778115883,
+      "senate_share_base": 0.4023816354591029,
+      "senate_share_with": 0.2989813101821292
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 12276356,
+      "other_recipients_hill_cents": 12276356,
+      "house_hill_cents": 5144173,
+      "senate_hill_cents": 7132183,
+      "house_share_base": 0.5350023352989417,
+      "house_share_with": 0.5946094266140636,
+      "senate_share_base": 0.5890073664625836,
+      "senate_share_with": 0.47295857947570347
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 2974398,
+      "other_recipients_hill_cents": 2974398,
+      "house_hill_cents": 1911327,
+      "senate_hill_cents": 1063071,
+      "house_share_base": 0.6116106309457626,
+      "house_share_with": 0.5951092055868054,
+      "senate_share_base": 0.5860711735536596,
+      "senate_share_with": 0.5757706076095653
+     },
+     {
+      "study_sector": "property_casualty",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 4096487,
+      "other_recipients_hill_cents": 4096487,
+      "house_hill_cents": 696422,
+      "senate_hill_cents": 3400065,
+      "house_share_base": 0.6575038240750039,
+      "house_share_with": 0.6320830410879312,
+      "senate_share_base": 0.8103939940639003,
+      "senate_share_with": 0.6434923136296392
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 23281726,
+      "other_recipients_hill_cents": 23281726,
+      "house_hill_cents": 14754479,
+      "senate_hill_cents": 8527247,
+      "house_share_base": 0.6415747173764527,
+      "house_share_with": 0.6960275257242566,
+      "senate_share_base": 0.6823826405134411,
+      "senate_share_with": 0.6975907327808092
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 31664018,
+      "other_recipients_hill_cents": 31664018,
+      "house_hill_cents": 18190418,
+      "senate_hill_cents": 13473600,
+      "house_share_base": 0.5905488216613718,
+      "house_share_with": 0.6213074626756713,
+      "senate_share_base": 0.6085101356102591,
+      "senate_share_with": 0.6137700387010574
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 25423932,
+      "other_recipients_hill_cents": 25423932,
+      "house_hill_cents": 19171050,
+      "senate_hill_cents": 6252882,
+      "house_share_base": 0.4730480409595526,
+      "house_share_with": 0.5386331168295614,
+      "senate_share_base": 0.712420832537236,
+      "senate_share_with": 0.739796336897064
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 30703037,
+      "other_recipients_hill_cents": 30703037,
+      "house_hill_cents": 14644384,
+      "senate_hill_cents": 16058653,
+      "house_share_base": 0.7217464806332616,
+      "house_share_with": 0.7761998884679719,
+      "senate_share_base": 0.6074559565369169,
+      "senate_share_with": 0.4981046345826992
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 5518299,
+      "other_recipients_hill_cents": 5518299,
+      "house_hill_cents": 1721089,
+      "senate_hill_cents": 3797210,
+      "house_share_base": 0.5996516845065601,
+      "house_share_with": 0.6027033827538724,
+      "senate_share_base": 0.5909423348945636,
+      "senate_share_with": 0.5720922807046721
+     },
+     {
+      "study_sector": "telecom",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 6461148,
+      "other_recipients_hill_cents": 6461148,
+      "house_hill_cents": 5256828,
+      "senate_hill_cents": 1204320,
+      "house_share_base": 0.5442522519871196,
+      "house_share_with": 0.6154806610942483,
+      "senate_share_base": 0.8587434927559774,
+      "senate_share_with": 0.8329659997141061
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2019,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2020,
+      "result": "MATCH",
+      "status": "missing"
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2021,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 134952,
+      "other_recipients_hill_cents": 134952,
+      "house_hill_cents": 59952,
+      "senate_hill_cents": 75000,
+      "house_share_base": 0.06598069375198896,
+      "house_share_with": 0.08198258219202674,
+      "senate_share_base": 0.417083093969608,
+      "senate_share_with": 0.4786271846163592
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2022,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 379500,
+      "other_recipients_hill_cents": 379500,
+      "house_hill_cents": 24500,
+      "senate_hill_cents": 355000,
+      "house_share_base": 0.2114719154237109,
+      "house_share_with": 0.21073986293925806,
+      "senate_share_base": 0.38126014938470987,
+      "senate_share_with": 0.3811267208519684
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2023,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 45000,
+      "other_recipients_hill_cents": 45000,
+      "house_hill_cents": 45000,
+      "senate_hill_cents": 0,
+      "house_share_base": 0.7236845740992446,
+      "house_share_with": 0.6832302071674445,
+      "senate_share_base": 0.5894634585707397,
+      "senate_share_with": 0.5894634585707397
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2024,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 69900,
+      "other_recipients_hill_cents": 69900,
+      "house_hill_cents": 10500,
+      "senate_hill_cents": 59400,
+      "house_share_base": 0.46771735079091364,
+      "house_share_with": 0.46594350308606297,
+      "senate_share_base": 0.27109000700613617,
+      "senate_share_with": 0.26267462211698106
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2025,
+      "result": "MATCH",
+      "status": "observed",
+      "hill_cents": 600000,
+      "other_recipients_hill_cents": 600000,
+      "house_hill_cents": 0,
+      "senate_hill_cents": 600000,
+      "house_share_base": 0.20085263839836315,
+      "house_share_with": 0.20085263839836315,
+      "senate_share_base": 0.6482816278016096,
+      "senate_share_with": 0.542995012426977
+     },
+     {
+      "study_sector": "community_banks",
+      "year": 2026,
+      "result": "MATCH",
+      "status": "partial",
+      "hill_cents": 51025,
+      "other_recipients_hill_cents": 51025,
+      "house_hill_cents": 26025,
+      "senate_hill_cents": 25000,
+      "house_share_base": 0.38495958236093375,
+      "house_share_with": 0.3818618408399847,
+      "senate_share_base": 0.7719743539453411,
+      "senate_share_with": 0.7522497524122558
+     }
+    ]
+   },
+   "hill_by_sector_chamber_usd_2021_2026": {
+    "commercial_banks/House": {
+     "D": 232951.09,
+     "R": 365685.34,
+     "n_rows": 3518
+    },
+    "commercial_banks/Senate": {
+     "D": 206931.71,
+     "R": 567437.84,
+     "n_rows": 3976
+    },
+    "community_banks/House": {
+     "D": 200.0,
+     "R": 1459.77,
+     "n_rows": 39
+    },
+    "community_banks/Senate": {
+     "D": 2100.0,
+     "R": 9044.0,
+     "n_rows": 26
+    },
+    "credit_arms/House": {
+     "D": 42455.0,
+     "R": 10874.85,
+     "n_rows": 732
+    },
+    "credit_arms/Senate": {
+     "D": 33546.88,
+     "R": 82157.64,
+     "n_rows": 1454
+    },
+    "credit_unions/House": {
+     "D": 3480.0,
+     "R": 1008.53,
+     "n_rows": 78
+    },
+    "credit_unions/Senate": {
+     "D": 2815.0,
+     "R": 437.5,
+     "n_rows": 53
+    },
+    "crypto/House": {
+     "D": 147900.0,
+     "R": 67300.0,
+     "n_rows": 16
+    },
+    "crypto/Senate": {
+     "D": 154565.0,
+     "R": 97500.0,
+     "n_rows": 12
+    },
+    "fintech/House": {
+     "D": 37670.0,
+     "R": 103400.0,
+     "n_rows": 22
+    },
+    "fintech/Senate": {
+     "D": 48480.33,
+     "R": 996234.87,
+     "n_rows": 43
+    },
+    "property_casualty/House": {
+     "D": 72903.94,
+     "R": 74779.05,
+     "n_rows": 2198
+    },
+    "property_casualty/Senate": {
+     "D": 45411.0,
+     "R": 150538.36,
+     "n_rows": 1495
+    },
+    "telecom/House": {
+     "D": 573953.07,
+     "R": 163429.41,
+     "n_rows": 3314
+    },
+    "telecom/Senate": {
+     "D": 258483.66,
+     "R": 234655.46,
+     "n_rows": 1902
+    }
+   },
+   "hill_facts_party_category_usd": {
+    "C00000935|D|Party Committee": 1111513.1,
+    "C00027466|R|Party Committee": 2138005.67,
+    "C00042366|D|Party Committee": 752333.58,
+    "C00075820|R|Party Committee": 787936.95
+   },
+   "committee_identity_cm": {
+    "2022/C00000935": [
+     "DCCC",
+     "Y",
+     "DEM"
+    ],
+    "2022/C00027466": [
+     "NRSC",
+     "Y",
+     "REP"
+    ],
+    "2022/C00042366": [
+     "DSCC",
+     "Y",
+     "DEM"
+    ],
+    "2022/C00075820": [
+     "NRCC",
+     "Y",
+     "REP"
+    ],
+    "2024/C00000935": [
+     "DCCC",
+     "Y",
+     "DEM"
+    ],
+    "2024/C00027466": [
+     "NRSC",
+     "Y",
+     "REP"
+    ],
+    "2024/C00042366": [
+     "DSCC",
+     "Y",
+     "DEM"
+    ],
+    "2024/C00075820": [
+     "NRCC",
+     "Y",
+     "REP"
+    ],
+    "2026/C00000935": [
+     "DCCC",
+     "Y",
+     "DEM"
+    ],
+    "2026/C00027466": [
+     "NRSC",
+     "Y",
+     "REP"
+    ],
+    "2026/C00042366": [
+     "DSCC",
+     "Y",
+     "DEM"
+    ],
+    "2026/C00075820": [
+     "NRCC",
+     "Y",
+     "REP"
+    ]
+   },
+   "dem_share_change_by_chamber": {
+    "House": {
+     "cells": 48,
+     "mean_change": 0.00021707162442519481,
+     "mean_abs_change": 0.02605618001694494,
+     "max_abs_change": {
+      "study_sector": "fintech",
+      "year": 2024,
+      "change": -0.23923045550763844
+     },
+     "cells_moved_toward_D": 22,
+     "cells_moved_toward_R": 23,
+     "cells_unchanged": 3
+    },
+    "Senate": {
+     "cells": 48,
+     "mean_change": -0.05763176419342796,
+     "mean_abs_change": 0.07190366554980511,
+     "max_abs_change": {
+      "study_sector": "fintech",
+      "year": 2021,
+      "change": -0.6665052845595661
+     },
+     "cells_moved_toward_D": 10,
+     "cells_moved_toward_R": 30,
+     "cells_unchanged": 8
+    }
+   },
+   "dem_share_pooled_by_chamber_year": {
+    "House 2021": {
+     "base": 0.6121993440575558,
+     "with_hill": 0.630498249405298,
+     "change": 0.018298905347742145,
+     "hill_D_usd": 212125.66,
+     "hill_R_usd": 81831.74
+    },
+    "Senate 2021": {
+     "base": 0.5447205905989989,
+     "with_hill": 0.4842585679247884,
+     "change": -0.060462022674210525,
+     "hill_D_usd": 118092.88,
+     "hill_R_usd": 320627.98
+    },
+    "House 2022": {
+     "base": 0.5971296269664308,
+     "with_hill": 0.5615385248386917,
+     "change": -0.03559110212773908,
+     "hill_D_usd": 220938.44,
+     "hill_R_usd": 324562.55
+    },
+    "Senate 2022": {
+     "base": 0.5630867362703982,
+     "with_hill": 0.5005568950805429,
+     "change": -0.06252984118985527,
+     "hill_D_usd": 194146.51,
+     "hill_R_usd": 494293.85
+    },
+    "House 2023": {
+     "base": 0.5736907305766068,
+     "with_hill": 0.5840824105213276,
+     "change": 0.010391679944720789,
+     "hill_D_usd": 173854.5,
+     "hill_R_usd": 98749.81
+    },
+    "Senate 2023": {
+     "base": 0.542610405349521,
+     "with_hill": 0.542004816189178,
+     "change": -0.0006055891603430341,
+     "hill_D_usd": 75677.34,
+     "hill_R_usd": 66065.42
+    },
+    "House 2024": {
+     "base": 0.6527820852634636,
+     "with_hill": 0.663438741112148,
+     "change": 0.01065665584868436,
+     "hill_D_usd": 313629.26,
+     "hill_R_usd": 117020.89
+    },
+    "Senate 2024": {
+     "base": 0.5795611019118347,
+     "with_hill": 0.5167067494940476,
+     "change": -0.06285435241778714,
+     "hill_D_usd": 153370.97,
+     "hill_R_usd": 371561.84
+    },
+    "House 2025": {
+     "base": 0.5971590543854296,
+     "with_hill": 0.5988625344727571,
+     "change": 0.001703480087327458,
+     "hill_D_usd": 77444.08,
+     "hill_R_usd": 45886.06
+    },
+    "Senate 2025": {
+     "base": 0.5662405388603027,
+     "with_hill": 0.5288713134508765,
+     "change": -0.03736922540942622,
+     "hill_D_usd": 101405.88,
+     "hill_R_usd": 204526.55
+    },
+    "House 2026": {
+     "base": 0.6746249506728886,
+     "with_hill": 0.6479640490653045,
+     "change": -0.026660901607584164,
+     "hill_D_usd": 113521.16,
+     "hill_R_usd": 119885.9
+    },
+    "Senate 2026": {
+     "base": 0.6853051261396869,
+     "with_hill": 0.427861906339731,
+     "change": -0.2574432197999559,
+     "hill_D_usd": 109640.0,
+     "hill_R_usd": 680930.03
+    }
+   },
+   "dem_share_change_cells": [
+    [
+     "commercial_banks",
+     2021,
+     "House",
+     -0.0035579200264439503
+    ],
+    [
+     "commercial_banks",
+     2021,
+     "Senate",
+     -0.027751559735981646
+    ],
+    [
+     "commercial_banks",
+     2022,
+     "House",
+     -0.08570464430485869
+    ],
+    [
+     "commercial_banks",
+     2022,
+     "Senate",
+     -0.02365578296436599
+    ],
+    [
+     "commercial_banks",
+     2023,
+     "House",
+     0.00044508500234174964
+    ],
+    [
+     "commercial_banks",
+     2023,
+     "Senate",
+     -0.0019472726696544984
+    ],
+    [
+     "commercial_banks",
+     2024,
+     "House",
+     0.01370128673770521
+    ],
+    [
+     "commercial_banks",
+     2024,
+     "Senate",
+     -0.0729993559180695
+    ],
+    [
+     "commercial_banks",
+     2025,
+     "House",
+     -0.0030849784936360924
+    ],
+    [
+     "commercial_banks",
+     2025,
+     "Senate",
+     -0.10882464706008654
+    ],
+    [
+     "commercial_banks",
+     2026,
+     "House",
+     -0.061546365707442985
+    ],
+    [
+     "commercial_banks",
+     2026,
+     "Senate",
+     -0.12277433657020165
+    ],
+    [
+     "credit_unions",
+     2021,
+     "House",
+     -0.009112264974772577
+    ],
+    [
+     "credit_unions",
+     2021,
+     "Senate",
+     0.0
+    ],
+    [
+     "credit_unions",
+     2022,
+     "House",
+     0.0008626896762855552
+    ],
+    [
+     "credit_unions",
+     2022,
+     "Senate",
+     0.0023034968999470218
+    ],
+    [
+     "credit_unions",
+     2023,
+     "House",
+     0.0014241370313829993
+    ],
+    [
+     "credit_unions",
+     2023,
+     "Senate",
+     0.0
+    ],
+    [
+     "credit_unions",
+     2024,
+     "House",
+     0.003963419266796997
+    ],
+    [
+     "credit_unions",
+     2024,
+     "Senate",
+     0.004406134116378357
+    ],
+    [
+     "credit_unions",
+     2025,
+     "House",
+     -0.0002920790736609391
+    ],
+    [
+     "credit_unions",
+     2025,
+     "Senate",
+     0.08705394421867174
+    ],
+    [
+     "credit_unions",
+     2026,
+     "House",
+     0.0
+    ],
+    [
+     "credit_unions",
+     2026,
+     "Senate",
+     0.0
+    ],
+    [
+     "crypto",
+     2021,
+     "House",
+     0.003480538403963118
+    ],
+    [
+     "crypto",
+     2021,
+     "Senate",
+     0.0
+    ],
+    [
+     "crypto",
+     2022,
+     "House",
+     0.0
+    ],
+    [
+     "crypto",
+     2022,
+     "Senate",
+     0.0
+    ],
+    [
+     "crypto",
+     2023,
+     "House",
+     -0.008801199953954786
+    ],
+    [
+     "crypto",
+     2023,
+     "Senate",
+     0.0
+    ],
+    [
+     "crypto",
+     2024,
+     "House",
+     0.041680070155545756
+    ],
+    [
+     "crypto",
+     2024,
+     "Senate",
+     0.10990565948803155
+    ],
+    [
+     "crypto",
+     2025,
+     "House",
+     0.03898092915807311
+    ],
+    [
+     "crypto",
+     2025,
+     "Senate",
+     0.006348774741689378
+    ],
+    [
+     "crypto",
+     2026,
+     "House",
+     -0.01187824575208063
+    ],
+    [
+     "crypto",
+     2026,
+     "Senate",
+     0.02312003272358798
+    ],
+    [
+     "credit_arms",
+     2021,
+     "House",
+     0.02349288216461992
+    ],
+    [
+     "credit_arms",
+     2021,
+     "Senate",
+     -0.1273985013036022
+    ],
+    [
+     "credit_arms",
+     2022,
+     "House",
+     -0.010400705484088335
+    ],
+    [
+     "credit_arms",
+     2022,
+     "Senate",
+     -0.03948247169537267
+    ],
+    [
+     "credit_arms",
+     2023,
+     "House",
+     0.04631379639935096
+    ],
+    [
+     "credit_arms",
+     2023,
+     "Senate",
+     -0.07252531590343325
+    ],
+    [
+     "credit_arms",
+     2024,
+     "House",
+     0.029213381655809556
+    ],
+    [
+     "credit_arms",
+     2024,
+     "Senate",
+     -0.06731022794013564
+    ],
+    [
+     "credit_arms",
+     2025,
+     "House",
+     -0.006245949123615202
+    ],
+    [
+     "credit_arms",
+     2025,
+     "Senate",
+     -0.06550889173529412
+    ],
+    [
+     "credit_arms",
+     2026,
+     "House",
+     0.011991001785372712
+    ],
+    [
+     "credit_arms",
+     2026,
+     "Senate",
+     -0.08564970629591784
+    ],
+    [
+     "fintech",
+     2021,
+     "House",
+     0.05793438400641171
+    ],
+    [
+     "fintech",
+     2021,
+     "Senate",
+     -0.6665052845595661
+    ],
+    [
+     "fintech",
+     2022,
+     "House",
+     -0.009011838729340527
+    ],
+    [
+     "fintech",
+     2022,
+     "Senate",
+     -0.34066177879792225
+    ],
+    [
+     "fintech",
+     2023,
+     "House",
+     0.0019354177728008182
+    ],
+    [
+     "fintech",
+     2023,
+     "Senate",
+     0.0
+    ],
+    [
+     "fintech",
+     2024,
+     "House",
+     -0.23923045550763844
+    ],
+    [
+     "fintech",
+     2024,
+     "Senate",
+     -0.04282600444598489
+    ],
+    [
+     "fintech",
+     2025,
+     "House",
+     -0.014711655004811086
+    ],
+    [
+     "fintech",
+     2025,
+     "Senate",
+     -0.004008879257075326
+    ],
+    [
+     "fintech",
+     2026,
+     "House",
+     -0.02094240131025571
+    ],
+    [
+     "fintech",
+     2026,
+     "Senate",
+     -0.5168977069871126
+    ],
+    [
+     "property_casualty",
+     2021,
+     "House",
+     -0.01984717735025343
+    ],
+    [
+     "property_casualty",
+     2021,
+     "Senate",
+     -0.03050313193820242
+    ],
+    [
+     "property_casualty",
+     2022,
+     "House",
+     -0.02606855626414195
+    ],
+    [
+     "property_casualty",
+     2022,
+     "Senate",
+     -0.007429199901810457
+    ],
+    [
+     "property_casualty",
+     2023,
+     "House",
+     -0.001721947371396082
+    ],
+    [
+     "property_casualty",
+     2023,
+     "Senate",
+     -0.10340032527697368
+    ],
+    [
+     "property_casualty",
+     2024,
+     "House",
+     0.059607091315121874
+    ],
+    [
+     "property_casualty",
+     2024,
+     "Senate",
+     -0.11604878698688009
+    ],
+    [
+     "property_casualty",
+     2025,
+     "House",
+     -0.016501425358957267
+    ],
+    [
+     "property_casualty",
+     2025,
+     "Senate",
+     -0.010300565944094231
+    ],
+    [
+     "property_casualty",
+     2026,
+     "House",
+     -0.02542078298707262
+    ],
+    [
+     "property_casualty",
+     2026,
+     "Senate",
+     -0.16690168043426112
+    ],
+    [
+     "telecom",
+     2021,
+     "House",
+     0.05445280834780397
+    ],
+    [
+     "telecom",
+     2021,
+     "Senate",
+     0.015208092267368079
+    ],
+    [
+     "telecom",
+     2022,
+     "House",
+     0.03075864101429948
+    ],
+    [
+     "telecom",
+     2022,
+     "Senate",
+     0.005259903090798268
+    ],
+    [
+     "telecom",
+     2023,
+     "House",
+     0.06558507587000878
+    ],
+    [
+     "telecom",
+     2023,
+     "Senate",
+     0.02737550435982805
+    ],
+    [
+     "telecom",
+     2024,
+     "House",
+     0.05445340783471031
+    ],
+    [
+     "telecom",
+     2024,
+     "Senate",
+     -0.10935132195421765
+    ],
+    [
+     "telecom",
+     2025,
+     "House",
+     0.003051698247312218
+    ],
+    [
+     "telecom",
+     2025,
+     "Senate",
+     -0.018850054189891496
+    ],
+    [
+     "telecom",
+     2026,
+     "House",
+     0.07122840910712869
+    ],
+    [
+     "telecom",
+     2026,
+     "Senate",
+     -0.02577749304187127
+    ],
+    [
+     "community_banks",
+     2021,
+     "House",
+     0.016001888440037776
+    ],
+    [
+     "community_banks",
+     2021,
+     "Senate",
+     0.061544090646751204
+    ],
+    [
+     "community_banks",
+     2022,
+     "House",
+     -0.0007320524844528498
+    ],
+    [
+     "community_banks",
+     2022,
+     "Senate",
+     -0.00013342853274145305
+    ],
+    [
+     "community_banks",
+     2023,
+     "House",
+     -0.040454366931800045
+    ],
+    [
+     "community_banks",
+     2023,
+     "Senate",
+     0.0
+    ],
+    [
+     "community_banks",
+     2024,
+     "House",
+     -0.0017738477048506729
+    ],
+    [
+     "community_banks",
+     2024,
+     "Senate",
+     -0.008415384889155109
+    ],
+    [
+     "community_banks",
+     2025,
+     "House",
+     0.0
+    ],
+    [
+     "community_banks",
+     2025,
+     "Senate",
+     -0.10528661537463258
+    ],
+    [
+     "community_banks",
+     2026,
+     "House",
+     -0.003097741520949049
+    ],
+    [
+     "community_banks",
+     2026,
+     "Senate",
+     -0.019724601533085306
+    ]
+   ],
+   "verification": {
+    "stage": {
+     "sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+     "passed": 56,
+     "failed": 0
+    },
+    "installed": {
+     "sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+     "passed": 56,
+     "failed": 0,
+     "checks": [
+      {
+       "check": "no <f> formula elements in any sheet XML",
+       "ok": true,
+       "detail": 0
+      },
+      {
+       "check": "no comments / drawings / external links / macros",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sheet names and order",
+       "ok": true,
+       "detail": "['sector_year_chamber', 'reconcile', 'other_recipients', 'committee_map', 'notes', 'dictionary', 'sources', 'hill_committees_sector_year', 'sector_year_chamber_with_hill', 'hill_reconcile']"
+      },
+      {
+       "check": "sector_year_chamber: header",
+       "ok": true,
+       "detail": "('study_sector', 'year', 'chamber', 'dem_usd', 'rep_usd', 'other_usd', 'dem_real_m', 'rep_real_m', 'dem_share', 'n_rows', 'total_usd', 'dr_party_from_facts_usd', 'dr_party_from_candidate_usd', 'n_committees', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+      },
+      {
+       "check": "reconcile: header",
+       "ok": true,
+       "detail": "('study_sector', 'year', 'house_usd', 'senate_usd', 'not_house_senate_usd', 'sum_usd', 'sheet04_giving_usd', 'index_year_usd', 'difference_usd', 'house_n_rows', 'senate_n_rows', 'not_house_senate_n_rows', 'sum_n_rows', 'sheet04_gifts', 'result', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+      },
+      {
+       "check": "other_recipients: header",
+       "ok": true,
+       "detail": "('study_sector', 'year', 'not_house_senate_usd', 'presidential_usd', 'party_usd', 'pac_usd', 'unknown_usd', 'of_which_hill_committees_usd', 'of_which_actblue_usd', 'of_which_winred_usd', 'of_which_leadership_pacs_usd', 'of_which_joint_fundraising_usd', 'n_rows', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+      },
+      {
+       "check": "committee_map: header",
+       "ok": true,
+       "detail": "('fec_cycle', 'committee_id', 'committee_name', 'chamber', 'other_type', 'other_subtype', 'link_rule', 'link_source', 'cand_ids', 'cand_names', 'cand_office', 'cand_party', 'cand_party_dr', 'cm_committee_type', 'cm_designation', 'mentat_recipient_category', 'facts_party', 'usd', 'n_rows', 'study_sectors', 'mentat_map_chamber', 'note', 'source_id')"
+      },
+      {
+       "check": "notes: header",
+       "ok": true,
+       "detail": "('note_id', 'topic', 'note')"
+      },
+      {
+       "check": "dictionary: header",
+       "ok": true,
+       "detail": "('sheet', 'column', 'type', 'unit', 'definition', 'source_ids')"
+      },
+      {
+       "check": "sources: header",
+       "ok": true,
+       "detail": "('source_id', 'absolute_path', 'zip_member', 'sha256', 'size_bytes', 'mtime', 'rows_read', 'read_at', 'note')"
+      },
+      {
+       "check": "hill_committees_sector_year: header",
+       "ok": true,
+       "detail": "('study_sector', 'year', 'committee', 'chamber', 'party', 'usd', 'real_m', 'n_rows', 'committee_id', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+      },
+      {
+       "check": "sector_year_chamber_with_hill: header",
+       "ok": true,
+       "detail": "('study_sector', 'year', 'chamber', 'dem_usd', 'rep_usd', 'other_usd', 'dem_real_m', 'rep_real_m', 'dem_share', 'n_rows', 'total_usd', 'dr_party_from_facts_usd', 'dr_party_from_candidate_usd', 'n_committees', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+      },
+      {
+       "check": "hill_reconcile: header",
+       "ok": true,
+       "detail": "('study_sector', 'year', 'hill_total_usd', 'other_recipients_hill_usd', 'difference_usd', 'other_recipients_party_usd', 'house_added_usd', 'dccc_plus_nrcc_usd', 'senate_added_usd', 'dscc_plus_nrsc_usd', 'house_added_n_rows', 'dccc_plus_nrcc_n_rows', 'senate_added_n_rows', 'dscc_plus_nrsc_n_rows', 'house_dem_share_base', 'house_dem_share_with_hill', 'house_dem_share_change', 'senate_dem_share_base', 'senate_dem_share_with_hill', 'senate_dem_share_change', 'result', 'mentat_industry', 'fec_cycle', 'status', 'note', 'source_id')"
+      },
+      {
+       "check": "no formula-like text cells",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year_chamber: key study_sector+year+chamber unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "reconcile: key study_sector+year unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "other_recipients: key study_sector+year unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "committee_map: key fec_cycle+committee_id unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "notes: key note_id unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "dictionary: key sheet+column unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sources: key source_id unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "hill_committees_sector_year: key study_sector+year+committee unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year_chamber_with_hill: key study_sector+year+chamber unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "hill_reconcile: key study_sector+year unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "dictionary documents every column and nothing else",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "every source_id token resolves to the sources sheet",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "every table row of the six sector-year sheets names a source",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sources: every file exists with the recorded SHA-256 and size",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "04 workbook bytes equal build_receipt_04 file.sha256",
+       "ok": true,
+       "detail": ""
+      },
+      {
+       "check": "sector_year_chamber: exactly 04's sector x year grid x {House, Senate} (128 rows)",
+       "ok": true,
+       "detail": 128
+      },
+      {
+       "check": "reconcile and other_recipients: exactly 04's 64 sector-years",
+       "ok": true,
+       "detail": "(64, 64)"
+      },
+      {
+       "check": "study_sector / mentat_industry / status / note as in 04 sector_year",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "committee_map: every House/Senate committee has an FEC P/A link to a candidate of that office (raw ccl/cm/cn)",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "committee_map: no 'other' committee is linked P/A to a House/Senate candidate in its cycle (or, unlinked there, in the nearest linked cycle)",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "committee_map: cand_party_dr = cn party of the linked candidate(s) (DEM/DFL=D, REP=R)",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "committee_map: conduits ActBlue / WinRed and the four Hill committees are 'other'",
+       "ok": true,
+       "detail": ""
+      },
+      {
+       "check": "every included facts row finds its (fec_cycle, committee_id) in committee_map",
+       "ok": true,
+       "detail": 0
+      },
+      {
+       "check": "committee_map: usd and n_rows == row-level re-derivation, and no committee without rows",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year_chamber: every money cell, n_rows and n_committees == row-level re-derivation (to the cent)",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year_chamber: dem/rep_real_m == usd x multiplier_to_2025_dollars / 1e6 (exact double); blank for 2026",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year_chamber: dem_share == dem/(dem+rep) exactly; blank iff D+R <= 0",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "missing rows are blank in every value column",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "other_recipients: every cell == row-level re-derivation; not_house_senate = presidential + party + pac + unknown",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "reconcile: House + Senate + not_house_senate == 04 sector_year giving == index year total (to the cent, rows == gifts), recomputed from cells; every row MATCH",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "reconcile: the 16 sector-years 2019-2020 are both-missing MATCH",
+       "ok": true,
+       "detail": 16
+      },
+      {
+       "check": "hill_committees_sector_year: exactly 04's sector x year grid x the four committees (256 rows)",
+       "ok": true,
+       "detail": 256
+      },
+      {
+       "check": "hill_committees_sector_year: committee -> committee_id / chamber / party as briefed (DCCC House D, NRCC House R, DSCC Senate D, NRSC Senate R)",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "Hill committee identity in raw cm22/cm24/cm26: name, type Y, party DEM/REP",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "facts.party of every Hill-committee row equals the committee's party",
+       "ok": true,
+       "detail": "{('C00075820', 'R'): 2797, ('C00042366', 'D'): 4390, ('C00027466', 'R'): 4571, ('C00000935', 'D'): 7120}"
+      },
+      {
+       "check": "hill_committees_sector_year: usd, n_rows == row-level re-derivation from the index; real_m exact; status/note as 04",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "hill_committees_sector_year per cycle == committee_map usd / n_rows of the committee (all sectors); committee_map keeps it in party",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year_chamber_with_hill: same 128 keys in the same order as sector_year_chamber",
+       "ok": true,
+       "detail": ""
+      },
+      {
+       "check": "sector_year_chamber_with_hill: = sector_year_chamber + DCCC/NRCC (House) or DSCC/NRSC (Senate) to the cent; other_usd, dr_party_* unchanged; n_rows, n_committees, real_m, dem_share recomputed exactly",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "hill_reconcile: exactly 04's 64 sector-years",
+       "ok": true,
+       "detail": 64
+      },
+      {
+       "check": "hill_reconcile: four Hill rows == other_recipients.of_which_hill_committees_usd; with_hill - base == DCCC+NRCC (House) and DSCC+NRSC (Senate) in dollars and rows; share changes exact; every row MATCH",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "hill_reconcile: the 16 sector-years 2019-2020 are both-missing MATCH",
+       "ok": true,
+       "detail": 16
+      }
+     ]
+    },
+    "negative_control": {
+     "tampered_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\out\\negctl_hill_20260926T053106Z\\tampered_08.xlsx",
+     "tampers": [
+      "sources!read_at row 2 changed (an ORIGINAL sheet cell)",
+      "hill_committees_sector_year!usd row 10 +0.01",
+      "sector_year_chamber_with_hill!dem_share row 6 +1e-9",
+      "hill_reconcile!result row 4 MATCH -> MISMATCH"
+     ],
+     "verifier_failed_checks": [
+      "hill_committees_sector_year: usd, n_rows == row-level re-derivation from the index; real_m exact; status/note as 04",
+      "hill_committees_sector_year per cycle == committee_map usd / n_rows of the committee (all sectors); committee_map keeps it in party",
+      "sector_year_chamber_with_hill: = sector_year_chamber + DCCC/NRCC (House) or DSCC/NRSC (Senate) to the cent; other_usd, dr_party_* unchanged; n_rows, n_committees, real_m, dem_share recomputed exactly",
+      "hill_reconcile: four Hill rows == other_recipients.of_which_hill_committees_usd; with_hill - base == DCCC+NRCC (House) and DSCC+NRSC (Senate) in dollars and rows; share changes exact; every row MATCH"
+     ],
+     "n_failed": 4,
+     "n_checks": 56,
+     "compare_to_backup_ok": false,
+     "compare_to_backup_differing": {
+      "sector_year_chamber": 0,
+      "reconcile": 0,
+      "other_recipients": 0,
+      "committee_map": 0,
+      "notes": 0,
+      "dictionary": 0,
+      "sources": 1
+     }
+    },
+    "note": "verify_08_v2.py = every v1 check (39) re-run on the amended file plus 17 Hill checks; the original-sheet tamper (sources read_at) is invisible to the verifier by design and is caught by compare_to_backup.py"
+   },
+   "install": {
+    "target": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+    "source_stage": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\out\\stage_hill_20260926T052428Z\\08_contributions_by_chamber.xlsx",
+    "target_sha256_before": "38ac779d31562d35fe5f80d95e42ad371c7e830e34b6f4dc234b2557694ab0bf",
+    "backup": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\superseded\\08_pre_hill_20260926\\08_contributions_by_chamber.xlsx",
+    "stage_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+    "installed_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+    "bytes_equal": true,
+    "size": 607883,
+    "mtime_utc": "2026-09-26T05:24:35Z",
+    "at_utc": "2026-09-26T05:34:47Z"
+   },
+   "scripts": {
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\amend_08_hill.py": "df5b847329ea95d7e5f8462c8d880abe674f83fad04a8257db06200dbe690330",
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\compare_to_backup.py": "7a52963013ee25c716fd0b342631d0fb385730b91023a38f06776a74ea633c92",
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\verify_08_v2.py": "c2936aadc0baefe4dcf9625a5ea597874c2fdf474283a19e54e6810ba3afa86c",
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\negctl_08_hill.py": "97c44390fdda1fcc73f801b1d69844b3941e29563bfc3810f588421fa1dbeb4d",
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\amend_receipt.py": "f108b2c48a654a1feefd2650e37db9b521909d0b7bdf774c71f007401c427467",
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\gb.py": "abae50baaf45cb2b43f2ba105cb7b73e56d2f0716ca346e01d5f7508bd8858b1",
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\build_08.py": "1937a30cc50141efe81e9d1d603f2ce6638f89a662ed4e913b203903a6a9bce1"
+   },
+   "exploration_scripts_not_part_of_the_build": {
+    "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\d613b40c-1424-47c6-9e5c-74bfe8df2f5c\\scratchpad\\work\\chamber_link\\explore_hill.py": "df1198b8840e625e47e6209db2cfcafd504e19b3c44b544efb623b52f2d42a06"
+   },
+   "scope": "only the four Hill committees; Hill-aligned super PACs / hybrid PACs (Congressional Leadership Fund, House Majority PAC, Senate Leadership Fund) and joint fundraising committees that include a Hill committee stay in pac, unchanged",
+   "historical_blocks": "the top-level verification, reconcile, coverage and mentat_map_crosscheck blocks describe the 7 original sheets as built (file 38ac779d..., 39/39 checks); those sheets are unchanged cell by cell, and the v2 verification above re-ran all 39 of those checks on the amended file"
+  }
+ ]
+}

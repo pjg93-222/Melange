@@ -1,0 +1,1213 @@
+{
+  "run_id": "import10-build-20260926",
+  "written_at": "2026-09-26T19:41:51Z",
+  "builder": {
+    "agent": "Claude (Opus 5.5) architect subagent for the study coordinator",
+    "session": "b82a832c",
+    "engine": "Python + openpyxl (import only; the analysis engine stays R)",
+    "environment": {
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "openpyxl": "3.1.5",
+      "platform": "Windows-11-10.0.26200-SP0"
+    }
+  },
+  "brief": "Import the Codex recipient classification (seat_gain_extension) into NEW workbook 10, one sheet per file, values verbatim; verify every input sha256 against Codex's receipt first and stop on any mismatch; keep every row (unmatched, ambiguous, provisional C/O); never convert missing to zero or safe; keep column names; record the join key cycle ending year + committee_id; check coverage of all 08 committee_map committees for 2022/2024/2026 and the $22,047,925.44 reconciliation; 2020 an explicit gap; notes and dictionary from the handoff. Do NOT import rating_aug25_inside.csv.",
+  "handoff": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\RECIPIENT_HANDOFF.md",
+  "file": {
+    "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\10_recipient_classification.xlsx",
+    "sha256": "a724c475019eda470a5b470ddff28e8fea36b03256d179be7f52d7c67eb0a47e",
+    "size_bytes": 792335,
+    "mtime": "2026-09-26T19:40:28Z",
+    "staged_copy": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\stage\\10_recipient_classification.xlsx",
+      "sha256": "a724c475019eda470a5b470ddff28e8fea36b03256d179be7f52d7c67eb0a47e",
+      "size_bytes": 792335
+    },
+    "copy_hash_verified": true
+  },
+  "sheet_order": [
+    "recipient_classification",
+    "candidate_service_terms",
+    "classification_diagnostics",
+    "receipt_codex",
+    "validation_codex",
+    "retro_sector_check_DESCRIPTIVE",
+    "retro_summary_DESCRIPTIVE",
+    "coverage",
+    "notes",
+    "dictionary",
+    "sources"
+  ],
+  "sheet_rows": {
+    "recipient_classification": 2850,
+    "candidate_service_terms": 3183,
+    "classification_diagnostics": 2021,
+    "receipt_codex": 117,
+    "validation_codex": 149,
+    "retro_sector_check_DESCRIPTIVE": 16,
+    "retro_summary_DESCRIPTIVE": 2,
+    "coverage": 12,
+    "notes": 25,
+    "dictionary": 129,
+    "sources": 19
+  },
+  "sheet_sources": {
+    "recipient_classification": "recipient_classification.csv",
+    "candidate_service_terms": "candidate_service_terms.csv",
+    "classification_diagnostics": "recipient_classification_diagnostics.csv",
+    "receipt_codex": "recipient_classification_receipt.json",
+    "validation_codex": "classification_validation.json",
+    "retro_sector_check_DESCRIPTIVE": "election_retrospective_sector_check.csv",
+    "retro_summary_DESCRIPTIVE": "election_retrospective_summary.csv"
+  },
+  "descriptive_sheets": [
+    "retro_sector_check_DESCRIPTIVE",
+    "retro_summary_DESCRIPTIVE"
+  ],
+  "join_key": {
+    "columns": [
+      "cycle",
+      "committee_id"
+    ],
+    "definition": "cycle = FEC cycle ending year (2022 for fec_cycle 2021-2022); committee_id = FEC committee id",
+    "unique": true,
+    "join_to_08_committee_map": "int(right(fec_cycle, 4)) + committee_id",
+    "rule": "Preserve unmatched and ambiguous rows; missing is never 0 and never safe."
+  },
+  "hash_gate": {
+    "rule": "Every input hashed before import; stop on any mismatch with a Codex-recorded hash.",
+    "hash_references": [
+      {
+        "file": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\recipient_classification_receipt.json",
+        "records": "outputs[]: the three CSVs"
+      },
+      {
+        "file": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\DELIVERY_MANIFEST.json",
+        "sha256": "bb6ae229e32711cde4fb0f411f380256945c5a810729418e33a040d2768620e1",
+        "created_utc": "2026-09-26T19:27:45.554092+00:00",
+        "records": "files[]: every delivered output, including all seven imported files"
+      }
+    ],
+    "results": {
+      "recipient_classification.csv": {
+        "sha256": "fe16ed725245f94f558fed5cc825f8fc2b28098e0a94892b34e031466791b1de",
+        "size_bytes": 1833068,
+        "expected_sha256": "fe16ed725245f94f558fed5cc825f8fc2b28098e0a94892b34e031466791b1de",
+        "expected_from": "recipient_classification_receipt.json outputs[] (Codex); DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+        "result": "MATCH",
+        "per_reference": [
+          {
+            "from": "recipient_classification_receipt.json outputs[] (Codex)",
+            "sha256": "fe16ed725245f94f558fed5cc825f8fc2b28098e0a94892b34e031466791b1de",
+            "size_bytes": 1833068,
+            "match": true
+          },
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "fe16ed725245f94f558fed5cc825f8fc2b28098e0a94892b34e031466791b1de",
+            "size_bytes": 1833068,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "candidate_service_terms.csv": {
+        "sha256": "421a33cc49ddb9e767ac4af2525f0179fb722897d15a8cb8151ff7c857dc0134",
+        "size_bytes": 783542,
+        "expected_sha256": "421a33cc49ddb9e767ac4af2525f0179fb722897d15a8cb8151ff7c857dc0134",
+        "expected_from": "recipient_classification_receipt.json outputs[] (Codex); DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+        "result": "MATCH",
+        "per_reference": [
+          {
+            "from": "recipient_classification_receipt.json outputs[] (Codex)",
+            "sha256": "421a33cc49ddb9e767ac4af2525f0179fb722897d15a8cb8151ff7c857dc0134",
+            "size_bytes": 783542,
+            "match": true
+          },
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "421a33cc49ddb9e767ac4af2525f0179fb722897d15a8cb8151ff7c857dc0134",
+            "size_bytes": 783542,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "recipient_classification_diagnostics.csv": {
+        "sha256": "64a861e0325d54dee9bee2ee33cc4f34803f955f23bd2b524bf57ae34780e130",
+        "size_bytes": 255291,
+        "expected_sha256": "64a861e0325d54dee9bee2ee33cc4f34803f955f23bd2b524bf57ae34780e130",
+        "expected_from": "recipient_classification_receipt.json outputs[] (Codex); DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+        "result": "MATCH",
+        "per_reference": [
+          {
+            "from": "recipient_classification_receipt.json outputs[] (Codex)",
+            "sha256": "64a861e0325d54dee9bee2ee33cc4f34803f955f23bd2b524bf57ae34780e130",
+            "size_bytes": 255291,
+            "match": true
+          },
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "64a861e0325d54dee9bee2ee33cc4f34803f955f23bd2b524bf57ae34780e130",
+            "size_bytes": 255291,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "recipient_classification_receipt.json": {
+        "sha256": "a90f913b45406877c250f03b3c8f694d60fccf0122ec2344f70e440163f3c4e7",
+        "size_bytes": 8224,
+        "expected_sha256": "a90f913b45406877c250f03b3c8f694d60fccf0122ec2344f70e440163f3c4e7",
+        "expected_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+        "result": "MATCH",
+        "per_reference": [
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "a90f913b45406877c250f03b3c8f694d60fccf0122ec2344f70e440163f3c4e7",
+            "size_bytes": 8224,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "classification_validation.json": {
+        "sha256": "2d3669ab9f18e5e2c7f9efad13c3d8d23d3de71058394c5fd340c078f43388e8",
+        "size_bytes": 7755,
+        "expected_sha256": "2d3669ab9f18e5e2c7f9efad13c3d8d23d3de71058394c5fd340c078f43388e8",
+        "expected_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+        "result": "MATCH",
+        "per_reference": [
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "2d3669ab9f18e5e2c7f9efad13c3d8d23d3de71058394c5fd340c078f43388e8",
+            "size_bytes": 7755,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "election_retrospective_sector_check.csv": {
+        "sha256": "e82a95d3fabd0c531e2237dcfd61dca62c2ac5e2cee1bce2dec730b56a6eaf25",
+        "size_bytes": 4325,
+        "expected_sha256": "e82a95d3fabd0c531e2237dcfd61dca62c2ac5e2cee1bce2dec730b56a6eaf25",
+        "expected_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+        "result": "MATCH",
+        "per_reference": [
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "e82a95d3fabd0c531e2237dcfd61dca62c2ac5e2cee1bce2dec730b56a6eaf25",
+            "size_bytes": 4325,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "election_retrospective_summary.csv": {
+        "sha256": "6aa8273aec6b4df7a9540705b827f3fa0b1129319b464a1f156f93aac916f1ad",
+        "size_bytes": 328,
+        "expected_sha256": "6aa8273aec6b4df7a9540705b827f3fa0b1129319b464a1f156f93aac916f1ad",
+        "expected_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+        "result": "MATCH",
+        "per_reference": [
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "6aa8273aec6b4df7a9540705b827f3fa0b1129319b464a1f156f93aac916f1ad",
+            "size_bytes": 328,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      }
+    },
+    "mismatches": 0,
+    "no_codex_hash_recorded": [],
+    "content_cross_checks": [
+      "checks.codex_receipt_consistency",
+      "checks.codex_validation_recomputed",
+      "checks.retrospective_recomputed",
+      "checks.diagnostics_subset"
+    ]
+  },
+  "checks": {
+    "coverage_08": {
+      "cycles_in_08_committee_map": [
+        "2021-2022",
+        "2023-2024",
+        "2025-2026"
+      ],
+      "house_senate_keys_08": 2850,
+      "classification_keys": 2850,
+      "duplicate_keys_08": [],
+      "duplicate_keys_classification": [],
+      "missing_from_classification": [],
+      "extra_in_classification": [],
+      "chamber_disagreements": [],
+      "fec_cycle_disagreements": [],
+      "keys_with_amount_unequal": 0,
+      "max_abs_amount_difference": 0.0,
+      "total_usd_08_house_senate": 22047925.44,
+      "total_usd_classification": 22047925.44,
+      "rows_by_cycle_classification": {
+        "2020": 0,
+        "2022": 1108,
+        "2024": 844,
+        "2026": 898
+      },
+      "rows_by_cycle_08_house_senate": {
+        "2020": 0,
+        "2022": 1108,
+        "2024": 844,
+        "2026": 898
+      },
+      "passed": true,
+      "info_08_reconcile_house_plus_senate_all_sector_years": 22047925.44,
+      "info_equals_classification_total": true
+    },
+    "codex_receipt_consistency": {
+      "coverage_recomputed_equal_by_cycle": {
+        "2020": true,
+        "2022": true,
+        "2024": true,
+        "2026": true
+      },
+      "checks_block_consistent": true,
+      "sources_hash_consistent": true,
+      "source_checks": [
+        {
+          "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+          "recorded_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+          "current_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+          "recorded_size": 607883,
+          "current_size": 607883,
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\05_industry_champions.xlsx",
+          "recorded_sha256": "d5c1c9206eb1955e5a24f51e063b5f58d56e2bd0b4d4bc46a6210b47c088e2cb",
+          "current_sha256": "d5c1c9206eb1955e5a24f51e063b5f58d56e2bd0b4d4bc46a6210b47c088e2cb",
+          "recorded_size": 1166504,
+          "current_size": 1166504,
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_08_contributions_by_chamber.json",
+          "recorded_sha256": "d1578a39fa838628eb78e1366596d3e089287f1dc6ea6bcda8105bd2de1c1e1d",
+          "current_sha256": "d1578a39fa838628eb78e1366596d3e089287f1dc6ea6bcda8105bd2de1c1e1d",
+          "recorded_size": 144181,
+          "current_size": 144181,
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\congress-legislators\\750c0608efb6ef1fc3257ba72c99af3771d35088\\legislators-current.yaml",
+          "recorded_sha256": "a4fde6aa9a67b210ea05b8671d88be0c40f5fe2162ed0c502d568294189429bb",
+          "current_sha256": "a4fde6aa9a67b210ea05b8671d88be0c40f5fe2162ed0c502d568294189429bb",
+          "recorded_size": 1079984,
+          "current_size": 1079984,
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\congress-legislators\\750c0608efb6ef1fc3257ba72c99af3771d35088\\legislators-historical.yaml",
+          "recorded_sha256": "9641615f336b3113d6f89152e3441128cbdc3f61ccf87c65da3a015076c78c91",
+          "current_sha256": "9641615f336b3113d6f89152e3441128cbdc3f61ccf87c65da3a015076c78c91",
+          "recorded_size": 8997407,
+          "current_size": 8997407,
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn22\\cn.txt",
+          "recorded_sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+          "current_sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+          "recorded_size": 832005,
+          "current_size": 832005,
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn24\\cn.txt",
+          "recorded_sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+          "current_sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+          "recorded_size": 952677,
+          "current_size": 952677,
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn26\\cn.txt",
+          "recorded_sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+          "current_sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+          "recorded_size": 829444,
+          "current_size": 829444,
+          "match": true
+        }
+      ],
+      "outputs_hash_consistent": true,
+      "codex_build_script": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\build_recipient_classification.py",
+      "codex_build_script_sha256": "9384ecdd55b74f3b0113e011073a8cad2700028c89b06af931d40a6635ca7bdd",
+      "codex_build_script_matches_receipt_script_sha256": true,
+      "passed": true
+    },
+    "codex_validation_recomputed": {
+      "passed_flag": true,
+      "unique_keys": {
+        "file": 2850,
+        "recomputed": 2850
+      },
+      "all_source_keys_covered": {
+        "file": true,
+        "recomputed": true
+      },
+      "amounts_reconciled": {
+        "file": true,
+        "recomputed": true
+      },
+      "total_source_map_nominal_usd": {
+        "file": 22047925.44,
+        "recomputed": 22047925.44
+      },
+      "dated_status_rows_recomputed": {
+        "file": 1177,
+        "recomputed": 1177
+      },
+      "status_mismatches": {
+        "file": [],
+        "recomputed": [],
+        "dated_rows_without_exactly_one_active_term": []
+      },
+      "edge_cases_equal": true,
+      "edge_cases_count": 13,
+      "hash_checks_cover_receipt_paths": true,
+      "hash_checks_all_true": true,
+      "service_terms_start_before_end": true,
+      "service_terms_end_exclusive_all": true,
+      "passed": true
+    },
+    "retrospective_recomputed": {
+      "sector_check_recomputed_equal": true,
+      "sector_check_rows": 16,
+      "summary_recomputed_equal": true,
+      "summary_equals_election_retrospective_receipt_results": true,
+      "receipt_source_08_sha256_equals_current": true,
+      "receipt_source_02_sha256_equals_current": true,
+      "first_differences": [],
+      "method": "Recomputed read-only from 08 sector_year_chamber and 02 seat_calls with the formulas of Codex election_descriptive_check.py; compared as CSV text (exact).",
+      "passed": true,
+      "rows_read": {
+        "wb08.sector_year_chamber": 128,
+        "wb02.seat_calls": 24
+      }
+    },
+    "diagnostics_subset": {
+      "diagnostics_rows": 2021,
+      "unique_keys": 2021,
+      "classification_rows_with_flags": 2021,
+      "same_key_set_as_flagged_classification_rows": true,
+      "field_mismatches": [],
+      "field_mismatch_count": 0,
+      "passed": true
+    },
+    "service_terms": {
+      "terms": 3183,
+      "cand_bioguide_pairs_in_terms": 652,
+      "pairs_not_in_classification": [],
+      "classification_pairs_without_terms": 14,
+      "duplicate_term_keys": 0,
+      "start_before_end_all": true,
+      "type_matches_chamber_all": true,
+      "passed": true
+    },
+    "wb08_sha256_equals_codex_receipt_source": true
+  },
+  "verification": {
+    "staged": {
+      "sheet_order": [
+        "recipient_classification",
+        "candidate_service_terms",
+        "classification_diagnostics",
+        "receipt_codex",
+        "validation_codex",
+        "retro_sector_check_DESCRIPTIVE",
+        "retro_summary_DESCRIPTIVE",
+        "coverage",
+        "notes",
+        "dictionary",
+        "sources"
+      ],
+      "sheet_order_ok": true,
+      "sheets": {
+        "recipient_classification": {
+          "header_equal": true,
+          "rows": 2850,
+          "cells_checked": 105450,
+          "nonempty_source_cells": 91742,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "candidate_service_terms": {
+          "header_equal": true,
+          "rows": 3183,
+          "cells_checked": 44562,
+          "nonempty_source_cells": 41074,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "classification_diagnostics": {
+          "header_equal": true,
+          "rows": 2021,
+          "cells_checked": 14147,
+          "nonempty_source_cells": 14120,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "receipt_codex": {
+          "header_equal": true,
+          "rows": 117,
+          "leaves": 117,
+          "mismatches": 0,
+          "first_mismatches": [],
+          "rebuilt_json_equals_file_object": true,
+          "rebuilt_json_text_equals_file_text": true,
+          "file_line_endings": "CRLF"
+        },
+        "validation_codex": {
+          "header_equal": true,
+          "rows": 149,
+          "leaves": 149,
+          "mismatches": 0,
+          "first_mismatches": [],
+          "rebuilt_json_equals_file_object": true,
+          "rebuilt_json_text_equals_file_text": true,
+          "file_line_endings": "CRLF"
+        },
+        "retro_sector_check_DESCRIPTIVE": {
+          "header_equal": true,
+          "rows": 16,
+          "cells_checked": 272,
+          "nonempty_source_cells": 272,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "retro_summary_DESCRIPTIVE": {
+          "header_equal": true,
+          "rows": 2,
+          "cells_checked": 16,
+          "nonempty_source_cells": 16,
+          "mismatches": 0,
+          "first_mismatches": []
+        }
+      },
+      "formula_or_error_cells": 0,
+      "merged_ranges": 0,
+      "strings_starting_with_equals_read_back": 0,
+      "meta_sheets": {
+        "coverage": {
+          "rows": 12,
+          "header": [
+            "row_type",
+            "cycle",
+            "fec_cycle",
+            "chamber",
+            "map_committees",
+            "map_nominal_usd",
+            "classified_committees",
+            "matched_keys",
+            "missing_from_classification",
+            "extra_in_classification",
+            "classified_nominal_usd",
+            "usd_difference",
+            "keys_amount_unequal",
+            "status",
+            "note"
+          ],
+          "equal_to_expected": true
+        },
+        "notes": {
+          "rows": 25,
+          "header": [
+            "note_id",
+            "topic",
+            "note",
+            "source_ids"
+          ],
+          "equal_to_expected": true
+        },
+        "dictionary": {
+          "rows": 129,
+          "header": [
+            "sheet",
+            "column",
+            "type",
+            "unit",
+            "definition",
+            "source_ids"
+          ],
+          "equal_to_expected": true
+        },
+        "sources": {
+          "rows": 19,
+          "header": [
+            "source_id",
+            "absolute_path",
+            "zip_member",
+            "sha256",
+            "size_bytes",
+            "mtime",
+            "rows_read",
+            "read_at",
+            "role",
+            "expected_sha256",
+            "expected_sha256_from",
+            "hash_check",
+            "note"
+          ],
+          "equal_to_expected": true
+        }
+      },
+      "passed": true
+    },
+    "destination": {
+      "sheet_order": [
+        "recipient_classification",
+        "candidate_service_terms",
+        "classification_diagnostics",
+        "receipt_codex",
+        "validation_codex",
+        "retro_sector_check_DESCRIPTIVE",
+        "retro_summary_DESCRIPTIVE",
+        "coverage",
+        "notes",
+        "dictionary",
+        "sources"
+      ],
+      "sheet_order_ok": true,
+      "sheets": {
+        "recipient_classification": {
+          "header_equal": true,
+          "rows": 2850,
+          "cells_checked": 105450,
+          "nonempty_source_cells": 91742,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "candidate_service_terms": {
+          "header_equal": true,
+          "rows": 3183,
+          "cells_checked": 44562,
+          "nonempty_source_cells": 41074,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "classification_diagnostics": {
+          "header_equal": true,
+          "rows": 2021,
+          "cells_checked": 14147,
+          "nonempty_source_cells": 14120,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "receipt_codex": {
+          "header_equal": true,
+          "rows": 117,
+          "leaves": 117,
+          "mismatches": 0,
+          "first_mismatches": [],
+          "rebuilt_json_equals_file_object": true,
+          "rebuilt_json_text_equals_file_text": true,
+          "file_line_endings": "CRLF"
+        },
+        "validation_codex": {
+          "header_equal": true,
+          "rows": 149,
+          "leaves": 149,
+          "mismatches": 0,
+          "first_mismatches": [],
+          "rebuilt_json_equals_file_object": true,
+          "rebuilt_json_text_equals_file_text": true,
+          "file_line_endings": "CRLF"
+        },
+        "retro_sector_check_DESCRIPTIVE": {
+          "header_equal": true,
+          "rows": 16,
+          "cells_checked": 272,
+          "nonempty_source_cells": 272,
+          "mismatches": 0,
+          "first_mismatches": []
+        },
+        "retro_summary_DESCRIPTIVE": {
+          "header_equal": true,
+          "rows": 2,
+          "cells_checked": 16,
+          "nonempty_source_cells": 16,
+          "mismatches": 0,
+          "first_mismatches": []
+        }
+      },
+      "formula_or_error_cells": 0,
+      "merged_ranges": 0,
+      "strings_starting_with_equals_read_back": 0,
+      "meta_sheets": {
+        "coverage": {
+          "rows": 12,
+          "header": [
+            "row_type",
+            "cycle",
+            "fec_cycle",
+            "chamber",
+            "map_committees",
+            "map_nominal_usd",
+            "classified_committees",
+            "matched_keys",
+            "missing_from_classification",
+            "extra_in_classification",
+            "classified_nominal_usd",
+            "usd_difference",
+            "keys_amount_unequal",
+            "status",
+            "note"
+          ]
+        },
+        "notes": {
+          "rows": 25,
+          "header": [
+            "note_id",
+            "topic",
+            "note",
+            "source_ids"
+          ]
+        },
+        "dictionary": {
+          "rows": 129,
+          "header": [
+            "sheet",
+            "column",
+            "type",
+            "unit",
+            "definition",
+            "source_ids"
+          ]
+        },
+        "sources": {
+          "rows": 19,
+          "header": [
+            "source_id",
+            "absolute_path",
+            "zip_member",
+            "sha256",
+            "size_bytes",
+            "mtime",
+            "rows_read",
+            "read_at",
+            "role",
+            "expected_sha256",
+            "expected_sha256_from",
+            "hash_check",
+            "note"
+          ]
+        }
+      },
+      "passed": true
+    },
+    "method": "Every imported cell read back with openpyxl and compared with its CSV text: empty -> empty cell; text -> identical string; integer -> str(value) identical; decimal -> repr(value) identical. JSON sheets: every leaf row compared, then the JSON rebuilt from the rows and compared with the file: equal as an object, and json.dumps(indent=2) with CRLF newlines reproduces the file text exactly."
+  },
+  "number_storage": "Numbers stored only in the declared numeric columns (numeric_columns). openpyxl 3.1.5 writes floats with %.16g, which can alter doubles that need 17 significant digits; the build writes floats with Python repr instead (shortest exact round trip) by replacing openpyxl.cell._writer.safe_string in-process. The read-back check proves every value.",
+  "numeric_columns": {
+    "recipient_classification.csv": {
+      "cycle": "integer",
+      "first_elected_year": "integer",
+      "terms_at_cycle_start": "integer",
+      "fec_candidate_election_year": "integer",
+      "eligible_current_election_and_chamber": "integer",
+      "cycle_start_status_dated_evidence": "integer",
+      "committee_map_nominal_usd": "decimal",
+      "committee_map_rows": "integer"
+    },
+    "candidate_service_terms.csv": {
+      "end_is_exclusive": "integer",
+      "term_index_same_chamber": "integer"
+    },
+    "recipient_classification_diagnostics.csv": {
+      "cycle": "integer",
+      "committee_map_nominal_usd": "decimal"
+    },
+    "election_retrospective_sector_check.csv": {
+      "dem_seat_call_2022": "decimal",
+      "dem_seat_call_2024": "decimal",
+      "dem_share_2022_percent": "decimal",
+      "dem_share_2024_percent": "decimal",
+      "dem_share_change_pp": "decimal",
+      "dem_usd_2022": "decimal",
+      "dem_usd_2024": "decimal",
+      "dem_usd_change": "decimal",
+      "rep_usd_2022": "decimal",
+      "rep_usd_2024": "decimal",
+      "rep_usd_change": "decimal",
+      "dem_real_m_change": "decimal",
+      "rep_real_m_change": "decimal",
+      "descriptive_pp_per_seat": "decimal"
+    },
+    "election_retrospective_summary.csv": {
+      "sectors": "integer",
+      "independent_elections": "integer",
+      "dem_seat_call_change": "decimal",
+      "equal_sector_mean_dem_share_change_pp": "decimal",
+      "sectors_dem_share_rose": "integer",
+      "sectors_dem_share_fell": "integer"
+    }
+  },
+  "input_parse": {
+    "recipient_classification.csv": {
+      "bom": false,
+      "crlf": 2851,
+      "lf": 2851,
+      "header_columns": 37,
+      "data_rows": 2850,
+      "row_lengths": [
+        37
+      ],
+      "duplicate_headers": false,
+      "fields_with_cr_or_lf": 0,
+      "fields_starting_with_equals": 0,
+      "fields_equal_to_excel_error_code": 0,
+      "fields_with_xml_illegal_chars": 0,
+      "fields_with_escape_like_x_hhhh": 0,
+      "max_field_length": 193,
+      "empty_fields": 13708
+    },
+    "candidate_service_terms.csv": {
+      "bom": false,
+      "crlf": 3184,
+      "lf": 3184,
+      "header_columns": 14,
+      "data_rows": 3183,
+      "row_lengths": [
+        14
+      ],
+      "duplicate_headers": false,
+      "fields_with_cr_or_lf": 0,
+      "fields_starting_with_equals": 0,
+      "fields_equal_to_excel_error_code": 0,
+      "fields_with_xml_illegal_chars": 0,
+      "fields_with_escape_like_x_hhhh": 0,
+      "max_field_length": 168,
+      "empty_fields": 3488
+    },
+    "recipient_classification_diagnostics.csv": {
+      "bom": false,
+      "crlf": 2022,
+      "lf": 2022,
+      "header_columns": 7,
+      "data_rows": 2021,
+      "row_lengths": [
+        7
+      ],
+      "duplicate_headers": false,
+      "fields_with_cr_or_lf": 0,
+      "fields_starting_with_equals": 0,
+      "fields_equal_to_excel_error_code": 0,
+      "fields_with_xml_illegal_chars": 0,
+      "fields_with_escape_like_x_hhhh": 0,
+      "max_field_length": 193,
+      "empty_fields": 27
+    },
+    "election_retrospective_sector_check.csv": {
+      "bom": false,
+      "crlf": 17,
+      "lf": 17,
+      "header_columns": 17,
+      "data_rows": 16,
+      "row_lengths": [
+        17
+      ],
+      "duplicate_headers": false,
+      "fields_with_cr_or_lf": 0,
+      "fields_starting_with_equals": 0,
+      "fields_equal_to_excel_error_code": 0,
+      "fields_with_xml_illegal_chars": 0,
+      "fields_with_escape_like_x_hhhh": 0,
+      "max_field_length": 40,
+      "empty_fields": 0
+    },
+    "election_retrospective_summary.csv": {
+      "bom": false,
+      "crlf": 3,
+      "lf": 3,
+      "header_columns": 8,
+      "data_rows": 2,
+      "row_lengths": [
+        8
+      ],
+      "duplicate_headers": false,
+      "fields_with_cr_or_lf": 0,
+      "fields_starting_with_equals": 0,
+      "fields_equal_to_excel_error_code": 0,
+      "fields_with_xml_illegal_chars": 0,
+      "fields_with_escape_like_x_hhhh": 0,
+      "max_field_length": 48,
+      "empty_fields": 0
+    }
+  },
+  "references": {
+    "codex_delivery_manifest": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\DELIVERY_MANIFEST.json",
+      "sha256": "bb6ae229e32711cde4fb0f411f380256945c5a810729418e33a040d2768620e1",
+      "size": 9629,
+      "size_stat": 9629,
+      "mtime": "2026-09-26T19:27:45Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "codex_delivery_manifest",
+      "role": "hash_reference",
+      "hash_refs": [],
+      "hash_check": "NO_CODEX_HASH_RECORDED",
+      "expected_sha256": null,
+      "expected_size_bytes": null,
+      "expected_sha256_from": null
+    },
+    "codex_recipient_handoff": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\RECIPIENT_HANDOFF.md",
+      "sha256": "1243f7ad7a4a786f596668446c0ca5bb28e0583348a7f8583436adf530472795",
+      "size": 4283,
+      "size_stat": 4283,
+      "mtime": "2026-09-26T19:07:10Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "codex_recipient_handoff",
+      "role": "notes_source",
+      "hash_refs": [
+        {
+          "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+          "sha256": "1243f7ad7a4a786f596668446c0ca5bb28e0583348a7f8583436adf530472795",
+          "size_bytes": 4283,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "1243f7ad7a4a786f596668446c0ca5bb28e0583348a7f8583436adf530472795",
+      "expected_size_bytes": 4283,
+      "expected_sha256_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)"
+    },
+    "codex_election_retrospective_receipt": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\election_retrospective_receipt.json",
+      "sha256": "273b01a3a20e759b86563dd34bc21e0c414eb42f1a3d6f7b1a2be7592ad286ae",
+      "size": 1541,
+      "size_stat": 1541,
+      "mtime": "2026-09-26T19:04:10Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "codex_election_retrospective_receipt",
+      "role": "cross_check",
+      "hash_refs": [
+        {
+          "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+          "sha256": "273b01a3a20e759b86563dd34bc21e0c414eb42f1a3d6f7b1a2be7592ad286ae",
+          "size_bytes": 1541,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "273b01a3a20e759b86563dd34bc21e0c414eb42f1a3d6f7b1a2be7592ad286ae",
+      "expected_size_bytes": 1541,
+      "expected_sha256_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)"
+    },
+    "wb08": {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+      "sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+      "size": 607883,
+      "size_stat": 607883,
+      "mtime": "2026-09-26T05:24:35Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "wb08",
+      "role": "cross_check",
+      "rows_read_detail": {
+        "committee_map": 5246,
+        "reconcile": 64,
+        "sector_year_chamber": 128
+      },
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+          "size_bytes": 607883,
+          "match": true
+        },
+        {
+          "from": "election_retrospective_receipt.json sources[] (Codex)",
+          "sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+          "size_bytes": null,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+      "expected_size_bytes": 607883,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex); election_retrospective_receipt.json sources[] (Codex)"
+    },
+    "wb02": {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\02_election_forecasting.xlsx",
+      "sha256": "79d051037c2383aa228a698ce7a5b85ae9c5a4cedc0d604812734550e4162ecb",
+      "size": 41512,
+      "size_stat": 41512,
+      "mtime": "2026-09-26T00:30:48Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "wb02",
+      "role": "cross_check",
+      "rows_read_detail": {
+        "seat_calls": 24
+      },
+      "hash_refs": [
+        {
+          "from": "election_retrospective_receipt.json sources[] (Codex)",
+          "sha256": "79d051037c2383aa228a698ce7a5b85ae9c5a4cedc0d604812734550e4162ecb",
+          "size_bytes": null,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "79d051037c2383aa228a698ce7a5b85ae9c5a4cedc0d604812734550e4162ecb",
+      "expected_size_bytes": null,
+      "expected_sha256_from": "election_retrospective_receipt.json sources[] (Codex)"
+    },
+    "wb05": {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\05_industry_champions.xlsx",
+      "sha256": "d5c1c9206eb1955e5a24f51e063b5f58d56e2bd0b4d4bc46a6210b47c088e2cb",
+      "size": 1166504,
+      "size_stat": 1166504,
+      "mtime": "2026-09-25T21:48:48Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "wb05",
+      "role": "hash_consistency_only",
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "d5c1c9206eb1955e5a24f51e063b5f58d56e2bd0b4d4bc46a6210b47c088e2cb",
+          "size_bytes": 1166504,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "d5c1c9206eb1955e5a24f51e063b5f58d56e2bd0b4d4bc46a6210b47c088e2cb",
+      "expected_size_bytes": 1166504,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex)"
+    },
+    "build_receipt_08": {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_08_contributions_by_chamber.json",
+      "sha256": "d1578a39fa838628eb78e1366596d3e089287f1dc6ea6bcda8105bd2de1c1e1d",
+      "size": 144181,
+      "size_stat": 144181,
+      "mtime": "2026-09-26T05:36:30Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "build_receipt_08",
+      "role": "hash_consistency_only",
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "d1578a39fa838628eb78e1366596d3e089287f1dc6ea6bcda8105bd2de1c1e1d",
+          "size_bytes": 144181,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "d1578a39fa838628eb78e1366596d3e089287f1dc6ea6bcda8105bd2de1c1e1d",
+      "expected_size_bytes": 144181,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex)"
+    },
+    "yaml_current": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\congress-legislators\\750c0608efb6ef1fc3257ba72c99af3771d35088\\legislators-current.yaml",
+      "sha256": "a4fde6aa9a67b210ea05b8671d88be0c40f5fe2162ed0c502d568294189429bb",
+      "size": 1079984,
+      "size_stat": 1079984,
+      "mtime": "2026-08-30T00:58:37Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "yaml_current",
+      "role": "hash_consistency_only",
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "a4fde6aa9a67b210ea05b8671d88be0c40f5fe2162ed0c502d568294189429bb",
+          "size_bytes": 1079984,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "a4fde6aa9a67b210ea05b8671d88be0c40f5fe2162ed0c502d568294189429bb",
+      "expected_size_bytes": 1079984,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex)"
+    },
+    "yaml_historical": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\staffer_network\\reference\\congress-legislators\\750c0608efb6ef1fc3257ba72c99af3771d35088\\legislators-historical.yaml",
+      "sha256": "9641615f336b3113d6f89152e3441128cbdc3f61ccf87c65da3a015076c78c91",
+      "size": 8997407,
+      "size_stat": 8997407,
+      "mtime": "2026-08-30T00:58:38Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "yaml_historical",
+      "role": "hash_consistency_only",
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "9641615f336b3113d6f89152e3441128cbdc3f61ccf87c65da3a015076c78c91",
+          "size_bytes": 8997407,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "9641615f336b3113d6f89152e3441128cbdc3f61ccf87c65da3a015076c78c91",
+      "expected_size_bytes": 8997407,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex)"
+    },
+    "fec_cn22": {
+      "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn22\\cn.txt",
+      "sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+      "size": 832005,
+      "size_stat": 832005,
+      "mtime": "2026-09-08T05:26:41Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "fec_cn22",
+      "role": "hash_consistency_only",
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+          "size_bytes": 832005,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+      "expected_size_bytes": 832005,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex)"
+    },
+    "fec_cn24": {
+      "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn24\\cn.txt",
+      "sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+      "size": 952677,
+      "size_stat": 952677,
+      "mtime": "2026-09-08T05:26:43Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "fec_cn24",
+      "role": "hash_consistency_only",
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+          "size_bytes": 952677,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+      "expected_size_bytes": 952677,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex)"
+    },
+    "fec_cn26": {
+      "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn26\\cn.txt",
+      "sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+      "size": 829444,
+      "size_stat": 829444,
+      "mtime": "2026-09-08T05:26:48Z",
+      "read_at": "2026-09-26T19:40:19Z",
+      "source_id": "fec_cn26",
+      "role": "hash_consistency_only",
+      "hash_refs": [
+        {
+          "from": "recipient_classification_receipt.json sources[] (Codex)",
+          "sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+          "size_bytes": 829444,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+      "expected_size_bytes": 829444,
+      "expected_sha256_from": "recipient_classification_receipt.json sources[] (Codex)"
+    }
+  },
+  "not_imported": [
+    {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\rating_aug25_inside.csv",
+      "sha256": "d3b1c6bf075261d534697ceb1fc587861c8b6d3351b2ab7bf4cecb4d1b6abed9",
+      "size_bytes": 23956,
+      "mtime": "2026-09-26T19:07:16Z",
+      "reason": "Brief: do NOT import yet; Codex sends the validated rating file separately."
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\rating_aug25_inside_receipt.json",
+      "sha256": "c69f67e33dd630d0709e8abb78dd03687b05abb59394425cd1d0d4543db494ff",
+      "size_bytes": 1687,
+      "mtime": "2026-09-26T19:07:16Z",
+      "reason": "Receipt of the rating file above; not imported with it."
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\candidate_committee_week_receipts.csv",
+      "size_bytes": 11197074,
+      "reason": "Handoff helper extract (73,239 rows); not requested for this workbook; not a replacement for workbook 09 controls."
+    }
+  ],
+  "conventions": {
+    "followed": [
+      "header in row 1, one table per sheet, values only (no formulas, merged cells, styles, filters, frozen panes)",
+      "missing = empty cell, never 0",
+      "dates as ISO text",
+      "years as integers",
+      "dictionary, sources, coverage, notes sheets (08 layout)"
+    ],
+    "deviations": [
+      "imported tables keep their exact columns: no added status or source_id column (verbatim import); provenance per sheet in sources",
+      "three sheet names shortened to Excel's 31-character limit (notes n25)"
+    ]
+  },
+  "scripts": [
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\build_10.py",
+      "sha256": "e7f0c50d7c0be3b4750c67193c683b3969c878ed5df41ddeb4f981dfaa79bbb9",
+      "role": "build (build + receipt subcommands)"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\explore_values.py",
+      "sha256": "e77b61b187e6bfbdd2846412daa3d8a390a8e10db4ff0e290caa7a5dd924394c",
+      "role": "read-only exploration, not part of the build"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\inspect_dest_10.py",
+      "sha256": "b0aefec3590be09ce55b97e478c7adea4743d2e4df629323b4d7b4a40222192f",
+      "role": "read-only exploration, not part of the build"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\inspect_inputs.py",
+      "sha256": "20c812bd5d1fff4ca5c622abb6982b8866df900ccfebc4f693a7d9a7b89f6828",
+      "role": "read-only exploration, not part of the build"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\probe_json_text.py",
+      "sha256": "2171e42a06d924da14ca922836c247945a493c2d7179acc0d72f6446280886a0",
+      "role": "read-only exploration, not part of the build"
+    }
+  ],
+  "study_folder_writes": [
+    "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\10_recipient_classification.xlsx",
+    "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_10_recipient_classification.json"
+  ],
+  "stage_folder": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\stage",
+  "supersedes": {
+    "previous_versions": {
+      "10_recipient_classification.xlsx": "26333864e4837d780543afd8dab355b20494f0cd065fc5f2374c978103f3a533",
+      "build_receipt_10_recipient_classification.json": "1660e7dbffd3e6f56c2ebc35322ccd0a4727ed6451121d34e0dd0633ea0ee0fa"
+    },
+    "preserved_copies": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import10\\superseded_v1",
+    "reason": "v1 (built before Codex published DELIVERY_MANIFEST.json at 2026-09-26T19:27:45.554092+00:00) recorded four inputs as NO_CODEX_HASH_RECORDED and notes n24 said no Codex hash existed. The manifest records all seven; every imported byte matches it. v2 changes only sources, notes n24 and the receipt; every imported cell is identical."
+  },
+  "decisions_recorded": [
+    "All seven inputs verified against Codex-recorded hashes: the classification receipt (three CSVs) and DELIVERY_MANIFEST.json (all seven); content cross-checks kept as additional evidence.",
+    "Numeric typing is declared per column (not guessed); codes with leading zeros (district) and ISO dates stay text.",
+    "district stays text in both recipient_classification (FEC '00' style) and candidate_service_terms (congress-legislators unpadded) so neither is reformatted.",
+    "JSON flattened to one row per leaf with an invertible json_path; value_json keeps the exact literal."
+  ],
+  "gaps_and_risks": [
+    "2020 has no rows (08 committee_map has no 2019-2020 cycle); explicit gap, not zero.",
+    "Race ratings (Toss-up / Lean / Likely / Safe) are not here; rating_aug25_inside.csv deliberately not imported.",
+    "status_at_cycle_start is a cycle-start label; race-level tests must re-evaluate status at each forecast origin from candidate_service_terms (notes n5-n9).",
+    "FEC eligibility is not nomination; challenger / open_seat are provisional FEC snapshots; first_elected_year is inferred."
+  ],
+  "glassbox": {
+    "run_id": "import10-build-20260926",
+    "source": "sector-growth-import10",
+    "start_event": "evt-20260926T1913010103936Z-bcb12280e5",
+    "correlation_id": "corr-20260926T1913009893527Z-cda073fe5b",
+    "events_dir": "C:\\Users\\pgoff\\.claude\\glassbox\\events"
+  }
+}

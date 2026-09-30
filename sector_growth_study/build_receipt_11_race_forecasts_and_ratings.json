@@ -1,0 +1,1247 @@
+{
+  "run_id": "import11-build-20260926",
+  "written_at": "2026-09-26T20:17:46Z",
+  "builder": {
+    "agent": "Claude (Opus 5.5) architect subagent for the study coordinator",
+    "session": "b82a832c",
+    "engine": "Python + openpyxl write-only (import only; the analysis engine stays R)",
+    "environment": {
+      "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+      "openpyxl": "3.1.5",
+      "platform": "Windows-11-10.0.26200-SP0"
+    }
+  },
+  "brief": "Build NEW data/11_race_forecasts_and_ratings.xlsx: sheets house_district_538_2022, senate_state_538_2022, rating_history_expert and the flattened validation and receipt sheets; values verbatim plus a computed available_at per row (the later of forecastdate and run timestamp) and a backfilled flag; notes: WY-1 is FEC WY-00, multiparty and same-party rows flagged; hash-verify every input; preserve all rows; receipt and Glass Box events.",
+  "file": {
+    "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\11_race_forecasts_and_ratings.xlsx",
+    "sha256": "47d933d1fb14688e317a7c95d39c8e17a002cee93a31294facedda4c49bd31a3",
+    "size_bytes": 76659914,
+    "staged_copy": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import11\\stage\\11_race_forecasts_and_ratings.xlsx",
+      "sha256": "47d933d1fb14688e317a7c95d39c8e17a002cee93a31294facedda4c49bd31a3",
+      "size_bytes": 76659914
+    },
+    "destination_equals_verified_stage": true
+  },
+  "sheet_order": [
+    "house_district_538_2022",
+    "senate_state_538_2022",
+    "rating_history_expert",
+    "receipt_rating_codex",
+    "validation_rating_codex",
+    "receipt_538_house_codex",
+    "validation_538_house_codex",
+    "receipt_538_senate_codex",
+    "coverage",
+    "notes",
+    "dictionary",
+    "sources"
+  ],
+  "sheet_rows": {
+    "house_district_538_2022": 199665,
+    "senate_state_538_2022": 16065,
+    "rating_history_expert": 2668,
+    "receipt_rating_codex": 264,
+    "validation_rating_codex": 12,
+    "receipt_538_house_codex": 105,
+    "validation_538_house_codex": 41,
+    "receipt_538_senate_codex": 193,
+    "coverage": 30,
+    "notes": 19,
+    "dictionary": 286,
+    "sources": 15
+  },
+  "dimensions": {
+    "house_district_538_2022": "A1:CR199666",
+    "senate_state_538_2022": "A1:CR16066",
+    "rating_history_expert": "A1:AC2669",
+    "receipt_rating_codex": "A1:D265",
+    "validation_rating_codex": "A1:D13",
+    "receipt_538_house_codex": "A1:D106",
+    "validation_538_house_codex": "A1:D42",
+    "receipt_538_senate_codex": "A1:D194",
+    "coverage": "A1:V31",
+    "notes": "A1:D20",
+    "dictionary": "A1:F287",
+    "sources": "A1:M16"
+  },
+  "sheet_sources": {
+    "house_district_538_2022": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\538_house_district_toplines_2022_wayback_20250306125234.csv",
+    "senate_state_538_2022": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\538_senate_state_toplines_2022_wayback_20250306125236.csv",
+    "rating_history_expert": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\rating_history.csv",
+    "receipt_rating_codex": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\rating_history_receipt.json",
+    "validation_rating_codex": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\rating_validation.json",
+    "receipt_538_house_codex": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\538_house_district_wayback_attempt.json",
+    "validation_538_house_codex": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\538_house_district_lite_validation.json",
+    "receipt_538_senate_codex": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\538_senate_state_wayback_receipt.json"
+  },
+  "computed_columns": {
+    "columns": [
+      "forecast_date",
+      "run_date",
+      "available_at",
+      "backfilled",
+      "available_at_launch_floor",
+      "codex_early_backfill_flag",
+      "same_party_flag",
+      "multiparty_flag"
+    ],
+    "sheets": [
+      "house_district_538_2022",
+      "senate_state_538_2022"
+    ],
+    "definitions": {
+      "forecast_date": "COMPUTED at import: forecastdate parsed as %m/%d/%y.",
+      "run_date": "COMPUTED at import: date part of timestamp (parsed as '%H:%M:%S %d %b %Y' after collapsing whitespace). The source gives no timezone.",
+      "available_at": "COMPUTED at import: the later of forecast_date and run_date (the coordinator's definition, 2026-09-26). No June 30 launch floor: see available_at_launch_floor.",
+      "backfilled": "COMPUTED at import: 1 when run_date is later than forecast_date (the vintage was computed after its nominal forecast date), else 0.",
+      "available_at_launch_floor": "COMPUTED at import: the latest of forecast_date, run_date and 2022-06-30, the public model launch (Codex's availability rule, RACE_FORECAST_SOURCE_NOTE.md and rating_history_538_lite_receipt.json).",
+      "codex_early_backfill_flag": "COMPUTED at import: Codex's early_backfill_flag rule: 1 when forecast_date is before 2022-06-30 or run_date is later than forecast_date.",
+      "same_party_flag": "COMPUTED at import: 1 when at least two named candidates of the same party (name_D1..D4 or name_R1..R4 non-empty) have a win probability above 0 in the row (a live same-party contest: top-two, jungle or ranked-choice races). The party win probability then differs from any single candidate's.",
+      "multiparty_flag": "COMPUTED at import: 1 when a candidate who is neither a Democrat nor a Republican has a win probability above 0 (winner_I1 > 0 or winner_O1 > 0). Senate party fields allocate independents by caucus/control (notes)."
+    }
+  },
+  "available_at_and_backfill_counts": {
+    "house": {
+      "_classic": {
+        "rows": 66555,
+        "races": 435,
+        "forecast_days": 153,
+        "first_forecast_date": "2022-06-01",
+        "last_forecast_date": "2022-11-08",
+        "available_at_rows": 66555,
+        "available_at_min": "2022-06-29",
+        "available_at_max": "2022-11-08",
+        "backfilled_rows": 8700,
+        "prelaunch_rows": 9135,
+        "available_at_before_launch_rows": 9135,
+        "launch_floor_changes_available_at_rows": 9135,
+        "same_party_rows": 1328,
+        "same_party_races": [
+          "AK-1",
+          "CA-15",
+          "CA-16",
+          "CA-29",
+          "CA-30",
+          "CA-34",
+          "CA-37",
+          "LA-3",
+          "LA-4",
+          "LA-5",
+          "LA-6",
+          "WA-4",
+          "WA-9"
+        ],
+        "multiparty_rows": 8380,
+        "multiparty_races_count": 162,
+        "dparty_plus_rparty_lt_1_rows": 161,
+        "winner_i1_positive_without_name_rows": 1,
+        "codex_party_certain_same_party_rows": 1230,
+        "codex_party_certain_same_party_races": [
+          "CA-15",
+          "CA-16",
+          "CA-29",
+          "CA-30",
+          "CA-34",
+          "CA-37",
+          "LA-3",
+          "LA-4",
+          "LA-6",
+          "WA-4",
+          "WA-9"
+        ],
+        "run_minus_forecast_date_day_counts": {
+          "0": 57855,
+          "3": 435,
+          "4": 435,
+          "5": 435,
+          "7": 435,
+          "8": 435,
+          "10": 435,
+          "11": 435,
+          "12": 435,
+          "14": 435,
+          "15": 435,
+          "16": 435,
+          "18": 435,
+          "19": 435,
+          "20": 435,
+          "22": 435,
+          "23": 435,
+          "24": 435,
+          "26": 435,
+          "27": 435,
+          "28": 435
+        }
+      },
+      "_deluxe": {
+        "rows": 66555,
+        "races": 435,
+        "forecast_days": 153,
+        "first_forecast_date": "2022-06-01",
+        "last_forecast_date": "2022-11-08",
+        "available_at_rows": 66555,
+        "available_at_min": "2022-06-29",
+        "available_at_max": "2022-11-08",
+        "backfilled_rows": 8700,
+        "prelaunch_rows": 9135,
+        "available_at_before_launch_rows": 9135,
+        "launch_floor_changes_available_at_rows": 9135,
+        "same_party_rows": 1328,
+        "same_party_races": [
+          "AK-1",
+          "CA-15",
+          "CA-16",
+          "CA-29",
+          "CA-30",
+          "CA-34",
+          "CA-37",
+          "LA-3",
+          "LA-4",
+          "LA-5",
+          "LA-6",
+          "WA-4",
+          "WA-9"
+        ],
+        "multiparty_rows": 8268,
+        "multiparty_races_count": 162,
+        "dparty_plus_rparty_lt_1_rows": 151,
+        "winner_i1_positive_without_name_rows": 1,
+        "codex_party_certain_same_party_rows": 1230,
+        "codex_party_certain_same_party_races": [
+          "CA-15",
+          "CA-16",
+          "CA-29",
+          "CA-30",
+          "CA-34",
+          "CA-37",
+          "LA-3",
+          "LA-4",
+          "LA-6",
+          "WA-4",
+          "WA-9"
+        ],
+        "run_minus_forecast_date_day_counts": {
+          "0": 57855,
+          "3": 435,
+          "4": 435,
+          "5": 435,
+          "7": 435,
+          "8": 435,
+          "10": 435,
+          "11": 435,
+          "12": 435,
+          "14": 435,
+          "15": 435,
+          "16": 435,
+          "18": 435,
+          "19": 435,
+          "20": 435,
+          "22": 435,
+          "23": 435,
+          "24": 435,
+          "26": 435,
+          "27": 435,
+          "28": 435
+        }
+      },
+      "_lite": {
+        "rows": 66555,
+        "races": 435,
+        "forecast_days": 153,
+        "first_forecast_date": "2022-06-01",
+        "last_forecast_date": "2022-11-08",
+        "available_at_rows": 66555,
+        "available_at_min": "2022-06-29",
+        "available_at_max": "2022-11-08",
+        "backfilled_rows": 8700,
+        "prelaunch_rows": 9135,
+        "available_at_before_launch_rows": 9135,
+        "launch_floor_changes_available_at_rows": 9135,
+        "same_party_rows": 1328,
+        "same_party_races": [
+          "AK-1",
+          "CA-15",
+          "CA-16",
+          "CA-29",
+          "CA-30",
+          "CA-34",
+          "CA-37",
+          "LA-3",
+          "LA-4",
+          "LA-5",
+          "LA-6",
+          "WA-4",
+          "WA-9"
+        ],
+        "multiparty_rows": 9958,
+        "multiparty_races_count": 162,
+        "dparty_plus_rparty_lt_1_rows": 199,
+        "winner_i1_positive_without_name_rows": 1,
+        "codex_party_certain_same_party_rows": 1230,
+        "codex_party_certain_same_party_races": [
+          "CA-15",
+          "CA-16",
+          "CA-29",
+          "CA-30",
+          "CA-34",
+          "CA-37",
+          "LA-3",
+          "LA-4",
+          "LA-6",
+          "WA-4",
+          "WA-9"
+        ],
+        "run_minus_forecast_date_day_counts": {
+          "0": 57855,
+          "3": 435,
+          "4": 435,
+          "5": 435,
+          "7": 435,
+          "8": 435,
+          "10": 435,
+          "11": 435,
+          "12": 435,
+          "14": 435,
+          "15": 435,
+          "16": 435,
+          "18": 435,
+          "19": 435,
+          "20": 435,
+          "22": 435,
+          "23": 435,
+          "24": 435,
+          "26": 435,
+          "27": 435,
+          "28": 435
+        }
+      }
+    },
+    "senate": {
+      "_classic": {
+        "rows": 5355,
+        "races": 35,
+        "forecast_days": 153,
+        "first_forecast_date": "2022-06-01",
+        "last_forecast_date": "2022-11-08",
+        "available_at_rows": 5355,
+        "available_at_min": "2022-06-29",
+        "available_at_max": "2022-11-08",
+        "backfilled_rows": 700,
+        "prelaunch_rows": 735,
+        "available_at_before_launch_rows": 735,
+        "launch_floor_changes_available_at_rows": 735,
+        "same_party_rows": 306,
+        "same_party_races": [
+          "AK-S3",
+          "LA-S3"
+        ],
+        "multiparty_rows": 868,
+        "multiparty_races_count": 17,
+        "dparty_plus_rparty_lt_1_rows": 22,
+        "winner_i1_positive_without_name_rows": 0,
+        "codex_party_certain_same_party_rows": 0,
+        "codex_party_certain_same_party_races": [],
+        "run_minus_forecast_date_day_counts": {
+          "0": 4655,
+          "3": 35,
+          "4": 35,
+          "5": 35,
+          "7": 35,
+          "8": 35,
+          "10": 35,
+          "11": 35,
+          "12": 35,
+          "14": 35,
+          "15": 35,
+          "16": 35,
+          "18": 35,
+          "19": 35,
+          "20": 35,
+          "22": 35,
+          "23": 35,
+          "24": 35,
+          "26": 35,
+          "27": 35,
+          "28": 35
+        }
+      },
+      "_deluxe": {
+        "rows": 5355,
+        "races": 35,
+        "forecast_days": 153,
+        "first_forecast_date": "2022-06-01",
+        "last_forecast_date": "2022-11-08",
+        "available_at_rows": 5355,
+        "available_at_min": "2022-06-29",
+        "available_at_max": "2022-11-08",
+        "backfilled_rows": 700,
+        "prelaunch_rows": 735,
+        "available_at_before_launch_rows": 735,
+        "launch_floor_changes_available_at_rows": 735,
+        "same_party_rows": 306,
+        "same_party_races": [
+          "AK-S3",
+          "LA-S3"
+        ],
+        "multiparty_rows": 859,
+        "multiparty_races_count": 17,
+        "dparty_plus_rparty_lt_1_rows": 13,
+        "winner_i1_positive_without_name_rows": 0,
+        "codex_party_certain_same_party_rows": 0,
+        "codex_party_certain_same_party_races": [],
+        "run_minus_forecast_date_day_counts": {
+          "0": 4655,
+          "3": 35,
+          "4": 35,
+          "5": 35,
+          "7": 35,
+          "8": 35,
+          "10": 35,
+          "11": 35,
+          "12": 35,
+          "14": 35,
+          "15": 35,
+          "16": 35,
+          "18": 35,
+          "19": 35,
+          "20": 35,
+          "22": 35,
+          "23": 35,
+          "24": 35,
+          "26": 35,
+          "27": 35,
+          "28": 35
+        }
+      },
+      "_lite": {
+        "rows": 5355,
+        "races": 35,
+        "forecast_days": 153,
+        "first_forecast_date": "2022-06-01",
+        "last_forecast_date": "2022-11-08",
+        "available_at_rows": 5355,
+        "available_at_min": "2022-06-29",
+        "available_at_max": "2022-11-08",
+        "backfilled_rows": 700,
+        "prelaunch_rows": 735,
+        "available_at_before_launch_rows": 735,
+        "launch_floor_changes_available_at_rows": 735,
+        "same_party_rows": 306,
+        "same_party_races": [
+          "AK-S3",
+          "LA-S3"
+        ],
+        "multiparty_rows": 934,
+        "multiparty_races_count": 17,
+        "dparty_plus_rparty_lt_1_rows": 19,
+        "winner_i1_positive_without_name_rows": 0,
+        "codex_party_certain_same_party_rows": 0,
+        "codex_party_certain_same_party_races": [],
+        "run_minus_forecast_date_day_counts": {
+          "0": 4655,
+          "3": 35,
+          "4": 35,
+          "5": 35,
+          "7": 35,
+          "8": 35,
+          "10": 35,
+          "11": 35,
+          "12": 35,
+          "14": 35,
+          "15": 35,
+          "16": 35,
+          "18": 35,
+          "19": 35,
+          "20": 35,
+          "22": 35,
+          "23": 35,
+          "24": 35,
+          "26": 35,
+          "27": 35,
+          "28": 35
+        }
+      }
+    }
+  },
+  "hash_gate": {
+    "rule": "Every input hashed before import; stop on any mismatch with any recorded hash.",
+    "results": {
+      "538_house_district_toplines_2022_wayback_20250306125234.csv": {
+        "sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+        "size_bytes": 74579773,
+        "result": "MATCH",
+        "records": [
+          {
+            "from": "538_house_district_wayback_attempt.json $.sha256 (Codex)",
+            "sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+            "size_bytes": 74579773,
+            "match": true
+          },
+          {
+            "from": "stratified_input_validation.json $.raw_source_sha256[\"C:\\\\Users\\\\pgoff\\\\Documents\\\\Codex\\\\2026-09-26\\\\loo\\\\work\\\\seat_gain_extension\\\\538_house_district_toplines_2022_wayback_20250306125234.csv\"] (Codex)",
+            "sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "independent_receipt_forecast_panel_receipt.json $.source_sha256[\"C:\\\\Users\\\\pgoff\\\\Documents\\\\Codex\\\\2026-09-26\\\\loo\\\\work\\\\seat_gain_extension\\\\538_house_district_toplines_2022_wayback_20250306125234.csv\"] (Codex)",
+            "sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "rating_history_538_lite_receipt.json $.input_sha256 (Codex)",
+            "sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "RACE_FORECAST_SOURCE_NOTE.md table row 'House archive' (Codex)",
+            "sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "coordinator brief 2026-09-26",
+            "sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+            "size_bytes": null,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "538_senate_state_toplines_2022_wayback_20250306125236.csv": {
+        "sha256": "8b1b7c28438ce2f57fefc33447d064382f7316e1d362bd57b5debb13e9027101",
+        "size_bytes": 6404405,
+        "result": "MATCH",
+        "records": [
+          {
+            "from": "538_senate_state_wayback_receipt.json $.sha256 (Codex)",
+            "sha256": "8b1b7c28438ce2f57fefc33447d064382f7316e1d362bd57b5debb13e9027101",
+            "size_bytes": 6404405,
+            "match": true
+          },
+          {
+            "from": "stratified_input_validation.json $.raw_source_sha256[\"C:\\\\Users\\\\pgoff\\\\Documents\\\\Codex\\\\2026-09-26\\\\loo\\\\work\\\\seat_gain_extension\\\\538_senate_state_toplines_2022_wayback_20250306125236.csv\"] (Codex)",
+            "sha256": "8b1b7c28438ce2f57fefc33447d064382f7316e1d362bd57b5debb13e9027101",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "independent_receipt_forecast_panel_receipt.json $.source_sha256[\"C:\\\\Users\\\\pgoff\\\\Documents\\\\Codex\\\\2026-09-26\\\\loo\\\\work\\\\seat_gain_extension\\\\538_senate_state_toplines_2022_wayback_20250306125236.csv\"] (Codex)",
+            "sha256": "8b1b7c28438ce2f57fefc33447d064382f7316e1d362bd57b5debb13e9027101",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "RACE_FORECAST_SOURCE_NOTE.md table row 'Senate archive' (Codex)",
+            "sha256": "8b1b7c28438ce2f57fefc33447d064382f7316e1d362bd57b5debb13e9027101",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "coordinator brief 2026-09-26",
+            "sha256": "8b1b7c28438ce2f57fefc33447d064382f7316e1d362bd57b5debb13e9027101",
+            "size_bytes": null,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "rating_history.csv": {
+        "sha256": "e2ff06ce594afb945731ba44fc9bd2bb5f22df3449a1b08ce4a71c6447b89980",
+        "size_bytes": 1214314,
+        "result": "MATCH",
+        "records": [
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "e2ff06ce594afb945731ba44fc9bd2bb5f22df3449a1b08ce4a71c6447b89980",
+            "size_bytes": 1214314,
+            "match": true
+          },
+          {
+            "from": "rating_history_receipt.json $.output_sha256 (Codex)",
+            "sha256": "e2ff06ce594afb945731ba44fc9bd2bb5f22df3449a1b08ce4a71c6447b89980",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "rating_validation.json $.output_sha256 (Codex)",
+            "sha256": "e2ff06ce594afb945731ba44fc9bd2bb5f22df3449a1b08ce4a71c6447b89980",
+            "size_bytes": null,
+            "match": true
+          },
+          {
+            "from": "coordinator brief 2026-09-26",
+            "sha256": "e2ff06ce594afb945731ba44fc9bd2bb5f22df3449a1b08ce4a71c6447b89980",
+            "size_bytes": null,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "rating_history_receipt.json": {
+        "sha256": "7cf62ac4da8295f1cc8033e1c79342ea335a67080c8d8c35549e8c4067b35861",
+        "size_bytes": 12228,
+        "result": "MATCH",
+        "records": [
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "7cf62ac4da8295f1cc8033e1c79342ea335a67080c8d8c35549e8c4067b35861",
+            "size_bytes": 12228,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "rating_validation.json": {
+        "sha256": "fb8a2e05eaf00bfe745e15d0620bd95241417921f3de28c258581e4a000c0c66",
+        "size_bytes": 617,
+        "result": "MATCH",
+        "records": [
+          {
+            "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+            "sha256": "fb8a2e05eaf00bfe745e15d0620bd95241417921f3de28c258581e4a000c0c66",
+            "size_bytes": 617,
+            "match": true
+          }
+        ],
+        "unchanged_at_receipt_time": true
+      },
+      "538_house_district_wayback_attempt.json": {
+        "sha256": "602a19ff4550ce8438a035701f84b679b78a5b5d8e88345e343cb3d9c5d03c4d",
+        "size_bytes": 3113,
+        "result": "NO_CODEX_HASH_RECORDED",
+        "records": [],
+        "unchanged_at_receipt_time": true
+      },
+      "538_house_district_lite_validation.json": {
+        "sha256": "91a4964335b63816f900a0a684112e5f7499cb97c9bd56d90c2651762265df4a",
+        "size_bytes": 1482,
+        "result": "NO_CODEX_HASH_RECORDED",
+        "records": [],
+        "unchanged_at_receipt_time": true
+      },
+      "538_senate_state_wayback_receipt.json": {
+        "sha256": "d21a15e8561d5c168e046619afd6b64831b3b53e33f0d60596e309cb89362611",
+        "size_bytes": 6032,
+        "result": "NO_CODEX_HASH_RECORDED",
+        "records": [],
+        "unchanged_at_receipt_time": true
+      }
+    },
+    "mismatches": 0,
+    "no_recorded_hash": [
+      "538_house_district_wayback_attempt.json",
+      "538_house_district_lite_validation.json",
+      "538_senate_state_wayback_receipt.json"
+    ],
+    "streamed_passes": "Each 538 CSV was hashed in the gate, then re-hashed during the validation, write and verify passes; all equal."
+  },
+  "checks": {
+    "rating_history_vs_codex_receipt_and_validation": {
+      "rows": 2668,
+      "unique_cycle_race_source_date": 2668,
+      "unique_date_source_race": 2668,
+      "validation_rows_equal": true,
+      "validation_unique_keys_equal": true,
+      "validation_output_sha256_equal": true,
+      "validation_cook_2024_classes_equal": true,
+      "validation_primary_eligible_equal": true,
+      "validation_extended_eligible_equal": true,
+      "validation_passed_flag": true,
+      "receipt_output_sha256_equal": true,
+      "receipt_row_count_equal": true,
+      "receipt_rows_by_snapshot_equal": true,
+      "receipt_timing_whitelist_equal": true,
+      "receipt_cook_2024_rows_equal": true,
+      "receipt_input_hashes": [
+        {
+          "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\ratings\\race_ratings_all_2020_2026.csv",
+          "recorded": "b72cfa84891deac140e6721addc0f4715246b4489961234528db02f227b6228d",
+          "current": "b72cfa84891deac140e6721addc0f4715246b4489961234528db02f227b6228d",
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\cook_20240912_house.pdf",
+          "recorded": "28c81625db4379a8d91fd57ea478e723438a9134c3432383bc3cae8b78bb70de",
+          "current": "28c81625db4379a8d91fd57ea478e723438a9134c3432383bc3cae8b78bb70de",
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\cook_20220901_nma.html",
+          "recorded": "2f26aa9860f24ba42a9e55cff5875e2e07c03bd8e176faf45aac439d069fd2d7",
+          "current": "2f26aa9860f24ba42a9e55cff5875e2e07c03bd8e176faf45aac439d069fd2d7",
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\inside_20221021.pdf",
+          "recorded": "1170f0e9682fe6fc5d5d25c8c85522e3a222a730ccb9ba096fa09db8527b66ef",
+          "current": "1170f0e9682fe6fc5d5d25c8c85522e3a222a730ccb9ba096fa09db8527b66ef",
+          "match": true
+        },
+        {
+          "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\rating_aug25_inside.csv",
+          "recorded": "d3b1c6bf075261d534697ceb1fc587861c8b6d3351b2ab7bf4cecb4d1b6abed9",
+          "current": "d3b1c6bf075261d534697ceb1fc587861c8b6d3351b2ab7bf4cecb4d1b6abed9",
+          "match": true
+        }
+      ],
+      "counts": {
+        "timing_eligible_primary": 553,
+        "timing_eligible_extended": 673,
+        "provisional_cached": 84,
+        "buckets": {
+          "likely": 480,
+          "lean": 616,
+          "toss_up": 330,
+          "safe": 1242
+        },
+        "evidence_kind": {
+          "secondary_wikipedia_compilation": 1911,
+          "secondary_contemporaneous_reprint": 120,
+          "primary_original_pdf_public_copy": 118,
+          "primary_original_issue_web_cache_only": 84,
+          "primary_original_pdf": 435
+        },
+        "by_cycle_chamber": {
+          "2020|House": 354,
+          "2020|Senate": 105,
+          "2022|House": 681,
+          "2022|Senate": 175,
+          "2024|House": 714,
+          "2024|Senate": 102,
+          "2026|House": 432,
+          "2026|Senate": 105
+        }
+      },
+      "passed": true
+    },
+    "wayback_receipts_and_lite_validation_vs_csv": {
+      "house_receipt_sha256_equal": true,
+      "house_receipt_bytes_equal": true,
+      "house_receipt_rows_equal": true,
+      "house_receipt_columns_equal": true,
+      "house_receipt_expressions_equal": true,
+      "house_receipt_path_equal": true,
+      "house_lite_rows_equal": true,
+      "house_lite_dates_equal": true,
+      "house_lite_districts_equal": true,
+      "house_lite_sample_in_data": true,
+      "house_lite_counts_per_day_equal": true,
+      "house_lite_duplicate_keys_equal": true,
+      "senate_receipt_sha256_equal": true,
+      "senate_receipt_bytes_equal": true,
+      "senate_receipt_rows_equal": true,
+      "senate_receipt_columns_equal": true,
+      "senate_receipt_expressions_equal": true,
+      "senate_receipt_path_equal": true,
+      "senate_lite_rows_equal": true,
+      "senate_lite_districts_equal": true,
+      "senate_lite_dates_equal": true,
+      "senate_lite_counts_per_day_equal": true,
+      "senate_duplicate_keys_equal": true,
+      "senate_lite_prelaunch_equal": true,
+      "senate_lite_lag_counts_equal": true,
+      "senate_launch_date_equal": true,
+      "passed": true
+    },
+    "senate_ut_independent_example": {
+      "found": true,
+      "fields_equal": {
+        "winner_I1": true,
+        "winner_R1": true,
+        "winner_Dparty": true,
+        "winner_Rparty": true,
+        "name_I1": true,
+        "name_R1": true
+      },
+      "passed": true
+    }
+  },
+  "verification": {
+    "staged": {
+      "sheets": {
+        "house_district_538_2022": {
+          "declared_dimension": "A1:CR199666",
+          "expected_dimension": "A1:CR199666",
+          "dimension_ok": true,
+          "header_equal": true,
+          "rows": 199665,
+          "expected_rows": 199665,
+          "extra_sheet_rows": 0,
+          "extra_csv_rows": 0,
+          "cells_checked": 19167840,
+          "mismatches": 0,
+          "first_mismatches": [],
+          "float_cells_whose_csv_text_is_not_python_repr": 1071228,
+          "verify_pass_sha256": "898124bcd7e664664f5f729d551a342e3410b1b5c38fb4eccd25b81c25dcf881",
+          "verify_pass_sha256_equals_hash_gate": true,
+          "passed": true
+        },
+        "senate_state_538_2022": {
+          "declared_dimension": "A1:CR16066",
+          "expected_dimension": "A1:CR16066",
+          "dimension_ok": true,
+          "header_equal": true,
+          "rows": 16065,
+          "expected_rows": 16065,
+          "extra_sheet_rows": 0,
+          "extra_csv_rows": 0,
+          "cells_checked": 1542240,
+          "mismatches": 0,
+          "first_mismatches": [],
+          "float_cells_whose_csv_text_is_not_python_repr": 110446,
+          "verify_pass_sha256": "8b1b7c28438ce2f57fefc33447d064382f7316e1d362bd57b5debb13e9027101",
+          "verify_pass_sha256_equals_hash_gate": true,
+          "passed": true
+        },
+        "rating_history_expert": {
+          "declared_dimension": "A1:AC2669",
+          "dimension_ok": true,
+          "rows": 2668,
+          "extra_cells": 0,
+          "header_equal": true,
+          "row_count_equal": true,
+          "mismatches": 0,
+          "first_mismatches": [],
+          "passed": true
+        },
+        "receipt_rating_codex": {
+          "declared_dimension": "A1:D265",
+          "dimension_ok": true,
+          "rows": 264,
+          "extra_cells": 0,
+          "header_equal": true,
+          "leaves": 264,
+          "mismatches": 0,
+          "rebuilt_equals_object": true,
+          "rebuilt_text_equals_file": true,
+          "file_line_endings": "CRLF",
+          "passed": true
+        },
+        "validation_rating_codex": {
+          "declared_dimension": "A1:D13",
+          "dimension_ok": true,
+          "rows": 12,
+          "extra_cells": 0,
+          "header_equal": true,
+          "leaves": 12,
+          "mismatches": 0,
+          "rebuilt_equals_object": true,
+          "rebuilt_text_equals_file": true,
+          "file_line_endings": "CRLF",
+          "passed": true
+        },
+        "receipt_538_house_codex": {
+          "declared_dimension": "A1:D106",
+          "dimension_ok": true,
+          "rows": 105,
+          "extra_cells": 0,
+          "header_equal": true,
+          "leaves": 105,
+          "mismatches": 0,
+          "rebuilt_equals_object": true,
+          "rebuilt_text_equals_file": true,
+          "file_line_endings": "CRLF",
+          "passed": true
+        },
+        "validation_538_house_codex": {
+          "declared_dimension": "A1:D42",
+          "dimension_ok": true,
+          "rows": 41,
+          "extra_cells": 0,
+          "header_equal": true,
+          "leaves": 41,
+          "mismatches": 0,
+          "rebuilt_equals_object": true,
+          "rebuilt_text_equals_file": true,
+          "file_line_endings": "CRLF",
+          "passed": true
+        },
+        "receipt_538_senate_codex": {
+          "declared_dimension": "A1:D194",
+          "dimension_ok": true,
+          "rows": 193,
+          "extra_cells": 0,
+          "header_equal": true,
+          "leaves": 193,
+          "mismatches": 0,
+          "rebuilt_equals_object": true,
+          "rebuilt_text_equals_file": true,
+          "file_line_endings": "CRLF",
+          "passed": true
+        },
+        "coverage": {
+          "declared_dimension": "A1:V31",
+          "dimension_ok": true,
+          "rows": 30,
+          "extra_cells": 0,
+          "equal_to_expected": true,
+          "passed": true
+        },
+        "notes": {
+          "declared_dimension": "A1:D20",
+          "dimension_ok": true,
+          "rows": 19,
+          "extra_cells": 0,
+          "equal_to_expected": true,
+          "passed": true
+        },
+        "dictionary": {
+          "declared_dimension": "A1:F287",
+          "dimension_ok": true,
+          "rows": 286,
+          "extra_cells": 0,
+          "equal_to_expected": true,
+          "passed": true
+        },
+        "sources": {
+          "declared_dimension": "A1:M16",
+          "dimension_ok": true,
+          "rows": 15,
+          "extra_cells": 0,
+          "equal_to_expected": true,
+          "passed": true
+        }
+      },
+      "sheet_order": [
+        "house_district_538_2022",
+        "senate_state_538_2022",
+        "rating_history_expert",
+        "receipt_rating_codex",
+        "validation_rating_codex",
+        "receipt_538_house_codex",
+        "validation_538_house_codex",
+        "receipt_538_senate_codex",
+        "coverage",
+        "notes",
+        "dictionary",
+        "sources"
+      ],
+      "sheet_order_ok": true,
+      "passed": true
+    },
+    "destination": "SHA-256 of the destination equals the verified staged workbook.",
+    "method": "Every imported cell read back (openpyxl read-only, dimensions reset so no cell is hidden) and compared with its CSV text: empty -> empty cell; text -> identical string; integer text -> identical int; other decimal text -> the identical double. Computed columns recomputed with an independent (regex) implementation. JSON sheets rebuilt and compared with the file object and text."
+  },
+  "number_storage": "Numbers stored only in declared numeric columns (numeric_columns), written with Python repr (shortest exact round trip) by replacing openpyxl.cell._writer.safe_string in-process. The 538 CSV text of many numbers is not canonical ('.000825', '1.06e+07'); the stored double equals float(text) exactly.",
+  "numeric_columns": {
+    "538": {
+      "integer": [
+        "cycle",
+        "simulations"
+      ],
+      "decimal": [
+        "winner_D1",
+        "winner_D2",
+        "winner_D3",
+        "winner_D4",
+        "winner_R1",
+        "winner_R2",
+        "winner_R3",
+        "winner_R4",
+        "winner_I1",
+        "winner_O1",
+        "winner_Dparty",
+        "winner_Rparty",
+        "tipping",
+        "vpi",
+        "mean_predicted_turnout",
+        "p90_simmed_turnout_gross",
+        "p10_simmed_turnout_gross",
+        "voteshare_mean_D1",
+        "voteshare_mean_D2",
+        "voteshare_mean_D3",
+        "voteshare_mean_D4",
+        "voteshare_mean_I1",
+        "voteshare_mean_R1",
+        "voteshare_mean_R2",
+        "voteshare_mean_R3",
+        "voteshare_mean_R4",
+        "voteshare_mean_O1",
+        "p90_voteshare_simmed_I1",
+        "p90_voteshare_simmed_O1",
+        "p90_voteshare_simmed_D1",
+        "p90_voteshare_simmed_R1",
+        "p90_voteshare_simmed_D2",
+        "p90_voteshare_simmed_R2",
+        "p90_voteshare_simmed_R3",
+        "p90_voteshare_simmed_R4",
+        "p90_voteshare_simmed_D3",
+        "p90_voteshare_simmed_D4",
+        "p10_voteshare_simmed_I1",
+        "p10_voteshare_simmed_O1",
+        "p10_voteshare_simmed_D1",
+        "p10_voteshare_simmed_R1",
+        "p10_voteshare_simmed_D2",
+        "p10_voteshare_simmed_R2",
+        "p10_voteshare_simmed_R3",
+        "p10_voteshare_simmed_R4",
+        "p10_voteshare_simmed_D3",
+        "p10_voteshare_simmed_D4",
+        "pvi_538",
+        "vep",
+        "elasticity",
+        "mean_netpartymargin",
+        "p90_netpartymargin",
+        "p10_netpartymargin",
+        "wonrunoff_D1",
+        "lostrunoff_D1",
+        "wonrunoff_D2",
+        "lostrunoff_D2",
+        "wonrunoff_D3",
+        "lostrunoff_D3",
+        "wonrunoff_D4",
+        "lostrunoff_D4",
+        "wonrunoff_R1",
+        "lostrunoff_R1",
+        "wonrunoff_R2",
+        "lostrunoff_R2",
+        "wonrunoff_R3",
+        "lostrunoff_R3",
+        "wonrunoff_R4",
+        "lostrunoff_R4",
+        "wonrunoff_I1",
+        "lostrunoff_I1"
+      ]
+    },
+    "rating_history": [
+      "cycle",
+      "direct_http_status",
+      "primary_source",
+      "provisional_cached",
+      "senate_class",
+      "special",
+      "tilt_flag",
+      "timing_eligible_extended",
+      "timing_eligible_primary"
+    ]
+  },
+  "parse": {
+    "house": {
+      "fields_starting_with_equals": 0,
+      "fields_equal_to_excel_error_code": 0,
+      "fields_with_cr_or_lf": 0,
+      "fields_with_xml_illegal_chars": 0,
+      "fields_with_escape_like_x_hhhh": 0,
+      "max_field_length": 28,
+      "empty_fields": 5611416,
+      "numeric_cells": 10501335,
+      "numeric_cells_text_not_python_repr": 1071228,
+      "ragged_rows": 0,
+      "data_rows": 199665,
+      "header_columns": 88,
+      "duplicate_headers": false,
+      "duplicate_district_forecastdate_expression_keys": 0
+    },
+    "senate": {
+      "fields_starting_with_equals": 0,
+      "fields_equal_to_excel_error_code": 0,
+      "fields_with_cr_or_lf": 0,
+      "fields_with_xml_illegal_chars": 0,
+      "fields_with_escape_like_x_hhhh": 0,
+      "max_field_length": 22,
+      "empty_fields": 453087,
+      "numeric_cells": 833700,
+      "numeric_cells_text_not_python_repr": 110446,
+      "ragged_rows": 0,
+      "data_rows": 16065,
+      "header_columns": 88,
+      "duplicate_headers": false,
+      "duplicate_district_forecastdate_expression_keys": 0
+    }
+  },
+  "references": {
+    "codex_delivery_manifest": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\DELIVERY_MANIFEST.json",
+      "size": 9629,
+      "mtime": "2026-09-26T19:27:45Z",
+      "sha256": "bb6ae229e32711cde4fb0f411f380256945c5a810729418e33a040d2768620e1",
+      "read_at": "2026-09-26T20:06:30Z",
+      "source_id": "codex_delivery_manifest",
+      "role": "hash_reference",
+      "hash_refs": [],
+      "hash_check": "NO_CODEX_HASH_RECORDED",
+      "expected_sha256": null,
+      "expected_sha256_from": null
+    },
+    "codex_race_forecast_source_note": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\RACE_FORECAST_SOURCE_NOTE.md",
+      "size": 5342,
+      "mtime": "2026-09-26T19:17:58Z",
+      "sha256": "5c11482dbdac5c4dd007513920438feddd14494af6231c4a781205c809af8efb",
+      "read_at": "2026-09-26T20:06:30Z",
+      "source_id": "codex_race_forecast_source_note",
+      "role": "notes_source; hash_reference",
+      "hash_refs": [
+        {
+          "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+          "sha256": "5c11482dbdac5c4dd007513920438feddd14494af6231c4a781205c809af8efb",
+          "size_bytes": 5342,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "5c11482dbdac5c4dd007513920438feddd14494af6231c4a781205c809af8efb",
+      "expected_sha256_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)"
+    },
+    "codex_rating_history_notes": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\RATING_HISTORY_NOTES.md",
+      "size": 5542,
+      "mtime": "2026-09-26T19:13:21Z",
+      "sha256": "ced2a3ce39a127e9bc0c27cff04c3272117db292cb31349a468da09300e9ec05",
+      "read_at": "2026-09-26T20:06:30Z",
+      "source_id": "codex_rating_history_notes",
+      "role": "notes_source",
+      "hash_refs": [
+        {
+          "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+          "sha256": "ced2a3ce39a127e9bc0c27cff04c3272117db292cb31349a468da09300e9ec05",
+          "size_bytes": 5542,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "ced2a3ce39a127e9bc0c27cff04c3272117db292cb31349a468da09300e9ec05",
+      "expected_sha256_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)"
+    },
+    "codex_538_readme_2022": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\work\\seat_gain_extension\\538_2022_readme.md",
+      "size": 9087,
+      "mtime": "2026-09-26T18:59:39Z",
+      "sha256": "77aa981b92feb32d178776f537ccd557dbefc158c24bfa556b036f5b44cded36",
+      "read_at": "2026-09-26T20:06:30Z",
+      "source_id": "codex_538_readme_2022",
+      "role": "dictionary_source",
+      "hash_refs": [],
+      "hash_check": "NO_CODEX_HASH_RECORDED",
+      "expected_sha256": null,
+      "expected_sha256_from": null
+    },
+    "codex_stratified_input_validation": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\stratified_input_validation.json",
+      "size": 19230,
+      "mtime": "2026-09-26T19:21:02Z",
+      "sha256": "174bf2c63f7189b9555c71ef9bbfc6d5e9e295b57ec4f4905b9611a89ef427f6",
+      "read_at": "2026-09-26T20:06:30Z",
+      "source_id": "codex_stratified_input_validation",
+      "role": "hash_reference",
+      "hash_refs": [
+        {
+          "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+          "sha256": "174bf2c63f7189b9555c71ef9bbfc6d5e9e295b57ec4f4905b9611a89ef427f6",
+          "size_bytes": 19230,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "174bf2c63f7189b9555c71ef9bbfc6d5e9e295b57ec4f4905b9611a89ef427f6",
+      "expected_sha256_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)"
+    },
+    "codex_forecast_panel_receipt": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\independent_receipt_forecast_panel_receipt.json",
+      "size": 7196,
+      "mtime": "2026-09-26T19:19:20Z",
+      "sha256": "55a137aba26fe92e28cebb313fd9d355ae2357b13be074c39e9b3709d465229e",
+      "read_at": "2026-09-26T20:06:30Z",
+      "source_id": "codex_forecast_panel_receipt",
+      "role": "hash_reference",
+      "hash_refs": [
+        {
+          "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+          "sha256": "55a137aba26fe92e28cebb313fd9d355ae2357b13be074c39e9b3709d465229e",
+          "size_bytes": 7196,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "55a137aba26fe92e28cebb313fd9d355ae2357b13be074c39e9b3709d465229e",
+      "expected_sha256_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)"
+    },
+    "codex_538_lite_receipt": {
+      "path": "C:\\Users\\pgoff\\Documents\\Codex\\2026-09-26\\loo\\outputs\\seat_gain_extension\\rating_history_538_lite_receipt.json",
+      "size": 10906,
+      "mtime": "2026-09-26T19:13:47Z",
+      "sha256": "34229f5838a9ba2ff50ba841b3d1c68dc0ce8f5b91b8ae83bf76c65b1c3fe238",
+      "read_at": "2026-09-26T20:06:30Z",
+      "source_id": "codex_538_lite_receipt",
+      "role": "hash_reference",
+      "hash_refs": [
+        {
+          "from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)",
+          "sha256": "34229f5838a9ba2ff50ba841b3d1c68dc0ce8f5b91b8ae83bf76c65b1c3fe238",
+          "size_bytes": 10906,
+          "match": true
+        }
+      ],
+      "hash_check": "MATCH",
+      "expected_sha256": "34229f5838a9ba2ff50ba841b3d1c68dc0ce8f5b91b8ae83bf76c65b1c3fe238",
+      "expected_sha256_from": "DELIVERY_MANIFEST.json files[] (Codex, created 2026-09-26T19:27:45.554092+00:00)"
+    }
+  },
+  "conventions": {
+    "followed": [
+      "header in row 1, one table per sheet, values only",
+      "missing = empty cell, never 0",
+      "computed dates as ISO text",
+      "dictionary, sources, coverage, notes sheets"
+    ],
+    "deviations": [
+      "imported tables keep their exact columns (no status / source_id); forecastdate stays M/D/YY verbatim with ISO forecast_date added",
+      "the 538 sheets append eight computed columns after the verbatim columns"
+    ]
+  },
+  "scripts": [
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import11\\build_11.py",
+      "sha256": "f51a86aec9f6042b3416d3c6c76f1b2e0a15efcba7d647985040c5eb6eb2df59",
+      "role": "build (build + receipt subcommands)"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import11\\probe_i1_unnamed.py",
+      "sha256": "bdf27192b6f853e8990d345692129a607de6454ed177b0a3706a69ae6713967a",
+      "role": "read-only profiling, not part of the build"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import11\\profile_inputs.py",
+      "sha256": "b541f8f522f36cf46d5efda7ae4ca7a415e3284fd75b1a5b6500b23fd0ff0206",
+      "role": "read-only profiling, not part of the build"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import11\\smoke_11.py",
+      "sha256": "7a071b33b22e7f8c2db9592897d020b742bcb9fb7a1033cb82331dbe25ad28f4",
+      "role": "read-only profiling, not part of the build"
+    }
+  ],
+  "build_script_at_build_time": {
+    "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import11\\build_11.py",
+    "sha256": "3c13a937a68e319f084e5106d8d798c4719025a3b1944ede058e55dda436e396"
+  },
+  "script_note": "build_11.py was edited after the build only to add two gaps_and_risks lines to this receipt; the build itself ran the version whose SHA-256 is build_script_at_build_time.",
+  "study_folder_writes": [
+    "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\11_race_forecasts_and_ratings.xlsx",
+    "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_11_race_forecasts_and_ratings.json"
+  ],
+  "stage_folder": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\import11\\stage",
+  "decisions_recorded": [
+    "available_at follows the coordinator's definition (later of forecastdate and run date); Codex's launch-floor rule is added as available_at_launch_floor with codex_early_backfill_flag, because the brief's first message cited Codex's rule.",
+    "same_party_flag and multiparty_flag are defined from the verbatim fields (notes n7, n8); Codex's narrower party-certain same-party rule is reported, not added.",
+    "All 199,665 House and 16,065 Senate rows kept (all three models), per 'preserve all rows'.",
+    "The three Codex work-folder JSONs have no recorded hash; imported with content cross-checks."
+  ],
+  "gaps_and_risks": [
+    "available_at (no launch floor) makes pre-launch June vintages look available before 2022-06-30; use available_at_launch_floor for strict timing unless the study rules otherwise.",
+    "The two availability columns differ only on pre-launch vintages: every one has available_at = 2022-06-29 (run the day before the public launch), which the launch floor moves to 2022-06-30 - 9,135 House and 735 Senate rows per model; one day.",
+    "Source quirk: LA-3 on 10/17/22 (all three models) has winner_I1 = .000025 with an empty name_I1; multiparty_flag = 1 on those rows.",
+    "538 publication of each daily vintage is not independently archived; timestamps carry no timezone.",
+    "Ratings are sparse snapshots; unlisted races are unknown, never safe."
+  ],
+  "glassbox": {
+    "run_id": "import11-build-20260926",
+    "source": "sector-growth-import11",
+    "start_event": "evt-20260926T1944394011844Z-7ef73d2c64",
+    "correlation_id": "corr-20260926T1944393865387Z-6820eee054"
+  }
+}

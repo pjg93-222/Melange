@@ -1,0 +1,2149 @@
+{
+ "run_id": "weekly09-build-20260926",
+ "written_at": "2026-09-26T20:06:11Z",
+ "builder": "sector-growth workbook 09, weekly partisan giving x dated seat forecasts (Claude architect subagent, session b82a832c)",
+ "brief": {
+  "paul_verbatim": "What about the partisanship of the spending as it correlates to expected seat gain for a party in the upcoming election?",
+  "method_review": "C:/Users/pgoff/Documents/Codex/2026-09-26/loo/outputs/SEAT_GAIN_FOLLOWUP.md (dated within-cycle forecast histories + transaction-dated party-labelled spending, House and Senate separately)",
+  "test_contract": "C:/Users/pgoff/Documents/Codex/2026-09-26/loo/work/seat_gain_extension/TEST_CONTRACT_REVIEW.md (outcome and timing sections)",
+  "coordinator_additions": [
+   "committee_week / committee_cycle / committee_ids for Paul's race-level question, verbatim: \"is it specifically among new incumbants, or does money go away from old incumbants, test generally, and those who are toss-ups, lean, likely, and safe each\"",
+   "538 versions labelled by name (Lite, not polls-only); gross/refund/net; transaction date; one dedup policy stated; data vintage; channels; donor keys + donor_committee_cycle + linkage quality; list local 538 race-level files (fetch nothing)",
+   "BINDING as-of rule: available_at / backfilled / availability_verified; aligned by available_at strictly before week_start; unverified rows only in a labelled sensitivity; coverage before/after the gate"
+  ],
+  "scope": "data build only; the R lane analyses the workbook"
+ },
+ "file": {
+  "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\09_weekly_partisan_seat_forecasts.xlsx",
+  "sha256": "815d27894f3859ede76b3de574ff2c1d1d49f2f1efbd57ccfa3c4e28d0076537",
+  "size_bytes": 6251459,
+  "mtime": "2026-09-26T19:57:32Z"
+ },
+ "sheet_rows": {
+  "weekly_giving": 4692,
+  "seat_forecasts": 2033,
+  "aligned": 1376,
+  "aligned_sensitivity": 112,
+  "coverage": 32,
+  "committee_week": 29689,
+  "committee_cycle": 5812,
+  "committee_ids": 5273,
+  "donor_committee_cycle": 18940,
+  "date_coverage": 64,
+  "reconcile": 128,
+  "reconcile_committee": 144,
+  "channel_map": 31,
+  "notes": 22,
+  "dictionary": 356,
+  "sources": 31
+ },
+ "population": {
+  "definition": "08's population: general giving as Mentat defines it, facts rows with receipt_cents != 0 (Include in Analysis amounts, refunds kept), every funding source kept (Paul: \"Keep those receipts\"); House/Senate = 08 committee_map chamber; party = 08's per-row rule",
+  "pins": {
+   "idx_banking": {
+    "industry": "banking",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\bb2b2452b4fc14c827c6632ae8b1ecc47444ce835d6e44d6a7d885997424b7d0.sqlite",
+    "sha256": "cd044cea86bb7c72392e71f19f2e74284204c25d98419f9230abee1cce480e9f",
+    "rows_read_nonzero": 592570,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790016422.2685504,
+     "built_at_utc": "2026-09-21T18:47:02.268550Z",
+     "provenance": {
+      "workbook": "Banking Industry Spending Overview.xlsx",
+      "workbook_sha256": "842ba7a2312ffb03d969e8452c970b32f227fd09befcbf80f935a63c94e97bd3",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "4abdea581b99cec1674252ee098ab6afca57674bd8e90313e9f4156e88b2d991",
+      "payload_sha256": "2156bc823346b10986a371381031e9ac3322d2ace2fbde23163c9d4faec21319",
+      "original_database_sha256": "4abdea581b99cec1674252ee098ab6afca57674bd8e90313e9f4156e88b2d991",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "bb2b2452b4fc14c827c6632ae8b1ecc47444ce835d6e44d6a7d885997424b7d0"
+     },
+     "ledger_run_id": null,
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 23387905200,
+      "receipt": 5476284405,
+      "original_observed": 6923618782,
+      "original_supported": 0,
+      "pac_activity": 0,
+      "records": 849399
+     }
+    }
+   },
+   "idx_credit_union": {
+    "industry": "credit_union",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\88e3f70252e75c3ebcbefab2096f39687b0f4874420f97f9b63f83e1e4d85bae.sqlite",
+    "sha256": "8ef1d494468869019db810e659a966ccdf9b73bd64216bd9d546a943cfe30619",
+    "rows_read_nonzero": 27519,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790001577.8058026,
+     "built_at_utc": "2026-09-21T14:39:37.805803Z",
+     "provenance": {
+      "workbook": "Credit Union Industry Spending Overview.xlsx",
+      "workbook_sha256": "a6591d397b2bda66ab7827b686e240985dc3b41fa6c53aa486e1def9c764c674",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "43c0c109c057d5cbca55106a5a68a200df871f6bbfc97feef5499bf22e2055d9",
+      "payload_sha256": "f512fb05ab5e902319a356cd277494e811237dc23b7154a6172d2fa84752dcef",
+      "original_database_sha256": "9a7c88ff97fdac51f26fad0a8b1731e8da0b77d35925bc44e67ab0e78b1d2279",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "88e3f70252e75c3ebcbefab2096f39687b0f4874420f97f9b63f83e1e4d85bae"
+     },
+     "ledger_run_id": "20260921T055153-885792788fa7",
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 12215269516,
+      "receipt": 142200565,
+      "original_observed": 886752407,
+      "original_supported": 0,
+      "pac_activity": 500000,
+      "records": 67169
+     }
+    }
+   },
+   "idx_crypto": {
+    "industry": "crypto",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\caaa897c7cbd0425354eedcee62c574a410591fd6bda8a9931f8580184e03844.sqlite",
+    "sha256": "c6f1ef6f050f0ecf00e4def0213ba35332baa506ab77ff7d0ec26ddbc460da5b",
+    "rows_read_nonzero": 6273,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790088798.37136,
+     "built_at_utc": "2026-09-22T14:53:18.371360Z",
+     "provenance": {
+      "workbook": "Crypto Industry Spending Overview.xlsx",
+      "workbook_sha256": "88ea228457b8499d1ec27eeaba967f61505bde842ae0ecfe35c30791c23d66f6",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "0c2dc2e228f5343af960a2cb4898f3a47921d7b33080fa60be161b78fc497dcb",
+      "payload_sha256": "ff3b40ab72aba97cafe60e29b39903fcab86a43c3539085e099699a1c3744dc1",
+      "original_database_sha256": "371f51e69ba2b9e477ec3a198d2a8e1ec689cd06f48b1c85683704772810893d",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "caaa897c7cbd0425354eedcee62c574a410591fd6bda8a9931f8580184e03844"
+     },
+     "ledger_run_id": null,
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 36894528595,
+      "receipt": 24994948317,
+      "original_observed": 26885498839,
+      "original_supported": 0,
+      "pac_activity": 100000,
+      "records": 14801
+     }
+    }
+   },
+   "idx_credit_arms": {
+    "industry": "credit_arms",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\ba38420fc8c51460f192df48c78542fe66fd650e7dc8eeb8910a1aa5a2c41234.sqlite",
+    "sha256": "f2d92efe0cec96a0ff2ae247f41a12247bd000029a199572933e4f2c488b4083",
+    "rows_read_nonzero": 416570,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790117240.739713,
+     "built_at_utc": "2026-09-22T22:47:20.739713Z",
+     "provenance": {
+      "workbook": "Credit Arms Industry Spending Overview.xlsx",
+      "workbook_sha256": "3295d02bed012ea9e8e6984ef8809f4ae0c2d0ee71cf0d16d816b418251e5669",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "03324c79c07a0e9247db0edf30285d191c75172798b207f7ab4dd9ce6fa70aa2",
+      "payload_sha256": "4da6a44bcead8067a253fabe46a4b12bc7609e448fc9b5cd4bbb1eba2c96154f",
+      "original_database_sha256": "ce2d9c6b79da586c2176a755a81a2d46e0270acaf037c2049aeb95910661de38",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "ba38420fc8c51460f192df48c78542fe66fd650e7dc8eeb8910a1aa5a2c41234"
+     },
+     "ledger_run_id": null,
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 4082007940,
+      "receipt": 2393244525,
+      "original_observed": 2474056125,
+      "original_supported": 0,
+      "pac_activity": 5000000,
+      "records": 434958
+     }
+    }
+   },
+   "idx_fintech": {
+    "industry": "fintech",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\2f9fa3df526b0f27a753943ed615240adf931be93f3223838752b517824ceb65.sqlite",
+    "sha256": "4667318c4993a1b69ea9ea55eddfed70f93d170970f4b7635b1dde4f3a384e76",
+    "rows_read_nonzero": 24901,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790117315.0420783,
+     "built_at_utc": "2026-09-22T22:48:35.042078Z",
+     "provenance": {
+      "workbook": "Fintech Industry Spending Overview.xlsx",
+      "workbook_sha256": "440296fad3606528e648db268cbefa194d5773e5e1992a1fcd57766ee94162af",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "d55ce04ced908141888e4c271e66c43b4bc7a75dab41246b13ae7b69a265f90a",
+      "payload_sha256": "a4d2430f02fe9a2e2273bcffc9daf2826d849e9e142375d4e63fe4f4ceeb7fed",
+      "original_database_sha256": "2a9bc0199a9065bde48c48e4a87b92e76fcb5557e15e146f59e557a40643231e",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "2f9fa3df526b0f27a753943ed615240adf931be93f3223838752b517824ceb65"
+     },
+     "ledger_run_id": null,
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 2124520737,
+      "receipt": 980389131,
+      "original_observed": 1232327089,
+      "original_supported": 0,
+      "pac_activity": 0,
+      "records": 86270
+     }
+    }
+   },
+   "idx_property_casualty_insurance": {
+    "industry": "property_casualty_insurance",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\b9dabba3d54e6550f75fb0a8e4e5e8774ea6d7745d98e20585c5f498569ada34.sqlite",
+    "sha256": "d8d3b6db52d9ed9b2b8fdf337adcc51da6a7372745bb9c5467b8f7af32b41209",
+    "rows_read_nonzero": 278839,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790117677.9437082,
+     "built_at_utc": "2026-09-22T22:54:37.943708Z",
+     "provenance": {
+      "workbook": "Property & Casualty Insurance Industry Spending Overview.xlsx",
+      "workbook_sha256": "ffed8ec4783dfb84971c35e794182a3bb609d9a907cc8fd639dd24dc2c683683",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "4defdf40e82a872d3e9de5da8aca1f01dbc4bb3699155f1c7e6e10ac3ea3e165",
+      "payload_sha256": "dbc27b4168d0a07df8a9b4246682da4f1bc1a5eddebc04342ef9a922e3e2066a",
+      "original_database_sha256": "712a1080ba38c2bcc94443c487dab0cfdc96a5c88ec0d68e9e0e8b4b59abe44e",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "b9dabba3d54e6550f75fb0a8e4e5e8774ea6d7745d98e20585c5f498569ada34"
+     },
+     "ledger_run_id": null,
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 5186266613,
+      "receipt": 1668736559,
+      "original_observed": 3099517113,
+      "original_supported": 0,
+      "pac_activity": 5750000,
+      "records": 360207
+     }
+    }
+   },
+   "idx_telecom": {
+    "industry": "telecom",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\6f7acaee8a6e8c5ac34e5d572094a078c85c68c46b1f990c022f3021d2dbc08c.sqlite",
+    "sha256": "9e14a596bba37b78c76f80b84867efececab325f4b12117cce8d9d2986bed794",
+    "rows_read_nonzero": 505794,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790092185.9960916,
+     "built_at_utc": "2026-09-22T15:49:45.996092Z",
+     "provenance": {
+      "workbook": "Telecom Industry Spending Overview.xlsx",
+      "workbook_sha256": "40a6ac01a5ad62f0aa166d051aa8bfcfd8b4a35f00dbfa88b32fd7368376282e",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "44148eb4f504a8fe723dcb41b7a7b79db7a556d70758ced206b056316d1628cb",
+      "payload_sha256": "f37e976021a265f30bfa191e66de344bb68f7cddcc08ec1023aa82a0265c9bd6",
+      "original_database_sha256": "34ef41793b3ab4c970e2d913ea7b42d50766b6c8f1430b40adbd9b0f8bd06d15",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "6f7acaee8a6e8c5ac34e5d572094a078c85c68c46b1f990c022f3021d2dbc08c"
+     },
+     "ledger_run_id": null,
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 10239650196,
+      "receipt": 3769812109,
+      "original_observed": 9213122816,
+      "original_supported": 0,
+      "pac_activity": 7500000,
+      "records": 808066
+     }
+    }
+   },
+   "idx_community_banks": {
+    "industry": "community_banks",
+    "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763.sqlite",
+    "sha256": "df15235d957fbb44398e6858d4c53b4eac5595244dc9994f29447672db0cc448",
+    "rows_read_nonzero": 3966,
+    "unchanged_across_read": true,
+    "vintage": {
+     "built_at_epoch": 1790040043.3696673,
+     "built_at_utc": "2026-09-22T01:20:43.369667Z",
+     "provenance": {
+      "workbook": "Community Banks Industry Spending Overview.xlsx",
+      "workbook_sha256": "bbe7ee6a0f03957cddc3d14eddfb0f1c0cede0c0f6676f3a071d4817c1a8b348",
+      "data_workbook": null,
+      "data_workbook_sha256": null,
+      "data_lineage_matches": null,
+      "destination_schema": 0,
+      "database_sha256": "923ab7866fab51dc4a4771b3b6e8f1fc14b5bb483c9f2eeecfb6795ddfda6ca2",
+      "payload_sha256": "32def575daa055e013a79d42118a0dc42fd6d12e80d573904a2ab48dffd922d6",
+      "original_database_sha256": "42b733201efff95404e9cc89e237d0d1b1655775f1b3d9ebd0b14ae256b42edc",
+      "accounting_engine_sha256": "6dbca4891b4bf2fc85154ed3b9021bce60fad0b156446c69510afe0a3943f595",
+      "cycle_basis": "Contribution date, calendar election cycle",
+      "scope": "Tracked companies represented by the pinned report source. Collection completeness is not inferred.",
+      "index_token": "aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763"
+     },
+     "ledger_run_id": null,
+     "identity_basis": "Known report person keys when available; otherwise reported name/state/ZIP identity. Distinct counts are not certified distinct people.",
+     "totals": {
+      "raw": 175769646,
+      "receipt": 86350598,
+      "original_observed": 78406468,
+      "original_supported": 0,
+      "pac_activity": 0,
+      "records": 4649
+     }
+    }
+   }
+  },
+  "years": [
+   2021,
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ],
+  "dated_row_coverage": {
+   "rows_all": 1856432,
+   "rows_all_dated": 1856432,
+   "share_all_dated": 1.0,
+   "rows_house_senate": 53667,
+   "rows_house_senate_dated": 53667,
+   "undated_rows_all": 0,
+   "undated_usd_all": 0.0,
+   "undated_rows_house_senate": 0,
+   "date_outside_year_rows": 0,
+   "why": "the index build requires a valid contribution_receipt_date and derives year/cycle from it (mentat/app/contribution_data.py:345-348, :366)"
+  },
+  "usd_all": 395119662.09,
+  "usd_house_senate": 22047925.44,
+  "data_vintage_built_at_utc": {
+   "idx_banking": "2026-09-21T18:47:02.268550Z",
+   "idx_credit_union": "2026-09-21T14:39:37.805803Z",
+   "idx_crypto": "2026-09-22T14:53:18.371360Z",
+   "idx_credit_arms": "2026-09-22T22:47:20.739713Z",
+   "idx_fintech": "2026-09-22T22:48:35.042078Z",
+   "idx_property_casualty_insurance": "2026-09-22T22:54:37.943708Z",
+   "idx_telecom": "2026-09-22T15:49:45.996092Z",
+   "idx_community_banks": "2026-09-22T01:20:43.369667Z"
+  },
+  "dedup_policy": "one row per FEC sub_id as the pinned index holds it (facts.source_id PRIMARY KEY, contribution_data.py:332; repeated observations of a sub_id coalesced before indexing, :486-490, :522-524); no further deduplication or amendment filtering here (as 04, 08)"
+ },
+ "reconcile": {
+  "weekly_vs_08": {
+   "MATCH (both missing)": 32,
+   "MATCH": 96
+  },
+  "committee": {
+   "MATCH": 144
+  },
+  "committee_map_crosscheck_differences": 0,
+  "statement": "for every sector x year x chamber 2021-2026, 08 dem_usd / rep_usd / other_usd / n_rows = weekly_giving rows of the year + undated (0) to the cent; committee_week, committee_cycle, donor_committee_cycle and 08 committee_map agree"
+ },
+ "channels": {
+  "totals_house_senate": {
+   "employee": {
+    "net_usd": 20943161.57,
+    "gross_usd": 22068065.58,
+    "n_rows": 52906
+   },
+   "other_included_receipt": {
+    "net_usd": 965763.87,
+    "gross_usd": 965799.87,
+    "n_rows": 693
+   },
+   "company_pac": {
+    "net_usd": 139000.0,
+    "gross_usd": 139000.0,
+    "n_rows": 68
+   }
+  },
+  "transfer_receipt_gross_usd": 2013085.52
+ },
+ "donor_keys": {
+  "key_quality_house_senate_gross": {
+   "person_key": {
+    "gross_usd": 22174465.22,
+    "gross_share": 0.9569151155624562,
+    "abs_usd": 23299369.23,
+    "n_rows": 52949
+   },
+   "reported_identity": {
+    "gross_usd": 998400.23,
+    "gross_share": 0.04308488443754374,
+    "abs_usd": 998436.23,
+    "n_rows": 718
+   }
+  },
+  "hashing": "donor_key = first 16 hex of SHA-256(facts.contributor_key); no names written",
+  "donor_committee_cycles_with_more_than_one_channel": {
+   "2": 6
+  },
+  "committees_with_more_than_one_party": {}
+ },
+ "committee_ids": {
+  "committee_cycles_without_cand_id": 2359,
+  "house_senate_without_cand_id": 0,
+  "stats": {
+   "no_cand_id|other": 2359,
+   "cand_row|House|cn_found": 2358,
+   "ici|House|I": 950,
+   "cand_row|Senate|cn_found": 510,
+   "ici|Senate|I": 248,
+   "ici|House|O": 510,
+   "ici|Senate|O": 130,
+   "cand_row|other|cn_found": 37,
+   "ici|other|C": 33,
+   "ici|Senate|C": 128,
+   "ici|House|C": 891,
+   "ici|other|I": 2,
+   "ici|Senate|blank": 4,
+   "cand_row|Senate|cn_missing": 1,
+   "cand_row|House|cn_missing": 7,
+   "ici|other|blank": 2,
+   "ici|House|blank": 7,
+   "cand_row|other|cn_missing": 1
+  },
+  "ici_source": "CAND_ICI from the same cycle's FEC cn file named in 08's sources (cn22, cn24, cn26, downloaded 2026-09-08); cn20 not held (2019-2020 not yet linked)"
+ },
+ "forecasts": {
+  "rows": 2033,
+  "backfill_census": {
+   "538|House|2020|Lite": {
+    "n": 95,
+    "backfilled": 66,
+    "lag2plus": 65,
+    "run_dates": {
+     "2020-10-06": 66
+    }
+   },
+   "538|House|2020|Deluxe": {
+    "n": 95,
+    "backfilled": 66,
+    "lag2plus": 65,
+    "run_dates": {
+     "2020-10-06": 66
+    }
+   },
+   "538|House|2020|Classic": {
+    "n": 95,
+    "backfilled": 66,
+    "lag2plus": 65,
+    "run_dates": {
+     "2020-10-06": 66
+    }
+   },
+   "538|Senate|2020|Lite": {
+    "n": 95,
+    "backfilled": 45,
+    "lag2plus": 44,
+    "run_dates": {
+     "2020-09-15": 45
+    }
+   },
+   "538|Senate|2020|Deluxe": {
+    "n": 95,
+    "backfilled": 45,
+    "lag2plus": 44,
+    "run_dates": {
+     "2020-09-15": 45
+    }
+   },
+   "538|Senate|2020|Classic": {
+    "n": 95,
+    "backfilled": 45,
+    "lag2plus": 44,
+    "run_dates": {
+     "2020-09-15": 45
+    }
+   },
+   "538|House|2022|Lite": {
+    "n": 153,
+    "backfilled": 20,
+    "lag2plus": 20,
+    "run_dates": {
+     "2022-06-29": 20
+    }
+   },
+   "538|House|2022|Deluxe": {
+    "n": 153,
+    "backfilled": 20,
+    "lag2plus": 20,
+    "run_dates": {
+     "2022-06-29": 20
+    }
+   },
+   "538|House|2022|Classic": {
+    "n": 153,
+    "backfilled": 20,
+    "lag2plus": 20,
+    "run_dates": {
+     "2022-06-29": 20
+    }
+   },
+   "538|Senate|2022|Lite": {
+    "n": 153,
+    "backfilled": 20,
+    "lag2plus": 20,
+    "run_dates": {
+     "2022-06-29": 20
+    }
+   },
+   "538|Senate|2022|Deluxe": {
+    "n": 153,
+    "backfilled": 20,
+    "lag2plus": 20,
+    "run_dates": {
+     "2022-06-29": 20
+    }
+   },
+   "538|Senate|2022|Classic": {
+    "n": 153,
+    "backfilled": 20,
+    "lag2plus": 20,
+    "run_dates": {
+     "2022-06-29": 20
+    }
+   }
+  },
+  "codex_audit_counts_differ": "the coordinator relayed '2020 House: 57 of 87 dates generated on 2020-10-06'; the file census here is 66 of 95 dates per version run on 2020-10-06 (65 with a run date 2+ days after the forecastdate; the 66th is forecastdate 2020-10-05 run 2020-10-06 12:xx). Senate 2020 (45 of 95; 44 at 2+ days) and 2022 (20 of 153) agree with the audit's 44 and 20 at 2+ days",
+  "538_2024": "archived 2024 538 zip is presidential only: no House/Senate forecast for 2024",
+  "race_level_file_search": "## root /c/Users/pgoff/Mentat\n/c/Users/pgoff/Mentat/sector_growth_study/archive/session_d613b40c_scratchpad/expected_control_538/scripts/smoketest/rootA/sub/deeper/national_toplines_2022.csv\n## exit 0 for /c/Users/pgoff/Mentat\n## root /c/Users/pgoff/Downloads\n## exit 0 for /c/Users/pgoff/Downloads\n## root /c/Users/pgoff/Documents\n## exit 0 for /c/Users/pgoff/Documents\n## root /c/Users/pgoff/AppData/Local/Melange\n## exit 0 for /c/Users/pgoff/AppData/Local/Melange\n## root /c/melange-data\n## exit 0 for /c/melange-data\n## root /c/Users/pgoff/OneDrive/Desktop\n## exit 0 for /c/Users/pgoff/OneDrive/Desktop\nstarted 2026-09-26T19:10:36Z finished 2026-09-26T19:16:33Z\n",
+  "not_used": "current_2026_control_probabilities.csv (Kalshi/Polymarket, no seats) and daily_control_probabilities.csv / iem_contract_prices_raw.csv: not in the brief's source list"
+ },
+ "availability_gate": [
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "House",
+   "series_id": "538|House|2018|Classic",
+   "n_forecast_rows": 98,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 98,
+   "updates_pre_election_by_forecast_date": 97,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 97,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "House",
+   "series_id": "538|House|2018|Deluxe",
+   "n_forecast_rows": 98,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 98,
+   "updates_pre_election_by_forecast_date": 97,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 97,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "House",
+   "series_id": "538|House|2018|Lite",
+   "n_forecast_rows": 98,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 98,
+   "updates_pre_election_by_forecast_date": 97,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 97,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "House",
+   "series_id": "CrystalBall|House|2018|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 1,
+   "updates_pre_election_by_forecast_date": 0,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2018|Classic",
+   "n_forecast_rows": 75,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 75,
+   "updates_pre_election_by_forecast_date": 74,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 74,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2018|Deluxe",
+   "n_forecast_rows": 75,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 75,
+   "updates_pre_election_by_forecast_date": 74,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 74,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2018|Lite",
+   "n_forecast_rows": 75,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 75,
+   "updates_pre_election_by_forecast_date": 74,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 74,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2017-2018",
+   "chamber": "Senate",
+   "series_id": "CrystalBall|Senate|2018|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 1,
+   "updates_pre_election_by_forecast_date": 0,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (outside the 2021-2026 population not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "House",
+   "series_id": "538|House|2020|Classic",
+   "n_forecast_rows": 95,
+   "n_rows_backfilled": 66,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 94,
+   "updates_pre_election_by_available_at": 94,
+   "updates_backfilled_pre_election": 66,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); 66 of 95 forecast dates were generated later (run on 2020-10-06); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "House",
+   "series_id": "538|House|2020|Deluxe",
+   "n_forecast_rows": 95,
+   "n_rows_backfilled": 66,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 94,
+   "updates_pre_election_by_available_at": 94,
+   "updates_backfilled_pre_election": 66,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); 66 of 95 forecast dates were generated later (run on 2020-10-06); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "House",
+   "series_id": "538|House|2020|Lite",
+   "n_forecast_rows": 95,
+   "n_rows_backfilled": 66,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 94,
+   "updates_pre_election_by_available_at": 94,
+   "updates_backfilled_pre_election": 66,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); 66 of 95 forecast dates were generated later (run on 2020-10-06); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "House",
+   "series_id": "CrystalBall|House|2020|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 1,
+   "updates_pre_election_by_forecast_date": 0,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2020|Classic",
+   "n_forecast_rows": 95,
+   "n_rows_backfilled": 45,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 94,
+   "updates_pre_election_by_available_at": 94,
+   "updates_backfilled_pre_election": 45,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); 45 of 95 forecast dates were generated later (run on 2020-09-15); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2020|Deluxe",
+   "n_forecast_rows": 95,
+   "n_rows_backfilled": 45,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 94,
+   "updates_pre_election_by_available_at": 94,
+   "updates_backfilled_pre_election": 45,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); 45 of 95 forecast dates were generated later (run on 2020-09-15); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2020|Lite",
+   "n_forecast_rows": 95,
+   "n_rows_backfilled": 45,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 94,
+   "updates_pre_election_by_available_at": 94,
+   "updates_backfilled_pre_election": 45,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); 45 of 95 forecast dates were generated later (run on 2020-09-15); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2019-2020",
+   "chamber": "Senate",
+   "series_id": "CrystalBall|Senate|2020|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 1,
+   "updates_pre_election_by_forecast_date": 0,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 0,
+   "weeks_with_spending_primary_window": 0,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no spending weeks in this cycle yet (cycle 2019-2020 not yet collected not in the population); availability not verifiable (no run timestamp / no recorded date): sensitivity only"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "House",
+   "series_id": "538|House|2022|Classic",
+   "n_forecast_rows": 153,
+   "n_rows_backfilled": 20,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 152,
+   "updates_pre_election_by_available_at": 152,
+   "updates_backfilled_pre_election": 20,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 30,
+   "weeks_paired_by_available_at": 26,
+   "weeks_removed_by_gate": 4,
+   "primary_window_weeks_paired_by_forecast_date": 22,
+   "primary_window_weeks_paired_by_available_at": 18,
+   "primary_window_weeks_removed_by_gate": 4,
+   "updates_used_by_forecast_date_primary_window": 22,
+   "updates_used_by_available_at_primary_window": 18,
+   "sector_week_rows_aligned": 156,
+   "sector_week_rows_aligned_primary_window": 131,
+   "weeks_in_sensitivity": 0,
+   "note": "20 of 153 forecast dates were generated later (run on 2022-06-29); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "House",
+   "series_id": "538|House|2022|Deluxe",
+   "n_forecast_rows": 153,
+   "n_rows_backfilled": 20,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 152,
+   "updates_pre_election_by_available_at": 152,
+   "updates_backfilled_pre_election": 20,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 30,
+   "weeks_paired_by_available_at": 26,
+   "weeks_removed_by_gate": 4,
+   "primary_window_weeks_paired_by_forecast_date": 22,
+   "primary_window_weeks_paired_by_available_at": 18,
+   "primary_window_weeks_removed_by_gate": 4,
+   "updates_used_by_forecast_date_primary_window": 22,
+   "updates_used_by_available_at_primary_window": 18,
+   "sector_week_rows_aligned": 156,
+   "sector_week_rows_aligned_primary_window": 131,
+   "weeks_in_sensitivity": 0,
+   "note": "20 of 153 forecast dates were generated later (run on 2022-06-29); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "House",
+   "series_id": "538|House|2022|Lite",
+   "n_forecast_rows": 153,
+   "n_rows_backfilled": 20,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 152,
+   "updates_pre_election_by_available_at": 152,
+   "updates_backfilled_pre_election": 20,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 30,
+   "weeks_paired_by_available_at": 26,
+   "weeks_removed_by_gate": 4,
+   "primary_window_weeks_paired_by_forecast_date": 22,
+   "primary_window_weeks_paired_by_available_at": 18,
+   "primary_window_weeks_removed_by_gate": 4,
+   "updates_used_by_forecast_date_primary_window": 22,
+   "updates_used_by_available_at_primary_window": 18,
+   "sector_week_rows_aligned": 156,
+   "sector_week_rows_aligned_primary_window": 131,
+   "weeks_in_sensitivity": 0,
+   "note": "20 of 153 forecast dates were generated later (run on 2022-06-29); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "House",
+   "series_id": "CrystalBall|House|2022|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 1,
+   "updates_pre_election_by_forecast_date": 0,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 7,
+   "note": "availability not verifiable (no run timestamp / no recorded date): sensitivity only; no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2022|Classic",
+   "n_forecast_rows": 153,
+   "n_rows_backfilled": 20,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 152,
+   "updates_pre_election_by_available_at": 152,
+   "updates_backfilled_pre_election": 20,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 30,
+   "weeks_paired_by_available_at": 26,
+   "weeks_removed_by_gate": 4,
+   "primary_window_weeks_paired_by_forecast_date": 22,
+   "primary_window_weeks_paired_by_available_at": 18,
+   "primary_window_weeks_removed_by_gate": 4,
+   "updates_used_by_forecast_date_primary_window": 22,
+   "updates_used_by_available_at_primary_window": 18,
+   "sector_week_rows_aligned": 192,
+   "sector_week_rows_aligned_primary_window": 142,
+   "weeks_in_sensitivity": 0,
+   "note": "20 of 153 forecast dates were generated later (run on 2022-06-29); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2022|Deluxe",
+   "n_forecast_rows": 153,
+   "n_rows_backfilled": 20,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 152,
+   "updates_pre_election_by_available_at": 152,
+   "updates_backfilled_pre_election": 20,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 30,
+   "weeks_paired_by_available_at": 26,
+   "weeks_removed_by_gate": 4,
+   "primary_window_weeks_paired_by_forecast_date": 22,
+   "primary_window_weeks_paired_by_available_at": 18,
+   "primary_window_weeks_removed_by_gate": 4,
+   "updates_used_by_forecast_date_primary_window": 22,
+   "updates_used_by_available_at_primary_window": 18,
+   "sector_week_rows_aligned": 192,
+   "sector_week_rows_aligned_primary_window": 142,
+   "weeks_in_sensitivity": 0,
+   "note": "20 of 153 forecast dates were generated later (run on 2022-06-29); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "Senate",
+   "series_id": "538|Senate|2022|Lite",
+   "n_forecast_rows": 153,
+   "n_rows_backfilled": 20,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 152,
+   "updates_pre_election_by_available_at": 152,
+   "updates_backfilled_pre_election": 20,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 30,
+   "weeks_paired_by_available_at": 26,
+   "weeks_removed_by_gate": 4,
+   "primary_window_weeks_paired_by_forecast_date": 22,
+   "primary_window_weeks_paired_by_available_at": 18,
+   "primary_window_weeks_removed_by_gate": 4,
+   "updates_used_by_forecast_date_primary_window": 22,
+   "updates_used_by_available_at_primary_window": 18,
+   "sector_week_rows_aligned": 192,
+   "sector_week_rows_aligned_primary_window": 142,
+   "weeks_in_sensitivity": 0,
+   "note": "20 of 153 forecast dates were generated later (run on 2022-06-29); they enter only at that run time"
+  },
+  {
+   "fec_cycle": "2021-2022",
+   "chamber": "Senate",
+   "series_id": "CrystalBall|Senate|2022|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 1,
+   "updates_pre_election_by_forecast_date": 0,
+   "updates_pre_election_by_available_at": 0,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 95,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 7,
+   "note": "availability not verifiable (no run timestamp / no recorded date): sensitivity only; no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2023-2024",
+   "chamber": "House",
+   "series_id": "CrystalBall|House|2024|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 105,
+   "weeks_with_spending_primary_window": 96,
+   "weeks_paired_by_forecast_date": 8,
+   "weeks_paired_by_available_at": 8,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 18,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2023-2024",
+   "chamber": "Senate",
+   "series_id": "CrystalBall|Senate|2024|final",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 106,
+   "weeks_with_spending_primary_window": 96,
+   "weeks_paired_by_forecast_date": 8,
+   "weeks_paired_by_available_at": 8,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 36,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2025-2026",
+   "chamber": "House",
+   "series_id": "Cook|House|2026|snapshot",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 84,
+   "weeks_with_spending_primary_window": 82,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2025-2026",
+   "chamber": "House",
+   "series_id": "Cornell|House|2026|snapshot",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 84,
+   "weeks_with_spending_primary_window": 82,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2025-2026",
+   "chamber": "House",
+   "series_id": "CrystalBall|House|2026|snapshot",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 84,
+   "weeks_with_spending_primary_window": 82,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2025-2026",
+   "chamber": "House",
+   "series_id": "FiftyPlusOne|House|2026|snapshot",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 84,
+   "weeks_with_spending_primary_window": 82,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2025-2026",
+   "chamber": "House",
+   "series_id": "InsideElections|House|2026|snapshot",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 84,
+   "weeks_with_spending_primary_window": 82,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  },
+  {
+   "fec_cycle": "2025-2026",
+   "chamber": "Senate",
+   "series_id": "CrystalBall|Senate|2026|snapshot",
+   "n_forecast_rows": 1,
+   "n_rows_backfilled": 0,
+   "n_rows_unverified": 0,
+   "updates_pre_election_by_forecast_date": 1,
+   "updates_pre_election_by_available_at": 1,
+   "updates_backfilled_pre_election": 0,
+   "updates_removed_by_gate": 0,
+   "weeks_with_spending": 85,
+   "weeks_with_spending_primary_window": 83,
+   "weeks_paired_by_forecast_date": 0,
+   "weeks_paired_by_available_at": 0,
+   "weeks_removed_by_gate": 0,
+   "primary_window_weeks_paired_by_forecast_date": 0,
+   "primary_window_weeks_paired_by_available_at": 0,
+   "primary_window_weeks_removed_by_gate": 0,
+   "updates_used_by_forecast_date_primary_window": 0,
+   "updates_used_by_available_at_primary_window": 0,
+   "sector_week_rows_aligned": 0,
+   "sector_week_rows_aligned_primary_window": 0,
+   "weeks_in_sensitivity": 0,
+   "note": "no complete pre-election week starts after a forecast became available"
+  }
+ ],
+ "aligned_pairs": 1376,
+ "aligned_sensitivity_pairs": 112,
+ "cover_end": {
+  "banking|2021": "2021-12-31",
+  "banking|2022": "2022-12-31",
+  "banking|2023": "2023-12-31",
+  "banking|2024": "2024-12-31",
+  "banking|2025": "2025-12-31",
+  "banking|2026": "2026-08-18",
+  "credit_union|2021": "2021-12-31",
+  "credit_union|2022": "2022-12-31",
+  "credit_union|2023": "2023-12-31",
+  "credit_union|2024": "2024-12-31",
+  "credit_union|2025": "2025-12-31",
+  "credit_union|2026": "2026-06-30",
+  "crypto|2021": "2021-12-31",
+  "crypto|2022": "2022-12-31",
+  "crypto|2023": "2023-12-31",
+  "crypto|2024": "2024-12-31",
+  "crypto|2025": "2025-12-31",
+  "crypto|2026": "2026-06-29",
+  "credit_arms|2021": "2021-12-31",
+  "credit_arms|2022": "2022-12-31",
+  "credit_arms|2023": "2023-12-31",
+  "credit_arms|2024": "2024-12-31",
+  "credit_arms|2025": "2025-12-31",
+  "credit_arms|2026": "2026-06-30",
+  "fintech|2021": "2021-12-31",
+  "fintech|2022": "2022-12-31",
+  "fintech|2023": "2023-12-31",
+  "fintech|2024": "2024-12-31",
+  "fintech|2025": "2025-12-31",
+  "fintech|2026": "2026-06-30",
+  "property_casualty_insurance|2021": "2021-12-31",
+  "property_casualty_insurance|2022": "2022-12-31",
+  "property_casualty_insurance|2023": "2023-12-31",
+  "property_casualty_insurance|2024": "2024-12-31",
+  "property_casualty_insurance|2025": "2025-12-31",
+  "property_casualty_insurance|2026": "2026-07-15",
+  "telecom|2021": "2021-12-31",
+  "telecom|2022": "2022-12-31",
+  "telecom|2023": "2023-12-31",
+  "telecom|2024": "2024-12-31",
+  "telecom|2025": "2025-12-31",
+  "telecom|2026": "2026-07-12",
+  "community_banks|2021": "2021-12-31",
+  "community_banks|2022": "2022-12-31",
+  "community_banks|2023": "2023-12-31",
+  "community_banks|2024": "2024-12-31",
+  "community_banks|2025": "2025-12-31",
+  "community_banks|2026": "2026-06-30"
+ },
+ "verification": {
+  "stage": {
+   "file": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\out\\stage_20260926T195605Z\\09_weekly_partisan_seat_forecasts.xlsx",
+   "sha256": "815d27894f3859ede76b3de574ff2c1d1d49f2f1efbd57ccfa3c4e28d0076537",
+   "passed": 53,
+   "failed": 0
+  },
+  "installed": {
+   "file": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\09_weekly_partisan_seat_forecasts.xlsx",
+   "sha256": "815d27894f3859ede76b3de574ff2c1d1d49f2f1efbd57ccfa3c4e28d0076537",
+   "passed": 53,
+   "failed": 0,
+   "checks": [
+    {
+     "check": "no <f> formula elements in any sheet XML",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "no comments / drawings / external links / macros",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sheet names and order",
+     "ok": true,
+     "detail": "[\"weekly_giving\", \"seat_forecasts\", \"aligned\", \"aligned_sensitivity\", \"coverage\", \"committee_week\", \"committee_cycle\", \"committee_ids\", \"donor_committee_cycle\", \"date_coverage\", \"reconcile\", \"reconcile_committee\", \"channel_map\", \"notes\", \"dictionary\", \"sources\"]"
+    },
+    {
+     "check": "no formula-like text cells",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "weekly_giving: key study_sector+chamber+year+week_start unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "seat_forecasts: key forecast_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "aligned: key study_sector+chamber+year+week_start+series_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "aligned_sensitivity: key study_sector+chamber+year+week_start+series_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "coverage: key election_year+chamber+series_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_week: key study_sector+committee_id+fec_cycle+year+chamber+party+week_start unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_cycle: key study_sector+committee_id+fec_cycle+chamber+party unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_ids: key fec_cycle+committee_id+cand_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "donor_committee_cycle: key study_sector+donor_key+committee_id+fec_cycle+chamber+party+channel unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "date_coverage: key study_sector+year unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile: key study_sector+year+chamber unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile_committee: key study_sector+fec_cycle+chamber+party unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "channel_map: key funding_source+receipt_role+channel+chamber unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "notes: key note_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "dictionary: key sheet+column unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sources: key source_id unique",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "dictionary documents every column (in order) and nothing else",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "every source id resolves to the sources sheet",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sources: every file (and zip member) exists with the recorded SHA-256 and size",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "08 workbook bytes equal build_receipt_08 file.sha256",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "banking: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "credit_union: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "crypto: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "credit_arms: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "fintech: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "property_casualty_insurance: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "telecom: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "community_banks: every population row finds its committee in 08 committee_map",
+     "ok": true,
+     "detail": 0
+    },
+    {
+     "check": "no population row has an unusable or out-of-year date (undated = 0, as the workbook reports)",
+     "ok": true,
+     "detail": "{\"banking\": 0, \"credit_union\": 0, \"crypto\": 0, \"credit_arms\": 0, \"fintech\": 0, \"property_casualty_insurance\": 0, \"telecom\": 0, \"community_banks\": 0}"
+    },
+    {
+     "check": "donor keys: no SHA-256/16 collision within a sector-committee-cycle",
+     "ok": true,
+     "detail": "null"
+    },
+    {
+     "check": "weekly_giving: exactly the covered week grid (every ISO week touching each covered year, split at 1 Jan)",
+     "ok": true,
+     "detail": "{\"missing\": [], \"extra\": [], \"n\": 4692}"
+    },
+    {
+     "check": "weekly_giving: every money, count, share and calendar cell == SQL re-derivation from the raw rows",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_week: rows == SQL groups (set) and every cell == SQL",
+     "ok": true,
+     "detail": "{\"bad\": [], \"missing\": []}"
+    },
+    {
+     "check": "committee_cycle: rows == SQL groups and every cell == SQL (first/last date, weeks, donors, undated 0)",
+     "ok": true,
+     "detail": "{\"bad\": [], \"missing\": []}"
+    },
+    {
+     "check": "donor_committee_cycle: rows == SQL groups by raw contributor_key (hashed here) and every cell == SQL",
+     "ok": true,
+     "detail": "{\"bad\": [], \"missing\": []}"
+    },
+    {
+     "check": "donor_committee_cycle: donor_key is 16 hex characters (no names or raw keys written)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "committee_ids: one row per committee-cycle x linked cand_id of 08 committee_map; cn fields == raw cn file; committee_cycle sums == 08 committee_map usd/n_rows",
+     "ok": true,
+     "detail": "{\"bad\": [], \"extra\": []}"
+    },
+    {
+     "check": "date_coverage: counts, dollars, first/last date and coverage_end == SQL (and 08's partial-year note)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile: 08 D/R/other/n_rows == weekly_giving sums of the year == SQL from raw rows (undated 0), every observed row MATCH",
+     "ok": true,
+     "detail": "{\"bad\": [], \"results\": {\"MATCH (both missing)\": 32, \"MATCH\": 96}}"
+    },
+    {
+     "check": "reconcile_committee: 08 (cycle, party) == committee_cycle == committee_week == weekly_giving == SQL; donor-keyed == SQL",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "channel_map == SQL by funding_source x receipt_role x chamber",
+     "ok": true,
+     "detail": "{\"diff\": []}"
+    },
+    {
+     "check": "seat_forecasts: every value == its own source-file line (Decimal), availability/backfill/baseline/net gain re-derived",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "seat_forecasts: complete (every 538 date x version, every Crystal Ball call, every 2026 snapshot row)",
+     "ok": true,
+     "detail": "{\"got\": {\"cb_predicted_house\": 11, \"cb_predicted_senate\": 9, \"f538_house_2018\": 294, \"f538_senate_2018\": 225, \"f538_house_2020\": 285, \"f538_senate_2020\": 285, \"f538_house_2022\": 459, \"f538_senate_2022\": 459, \"cb_current_2026_other\": 4, \"cb_current_2026_seats\": 2}, \"expected\": {\"f538_house_2018\": 294, \"f538_senate_2018\": 225, \"f538_house_2020\": 285, \"f538_senate_2020\": 285, \"f538_house_2022\": 459, \"f538_senate_2022\": 459, \"cb_predicted_house\": 11, \"cb_predicted_senate\": 9, \"cb_current_2026_seats\": 2, \"cb_current_2026_other\": 4}}"
+    },
+    {
+     "check": "538 versions labelled by name only (no 'polls-only' label)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "aligned: pairs == independent recomputation (latest forecast whose available_at date < week_start)",
+     "ok": true,
+     "detail": "{\"n_exp\": 1376, \"n_got\": 1376, \"bad\": []}"
+    },
+    {
+     "check": "aligned: as-of invariants on every row (forecast public before week_start, verified only, same cycle, backfilled rows only after their run date, copied cells == sources)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "aligned_sensitivity: pairs == independent recomputation (latest forecast whose assumed availability date < week_start)",
+     "ok": true,
+     "detail": "{\"n_exp\": 112, \"n_got\": 112, \"bad\": []}"
+    },
+    {
+     "check": "aligned_sensitivity: as-of invariants on every row (forecast public before week_start, unverified only, same cycle, backfilled rows only after their run date, copied cells == sources)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "coverage: spending weeks, pairs before/after the gate and update counts == recomputation",
+     "ok": true,
+     "detail": "[]"
+    }
+   ]
+  },
+  "negative_control": {
+   "tampered_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\out\\negctl_20260926T195758Z\\tampered_09.xlsx",
+   "tampers": [
+    "weekly_giving!d_usd row 3 +0.01",
+    "seat_forecasts!expected_dem_seats row 1413 +1e-6 (538 House 2022 Lite)",
+    "aligned!forecast_id row 2 -> an earlier forecast",
+    "aligned!available_at row 3 -> after week_start",
+    "committee_ids!cand_ici row 510 C -> I",
+    "donor_committee_cycle!donor_key row 2 -> a raw name key",
+    "notes!note row 2 = formula '=1+1'",
+    "sources!sha256 row 2 zeroed",
+    "committee_week row 5 deleted",
+    "coverage!weeks_paired_by_available_at row 18 +1"
+   ],
+   "verifier_exit": 1,
+   "n_checks": 53,
+   "n_failed": 13,
+   "failed_checks": [
+    "no <f> formula elements in any sheet XML",
+    "no formula-like text cells",
+    "sources: every file (and zip member) exists with the recorded SHA-256 and size",
+    "weekly_giving: every money, count, share and calendar cell == SQL re-derivation from the raw rows",
+    "committee_week: rows == SQL groups (set) and every cell == SQL",
+    "donor_committee_cycle: rows == SQL groups by raw contributor_key (hashed here) and every cell == SQL",
+    "donor_committee_cycle: donor_key is 16 hex characters (no names or raw keys written)",
+    "committee_ids: one row per committee-cycle x linked cand_id of 08 committee_map; cn fields == raw cn file; committee_cycle sums == 08 committee_map usd/n_rows",
+    "reconcile: 08 D/R/other/n_rows == weekly_giving sums of the year == SQL from raw rows (undated 0), every observed row MATCH",
+    "seat_forecasts: every value == its own source-file line (Decimal), availability/backfill/baseline/net gain re-derived",
+    "aligned: pairs == independent recomputation (latest forecast whose available_at date < week_start)",
+    "aligned: as-of invariants on every row (forecast public before week_start, verified only, same cycle, backfilled rows only after their run date, copied cells == sources)",
+    "coverage: spending weeks, pairs before/after the gate and update counts == recomputation"
+   ]
+  },
+  "method": "verify_09.py shares no code with build_09.py: SQL re-derivation of every money cell from the raw facts rows (ISO week by SQLite date functions) joined to 08's committee_map as published; every seat_forecasts row checked against its own source-file line (Decimal); alignment recomputed by a different algorithm with the as-of invariants asserted row by row"
+ },
+ "install": {
+  "target": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\09_weekly_partisan_seat_forecasts.xlsx",
+  "target_existed_before": false,
+  "source_stage": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\out\\stage_20260926T195605Z\\09_weekly_partisan_seat_forecasts.xlsx",
+  "stage_sha256": "815d27894f3859ede76b3de574ff2c1d1d49f2f1efbd57ccfa3c4e28d0076537",
+  "installed_sha256": "815d27894f3859ede76b3de574ff2c1d1d49f2f1efbd57ccfa3c4e28d0076537",
+  "bytes_equal": true,
+  "size": 6251459,
+  "mtime_utc": "2026-09-26T19:57:32Z",
+  "method": "PowerShell Copy-Item after Test-Path (no overwrite), Get-FileHash both sides"
+ },
+ "sources": [
+  {
+   "source_id": "receipt08",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_08_contributions_by_chamber.json",
+   "zip_member": null,
+   "sha256": "d1578a39fa838628eb78e1366596d3e089287f1dc6ea6bcda8105bd2de1c1e1d",
+   "size_bytes": 144181,
+   "mtime": "2026-09-26T05:36:30Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:54:01Z",
+   "note": "08's build receipt (run chamber-link-20260925): population_pin names the pinned analytics indexes (the same 04 uses); file names the 08 workbook"
+  },
+  {
+   "source_id": "wb08",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\08_contributions_by_chamber.xlsx",
+   "zip_member": null,
+   "sha256": "a1d2f2f8f618335183350f314e3c3c1cfd47a34a7dc46b8fd352c735cf1d5940",
+   "size_bytes": 607883,
+   "mtime": "2026-09-26T05:24:35Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:54:01Z",
+   "note": "08_contributions_by_chamber.xlsx: sector_year_chamber (years, status, D/R/other totals reconciled here), committee_map (committee -> chamber, candidate link and party), sources (index and FEC file pins); SHA-256 equal to build_receipt_08 file.sha256"
+  },
+  {
+   "source_id": "idx_banking",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\bb2b2452b4fc14c827c6632ae8b1ecc47444ce835d6e44d6a7d885997424b7d0.sqlite",
+   "zip_member": null,
+   "sha256": "cd044cea86bb7c72392e71f19f2e74284204c25d98419f9230abee1cce480e9f",
+   "size_bytes": 707866624,
+   "mtime": "2026-09-21T18:47:19Z",
+   "rows_read": 592570,
+   "read_at": "2026-09-26T19:54:35Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-21T18:47:02.268550Z"
+  },
+  {
+   "source_id": "idx_credit_union",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\88e3f70252e75c3ebcbefab2096f39687b0f4874420f97f9b63f83e1e4d85bae.sqlite",
+   "zip_member": null,
+   "sha256": "8ef1d494468869019db810e659a966ccdf9b73bd64216bd9d546a943cfe30619",
+   "size_bytes": 56930304,
+   "mtime": "2026-09-21T14:39:37Z",
+   "rows_read": 27519,
+   "read_at": "2026-09-26T19:54:36Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-21T14:39:37.805803Z"
+  },
+  {
+   "source_id": "idx_crypto",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\caaa897c7cbd0425354eedcee62c574a410591fd6bda8a9931f8580184e03844.sqlite",
+   "zip_member": null,
+   "sha256": "c6f1ef6f050f0ecf00e4def0213ba35332baa506ab77ff7d0ec26ddbc460da5b",
+   "size_bytes": 11689984,
+   "mtime": "2026-09-22T14:53:18Z",
+   "rows_read": 6273,
+   "read_at": "2026-09-26T19:54:37Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-22T14:53:18.371360Z"
+  },
+  {
+   "source_id": "idx_credit_arms",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\ba38420fc8c51460f192df48c78542fe66fd650e7dc8eeb8910a1aa5a2c41234.sqlite",
+   "zip_member": null,
+   "sha256": "f2d92efe0cec96a0ff2ae247f41a12247bd000029a199572933e4f2c488b4083",
+   "size_bytes": 401338368,
+   "mtime": "2026-09-22T22:47:25Z",
+   "rows_read": 416570,
+   "read_at": "2026-09-26T19:55:07Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-22T22:47:20.739713Z"
+  },
+  {
+   "source_id": "idx_fintech",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\2f9fa3df526b0f27a753943ed615240adf931be93f3223838752b517824ceb65.sqlite",
+   "zip_member": null,
+   "sha256": "4667318c4993a1b69ea9ea55eddfed70f93d170970f4b7635b1dde4f3a384e76",
+   "size_bytes": 68304896,
+   "mtime": "2026-09-22T22:48:35Z",
+   "rows_read": 24901,
+   "read_at": "2026-09-26T19:55:10Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-22T22:48:35.042078Z"
+  },
+  {
+   "source_id": "idx_property_casualty_insurance",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\b9dabba3d54e6550f75fb0a8e4e5e8774ea6d7745d98e20585c5f498569ada34.sqlite",
+   "zip_member": null,
+   "sha256": "d8d3b6db52d9ed9b2b8fdf337adcc51da6a7372745bb9c5467b8f7af32b41209",
+   "size_bytes": 302358528,
+   "mtime": "2026-09-22T22:54:40Z",
+   "rows_read": 278839,
+   "read_at": "2026-09-26T19:55:21Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-22T22:54:37.943708Z"
+  },
+  {
+   "source_id": "idx_telecom",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\6f7acaee8a6e8c5ac34e5d572094a078c85c68c46b1f990c022f3021d2dbc08c.sqlite",
+   "zip_member": null,
+   "sha256": "9e14a596bba37b78c76f80b84867efececab325f4b12117cce8d9d2986bed794",
+   "size_bytes": 676626432,
+   "mtime": "2026-09-22T15:50:15Z",
+   "rows_read": 505794,
+   "read_at": "2026-09-26T19:55:58Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-22T15:49:45.996092Z"
+  },
+  {
+   "source_id": "idx_community_banks",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763.sqlite",
+   "zip_member": null,
+   "sha256": "df15235d957fbb44398e6858d4c53b4eac5595244dc9994f29447672db0cc448",
+   "size_bytes": 3899392,
+   "mtime": "2026-09-22T01:20:43Z",
+   "rows_read": 3966,
+   "read_at": "2026-09-26T19:55:59Z",
+   "note": "pinned analytics index named by build_receipt_08 population_pin (the same file 04 and 08 read; SHA-256, size and mtime equal 08's sources row before and after the read); table facts, rows with receipt_cents != 0; in place, sqlite3 URI mode=ro&immutable=1 (no copy, no lock, nothing written); data vintage (metadata manifest built_at) 2026-09-22T01:20:43.369667Z"
+  },
+  {
+   "source_id": "fec_cn22",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn22\\cn.txt",
+   "zip_member": null,
+   "sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38",
+   "size_bytes": 832005,
+   "mtime": "2026-09-08T05:26:41Z",
+   "rows_read": 8579,
+   "read_at": "2026-09-26T19:55:59Z",
+   "note": "FEC bulk candidate master cn22 (2021-2022), the file 08 linked through (08 sources row fec_cn22); read for CAND_ICI (I/C/O), CAND_STATUS, CAND_PCC, CAND_ELECTION_YR, office state/district; SHA-256 equal to 08's"
+  },
+  {
+   "source_id": "fec_cn24",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn24\\cn.txt",
+   "zip_member": null,
+   "sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f",
+   "size_bytes": 952677,
+   "mtime": "2026-09-08T05:26:43Z",
+   "rows_read": 9798,
+   "read_at": "2026-09-26T19:56:00Z",
+   "note": "FEC bulk candidate master cn24 (2023-2024), the file 08 linked through (08 sources row fec_cn24); read for CAND_ICI (I/C/O), CAND_STATUS, CAND_PCC, CAND_ELECTION_YR, office state/district; SHA-256 equal to 08's"
+  },
+  {
+   "source_id": "fec_cn26",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\repair-20260908-inputs\\fec_beneficiary\\cn26\\cn.txt",
+   "zip_member": null,
+   "sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740",
+   "size_bytes": 829444,
+   "mtime": "2026-09-08T05:26:48Z",
+   "rows_read": 8516,
+   "read_at": "2026-09-26T19:56:00Z",
+   "note": "FEC bulk candidate master cn26 (2025-2026), the file 08 linked through (08 sources row fec_cn26); read for CAND_ICI (I/C/O), CAND_STATUS, CAND_PCC, CAND_ELECTION_YR, office state/district; SHA-256 equal to 08's"
+  },
+  {
+   "source_id": "f538_manifest",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\fetch_manifest.json",
+   "zip_member": null,
+   "sha256": "efb03f345391eaea99d85742cc33982c5653a0f886fb0c649bb35dde169e6592",
+   "size_bytes": 93240,
+   "mtime": "2026-09-26T00:23:53Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:56:00Z",
+   "note": "fetch manifest of the archived 538 files (session d613b40c, copied to the study archive 2026-09-26): URL, Wayback timestamp, fetch time, SHA-256 per file; every 538 file below is checked against it"
+  },
+  {
+   "source_id": "f538_house_2018",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\wayback\\house_2018_20250306181758.csv",
+   "zip_member": null,
+   "sha256": "0f0bb4e2fc1a4109bf6e12c7c453cb3436c2193609c908810ee6acd6b55767b5",
+   "size_bytes": 42263,
+   "mtime": "2026-09-26T00:14:22Z",
+   "rows_read": 588,
+   "read_at": "2026-09-26T19:56:00Z",
+   "note": "538 official national House forecast 2018, archived copy of https://projects.fivethirtyeight.com/congress-model-2018/house_national_forecast.csv (Wayback 20250306181758, fetched 2026-09-26T00:14:22Z); SHA-256 equal to the fetch manifest"
+  },
+  {
+   "source_id": "f538_senate_2018",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\wayback\\senate_2018_20250306181805.csv",
+   "zip_member": null,
+   "sha256": "54985a0937190aac03c2275fad1ac3d72487ad085094cadf5d95498bd313c5c5",
+   "size_bytes": 31491,
+   "mtime": "2026-09-26T00:14:50Z",
+   "rows_read": 450,
+   "read_at": "2026-09-26T19:56:00Z",
+   "note": "538 official national Senate forecast 2018, archived copy of https://projects.fivethirtyeight.com/congress-model-2018/senate_national_forecast.csv (Wayback 20250306181805, fetched 2026-09-26T00:14:50Z); SHA-256 equal to the fetch manifest"
+  },
+  {
+   "source_id": "f538_house_2020",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\wayback\\house_2020_20250306125216.csv",
+   "zip_member": null,
+   "sha256": "b75f64522782f8727a3737a418fcd1aeef6d617b7d2514b74201f9a012737cd8",
+   "size_bytes": 60683,
+   "mtime": "2026-09-26T00:15:17Z",
+   "rows_read": 285,
+   "read_at": "2026-09-26T19:56:00Z",
+   "note": "538 official national House forecast 2020, archived copy of https://projects.fivethirtyeight.com/2020-general-data/house_national_toplines_2020.csv (Wayback 20250306125216, fetched 2026-09-26T00:15:17Z); SHA-256 equal to the fetch manifest"
+  },
+  {
+   "source_id": "f538_senate_2020",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\wayback\\senate_2020_20250306125229.csv",
+   "zip_member": null,
+   "sha256": "398cd0e5abbf748ed3496fe2dcade7ef3ce871793cdc4d6ce3e5e900ec9f41a9",
+   "size_bytes": 45750,
+   "mtime": "2026-09-26T00:15:56Z",
+   "rows_read": 285,
+   "read_at": "2026-09-26T19:56:01Z",
+   "note": "538 official national Senate forecast 2020, archived copy of https://projects.fivethirtyeight.com/2020-general-data/senate_national_toplines_2020.csv (Wayback 20250306125229, fetched 2026-09-26T00:15:56Z); SHA-256 equal to the fetch manifest"
+  },
+  {
+   "source_id": "f538_house_2022",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\wayback\\house_2022_20250306125234.csv",
+   "zip_member": null,
+   "sha256": "d3ccf757c2818ff02be3295a28054fd3703311b3e1e8c385fd02a290d0eedaad",
+   "size_bytes": 79244,
+   "mtime": "2026-09-26T00:16:19Z",
+   "rows_read": 459,
+   "read_at": "2026-09-26T19:56:01Z",
+   "note": "538 official national House forecast 2022, archived copy of https://projects.fivethirtyeight.com/2022-general-election-forecast-data/house_national_toplines_2022.csv (Wayback 20250306125234, fetched 2026-09-26T00:16:19Z); SHA-256 equal to the fetch manifest"
+  },
+  {
+   "source_id": "f538_senate_2022",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\wayback\\senate_2022_20250306125235.csv",
+   "zip_member": null,
+   "sha256": "f8b7c59d2221739028de97d36ec8f609aa60395c566989186a4c2d97aa9fbf4c",
+   "size_bytes": 73471,
+   "mtime": "2026-09-26T00:17:16Z",
+   "rows_read": 459,
+   "read_at": "2026-09-26T19:56:01Z",
+   "note": "538 official national Senate forecast 2022, archived copy of https://projects.fivethirtyeight.com/2022-general-election-forecast-data/senate_national_toplines_2022.csv (Wayback 20250306125235, fetched 2026-09-26T00:17:16Z); SHA-256 equal to the fetch manifest"
+  },
+  {
+   "source_id": "f538_2024_zip",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\wayback\\538_2024_election_forecast_data_20250306102112.zip",
+   "zip_member": null,
+   "sha256": "e5718eb5cb65b53d2c233ca2ce8384817509b89adf82a91f9893e523c2eb1165",
+   "size_bytes": 640950,
+   "mtime": "2026-09-26T00:20:13Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "EXAMINED, NOT USED: 538's archived 2024 forecast-data zip (Wayback 20250306102112) is the presidential model only (members daily_summary.csv; tipping_points_vpi.csv; README.md; poll_list.csv; scenarios.csv; daily_summary.csv variables electoral college; popular vote; state vote; state vote dem margin); no House or Senate forecast"
+  },
+  {
+   "source_id": "readme538_2018_house",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\github_forecasts\\house-forecast-2018__README.md",
+   "zip_member": null,
+   "sha256": "619327852f4e7f2c4704e2ee43c1f87059b22c6d33cd77ab2ece35f2ddb1b634",
+   "size_bytes": 640,
+   "mtime": "2026-09-26T00:12:16Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "538 README (fetched from github fivethirtyeight/data, session d613b40c): column definitions (forecastdate, timestamp, chamber_Dparty, mean_seats_Dparty, expression lite/classic/deluxe)"
+  },
+  {
+   "source_id": "readme538_2018_senate",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\github_forecasts\\senate-forecast-2018__README.md",
+   "zip_member": null,
+   "sha256": "c347a1cc8be73cc0eb56e0e86b994aa68f0324cf22451a47b9db19e8cfe7f187",
+   "size_bytes": 636,
+   "mtime": "2026-09-26T00:12:24Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "538 README (fetched from github fivethirtyeight/data, session d613b40c): column definitions (forecastdate, timestamp, chamber_Dparty, mean_seats_Dparty, expression lite/classic/deluxe)"
+  },
+  {
+   "source_id": "readme538_2020",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\github_forecasts\\election-forecasts-2020__README.md",
+   "zip_member": null,
+   "sha256": "553ff0bd5d20072b3b461fb7066e232b1e49c9114e319655caae1f797d39cb2e",
+   "size_bytes": 20506,
+   "mtime": "2026-09-26T00:12:04Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "538 README (fetched from github fivethirtyeight/data, session d613b40c): column definitions (forecastdate, timestamp, chamber_Dparty, mean_seats_Dparty, expression lite/classic/deluxe)"
+  },
+  {
+   "source_id": "readme538_2022",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\archive\\session_d613b40c_scratchpad\\expected_control_538\\raw\\github_forecasts\\election-forecasts-2022__README.md",
+   "zip_member": null,
+   "sha256": "eb753f6b039c0c035c11d3ca5f29b66cf905ebbd412c37a3bb428d52695e160d",
+   "size_bytes": 9085,
+   "mtime": "2026-09-26T00:12:06Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "538 README (fetched from github fivethirtyeight/data, session d613b40c): column definitions (forecastdate, timestamp, chamber_Dparty, mean_seats_Dparty, expression lite/classic/deluxe)"
+  },
+  {
+   "source_id": "cb_zip",
+   "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+   "zip_member": null,
+   "sha256": "852d894f3ef2d7fe0aa45e319013bf9a0f2388596759f66c71e06925663f67d2",
+   "size_bytes": 586840,
+   "mtime": "2026-09-25T15:55:09Z",
+   "rows_read": null,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "Paul's House_Senate_Control_Forecasts_CSV.zip (members read in memory, nothing extracted to disk)"
+  },
+  {
+   "source_id": "cb_predicted_house",
+   "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+   "zip_member": "predicted_house.csv",
+   "sha256": "d813ddc4983726fe1bb9996a718cd8b12ca9289038dd6671ad30778b66d5760d",
+   "size_bytes": 3312,
+   "mtime": null,
+   "rows_read": 12,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "Crystal Ball final pre-election House calls by election year; sha256 is of the member's bytes"
+  },
+  {
+   "source_id": "cb_predicted_senate",
+   "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+   "zip_member": "predicted_senate.csv",
+   "sha256": "f6aa9a163b122008b149df82f7d2e993630cc7e38dc9f58fcc7b1bbbd166cea0",
+   "size_bytes": 2840,
+   "mtime": null,
+   "rows_read": 12,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "Crystal Ball final pre-election Senate calls by election year; sha256 is of the member's bytes"
+  },
+  {
+   "source_id": "cb_seat_results",
+   "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+   "zip_member": "seat_results.csv",
+   "sha256": "a3cf85839620f7b413ecf1fe2732571eea81670f428d25e708e510319dcf0330",
+   "size_bytes": 4867,
+   "mtime": null,
+   "rows_read": 30,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "seats after each election (start of each Congress), House and Senate: the pre-election baseline for expected_dem_net_gain; sha256 is of the member's bytes"
+  },
+  {
+   "source_id": "cb_current_2026_seats",
+   "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+   "zip_member": "current_2026_seat_predictions.csv",
+   "sha256": "c37ff0c09e5faee6d7b923c5b52b2139a2014a26af7981a93a47858e3742b5fc",
+   "size_bytes": 934,
+   "mtime": null,
+   "rows_read": 2,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "2026 Crystal Ball ratings snapshot (House as reported 2026-09-18, Senate 2026-09-22); sha256 is of the member's bytes"
+  },
+  {
+   "source_id": "cb_current_2026_other",
+   "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+   "zip_member": "current_2026_other_forecasts.csv",
+   "sha256": "47aa3443cf4e67451ad2066d36183464bc898e1e0d68658b1980610928d13f54",
+   "size_bytes": 351,
+   "mtime": null,
+   "rows_read": 4,
+   "read_at": "2026-09-26T19:56:02Z",
+   "note": "2026 snapshots of Cook, Inside Elections, FiftyPlusOne and Cornell; sha256 is of the member's bytes"
+  }
+ ],
+ "intermediates": {
+  "out/stage_20260926T195605Z\\build_facts.json": "182b261c80deefa0df4276d24c187b9fad543e2a7d6ebc0291435d343c899e7a",
+  "out/stage_20260926T195605Z\\verify_stage.json": "6e30b06726ef7815670f1bb33c166cb254d9fb56a3f86a9d98c5c1caeb58166b",
+  "out/stage_20260926T195605Z\\verify_installed.json": "ae5344ca51a0c8529da1d31f71a77d6d9051c9e793cf73a35ac31bf3293fb8b3"
+ },
+ "scripts": {
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\gb.py": "51c7290afbfa9a2d8aa530e518e67ae030fc9fd7c4f0f0f7b50847813fa6abb6",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\build_09.py": "08c16a1299ef6c23b5a56edf8d0c035feebcb8a27c81080684ce9812e1988c1a",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\verify_09.py": "ead004123c71f1f44eebfb8f7978a538eee7fbb76e02cbdfc4bbd5badf0c653f",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\negctl_09.py": "4f41e09f0d9a9d55f647adcf1de24c354d50170942541dfe6a2bf524695551c1",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\write_receipt_09.py": "12b1cf71f01b8f4d9b66ddb6bfe38943048a311ecc4f9f25c2c1f168c91c15da"
+ },
+ "exploration_scripts_not_part_of_the_build": {
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\explore_facts.py": "591b51cdd29059633cc21a66d49f0f04b2885abf99d166e38fed5c83c653edfa",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\b82a832c-4c32-4edd-9a98-4b671b9898ec\\scratchpad\\work\\weekly09\\explore_meta.py": "cd84838654c2663296dc868f59c132bbe7327fb2583d07dc3a22fc00ae564080"
+ },
+ "study_folder_writes": [
+  "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\09_weekly_partisan_seat_forecasts.xlsx",
+  "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_09_weekly_partisan_seat_forecasts.json"
+ ],
+ "decisions_recorded": [
+  "A week crossing 1 January is split into two rows (one per calendar year), so every row has one year and one FEC cycle and the year sums reconcile to 08 exactly; sum by study_sector x chamber x week_start for whole weeks.",
+  "weekly_giving is the complete covered week grid (zero rows are counted zeros); 2026 is covered through each index's max transaction date, equal to 08's note.",
+  "dem_share = d/(d+r) on net dollars (brief and 08); dem_share_gross on gross positive dollars (the Codex contract's primary outcome) alongside.",
+  "Channel by funding_source: employee_original -> employee; pac_activity -> company_pac; everything else -> other_included_receipt; transfer_receipt gross shown separately.",
+  "Committee sheets keyed by 08's per-row party (no committee-cycle has more than one party).",
+  "Donor keys are hashed (16 hex of SHA-256); no donor names in the workbook.",
+  "expected_dem_net_gain = expected D seats - D seats at the start of the outgoing Congress (seat_results.csv, the previous election as seated), fixed within cycle; the files' own net changes kept alongside (three Crystal Ball rows measured from another baseline: House 2004, House 2006, Senate 2018).",
+  "Toss-ups split evenly (ratings snapshots; the two unassigned Georgia seats of the 2020 Senate call); Crystal Ball rows with no projected seats have blank expected seats.",
+  "backfilled = run date after forecastdate (includes the two launch-day rows with a 1-day lag); availability unverified (2018 538, undated Crystal Ball finals) -> aligned_sensitivity only; the undated Crystal Ball sensitivity date is election day (the latest a final pre-election call can be).",
+  "Among forecasts available before week_start, the latest by forecast_date is taken (not the latest run time): a backfill batch releases many old dates at once and the most recent information is the latest-dated one.",
+  "Same election cycle = the row's FEC cycle; election and post-election weeks kept in aligned, flagged (week_position, primary_window).",
+  "Crystal Ball dates parsed only where the file records one (quote text or the ljsYYYYMMDD article slug).",
+  "538 run timestamps carry no time zone; used as recorded; availability compared by calendar date (a run after midnight Monday is not available to that week)."
+ ],
+ "gaps_and_risks": [
+  "Only cycle 2022 has complete pre-election weeks paired after the gate (18 per 538 version per chamber). 2024: Crystal Ball finals dated 2024-11-04, no week_start before election day after that date. 2026: snapshots dated after the last indexed transaction. 2020: money not collected yet; after the 2020 rerun at most 3 House weeks (Oct 12, 19, 26) and 6 Senate weeks (Sep 21 - Oct 26) can pair with 538.",
+  "538's House/Senate fundamentals include a Fundraising component (2020 README): a feedback path from money to the Classic/Deluxe forecasts; per-version weights not held locally.",
+  "CAND_ICI is the FEC's code in cn files downloaded 2026-09-08 (end-of-cycle status), not a status fixed at a forecast origin; 9 linked candidate rows are absent from the same-cycle cn file; 13 have a blank CAND_ICI.",
+  "company_pac channel here is only the index's recipient-side PAC activity ($139,000 House/Senate); the FEC pas2 company-PAC-to-candidate channel is not in 08's population.",
+  "Donor keys are not certified person identities (Mentat's identity_basis); 4.31% of House/Senate gross dollars carry the reported NAME|STATE|ZIP fallback key.",
+  "Committee sheets have no zero-receipt candidates (the index holds only money that exists); a contemporaneous all-candidate universe needs the full FEC candidate files."
+ ],
+ "rerun_for_2020": "after 08 is re-linked with 2019-2020 (new population pin(s), committee_map rows for 2019-2020, fec_cn20 in its sources): python build_09.py, then verify_09.py on the stage, install and a new receipt; the builder reads years, pins, committee map and cn files from 08 at run time and fails closed if 08 and the indexes disagree. A multi-pin (union) population is de-duplicated by facts.source_id; verify_09.py flags multi-pin populations for an update before it can pass.",
+ "glassbox_run_start_event": "evt-20260926T1912432664220Z-0000058240",
+ "receipt_note": "The receipt does not list its own hash."
+}

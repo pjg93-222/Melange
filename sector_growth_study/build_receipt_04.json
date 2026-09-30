@@ -1,0 +1,1889 @@
+{
+ "run_id": "workbook04-build-20260925b",
+ "written_at": "2026-09-25T20:03:23Z",
+ "builder": "sector-growth-build workbook 04 (Claude architect, session ea828b90)",
+ "file": {
+  "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\04_campaign_spending.xlsx",
+  "sha256": "b0de2eda142a234df90282bab87ed465c271e470c80fb8510708cad0809bc406",
+  "size_bytes": 434254,
+  "mtime": "2026-09-25T21:36:04Z"
+ },
+ "sheet_rows": {
+  "data": 4547,
+  "dictionary": 105,
+  "sources": 26,
+  "coverage": 10,
+  "sector_year": 64,
+  "reconcile": 24,
+  "tier_by_year": 1384,
+  "tier_by_cycle": 747,
+  "tier_reconcile": 72
+ },
+ "outcome_definition": "general giving as Mentat defines it: SUM(facts.receipt_cents)/100 where receipt_cents = Amount when Include in Analysis = 'Yes'; all recipient categories",
+ "reconcile": {
+  "summary": "24/24 MATCH",
+  "rows": [
+   {
+    "mentat_industry": "banking",
+    "cycle": "2021-2022",
+    "index_cents": 1665245877,
+    "data_sheet_cents": 1665245877,
+    "discovery_census_cents": 1665245877,
+    "manifest_cents": 1665245877,
+    "payload_expected_cents": 1665245877,
+    "payload_expected_as_stated": 16652458.7700014,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "banking",
+    "cycle": "2023-2024",
+    "index_cents": 2610720416,
+    "data_sheet_cents": 2610720416,
+    "discovery_census_cents": 2610720416,
+    "manifest_cents": 2610720416,
+    "payload_expected_cents": 2610720416,
+    "payload_expected_as_stated": 26107204.1599989,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "banking",
+    "cycle": "2025-2026",
+    "index_cents": 1200318112,
+    "data_sheet_cents": 1200318112,
+    "discovery_census_cents": 1200318112,
+    "manifest_cents": 1200318112,
+    "payload_expected_cents": 1200318112,
+    "payload_expected_as_stated": 12003181.1200005,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "credit_union",
+    "cycle": "2021-2022",
+    "index_cents": 36942316,
+    "data_sheet_cents": 36942316,
+    "discovery_census_cents": 36942316,
+    "manifest_cents": 36942316,
+    "payload_expected_cents": 36942316,
+    "payload_expected_as_stated": 369423.160000002,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "credit_union",
+    "cycle": "2023-2024",
+    "index_cents": 77908835,
+    "data_sheet_cents": 77908835,
+    "discovery_census_cents": 77908835,
+    "manifest_cents": 77908835,
+    "payload_expected_cents": 77908835,
+    "payload_expected_as_stated": 779088.349999998,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "credit_union",
+    "cycle": "2025-2026",
+    "index_cents": 27349414,
+    "data_sheet_cents": 27349414,
+    "discovery_census_cents": 27349414,
+    "manifest_cents": 27349414,
+    "payload_expected_cents": 27349414,
+    "payload_expected_as_stated": 273494.14,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "crypto",
+    "cycle": "2021-2022",
+    "index_cents": 175627334,
+    "data_sheet_cents": 175627334,
+    "discovery_census_cents": 175627334,
+    "manifest_cents": 175627334,
+    "payload_expected_cents": 175627334,
+    "payload_expected_as_stated": 1756273.34,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "crypto",
+    "cycle": "2023-2024",
+    "index_cents": 14546207845,
+    "data_sheet_cents": 14546207845,
+    "discovery_census_cents": 14546207845,
+    "manifest_cents": 14546207845,
+    "payload_expected_cents": 14546207845,
+    "payload_expected_as_stated": 145462078.450002,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "crypto",
+    "cycle": "2025-2026",
+    "index_cents": 10273113138,
+    "data_sheet_cents": 10273113138,
+    "discovery_census_cents": 10273113138,
+    "manifest_cents": 10273113138,
+    "payload_expected_cents": 10273113138,
+    "payload_expected_as_stated": 102731131.38,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "cycle": "2021-2022",
+    "index_cents": 877897926,
+    "data_sheet_cents": 877897926,
+    "discovery_census_cents": 877897926,
+    "manifest_cents": 877897926,
+    "payload_expected_cents": 877897926,
+    "payload_expected_as_stated": 8778979.26000029,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "cycle": "2023-2024",
+    "index_cents": 967752539,
+    "data_sheet_cents": 967752539,
+    "discovery_census_cents": 967752539,
+    "manifest_cents": 967752539,
+    "payload_expected_cents": 967752539,
+    "payload_expected_as_stated": 9677525.39000084,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "credit_arms",
+    "cycle": "2025-2026",
+    "index_cents": 547594060,
+    "data_sheet_cents": 547594060,
+    "discovery_census_cents": 547594060,
+    "manifest_cents": 547594060,
+    "payload_expected_cents": 547594060,
+    "payload_expected_as_stated": 5475940.6000001,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "fintech",
+    "cycle": "2021-2022",
+    "index_cents": 189155966,
+    "data_sheet_cents": 189155966,
+    "discovery_census_cents": 189155966,
+    "manifest_cents": 189155966,
+    "payload_expected_cents": 189155966,
+    "payload_expected_as_stated": 1891559.65999999,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "fintech",
+    "cycle": "2023-2024",
+    "index_cents": 385952456,
+    "data_sheet_cents": 385952456,
+    "discovery_census_cents": 385952456,
+    "manifest_cents": 385952456,
+    "payload_expected_cents": 385952456,
+    "payload_expected_as_stated": 3859524.56000004,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "fintech",
+    "cycle": "2025-2026",
+    "index_cents": 405280709,
+    "data_sheet_cents": 405280709,
+    "discovery_census_cents": 405280709,
+    "manifest_cents": 405280709,
+    "payload_expected_cents": 405280709,
+    "payload_expected_as_stated": 4052807.09,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "cycle": "2021-2022",
+    "index_cents": 524033966,
+    "data_sheet_cents": 524033966,
+    "discovery_census_cents": 524033966,
+    "manifest_cents": 524033966,
+    "payload_expected_cents": 524033966,
+    "payload_expected_as_stated": 5240339.66000002,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "cycle": "2023-2024",
+    "index_cents": 785744542,
+    "data_sheet_cents": 785744542,
+    "discovery_census_cents": 785744542,
+    "manifest_cents": 785744542,
+    "payload_expected_cents": 785744542,
+    "payload_expected_as_stated": 7857445.4200001,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "property_casualty_insurance",
+    "cycle": "2025-2026",
+    "index_cents": 358958051,
+    "data_sheet_cents": 358958051,
+    "discovery_census_cents": 358958051,
+    "manifest_cents": 358958051,
+    "payload_expected_cents": 358958051,
+    "payload_expected_as_stated": 3589580.51000001,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "telecom",
+    "cycle": "2021-2022",
+    "index_cents": 1246387375,
+    "data_sheet_cents": 1246387375,
+    "discovery_census_cents": 1246387375,
+    "manifest_cents": 1246387375,
+    "payload_expected_cents": 1246387375,
+    "payload_expected_as_stated": 12463873.7500038,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "telecom",
+    "cycle": "2023-2024",
+    "index_cents": 1797815389,
+    "data_sheet_cents": 1797815389,
+    "discovery_census_cents": 1797815389,
+    "manifest_cents": 1797815389,
+    "payload_expected_cents": 1797815389,
+    "payload_expected_as_stated": 17978153.8900088,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "telecom",
+    "cycle": "2025-2026",
+    "index_cents": 725609345,
+    "data_sheet_cents": 725609345,
+    "discovery_census_cents": 725609345,
+    "manifest_cents": 725609345,
+    "payload_expected_cents": 725609345,
+    "payload_expected_as_stated": 7256093.45000129,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "community_banks",
+    "cycle": "2021-2022",
+    "index_cents": 22875522,
+    "data_sheet_cents": 22875522,
+    "discovery_census_cents": 22875522,
+    "manifest_cents": 22875522,
+    "payload_expected_cents": 22875522,
+    "payload_expected_as_stated": 228755.22,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "community_banks",
+    "cycle": "2023-2024",
+    "index_cents": 37945503,
+    "data_sheet_cents": 37945503,
+    "discovery_census_cents": 37945503,
+    "manifest_cents": 37945503,
+    "payload_expected_cents": 37945503,
+    "payload_expected_as_stated": 379455.03,
+    "result": "MATCH"
+   },
+   {
+    "mentat_industry": "community_banks",
+    "cycle": "2025-2026",
+    "index_cents": 25529573,
+    "data_sheet_cents": 25529573,
+    "discovery_census_cents": 25529573,
+    "manifest_cents": 25529573,
+    "payload_expected_cents": 25529573,
+    "payload_expected_as_stated": 255295.73,
+    "result": "MATCH"
+   }
+  ]
+ },
+ "tier_checks": {
+  "summary": "72/72 MATCH",
+  "rows": [
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "banking",
+    "period": 2021,
+    "tier_cents": 704351792,
+    "data_cents": 704351792,
+    "tier_gifts": 93960,
+    "data_gifts": 93960,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "banking",
+    "period": 2022,
+    "tier_cents": 960894085,
+    "data_cents": 960894085,
+    "tier_gifts": 121576,
+    "data_gifts": 121576,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "banking",
+    "period": 2023,
+    "tier_cents": 640871729,
+    "data_cents": 640871729,
+    "tier_gifts": 68515,
+    "data_gifts": 68515,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "banking",
+    "period": 2024,
+    "tier_cents": 1969848687,
+    "data_cents": 1969848687,
+    "tier_gifts": 190812,
+    "data_gifts": 190812,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "banking",
+    "period": 2025,
+    "tier_cents": 607001669,
+    "data_cents": 607001669,
+    "tier_gifts": 73713,
+    "data_gifts": 73713,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "banking",
+    "period": 2026,
+    "tier_cents": 593316443,
+    "data_cents": 593316443,
+    "tier_gifts": 43994,
+    "data_gifts": 43994,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "banking",
+    "period": "2021-2022",
+    "tier_cents": 1665245877,
+    "index_cents": 1665245877,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "banking",
+    "period": "2023-2024",
+    "tier_cents": 2610720416,
+    "index_cents": 2610720416,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "banking",
+    "period": "2025-2026",
+    "tier_cents": 1200318112,
+    "index_cents": 1200318112,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_union",
+    "period": 2021,
+    "tier_cents": 14041828,
+    "data_cents": 14041828,
+    "tier_gifts": 3035,
+    "data_gifts": 3035,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_union",
+    "period": 2022,
+    "tier_cents": 22900488,
+    "data_cents": 22900488,
+    "tier_gifts": 4614,
+    "data_gifts": 4614,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_union",
+    "period": 2023,
+    "tier_cents": 28280859,
+    "data_cents": 28280859,
+    "tier_gifts": 2893,
+    "data_gifts": 2893,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_union",
+    "period": 2024,
+    "tier_cents": 49627976,
+    "data_cents": 49627976,
+    "tier_gifts": 11869,
+    "data_gifts": 11869,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_union",
+    "period": 2025,
+    "tier_cents": 20373588,
+    "data_cents": 20373588,
+    "tier_gifts": 3466,
+    "data_gifts": 3466,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_union",
+    "period": 2026,
+    "tier_cents": 6975826,
+    "data_cents": 6975826,
+    "tier_gifts": 1642,
+    "data_gifts": 1642,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "credit_union",
+    "period": "2021-2022",
+    "tier_cents": 36942316,
+    "index_cents": 36942316,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "credit_union",
+    "period": "2023-2024",
+    "tier_cents": 77908835,
+    "index_cents": 77908835,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "credit_union",
+    "period": "2025-2026",
+    "tier_cents": 27349414,
+    "index_cents": 27349414,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "crypto",
+    "period": 2021,
+    "tier_cents": 36608546,
+    "data_cents": 36608546,
+    "tier_gifts": 238,
+    "data_gifts": 238,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "crypto",
+    "period": 2022,
+    "tier_cents": 139018788,
+    "data_cents": 139018788,
+    "tier_gifts": 818,
+    "data_gifts": 818,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "crypto",
+    "period": 2023,
+    "tier_cents": 5795707360,
+    "data_cents": 5795707360,
+    "tier_gifts": 851,
+    "data_gifts": 851,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "crypto",
+    "period": 2024,
+    "tier_cents": 8750500485,
+    "data_cents": 8750500485,
+    "tier_gifts": 2510,
+    "data_gifts": 2510,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "crypto",
+    "period": 2025,
+    "tier_cents": 9437937871,
+    "data_cents": 9437937871,
+    "tier_gifts": 1267,
+    "data_gifts": 1267,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "crypto",
+    "period": 2026,
+    "tier_cents": 835175267,
+    "data_cents": 835175267,
+    "tier_gifts": 589,
+    "data_gifts": 589,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "crypto",
+    "period": "2021-2022",
+    "tier_cents": 175627334,
+    "index_cents": 175627334,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "crypto",
+    "period": "2023-2024",
+    "tier_cents": 14546207845,
+    "index_cents": 14546207845,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "crypto",
+    "period": "2025-2026",
+    "tier_cents": 10273113138,
+    "index_cents": 10273113138,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_arms",
+    "period": 2021,
+    "tier_cents": 507518878,
+    "data_cents": 507518878,
+    "tier_gifts": 94773,
+    "data_gifts": 94773,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_arms",
+    "period": 2022,
+    "tier_cents": 370379048,
+    "data_cents": 370379048,
+    "tier_gifts": 75082,
+    "data_gifts": 75082,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_arms",
+    "period": 2023,
+    "tier_cents": 419691990,
+    "data_cents": 419691990,
+    "tier_gifts": 78424,
+    "data_gifts": 78424,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_arms",
+    "period": 2024,
+    "tier_cents": 548060549,
+    "data_cents": 548060549,
+    "tier_gifts": 94392,
+    "data_gifts": 94392,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_arms",
+    "period": 2025,
+    "tier_cents": 457036809,
+    "data_cents": 457036809,
+    "tier_gifts": 63478,
+    "data_gifts": 63478,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "credit_arms",
+    "period": 2026,
+    "tier_cents": 90557251,
+    "data_cents": 90557251,
+    "tier_gifts": 10421,
+    "data_gifts": 10421,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "credit_arms",
+    "period": "2021-2022",
+    "tier_cents": 877897926,
+    "index_cents": 877897926,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "credit_arms",
+    "period": "2023-2024",
+    "tier_cents": 967752539,
+    "index_cents": 967752539,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "credit_arms",
+    "period": "2025-2026",
+    "tier_cents": 547594060,
+    "index_cents": 547594060,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "fintech",
+    "period": 2021,
+    "tier_cents": 68301865,
+    "data_cents": 68301865,
+    "tier_gifts": 2776,
+    "data_gifts": 2776,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "fintech",
+    "period": 2022,
+    "tier_cents": 120854101,
+    "data_cents": 120854101,
+    "tier_gifts": 4333,
+    "data_gifts": 4333,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "fintech",
+    "period": 2023,
+    "tier_cents": 84303763,
+    "data_cents": 84303763,
+    "tier_gifts": 2260,
+    "data_gifts": 2260,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "fintech",
+    "period": 2024,
+    "tier_cents": 301648693,
+    "data_cents": 301648693,
+    "tier_gifts": 10459,
+    "data_gifts": 10459,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "fintech",
+    "period": 2025,
+    "tier_cents": 196561179,
+    "data_cents": 196561179,
+    "tier_gifts": 3327,
+    "data_gifts": 3327,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "fintech",
+    "period": 2026,
+    "tier_cents": 208719530,
+    "data_cents": 208719530,
+    "tier_gifts": 1746,
+    "data_gifts": 1746,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "fintech",
+    "period": "2021-2022",
+    "tier_cents": 189155966,
+    "index_cents": 189155966,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "fintech",
+    "period": "2023-2024",
+    "tier_cents": 385952456,
+    "index_cents": 385952456,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "fintech",
+    "period": "2025-2026",
+    "tier_cents": 405280709,
+    "index_cents": 405280709,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "property_casualty_insurance",
+    "period": 2021,
+    "tier_cents": 246130747,
+    "data_cents": 246130747,
+    "tier_gifts": 43946,
+    "data_gifts": 43946,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "property_casualty_insurance",
+    "period": 2022,
+    "tier_cents": 277903219,
+    "data_cents": 277903219,
+    "tier_gifts": 55484,
+    "data_gifts": 55484,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "property_casualty_insurance",
+    "period": 2023,
+    "tier_cents": 225357854,
+    "data_cents": 225357854,
+    "tier_gifts": 29188,
+    "data_gifts": 29188,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "property_casualty_insurance",
+    "period": 2024,
+    "tier_cents": 560386688,
+    "data_cents": 560386688,
+    "tier_gifts": 93310,
+    "data_gifts": 93310,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "property_casualty_insurance",
+    "period": 2025,
+    "tier_cents": 238885817,
+    "data_cents": 238885817,
+    "tier_gifts": 39856,
+    "data_gifts": 39856,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "property_casualty_insurance",
+    "period": 2026,
+    "tier_cents": 120072234,
+    "data_cents": 120072234,
+    "tier_gifts": 17055,
+    "data_gifts": 17055,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "property_casualty_insurance",
+    "period": "2021-2022",
+    "tier_cents": 524033966,
+    "index_cents": 524033966,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "property_casualty_insurance",
+    "period": "2023-2024",
+    "tier_cents": 785744542,
+    "index_cents": 785744542,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "property_casualty_insurance",
+    "period": "2025-2026",
+    "tier_cents": 358958051,
+    "index_cents": 358958051,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "telecom",
+    "period": 2021,
+    "tier_cents": 625876326,
+    "data_cents": 625876326,
+    "tier_gifts": 77962,
+    "data_gifts": 77962,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "telecom",
+    "period": 2022,
+    "tier_cents": 620511049,
+    "data_cents": 620511049,
+    "tier_gifts": 101840,
+    "data_gifts": 101840,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "telecom",
+    "period": 2023,
+    "tier_cents": 612909875,
+    "data_cents": 612909875,
+    "tier_gifts": 66614,
+    "data_gifts": 66614,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "telecom",
+    "period": 2024,
+    "tier_cents": 1184905514,
+    "data_cents": 1184905514,
+    "tier_gifts": 141485,
+    "data_gifts": 141485,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "telecom",
+    "period": 2025,
+    "tier_cents": 449407839,
+    "data_cents": 449407839,
+    "tier_gifts": 71281,
+    "data_gifts": 71281,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "telecom",
+    "period": 2026,
+    "tier_cents": 276201506,
+    "data_cents": 276201506,
+    "tier_gifts": 46612,
+    "data_gifts": 46612,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "telecom",
+    "period": "2021-2022",
+    "tier_cents": 1246387375,
+    "index_cents": 1246387375,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "telecom",
+    "period": "2023-2024",
+    "tier_cents": 1797815389,
+    "index_cents": 1797815389,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "telecom",
+    "period": "2025-2026",
+    "tier_cents": 725609345,
+    "index_cents": 725609345,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "community_banks",
+    "period": 2021,
+    "tier_cents": 4364264,
+    "data_cents": 4364264,
+    "tier_gifts": 540,
+    "data_gifts": 540,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "community_banks",
+    "period": 2022,
+    "tier_cents": 18511258,
+    "data_cents": 18511258,
+    "tier_gifts": 804,
+    "data_gifts": 804,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "community_banks",
+    "period": 2023,
+    "tier_cents": 7405093,
+    "data_cents": 7405093,
+    "tier_gifts": 455,
+    "data_gifts": 455,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "community_banks",
+    "period": 2024,
+    "tier_cents": 30540410,
+    "data_cents": 30540410,
+    "tier_gifts": 1368,
+    "data_gifts": 1368,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "community_banks",
+    "period": 2025,
+    "tier_cents": 17486569,
+    "data_cents": 17486569,
+    "tier_gifts": 594,
+    "data_gifts": 594,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_year_vs_data",
+    "mentat_industry": "community_banks",
+    "period": 2026,
+    "tier_cents": 8043004,
+    "data_cents": 8043004,
+    "tier_gifts": 205,
+    "data_gifts": 205,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "community_banks",
+    "period": "2021-2022",
+    "tier_cents": 22875522,
+    "index_cents": 22875522,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "community_banks",
+    "period": "2023-2024",
+    "tier_cents": 37945503,
+    "index_cents": 37945503,
+    "result": "MATCH"
+   },
+   {
+    "check": "tier_by_cycle_vs_index",
+    "mentat_industry": "community_banks",
+    "period": "2025-2026",
+    "tier_cents": 25529573,
+    "index_cents": 25529573,
+    "result": "MATCH"
+   }
+  ]
+ },
+ "tier_coverage": {
+  "tier_by_year": {
+   "banking": "index facts receipt_cents (!= 0) joined by source_id to payload raw_rows employee_tier",
+   "credit_union": "workbook transaction sheets 2021-2022/2023-2024/2025-2026: Analysis Amount where Include in Analysis = Yes, by calendar year of Date",
+   "crypto": "workbook transaction sheets 2021-2022/2023-2024/2025-2026: Analysis Amount where Include in Analysis = Yes, by calendar year of Date",
+   "credit_arms": "index facts receipt_cents (!= 0) joined by source_id to payload raw_rows employee_tier",
+   "fintech": "index facts receipt_cents (!= 0) joined by source_id to payload raw_rows employee_tier",
+   "property_casualty_insurance": "index facts receipt_cents (!= 0) joined by source_id to payload raw_rows employee_tier",
+   "telecom": "index facts receipt_cents (!= 0) joined by source_id to payload raw_rows employee_tier",
+   "community_banks": "index facts receipt_cents (!= 0) joined by source_id to payload raw_rows employee_tier"
+  },
+  "tier_by_cycle": {
+   "banking": "formula_facts",
+   "credit_union": "transaction",
+   "crypto": "transaction",
+   "credit_arms": "formula_facts",
+   "fintech": "transaction",
+   "property_casualty_insurance": "formula_facts",
+   "telecom": "formula_facts",
+   "community_banks": "transaction"
+  }
+ },
+ "tier_crosscheck_payload_vs_workbook": {
+  "banking": {
+   "company_tier_cycle_cells": 106,
+   "cells_differing": 0,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [],
+   "workbook_companies_not_in_index": []
+  },
+  "credit_union": {
+   "company_tier_cycle_cells": 90,
+   "cells_differing": 0,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [],
+   "workbook_companies_not_in_index": []
+  },
+  "crypto": {
+   "company_tier_cycle_cells": 96,
+   "cells_differing": 48,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [
+    "BINANCE US",
+    "Coinlist",
+    "Foris Dax Inc",
+    "Tzero"
+   ],
+   "workbook_companies_not_in_index": [
+    "Binance",
+    "CoinList",
+    "Crypto.com",
+    "tZero"
+   ]
+  },
+  "credit_arms": {
+   "company_tier_cycle_cells": 92,
+   "cells_differing": 0,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [],
+   "workbook_companies_not_in_index": []
+  },
+  "fintech": {
+   "company_tier_cycle_cells": 82,
+   "cells_differing": 0,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [],
+   "workbook_companies_not_in_index": []
+  },
+  "property_casualty_insurance": {
+   "company_tier_cycle_cells": 115,
+   "cells_differing": 0,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [],
+   "workbook_companies_not_in_index": []
+  },
+  "telecom": {
+   "company_tier_cycle_cells": 113,
+   "cells_differing": 0,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [],
+   "workbook_companies_not_in_index": []
+  },
+  "community_banks": {
+   "company_tier_cycle_cells": 77,
+   "cells_differing": 0,
+   "tier_cycle_cells_differing": 0,
+   "index_companies_not_in_workbook": [],
+   "workbook_companies_not_in_index": []
+  }
+ },
+ "verification": {
+  "installed": {
+   "passed": 36,
+   "failed": 0,
+   "checks": [
+    {
+     "check": "no <f> formula elements in any sheet XML",
+     "ok": true,
+     "detail": "0"
+    },
+    {
+     "check": "no comments/drawings parts",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "no formula cells (openpyxl data_only=False)",
+     "ok": true,
+     "detail": "0"
+    },
+    {
+     "check": "sheet names",
+     "ok": true,
+     "detail": "['data', 'dictionary', 'sources', 'coverage', 'sector_year', 'reconcile', 'tier_by_year', 'tier_by_cycle', 'tier_reconcile']"
+    },
+    {
+     "check": "data: every source_id resolves",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sector_year: every source_id resolves",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile: every source_id resolves",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "tier_by_year: every source_id resolves",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "tier_by_cycle: every source_id resolves",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "tier_reconcile: every source_id resolves",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "coverage: every source_id resolves",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "sources: sha256 present for every file <= 300 MiB",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "data: key (year, sector, company, recipient_category, party, funding_source) unique",
+     "ok": true,
+     "detail": "0"
+    },
+    {
+     "check": "data: years are integers 2021-2026",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "data: rows kept only where giving != 0 or gifts > 0",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "data: 2026 partial, 2021-2025 observed",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "data: 2026 real blank, other years real present",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "data: real == nominal x CPI multiplier (exact double)",
+     "ok": true,
+     "detail": "0"
+    },
+    {
+     "check": "data: per industry-year giving and gifts == index extraction",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "data: every group equals the index extraction (cell census)",
+     "ok": true,
+     "detail": "0"
+    },
+    {
+     "check": "sector_year: 8 industries x 2019-2026",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "sector_year: 2019-2020 missing with the approved note",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "sector_year: giving == sum of data rows",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "reconcile: 24 rows (8 industries x 3 cycles)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "reconcile: every row MATCH (recomputed from cells)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "reconcile: index cycle totals == discovery expected_cycle_totals (to the cent)",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "data sheet cycle sums == discovery cycle totals",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "tier_reconcile: every check MATCH",
+     "ok": true,
+     "detail": "[]"
+    },
+    {
+     "check": "tier_by_year: industry-year totals == data sheet (recomputed)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "tier_by_year: key unique",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "tier_by_cycle: industry-cycle totals == data sheet cycle sums (recomputed)",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "coverage: nine study sectors + community_banks",
+     "ok": true,
+     "detail": "set()"
+    },
+    {
+     "check": "coverage: year headers are integers 2019-2026",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "every sheet has a non-empty unique header in row 1",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "check": "data: sector/mentat_industry pairs as specified",
+     "ok": true,
+     "detail": "{('credit_arms', 'credit_arms'), ('property_casualty', 'property_casualty_insurance'), ('credit_unions', 'credit_union'), ('community_banks', 'community_banks'), ('fintech', 'fintech'), ('telecom', 'telecom'), ('commercial_banks', 'banking'), ('crypto', 'crypto')}"
+    },
+    {
+     "check": "data: study_sector_note only on community_banks",
+     "ok": true,
+     "detail": "({'separate available category, not one of the nine study sectors'}, {None})"
+    }
+   ]
+  },
+  "stage": {
+   "passed": 36,
+   "failed": 0,
+   "sha256": "13a86ef6d62de9d04caf481250a73d9225b903215e2c8d81633b72f92de9e9c2"
+  },
+  "negative_control": {
+   "tampered_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\negctl\\tampered_04.xlsx",
+   "tampers": [
+    "data!giving_nominal_usd row 2 +0.01",
+    "reconcile!index_giving_nominal_usd row 3 +0.01",
+    "sector_year!note row 5 = formula '=1+1'",
+    "tier_by_year!source_id row 2 = 'bogus_source'"
+   ],
+   "failed_checks": [
+    "no <f> formula elements in any sheet XML",
+    "no formula cells (openpyxl data_only=False)",
+    "tier_by_year: every source_id resolves",
+    "data: real == nominal x CPI multiplier (exact double)",
+    "data: per industry-year giving and gifts == index extraction",
+    "data: every group equals the index extraction (cell census)",
+    "sector_year: giving == sum of data rows",
+    "reconcile: every row MATCH (recomputed from cells)",
+    "reconcile: index cycle totals == discovery expected_cycle_totals (to the cent)",
+    "data sheet cycle sums == discovery cycle totals",
+    "tier_by_year: industry-year totals == data sheet (recomputed)",
+    "tier_by_cycle: industry-cycle totals == data sheet cycle sums (recomputed)"
+   ],
+   "n_failed": 12
+  }
+ },
+ "install": {
+  "target": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\04_campaign_spending.xlsx",
+  "target_existed_before": true,
+  "prior_meta": {
+   "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\04_campaign_spending.xlsx",
+   "size_bytes": 434225,
+   "mtime": "2026-09-25T19:58:19Z",
+   "mtime_ns": 1790366299260650600,
+   "sha256": "56895439fe37e7b410e45c99105623bc9da6ed2b31ba3720cfae1db94269406e",
+   "sha256_note": ""
+  },
+  "free_before": 50757472256,
+  "stage_sha256": "13a86ef6d62de9d04caf481250a73d9225b903215e2c8d81633b72f92de9e9c2",
+  "installed_sha256": "13a86ef6d62de9d04caf481250a73d9225b903215e2c8d81633b72f92de9e9c2",
+  "bytes_equal": true,
+  "size": 434248
+ },
+ "independent_census_check": {
+  "check": "installed sector_year == discovery census.index.by_calendar_year (giving and gifts), and no 2019-2020 giving in the census",
+  "rows_compared": 48,
+  "differences": 0
+ },
+ "data_rows_dropped_zero_giving_and_zero_gifts": {
+  "banking": 349,
+  "credit_union": 84,
+  "crypto": 55,
+  "credit_arms": 96,
+  "fintech": 90,
+  "property_casualty_insurance": 173,
+  "telecom": 198,
+  "community_banks": 49
+ },
+ "sources": [
+  {
+   "source_id": "idx_banking",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\bb2b2452b4fc14c827c6632ae8b1ecc47444ce835d6e44d6a7d885997424b7d0.sqlite",
+   "zip_member": null,
+   "sha256": null,
+   "size_bytes": 707866624,
+   "mtime": "2026-09-21T18:47:19Z",
+   "rows_read": 849399,
+   "read_at": "2026-09-25T19:53:13Z",
+   "note": "not hashed: larger than 300 MiB; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "idx_credit_union",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\88e3f70252e75c3ebcbefab2096f39687b0f4874420f97f9b63f83e1e4d85bae.sqlite",
+   "zip_member": null,
+   "sha256": "8ef1d494468869019db810e659a966ccdf9b73bd64216bd9d546a943cfe30619",
+   "size_bytes": 56930304,
+   "mtime": "2026-09-21T14:39:37Z",
+   "rows_read": 67169,
+   "read_at": "2026-09-25T19:51:17Z",
+   "note": "sha256 of the byte copy opened mode=ro; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "idx_crypto",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\caaa897c7cbd0425354eedcee62c574a410591fd6bda8a9931f8580184e03844.sqlite",
+   "zip_member": null,
+   "sha256": "c6f1ef6f050f0ecf00e4def0213ba35332baa506ab77ff7d0ec26ddbc460da5b",
+   "size_bytes": 11689984,
+   "mtime": "2026-09-22T14:53:18Z",
+   "rows_read": 14801,
+   "read_at": "2026-09-25T19:51:07Z",
+   "note": "sha256 of the byte copy opened mode=ro; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "idx_credit_arms",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\ba38420fc8c51460f192df48c78542fe66fd650e7dc8eeb8910a1aa5a2c41234.sqlite",
+   "zip_member": null,
+   "sha256": null,
+   "size_bytes": 401338368,
+   "mtime": "2026-09-22T22:47:25Z",
+   "rows_read": 434958,
+   "read_at": "2026-09-25T19:51:56Z",
+   "note": "not hashed: larger than 300 MiB; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "idx_fintech",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\2f9fa3df526b0f27a753943ed615240adf931be93f3223838752b517824ceb65.sqlite",
+   "zip_member": null,
+   "sha256": "4667318c4993a1b69ea9ea55eddfed70f93d170970f4b7635b1dde4f3a384e76",
+   "size_bytes": 68304896,
+   "mtime": "2026-09-22T22:48:35Z",
+   "rows_read": 86270,
+   "read_at": "2026-09-25T19:51:19Z",
+   "note": "sha256 of the byte copy opened mode=ro; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "idx_property_casualty_insurance",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\b9dabba3d54e6550f75fb0a8e4e5e8774ea6d7745d98e20585c5f498569ada34.sqlite",
+   "zip_member": null,
+   "sha256": "d8d3b6db52d9ed9b2b8fdf337adcc51da6a7372745bb9c5467b8f7af32b41209",
+   "size_bytes": 302358528,
+   "mtime": "2026-09-22T22:54:40Z",
+   "rows_read": 360207,
+   "read_at": "2026-09-25T19:51:37Z",
+   "note": "sha256 of the byte copy opened mode=ro; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "idx_telecom",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\6f7acaee8a6e8c5ac34e5d572094a078c85c68c46b1f990c022f3021d2dbc08c.sqlite",
+   "zip_member": null,
+   "sha256": null,
+   "size_bytes": 676626432,
+   "mtime": "2026-09-22T15:50:15Z",
+   "rows_read": 808066,
+   "read_at": "2026-09-25T19:52:24Z",
+   "note": "not hashed: larger than 300 MiB; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "idx_community_banks",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763.sqlite",
+   "zip_member": null,
+   "sha256": "df15235d957fbb44398e6858d4c53b4eac5595244dc9994f29447672db0cc448",
+   "size_bytes": 3899392,
+   "mtime": "2026-09-22T01:20:43Z",
+   "rows_read": 4649,
+   "read_at": "2026-09-25T19:51:17Z",
+   "note": "sha256 of the byte copy opened mode=ro; built analytics index (table facts) the Mentat console reads; copy deleted after reading"
+  },
+  {
+   "source_id": "payload_banking",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\banking\\industry_data-4abdea581b99cec1.json",
+   "zip_member": null,
+   "sha256": null,
+   "size_bytes": 1444548416,
+   "mtime": "2026-09-10T15:56:09Z",
+   "rows_read": 602125,
+   "read_at": "2026-09-25T19:53:13Z",
+   "note": "not hashed: larger than 300 MiB; manifest data_sha256 2156bc823346b10986a371381031e9ac3322d2ace2fbde23163c9d4faec21319; raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "payload_credit_union",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\credit_union\\industry_data-9a7c88ff97fdac51.json",
+   "zip_member": null,
+   "sha256": "f512fb05ab5e902319a356cd277494e811237dc23b7154a6172d2fa84752dcef",
+   "size_bytes": 69828892,
+   "mtime": "2026-07-29T02:52:35Z",
+   "rows_read": 27519,
+   "read_at": "2026-09-25T19:51:17Z",
+   "note": "raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "payload_crypto",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\crypto\\industry_data-371f51e69ba2b9e4.json",
+   "zip_member": null,
+   "sha256": "ff3b40ab72aba97cafe60e29b39903fcab86a43c3539085e099699a1c3744dc1",
+   "size_bytes": 21100196,
+   "mtime": "2026-07-29T01:00:22Z",
+   "rows_read": 6305,
+   "read_at": "2026-09-25T19:51:07Z",
+   "note": "raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "payload_credit_arms",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\credit_arms\\industry_data-ce2d9c6b79da586c.json",
+   "zip_member": null,
+   "sha256": null,
+   "size_bytes": 486683132,
+   "mtime": "2026-07-29T16:27:47Z",
+   "rows_read": 416780,
+   "read_at": "2026-09-25T19:51:56Z",
+   "note": "not hashed: larger than 300 MiB; manifest data_sha256 4da6a44bcead8067a253fabe46a4b12bc7609e448fc9b5cd4bbb1eba2c96154f; raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "payload_fintech",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\fintech\\industry_data-2a9bc0199a9065bd.json",
+   "zip_member": null,
+   "sha256": "a4d2430f02fe9a2e2273bcffc9daf2826d849e9e142375d4e63fe4f4ceeb7fed",
+   "size_bytes": 60140845,
+   "mtime": "2026-07-29T20:27:38Z",
+   "rows_read": 24908,
+   "read_at": "2026-09-25T19:51:19Z",
+   "note": "raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "payload_property_casualty_insurance",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\property_casualty_insurance\\industry_data-712a1080ba38c2bc.json",
+   "zip_member": null,
+   "sha256": null,
+   "size_bytes": 337117949,
+   "mtime": "2026-07-29T15:49:35Z",
+   "rows_read": 278887,
+   "read_at": "2026-09-25T19:51:37Z",
+   "note": "not hashed: larger than 300 MiB; manifest data_sha256 dbc27b4168d0a07df8a9b4246682da4f1bc1a5eddebc04342ef9a922e3e2066a; raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "payload_telecom",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\telecom\\industry_data-34ef41793b3ab4c9.json",
+   "zip_member": null,
+   "sha256": null,
+   "size_bytes": 405066930,
+   "mtime": "2026-07-30T00:46:58Z",
+   "rows_read": 506017,
+   "read_at": "2026-09-25T19:52:24Z",
+   "note": "not hashed: larger than 300 MiB; manifest data_sha256 f37e976021a265f30bfa191e66de344bb68f7cddcc08ec1023aa82a0265c9bd6; raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "payload_community_banks",
+   "absolute_path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\community_banks\\industry_data-42b733201efff954.json",
+   "zip_member": null,
+   "sha256": "32def575daa055e013a79d42118a0dc42fd6d12e80d573904a2ab48dffd922d6",
+   "size_bytes": 17875828,
+   "mtime": "2026-07-29T03:04:02Z",
+   "rows_read": 3966,
+   "read_at": "2026-09-25T19:51:17Z",
+   "note": "raw_rows streamed (employee_tier by source_id)"
+  },
+  {
+   "source_id": "wb_banking",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Banking Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "842ba7a2312ffb03d969e8452c970b32f227fd09befcbf80f935a63c94e97bd3",
+   "size_bytes": 39994686,
+   "mtime": "2026-09-10T18:56:16Z",
+   "rows_read": 20164,
+   "read_at": "2026-09-25T19:52:56Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "wb_credit_union",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Credit Union Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "a6591d397b2bda66ab7827b686e240985dc3b41fa6c53aa486e1def9c764c674",
+   "size_bytes": 15113389,
+   "mtime": "2026-07-29T03:01:37Z",
+   "rows_read": 30499,
+   "read_at": "2026-09-25T19:53:14Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local); Excel lock file ~$ present (workbook open in Excel), bytes unchanged across the read"
+  },
+  {
+   "source_id": "wb_crypto",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Crypto Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "88ea228457b8499d1ec27eeaba967f61505bde842ae0ecfe35c30791c23d66f6",
+   "size_bytes": 5788519,
+   "mtime": "2026-07-31T19:18:31Z",
+   "rows_read": 8302,
+   "read_at": "2026-09-25T19:52:33Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "wb_credit_arms",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Credit Arms Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "3295d02bed012ea9e8e6984ef8809f4ae0c2d0ee71cf0d16d816b418251e5669",
+   "size_bytes": 18648829,
+   "mtime": "2026-07-29T16:35:38Z",
+   "rows_read": 58674,
+   "read_at": "2026-09-25T19:53:25Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "wb_fintech",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Fintech Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "440296fad3606528e648db268cbefa194d5773e5e1992a1fcd57766ee94162af",
+   "size_bytes": 14211321,
+   "mtime": "2026-07-29T20:31:23Z",
+   "rows_read": 27387,
+   "read_at": "2026-09-25T19:53:20Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "wb_property_casualty_insurance",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Property & Casualty Insurance Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "ffed8ec4783dfb84971c35e794182a3bb609d9a907cc8fd639dd24dc2c683683",
+   "size_bytes": 22781912,
+   "mtime": "2026-07-30T04:01:36Z",
+   "rows_read": 45353,
+   "read_at": "2026-09-25T19:53:09Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "wb_telecom",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Telecom Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "40a6ac01a5ad62f0aa166d051aa8bfcfd8b4a35f00dbfa88b32fd7368376282e",
+   "size_bytes": 28459430,
+   "mtime": "2026-07-30T02:00:56Z",
+   "rows_read": 17040,
+   "read_at": "2026-09-25T19:53:01Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "wb_community_banks",
+   "absolute_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Community Banks Industry Spending Overview.xlsx",
+   "zip_member": null,
+   "sha256": "bbe7ee6a0f03957cddc3d14eddfb0f1c0cede0c0f6676f3a071d4817c1a8b348",
+   "size_bytes": 4682775,
+   "mtime": "2026-07-29T23:59:41Z",
+   "rows_read": 6588,
+   "read_at": "2026-09-25T19:53:11Z",
+   "note": "sheets 2021-2022, 2023-2024, 2025-2026 (header row 4) and Beneficiary Summary (header row 5); OneDrive attributes 0x20 (local)"
+  },
+  {
+   "source_id": "cpi_annual_2006_2025",
+   "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\cpi_annual_2006_2025.csv",
+   "zip_member": null,
+   "sha256": "3ab2b1ece1b1c749b0595ca1912145bfd650cd25e75ea92e3e7dee3cea05c239",
+   "size_bytes": 3747,
+   "mtime": "2026-09-25T15:58:35Z",
+   "rows_read": 20,
+   "read_at": "2026-09-25T20:02:53Z",
+   "note": "multiplier_to_2025_dollars"
+  },
+  {
+   "source_id": "discovery_report",
+   "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\evidence\\mentat_data_discovery.json",
+   "zip_member": null,
+   "sha256": "91e170e22f503c773cddfb280bb1631df0ead1049eb56b3c680dbe1a96550c84",
+   "size_bytes": 430064,
+   "mtime": "2026-09-25T19:14:47Z",
+   "rows_read": 8,
+   "read_at": "2026-09-25T20:02:53Z",
+   "note": "Mentat data discovery 2026-09-25 (session e55a3219): index paths and cycle totals for reconcile; companion .md"
+  }
+ ],
+ "side_outputs": {
+  "beneficiary_summary": {
+   "combined_csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_all.csv",
+   "rows": 22733,
+   "sha256": "99f4871b49d25fd27421c652bb9c2acd3bfafd6f3d0b57cb639a308ab3510279",
+   "rows_by_industry": {
+    "banking": 3300,
+    "credit_union": 2980,
+    "crypto": 1997,
+    "credit_arms": 3026,
+    "fintech": 2479,
+    "property_casualty_insurance": 3170,
+    "telecom": 3159,
+    "community_banks": 2622
+   },
+   "per_industry": {
+    "banking": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_banking.csv",
+     "sha256": "fc8430277a2c0730303c64654218424ea8bf9152a4cd7fc1e93a81127eea039e"
+    },
+    "credit_union": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_credit_union.csv",
+     "sha256": "d2be10efb851e2653ff28d5b442a30c9a7ddea7d27a9350576e9942e819b1306"
+    },
+    "crypto": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_crypto.csv",
+     "sha256": "bc636a58f69d0cc6de499061c8d33d036ca1148ed25684cec0ed69399f600f9d"
+    },
+    "credit_arms": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_credit_arms.csv",
+     "sha256": "d9592e8fd9b6f5c597767cd9550b773f97f8e68967e9592f678b55ba5ab8e3d7"
+    },
+    "fintech": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_fintech.csv",
+     "sha256": "d37e2e59963fe03b0d467745f0ff1a603fabe5dd5b6cab83247faa94b08f352c"
+    },
+    "property_casualty_insurance": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_property_casualty_insurance.csv",
+     "sha256": "82ebcbddf069e51953ae2b77550479bc33e85ab6c347402fe7cb6750affd1669"
+    },
+    "telecom": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_telecom.csv",
+     "sha256": "59f7cf33c3ffac411f24c369eadc807d08e7dc4b33599b15253ca02fe8c08e27"
+    },
+    "community_banks": {
+     "csv": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\extract\\beneficiary_summary_community_banks.csv",
+     "sha256": "d6202287cc723aaffa9f30ecb9a11c9e0e73d6edf3296164134a5eee42d78aa3"
+    }
+   },
+   "note": "header row 5, all columns, verbatim; UTF-8 without BOM; combined file names the one industry-specific column 'Associated Industry Funding'"
+  }
+ },
+ "gaps": [
+  "2019-2020: missing for every industry (no 2020 cycle in any index; cycle 2020 not yet collected; Mentat collection of 2020 approved 2026-09-25). Source DBs hold a few 2020-dated rows that Mentat drops by design (contribution_data.py:512); they are not used.",
+  "life_insurance and auto_manufacturing (study_sector codes of sector_crosswalk.xlsx): no Mentat spending workbook or index; coverage rows are 'missing' for 2019-2026.",
+  "2026 partial: max transaction date per index = banking 2026-08-18, credit_union 2026-06-30, crypto 2026-06-29, credit_arms 2026-06-30, fintech 2026-06-30, property_casualty_insurance 2026-07-15, telecom 2026-07-12, community_banks 2026-06-30.",
+  "Crypto company labels differ between the index (data sheet) and the workbook (tier sheets) for 4 companies: BINANCE US = Binance, Coinlist = CoinList, Foris Dax Inc = Crypto.com, Tzero = tZero (amounts equal per cycle for each pair; tier x cycle totals equal). Labels are kept as each source states them.",
+  "Blank Employee Tier within general giving: none (payload rows with a blank tier exist: banking 9406, crypto 32, credit_arms 21, fintech 6, property_casualty_insurance 27, telecom 28; none of them joins to a fact with receipt_cents != 0, so none enters the outcome).",
+  "sha256 not computed for files larger than 300 MiB: idx_banking, idx_credit_arms, idx_telecom and payload_banking, payload_credit_arms, payload_property_casualty_insurance, payload_telecom (sizes/mtimes recorded; payload manifests' data_sha256 quoted in the sources note).",
+  "donors = distinct Mentat contributor_key (report person key, else reported name/state/ZIP); not certified distinct people."
+ ],
+ "notes": [
+  "Sector keys: `sector` holds the study code (commercial_banks, credit_unions, crypto, credit_arms, fintech, property_casualty, telecom, community_banks) and `mentat_industry` the Mentat slug (banking, credit_union, crypto, credit_arms, fintech, property_casualty_insurance, telecom, community_banks), matching the study_sector / mentat_industry columns of sector_crosswalk.xlsx as rebuilt 2026-09-25 16:01 by the nine-sector lane. That lane's 06/07 now name the study code `study_sector` and keep the source label in `sector`; this workbook follows the brief and names the study code `sector`.",
+  "Extra sheet `tier_reconcile` (not named in the brief) holds the step 4/5 checks so that `reconcile` holds only the step 3 cycle reconciliation.",
+  "tier_by_year: credit_union and crypto from the workbook transaction sheets (as briefed); the other six industries from the payload raw_rows employee_tier joined by source_id to the index facts (every nonzero fact found a payload row; amounts, inclusion and company agree on every joined row except 199 crypto company labels). The Telecom payload is compacted without dates, so the join supplies the year.",
+  "tier_by_cycle: Formula Facts workbooks (banking, credit_arms, property_casualty_insurance, telecom) use Fact Type = Master rows; transaction workbooks (community_banks, credit_union, crypto, fintech) use Analysis Amount where Include in Analysis = Yes. Every workbook read had cached values (0 empty Analysis Amount cells) and Analysis Amount = Amount on every included row.",
+  "Cross-check (report only): company x tier x cycle totals from the payload join equal the workbook cycle sheets exactly for 7 industries; crypto differs only by the 4 company labels above.",
+  "Credit Union workbook had an Excel lock file (~$...) present, i.e. it was open in Excel; the on-disk bytes were read and were unchanged (sha256 and mtime) across the read.",
+  "Numbers are written with repr() (same serializer override as the study's build_workbooks.py) so real values round-trip exactly; the verifier recomputes nominal x multiplier as an exact double.",
+  "The negative control's extra failure 'real == nominal x CPI multiplier (697 rows)' is caused by openpyxl's default '%.16g' serializer used to save the tampered copy, not by a tamper; it shows the exact-double check has teeth.",
+  "2026-09-25 amendment workbook04-rename-20260925: the study-code column is now named `study_sector` in every sheet and in the dictionary (Paul's uniform-column ruling). The first note above describes the original build, when the column was named `sector`; the file hash above is the renamed file."
+ ],
+ "scripts": [
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\gb.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\common.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\index_extract.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\wb_extract.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\build_04.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\verify_04.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\negctl_and_install.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\combine_beneficiary.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\crosscheck_tiers.py",
+  "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\spending\\report_04.py"
+ ],
+ "study_folder_writes": [
+  "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\04_campaign_spending.xlsx",
+  "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\build_receipt_04.json"
+ ],
+ "receipt_note": "The receipt does not list its own hash.",
+ "rewritten_at": "2026-09-25T21:36:06Z",
+ "amendments": [
+  {
+   "run_id": "workbook04-rename-20260925",
+   "at": "2026-09-25T21:36:06Z",
+   "by": "sector-growth analysis lane (Claude architect, session ea828b90), on Paul's ruling (uniform column name)",
+   "change": "renamed the study-sector column `sector` to `study_sector` in every sheet that had it (data, coverage, sector_year, reconcile, tier_by_year, tier_by_cycle, tier_reconcile) and in the dictionary (the `column` cell of the 7 rows documenting it). Nothing else changed: same sheets, rows, columns and values.",
+   "method": "byte-level edit of the 14 inline-string cells whose text was exactly 'sector' (<is><t>sector</t></is> -> <is><t>study_sector</t></is>); every other zip member rewritten with identical uncompressed content; numbers untouched (their XML text is unchanged, so the exact repr() values of the original build are preserved)",
+   "cells_changed": 14,
+   "cells_changed_by_member": {
+    "xl/worksheets/sheet1.xml": 1,
+    "xl/worksheets/sheet2.xml": 7,
+    "xl/worksheets/sheet4.xml": 1,
+    "xl/worksheets/sheet5.xml": 1,
+    "xl/worksheets/sheet6.xml": 1,
+    "xl/worksheets/sheet7.xml": 1,
+    "xl/worksheets/sheet8.xml": 1,
+    "xl/worksheets/sheet9.xml": 1
+   },
+   "previous_file": {
+    "sha256": "13a86ef6d62de9d04caf481250a73d9225b903215e2c8d81633b72f92de9e9c2",
+    "size_bytes": 434248,
+    "mtime": "2026-09-25T20:03:04Z"
+   },
+   "previous_file_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\04_pre_rename\\04_campaign_spending.xlsx",
+   "previous_receipt_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\04_pre_rename\\build_receipt_04.json",
+   "new_sha256": "b0de2eda142a234df90282bab87ed465c271e470c80fb8510708cad0809bc406",
+   "not_changed": [
+    "the study_sector_note column keeps its name",
+    "definition texts in the dictionary",
+    "the historical 'verification' block and 'notes' of the original build (they describe the file as built, with the column then named `sector`)"
+   ],
+   "verification": {
+    "stage": {
+     "passed": 31,
+     "failed": 0,
+     "sha256": "b0de2eda142a234df90282bab87ed465c271e470c80fb8510708cad0809bc406"
+    },
+    "installed": {
+     "passed": 31,
+     "failed": 0,
+     "checks": [
+      {
+       "check": "no <f> formula elements in any sheet XML",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "no comments/drawings parts",
+       "ok": true,
+       "detail": ""
+      },
+      {
+       "check": "no formula-like text cells (value starting with '=')",
+       "ok": true,
+       "detail": 0
+      },
+      {
+       "check": "sheet names and order unchanged",
+       "ok": true,
+       "detail": "['data', 'dictionary', 'sources', 'coverage', 'sector_year', 'reconcile', 'tier_by_year', 'tier_by_cycle', 'tier_reconcile']"
+      },
+      {
+       "check": "same sheets, rows and columns as the old file",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "exactly 14 cells changed, each 'sector' -> 'study_sector'",
+       "ok": true,
+       "detail": "14 differing cells; 14 are the rename"
+      },
+      {
+       "check": "renamed header cells: row 1 of the 7 sheets that had `sector`",
+       "ok": true,
+       "detail": "['coverage', 'data', 'reconcile', 'sector_year', 'tier_by_cycle', 'tier_by_year', 'tier_reconcile']"
+      },
+      {
+       "check": "renamed dictionary cells: the `column` cell of the 7 rows that named `sector`",
+       "ok": true,
+       "detail": "[(2, 2), (17, 2), (32, 2), (47, 2), (61, 2), (82, 2), (86, 2)]"
+      },
+      {
+       "check": "no sheet header names `sector` any more",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "`study_sector` header present in the 7 sheets",
+       "ok": true,
+       "detail": ""
+      },
+      {
+       "check": "dictionary: no row documents a column `sector`",
+       "ok": true,
+       "detail": ""
+      },
+      {
+       "check": "dictionary: 7 rows document `study_sector`, one per renamed sheet",
+       "ok": true,
+       "detail": ""
+      },
+      {
+       "check": "data: key (year, study_sector, company, recipient_category, party, funding_source) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year: key (study_sector, year) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "tier_by_year: key (year, study_sector, company, employee_tier) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "tier_by_cycle: key (fec_cycle, study_sector, company, employee_tier) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "reconcile: key (study_sector, mentat_industry, fec_cycle) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "coverage: key (study_sector) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "tier_reconcile: key (check, study_sector, period) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sources: key (source_id) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "dictionary: key (sheet, column) unique",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "data: every source_id resolves",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "sector_year: every source_id resolves",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "reconcile: every source_id resolves",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "tier_by_year: every source_id resolves",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "tier_by_cycle: every source_id resolves",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "tier_reconcile: every source_id resolves",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "coverage: every source_id resolves",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "reconcile: every row MATCH (recomputed from cells and from the data sheet), 24 rows",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "tier_reconcile: every check MATCH",
+       "ok": true,
+       "detail": "[]"
+      },
+      {
+       "check": "row counts equal the receipt's sheet_rows",
+       "ok": true,
+       "detail": ""
+      }
+     ]
+    },
+    "installed_bytes_equal_stage": true
+   },
+   "script": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\run2\\rename04.py"
+  }
+ ]
+}

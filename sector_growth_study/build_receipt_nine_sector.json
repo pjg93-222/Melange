@@ -1,0 +1,775 @@
+{
+  "run_id": "nine-sector-update-20260925",
+  "receipt_written_at": "2026-09-25T20:01:25Z",
+  "target_root": "C:\\Users\\pgoff\\Mentat\\sector_growth_study",
+  "stage": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\nine_sector\\stage\\attempt_20260925T200123Z_37048",
+  "plan": "C:\\Users\\pgoff\\Downloads\\Sector_Growth_and_Political_Spending_Research_Plan.md",
+  "scripts": {
+    "build_nine_sector.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\nine_sector\\build_nine_sector.py",
+      "sha256": "2e7aac44377bb9e9b184354ff72db676e97dce13b3e471d18d8cc9123913db89"
+    },
+    "verify_step1.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\nine_sector\\verify_step1.py",
+      "sha256": "47b4f035fd2d1d46eedc2fc9ddad3bd1f3feb8d9881682db7b6bf571c20cd77d"
+    },
+    "check_expected_control.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\nine_sector\\check_expected_control.py",
+      "sha256": "0e3c28aa7321df5767a33216606be4e5833e074895e0d35fbbe4647353f819ca"
+    },
+    "gb.py": {
+      "path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\build\\nine_sector\\gb.py",
+      "sha256": "be15780575d291b958ba8b46d2479ca63e4389d3a0a2df88e38c40e29a116940"
+    }
+  },
+  "files": [
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\README.md",
+      "relative_path": "README.md",
+      "sha256": "e61839d329ae2da9c233b1a5629ac4c5cc720477d7b0fbc176409c53fee4c3ff",
+      "size_bytes": 12306
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\02_election_forecasting.xlsx",
+      "relative_path": "data/02_election_forecasting.xlsx",
+      "sha256": "2ec5fad6d8f42e258c8faf72098f7ca930947760551cfebd5fe31ddb2195ccc2",
+      "size_bytes": 22720,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 36,
+          "columns": 11
+        },
+        {
+          "name": "seat_calls",
+          "rows": 24,
+          "columns": 14
+        },
+        {
+          "name": "current_2026",
+          "rows": 8,
+          "columns": 29
+        },
+        {
+          "name": "notes",
+          "rows": 7,
+          "columns": 8
+        },
+        {
+          "name": "dictionary",
+          "rows": 74,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 12,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 10,
+          "columns": 28
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\06_predicted_industry_growth.xlsx",
+      "relative_path": "data/06_predicted_industry_growth.xlsx",
+      "sha256": "6ee67a899b018a32340730da8181a2f1a626e8ea520d28c03af07eb76605a71c",
+      "size_bytes": 62228,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 162,
+          "columns": 24
+        },
+        {
+          "name": "supplemental_observations",
+          "rows": 12,
+          "columns": 17
+        },
+        {
+          "name": "component_forecasts",
+          "rows": 35,
+          "columns": 81
+        },
+        {
+          "name": "verification",
+          "rows": 162,
+          "columns": 11
+        },
+        {
+          "name": "dictionary",
+          "rows": 143,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 8,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 9,
+          "columns": 19
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\07_actual_industry_growth.xlsx",
+      "relative_path": "data/07_actual_industry_growth.xlsx",
+      "sha256": "996b89e079671a84cdb330f786670f2ded7b5bf3f1e0c81b74ef5c0c36a7a0a1",
+      "size_bytes": 24237,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 150,
+          "columns": 19
+        },
+        {
+          "name": "dictionary",
+          "rows": 29,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 9,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 11,
+          "columns": 21
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\sector_crosswalk.xlsx",
+      "relative_path": "data/sector_crosswalk.xlsx",
+      "sha256": "a3e6c15b6ac58425cac4a336ae19f24113e7a465b548553437c58d5847624494",
+      "size_bytes": 10659,
+      "sheets": [
+        {
+          "name": "data",
+          "rows": 10,
+          "columns": 10
+        },
+        {
+          "name": "dictionary",
+          "rows": 24,
+          "columns": 6
+        },
+        {
+          "name": "sources",
+          "rows": 5,
+          "columns": 8
+        },
+        {
+          "name": "coverage",
+          "rows": 10,
+          "columns": 6
+        }
+      ]
+    }
+  ],
+  "superseded": [
+    {
+      "file": "README.md",
+      "superseded_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\README.md",
+      "sha256": "dbdafc52df34c629c0bab172d6d4682436b4ce8266c4a7501d3a32246bb12841",
+      "size_bytes": 6421
+    },
+    {
+      "file": "data/02_election_forecasting.xlsx",
+      "superseded_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\02_election_forecasting.xlsx",
+      "sha256": "dd51787d565f241de18affdb6ddf417807c7f358a8e7fcbba604965e6143ccfe",
+      "size_bytes": 20566
+    },
+    {
+      "file": "data/06_predicted_industry_growth.xlsx",
+      "superseded_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\06_predicted_industry_growth.xlsx",
+      "sha256": "5e38349c24e8ebb5fc37a067ea8c0d956572a5dffa50f5f64bd18ac47c4c2ac2",
+      "size_bytes": 20441
+    },
+    {
+      "file": "data/07_actual_industry_growth.xlsx",
+      "superseded_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\07_actual_industry_growth.xlsx",
+      "sha256": "69d7cc131d7b585b00bb37c2864a3fd60eacc62c04007628a5fd599dcdb8745a",
+      "size_bytes": 13182
+    },
+    {
+      "file": "data/sector_crosswalk.xlsx",
+      "superseded_copy": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\ea828b90-c616-4dc3-b733-93088defe7fe\\scratchpad\\superseded\\sector_crosswalk.xlsx",
+      "sha256": "fda1c9fe78422efec7ba4e9ec2a2e71ebd9d98edb091048d20a925c12a98d8d5",
+      "size_bytes": 6618
+    }
+  ],
+  "unchanged_files": [
+    {
+      "relative_path": "data/00_controls.xlsx",
+      "sha256": "253aaadd6912862df817f51c9d97225735b5f8a764cac64deca40f224d1ab80e"
+    },
+    {
+      "relative_path": "data/01_lobbying_expenditures.xlsx",
+      "sha256": "f06421a643d67fef687da2bcc85a5b7ad55d56f04fbc5259efa9d53890c67e35"
+    },
+    {
+      "relative_path": "data/03_actual_seat_gain.xlsx",
+      "sha256": "d7181b61556be66a6dd7f8e6de94bc72aecb5227614de5cbcb80a6d0e54b792a"
+    }
+  ],
+  "never_touched": [
+    "04_campaign_spending.xlsx",
+    "build_receipt_04.json"
+  ],
+  "sources": {
+    "predicted_industry_growth_nine_sectors_2008_2025": {
+      "source_id": "predicted_industry_growth_nine_sectors_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\predicted_industry_growth_nine_sectors_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "b3ccf6c8dee79df6a6b7b370632e0480c3281fb63928973038f6c26e3cca15b1",
+      "size_bytes": 65947,
+      "mtime": "2026-09-25T19:26:44Z",
+      "rows_read": 162,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "additional_forecast_observations": {
+      "source_id": "additional_forecast_observations",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\forecast_gap_recheck\\additional_forecast_observations.csv",
+      "zip_member": null,
+      "sha256": "4752a5ff247844de55b62951f889a77378bb9f61063450c2c8e0cd8b2b606d59",
+      "size_bytes": 8600,
+      "mtime": "2026-09-25T19:00:46Z",
+      "rows_read": 12,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "telecom_component_selected_forecasts_2008_2025": {
+      "source_id": "telecom_component_selected_forecasts_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\telecom_ibis\\telecom_component_selected_forecasts_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "b2d8e18d12cbcdf4d5254666013cd3e9f6a32abd9ae4146464f06d5b714b297e",
+      "size_bytes": 49218,
+      "mtime": "2026-09-25T19:26:42Z",
+      "rows_read": 32,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "fintech_broad_multiyear_revenue_forecasts": {
+      "source_id": "fintech_broad_multiyear_revenue_forecasts",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\fintech\\fintech_broad_multiyear_revenue_forecasts.csv",
+      "zip_member": null,
+      "sha256": "ace0527f35f2ae6041565cd3c60ab01cc27fc25f2158e38c067877fbb1e4c16f",
+      "size_bytes": 2859,
+      "mtime": "2026-09-25T19:26:43Z",
+      "rows_read": 2,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "fintech_component_forecast_observations": {
+      "source_id": "fintech_component_forecast_observations",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\fintech\\fintech_component_forecast_observations.csv",
+      "zip_member": null,
+      "sha256": "4004560197cfa03d0fa7addb436cb06f5ee83a3663752706edfa61790544d214",
+      "size_bytes": 1082,
+      "mtime": "2026-09-25T19:26:43Z",
+      "rows_read": 1,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "predicted_industry_growth_2008_2025": {
+      "source_id": "predicted_industry_growth_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\predicted_industry_growth_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "624a6735c6f2afdf88daf5d1546770cc782fc424fca3b41234727edd6d1e49be",
+      "size_bytes": 32855,
+      "mtime": "2026-09-25T19:02:17Z",
+      "rows_read": 90,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "predicted_growth_verify_json": {
+      "source_id": "predicted_growth_verify_json",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\evidence\\predicted_growth_verify.json",
+      "zip_member": null,
+      "sha256": "f21566d08599fc3175a3484ed52808aeff7ebc078f2e705c4c20ea70693d784d",
+      "size_bytes": 915690,
+      "mtime": "2026-09-25T19:14:27Z",
+      "rows_read": 90,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "predicted_growth_verify_md": {
+      "source_id": "predicted_growth_verify_md",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\evidence\\predicted_growth_verify.md",
+      "zip_member": null,
+      "sha256": "e4003169f8a992072939140bb5c0e0a007e1bb8a5fbdb8ea6396b09bc9b5fdb0",
+      "size_bytes": 124005,
+      "mtime": "2026-09-25T19:14:27Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "industry_growth_ibisworld": {
+      "source_id": "industry_growth_ibisworld",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\industry_growth_ibisworld.csv",
+      "zip_member": null,
+      "sha256": "812df2f3e6941b4eabd7e4370bbd4a88614d3b1a761f48849d1030bc1b36bdd3",
+      "size_bytes": 12398,
+      "mtime": "2026-09-25T16:04:21Z",
+      "rows_read": 78,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_52222_2024_07_key_statistics": {
+      "source_id": "ibis_52222_2024_07_key_statistics",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\credit_arms\\extracted_evidence\\2024_07_52222.json",
+      "zip_member": null,
+      "sha256": "7ffcff3995234250d0346dcfd5b64b07c0c0ec600d3bd7fc9a8ddf1037510025",
+      "size_bytes": 3819,
+      "mtime": "2026-09-25T19:16:29Z",
+      "rows_read": 27,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_52222_2024_07_pdf": {
+      "source_id": "ibis_52222_2024_07_pdf",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\credit_arms\\source_pdfs\\2024_07_52222.pdf",
+      "zip_member": null,
+      "sha256": "fc6f3f0f41d8ae9aed58f60c6e1a46a4dcca455936aa560d1e192910550d2b1e",
+      "size_bytes": 3793374,
+      "mtime": "2026-09-25T19:13:43Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_52412_2024_11_key_statistics": {
+      "source_id": "ibis_52412_2024_11_key_statistics",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\property_casualty\\extracted_evidence\\2024_11_52412.json",
+      "zip_member": null,
+      "sha256": "e9ed0de0cf875a9dea64f2c900a1ae5f66786101f58f3cab5568573dedd04659",
+      "size_bytes": 3876,
+      "mtime": "2026-09-25T19:14:48Z",
+      "rows_read": 27,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_52412_2024_11_pdf": {
+      "source_id": "ibis_52412_2024_11_pdf",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\property_casualty\\source_pdfs\\2024_11_52412.pdf",
+      "zip_member": null,
+      "sha256": "f484c65f2afbbdc8514eca2bac4f9d6d49f6bb689547d60e9519d0121f3b3b21",
+      "size_bytes": 3755323,
+      "mtime": "2026-09-25T19:12:35Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_51721_2024_10_key_statistics": {
+      "source_id": "ibis_51721_2024_10_key_statistics",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\telecom_ibis\\extracted_evidence\\2024_10_51721.json",
+      "zip_member": null,
+      "sha256": "87f74a74f4069e96a5e599a2529a4fcdfad270b7b84574474adc4fd37b1d77f8",
+      "size_bytes": 3737,
+      "mtime": "2026-09-25T19:20:58Z",
+      "rows_read": 26,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_51721_2024_10_pdf": {
+      "source_id": "ibis_51721_2024_10_pdf",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\telecom_ibis\\source_pdfs\\2024_10_51721.pdf",
+      "zip_member": null,
+      "sha256": "62c696e04ca8ea793c28fa2014a277a4fbe36a81260f039c09c8f5a908c1725f",
+      "size_bytes": 3842054,
+      "mtime": "2026-09-25T19:15:15Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_51711a_2024_12_key_statistics": {
+      "source_id": "ibis_51711a_2024_12_key_statistics",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\telecom_ibis\\extracted_evidence\\2024_12_51711a.json",
+      "zip_member": null,
+      "sha256": "97ec3b2091c6945e88ad3185bfe60354ff1f29ee7155c418038ced61df2415c6",
+      "size_bytes": 6309,
+      "mtime": "2026-09-25T19:23:28Z",
+      "rows_read": 26,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "ibis_51711a_2024_12_pdf": {
+      "source_id": "ibis_51711a_2024_12_pdf",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\telecom_ibis\\source_pdfs\\2024_12_51711a.pdf",
+      "zip_member": null,
+      "sha256": "76022804644ee64074204c45aaab4f9b37b21dd9a2a8afb4d1a5273947354f3f",
+      "size_bytes": 348236,
+      "mtime": "2026-09-25T19:16:05Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "research_plan_20260925_1522": {
+      "source_id": "research_plan_20260925_1522",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Growth_and_Political_Spending_Research_Plan.md",
+      "zip_member": null,
+      "sha256": "0ff21bb9309bfccf0150a63f30a0253358a5e50541fd116dc5a6b1c2372ea974",
+      "size_bytes": 30056,
+      "mtime": "2026-09-25T19:22:25Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "champions_boards": {
+      "source_id": "champions_boards",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\derived\\champions_v2\\boards.json",
+      "zip_member": null,
+      "sha256": "36141a8d0fcb8c4fa7962873fbb09ab79a985caf5f9969b43595209025f0c17c",
+      "size_bytes": 266117,
+      "mtime": "2026-09-20T19:44:35Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "sector_source_mappings": {
+      "source_id": "sector_source_mappings",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\expanded_sectors\\sector_source_mappings.json",
+      "zip_member": null,
+      "sha256": "c14c7891d7d432e82906b1950b349d3ea35253b5532a04455192b63e343fc763",
+      "size_bytes": 6956,
+      "mtime": "2026-09-25T19:26:05Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "mentat_data_discovery": {
+      "source_id": "mentat_data_discovery",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-sector-growth-political-spending-9cc0c8\\e55a3219-4c76-4359-84c4-d99e6bbc15cf\\scratchpad\\evidence\\mentat_data_discovery.md",
+      "zip_member": null,
+      "sha256": "bc24a14e39ac2d92be0854c2bb553c206a6266d79a40a42fb943aa20dc5869b7",
+      "size_bytes": 164049,
+      "mtime": "2026-09-25T19:14:47Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "lda_sector_spend_csv": {
+      "source_id": "lda_sector_spend_csv",
+      "absolute_path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\derived\\sector_spend\\sector_spend.csv",
+      "zip_member": null,
+      "sha256": "22d1ab59d1c9282ab34d58294ebc1379357d2a9c6cd85b305fb6c0fbe901a56c",
+      "size_bytes": 19421,
+      "mtime": "2026-08-06T21:23:14Z",
+      "rows_read": 120,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "annual_controls_2008_2025": {
+      "source_id": "annual_controls_2008_2025",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\Sector_Research_Source_Check_2026-09-25\\annual_controls_2008_2025.csv",
+      "zip_member": null,
+      "sha256": "ad336dea332fecdd2bbafdc2077bfde746001a0a1e2a2fca5b2f8ba432cd9ab3",
+      "size_bytes": 1338,
+      "mtime": "2026-09-25T16:04:21Z",
+      "rows_read": 18,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "hsc_zip": {
+      "source_id": "hsc_zip",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": null,
+      "sha256": "852d894f3ef2d7fe0aa45e319013bf9a0f2388596759f66c71e06925663f67d2",
+      "size_bytes": 586840,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "hsc_annual_summary": {
+      "source_id": "hsc_annual_summary",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "annual_summary.csv",
+      "sha256": "82fdb6996980b8373c9cb362258bd739e3d6a85167733c217b5d733ecb1c4608",
+      "size_bytes": 8451,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 50,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "hsc_daily_control_probabilities": {
+      "source_id": "hsc_daily_control_probabilities",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_CSV.zip",
+      "zip_member": "daily_control_probabilities.csv",
+      "sha256": "56fda6f518df3adc696e0ca7d95b088cea0abb8ed350b5c38b5c1d2e1102b662",
+      "size_bytes": 1895264,
+      "mtime": "2026-09-25T15:55:09Z",
+      "rows_read": 16756,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "iem_workbook_2002_2022_1": {
+      "source_id": "iem_workbook_2002_2022_1",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_IEM_2002-2022_1.xlsx",
+      "zip_member": null,
+      "sha256": "2b7ca456daa07669b301e04b299b35369433542189149ea229e51dc37a44268c",
+      "size_bytes": 2812983,
+      "mtime": "2026-09-25T15:55:07Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    },
+    "iem_workbook_2002_2022": {
+      "source_id": "iem_workbook_2002_2022",
+      "absolute_path": "C:\\Users\\pgoff\\Downloads\\House_Senate_Control_Forecasts_IEM_2002-2022.xlsx",
+      "zip_member": null,
+      "sha256": "7bdea74f028a3b76f099b385fd6fcaeabe98e0473d0a3fed8d7b1196653595d3",
+      "size_bytes": 2782695,
+      "mtime": "2026-09-25T04:26:51Z",
+      "rows_read": null,
+      "read_at": "2026-09-25T20:01:23Z"
+    }
+  },
+  "stage_checks": {
+    "02_election_forecasting.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 36,
+          "columns": 11
+        },
+        "seat_calls": {
+          "rows": 24,
+          "columns": 14
+        },
+        "current_2026": {
+          "rows": 8,
+          "columns": 29
+        },
+        "notes": {
+          "rows": 7,
+          "columns": 8
+        },
+        "dictionary": {
+          "rows": 74,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 12,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 10,
+          "columns": 28
+        }
+      },
+      "failures": []
+    },
+    "06_predicted_industry_growth.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 162,
+          "columns": 24
+        },
+        "supplemental_observations": {
+          "rows": 12,
+          "columns": 17
+        },
+        "component_forecasts": {
+          "rows": 35,
+          "columns": 81
+        },
+        "verification": {
+          "rows": 162,
+          "columns": 11
+        },
+        "dictionary": {
+          "rows": 143,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 8,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 9,
+          "columns": 19
+        }
+      },
+      "failures": []
+    },
+    "07_actual_industry_growth.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 150,
+          "columns": 19
+        },
+        "dictionary": {
+          "rows": 29,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 9,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 11,
+          "columns": 21
+        }
+      },
+      "failures": []
+    },
+    "sector_crosswalk.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 10,
+          "columns": 10
+        },
+        "dictionary": {
+          "rows": 24,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 5,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 10,
+          "columns": 6
+        }
+      },
+      "failures": []
+    }
+  },
+  "installed_checks": {
+    "02_election_forecasting.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 36,
+          "columns": 11
+        },
+        "seat_calls": {
+          "rows": 24,
+          "columns": 14
+        },
+        "current_2026": {
+          "rows": 8,
+          "columns": 29
+        },
+        "notes": {
+          "rows": 7,
+          "columns": 8
+        },
+        "dictionary": {
+          "rows": 74,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 12,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 10,
+          "columns": 28
+        }
+      },
+      "failures": []
+    },
+    "06_predicted_industry_growth.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 162,
+          "columns": 24
+        },
+        "supplemental_observations": {
+          "rows": 12,
+          "columns": 17
+        },
+        "component_forecasts": {
+          "rows": 35,
+          "columns": 81
+        },
+        "verification": {
+          "rows": 162,
+          "columns": 11
+        },
+        "dictionary": {
+          "rows": 143,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 8,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 9,
+          "columns": 19
+        }
+      },
+      "failures": []
+    },
+    "07_actual_industry_growth.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 150,
+          "columns": 19
+        },
+        "dictionary": {
+          "rows": 29,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 9,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 11,
+          "columns": 21
+        }
+      },
+      "failures": []
+    },
+    "sector_crosswalk.xlsx": {
+      "sheets": {
+        "data": {
+          "rows": 10,
+          "columns": 10
+        },
+        "dictionary": {
+          "rows": 24,
+          "columns": 6
+        },
+        "sources": {
+          "rows": 5,
+          "columns": 8
+        },
+        "coverage": {
+          "rows": 10,
+          "columns": 6
+        }
+      },
+      "failures": []
+    }
+  },
+  "installed_check_failures": [],
+  "info": {
+    "06_predicted_industry_growth.xlsx": {
+      "grid_types": {
+        "sector": "text",
+        "year": "int",
+        "predicted_growth_pct": "float",
+        "collected_forecast_growth_pct": "float",
+        "forecast_status": "text",
+        "forecast_publication_month": "text",
+        "forecast_known_available_by": "text",
+        "forecast_baseline_year": "int",
+        "forecast_target_year": "int",
+        "forecast_baseline_revenue_million": "float",
+        "forecast_target_revenue_million": "float",
+        "forecast_price_basis": "text",
+        "forecast_method": "text",
+        "forecast_component_months": "text",
+        "forecast_source_urls": "text",
+        "forecast_source_pdfs": "text",
+        "forecast_source_pages": "text",
+        "forecast_note": "text",
+        "scope_qualification": "text",
+        "forecast_horizon_years": "int"
+      },
+      "verification_counts": {
+        "NOT CITED": 33,
+        "NO CSV VALUES": 2,
+        "MATCH": 55,
+        "not verified": 72
+      }
+    },
+    "07_actual_industry_growth.xlsx": {
+      "growth_crosscheck_max_abs_diff": 0.04965572984939115,
+      "growth_crosscheck_rows": 72
+    },
+    "sector_crosswalk.xlsx": {},
+    "02_election_forecasting.xlsx": {
+      "readme_row": 27,
+      "readme_cell": "Not covered: 2000 (no downloadable prices), and 2024 and 2026 (IEM lists no congressional markets for those cycles). Rows for 2023-2026 are included with blank forecasts so another source can be added."
+    }
+  },
+  "oddities": [],
+  "step1": "PASS",
+  "notes": [
+    "The receipt does not list its own hash.",
+    "build_receipt.json (15:28 build) is left as it was."
+  ]
+}
