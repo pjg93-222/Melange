@@ -14,7 +14,7 @@ async function prepare(page,storage='normal') {
     return route.fulfill({contentType:file ? file.endsWith('.js')?'application/javascript;charset=utf-8':'text/css;charset=utf-8':'text/html;charset=utf-8',body:file?fs.readFileSync(path.join(app,file),'utf8'):html});
   });
   await page.addInitScript(storage=>{
-    if(storage==='corrupt')localStorage.setItem('mentat.insights.panels.v1','invalid JSON');
+    if(storage==='corrupt'){localStorage.setItem('mentat.insights.panels.v1','invalid JSON');localStorage.setItem('mentat.insights.forecast-card.v1','invalid JSON');}
     if(storage==='blocked'){Storage.prototype.getItem=()=>{throw new DOMException('Blocked','SecurityError');};Storage.prototype.setItem=()=>{throw new DOMException('Blocked','SecurityError');};}
     window.queries=[];window.recordQueries=[];window.hideCompany=false;window.failNextPage=false;
     window.fetch=async (url,options={})=>{
@@ -82,8 +82,9 @@ async function prepare(page,storage='normal') {
     const headers=csv.split('\r\n')[0].split(',');assert.equal(new Set(headers).size,headers.length,'CSV scope and analysis fields need distinct headers');assert.match(csv,/employee_original/,'Exports retain source codes');
     await page.selectOption('#insights-dataset','Beta');await page.waitForFunction(()=>queries.at(-1).dataset==='Beta');const changed=await page.evaluate(()=>queries.at(-1));for(const key of ['company','funding_source','comparison_dataset'])assert.equal(changed[key],undefined,'Changing industry clears incompatible '+key);assert.equal(changed.as_of,'2024-06-30');assert.equal(changed.baseline_cycle,'2021-2022');assert.equal(changed.current_cycle,'2023-2024');
     assert.deepEqual(errors,[]);
-    const corrupt=await browser.newPage();await prepare(corrupt,'corrupt');assert.equal(await corrupt.locator('#insights-toggles input:checked').count(),3);assert.equal(await corrupt.locator('#insights-preference-note').isHidden(),true,'A repaired malformed preference is not a storage failure');
+    const corrupt=await browser.newPage();await prepare(corrupt,'corrupt');assert.equal(await corrupt.locator('#insights-toggles input:checked').count(),3);assert.equal(await corrupt.locator('#insights-toggles input').count(),10,'A malformed forecast setting reads as off');assert.equal(await corrupt.locator('#insights-toggle-forecast').count(),0);assert.equal(await corrupt.locator('#insights-preference-note').isHidden(),true,'A repaired malformed preference is not a storage failure');
     const blocked=await browser.newPage();await prepare(blocked,'blocked');assert.equal(await blocked.locator('#insights-preference-note').isVisible(),true);for(const id of await blocked.locator('#insights-toggles input:checked').evaluateAll(nodes=>nodes.map(node=>node.id)))await blocked.locator('#'+id).uncheck();assert.equal(await blocked.locator('#insights-results article').count(),0);
+    await blocked.locator('#insights-more-options').click();await blocked.locator('#insights-show-forecast').check();assert.equal(await blocked.locator('#insights-toggle-forecast').count(),1,'The forecast setting applies to a visit whose storage is blocked');assert.equal(await blocked.locator('#insights-preference-note').isVisible(),true);
     // Swap exchanges the chips only: no request, and the strip, change and waterfall
     // stay in time order (earlier -> later), so a fall is never shown as growth.
     const swap=await browser.newPage(),swapErrors=[];swap.on('pageerror',error=>swapErrors.push(error.message));await prepare(swap);

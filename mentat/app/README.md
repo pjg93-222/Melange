@@ -373,7 +373,7 @@ source report fingerprints. Existing worksheet limits still apply to charts.
 **Create chart** immediately builds a chart from the selected report. Pick a
 statistic and click **Bar**, **Line**, **Pie**, **Scatter**, **Histogram** or
 **Box plot**; compatible columns are selected automatically. Every change redraws
-the chart. **Over time**, **Year over year** and **Forecast** select the available
+the chart. **Over time**, **Year over year** and **Same-phase baseline** select the available
 date/year field, and comparison time views offer a subject dropdown. **Change
 data** contains run/worksheet selection; **More options** contains detailed
 settings. The builder scans completed report worksheets locally and supports bar,
@@ -556,7 +556,7 @@ CSV exports retain all points.
 
 Over time shows period totals (or the selected aggregation). Year over year shows
 percentage change from the prior calendar year; election-cycle data uses period
-change instead. Forecast uses a same-election-phase historical baseline: the latest
+change instead. Same-phase baseline uses a same-election-phase historical baseline: the latest
 completed value from the corresponding phase of the four-year calendar. It needs
 eight consecutive closed years or four closed two-year cycles, with at least two
 observations per phase. Current, explicitly partial and missing-value periods do

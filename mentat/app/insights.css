@@ -78,6 +78,8 @@
 #view-insights .insights-toggle input:checked::before{transform:translateX(17px)}
 #view-insights .insights-toggle input:focus-visible{outline:2px solid var(--acu-purple);outline-offset:2px}
 #view-insights .insights-preference-note{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted)}
+#view-insights .insights-toggle.insights-setting{grid-column:1/-1;justify-content:flex-start;height:auto;min-height:40px;padding:6px 0;border-bottom:0}
+#view-insights .insights-setting .insights-toggle-label{white-space:normal;overflow:visible}
 #view-insights .insights-rail-footer{display:flex;align-items:center;margin-top:23px;padding-top:12px;border-top:1px solid #efefef}
 #view-insights .insights-text-button{height:24px;min-height:0;margin:0;padding:0;border:0;background:none;font:400 11.2px/1 var(--font-sans);color:#65667b;cursor:pointer}
 #view-insights .insights-text-button:hover{color:var(--acu-plum);text-decoration:underline;text-underline-offset:3px}

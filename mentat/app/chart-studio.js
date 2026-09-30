@@ -26,7 +26,7 @@
     {id: 'annual', group: 'transform', label: 'Period totals', hint: 'Group dated rows into calendar years or election cycles'},
     {id: 'yoy', group: 'transform', label: 'Year-over-year %', hint: 'Percentage change from the previous calendar year'},
     {id: 'change', group: 'transform', label: 'Period change', hint: 'Difference from the preceding period'},
-    {id: 'forecast', group: 'transform', label: 'Same-phase forecast', hint: 'Repeat the last completed value from the matching election phase'},
+    {id: 'forecast', group: 'transform', label: 'Same-phase baseline', hint: 'Repeat the last completed value from the matching election phase'},
     {id: 'totals', group: 'flag', label: 'Totals', hint: 'Add a grand total of the plotted marks'},
     {id: 'average', group: 'flag', label: 'Average line', hint: 'Dashed reference line at the mean of the marks'},
     {id: 'median', group: 'flag', label: 'Median line', hint: 'Dashed reference line at the median of the marks'}

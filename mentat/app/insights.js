@@ -21,7 +21,7 @@
   const SHORT_TITLES = {favorites:'Top recipients',trends:'Trends',changes:'Changes',concentration:'Concentration',relationships:'Relationships',overlap:'Company overlap',timing:'Timing',profiles:'Recipient profiles',spending:'Outgoing spending',legislation:'Legislative context',forecast:'Forecasts'};
   const KEYS = PANELS.map(p => p[0]);
   const BASES = ['receipt', 'original_observed', 'original_supported', 'pac_activity'];
-  const STORAGE = 'mentat.insights.panels.v1';
+  const STORAGE = 'mentat.insights.panels.v1', FORECAST_STORAGE = 'mentat.insights.forecast-card.v1', FORECAST = 'forecast';
   const PANEL_CONTEXT = {profiles:'Dated FEC identity context; no contribution allocation',spending:'Saved outgoing payments and full campaign or committee finances; separate from industry giving',legislation:'Dated legislative context; no contribution dollars assigned to bills'};
   const FUNDING_LABELS = {employee_original:'Employee giving',employee:'Employee giving',corporate_original:'Corporate giving',corporate:'Corporate giving',pac_activity:'PAC activity',organization_unverified:'Unverified organization',funding_unverified:'Unverified funding',unverified:'Unverified funding',conflicting_source_evidence:'Conflicting source evidence',linked_refund:'Linked refunds',non_giving:'Non-giving records',excluded_source_policy:'Excluded by source policy',excluded_company_match:'Excluded company matches',connected_pac:'Connected PAC'};
   const STATUS_LABELS = {ready:'Available',partial:'Partial coverage',unavailable:'Not available',empty:'No observed rows',insufficient_history:'More history needed',observed:'Observed'};
@@ -191,7 +191,13 @@
   let analysisView = 'overview', summaryChannel = null, channelScope = '', magnitudes = new Map(), clipCounter = 0;
   let resolvedPeriods = {baseline: '', current: ''}, shownPeriods = {'baseline-cycle': '', 'current-cycle': ''};
   let enabled = CORE.slice(), storageAvailable = true;
-  try { const saved = JSON.parse(localStorage.getItem(STORAGE)); if (Array.isArray(saved)) enabled = KEYS.filter(key => saved.includes(key)); } catch (_) { storageAvailable = false; }
+  // Owner ruling 2026-09-30: the historical-baseline forecast card is hidden behind a per-browser setting
+  // (More options), off until chosen. While it is off the card, its switch and its place in All are absent,
+  // and a saved choice of it is dropped, so it is never requested. panelShown answers for every list below.
+  let showForecast = false;
+  try { showForecast = JSON.parse(localStorage.getItem(FORECAST_STORAGE)) === true; } catch (_) { storageAvailable = false; }
+  const panelShown = key => showForecast || key !== FORECAST;
+  try { const saved = JSON.parse(localStorage.getItem(STORAGE)); if (Array.isArray(saved)) enabled = KEYS.filter(key => panelShown(key) && saved.includes(key)); } catch (_) { storageAvailable = false; }
   const sorts = {}, tablesShown = {}, methodsShown = {};
   const ANALYSIS_VIEWS = {overview: 'results', sources: 'sources'};
   // Board I1 order: the running total on top, then What changed beside Top recipients.
@@ -222,20 +228,20 @@
     el('page-sources').setAttribute('aria-expanded', String(name === 'sources'));
   }
   function preferences() {
-    try { localStorage.setItem(STORAGE, JSON.stringify(enabled)); storageAvailable = true; } catch (_) { storageAvailable = false; }
+    try { localStorage.setItem(STORAGE, JSON.stringify(enabled)); localStorage.setItem(FORECAST_STORAGE, JSON.stringify(showForecast)); storageAvailable = true; } catch (_) { storageAvailable = false; }
     el('preference-note').textContent = storageAvailable ? 'Choices saved in this browser.' : 'Choices apply to this visit; browser storage is unavailable.';
     el('preference-note').hidden = storageAvailable;
   }
   // The rail: one switch per analysis, short labels, descriptions for assistive tech.
   function renderToggles() {
     el('toggles').replaceChildren();
-    for (const [key, title, description] of PANELS) {
+    for (const [key, title, description] of PANELS.filter(panel => panelShown(panel[0]))) {
       const metadata = (catalog && catalog.panels || []).find(p => p.id === key) || {};
       const label = node('label', undefined, 'insights-toggle'), checkbox = node('input'), text = node('span', SHORT_TITLES[key] || metadata.title || title, 'insights-toggle-label');
       checkbox.type = 'checkbox'; checkbox.setAttribute('role', 'switch'); checkbox.value = key; checkbox.checked = enabled.includes(key); checkbox.id = 'insights-toggle-' + key;
       text.append(node('small', ': ' + (metadata.description || description), 'insights-visually-hidden'));
       label.title = (metadata.title || title) + ': ' + (metadata.description || description); label.append(text, checkbox);
-      checkbox.addEventListener('change', () => { enabled = KEYS.filter(k => k === key ? checkbox.checked : enabled.includes(k)); preferences(); load(); });
+      checkbox.addEventListener('change', () => { enabled = KEYS.filter(k => panelShown(k) && (k === key ? checkbox.checked : enabled.includes(k))); preferences(); load(); });
       el('toggles').append(label);
     }
   }
@@ -963,7 +969,15 @@
     if (id === 'dataset') { resetIndustryFilters();root.MentatScope?.write({industry:el('dataset').value}); }
     load();
   });
-  for (const [id,value] of [['enable-all',KEYS],['core-only',CORE]]) el(id).addEventListener('click',() => { enabled = value.slice(); preferences(); renderToggles(); load(); });
+  for (const [id,value] of [['enable-all',() => KEYS],['core-only',() => CORE]]) el(id).addEventListener('click',() => { enabled = value().filter(panelShown); preferences(); renderToggles(); load(); });
+  // The forecast setting. Switching it off also turns the card off, which changes the request; switching it on only
+  // brings the switch back, still off, so nothing is fetched until the card itself is chosen.
+  el('show-forecast').checked = showForecast;
+  el('show-forecast').addEventListener('change', () => {
+    showForecast = el('show-forecast').checked;
+    const before = enabled.length; enabled = enabled.filter(panelShown);
+    preferences(); renderToggles(); if (enabled.length !== before) load();
+  });
   el('sources-close').addEventListener('click',()=>closeSources(true)); el('sources-retry').addEventListener('click',()=>loadSources(true));
   el('sources-prev').addEventListener('click',() => { if (sourceContext) { sourceContext.offset = Math.max(0,sourceContext.offset-PAGE_SIZE); loadSources(); } });
   el('sources-next').addEventListener('click',() => { if (sourceContext) { sourceContext.offset += PAGE_SIZE; loadSources(); } });

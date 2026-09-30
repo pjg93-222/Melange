@@ -32,6 +32,8 @@ notes remain expandable below each chart.
 | Legislative context | Dated sponsorship/cosponsorship/action context through exact FEC-to-Bioguide links. Association does not establish influence or causation. |
 | Forecasts | Conservative historical baselines, with rolling-origin errors where evaluable. Four consecutive explicitly complete historical cycles are required; source-vintage limitations and unavailable intervals remain visible. |
 
+The historical-baseline Forecasts card is hidden by default; enable "Show the historical-baseline forecast card" under Insights More options to reveal it. This setting is saved in the current browser.
+
 ## Scope, evidence and exports
 
 Choose the published industry, accounting basis, company and contribution-date

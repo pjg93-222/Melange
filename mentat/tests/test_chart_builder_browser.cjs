@@ -134,6 +134,9 @@ test('chart type defaults, axis labels, time explanations and dense scatter pres
   assert.equal(await page.locator('#chart-error').isHidden(),true);
   assert.match(await page.locator('#chart-scope').textContent(),/same-election-phase/);
   assert.match(await page.locator('#chart-values').textContent(),/Same-phase baseline/);
+  assert.equal((await page.locator('[data-transform=forecast]').textContent()).trim(),'Same-phase baseline','The quick button carries the baseline label; its transform id is unchanged');
+  assert.equal(await page.locator('#chart-transform').inputValue(),'forecast');assert.equal(await page.locator('#chart-transform option:checked').textContent(),'Same-phase baseline');
+  assert.match(await page.locator('#chart-quick-note').textContent(),/^Same-phase baseline compares corresponding election phases/,'The quick note names the baseline');
 
   await page.evaluate(()=>{
     const simple={...window.workshop,columns:[{index:0,name:'Category',type:'category',distinct:2},{index:1,name:'Amount',type:'number',distinct:2}],rows:[['A',10],['B',20]],row_numbers:[2,3],row_count:2,

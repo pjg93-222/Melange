@@ -52,7 +52,8 @@ function fixture(dataset='Alpha', panels=['favorites','trends','changes']) {
     // The rail replaced the Choose analyses tab: it sits beside the cards.
     assert.equal(await page.locator('#insights-analyses').isVisible(),true,'The analyses rail is always on the page');
     assert.equal(await page.locator('#insights-results').isVisible(),true,'The rail sits beside the cards instead of replacing them');
-    assert.equal(await page.locator('#insights-toggles input').count(),11);
+    assert.equal(await page.locator('#insights-toggles input').count(),10,'Ten switches: the forecast card is behind a setting that is off by default');
+    assert.equal(await page.locator('#insights-toggle-forecast').count(),0,'The forecast switch is not rendered while its setting is off');assert.equal(await page.locator('#insights-panel-forecast').count(),0);
     assert.equal(await page.locator('#insights-toggles input:checked').count(),3);
     assert.equal(await page.locator('#insights-panel-favorites .insights-ranked tbody tr').count(),2,'Top recipients ranks the returned rows in Chart view');
     assert.equal(await page.locator('#insights-panel-trends .insights-card-tools button').first().isDisabled(),true,'No dated series: no running-total curve is drawn from undated totals');
@@ -118,6 +119,9 @@ function fixture(dataset='Alpha', panels=['favorites','trends','changes']) {
     assert.match(await page.locator('#insights-status').innerText(),/All analyses are off/); assert.equal(await page.evaluate(()=>pending.length),16,'The all-off state sends no query');
     await page.reload(); await show(); assert.equal(await page.locator('#insights-toggles input:checked').count(),0,'Off choices persist across page reload'); assert.equal(await page.evaluate(()=>calls.length),0);
     await page.locator('#insights-core-only').click(); await pending(1); await respond(0,fixture());
+    // The forecast card sits behind a setting (More options, off by default). Switch it on so the engine pass below covers every card.
+    await page.locator('#insights-more-options').click(); await page.locator('#insights-show-forecast').check();
+    assert.equal(await page.locator('#insights-toggle-forecast').isChecked(),false,'Showing the forecast switch does not turn the card on');assert.equal(await page.evaluate(()=>pending.length),1,'Showing the switch requests nothing');
     assert.equal(await page.locator('#insights-toggles input:checked').count(),3);
     // A second pass uses actual pure-engine envelopes, not a copied UI contract.
     const engine=JSON.parse(execFileSync(process.env.MENTAT_PYTHON || 'python',['-c',[
@@ -131,7 +135,7 @@ function fixture(dataset='Alpha', panels=['favorites','trends','changes']) {
       '   rows.append(dict(source_id=str(len(rows)), company=company, committee_id="C0001", recipient="Synthetic candidate", funding_source=channel, amount_cents=amount+(cycle-2020)*1000, date=str(cycle)+"-04-10", cycle=str(cycle), contributor_key=company))',
       'print(json.dumps(analyze(rows,dict(as_of="2026-09-01",basis="receipt"))))'
     ].join('\n'),app],{encoding:'utf8',windowsHide:true}));
-    await page.locator('#insights-enable-all').click(); await pending(2);
+    await page.locator('#insights-enable-all').click(); await pending(2); assert.deepEqual(await page.evaluate(()=>pending[1].body.panels),PANELS.map(p=>p[0]),'With the forecast setting on, All requests every analysis');
     const actual=fixture('Alpha',[]); actual.panels=engine.panels;
     actual.panels.spending={status:'partial',title:'Outgoing payments and campaign finances',summary:'Synthetic full committee outgoing activity.',columns:[{key:'entity',label:'Entity',type:'text'},{key:'amount',label:'Disbursements',type:'money'},{key:'source_url',label:'Source',type:'url'}],rows:[{entity:'Synthetic campaign',amount:12345,source_url:'https://www.fec.gov/data/committee/C0001/'}],sources:[{file:'synthetic-openfec-manifest.json',sha256:'synthetic-integration-sha',scope:'All campaign activity'}],notices:[],vendor_patterns:[{sender_id:'C0001',payee:'Synthetic payee',amount_cents:12345,positive_share:1}]};
     await respond(1,actual);
@@ -251,6 +255,6 @@ function fixture(dataset='Alpha', panels=['favorites','trends','changes']) {
     await missingPage.selectOption('#insights-dataset','Beta');await missingPage.waitForFunction(()=>analysisQueries.length===2);assert.equal(await missingPage.evaluate(()=>MentatScope.read().industry),'Beta');assert.equal(await missingPage.locator('#insights-results article[data-state="ready"]').count(),3,'Selecting an available industry recovers without reloading');
     const transmitted=await page.evaluate(()=>calls.filter(call=>['/api/insights/query','/api/insights/records'].includes(call.url)).map(call=>({body:call.body,records:call.url.endsWith('/records')})));
     execFileSync(process.env.MENTAT_PYTHON || 'python',['-c','import json,sys; sys.path.insert(0,sys.argv[1]); from analysis_data import validate; [validate(item["body"], records=item["records"]) for item in json.loads(sys.argv[2])]',app,JSON.stringify(transmitted)],{encoding:'utf8',windowsHide:true});
-    console.log('PASS Insights: lazy activation, eleven toggles, persistent preferences, integer-cent charts, scope invalidation, resolved source context, source pagination, exports, failure/retry, preparation polling, late replies and narrow layout');
+    console.log('PASS Insights: lazy activation, ten toggles plus the forecast setting, persistent preferences, integer-cent charts, scope invalidation, resolved source context, source pagination, exports, failure/retry, preparation polling, late replies and narrow layout');
   } finally { await browser.close(); }
 })().catch(error=>{console.error(error);process.exitCode=1;});

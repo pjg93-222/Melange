@@ -1478,7 +1478,7 @@
     }
 
     if (config && transform === 'forecast' && (config.start || config.end || config.limit)) {
-      notes.push('The same-phase forecast reads every worksheet row; clear the row range and row limit in Parameters.');
+      notes.push('The same-phase baseline reads every worksheet row; clear the row range and row limit in Parameters.');
     }
     if (config && config.splitMulti && config.aggregation !== 'count') notes.push('Split multi-value cells repeats the measure across values, so the grand total is not shown. Choose Count for coverage, or use transaction-level ZIP data for money.');
     // Splitting rewrites the grouping cell, so a view with nothing on the axis

@@ -230,14 +230,14 @@
 <button type="button" data-chart="bar">▥<span>Bar</span></button><button type="button" data-chart="line">⌁<span>Line</span></button><button type="button" data-chart="pie">◕<span>Pie</span></button><button type="button" data-chart="scatter">⠿<span>Scatter</span></button><button type="button" data-chart="histogram">▟<span>Histogram</span></button><button type="button" data-chart="box">⊞<span>Box plot</span></button>
 </div>
 <label for="chart-x"><span id="chart-x-label">Compare by</span><select id="chart-x"></select></label>
-<div id="chart-time-quick" class="chart-time-quick" aria-label="Explore changes over time"><button type="button" data-transform="annual">Over time</button><button type="button" data-transform="yoy">Year over year</button><button type="button" data-transform="forecast">Forecast</button></div>
+<div id="chart-time-quick" class="chart-time-quick" aria-label="Explore changes over time"><button type="button" data-transform="annual">Over time</button><button type="button" data-transform="yoy">Year over year</button><button type="button" data-transform="forecast">Same-phase baseline</button></div>
 <label id="chart-subject-label" for="chart-subject" hidden>Subject<select id="chart-subject"></select></label>
 <p id="chart-quick-note" class="chart-note"></p>
 <details id="graph-advanced"><summary>More options</summary>
 <label for="chart-suggestion">Suggested from columns<select id="chart-suggestion"></select></label>
 
 <label for="chart-aggregation">Aggregation<select id="chart-aggregation"><option value="sum">Sum</option><option value="mean">Mean</option><option value="count">Count rows</option><option value="median">Median</option><option value="min">Minimum</option><option value="max">Maximum</option></select></label>
-<label for="chart-transform">Time analysis<select id="chart-transform"><option value="none">None</option><option value="annual">Period totals</option><option value="yoy">Year-over-year %</option><option value="change">Period change</option><option value="forecast">Same-phase baseline</option></select></label><div class="chart-row"><label for="chart-period">Period<select id="chart-period"><option value="year">Calendar year</option><option value="cycle">Election cycle (2 years)</option></select></label><label for="chart-horizon">Forecast periods<input id="chart-horizon" type="number" min="1" max="10" value="2"></label></div><p class="chart-note">For time analysis, choose a date/year as X and a bar, line or area chart. Filter to one subject before comparing periods. Over time shows totals by year or election cycle. Year over year compares consecutive calendar years. Forecast repeats the latest completed value from the matching election phase; it needs four closed cycles or eight closed years. Current and partial periods stay visible but do not train the baseline.</p><details open><summary>Filter a subsection</summary><p class="muted">Filters combine with AND. Row numbers refer to the worksheet.</p><label for="chart-end">Last worksheet row (optional)<input id="chart-end" type="number" min="1" step="1"></label><div id="chart-filters"></div><button id="chart-add-filter" class="secondary" type="button">+ Add filter</button></details>
+<label for="chart-transform">Time analysis<select id="chart-transform"><option value="none">None</option><option value="annual">Period totals</option><option value="yoy">Year-over-year %</option><option value="change">Period change</option><option value="forecast">Same-phase baseline</option></select></label><div class="chart-row"><label for="chart-period">Period<select id="chart-period"><option value="year">Calendar year</option><option value="cycle">Election cycle (2 years)</option></select></label><label for="chart-horizon">Forecast periods<input id="chart-horizon" type="number" min="1" max="10" value="2"></label></div><p class="chart-note">For time analysis, choose a date/year as X and a bar, line or area chart. Filter to one subject before comparing periods. Over time shows totals by year or election cycle. Year over year compares consecutive calendar years. Same-phase baseline repeats the latest completed value from the matching election phase; it needs four closed cycles or eight closed years. Current and partial periods stay visible but do not train the baseline.</p><details open><summary>Filter a subsection</summary><p class="muted">Filters combine with AND. Row numbers refer to the worksheet.</p><label for="chart-end">Last worksheet row (optional)<input id="chart-end" type="number" min="1" step="1"></label><div id="chart-filters"></div><button id="chart-add-filter" class="secondary" type="button">+ Add filter</button></details>
 <button id="chart-create" class="secondary" type="button">Update chart</button>
 </details>
 </fieldset></section>
@@ -405,7 +405,7 @@
 <label for="studio-param-period">Period<select id="studio-param-period"><option value="">From the field</option><option value="year">Calendar year</option><option value="cycle">Election cycle (2 years)</option></select></label>
 <label for="studio-param-horizon">Forecast periods<input id="studio-param-horizon" type="number" min="1" value="2"></label>
 <label id="studio-param-subject-label" for="studio-param-subject" hidden>Subject<select id="studio-param-subject" title="Time analysis adds up one subject at a time; other views read every row."></select></label>
-<p class="studio-note">Drag an object onto the view, or press it. Period totals, year-over-year, period change and the same-phase forecast need a date, year or election-cycle field on a shelf.</p>
+<p class="studio-note">Drag an object onto the view, or press it. Period totals, year-over-year, period change and the same-phase baseline need a date, year or election-cycle field on a shelf.</p>
 </div>
 <div class="studio-pane" id="studio-pane-filters" role="tabpanel" aria-labelledby="studio-tab-filters" hidden>
 <h3>Active filters</h3>
@@ -510,6 +510,7 @@
     <div id="insights-options" class="insights-comparison-options" hidden>
       <label class="insights-field">Contributions through<input id="insights-as-of" type="date" title="Include contribution dates up to this day. Blank uses today."></label>
       <label class="insights-field">Compare industry<select id="insights-comparison-dataset"><option value="">No industry comparison</option></select></label>
+      <label class="insights-toggle insights-setting" for="insights-show-forecast"><span class="insights-toggle-label">Show the historical-baseline forecast card</span><input id="insights-show-forecast" type="checkbox" role="switch"></label>
     </div>
   </form>
   <section id="insights-summary" class="card insights-summary" aria-label="Period summary"><dl>
