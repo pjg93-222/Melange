@@ -45,7 +45,10 @@ max_abs <- function(a, b) {
   stopifnot(length(a) == length(b))
   if (!identical(is.na(a), is.na(b))) return(Inf)
   ok <- !is.na(a)
-  if (!any(ok)) 0 else max(abs(as.numeric(a[ok]) - as.numeric(b[ok])))
+  if (!any(ok)) return(0)
+  d <- abs(as.numeric(a[ok]) - as.numeric(b[ok]))
+  d[as.numeric(a[ok]) == as.numeric(b[ok])] <- 0    # equal infinities (AICc of an ineligible model) are a zero difference
+  max(d)
 }
 
 # Leaf-by-leaf comparison of two parsed JSON trees; returns a data.frame of mismatches (path, kind, a, b) and the

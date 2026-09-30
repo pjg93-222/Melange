@@ -48,11 +48,6 @@
       "id": "pac_complete", "calculator": false, "kind": "pac",
       "outcome": "log_pac", "formula": "log_pac ~ sector + factor(cycle_end) + G_prior + G_current + Neg_prior", "focal": "G_current",
       "clusters": ["sector", "cycle_end"], "training": "cycles 2012-2024"
-    },
-    {
-      "id": "lobby_differenced_controls", "calculator": false, "kind": "lobby",
-      "outcome": "dy", "formula": "dy ~ 0 + dg + d_pres_year + d_midterm_year + d_exp_dem_house + d_exp_dem_senate + d_cur_dem_house + d_cur_dem_senate", "focal": "dg",
-      "clusters": ["study_sector"], "training": "all71"
     }
   ],
   "stepwise_grid": {

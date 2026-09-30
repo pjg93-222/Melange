@@ -7,7 +7,10 @@
 #                    <MENTAT_DATA_ROOT>\forecast\refit when MENTAT_DATA_ROOT is set (as mentat/R/paths.R does)
 #   RF_RLIB          vendored package library (default <RUNTIME>\Rlib)
 #   RF_GLASSBOX_DIR  Glass Box event folder (default C:\Users\pgoff\.claude\glassbox\events)
-#   RF_ROOT_<ALIAS>  one of LOO, CHE, SGSD, SGSA, ZIPC, RLIBX, BUNDLE_V1
+#   RF_INPUT_ROOT    one folder that mirrors every pinned raw-input root (for another machine, e.g. a compute pod):
+#                    <root>/LOO, <root>/CHE, <root>/SGSD, <root>/SGSA, <root>/RLIBX and
+#                    <root>/House_Senate_Control_Forecasts_CSV.zip. The manifest hashes still pin every file.
+#   RF_ROOT_<ALIAS>  one of LOO, CHE, SGSD, SGSA, ZIPC, RLIBX, BUNDLE_V1; overrides RF_INPUT_ROOT and the local defaults
 #
 # The pipeline reads inputs read-only, writes only under the runtime folder, and never touches the network.
 
@@ -43,14 +46,20 @@ rf_runtime_default <- function() {
   data_root <- trimws(Sys.getenv("MENTAT_DATA_ROOT", unset = ""))
   if (nzchar(data_root)) return(file.path(data_root, "forecast", "refit"))
   lad <- trimws(Sys.getenv("LOCALAPPDATA", unset = ""))
-  if (!nzchar(lad)) stop("LOCALAPPDATA is empty; set RF_RUNTIME to a writable local directory.", call. = FALSE)
-  file.path(lad, "Mentat", "forecast", "refit")
+  if (nzchar(lad)) return(file.path(lad, "Mentat", "forecast", "refit"))
+  home <- trimws(Sys.getenv("HOME", unset = ""))          # non-Windows (compute pod): ~/.local/share
+  if (nzchar(home)) return(file.path(home, ".local", "share", "Mentat", "forecast", "refit"))
+  stop("LOCALAPPDATA and HOME are empty; set RF_RUNTIME to a writable local directory.", call. = FALSE)
 }
 
 # Resolved at call time (not at load time) so a test can change the environment variables between runs.
 rf_runtime <- function() normalizePath(rf_env_path("RF_RUNTIME", rf_runtime_default()), winslash = "/", mustWork = FALSE)
 rf_rlib_dir <- function() normalizePath(rf_env_path("RF_RLIB", file.path(rf_runtime(), "Rlib")), winslash = "/", mustWork = FALSE)
-rf_glassbox_dir <- function() rf_env_path("RF_GLASSBOX_DIR", "C:/Users/pgoff/.claude/glassbox/events")
+rf_glassbox_dir <- function() {
+  default <- if (nzchar(trimws(Sys.getenv("LOCALAPPDATA", unset = "")))) "C:/Users/pgoff/.claude/glassbox/events"
+             else file.path(Sys.getenv("HOME"), ".claude", "glassbox", "events")
+  rf_env_path("RF_GLASSBOX_DIR", default)
+}
 
 rf_roots <- function() {
   loo <- "C:/Users/pgoff/Documents/Codex/2026-09-26/loo"
@@ -60,9 +69,15 @@ rf_roots <- function() {
     SGSD = "C:/Users/pgoff/Mentat/sector_growth_study/data",
     SGSA = "C:/Users/pgoff/Mentat/sector_growth_study/archive/session_d613b40c_scratchpad",
     ZIPC = "C:/Users/pgoff/Downloads/House_Senate_Control_Forecasts_CSV.zip",
-    RLIBX = file.path(loo, "work/lobbying_followup/Rlib"),
-    BUNDLE_V1 = file.path(dirname(dirname(rf_home())), "app", "data", "giving-models-v1.json")
+    RLIBX = file.path(loo, "work/lobbying_followup/Rlib")
   )
+  umbrella <- trimws(Sys.getenv("RF_INPUT_ROOT", unset = ""))
+  if (nzchar(umbrella)) {
+    d <- list(LOO = file.path(umbrella, "LOO"), CHE = file.path(umbrella, "CHE"), SGSD = file.path(umbrella, "SGSD"),
+              SGSA = file.path(umbrella, "SGSA"), ZIPC = file.path(umbrella, "House_Senate_Control_Forecasts_CSV.zip"),
+              RLIBX = file.path(umbrella, "RLIBX"))
+  }
+  d$BUNDLE_V1 <- file.path(dirname(dirname(rf_home())), "app", "data", "giving-models-v1.json")
   for (k in names(d)) d[[k]] <- rf_env_path(paste0("RF_ROOT_", k), d[[k]])
   d
 }
@@ -82,6 +97,11 @@ RF <- list(
 
   # Frozen v1 model bundle this phase must reproduce (its sha256 is the parity target).
   V1_MODEL_VERSION = "2026-09-27-association-v1",
+  V1_TEXT = list(built_on = "2026-09-27", currency = "2025 USD", inference = "Ordinary OLS; conditional on model selection",
+                 validation = "Historical associations. Scenario intervals cover coefficients, not future outcomes."),
+  V1_SOURCE_FILES = c("selected_models.csv", "analysis_case_panels.csv", "regression_panel.csv", "pac_selected_design.csv",
+                      "year_effects__all71.csv", "money_panel.csv", "industry_forecast_slopes.csv", "nested_validation_metrics.csv",
+                      "02_election_forecasting.xlsx"),
   V1_BUNDLE_SHA256 = "75c382af",   # prefix only; the full value is compared in test-02-inputs.R from the file itself
 
   # The byte copy of the SGS numpy-stream port (see rf_rng.R); a test pins its hash.

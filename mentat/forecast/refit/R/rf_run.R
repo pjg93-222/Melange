@@ -33,10 +33,20 @@ rf_build_panels <- function(inputs, reg) {
        market_window = rf_market_window(files, "2026-01-01", "2026-06-30"), market_ytd = rf_market_window(files, "2026-01-01", "2026-09-24")$markets)
 }
 
+# Panels, the frozen fits, the wild / selection p-values the v1 bundle stores, and the stepwise grid.
 rf_parity_context <- function(inputs, reg, models) {
   ctx <- rf_build_panels(inputs, reg)
   ctx$inputs <- inputs
   ctx$reg <- reg
   ctx$models <- models
+  fp <- rf_fit_panels(ctx, models)
+  ctx$fits <- fp$fits
+  ctx$fits_data <- fp$data
+  ctx$pac_selection <- rf_selection_repeated_pac(ctx$pac_panel)
+  m <- ctx$fits$lobby
+  X <- stats::model.matrix(m); y <- stats::model.response(stats::model.frame(m)); k <- match("dg", colnames(X))
+  ctx$lobby_wild <- rf_wcr(X, y, ctx$lobby$diffs$study_sector, k, "webb", entropy = c(RF$SEED, sgs_crc32("lobby"), sgs_crc32("dg"), sgs_crc32("study_sector")))
+  ctx$lobby_cr2 <- rf_cr2(m, "dg", ctx$lobby$diffs$study_sector)
+  ctx$stepwise <- rf_stepwise_grid(ctx$cases)
   ctx
 }

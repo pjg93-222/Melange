@@ -106,3 +106,37 @@ test_that("rf_write_json_atomic refuses non-finite numbers, writes UTF-8 without
   expect_null(back$c)
   expect_equal(length(list.files(dirname(p), pattern = "\\.tmp$")), 0L)
 })
+
+test_that("RF_INPUT_ROOT and RF_ROOT_<ALIAS> redirect the pinned input roots (same code, another machine)", {
+  old <- Sys.getenv(c("RF_INPUT_ROOT", "RF_ROOT_SGSD"), unset = NA)
+  on.exit({ for (k in names(old)) if (is.na(old[[k]])) Sys.unsetenv(k) else do.call(Sys.setenv, stats::setNames(list(old[[k]]), k)) }, add = TRUE)
+  mirror <- file.path(tempdir(), "input_mirror")
+  dir.create(file.path(mirror, "SGSD"), recursive = TRUE, showWarnings = FALSE)
+  local_roots <- rf_roots()
+  file.copy(file.path(local_roots$SGSD, c("00_controls.xlsx", "07_actual_industry_growth.xlsx")), file.path(mirror, "SGSD"), overwrite = TRUE)
+  Sys.setenv(RF_INPUT_ROOT = mirror)
+  r <- rf_roots()
+  expect_identical(r$SGSD, file.path(mirror, "SGSD"))
+  expect_identical(r$LOO, file.path(mirror, "LOO"))
+  expect_identical(r$ZIPC, file.path(mirror, "House_Senate_Control_Forecasts_CSV.zip"))
+  expect_identical(r$BUNDLE_V1, local_roots$BUNDLE_V1)   # the v1 bundle stays in the checkout
+  expect_identical(rf_expand("{SGSD}/00_controls.xlsx"), file.path(mirror, "SGSD", "00_controls.xlsx"))
+  # the manifest still pins every file: the mirrored copies verify, an absent one is reported missing
+  sub <- RF_TEST_MANIFEST[RF_TEST_MANIFEST$role %in% c("cpi", "ibis_actual", "current_control"), ]
+  inp <- rf_resolve_inputs(sub, roots = rf_roots(), vault = FALSE)
+  expect_identical(inp$status[inp$role == "cpi"], "ok")
+  expect_identical(inp$status[inp$role == "ibis_actual"], "ok")
+  expect_true(inp$status[inp$role == "current_control"] %in% c("missing", "ok_from_vault"))
+  expect_true(startsWith(inp$path[inp$role == "cpi"], mirror))
+  # a single alias override wins over the umbrella
+  Sys.setenv(RF_ROOT_SGSD = file.path(tempdir(), "elsewhere"))
+  expect_identical(rf_roots()$SGSD, file.path(tempdir(), "elsewhere"))
+  expect_identical(rf_roots()$LOO, file.path(mirror, "LOO"))
+  # a changed byte in the mirror fails the pin
+  Sys.setenv(RF_ROOT_SGSD = file.path(mirror, "SGSD"))
+  bad <- file.path(mirror, "SGSD", "00_controls.xlsx")
+  bytes <- readBin(bad, "raw", file.size(bad)); bytes[length(bytes) - 1L] <- as.raw(bitwXor(as.integer(bytes[length(bytes) - 1L]), 1L))
+  writeBin(bytes, bad)
+  inp2 <- rf_resolve_inputs(sub[sub$role == "cpi", ], roots = rf_roots(), vault = FALSE)
+  expect_identical(inp2$status, "hash_mismatch")
+})

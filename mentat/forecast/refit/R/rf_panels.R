@@ -19,6 +19,7 @@ rf_pac_panel <- function(reg, inputs) {
     tot <- tot[tot$cycle_end >= 2008 & tot$cycle_end <= 2024, ]
     g <- growth[growth$sector == reg$industries[[id]]$ibisworld$actual_sector, ]
     g$sector <- id
+    names(g)[names(g) == "source_url"] <- "ibis_source_url"   # keep the OpenSecrets capture URL as source_url
     cbind(data.frame(opensecrets_code = reg$industries[[id]]$opensecrets$codes[[1]], sector = id, stringsAsFactors = FALSE),
           merge(tot, g[, setdiff(names(g), "sector")], by = "cycle_end"))
   })
