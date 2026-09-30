@@ -92,7 +92,10 @@ and after each Mentat publish. A separate file from the model bundle, because an
 `MENTAT_GIVING_ANCHORS` overrides the path. The console **refuses** (`status: anchor_stale`) when `industries[id].mentat.workbook_sha256` differs from
 the sha256 of the workbook file now published in the report directory.
 
-* Top: `schema_version` 1, `kind`, `built_at_utc`, `builder`, `cpi` (`multipliers`: cycle end year -> `cpi[2025] / mean(cpi[t-1], cpi[t])`; a missing
+* The example `giving-anchors-v1.example.json` is **real builder output** (the four Mentat datasets built from the published workbooks, indexes,
+  FEC files and Melange LDA file on 2026-09-30), not hand-made: every number in ADDENDUM section F comes from it, and
+  `MENTAT_ANCHORS_REAL=all python -m pytest mentat/tests/test_giving_anchors.py` re-derives banks and credit unions from the real tree and compares.
+* Top: `schema_version` 1, `kind`, `built_at_utc`, `builder`, `unavailable` ({id: reason} for industries it could not anchor), `cpi` (`multipliers`: cycle end year -> `cpi[2025] / mean(cpi[t-1], cpi[t])`; a missing
   year means face value: 2026 CPI does not exist), `thin_base_threshold_usd` (100,000), `industries`.
 * `industries[id]` (`id` is the forecast industry id: `commercial_banks` = Mentat Banking, `credit_unions` = Credit Union, `property_casualty`;
   `community_banks` is a separate entry with `forecast_industry: null`, never merged into banks; auto has no Mentat data and no entry):

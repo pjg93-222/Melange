@@ -40,11 +40,16 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(contract.validate_kind(contract.example('models'), 'models'), [])
 
     @staticmethod
-    def _accepted_controls(validator):
-        """Ids of the bundle negative controls a validator wrongly accepts (empty = every control was rejected)."""
-        example = contract.example('models')
-        return [c['id'] for c in contract.negative_controls() if c['target'] == 'models'
-                and not validator(contract.apply_mutation(example, c))]
+    def _accepted_controls(validator, target='models'):
+        """Ids of the negative controls of one target a validator wrongly accepts (empty = every control was rejected)."""
+        example = contract.example(target)
+        out = []
+        for c in contract.negative_controls():
+            if c['target'] == target:
+                path = ['commercial_banks' if step == '<industry>' else step for step in c['path']]
+                if not validator(contract.apply_mutation(example, {**c, 'path': path})):
+                    out.append(c['id'])
+        return out
 
     def test_every_bundle_negative_control_fails_validation(self):
         self.assertGreaterEqual(len([c for c in contract.negative_controls() if c['target'] == 'models']), 10)
@@ -54,6 +59,27 @@ class ContractTests(unittest.TestCase):
         # Negative control of the negative controls: a permissive validator must be reported, control by control.
         accepted = self._accepted_controls(lambda doc: [])
         self.assertEqual(len(accepted), len([c for c in contract.negative_controls() if c['target'] == 'models']))
+
+    def test_the_anchor_example_validates_and_is_consistent(self):
+        example = contract.example('anchors')
+        self.assertEqual(contract.validate_kind(example, 'anchors'), [])
+        self.assertEqual(contract.check_anchor_invariants(example), [])
+        self.assertEqual({'commercial_banks', 'credit_unions'} <= set(example['industries']), True)
+        self.assertNotIn('auto_light_duty_manufacturing', example['industries'])       # auto has no Mentat data
+        self.assertEqual(example['industries']['community_banks']['forecast_industry'], None)   # separate, never merged into banks
+
+    def _anchor_validator(self, doc):
+        return contract.validate_kind(doc, 'anchors') or contract.check_anchor_invariants(doc)
+
+    def test_every_anchor_negative_control_fails_validation_or_the_invariants(self):
+        self.assertEqual(self._accepted_controls(self._anchor_validator, 'anchors'), [])
+        self.assertEqual(len([c for c in contract.negative_controls() if c['target'] == 'anchors']), 16)
+
+    def test_a_schema_only_validator_misses_the_invariant_controls(self):
+        # The invariant controls are schema-valid by design: only the cross-field checks catch them.
+        missed = self._accepted_controls(lambda doc: contract.validate_kind(doc, 'anchors'), 'anchors')
+        kinds = {c['id']: c['kind'] for c in contract.negative_controls() if c['target'] == 'anchors'}
+        self.assertEqual(sorted(missed), sorted(i for i, k in kinds.items() if k == 'invariant'))
 
     def test_the_example_itself_is_not_changed_by_a_mutation(self):
         example = contract.example('models')

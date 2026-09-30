@@ -1,5 +1,5 @@
 {
-  "note": "Shared negative controls (DE-021). Each control mutates the named example and MUST fail validation against its schema (kind 'schema') or the anchor invariants (kind 'invariant'). Apply them to the example, to a producer's real output, or both: a validator that accepts any of them is not checking what it claims to. ops: delete | set. A value {\"$nonfinite\": \"NaN\"} means a non-finite number (JSON cannot carry one): use the language's own NaN / Inf.",
+  "note": "Shared negative controls (DE-021). Each control mutates the named example and MUST fail validation against its schema (kind 'schema') or the anchor invariants (kind 'invariant'). Apply them to the example, to a producer's real output, or both: a validator that accepts any of them is not checking what it claims to. ops: delete | set. A value {\"$nonfinite\": \"NaN\"} means a non-finite number (JSON cannot carry one): use the language's own NaN / Inf. Anchor controls use the path step \"<industry>\" for the industry id under test (commercial_banks in the example).",
   "controls": [
     {"id": "B01", "target": "models", "kind": "schema", "op": "delete", "path": ["anchor_contract"], "why": "the bundle must name which Mentat measure each model applies to"},
     {"id": "B02", "target": "models", "kind": "schema", "op": "set", "path": ["schema_version"], "value": 1, "why": "a v1 bundle is not a v2 bundle"},
@@ -16,6 +16,22 @@
     {"id": "B13", "target": "models", "kind": "schema", "op": "set", "path": ["pac_model", "prediction", "industries"], "value": {}, "why": "a prediction interval needs a residual block for at least one industry"},
     {"id": "B14", "target": "models", "kind": "schema", "op": "set", "path": ["saved_outlook", "seats"], "value": {}, "why": "saved_outlook has no seats block in v2"},
     {"id": "B15", "target": "models", "kind": "schema", "op": "set", "path": ["evidence_models", "seats_House", "calculator"], "value": true, "why": "evidence models never feed the calculator"},
-    {"id": "B16", "target": "models", "kind": "schema", "op": "set", "path": ["political_inputs", "anchor_cycles", "2024", "House", "days"], "value": 0, "why": "a market window has at least one day"}
+    {"id": "B16", "target": "models", "kind": "schema", "op": "set", "path": ["political_inputs", "anchor_cycles", "2024", "House", "days"], "value": 0, "why": "a market window has at least one day"},
+    {"id": "A01", "target": "anchors", "kind": "schema", "op": "delete", "path": ["industries", "<industry>", "mentat", "workbook_sha256"], "why": "the console refuses a snapshot whose workbook sha it cannot compare"},
+    {"id": "A02", "target": "anchors", "kind": "schema", "op": "set", "path": ["industries", "<industry>", "coverage", "coverage_end"], "why": "a coverage end is an ISO date", "value": "2026-6-30"},
+    {"id": "A03", "target": "anchors", "kind": "schema", "op": "set", "path": ["industries", "<industry>", "pac_to_candidates", "cycles", "2024", "House", "D"], "why": "dollars are numbers", "value": "x"},
+    {"id": "A04", "target": "anchors", "kind": "schema", "op": "set", "path": ["schema_version"], "why": "a v2 snapshot is not a v1 snapshot", "value": 2},
+    {"id": "A05", "target": "anchors", "kind": "schema", "op": "set", "path": ["industries", "<industry>", "unexpected"], "why": "objects are closed", "value": {}},
+    {"id": "A06", "target": "anchors", "kind": "schema", "op": "set", "path": ["industries", "<industry>", "status", "lda"], "why": "a measure is ready or unavailable", "value": "maybe"},
+    {"id": "A07", "target": "anchors", "kind": "schema", "op": "set", "path": ["cpi", "multipliers", "2024"], "why": "a CPI multiplier is positive", "value": -1},
+    {"id": "A08", "target": "anchors", "kind": "schema", "op": "set", "path": ["industries", "<industry>", "general_giving", "cycles", "2024"], "why": "NaN / Inf are forbidden anywhere", "value": {"$nonfinite": "NaN"}},
+    {"id": "A09", "target": "anchors", "kind": "schema", "op": "delete", "path": ["unavailable"], "why": "the snapshot names the industries it could not anchor, even when there are none"},
+    {"id": "A10", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "pac_to_candidates", "cycles", "2024", "to_house_senate"], "why": "to_house_senate is the sum of the House and Senate parts", "value": 1},
+    {"id": "A11", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "pac_to_candidates", "single_pac"], "why": "single_pac is true exactly when one committee is listed", "value": true},
+    {"id": "A12", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "coverage", "coverage_end"], "why": "the last observed cut is the coverage end", "value": "2026-06-29"},
+    {"id": "A13", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "candidate_receipts", "thin_base", "2024", "House"], "why": "a thin-base flag agrees with its dollars and the threshold", "value": true},
+    {"id": "A14", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "general_giving", "observed", 0, "through"], "why": "observed cuts are strictly increasing", "value": "2030-01-31"},
+    {"id": "A15", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "general_giving", "observed"], "why": "a ready measure carries observed cuts", "value": []},
+    {"id": "A16", "target": "anchors", "kind": "invariant", "op": "set", "path": ["industries", "<industry>", "lda", "series", "income_total", "partial", "total"], "why": "a partial LDA total equals its quarters", "value": 1}
   ]
 }
