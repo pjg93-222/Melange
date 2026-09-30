@@ -9,20 +9,21 @@
       <div><h2 id="gf-title">Forecast giving</h2><p>Explore how growth and expected political power relate to later giving.</p></div>
       <button id="gf-export" type="button" class="secondary" disabled>Export scenario</button>
     </div>
-    <p class="gf-scope">Whole-industry scenarios for commercial banks, credit unions and auto manufacturers. Company and report filters do not apply.</p>
+    <p id="gf-scope" class="gf-scope">Industry scenarios. Company and report filters do not apply.</p>
     <p id="gf-load-status" role="status" aria-live="polite">Loading reviewed models…</p>
     <form id="gf-form" hidden>
       <div class="gf-settings">
         <label>Research industry<select id="gf-industry"></select></label>
         <label>As of<input id="gf-date" type="date" required></label>
-        <label>Political expectations<select id="gf-signal"><option value="control">Expected control</option><option value="seats">Expected seat gain</option></select></label>
-        <label>Political slopes<select id="gf-slopes"><option value="pooled">Pooled across industries</option><option value="industry">Industry-specific</option></select></label>
+        <label id="gf-signal-field">Political expectations<select id="gf-signal"><option value="control">Expected control</option><option value="seats">Expected seat gain</option></select></label>
+        <label id="gf-slopes-field">Political slopes<select id="gf-slopes"><option value="pooled">Pooled across industries</option><option value="industry">Industry-specific</option></select></label>
       </div>
       <p id="gf-model-note" class="gf-help"></p>
+      <p id="gf-anchors-note" class="gf-help"></p>
       <div class="gf-horizons" id="gf-horizons"></div>
       <details class="gf-disclosure">
-        <summary>Sources and remainder amounts</summary>
-        <p>Use comparable whole-industry amounts in constant 2025 dollars. PAC totals and PAC plus individual candidate giving are separate accounts.</p>
+        <summary id="gf-sources-summary">Sources and remainder amounts</summary>
+        <p id="gf-sources-note">Use comparable whole-industry amounts in constant 2025 dollars. PAC totals and PAC plus individual candidate giving are separate accounts.</p>
         <div class="gf-settings gf-provenance">
           <label>Assumption source<input id="gf-source" type="text" maxlength="500" placeholder="Forecast provider or scenario description"></label>
           <label>Assumptions dated<input id="gf-source-date" type="date"></label>

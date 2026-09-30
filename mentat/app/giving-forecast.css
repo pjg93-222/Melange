@@ -62,6 +62,15 @@
 .gf-evidence-table caption{text-align:left;font-weight:600;padding:18px 0 10px}
 .gf-notice{margin-top:18px!important;font-size:13px;color:var(--muted)}
 .gf-error{color:var(--chart-negative)}
+.giving-forecast [hidden]{display:none}
+/* Schema 2: two measures or bases side by side inside a horizon cell. */
+.gf-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px 22px;align-items:start}
+.gf-col{min-width:0;border-left:2px solid var(--line);padding-left:12px}
+.gf-col-title{display:block;font-size:13px;font-weight:600;line-height:1.35;margin-bottom:6px;color:var(--acu-plum)}
+.gf-value.gf-value-small{font-size:20px}
+.gf-pair + .gf-detail{margin-top:14px}
+.giving-forecast.gf-v2 .gf-settings{grid-template-columns:1.4fr .8fr}
+.giving-forecast.gf-v2 .gf-table th:first-child{width:16%}
 @media(max-width:1050px){.gf-settings{grid-template-columns:1fr 1fr}.gf-horizons{gap:22px}.giving-forecast{padding:22px}.gf-table :is(th,td){padding:16px 10px}.gf-value{font-size:22px}}
 @media(max-width:640px){
   .giving-forecast{padding:18px 16px;margin-top:8px}.giving-forecast h2{font-size:27px}
@@ -76,4 +85,6 @@
   .gf-comparison .gf-table th,.gf-comparison .gf-table td{display:block;width:100%;border:0;padding:8px 0}
   .gf-comparison .gf-table td::before{content:attr(data-horizon);display:block;font-size:12px;font-weight:600;color:var(--acu-purple);margin-bottom:8px}
   .gf-comparison .gf-table tbody th{font-size:20px}
+  .giving-forecast.gf-v2 .gf-settings{grid-template-columns:1fr}
+  .gf-pair{grid-template-columns:1fr}
 }

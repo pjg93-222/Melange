@@ -456,7 +456,7 @@ def _catalog_v2(b, today):
     return dict(schema_version=2, model_version=b['model_version'], model_sha256=b['sha256'], built_on=b['built_on'], as_of=today.isoformat(),
                 current_cycle=cycle, next_cycle=cycle + 2, currency=b['currency'], industries=offered, not_offered=not_offered,
                 share_models=b['share_models'], pac_model=b['pac_model'], lobby_model=b['lobby_model'], evidence=b['evidence'],
-                evidence_models={k: {f: v[f] for f in ('id', 'signal', 'chamber', 'specification', 'n', 'ordinary_p', 'calculator')} for k, v in b['evidence_models'].items()},
+                evidence_models={k: {f: v[f] for f in ('id', 'signal', 'chamber', 'specification', 'n', 'ordinary_p', 'training_cycles', 'calculator')} for k, v in b['evidence_models'].items()},
                 industry_slopes=b['industry_slopes'], validation_metrics=b['validation_metrics'], backtests=b['backtests'], sources=b['sources'],
                 saved_outlook=b['saved_outlook'], political_inputs=b['political_inputs'], anchor_contract=b['anchor_contract'],
                 interval_labels=b['interval_labels'], inference=b['inference'], validation=b['validation'], anchors=_anchors_status(b, offered),

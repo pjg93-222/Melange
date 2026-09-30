@@ -63,6 +63,7 @@
   }
   function horizonTitle(end, index) { return index === 0 ? 'Remainder of ' + end : (end - 1) + '–' + end; }
   function buildInputs() {
+    if (isV2()) return buildInputsV2();
     $('gf-horizons').replaceChildren(); $('gf-observed').replaceChildren();
     const current = cycle(), sector = industry(), signal = $('gf-signal').value;
     [current,current + 2].forEach((end,index) => {
@@ -100,6 +101,7 @@
     updateModelNote();
   }
   function updateModelNote() {
+    if (isV2()) return updateModelNoteV2();
     $('gf-model-note').textContent = ($('gf-signal').value === 'control'
       ? 'Control: selected pooled models by default. Scores from another provider are scenario assumptions, not automatically equivalent to IEM.'
       : 'Seats: the original full model is a sensitivity analysis. Seat gain was not retained by the selected pooled share models.') +
@@ -107,6 +109,7 @@
   }
   function value(id) { return $(id)?.value ?? ''; }
   function getRequest() {
+    if (isV2()) return getRequestV2();
     const current = cycle(), horizons = {};
     for (const end of [current,current + 2]) {
       const a = {growth_pct:value(`gf-${end}-growth`),prior_growth_pct:value(`gf-${end}-prior`),current_control:{},control_scores:{},seat_gains:{},annual_forecast_changes:{},candidate_budgets:{}};
@@ -172,6 +175,7 @@
     return cell;
   }
   function render(data) {
+    if (data.schema_version === 2) return renderV2(data);
     const root = $('gf-results'); root.replaceChildren();
     const section = node('div',null,'gf-comparison');
     section.append(node('h3',data.industry_label + ' · both horizons'));
@@ -212,6 +216,7 @@
     const body=node('tbody');rows.forEach(values=>{const tr=node('tr');values.forEach(value=>tr.append(node('td',value)));body.append(tr);});table.append(body);wrap.append(table);parent.append(wrap);
   }
   function renderEvidence() {
+    if (isV2()) return renderEvidenceV2();
     const root=$('gf-evidence-content');root.replaceChildren();
     root.append(node('p',`Model version ${catalog.model_version}. Three growth/PAC industries, 2012–2024; control/share samples end in 2022 and seat/share samples in 2024. Ordinary OLS p-values are conditional on the fitted specification and any variable selection.`));
     evidenceTable(root,'Growth relationships',['Outcome','Association','Ordinary p','Sample'],[
@@ -240,6 +245,7 @@
     sources.append(node('p','Package SHA-256 '+catalog.model_sha256));root.append(sources);
   }
   function historicalExample() {
+    if (isV2()) return historicalExampleV2();
     invalidate(); const sector=industry(),current=cycle();
     for(const end of [current,current+2]) {
       const ref=reference(sector.history,end);$(`gf-${end}-growth`).value=ref.growth_pct;
@@ -250,6 +256,7 @@
     message('Historical reference values loaded as an example. Add current assumptions and observed amounts for a usable remainder scenario.');
   }
   function savedOutlook() {
+    if (isV2()) return savedOutlookV2();
     const snapshot=catalog.saved_outlook, current=cycle();
     if(!snapshot || current!==snapshot.cycle)return;
     const signal=$('gf-signal').value;
@@ -259,6 +266,259 @@
     $('gf-source').value=snapshot[signal].description+'. 2026 politics only; growth, lobbying and next-cycle inputs are separate scenarios.';$('gf-source-date').value=snapshot.available_on;
     message('Saved '+current+' outlook loaded, dated '+snapshot.available_on+'. Enter cycle growth and next-cycle expectations. Control-market scores are a cross-provider sensitivity.');
   }
+  const SLOPE_LABELS = {R0: 'pooled slope', R1: 'industry-specific slope', R2: 'partially pooled slope'};
+  // ------------------------------------------------------------------------------------------------------------------
+  // Schema 2: Mentat-anchored projections. The bundle supplies relationships; every level comes from Mentat's anchor snapshot.
+  // ------------------------------------------------------------------------------------------------------------------
+  const isV2 = () => Boolean(catalog && catalog.schema_version === 2);
+  const period = cycleEnd => (cycleEnd - 1) + '–' + cycleEnd;
+  const range = (low, high, format = money) => format(low) + ' to ' + format(high);
+  const pct = value => signed(value) + '%';
+  function pair(columns) { const wrap = node('div', null, 'gf-pair'); columns.forEach(column => wrap.append(column)); return wrap; }
+  function column(title) { const col = node('div', null, 'gf-col'); col.append(node('b', title, 'gf-col-title')); return col; }
+  function flag(parent, text) { parent.append(node('div', text, 'gf-detail gf-error')); }
+  function configureForSchema() {
+    const v2 = isV2();
+    $('giving-forecast').classList.toggle('gf-v2', v2);
+    for (const id of ['gf-signal-field', 'gf-slopes-field']) if ($(id)) $(id).hidden = v2;
+    if ($('gf-scope')) $('gf-scope').textContent = catalog.scope;
+    if ($('gf-sources-summary')) $('gf-sources-summary').textContent = v2 ? 'Sources and assumption notes' : 'Sources and remainder amounts';
+    if (v2 && $('gf-sources-note')) $('gf-sources-note').textContent = 'Note where your assumptions come from. Observed amounts come from Mentat and need no entry. PAC, candidate-share and lobbying amounts are separate accounts.';
+    if (v2) $('gf-signal').value = 'control';
+  }
+  function anchorStatus(sector) {
+    const status = catalog.anchors && catalog.anchors.industries && catalog.anchors.industries[sector.id];
+    return status || {status: catalog.anchors ? catalog.anchors.status : 'anchor_unavailable', reason: catalog.anchors && catalog.anchors.reason};
+  }
+  function anchorNote(sector) {
+    const holder = $('gf-anchors-note'); if (!holder) return;
+    holder.replaceChildren();
+    const info = anchorStatus(sector);
+    if (info.status !== 'ready') { holder.append(node('span', (info.reason || 'The Mentat anchors are not available.') + ' Forecasts need a current anchor snapshot.', 'gf-error')); return; }
+    holder.append(node('span', `Mentat anchors: ${info.workbook}; collected ${info.collection_date}; observed through ${info.coverage_end}, the remainder starts the day after. ${info.current_cycle ? period(info.current_cycle) + ' is the open cycle.' : ''}`));
+    for (const text of info.flags || []) holder.append(node('div', text, 'gf-detail'));
+  }
+  function buildInputsV2() {
+    $('gf-horizons').replaceChildren(); $('gf-observed').replaceChildren();
+    const current = cycle(), sector = industry();
+    const outlook = catalog.saved_outlook && catalog.saved_outlook.cycle === current ? catalog.saved_outlook.control : null;
+    [current, current + 2].forEach((end, index) => {
+      const group = node('fieldset', null, 'gf-horizon'); group.append(node('legend', horizonTitle(end, index)));
+      group.append(node('p', index === 0 ? 'Model the full cycle from Mentat\'s previous cycle, then subtract what Mentat has observed to its coverage end.' : 'The next complete two-year election cycle, chained on the previous-cycle anchor.'));
+      const fields = node('div', null, 'gf-fields');
+      const anchorCycle = (catalog.anchors && catalog.anchors.industries && catalog.anchors.industries[sector.id] && catalog.anchors.industries[sector.id].current_cycle || current) - 2;
+      const ref = sector.history.find(row => row.cycle === anchorCycle);
+      field(fields, `gf-${end}-growth`, 'Cycle revenue growth (%)', {min:-99.9,max:500,wide:true,help:`100 × (total revenue in ${end-1}–${end} ÷ total revenue in ${end-3}–${end-2} − 1), on the historical revenue price basis.${ref ? ` ${anchorCycle} (the Mentat anchor cycle): ${number(ref.growth_pct)}%.` : ''}`});
+      for (const chamber of chambers) {
+        const political = field(fields, `gf-${end}-${chamber}-political`, chamber + ' R control score', {min:0,max:100,help:end === current && outlook ? 'Polymarket January–June mean, 0–100 (saved, editable).' : '0–100: Polymarket-style probability of Republican control, scaled like the January–June averages.'});
+        const majority = field(fields, `gf-${end}-${chamber}-majority`, chamber + ' control before election', {choices:[['','Choose control'],['0','Democratic'],['1','Republican']]});
+        if (end === current && outlook) { political.value = outlook[chamber].value; majority.value = outlook[chamber].current_control; }
+      }
+      field(fields, `gf-${end}-prior`, 'Prior-cycle growth override (%)', {min:-99.9,max:500,wide:true,help:index === 0 ? 'Blank uses the previous completed cycle when available.' : 'Blank uses the current-cycle growth assumption above.'});
+      group.append(fields);
+      const lobbying = node('details', null, 'gf-disclosure'); lobbying.append(node('summary', 'Annual lobbying assumptions'));
+      lobbying.append(node('p', 'Change in forecast annual industry growth from the preceding year, in percentage points. A relative change applies to the latest complete Melange LDA year; years beyond the next one need every change in between.'));
+      const lobbyFields = node('div', null, 'gf-fields');
+      for (let year = index === 0 ? Number($('gf-date').value.slice(0,4)) : end - 1; year <= end; year++) field(lobbyFields, `gf-${year}-lobby`, year + ' growth-forecast change (pp)', {min:-100,max:100});
+      lobbying.append(lobbyFields); group.append(lobbying); $('gf-horizons').append(group);
+    });
+    anchorNote(sector); updateModelNote();
+  }
+  function getRequestV2() {
+    const current = cycle(), horizons = {};
+    for (const end of [current, current + 2]) {
+      const a = {growth_pct:value(`gf-${end}-growth`),prior_growth_pct:value(`gf-${end}-prior`),current_control:{},control_scores:{},annual_forecast_changes:{}};
+      for (const chamber of chambers) { a.current_control[chamber] = value(`gf-${end}-${chamber}-majority`); a.control_scores[chamber] = value(`gf-${end}-${chamber}-political`); }
+      for (let year = end === current ? Number($('gf-date').value.slice(0,4)) : end - 1; year <= end; year++) a.annual_forecast_changes[year] = value(`gf-${year}-lobby`);
+      horizons[end] = a;
+    }
+    return {industry:value('gf-industry'),as_of:value('gf-date'),assumption_source:value('gf-source'),assumption_date:value('gf-source-date') || value('gf-date'),horizons};
+  }
+  function updateModelNoteV2() {
+    $('gf-model-note').textContent = 'Expected control: the January–June average of Polymarket, both for the 2024 anchor cycle and for 2026. Each slope follows the rule the model package records for its term (pooled slope, industry-specific slope or partially pooled slope). Seat forecasts are evidence only: no signal.';
+  }
+  function slopeText(slope, p) { return `${slope.label} · ordinary p = ${pvalue(p)}`; }
+  function pacMeasureColumn(m, p, current) {
+    const col = column(m.label);
+    if (m.status !== 'ready') { detail(col, m.reason || 'Unavailable.'); return col; }
+    const remaining = current && m.projected_remaining != null;
+    col.append(node('strong', remaining ? money(m.projected_remaining) : money(m.projected_cycle_real_2025), 'gf-value gf-value-small'));
+    detail(col, remaining ? 'Remainder from ' + m.remainder_starts : current ? (m.remainder_reason || 'Full cycle') : 'Full-cycle projection');
+    if (m.remainder_status === 'baseline_exceeded' || m.remainder_status === 'no_observed') flag(col, m.remainder_reason);
+    if (current) detail(col, 'Projected full cycle: ' + money(m.projected_cycle_real_2025));
+    if (m.observed) detail(col, `Observed through ${m.observed.through}: ${money(m.observed.amount_nominal)}${m.observed.face_value ? ' (face value; no ' + (p.anchor_cycle + 2) + ' CPI yet)' : ''}.`);
+    detail(col, `Mentat ${period(p.anchor_cycle)}: ${money(m.anchor_cycle_nominal)} nominal · ${money(m.anchor_cycle_real_2025)} in 2025 USD.`);
+    detail(col, 'Full-cycle coefficient interval: ' + range(m.cycle_coefficient_low, m.cycle_coefficient_high) + '.');
+    detail(col, 'Full-cycle prediction interval: ' + range(m.cycle_prediction_low, m.cycle_prediction_high) + '.');
+    if (remaining) {
+      detail(col, 'Remainder coefficient interval: ' + range(m.remaining_coefficient_low, m.remaining_coefficient_high) + '.');
+      detail(col, 'Remainder prediction interval: ' + range(m.remaining_prediction_low, m.remaining_prediction_high) + '.');
+    }
+    if ((m.flags || []).includes('single_pac_thin_base')) flag(col, m.flag_text);
+    return col;
+  }
+  function pacCellV2(p, current) {
+    const cell = node('td');
+    if (p.status !== 'ready') { detail(cell, p.reason || 'Enter expected cycle revenue growth.'); if (p.slope) detail(cell, slopeText(p.slope, p.ordinary_p)); return cell; }
+    cell.append(pair(p.measures.map(m => pacMeasureColumn(m, p, current))));
+    detail(cell, `${pct(p.change_pct)} vs the Mentat ${period(p.anchor_cycle)} level (${p.chained ? 'chained on a projection, ' + p.steps + ' steps' : 'previous cycle'}); coefficient interval ${pct(p.coefficient_interval_pct[0])} to ${pct(p.coefficient_interval_pct[1])}; prediction interval ${pct(p.prediction_interval_pct[0])} to ${pct(p.prediction_interval_pct[1])}.`);
+    detail(cell, slopeText(p.slope, p.ordinary_p));
+    if (p.extrapolation) flag(cell, 'Growth is outside this industry\'s historical range.');
+    return cell;
+  }
+  function basisColumn(b, s, current, chamber) {
+    const col = column(b.label);
+    if (b.status === 'unavailable') { detail(col, b.reason); return col; }
+    const remaining = current && b.projected_remaining_R_share != null;
+    if (b.status === 'outside_share_range') { flag(col, `Linear estimate ${percent(b.raw_projected_cycle_R_share)} is outside 0–100%; not clipped.`); }
+    else col.append(node('strong', percent(remaining ? b.projected_remaining_R_share : b.projected_cycle_R_share) + ' Republican', 'gf-value gf-value-small'));
+    detail(col, remaining ? 'Share of remaining two-party candidate giving' : 'Full-cycle two-party candidate share');
+    detail(col, `${period(s.anchor_cycle)} Mentat share ${percent(b.anchor_share)} → ${percent(b.raw_projected_cycle_R_share)} (${signed(s.change_pp)} pp).`);
+    detail(col, 'Coefficient interval: ' + range(b.cycle_coefficient_low, b.cycle_coefficient_high, percent) + '.');
+    detail(col, 'Prediction interval: ' + range(b.cycle_prediction_low, b.cycle_prediction_high, percent) + '.');
+    if (b.thin_base) flag(col, `Thin base: ${money(b.anchor_total_nominal)} of two-party ${chamber} giving in ${period(s.anchor_cycle)} (under $100K).`);
+    if (b.interval_outside_share_range) flag(col, 'The coefficient interval extends outside 0–100%; it is not clipped.');
+    if (current && b.remainder_status === 'ready') detail(col, `Remaining allocation: R ${money(b.projected_remaining_R_real_2025)} · D ${money(b.projected_remaining_D_real_2025)} of a projected ${money(b.projected_total_real_2025)} two-party total.`);
+    if (current && b.remainder_status === 'budget_inconsistent') { flag(col, 'budget_inconsistent: ' + b.remainder_reason); detail(col, `Projected total ${money(b.projected_total_real_2025)}; remaining R ${money(b.projected_remaining_R_real_2025)} · D ${money(b.projected_remaining_D_real_2025)} (not clipped).`); }
+    if (current && ['needs_inputs', 'no_observed', 'cycle_closed'].includes(b.remainder_status)) detail(col, b.remainder_reason);
+    if (b.observed) detail(col, `Observed through ${b.observed.through}: R ${money(b.observed.R)} · D ${money(b.observed.D)}.`);
+    return col;
+  }
+  function shareCellV2(s, current, chamber) {
+    const cell = node('td');
+    if (s.status !== 'ready') { detail(cell, s.reason || 'Enter the control inputs.'); detail(cell, slopeText({label: s.slope_label}, s.ordinary_p)); return cell; }
+    cell.append(pair(s.bases.map(b => basisColumn(b, s, current, chamber))));
+    const input = s.anchor_input;
+    detail(cell, `${period(s.anchor_cycle)} ${chamber} control input: ${number(input.p_rep * 100)} (${input.market} January–June, ${input.days}/${input.expected_days} days).`);
+    if (input.partial_window) flag(cell, `${input.days}/${input.expected_days} days of the ${s.anchor_cycle} window exist (from ${input.first_day}). ${input.note || ''}`);
+    detail(cell, `Change in R share: ${signed(s.change_pp)} pp on each basis. Political-input change alone: ${signed(s.political_change_pp)} pp; ${s.slope_label} ordinary p = ${pvalue(s.ordinary_p)}.`);
+    detail(cell, `Political-effect interval: ${signed(s.political_low_pp)} to ${signed(s.political_high_pp)} pp.`);
+    if (s.extrapolation) flag(cell, 'An input is outside the range this model was fitted on.');
+    const material = node('div', null, 'gf-material');
+    material.append(node('b', `Materiality test toward the expected advantaged party: ${s.expected_advantaged_party === 'Neither' ? 'neither party' : (s.expected_advantaged_party === 'R' ? 'Republicans' : 'Democrats')}`));
+    for (const test of s.materiality) detail(material, `${test.threshold_pp} pp: ${test.point_meets == null ? 'no favored party' : test.point_meets ? 'point estimate meets' : 'point estimate does not meet'}; ${test.ordinary_interval_meets ? 'ordinary interval also meets' : 'interval does not establish threshold'}.`, '');
+    cell.append(material); return cell;
+  }
+  function seriesColumn(s, row) {
+    const col = column(s.label);
+    const remaining = s.projected_remaining != null;
+    col.append(node('strong', money(remaining ? s.projected_remaining : s.projected), 'gf-value gf-value-small'));
+    detail(col, remaining ? 'Remainder after the observed quarters' : 'Full-year projection');
+    if (s.remainder_status === 'baseline_exceeded' || s.remainder_status === 'no_observed') flag(col, s.remainder_reason);
+    detail(col, `${row.base_year} level ${money(s.base_level)} · ${pct(row.change_pct)}${row.chained ? ' (chained, ' + row.steps + ' steps)' : ''}.`);
+    if (remaining) detail(col, `Observed ${s.observed.through_quarter === 'Q2' ? 'Q1+Q2' : 'through ' + s.observed.through_quarter}: ${money(s.observed.amount_nominal)}; full year ${money(s.projected)}.`);
+    detail(col, 'Coefficient interval: ' + range(s.coefficient_low, s.coefficient_high) + '.');
+    detail(col, 'Prediction interval: ' + range(s.prediction_low, s.prediction_high) + '.');
+    return col;
+  }
+  function lobbyCellV2(block) {
+    const cell = node('td');
+    if (block.status !== 'ready') { flag(cell, 'Not shown: ' + block.reason); return cell; }
+    for (const row of block.rows) {
+      detail(cell, String(row.year));
+      if (row.status === 'complete') { detail(cell, row.reason); continue; }
+      if (row.status !== 'ready') { detail(cell, row.reason || 'Enter an annual growth-forecast change.'); continue; }
+      cell.append(pair(row.series.map(s => seriesColumn(s, row))));
+    }
+    detail(cell, `${block.sector_label}, nominal dollars; relative change from the log refit on the latest complete year (${block.base_year}); ${slopeText(block.slope, block.ordinary_p)}.`);
+    detail(cell, 'The two series are different flows and are never added.');
+    return cell;
+  }
+  function renderRefusal(data) {
+    const root = $('gf-results'); root.replaceChildren();
+    const section = node('div', null, 'gf-comparison');
+    section.append(node('h3', data.industry_label + ' · not calculated'));
+    section.append(node('p', data.reason || 'The Mentat anchors cannot be used.', 'gf-error'));
+    section.append(node('p', data.status === 'anchor_stale' ? 'The anchors were built from an earlier version of the published Mentat report. The forecast refuses rather than mix old levels with a new report.' : 'Build the Mentat anchor snapshot (mentat/forecast/anchors/build_giving_anchors.py), then calculate again.', 'gf-notice'));
+    root.append(section);
+  }
+  function renderV2(data) {
+    if (data.status !== 'ready') return renderRefusal(data);
+    const root = $('gf-results'); root.replaceChildren();
+    const section = node('div', null, 'gf-comparison');
+    section.append(node('h3', data.industry_label + ' · both horizons'));
+    section.append(node('p', 'Mentat levels carried forward with changes estimated on OpenSecrets data, in 2025 dollars where a cycle is deflated. The coefficient interval covers slope uncertainty only; the prediction interval also carries the residual variance of the anchored step.', 'gf-help'));
+    const wrap = node('div', null, 'gf-table-wrap'), table = node('table', null, 'gf-table');
+    const head = node('thead'), hr = node('tr'); hr.append(node('th', 'Outcome'));
+    data.horizons.forEach((h, index) => { const th = node('th', horizonTitle(h.cycle, index)); th.scope = 'col'; th.append(node('small', h.starts ? h.starts + ' to ' + h.ends : 'Cycle ended on cutoff')); hr.append(th); });
+    head.append(hr); table.append(head);
+    const body = node('tbody');
+    const outcomes = [
+      ['PAC giving', 'The roster companies\' PACs\' own giving to House and Senate candidates, beside Mentat general giving (all channels). Never added.', h => pacCellV2(h.pac, h.horizon === 'current_remainder')],
+      ...chambers.map(chamber => [chamber + ' candidate mix', 'Republican share of two-party candidate giving, on two bases: employees and roster PACs.', h => shareCellV2(h.shares[chamber], h.horizon === 'current_remainder', chamber)]),
+      ['Lobbying (Melange LDA)', 'Annual level: outside-firm fees beside in-house expenses, never summed.', h => lobbyCellV2(h.lobbying)]
+    ];
+    for (const [title, description, renderCell] of outcomes) {
+      const row = node('tr'), th = node('th', title); th.scope = 'row'; th.append(node('small', description)); row.append(th);
+      data.horizons.forEach((h, i) => { const cell = renderCell(h); cell.dataset.horizon = horizonTitle(h.cycle, i); row.append(cell); }); body.append(row);
+    }
+    table.append(body); wrap.append(table); section.append(wrap);
+    const a = data.anchors;
+    section.append(node('p', `Mentat anchors: ${a.dataset} (${a.workbook}), collected ${a.collection_date}; observed through ${a.coverage_end}${a.coverage_reason ? ' (cut back from ' + a.rule_coverage_end + ': ' + a.coverage_reason + ')' : ''}; the remainder starts the next day. Anchor cycle ${period(a.anchor_cycle)}.`, 'gf-notice'));
+    for (const text of a.flags) section.append(node('p', text, 'gf-notice'));
+    section.append(node('p', `Assumptions: ${data.assumption_source}. Dated ${data.assumption_date}; giving cutoff ${data.as_of}.`, 'gf-notice'));
+    for (const text of data.notices) section.append(node('p', text, 'gf-notice'));
+    root.append(section);
+  }
+  function renderEvidenceV2() {
+    const root = $('gf-evidence-content'); root.replaceChildren();
+    const pac = catalog.pac_model, lobby = catalog.lobby_model, log = lobby.log_refit;
+    const control = catalog.share_models.control_House, seatHouse = catalog.evidence_models.seats_House;
+    const senate = catalog.share_models.control_Senate, j = senate.terms.indexOf('Forecast');
+    root.append(node('p', `Model version ${catalog.model_version}. ${pac.industries.length} growth/PAC industries, ${Math.min(...pac.cycles)}–${Math.max(...pac.cycles)}; control/share samples end in ${Math.max(...control.training_cycles)}${seatHouse ? ' and seat/share samples in ' + Math.max(...seatHouse.training_cycles) : ''}. Ordinary OLS p-values are conditional on the fitted specification and any variable selection. OpenSecrets data estimated these relationships; every level in the forecast is Mentat's.`));
+    const pacRows = [['PAC amount · pooled', `${signed((Math.exp(-pac.beta) - 1) * 100)}% for 1 industry SD lower cycle growth`, pvalue(pac.ordinary_p), `${pac.n} industry-cycles; pooled growth slope`]];
+    for (const [id, row] of Object.entries(pac.slopes)) { const label = (catalog.industries.find(i => i.id === id) || {label: id}).label; pacRows.push([`PAC amount · ${label}`, `${signed((Math.exp(-row.applied.beta) - 1) * 100)}% for 1 industry SD lower cycle growth`, pvalue(row.applied.ordinary_p), SLOPE_LABELS[row.applied.rule] + ' (applied)']); }
+    evidenceTable(root, 'Growth relationships', ['Outcome', 'Association', 'Ordinary p', 'Sample'], [...pacRows,
+      ['Lobbying change', `${signed((Math.exp(-log.beta) - 1) * 100)}% per 1 pp fall in forecast annual growth (relative, log refit)`, pvalue(log.ordinary_p), `${log.n} annual pairs across ${Object.keys(lobby.industry_pair_counts).length} industries; ${SLOPE_LABELS[log.slope_rule]}`]]);
+    root.append(node('p', 'PAC growth is standardized separately within each industry. Lobbying uses changes in forecast annual growth. The applied slope of each term follows the rule the model package records; the PAC slope is each industry\'s own unless the package says otherwise.'));
+    const own = catalog.industry_slopes.filter(r => r.sector === industry().id);
+    evidenceTable(root, industry().label + ': industry-specific political slopes (evidence)', ['Model', 'Standard contrast', 'R-share shift (pp)', 'Ordinary p'], own.map(r => [r.signal === 'seats' ? 'seats · ' + r.chamber + ' · no signal' : r.signal + ' · ' + r.chamber, r.signal === 'control' ? '+10 IEM score points' : r.chamber === 'House' ? '+10 R seats' : '+1 R seat', signed(r.effect_pp), pvalue(r.ordinary_p)]));
+    evidenceTable(root, 'Selected pooled political associations', ['Model / outcome', 'Contrast', 'Effect', 'Ordinary p'], catalog.evidence.map(r => [(r.signal === 'seats' ? 'seats (no signal) · ' : r.signal + ' · ') + r.chamber + ' · ' + ({RShare:'R share',log_R:'R dollars',log_D:'D dollars',log_TwoParty:'two-party dollars'}[r.outcome] || r.outcome), r.contrast, r.forecast_selected ? signed(r.effect) + ' ' + r.effect_unit : 'Forecast term not retained', pvalue(r.ordinary_p)]));
+    root.append(node('p', `Seat regressions stay here as evidence only: no signal, and they never enter the calculator. Separate party-dollar regressions are supporting evidence. The selected Senate control effect is ${senate.beta[j] < 0 ? 'negative' : 'positive'}: ${signed(senate.beta[j] * 10)} pp Republican share per +10 score points.`));
+    const validation = node('details', null, 'gf-disclosure'); validation.append(node('summary', 'Predictive checks and additional inference'));
+    evidenceTable(validation, 'Leave-one-election-out selected-model checks: lower error is better', ['Model', 'Comparison', 'Selected MAE (pp)', 'Baseline MAE (pp)', 'Test rows'], catalog.validation_metrics.filter(r => r.rows > 0).map(r => [r.case.replaceAll('__', ' · ').replace('pooled · RShare', 'R share'), r.comparison, number(r.stepwise_MAE), number(r.baseline_MAE), r.rows]));
+    if (catalog.backtests.length) evidenceTable(validation, 'Calculator-path backtests (no leakage)', ['Model', 'Design', 'Path', 'Rule', 'MAE', 'Units', 'Rows'], catalog.backtests.map(r => [r.model, r.design, r.path, r.rule, number(r.MAE), r.units, r.n]));
+    validation.append(node('p', `These tests assess historical fits, not a calibration of this Mentat-anchored calculator. Ordinary p-values remain primary. For context, PAC selection-repeated global p = ${pvalue(pac.selection_repeated_p)}; lobbying industry-cluster wild p = ${pvalue(lobby.wild_p)} and CR2 p = ${pvalue(lobby.CR2_p)}.`));
+    root.append(validation);
+    const anchors = node('details', null, 'gf-disclosure'); anchors.append(node('summary', 'Mentat anchors and the 2024 control input'));
+    const inputs = catalog.political_inputs;
+    anchors.append(node('p', inputs.market_rule));
+    for (const [cycleKey, row] of Object.entries(inputs.anchor_cycles)) for (const chamber of chambers) anchors.append(node('p', `${cycleKey} ${chamber}: P(R control) ${number(row[chamber].p_rep * 100)} (${row[chamber].days}/${row[chamber].expected_days} days from ${row[chamber].first_day}). ${row[chamber].note || ''}`));
+    for (const [id, info] of Object.entries(catalog.anchors.industries || {})) anchors.append(node('p', info.status === 'ready' ? `${id}: ${info.workbook}; collected ${info.collection_date}; observed through ${info.coverage_end}.` : `${id}: ${info.reason}`));
+    if (catalog.not_offered.length) anchors.append(node('p', 'Not shown: ' + catalog.not_offered.map(n => n.label + ' (' + n.reason + ')').join(' ')));
+    root.append(anchors);
+    const sources = node('details', null, 'gf-disclosure'); sources.append(node('summary', 'Model provenance'));
+    const snapshot = catalog.saved_outlook;
+    if (snapshot) {
+      sources.append(node('p', 'Saved political outlook: ' + snapshot.available_on + '. These stored values are offered as editable assumptions. They have not been refreshed for this session.'));
+      for (const chamber of chambers) {
+        const row = snapshot.control[chamber];
+        sources.append(node('p', `${chamber} control: ${number(row.value)} (${row.market}, ${row.window.start} to ${row.window.end}) · equal-weight Kalshi + Polymarket sensitivity ${number(row.sensitivity.equal_weight_score)}. ${row.notes || ''}`));
+      }
+    }
+    for (const source of catalog.sources) sources.append(node('p', source.file + ' · SHA-256 ' + source.sha256));
+    sources.append(node('p', 'Package SHA-256 ' + catalog.model_sha256)); root.append(sources);
+  }
+  function historicalExampleV2() {
+    invalidate(); const sector = industry(), current = cycle();
+    const info = anchorStatus(sector), anchorCycle = (info.current_cycle || current) - 2, ref = sector.history.find(row => row.cycle === anchorCycle);
+    const inputs = catalog.political_inputs.anchor_cycles[String(anchorCycle)];
+    for (const end of [current, current + 2]) {
+      if (ref) $(`gf-${end}-growth`).value = ref.growth_pct;
+      if (inputs) for (const chamber of chambers) { $(`gf-${end}-${chamber}-political`).value = inputs[chamber].p_rep * 100; $(`gf-${end}-${chamber}-majority`).value = inputs.current_control[chamber]; }
+    }
+    $('gf-source').value = 'Anchor-cycle growth and control example (no change from the Mentat previous cycle); not current expectations.'; $('gf-source-date').value = $('gf-date').value;
+    message('Anchor-cycle values loaded as an example: growth and control as in ' + period(anchorCycle) + ', so the projection equals the Mentat level. Change them to explore.');
+  }
+  function savedOutlookV2() {
+    const snapshot = catalog.saved_outlook, current = cycle();
+    if (!snapshot || current !== snapshot.cycle) return;
+    if (snapshot.available_on > $('gf-date').value) { message('This outlook was not yet available at the chosen cutoff. Use a later as-of date.', true); return; }
+    invalidate();
+    for (const chamber of chambers) { const row = snapshot.control[chamber]; $(`gf-${current}-${chamber}-political`).value = row.value; $(`gf-${current}-${chamber}-majority`).value = row.current_control; }
+    $('gf-source').value = snapshot.control.description; $('gf-source-date').value = snapshot.available_on;
+    message('Saved ' + current + ' outlook loaded, dated ' + snapshot.available_on + '. Enter cycle growth and next-cycle expectations.');
+  }
   async function initialize() {
     if(catalog)return;if(loading)return loading;
     loading=(async()=>{
@@ -267,11 +527,12 @@
         const [data,session]=await Promise.all([api('/api/forecast/catalog'),api('/api/session?light=1')]);
         if(!session.token)throw new Error('The console did not provide a session token. Reload the page.');
         sessionToken=session.token;catalog=data;
-        for(const row of data.industries){const option=node('option',row.label+' · '+row.code);option.value=row.id;$('gf-industry').append(option);}
+        configureForSchema();
+        for(const row of data.industries){const option=node('option',row.label+(row.code?' · '+row.code:''));option.value=row.id;$('gf-industry').append(option);}
         $('gf-date').value=data.as_of;$('gf-date').min=data.built_on;$('gf-date').max=data.as_of;$('gf-source-date').max=data.as_of;
         buildInputs();renderEvidence();$('gf-form').hidden=false;$('gf-load-status').hidden=true;
         const snapshot=data.saved_outlook;
-        if(snapshot && snapshot.cycle===cycle()) {
+        if(snapshot && snapshot.cycle===cycle() && !isV2()) {
           const row=node('div',null,'gf-saved-outlook'),button=node('button','Use saved '+snapshot.cycle+' outlook','secondary');button.type='button';button.addEventListener('click',savedOutlook);
           row.append(button,node('span','Saved '+snapshot.available_on+' · editable, not a live feed','gf-help'));$('gf-model-note').after(row);
         }

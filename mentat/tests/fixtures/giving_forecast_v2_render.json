@@ -643,7 +643,16 @@
      "industry:credit_unions": 0.7273043586242817
     },
     "signal": "seats",
-    "specification": "Original full seat-gain sensitivity; seat gain was not retained by selected pooled share model"
+    "specification": "Original full seat-gain sensitivity; seat gain was not retained by selected pooled share model",
+    "training_cycles": [
+     2012,
+     2014,
+     2016,
+     2018,
+     2020,
+     2022,
+     2024
+    ]
    },
    "seats_Senate": {
     "calculator": false,
@@ -661,7 +670,16 @@
      "industry:credit_unions": 0.8997715225400038
     },
     "signal": "seats",
-    "specification": "Original full seat-gain sensitivity; seat gain was not retained by selected pooled share model"
+    "specification": "Original full seat-gain sensitivity; seat gain was not retained by selected pooled share model",
+    "training_cycles": [
+     2012,
+     2014,
+     2016,
+     2018,
+     2020,
+     2022,
+     2024
+    ]
    }
   },
   "industries": [
