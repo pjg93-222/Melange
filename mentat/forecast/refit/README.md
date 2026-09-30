@@ -1,4 +1,4 @@
-# Giving Forecast refit pipeline (Phase 1: parity)
+# Giving Forecast refit pipeline (Phase 1 parity, Phase 2 bundle v2, Phase 5 refit agent)
 
 R pipeline that rebuilds every number of `mentat/app/data/giving-models-v1.json` from **raw inputs** and proves it reproduces the
 frozen v1 bundle and every Codex design file to the spec's tolerances. Phase 1 makes **no methodology change**: the v1 variable
@@ -43,7 +43,7 @@ machine with a threaded BLAS so a matrix product cannot differ in its last bits 
 
 ## Inputs
 
-`registry/inputs.json` pins 94 files by sha256 (OpenSecrets captures, FEC candidate masters, IBISWorld / CPI / control / LobbyView
+`registry/inputs.json` pins 98 files by sha256 (OpenSecrets captures, FEC candidate masters, IBISWorld / CPI / control / LobbyView
 workbooks, the IEM zip, the four 2026 daily market files, and the Codex design files as **parity references only**). Aliases
 resolve through `R/rf_config.R`. On first sight each file is copied into `<RUNTIME>/raw/<sha256>/<name>` and read from there, so
 a Downloads / Temp clean-up cannot break a refit. A pinned file whose hash changes fails gate G1 until the manifest is regenerated.
@@ -84,9 +84,47 @@ rule auto-pick, the whole v1 projection, the run (read-only, events, receipt, fa
 Fixtures in `tests/testthat/fixtures/` are copies of the earlier audit lanes' outputs (`robustness_pvalues.csv`, `fold_coefficients.csv`,
 `full_sample_slopes.csv`, `summary.csv`, `pac_prevchg_reconcile.csv`), used as numerical references.
 
-## Not in Phase 1
+## Phase 2: bundle v2 (asserted against the shared contract)
 
-Bundle schema v2 and its JSON Schema, the refit agent and new-industry detection, gates G4-G9, publish / rollback, the DL / own-slope
-choice in the bundle, the 2026 Jan-Jun input in `saved_outlook` (the window itself is built and tested: House 0.1903485028, Senate 0.5639529613),
-the optional R port of the LobbyView raw builder, and the IEM `max_contract_trade_age_days` column (no bundle number depends on it).
-The `lobby_differenced_controls` evidence regression needs inputs outside the v1 bundle and is not built.
+`rf_v2_context()` computes everything a refit needs; `rf_bundle_v2()` writes `giving-models-v2.json` exactly as `mentat/forecast/contracts/giving-models-v2.schema.json`
+demands (objects are closed; the schema, the example and the 16 shared negative controls are the contract and are read-only here). `R/rf_schema.R` validates with a hand-written
+validator of the contract's keyword subset (no JSON Schema package is installed); `tools/check_bundle_contract.py` runs the contract's own Python validator on a bundle as a second
+opinion, and `test-15-bundle-v2.R` asserts: the example validates, every shared control is rejected on the example AND on the writer's output, the writer's output validates in R and
+in Python, plus the numbers of ADDENDUM section F.
+
+* PAC: the auto-pick (`rf_select_rule`, a non-pooled rule must beat the pooled slope by 5% in every design) chose own slopes (R1). `pac_model.slopes[id].applied` is the slope the
+  calculator uses; `prediction.industries[id]` holds each industry's anchored-step residual (pairs (t-2, t)); `evidence` (open object) records the rule-selection table and the
+  calculator-path leave-one-election-out MAE per industry, which a later refit's G6 compares against.
+* Shares: pooled slope (R0) and the previous-cycle anchor; Polymarket-to-Polymarket control inputs (`political_inputs` 2024, `saved_outlook` 2026, Kalshi and the equal weight kept as sensitivities).
+* Lobbying: `lobby_model.log_refit` (`dly ~ dg + factor(year)`, -0.811% per point, p 0.029), the dollar model kept as evidence.
+* Seats are evidence only (`evidence_models`, `calculator: false`). `pac_complete` and the lobbying differenced-controls regressions stay in `regressions.txt`: the contract's evidence model requires a chamber.
+
+## Phase 5: the refit agent
+
+```
+Rscript run_refit.R --mode detect                                  # read-only scan of Mentat's report directory; queue industries the registry does not know
+Rscript run_refit.R --mode refit [--industry <id>] [--publish auto|never]
+Rscript run_refit.R --rollback <model_version>
+```
+* **Watcher** (`rf_agent_detect`): lists `* Industry Spending Overview.xlsx` in the report directory (mentat/config/report-directory.json, or `RF_REPORT_DIR`), reads each workbook's
+  export receipt (`<name>.audit/audit-manifest.json`) read-only, compares with the registry and with what it saw last (`<runtime>/agent/seen.json`). A workbook the registry does not know is queued
+  once (`<runtime>/agent/queue/<slug>.json`) with a `DATA_REQUEST.md` and a registry stub; declined industries are not re-flagged.
+* **Waiting for data**: an industry whose inputs are missing (property and casualty: OpenSecrets F3400 captures, and IBISWorld revenue that ends before the 2024 cycle) ends as
+  `WAITING_FOR_DATA` (exit 0, success event, `DATA_REQUEST.md`), never as a failure; the packet lists the gaps.
+* **Gates** (`R/rf_gates.R`): G0 environment, G1 inputs, G2 parity (the parity suite, in the same run), G3 panels, G4 sample adequacy (WARN, capability withheld with a stated reason),
+  G5 stability (HOLD), **G6 hard backtest gate: no existing industry's calculator-path leave-one-election-out MAE may exceed the published calculator's (new <= published + 1e-9)** (HOLD),
+  G7 bundle schema and completeness (FAIL), G8 consumer smoke (HOLD until `MENTAT_G8_CMD` names a v2-capable calculator command), G9 beats last-period naive (WARN only).
+  Decision: any FAIL, else any HOLD, else PUBLISH.
+* **Publish** (`R/rf_publish.R`): only on PUBLISH. Under the lock (`<runtime>/refit.lock`, stale after 6 h with a dead owner): stage, re-validate and hash-check the bundle, rename it into place as
+  `giving-models-v2.json` with its receipt, archive the pair under `<runtime>/published/<model_version>/`, then switch the pointer `giving-models-current.json` atomically. v1 stays where it is;
+  nothing is committed. `RF_PUBLISH_DIR` (default `mentat/app/data`) names the target. `--rollback <model_version>` restores an archived publish or the kept v1.
+* **Review packet** (`<run>/review/`): `REVIEW.md` (decision, gate table, rule-selection table, slopes, G6 table, log refit, data gaps, 2026 inputs, platform), `regressions.txt` (real
+  `summary(lm())` blocks plus the robustness block of every model, including the lobbying log refit), backtests, rule selection, robustness p-values, G4/G5/G6 tables, bundle diff, inputs.
+* **Glass Box**: run.start, stage.start/finish per stage, gate.result per gate, publish.start/done/hold, run.finish or a failure event.
+* **Platform**: every receipt carries `platform` (R version, BLAS, LAPACK, worker count). Results on another platform agree to ~1e-13 (a pod's ATLAS BLAS against a laptop's reference
+  BLAS); bundles are compared with `rf_bundle_diff()` (tolerances, run-identity fields ignored), never byte equality. Parallel == serial bit-for-bit holds within one platform.
+
+## Not built
+
+The IEM `max_contract_trade_age_days` column (no bundle number depends on it); the `lobby_differenced_controls` evidence regression; an R port of the LobbyView raw builder; the Python
+consumer and the anchor snapshot builder (other lanes). Gate G8 stays HOLD until the v2 calculator exists.

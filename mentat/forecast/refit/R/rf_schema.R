@@ -14,7 +14,7 @@ rf_schema_default_path <- function() file.path(rf_contracts_dir(), "giving-model
 
 .rf_is_type <- function(x, type) {
   switch(type,
-    object = is.list(x) && (length(x) == 0L || !is.null(names(x))),
+    object = is.list(x) && !is.null(names(x)),                          # JSON {} parses to a NAMED empty list, [] to an unnamed one
     array = is.list(x) && is.null(names(x)),
     string = is.character(x) && length(x) == 1L && !is.na(x),
     number = is.numeric(x) && length(x) == 1L && is.finite(x),
@@ -72,10 +72,6 @@ rf_schema_check <- function(x, node, root, path = "$") {
       else if (identical(extra, FALSE)) out <- c(out, paste0(child, ": unexpected property"))
       else if (is.list(extra)) out <- c(out, rf_schema_check(x[[k]], extra, root, child))
     }
-  } else if (is.list(x) && length(x) == 0L && is.null(names(x))) {       # empty: an empty object (from {}) or an empty array (from [])
-    for (k in unlist(node$required)) out <- c(out, paste0(path, ": missing required \"", k, "\""))
-    if (!is.null(node$minProperties) && node$minProperties > 0) out <- c(out, paste0(path, ": fewer than ", node$minProperties, " entries"))
-    if (!is.null(node$minItems) && node$minItems > 0) out <- c(out, paste0(path, ": fewer than ", node$minItems, " items"))
   } else if (is.list(x)) {
     if (!is.null(node$minItems) && length(x) < node$minItems) out <- c(out, paste0(path, ": fewer than ", node$minItems, " items"))
     if (!is.null(node$items)) for (i in seq_along(x)) out <- c(out, rf_schema_check(x[[i]], node$items, root, paste0(path, "[", i - 1L, "]")))

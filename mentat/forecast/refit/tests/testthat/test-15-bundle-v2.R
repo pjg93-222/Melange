@@ -206,3 +206,24 @@ test_that("backtests rows carry exactly the contract's keys and the chosen-rule 
   expect_equal(pr$MAE, 10.765, tolerance = 1e-4)
   expect_true(isTRUE(pr$beats_naive))
 })
+
+test_that("the contract's own Python validator (an independent implementation) accepts the writer's bundle and rejects every control", {
+  py <- Sys.which(c("python3", "python"))
+  py <- py[nzchar(py)][1]
+  skip_if(is.na(py), "no Python on this machine")
+  p <- file.path(tempdir(), "bundle_v2_py.json")
+  rf_write_json_atomic(test_bundle2(), p)
+  out <- suppressWarnings(system2(py, c(shQuote(file.path(.RF_HOME, "tools", "check_bundle_contract.py")), shQuote(p), shQuote(rf_contracts_dir())), stdout = TRUE, stderr = TRUE))
+  status <- attr(out, "status") %||% 0L
+  if (status != 0L) print(out)
+  expect_identical(status, 0L)
+  expect_true(any(grepl("problems: 0", out, fixed = TRUE)))
+  expect_true(any(grepl("negative controls accepted (must be none): []", out, fixed = TRUE)) || any(grepl("negative controls accepted", out)))
+})
+
+test_that("an empty withheld map is written as an object, never an array (caught by the independent validator)", {
+  b <- test_bundle2()
+  expect_identical(jsonlite::toJSON(b$industries$commercial_banks$withheld, auto_unbox = TRUE), jsonlite::toJSON(stats::setNames(list(), character(0)), auto_unbox = TRUE))
+  bad <- b; bad$industries$commercial_banks$withheld <- list()
+  expect_true(any(grepl("withheld", rf_validate_bundle(bad))))
+})

@@ -93,7 +93,7 @@ rf_v2_industries <- function(v) {
     i <- reg$industries[[id]]
     if (!(isTRUE(i$calculator) || id %in% rf_capable(reg, "pac"))) next
     caps <- list(pac = id %in% rf_capable(reg, "pac"), control = id %in% rf_capable(reg, "control"), lobbying = id %in% rf_capable(reg, "lobbying"))
-    withheld <- list()
+    withheld <- stats::setNames(list(), character(0))                       # written as {} (an empty object), never []
     for (m in c("pac", "control", "lobbying")) if (!caps[[m]]) withheld[[m]] <- rf_withheld_reason(i, m)
     for (w in v$adequacy$withheld[[id]] %||% list()) { caps[[w$model]] <- FALSE; withheld[[w$model]] <- w$reason }
     g <- p[p$sector == id, ]; g <- g[order(g$cycle_end), ]
