@@ -9,6 +9,7 @@ Schema 2 (giving-models-v2.json): the models only supply the RELATIONSHIPS (esti
 own anchor snapshot (owner rulings of 2026-09-30, see the section "Schema 2" below). Both bundle and snapshot are validated against the
 shared contract in mentat/forecast/contracts (brain DE-021).
 """
+import copy
 from datetime import date, timedelta
 from functools import lru_cache
 import hashlib
@@ -30,7 +31,7 @@ def _load(path, stamp, size):
     if version not in (1, 2):
         raise ValueError('Unsupported forecast model package. Rebuild the reviewed model package.')
     if version == 2:
-        problems = _contract().validate_kind(out, 'models')
+        problems = _contract().validate_model(out)                   # schema, then the cross-field invariants (the anchor auto-pick)
         if not problems:
             problems = _v2_contract_problems(out)
         if problems:
@@ -309,8 +310,9 @@ def project(request):
 # Schema 2: Mentat-anchored projections (owner rulings of 2026-09-30)
 #
 # The models are estimated on OpenSecrets whole-industry data; they only supply the RELATIONSHIPS. Every level comes from Mentat's own
-# anchor snapshot (mentat/forecast/anchors): % changes (PAC, lobbying) and pp changes (shares) are carried over from Mentat's previous
-# cycle (or, for lobbying, latest complete year). The snapshot is a separate file from the model bundle; the calculator refuses an
+# anchor snapshot (mentat/forecast/anchors): % changes (PAC, lobbying) are carried over from Mentat's previous cycle (or, for lobbying,
+# latest complete year); pp changes (shares) from the anchor the bundle records per industry x chamber (share_models.*.anchors: the
+# previous cycle, or the cycle of the same phase). The snapshot is a separate file from the model bundle; the calculator refuses an
 # industry whose snapshot workbook sha no longer matches the workbook published now (status anchor_stale).
 # ----------------------------------------------------------------------------------------------------------------------
 SLOPE_LABELS = {'R0': 'pooled slope', 'R1': 'industry-specific slope', 'R2': 'partially pooled slope'}
@@ -319,7 +321,12 @@ PAC_MEASURES = (('pac_to_candidates', 'Roster companies\' PACs: own giving to Ho
 SHARE_BASES = (('employee_candidate', 'Employees\' candidate giving'), ('pac_candidate', 'Roster PACs\' candidate giving'))
 LOBBY_SERIES = (('income_total', 'Outside-firm fees'), ('expenses_total', 'In-house expenses'))
 SUPPORTED_CONTRACT = dict(pac_measures={'pac_to_candidates', 'general_giving'}, share_bases={'employee_candidate', 'pac_candidate'},
-                          lobbying_series={'income_total', 'expenses_total'})
+                          lobbying_series={'income_total', 'expenses_total'}, share_anchors={'previous_cycle', 'same_phase'})
+# The share anchors this calculator implements (owner ruling 2026-09-30), as anchor_contract.share.anchor_options must declare them.
+# previous_cycle: Mentat cycle A = open cycle - 2 for both horizons, the next cycle chained through the open one (steps (cycle - A) / 2).
+# same_phase: Mentat cycle A = target cycle - 4, one step each (both anchors are observed Mentat cycles).
+SHARE_ANCHORS = {'previous_cycle': dict(cycle_offset=2, chained=True, label='previous cycle'),
+                 'same_phase': dict(cycle_offset=4, chained=False, label='same phase')}
 ANCHOR_FILE = Path(__file__).resolve().parents[1] / 'state' / 'giving-anchors' / 'giving-anchors-v1.json'
 CONTRACT_DIR = Path(__file__).resolve().parents[1] / 'forecast' / 'contracts'
 SEATS_TEXT = 'Seat forecasts are evidence only ("no signal"); the calculator uses expected control.'
@@ -421,6 +428,12 @@ def _v2_contract_problems(b):
         problems.append('share bases')
     if {m['id'] for m in c['lobbying']['series']} != SUPPORTED_CONTRACT['lobbying_series']:
         problems.append('lobbying series')
+    options = c['share']['anchor_options']
+    ids = [o['id'] for o in options]
+    if set(ids) != SUPPORTED_CONTRACT['share_anchors'] or len(ids) != len(set(ids)):
+        problems.append('share anchor options (the console implements previous_cycle and same_phase)')
+    elif any((o['cycle_offset'], o['chained']) != (SHARE_ANCHORS[o['id']]['cycle_offset'], SHARE_ANCHORS[o['id']]['chained']) for o in options):
+        problems.append('share anchor offsets (the console implements previous_cycle: 2, chained; same_phase: 4, one step)')
     for model_id, model in b['share_models'].items():
         if 'Forecast' not in model['terms']:
             problems.append(model_id + ' has no Forecast term')
@@ -627,26 +640,68 @@ def _v2_share_effect(m, ind_id, target, anchor):
             focal * d_forecast, focal_var * d_forecast ** 2, missing)
 
 
+def _share_anchor(ctx, m, ind_id, cycle):
+    """(anchor id, Mentat anchor cycle A, steps k, the bundle's anchor entry) of one share model x industry x horizon.
+
+    The entry is the auto-pick of the refit (share_models.*.anchors[id]); an industry without one (no control capability) takes the default."""
+    entry = m['anchors'].get(ind_id)
+    anchor = entry['anchor'] if entry else 'previous_cycle'
+    if anchor == 'same_phase':
+        return anchor, cycle - SHARE_ANCHORS['same_phase']['cycle_offset'], 1, entry
+    return anchor, ctx['anchor_cycle'], (cycle - ctx['anchor_cycle']) // 2, entry
+
+
+def _share_anchor_inputs(b, m, ind, chamber, a):
+    """(anchor-cycle inputs, the anchor_input block reported) for Mentat anchor cycle `a`, or None when the bundle has no control input or growth for it.
+
+    Control input: political_inputs.anchor_cycles[a] when present (2024), else the share model's own history row of this industry for `a`.
+    Growth: the history row when that is the source, with the industry's growth history as the fallback (and the only source for 2024)."""
+    mu, sd = ind['growth_mean'], ind['growth_sd']
+    political = b['political_inputs']['anchor_cycles'].get(str(a))
+    grown = next((r for r in ind['history'] if r['cycle'] == a), None)
+    if political is not None:
+        ch = political[chamber]
+        control, forecast = political['current_control'][chamber], ch['p_rep']
+        block = dict(cycle=a, p_rep=forecast, market=ch['market'], days=ch['days'], expected_days=ch['expected_days'], first_day=ch['first_day'],
+                     partial_window=ch['partial_window'], note=ch.get('note'), current_control=control, source='political_inputs')
+        rows = [grown]
+    else:
+        hist = next((r for r in m['history'] if r['industry'] == ind['id'] and r['cycle'] == a), None)
+        if hist is None:
+            return None
+        control, forecast = hist['current_control'], hist['forecast']
+        block = dict(cycle=a, p_rep=forecast, market=None, days=None, expected_days=None, first_day=None, partial_window=False,
+                     note='The ' + _period(a) + ' control input is the value the model was fitted on for that cycle (its training history row).',
+                     current_control=control, source='model_history')
+        rows = [hist, grown]
+    g = {key: next((r[key] for r in rows if r is not None and r.get(key) is not None), None) for key in ('growth_pct', 'prior_growth_pct')}
+    if control is None or forecast is None or g['growth_pct'] is None or g['prior_growth_pct'] is None:
+        return None
+    inputs = {'RMajNow': float(control), 'Forecast': forecast, 'G_prior': (g['prior_growth_pct'] - mu) / sd, 'G_current': (g['growth_pct'] - mu) / sd,
+              'Pres': float(a % 4 == 0)}
+    return inputs, block
+
+
 def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
     b, ind = ctx['b'], ctx['industry']
     m = b['share_models']['control_' + chamber]
-    k = (cycle - ctx['anchor_cycle']) // 2
+    anchor_id, a, k, entry = _share_anchor(ctx, m, ind['id'], cycle)
     row = m['slopes'].get(ind['id'])
     rule = row['applied']['rule'] if row else m['slope_rule']
-    anchor_input = b['political_inputs']['anchor_cycles'].get(str(ctx['anchor_cycle']))
-    out = dict(status='needs_inputs', chamber=chamber, model_id=m['id'], anchor_cycle=ctx['anchor_cycle'], steps=k, slope_rule=rule, slope_label=SLOPE_LABELS[rule],
+    out = dict(status='needs_inputs', chamber=chamber, model_id=m['id'], anchor_cycle=a, steps=k, slope_rule=rule, slope_label=SLOPE_LABELS[rule],
                ordinary_p=(row['applied']['ordinary_p'] if row and m['application'] == 'offset' else m['ordinary_p'].get('Forecast')),
-               specification=m['specification'], n=m['n'], training_cycles=m['training_cycles'], bases=[], combined_reference=None)
+               specification=m['specification'], n=m['n'], training_cycles=m['training_cycles'], bases=[], combined_reference=None,
+               anchor=anchor_id, anchor_label='Mentat ' + _period(a) + ' (' + SHARE_ANCHORS[anchor_id]['label'] + ')',
+               anchor_reason=entry['reason'] if entry else None, anchor_backtest=copy.deepcopy(entry['backtest']) if entry else None)
     if not ind['capabilities']['control']:
         return out | dict(status='withheld', reason=ind['withheld'].get('control') or 'The control model is withheld for this industry.')
-    ref = next((r for r in ind['history'] if r['cycle'] == ctx['anchor_cycle']), None)
+    if a > ctx['open_cycle'] - 2:
+        return out | dict(status='unavailable', reason='Mentat\'s ' + _period(a) + ' cycle is still open in the anchor snapshot, so it cannot anchor this share.')
+    found = _share_anchor_inputs(b, m, ind, chamber, a)
     step = m['prediction']['industries'].get(ind['id'])
-    if anchor_input is None or ref is None or step is None:
+    if found is None or step is None:
         return out | dict(status='withheld', reason='The model package has no anchor-cycle control input, growth history or residual variance for this industry.')
-    anchor_chamber = anchor_input[chamber]
-    out['anchor_input'] = dict(cycle=ctx['anchor_cycle'], p_rep=anchor_chamber['p_rep'], market=anchor_chamber['market'], days=anchor_chamber['days'],
-                               expected_days=anchor_chamber['expected_days'], first_day=anchor_chamber['first_day'], partial_window=anchor_chamber['partial_window'],
-                               note=anchor_chamber.get('note'), current_control=anchor_input['current_control'][chamber])
+    at_anchor, out['anchor_input'] = found
     majority = _number(_mapping(assumptions.get('current_control'), 'Current control').get(chamber), chamber + ' current control', 0, 1)
     if majority is not None and majority not in (0., 1.):
         raise ValueError('Current control must be Democratic (0) or Republican (1).')
@@ -655,9 +710,7 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
     mu, sd = ind['growth_mean'], ind['growth_sd']
     target = {'RMajNow': majority, 'Forecast': forecast, 'G_prior': None if prior is None else (prior - mu) / sd,
               'G_current': None if growth is None else (growth - mu) / sd, 'Pres': float(cycle % 4 == 0)}
-    anchor = {'RMajNow': float(anchor_input['current_control'][chamber]), 'Forecast': anchor_chamber['p_rep'], 'G_prior': (ref['prior_growth_pct'] - mu) / sd,
-              'G_current': (ref['growth_pct'] - mu) / sd, 'Pres': float(ctx['anchor_cycle'] % 4 == 0)}
-    effect, var, crit, f_effect, f_var, missing = _v2_share_effect(m, ind['id'], target, anchor)
+    effect, var, crit, f_effect, f_var, missing = _v2_share_effect(m, ind['id'], target, at_anchor)
     if missing:
         names = {'RMajNow': chamber + ' current-control assumption', 'Forecast': chamber + ' control score', 'G_current': 'cycle growth', 'G_prior': 'prior-cycle growth'}
         return out | dict(reason='Enter ' + ', '.join(names.get(t, t) for t in missing) + '.')
@@ -665,7 +718,7 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
     fh = crit * math.sqrt(max(0., f_var))
     directed, directed_low = f_effect * favored * 100, min((f_effect - fh) * favored, (f_effect + fh) * favored) * 100
     out.update(change_pp=effect * 100, political_change_pp=f_effect * 100, political_low_pp=(f_effect - fh) * 100, political_high_pp=(f_effect + fh) * 100,
-               forecast=forecast, baseline_forecast=anchor_chamber['p_rep'], expected_advantaged_party='R' if favored == 1 else 'D' if favored == -1 else 'Neither',
+               forecast=forecast, baseline_forecast=at_anchor['Forecast'], expected_advantaged_party='R' if favored == 1 else 'D' if favored == -1 else 'Neither',
                materiality=[dict(threshold_pp=t, toward_expected_party_pp=directed if favored else None, point_meets=directed >= t if favored else None,
                                  ordinary_interval_meets=directed_low >= t if favored else None) for t in (1, 3, 5)])
     hist = [r for r in m['history'] if r['industry'] == ind['id']]
@@ -684,10 +737,10 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
         if block['status'] != 'ready':
             basis.update(status='unavailable', reason=block['reason'])
             continue
-        parts = block['cycles'].get(str(ctx['anchor_cycle']), {}).get(chamber)
+        parts = block['cycles'].get(str(a), {}).get(chamber)
         total = None if parts is None else parts['D'] + parts['R']
         if not total or total <= 0:
-            basis.update(status='unavailable', reason='No two-party ' + chamber + ' candidate giving in the ' + _period(ctx['anchor_cycle']) + ' anchor cycle to take a share of.')
+            basis.update(status='unavailable', reason='No two-party ' + chamber + ' candidate giving in the ' + _period(a) + ' anchor cycle to take a share of.')
             continue
         share_a = parts['R'] / total
         raw = share_a + effect
@@ -703,7 +756,7 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
             continue
         basis.update(status='ready', projected_cycle_R_share=raw)
     if all(bases[bid]['status'] in ('unavailable', 'needs_inputs') for bid in bases):
-        return out | dict(status='unavailable', reason='Neither candidate-giving basis has a two-party ' + chamber + ' anchor for the ' + _period(ctx['anchor_cycle']) + ' cycle.')
+        return out | dict(status='unavailable', reason='Neither candidate-giving basis has a two-party ' + chamber + ' anchor for the ' + _period(a) + ' cycle.')
     out['status'] = 'ready'
     # Remainder: projected two-party total of each basis = projected measure x previous-cycle candidate share of that measure.
     if wstatus and wstatus != 'window':

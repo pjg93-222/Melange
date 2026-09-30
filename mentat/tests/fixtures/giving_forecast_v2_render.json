@@ -37,7 +37,21 @@
    },
    "schema_version": 1,
    "share": {
-    "anchor_cycle_rule": "previous_cycle",
+    "anchor_cycle_rule": "by_industry_chamber",
+    "anchor_options": [
+     {
+      "chained": true,
+      "cycle_offset": 2,
+      "id": "previous_cycle",
+      "label": "Mentat's previous cycle; the next cycle is chained through the open cycle"
+     },
+     {
+      "chained": false,
+      "cycle_offset": 4,
+      "id": "same_phase",
+      "label": "Mentat's cycle of the same phase (presidential or midterm); one step each, no chaining"
+     }
+    ],
     "bases": [
      {
       "anchor": "candidate_receipts.cycles[A]",
@@ -1499,7 +1513,7 @@
     2023
    ]
   },
-  "model_sha256": "0d83947ac1dfa6b6d0bacab4f1788c7a5b647ec7c20409ab6a4752e4e446dbdb",
+  "model_sha256": "b45a7bcdf6988b5e0ec25b90fe1a6bc2b77ca66e44e4090f4e999d8fe8af2b92",
   "model_version": "fixture-20260930-anchors",
   "next_cycle": 2028,
   "not_offered": [
@@ -1735,7 +1749,126 @@
   "share_models": {
    "control_House": {
     "adjusted_r2": 0.9836545689840998,
-    "anchor_rule": "previous_cycle",
+    "anchor_rule": "by_industry",
+    "anchors": {
+     "auto_light_duty_manufacturing": {
+      "anchor": "previous_cycle",
+      "backtest": {
+       "previous_cycle": {
+        "chrono_mae": 5.951,
+        "chrono_n": 2,
+        "loeo_mae": 0.852,
+        "loeo_n": 5
+       },
+       "same_phase": {
+        "chrono_mae": 5.438,
+        "chrono_n": 2,
+        "loeo_mae": 1.338,
+        "loeo_n": 5
+       },
+       "same_phase_gain": {
+        "chrono": 0.08620399932784406,
+        "loeo": -0.5704225352112677
+       }
+      },
+      "default": "previous_cycle",
+      "min_gain": 0.05,
+      "prediction": {
+       "previous_cycle": {
+        "critical_95": 2.144786687917804,
+        "df": 14,
+        "pairs": 15,
+        "sigma2": 0.0002285336254552925
+       },
+       "same_phase": {
+        "critical_95": 2.200985159,
+        "df": 11,
+        "pairs": 12,
+        "sigma2": 0.0002285336254552925
+       }
+      },
+      "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+      "slope_rule": "R0"
+     },
+     "commercial_banks": {
+      "anchor": "previous_cycle",
+      "backtest": {
+       "previous_cycle": {
+        "chrono_mae": 5.082,
+        "chrono_n": 2,
+        "loeo_mae": 1.544,
+        "loeo_n": 5
+       },
+       "same_phase": {
+        "chrono_mae": 5.958,
+        "chrono_n": 2,
+        "loeo_mae": 1.053,
+        "loeo_n": 5
+       },
+       "same_phase_gain": {
+        "chrono": -0.17237308146399055,
+        "loeo": 0.3180051813471503
+       }
+      },
+      "default": "previous_cycle",
+      "min_gain": 0.05,
+      "prediction": {
+       "previous_cycle": {
+        "critical_95": 2.144786687917804,
+        "df": 14,
+        "pairs": 15,
+        "sigma2": 0.0002285336254552925
+       },
+       "same_phase": {
+        "critical_95": 2.200985159,
+        "df": 11,
+        "pairs": 12,
+        "sigma2": 0.0002285336254552925
+       }
+      },
+      "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+      "slope_rule": "R0"
+     },
+     "credit_unions": {
+      "anchor": "previous_cycle",
+      "backtest": {
+       "previous_cycle": {
+        "chrono_mae": 6.365,
+        "chrono_n": 2,
+        "loeo_mae": 1.477,
+        "loeo_n": 5
+       },
+       "same_phase": {
+        "chrono_mae": 4.573,
+        "chrono_n": 2,
+        "loeo_mae": 1.522,
+        "loeo_n": 5
+       },
+       "same_phase_gain": {
+        "chrono": 0.28153967007069913,
+        "loeo": -0.030467163168584888
+       }
+      },
+      "default": "previous_cycle",
+      "min_gain": 0.05,
+      "prediction": {
+       "previous_cycle": {
+        "critical_95": 2.144786687917804,
+        "df": 14,
+        "pairs": 15,
+        "sigma2": 0.0002285336254552925
+       },
+       "same_phase": {
+        "critical_95": 2.200985159,
+        "df": 11,
+        "pairs": 12,
+        "sigma2": 0.0002285336254552925
+       }
+      },
+      "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+      "slope_rule": "R0"
+     }
+    },
     "application": "pooled",
     "beta": [
      0.41015943153514184,
@@ -2128,7 +2261,126 @@
    },
    "control_Senate": {
     "adjusted_r2": 0.7206754990341815,
-    "anchor_rule": "previous_cycle",
+    "anchor_rule": "by_industry",
+    "anchors": {
+     "auto_light_duty_manufacturing": {
+      "anchor": "previous_cycle",
+      "backtest": {
+       "previous_cycle": {
+        "chrono_mae": 2.164,
+        "chrono_n": 2,
+        "loeo_mae": 1.853,
+        "loeo_n": 5
+       },
+       "same_phase": {
+        "chrono_mae": 4.705,
+        "chrono_n": 2,
+        "loeo_mae": 3.516,
+        "loeo_n": 5
+       },
+       "same_phase_gain": {
+        "chrono": -1.1742144177449165,
+        "loeo": -0.8974635725849973
+       }
+      },
+      "default": "previous_cycle",
+      "min_gain": 0.05,
+      "prediction": {
+       "previous_cycle": {
+        "critical_95": 2.144786687917804,
+        "df": 14,
+        "pairs": 15,
+        "sigma2": 0.003564790842118616
+       },
+       "same_phase": {
+        "critical_95": 2.200985159,
+        "df": 11,
+        "pairs": 12,
+        "sigma2": 0.003564790842118616
+       }
+      },
+      "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+      "slope_rule": "R0"
+     },
+     "commercial_banks": {
+      "anchor": "previous_cycle",
+      "backtest": {
+       "previous_cycle": {
+        "chrono_mae": 4.543,
+        "chrono_n": 2,
+        "loeo_mae": 5.285,
+        "loeo_n": 5
+       },
+       "same_phase": {
+        "chrono_mae": 5.029,
+        "chrono_n": 2,
+        "loeo_mae": 6.528,
+        "loeo_n": 5
+       },
+       "same_phase_gain": {
+        "chrono": -0.10697776799471703,
+        "loeo": -0.23519394512771985
+       }
+      },
+      "default": "previous_cycle",
+      "min_gain": 0.05,
+      "prediction": {
+       "previous_cycle": {
+        "critical_95": 2.144786687917804,
+        "df": 14,
+        "pairs": 15,
+        "sigma2": 0.003564790842118616
+       },
+       "same_phase": {
+        "critical_95": 2.200985159,
+        "df": 11,
+        "pairs": 12,
+        "sigma2": 0.003564790842118616
+       }
+      },
+      "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+      "slope_rule": "R0"
+     },
+     "credit_unions": {
+      "anchor": "previous_cycle",
+      "backtest": {
+       "previous_cycle": {
+        "chrono_mae": 9.564,
+        "chrono_n": 2,
+        "loeo_mae": 6.912,
+        "loeo_n": 5
+       },
+       "same_phase": {
+        "chrono_mae": 10.502,
+        "chrono_n": 2,
+        "loeo_mae": 8.308,
+        "loeo_n": 5
+       },
+       "same_phase_gain": {
+        "chrono": -0.09807611877875377,
+        "loeo": -0.20196759259259256
+       }
+      },
+      "default": "previous_cycle",
+      "min_gain": 0.05,
+      "prediction": {
+       "previous_cycle": {
+        "critical_95": 2.144786687917804,
+        "df": 14,
+        "pairs": 15,
+        "sigma2": 0.003564790842118616
+       },
+       "same_phase": {
+        "critical_95": 2.200985159,
+        "df": 11,
+        "pairs": 12,
+        "sigma2": 0.003564790842118616
+       }
+      },
+      "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+      "slope_rule": "R0"
+     }
+    },
     "application": "pooled",
     "beta": [
      0.7845556337813133,
@@ -2875,6 +3127,25 @@
      "prior_growth_pct": 48.8853332525,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.958,
+         "chrono_n": 2,
+         "loeo_mae": 1.053,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.17237308146399055,
+         "loeo": 0.3180051813471503
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -2885,8 +3156,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.4491603053435114,
        "bases": [
         {
@@ -3025,6 +3299,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -3035,8 +3328,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.7064560439560439,
        "bases": [
         {
@@ -3325,6 +3621,25 @@
      "prior_growth_pct": 6.984134088271428,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.958,
+         "chrono_n": 2,
+         "loeo_mae": 1.053,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.17237308146399055,
+         "loeo": 0.3180051813471503
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -3335,8 +3650,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.4491603053435114,
        "bases": [
         {
@@ -3425,6 +3743,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -3435,8 +3772,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.7064560439560439,
        "bases": [
         {
@@ -3575,7 +3915,7 @@
     "coefficient": "Ordinary 95% coefficient interval",
     "prediction": "95% prediction interval (adds the anchored-step residual variance)"
    },
-   "model_sha256": "0d83947ac1dfa6b6d0bacab4f1788c7a5b647ec7c20409ab6a4752e4e446dbdb",
+   "model_sha256": "b45a7bcdf6988b5e0ec25b90fe1a6bc2b77ca66e44e4090f4e999d8fe8af2b92",
    "model_version": "fixture-20260930-anchors",
    "notices": [
     "Levels come from Mentat's own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.",
@@ -3675,6 +4015,25 @@
      "prior_growth_pct": 48.8853332525,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.958,
+         "chrono_n": 2,
+         "loeo_mae": 1.053,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.17237308146399055,
+         "loeo": 0.3180051813471503
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -3685,8 +4044,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "House",
        "combined_reference": null,
@@ -3709,6 +4071,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -3719,8 +4100,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "Senate",
        "combined_reference": null,
@@ -3804,6 +4188,25 @@
      "prior_growth_pct": null,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.958,
+         "chrono_n": 2,
+         "loeo_mae": 1.053,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.17237308146399055,
+         "loeo": 0.3180051813471503
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -3814,8 +4217,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "House",
        "combined_reference": null,
@@ -3838,6 +4244,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -3848,8 +4273,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "Senate",
        "combined_reference": null,
@@ -3888,7 +4316,7 @@
     "coefficient": "Ordinary 95% coefficient interval",
     "prediction": "95% prediction interval (adds the anchored-step residual variance)"
    },
-   "model_sha256": "0d83947ac1dfa6b6d0bacab4f1788c7a5b647ec7c20409ab6a4752e4e446dbdb",
+   "model_sha256": "b45a7bcdf6988b5e0ec25b90fe1a6bc2b77ca66e44e4090f4e999d8fe8af2b92",
    "model_version": "fixture-20260930-anchors",
    "notices": [
     "Levels come from Mentat's own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.",
@@ -4105,6 +4533,25 @@
      "prior_growth_pct": 48.8853332525,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.958,
+         "chrono_n": 2,
+         "loeo_mae": 1.053,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.17237308146399055,
+         "loeo": 0.3180051813471503
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -4115,8 +4562,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.4491603053435114,
        "bases": [
         {
@@ -4255,6 +4705,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -4265,8 +4734,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.7064560439560439,
        "bases": [
         {
@@ -4555,6 +5027,25 @@
      "prior_growth_pct": 6.984134088271428,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.958,
+         "chrono_n": 2,
+         "loeo_mae": 1.053,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.17237308146399055,
+         "loeo": 0.3180051813471503
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -4565,8 +5056,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.4491603053435114,
        "bases": [
         {
@@ -4655,6 +5149,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -4665,8 +5178,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.7064560439560439,
        "bases": [
         {
@@ -4805,7 +5321,1012 @@
     "coefficient": "Ordinary 95% coefficient interval",
     "prediction": "95% prediction interval (adds the anchored-step residual variance)"
    },
-   "model_sha256": "0d83947ac1dfa6b6d0bacab4f1788c7a5b647ec7c20409ab6a4752e4e446dbdb",
+   "model_sha256": "b45a7bcdf6988b5e0ec25b90fe1a6bc2b77ca66e44e4090f4e999d8fe8af2b92",
+   "model_version": "fixture-20260930-anchors",
+   "notices": [
+    "Levels come from Mentat's own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.",
+    "PAC, candidate-share and lobbying amounts are separate accounts and must not be added. The two lobbying series are never summed.",
+    "Observed amounts run to the Mentat coverage end (declared by rule) and the remainder starts the day after; rows dated later stay in the remainder.",
+    "Historical associations and scenario inputs are not validated future-giving predictions; the prediction interval adds the residual variance of the anchored step."
+   ],
+   "product": "Mentat-anchored industry scenarios",
+   "schema_version": 2,
+   "scope": "OpenSecrets F03 whole-industry accounting; separate from company/subindustry report scopes",
+   "status": "ready"
+  },
+  "banks_same_phase_house": {
+   "anchors": {
+    "anchor_cycle": 2024,
+    "built_at_utc": "2026-09-30T18:05:17Z",
+    "collection_date": "2026-09-09",
+    "coverage_end": "2026-06-30",
+    "coverage_reason": null,
+    "cpi_multiplier": 1.0410737386804656,
+    "current_cycle": 2026,
+    "dataset": "Banking",
+    "face_value_current_cycle": true,
+    "flags": [
+     "41 of 67 2026 collection work units are stored_complete (67 fetched) in the collection database's own progress table; the observed total is probably low.",
+     "Included receipts dated after the coverage end ($436,376.35) are not observed; they stay in the remainder window.",
+     "No 2026 CPI exists yet: 2025-2026 observed amounts are compared at face value.",
+     "Included receipts the accounting engine buckets as non_giving stay inside the Analysis Amount (reported, not changed): 2024 $191,721.37; 2026 $67,940.35."
+    ],
+    "index_token": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+    "measures": {
+     "candidate_receipts": "ready",
+     "general_giving": "ready",
+     "lda": "ready",
+     "pac_to_candidates": "ready"
+    },
+    "rule_coverage_end": "2026-06-30",
+    "thin_base_threshold_usd": 100000.0,
+    "workbook": "Banking Industry Spending Overview.xlsx",
+    "workbook_sha256": "842ba7a2312ffb03d969e8452c970b32f227fd09befcbf80f935a63c94e97bd3"
+   },
+   "as_of": "2026-09-30",
+   "assumption_date": "2026-09-30",
+   "assumption_source": "User scenario assumptions; not an automatically updated live forecast",
+   "currency": "2025 USD",
+   "horizons": [
+    {
+     "coverage_through": "2026-06-30",
+     "cycle": 2026,
+     "ends": "2026-12-31",
+     "horizon": "current_remainder",
+     "lobbying": {
+      "base_year": 2025,
+      "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
+      "ordinary_p": 0.029125763521828413,
+      "reason": null,
+      "rows": [
+       {
+        "base_year": 2025,
+        "chained": false,
+        "change_pct": 0.0,
+        "cumulative_change_pp": 0.0,
+        "forecast_change_pp": 0.0,
+        "series": [
+         {
+          "base_level": 23824000.0,
+          "coefficient_high": 23824000.0,
+          "coefficient_low": 23824000.0,
+          "id": "income_total",
+          "label": "Outside-firm fees",
+          "observed": {
+           "amount_nominal": 13367000.0,
+           "through": "2026-06-30",
+           "through_quarter": "Q2"
+          },
+          "prediction_high": 32389257.2226584,
+          "prediction_low": 17523803.404881377,
+          "projected": 23824000.0,
+          "projected_remaining": 10457000.0,
+          "remainder_reason": null,
+          "remainder_starts": "2026-07-01",
+          "remainder_status": "ready",
+          "remaining_coefficient_high": 10457000.0,
+          "remaining_coefficient_low": 10457000.0,
+          "remaining_prediction_high": 19022257.2226584,
+          "remaining_prediction_low": 4156803.404881377
+         },
+         {
+          "base_level": 65696931.0,
+          "coefficient_high": 65696931.0,
+          "coefficient_low": 65696931.0,
+          "id": "expenses_total",
+          "label": "In-house expenses",
+          "observed": {
+           "amount_nominal": 38975000.0,
+           "through": "2026-06-30",
+           "through_quarter": "Q2"
+          },
+          "prediction_high": 89316437.07598391,
+          "prediction_low": 48323543.617698826,
+          "projected": 65696931.0,
+          "projected_remaining": 26721931.0,
+          "remainder_reason": null,
+          "remainder_starts": "2026-07-01",
+          "remainder_status": "ready",
+          "remaining_coefficient_high": 26721931.0,
+          "remaining_coefficient_low": 26721931.0,
+          "remaining_prediction_high": 50341437.07598391,
+          "remaining_prediction_low": 9348543.617698826
+         }
+        ],
+        "status": "ready",
+        "steps": 1,
+        "year": 2026
+       }
+      ],
+      "sector": "bank",
+      "sector_label": "Melange LDA bank sector (total, not a bank tier)",
+      "slope": {
+       "beta": -0.00814763405915353,
+       "df": 55,
+       "label": "pooled slope",
+       "rule": "R0",
+       "se": 0.003636721200861857
+      },
+      "source_file": "sector_spend.csv",
+      "status": "ready",
+      "through": "2026-06-30"
+     },
+     "pac": {
+      "anchor_cycle": 2024,
+      "baseline_growth_pct": 48.8853332525,
+      "chained": false,
+      "change_pct": 13.207433813933148,
+      "coefficient_interval_pct": [
+       -16.679143521880917,
+       53.81410624483496
+      ],
+      "extrapolation": false,
+      "growth_pct": 6.984134088271428,
+      "interval_kind": "Coefficient interval for the slope; prediction interval adds the residual variance of the anchored step",
+      "measures": [
+       {
+        "anchor_cycle_nominal": 5692500.0,
+        "anchor_cycle_real_2025": 5926312.257438551,
+        "cycle_coefficient_high": 9115504.23205721,
+        "cycle_coefficient_low": 4937854.130465554,
+        "cycle_prediction_high": 12265136.498471338,
+        "cycle_prediction_low": 3669835.246362718,
+        "flags": [],
+        "id": "pac_to_candidates",
+        "label": "Roster companies' PACs: own giving to House and Senate candidates",
+        "observed": {
+         "amount_nominal": 4673000.0,
+         "amount_real_2025": 4673000.0,
+         "face_value": true,
+         "through": "2026-06-30"
+        },
+        "projected_cycle_real_2025": 6709026.026446754,
+        "projected_remaining": 2036026.026446754,
+        "remainder_reason": null,
+        "remainder_starts": "2026-07-01",
+        "remainder_status": "ready",
+        "remaining_coefficient_high": 4442504.23205721,
+        "remaining_coefficient_low": 264854.1304655541,
+        "remaining_prediction_high": 7592136.498471338,
+        "remaining_prediction_low": -1003164.7536372822,
+        "status": "ready"
+       },
+       {
+        "anchor_cycle_nominal": 26107204.16,
+        "anchor_cycle_real_2025": 27179524.641345404,
+        "cycle_coefficient_high": 41805942.90868012,
+        "cycle_coefficient_low": 22646212.717850417,
+        "cycle_prediction_high": 56250930.630805224,
+        "cycle_prediction_low": 16830766.448898617,
+        "flags": [],
+        "id": "general_giving",
+        "label": "Mentat general giving (all channels)",
+        "observed": {
+         "amount_nominal": 11566804.77,
+         "amount_real_2025": 11566804.77,
+         "face_value": true,
+         "through": "2026-06-30"
+        },
+        "projected_cycle_real_2025": 30769242.369292747,
+        "projected_remaining": 19202437.599292748,
+        "remainder_reason": null,
+        "remainder_starts": "2026-07-01",
+        "remainder_status": "ready",
+        "remaining_coefficient_high": 30239138.13868012,
+        "remaining_coefficient_low": 11079407.947850417,
+        "remaining_prediction_high": 44684125.86080523,
+        "remaining_prediction_low": 5263961.678898618,
+        "status": "ready"
+       }
+      ],
+      "ordinary_p": 0.383798652458122,
+      "prediction_interval_pct": [
+       -38.07556728458852,
+       106.9606859320729
+      ],
+      "slope": {
+       "beta": -0.0591425935675335,
+       "df": 9,
+       "label": "industry-specific slope",
+       "rule": "R1",
+       "se": 0.0646008205887455
+      },
+      "status": "ready",
+      "steps": 1
+     },
+     "period": "2025\u20132026",
+     "prior_growth_pct": 48.8853332525,
+     "shares": {
+      "House": {
+       "anchor": "same_phase",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 3.5573999999999995,
+         "chrono_n": 2,
+         "loeo_mae": 1.2352,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": 0.30000000000000004,
+         "loeo": 0.19999999999999996
+        }
+       },
+       "anchor_cycle": 2022,
+       "anchor_input": {
+        "current_control": 0,
+        "cycle": 2022,
+        "days": null,
+        "expected_days": null,
+        "first_day": null,
+        "market": null,
+        "note": "The 2021\u20132022 control input is the value the model was fitted on for that cycle (its training history row).",
+        "p_rep": 0.8608764810263115,
+        "partial_window": false,
+        "source": "model_history"
+       },
+       "anchor_label": "Mentat 2021\u20132022 (same phase)",
+       "anchor_reason": "same_phase chosen: its MAE is 20% (LOEO) and 30% (chronological) below previous_cycle (test fixture)",
+       "baseline_forecast": 0.8608764810263115,
+       "bases": [
+        {
+         "anchor_D": 1145626.0,
+         "anchor_R": 724679.59,
+         "anchor_share": 0.387465873959132,
+         "anchor_total_nominal": 1870305.5899999999,
+         "cycle_coefficient_high": 0.5138623127874883,
+         "cycle_coefficient_low": 0.4579632682645352,
+         "cycle_prediction_high": 0.538055959416339,
+         "cycle_prediction_low": 0.43376962163568455,
+         "flags": [],
+         "id": "employee_candidate",
+         "interval_outside_share_range": false,
+         "label": "Employees' candidate giving",
+         "observed": {
+          "D": 925420.15,
+          "D_real_2025": 925420.15,
+          "R": 334699.49,
+          "R_real_2025": 334699.49,
+          "face_value": true,
+          "through": "2026-06-30"
+         },
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.4859127905260118,
+         "projected_remaining_D_real_2025": 285928.61658860475,
+         "projected_remaining_R_real_2025": 810261.6150926058,
+         "projected_remaining_R_share": 0.7391614992316797,
+         "projected_total_real_2025": 2356309.8716812106,
+         "raw_projected_cycle_R_share": 0.4859127905260118,
+         "remainder_reason": null,
+         "remainder_starts": "2026-07-01",
+         "remainder_status": "ready",
+         "status": "ready",
+         "thin_base": false
+        },
+        {
+         "anchor_D": 2113500.0,
+         "anchor_R": 1802700.0,
+         "anchor_share": 0.46031867626781064,
+         "anchor_total_nominal": 3916200.0,
+         "cycle_coefficient_high": 0.5867151150961669,
+         "cycle_coefficient_low": 0.5308160705732139,
+         "cycle_prediction_high": 0.6109087617250176,
+         "cycle_prediction_low": 0.5066224239443632,
+         "flags": [],
+         "id": "pac_candidate",
+         "interval_outside_share_range": false,
+         "label": "Roster PACs' candidate giving",
+         "observed": {
+          "D": 1712500.0,
+          "D_real_2025": 1712500.0,
+          "R": 1907000.0,
+          "R_real_2025": 1907000.0,
+          "face_value": true,
+          "through": "2026-06-30"
+         },
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.5587655928346904,
+         "projected_remaining_D_real_2025": 768028.3072901326,
+         "projected_remaining_R_real_2025": 1234264.2524201903,
+         "projected_remaining_R_share": 0.6164255300427999,
+         "projected_total_real_2025": 5621792.559710323,
+         "raw_projected_cycle_R_share": 0.5587655928346904,
+         "remainder_reason": null,
+         "remainder_starts": "2026-07-01",
+         "remainder_status": "ready",
+         "status": "ready",
+         "thin_base": false
+        }
+       ],
+       "chamber": "House",
+       "change_pp": 9.844691656687976,
+       "combined_reference": {
+        "anchor_share": 0.43677130362886246,
+        "anchor_total_nominal": 5786505.59,
+        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
+        "observed": {
+         "D": 2637920.15,
+         "D_real_2025": 2637920.15,
+         "R": 2241699.49,
+         "R_real_2025": 2241699.49,
+         "face_value": true,
+         "through": "2026-06-30"
+        },
+        "projected_remaining_D_real_2025": 1070156.4975228328,
+        "projected_remaining_R_real_2025": 2028326.2938687,
+        "projected_remaining_R_share": 0.6546191895930382,
+        "projected_total_real_2025": 7978102.431391533,
+        "raw_projected_cycle_R_share": 0.5352182201957423,
+        "remainder_reason": null,
+        "remainder_status": "ready",
+        "status": "ready"
+       },
+       "expected_advantaged_party": "D",
+       "extrapolation": true,
+       "forecast": 0.17752326519337014,
+       "materiality": [
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": true,
+         "threshold_pp": 1,
+         "toward_expected_party_pp": 2.4844129249484888
+        },
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": false,
+         "threshold_pp": 3,
+         "toward_expected_party_pp": 2.4844129249484888
+        },
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": false,
+         "threshold_pp": 5,
+         "toward_expected_party_pp": 2.4844129249484888
+        }
+       ],
+       "model_id": "control_House",
+       "n": 18,
+       "ordinary_p": 0.007383125948010718,
+       "political_change_pp": -2.4844129249484888,
+       "political_high_pp": -0.8153703183980198,
+       "political_low_pp": -4.153455531498958,
+       "slope_label": "pooled slope",
+       "slope_rule": "R0",
+       "specification": "AICc-selected pooled model",
+       "status": "ready",
+       "steps": 1,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ]
+      },
+      "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
+       "anchor_cycle": 2024,
+       "anchor_input": {
+        "current_control": 0,
+        "cycle": 2024,
+        "days": 182,
+        "expected_days": 182,
+        "first_day": "2024-01-01",
+        "market": "polymarket",
+        "note": null,
+        "p_rep": 0.7064560439560439,
+        "partial_window": false,
+        "source": "political_inputs"
+       },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+       "baseline_forecast": 0.7064560439560439,
+       "bases": [
+        {
+         "anchor_D": 751277.47,
+         "anchor_R": 795893.13,
+         "anchor_share": 0.5144184681379028,
+         "anchor_total_nominal": 1547170.6,
+         "cycle_coefficient_high": 0.7174141252444611,
+         "cycle_coefficient_low": 0.5440709335672863,
+         "cycle_prediction_high": 0.7846178075847788,
+         "cycle_prediction_low": 0.4768672512269686,
+         "flags": [],
+         "id": "employee_candidate",
+         "interval_outside_share_range": false,
+         "label": "Employees' candidate giving",
+         "observed": {
+          "D": 525283.85,
+          "D_real_2025": 525283.85,
+          "R": 321465.17,
+          "R_real_2025": 321465.17,
+          "face_value": true,
+          "through": "2026-06-30"
+         },
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.6307425294058737,
+         "projected_remaining_D_real_2025": 148039.89762882842,
+         "projected_remaining_R_real_2025": 828664.3670006387,
+         "projected_remaining_R_share": 0.8484291479110205,
+         "projected_total_real_2025": 1823453.284629467,
+         "raw_projected_cycle_R_share": 0.6307425294058737,
+         "remainder_reason": null,
+         "remainder_starts": "2026-07-01",
+         "remainder_status": "ready",
+         "status": "ready",
+         "thin_base": false
+        },
+        {
+         "anchor_D": 302500.0,
+         "anchor_R": 549500.0,
+         "anchor_share": 0.6449530516431925,
+         "anchor_total_nominal": 852000.0,
+         "cycle_coefficient_high": 0.8479487087497508,
+         "cycle_coefficient_low": 0.674605517072576,
+         "cycle_prediction_high": 0.9151523910900685,
+         "cycle_prediction_low": 0.6074018347322583,
+         "flags": [],
+         "id": "pac_candidate",
+         "interval_outside_share_range": false,
+         "label": "Roster PACs' candidate giving",
+         "observed": {
+          "D": 229000.0,
+          "D_real_2025": 229000.0,
+          "R": 761500.0,
+          "R_real_2025": 761500.0,
+          "face_value": true,
+          "through": "2026-06-30"
+         },
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.7612771129111634,
+         "projected_remaining_D_real_2025": 10712.173794389557,
+         "projected_remaining_R_real_2025": 2931.906053240644,
+         "projected_remaining_R_share": 0.21488485013152997,
+         "projected_total_real_2025": 1004144.0798476302,
+         "raw_projected_cycle_R_share": 0.7612771129111634,
+         "remainder_reason": null,
+         "remainder_starts": "2026-07-01",
+         "remainder_status": "ready",
+         "status": "ready",
+         "thin_base": false
+        }
+       ],
+       "chamber": "Senate",
+       "change_pp": 11.632406126797095,
+       "combined_reference": {
+        "anchor_share": 0.5607742650731048,
+        "anchor_total_nominal": 2399170.6,
+        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
+        "observed": {
+         "D": 754283.85,
+         "D_real_2025": 754283.85,
+         "R": 1082965.17,
+         "R_real_2025": 1082965.17,
+         "face_value": true,
+         "through": "2026-06-30"
+        },
+        "projected_remaining_D_real_2025": 158752.071423218,
+        "projected_remaining_R_real_2025": 831596.2730538792,
+        "projected_remaining_R_share": 0.8397007756830867,
+        "projected_total_real_2025": 2827597.364477097,
+        "raw_projected_cycle_R_share": 0.6770983263410757,
+        "remainder_reason": null,
+        "remainder_status": "ready",
+        "status": "ready"
+       },
+       "expected_advantaged_party": "R",
+       "extrapolation": true,
+       "forecast": 0.5571359723756907,
+       "materiality": [
+        {
+         "ordinary_interval_meets": true,
+         "point_meets": true,
+         "threshold_pp": 1,
+         "toward_expected_party_pp": 6.34584608239895
+        },
+        {
+         "ordinary_interval_meets": true,
+         "point_meets": true,
+         "threshold_pp": 3,
+         "toward_expected_party_pp": 6.34584608239895
+        },
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": true,
+         "threshold_pp": 5,
+         "toward_expected_party_pp": 6.34584608239895
+        }
+       ],
+       "model_id": "control_Senate",
+       "n": 18,
+       "ordinary_p": 0.000721705456463732,
+       "political_change_pp": 6.34584608239895,
+       "political_high_pp": 9.415704536448052,
+       "political_low_pp": 3.2759876283498466,
+       "slope_label": "pooled slope",
+       "slope_rule": "R0",
+       "specification": "AICc-selected pooled model",
+       "status": "ready",
+       "steps": 1,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ]
+      }
+     },
+     "starts": "2026-07-01"
+    },
+    {
+     "coverage_through": null,
+     "cycle": 2028,
+     "ends": "2028-12-31",
+     "horizon": "next_complete",
+     "lobbying": {
+      "base_year": 2025,
+      "note": "Melange LDA sector level, nominal dollars. income_total = fees paid to outside firms; expenses_total = the client's own in-house spending. The two series are different flows and are never added. The sector roster is wider than Mentat's ten companies.",
+      "ordinary_p": 0.029125763521828413,
+      "reason": null,
+      "rows": [
+       {
+        "base_year": 2025,
+        "chained": true,
+        "change_pct": 0.0,
+        "cumulative_change_pp": 0.0,
+        "forecast_change_pp": 0.0,
+        "series": [
+         {
+          "base_level": 23824000.0,
+          "coefficient_high": 23824000.0,
+          "coefficient_low": 23824000.0,
+          "id": "income_total",
+          "label": "Outside-firm fees",
+          "prediction_high": 36783360.74126618,
+          "prediction_low": 15430427.360685539,
+          "projected": 23824000.0
+         },
+         {
+          "base_level": 65696931.0,
+          "coefficient_high": 65696931.0,
+          "coefficient_low": 65696931.0,
+          "id": "expenses_total",
+          "label": "In-house expenses",
+          "prediction_high": 101433592.70345339,
+          "prediction_low": 42550861.38412818,
+          "projected": 65696931.0
+         }
+        ],
+        "status": "ready",
+        "steps": 2,
+        "year": 2027
+       },
+       {
+        "base_year": 2025,
+        "chained": true,
+        "change_pct": 0.0,
+        "cumulative_change_pp": 0.0,
+        "forecast_change_pp": 0.0,
+        "series": [
+         {
+          "base_level": 23824000.0,
+          "coefficient_high": 23824000.0,
+          "coefficient_low": 23824000.0,
+          "id": "income_total",
+          "label": "Outside-firm fees",
+          "prediction_high": 40555199.5899996,
+          "prediction_low": 13995319.508671802,
+          "projected": 23824000.0
+         },
+         {
+          "base_level": 65696931.0,
+          "coefficient_high": 65696931.0,
+          "coefficient_low": 65696931.0,
+          "id": "expenses_total",
+          "label": "In-house expenses",
+          "prediction_high": 111834794.70934486,
+          "prediction_low": 38593415.88667584,
+          "projected": 65696931.0
+         }
+        ],
+        "status": "ready",
+        "steps": 3,
+        "year": 2028
+       }
+      ],
+      "sector": "bank",
+      "sector_label": "Melange LDA bank sector (total, not a bank tier)",
+      "slope": {
+       "beta": -0.00814763405915353,
+       "df": 55,
+       "label": "pooled slope",
+       "rule": "R0",
+       "se": 0.003636721200861857
+      },
+      "source_file": "sector_spend.csv",
+      "status": "ready",
+      "through": "2026-06-30"
+     },
+     "pac": {
+      "anchor_cycle": 2024,
+      "baseline_growth_pct": 48.8853332525,
+      "chained": true,
+      "change_pct": 13.207433813933148,
+      "coefficient_interval_pct": [
+       -16.679143521880917,
+       53.81410624483496
+      ],
+      "extrapolation": false,
+      "growth_pct": 6.984134088271428,
+      "interval_kind": "Coefficient interval for the slope; prediction interval adds the residual variance of 2 chained steps",
+      "measures": [
+       {
+        "anchor_cycle_nominal": 5692500.0,
+        "anchor_cycle_real_2025": 5926312.257438551,
+        "cycle_coefficient_high": 9115504.23205721,
+        "cycle_coefficient_low": 4937854.130465554,
+        "cycle_prediction_high": 14618999.116225742,
+        "cycle_prediction_low": 3078940.6214261157,
+        "flags": [],
+        "id": "pac_to_candidates",
+        "label": "Roster companies' PACs: own giving to House and Senate candidates",
+        "projected_cycle_real_2025": 6709026.026446754,
+        "status": "ready"
+       },
+       {
+        "anchor_cycle_nominal": 26107204.16,
+        "anchor_cycle_real_2025": 27179524.641345404,
+        "cycle_coefficient_high": 41805942.90868012,
+        "cycle_coefficient_low": 22646212.717850417,
+        "cycle_prediction_high": 67046323.15189548,
+        "cycle_prediction_low": 14120778.462905379,
+        "flags": [],
+        "id": "general_giving",
+        "label": "Mentat general giving (all channels)",
+        "projected_cycle_real_2025": 30769242.369292747,
+        "status": "ready"
+       }
+      ],
+      "ordinary_p": 0.383798652458122,
+      "prediction_interval_pct": [
+       -48.04626405634446,
+       146.67952819860886
+      ],
+      "slope": {
+       "beta": -0.0591425935675335,
+       "df": 9,
+       "label": "industry-specific slope",
+       "rule": "R1",
+       "se": 0.0646008205887455
+      },
+      "status": "ready",
+      "steps": 2
+     },
+     "period": "2027\u20132028",
+     "prior_growth_pct": 6.984134088271428,
+     "shares": {
+      "House": {
+       "anchor": "same_phase",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 5.082,
+         "chrono_n": 2,
+         "loeo_mae": 1.544,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 3.5573999999999995,
+         "chrono_n": 2,
+         "loeo_mae": 1.2352,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": 0.30000000000000004,
+         "loeo": 0.19999999999999996
+        }
+       },
+       "anchor_cycle": 2024,
+       "anchor_input": {
+        "current_control": 1,
+        "cycle": 2024,
+        "days": 131,
+        "expected_days": 182,
+        "first_day": "2024-02-21",
+        "market": "polymarket",
+        "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
+        "p_rep": 0.4491603053435114,
+        "partial_window": true,
+        "source": "political_inputs"
+       },
+       "anchor_label": "Mentat 2023\u20132024 (same phase)",
+       "anchor_reason": "same_phase chosen: its MAE is 20% (LOEO) and 30% (chronological) below previous_cycle (test fixture)",
+       "baseline_forecast": 0.4491603053435114,
+       "bases": [
+        {
+         "anchor_D": 1312602.53,
+         "anchor_R": 686688.26,
+         "anchor_share": 0.34346592473424037,
+         "anchor_total_nominal": 1999290.79,
+         "cycle_coefficient_high": 0.3458650381491531,
+         "cycle_coefficient_low": 0.331587159151803,
+         "cycle_prediction_high": 0.38332092710816457,
+         "cycle_prediction_low": 0.2941312701927915,
+         "flags": [],
+         "id": "employee_candidate",
+         "interval_outside_share_range": false,
+         "label": "Employees' candidate giving",
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.33872609865047804,
+         "raw_projected_cycle_R_share": 0.33872609865047804,
+         "status": "ready",
+         "thin_base": false
+        },
+        {
+         "anchor_D": 2177000.0,
+         "anchor_R": 2593000.0,
+         "anchor_share": 0.5436058700209644,
+         "anchor_total_nominal": 4770000.0,
+         "cycle_coefficient_high": 0.5460049834358771,
+         "cycle_coefficient_low": 0.531727104438527,
+         "cycle_prediction_high": 0.5834608723948886,
+         "cycle_prediction_low": 0.49427121547951547,
+         "flags": [],
+         "id": "pac_candidate",
+         "interval_outside_share_range": false,
+         "label": "Roster PACs' candidate giving",
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.538866043937202,
+         "raw_projected_cycle_R_share": 0.538866043937202,
+         "status": "ready",
+         "thin_base": false
+        }
+       ],
+       "chamber": "House",
+       "change_pp": -0.4739826083762325,
+       "combined_reference": null,
+       "expected_advantaged_party": "D",
+       "extrapolation": true,
+       "forecast": 0.17752326519337014,
+       "materiality": [
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": false,
+         "threshold_pp": 1,
+         "toward_expected_party_pp": 0.9875691777072789
+        },
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": false,
+         "threshold_pp": 3,
+         "toward_expected_party_pp": 0.9875691777072789
+        },
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": false,
+         "threshold_pp": 5,
+         "toward_expected_party_pp": 0.9875691777072789
+        }
+       ],
+       "model_id": "control_House",
+       "n": 18,
+       "ordinary_p": 0.007383125948010718,
+       "political_change_pp": -0.9875691777072789,
+       "political_high_pp": -0.3241146376196502,
+       "political_low_pp": -1.6510237177949076,
+       "slope_label": "pooled slope",
+       "slope_rule": "R0",
+       "specification": "AICc-selected pooled model",
+       "status": "ready",
+       "steps": 1,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ]
+      },
+      "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 4.543,
+         "chrono_n": 2,
+         "loeo_mae": 5.285,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 5.029,
+         "chrono_n": 2,
+         "loeo_mae": 6.528,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.10697776799471703,
+         "loeo": -0.23519394512771985
+        }
+       },
+       "anchor_cycle": 2024,
+       "anchor_input": {
+        "current_control": 0,
+        "cycle": 2024,
+        "days": 182,
+        "expected_days": 182,
+        "first_day": "2024-01-01",
+        "market": "polymarket",
+        "note": null,
+        "p_rep": 0.7064560439560439,
+        "partial_window": false,
+        "source": "political_inputs"
+       },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
+       "baseline_forecast": 0.7064560439560439,
+       "bases": [
+        {
+         "anchor_D": 751277.47,
+         "anchor_R": 795893.13,
+         "anchor_share": 0.5144184681379028,
+         "anchor_total_nominal": 1547170.6,
+         "cycle_coefficient_high": 0.6102594107908963,
+         "cycle_coefficient_low": 0.49617271356137455,
+         "cycle_prediction_high": 0.7428208200665034,
+         "cycle_prediction_low": 0.3636113042857674,
+         "flags": [],
+         "id": "employee_candidate",
+         "interval_outside_share_range": false,
+         "label": "Employees' candidate giving",
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.5532160621761354,
+         "raw_projected_cycle_R_share": 0.5532160621761354,
+         "status": "ready",
+         "thin_base": false
+        },
+        {
+         "anchor_D": 302500.0,
+         "anchor_R": 549500.0,
+         "anchor_share": 0.6449530516431925,
+         "anchor_total_nominal": 852000.0,
+         "cycle_coefficient_high": 0.740793994296186,
+         "cycle_coefficient_low": 0.6267072970666642,
+         "cycle_prediction_high": 0.8733554035717931,
+         "cycle_prediction_low": 0.49414588779105706,
+         "flags": [],
+         "id": "pac_candidate",
+         "interval_outside_share_range": false,
+         "label": "Roster PACs' candidate giving",
+         "prediction_outside_share_range": false,
+         "projected_cycle_R_share": 0.6837506456814251,
+         "raw_projected_cycle_R_share": 0.6837506456814251,
+         "status": "ready",
+         "thin_base": false
+        }
+       ],
+       "chamber": "Senate",
+       "change_pp": 3.879759403823255,
+       "combined_reference": null,
+       "expected_advantaged_party": "R",
+       "extrapolation": false,
+       "forecast": 0.5571359723756907,
+       "materiality": [
+        {
+         "ordinary_interval_meets": true,
+         "point_meets": true,
+         "threshold_pp": 1,
+         "toward_expected_party_pp": 6.34584608239895
+        },
+        {
+         "ordinary_interval_meets": true,
+         "point_meets": true,
+         "threshold_pp": 3,
+         "toward_expected_party_pp": 6.34584608239895
+        },
+        {
+         "ordinary_interval_meets": false,
+         "point_meets": true,
+         "threshold_pp": 5,
+         "toward_expected_party_pp": 6.34584608239895
+        }
+       ],
+       "model_id": "control_Senate",
+       "n": 18,
+       "ordinary_p": 0.000721705456463732,
+       "political_change_pp": 6.34584608239895,
+       "political_high_pp": 9.415704536448052,
+       "political_low_pp": 3.2759876283498466,
+       "slope_label": "pooled slope",
+       "slope_rule": "R0",
+       "specification": "AICc-selected pooled model",
+       "status": "ready",
+       "steps": 2,
+       "training_cycles": [
+        2012,
+        2014,
+        2016,
+        2018,
+        2020,
+        2022
+       ]
+      }
+     },
+     "starts": "2027-01-01"
+    }
+   ],
+   "industry": "commercial_banks",
+   "industry_code": "F03",
+   "industry_label": "Commercial banks",
+   "inference": "Ordinary OLS p-values are primary. Industry slopes follow the refit auto-pick (pooled, own or DerSimonian-Laird blend); conditional on model selection",
+   "inputs": {
+    "as_of": "2026-09-30",
+    "horizons": {
+     "2026": {
+      "annual_forecast_changes": {
+       "2026": 0,
+       "2027": 0,
+       "2028": 0
+      },
+      "control_scores": {
+       "House": 17.752326519337014,
+       "Senate": 55.71359723756907
+      },
+      "current_control": {
+       "House": 1,
+       "Senate": 1
+      },
+      "growth_pct": 6.984134088271428
+     },
+     "2028": {
+      "annual_forecast_changes": {
+       "2026": 0,
+       "2027": 0,
+       "2028": 0
+      },
+      "control_scores": {
+       "House": 17.752326519337014,
+       "Senate": 55.71359723756907
+      },
+      "current_control": {
+       "House": 1,
+       "Senate": 1
+      },
+      "growth_pct": 6.984134088271428
+     }
+    },
+    "industry": "commercial_banks"
+   },
+   "interval_label": "Ordinary 95% coefficient interval; 95% prediction interval (adds the anchored-step residual variance)",
+   "interval_labels": {
+    "coefficient": "Ordinary 95% coefficient interval",
+    "prediction": "95% prediction interval (adds the anchored-step residual variance)"
+   },
+   "model_sha256": "33a3cbd029cb6b0a67c407d609e23a069fd9af79e76e5cbc16ffc5c44bc605ce",
    "model_version": "fixture-20260930-anchors",
    "notices": [
     "Levels come from Mentat's own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.",
@@ -4871,7 +6392,7 @@
     "coefficient": "Ordinary 95% coefficient interval",
     "prediction": "95% prediction interval (adds the anchored-step residual variance)"
    },
-   "model_sha256": "0d83947ac1dfa6b6d0bacab4f1788c7a5b647ec7c20409ab6a4752e4e446dbdb",
+   "model_sha256": "b45a7bcdf6988b5e0ec25b90fe1a6bc2b77ca66e44e4090f4e999d8fe8af2b92",
    "model_version": "fixture-20260930-anchors",
    "notices": [
     "The Mentat anchors were built from an earlier version of Banking Industry Spending Overview.xlsx (anchor sha256 842ba7a2, published eeeeeeee). Rebuild the anchors."
@@ -5090,6 +6611,25 @@
      "prior_growth_pct": 34.8042488413,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 6.365,
+         "chrono_n": 2,
+         "loeo_mae": 1.477,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 4.573,
+         "chrono_n": 2,
+         "loeo_mae": 1.522,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": 0.28153967007069913,
+         "loeo": -0.030467163168584888
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -5100,8 +6640,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.4491603053435114,
        "bases": [
         {
@@ -5244,6 +6787,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 9.564,
+         "chrono_n": 2,
+         "loeo_mae": 6.912,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 10.502,
+         "chrono_n": 2,
+         "loeo_mae": 8.308,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.09807611877875377,
+         "loeo": -0.20196759259259256
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -5254,8 +6816,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.7064560439560439,
        "bases": [
         {
@@ -5549,6 +7114,25 @@
      "prior_growth_pct": 9.287112288928572,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 6.365,
+         "chrono_n": 2,
+         "loeo_mae": 1.477,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 4.573,
+         "chrono_n": 2,
+         "loeo_mae": 1.522,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": 0.28153967007069913,
+         "loeo": -0.030467163168584888
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 1,
@@ -5559,8 +7143,11 @@
         "market": "polymarket",
         "note": "Kalshi has no 2024 January-June data (its 2024 series starts 2024-09-12). Polymarket window is partial: 131 of 182 days, from 2024-02-21.",
         "p_rep": 0.4491603053435114,
-        "partial_window": true
+        "partial_window": true,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.4491603053435114,
        "bases": [
         {
@@ -5653,6 +7240,25 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": {
+        "previous_cycle": {
+         "chrono_mae": 9.564,
+         "chrono_n": 2,
+         "loeo_mae": 6.912,
+         "loeo_n": 5
+        },
+        "same_phase": {
+         "chrono_mae": 10.502,
+         "chrono_n": 2,
+         "loeo_mae": 8.308,
+         "loeo_n": 5
+        },
+        "same_phase_gain": {
+         "chrono": -0.09807611877875377,
+         "loeo": -0.20196759259259256
+        }
+       },
        "anchor_cycle": 2024,
        "anchor_input": {
         "current_control": 0,
@@ -5663,8 +7269,11 @@
         "market": "polymarket",
         "note": null,
         "p_rep": 0.7064560439560439,
-        "partial_window": false
+        "partial_window": false,
+        "source": "political_inputs"
        },
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "baseline_forecast": 0.7064560439560439,
        "bases": [
         {
@@ -5805,7 +7414,7 @@
     "coefficient": "Ordinary 95% coefficient interval",
     "prediction": "95% prediction interval (adds the anchored-step residual variance)"
    },
-   "model_sha256": "0d83947ac1dfa6b6d0bacab4f1788c7a5b647ec7c20409ab6a4752e4e446dbdb",
+   "model_sha256": "b45a7bcdf6988b5e0ec25b90fe1a6bc2b77ca66e44e4090f4e999d8fe8af2b92",
    "model_version": "fixture-20260930-anchors",
    "notices": [
     "Levels come from Mentat's own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.",
@@ -5876,7 +7485,11 @@
      "prior_growth_pct": null,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": null,
        "anchor_cycle": 2024,
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": null,
        "bases": [],
        "chamber": "House",
        "combined_reference": null,
@@ -5899,7 +7512,11 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": null,
        "anchor_cycle": 2024,
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": null,
        "bases": [],
        "chamber": "Senate",
        "combined_reference": null,
@@ -5949,7 +7566,11 @@
      "prior_growth_pct": null,
      "shares": {
       "House": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": null,
        "anchor_cycle": 2024,
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": null,
        "bases": [],
        "chamber": "House",
        "combined_reference": null,
@@ -5972,7 +7593,11 @@
        ]
       },
       "Senate": {
+       "anchor": "previous_cycle",
+       "anchor_backtest": null,
        "anchor_cycle": 2024,
+       "anchor_label": "Mentat 2023\u20132024 (previous cycle)",
+       "anchor_reason": null,
        "bases": [],
        "chamber": "Senate",
        "combined_reference": null,
@@ -6045,7 +7670,7 @@
     "coefficient": "Ordinary 95% coefficient interval",
     "prediction": "95% prediction interval (adds the anchored-step residual variance)"
    },
-   "model_sha256": "0d83947ac1dfa6b6d0bacab4f1788c7a5b647ec7c20409ab6a4752e4e446dbdb",
+   "model_sha256": "b45a7bcdf6988b5e0ec25b90fe1a6bc2b77ca66e44e4090f4e999d8fe8af2b92",
    "model_version": "fixture-20260930-anchors",
    "notices": [
     "Levels come from Mentat's own data for the tracked companies; OpenSecrets whole-industry data only estimated the relationships.",

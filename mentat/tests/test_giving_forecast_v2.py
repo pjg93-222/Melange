@@ -78,6 +78,26 @@ def run(request, **world):
         return gf.project(request)
 
 
+SAME_PHASE_SIGMA2 = 4.0e-4        # distinct from the previous-cycle residual variance, so an interval that read the wrong block would show
+
+
+def same_phase_bundle(chamber='House', sector=BANKS):
+    """The contract example with one industry x chamber flipped to the same-phase anchor, consistently: the backtest MAEs make same_phase win by
+    more than min_gain in both designs, the gains follow from them, and prediction.industries repeats the same-phase block (owner ruling 2026-09-30).
+    The example's own same_phase numbers are interim placeholders, so the flip is built here rather than read from the example."""
+    bundle = copy.deepcopy(contract.example('models'))
+    m = bundle['share_models']['control_' + chamber]
+    entry = m['anchors'][sector]
+    back = entry['backtest']
+    back['same_phase'].update(loeo_mae=back['previous_cycle']['loeo_mae'] * 0.8, chrono_mae=back['previous_cycle']['chrono_mae'] * 0.7)
+    back['same_phase_gain'] = {d: 1 - back['same_phase'][d + '_mae'] / back['previous_cycle'][d + '_mae'] for d in ('loeo', 'chrono')}
+    entry['prediction']['same_phase']['sigma2'] = SAME_PHASE_SIGMA2
+    entry.update(anchor='same_phase', reason='same_phase chosen: its MAE is 20% (LOEO) and 30% (chronological) below previous_cycle (test fixture)')
+    m['prediction']['industries'][sector] = copy.deepcopy(entry['prediction']['same_phase'])
+    assert contract.validate_model(bundle) == [], contract.validate_model(bundle)
+    return bundle
+
+
 def near(test, actual, expected, places=0):
     test.assertAlmostEqual(actual, expected, places=places, msg=f'{actual} != {expected}')
 
@@ -662,6 +682,244 @@ class UnusualButValidAnchorTests(unittest.TestCase):
         self.assertEqual(h['lobbying']['rows'][0]['series'][0]['remainder_status'], 'ready')       # Melange LDA's Q3 + Q4 are not filed yet: that remainder stands
 
 
+def pooled_change(m, target, anchor):
+    """(effect, variance) of a pooled share model for the change of inputs from `anchor` to `target`, computed from beta and the covariance."""
+    delta = [0. if t == 'Intercept' or t.startswith('industry:') else target[t] - anchor[t] for t in m['terms']]
+    effect = sum(d * b for d, b in zip(delta, m['beta']))
+    variance = sum(delta[i] * m['covariance'][i][j] * delta[j] for i in range(len(delta)) for j in range(len(delta)))
+    return effect, variance
+
+
+class SharePerChamberAnchorTests(unittest.TestCase):
+    """Owner ruling 2026-09-30: each industry x chamber carries its anchor (previous_cycle or same_phase) in the bundle; the share uses it."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.bundle = same_phase_bundle('House', BANKS)
+        cls.request = scenario(BANKS)
+        cls.flipped = run(cls.request, bundle=cls.bundle)
+        cls.base = run(cls.request)
+
+    def share(self, out, horizon, chamber='House'):
+        return out['horizons'][horizon]['shares'][chamber]
+
+    def basis(self, out, horizon, bid, chamber='House'):
+        return next(b for b in self.share(out, horizon, chamber)['bases'] if b['id'] == bid)
+
+    def inputs(self, horizon_cycle):
+        """The House model's inputs for a target horizon of the scenario and for its same-phase anchor cycle, built here from the bundle."""
+        b, m = self.bundle, self.bundle['share_models']['control_House']
+        ind = b['industries'][BANKS]
+        mu, sd = ind['growth_mean'], ind['growth_sd']
+        h = self.request['horizons'][str(horizon_cycle)]
+        prior = next((r['growth_pct'] for r in ind['history'] if r['cycle'] == horizon_cycle - 2), None)
+        prior = self.request['horizons'][str(horizon_cycle - 2)]['growth_pct'] if prior is None else prior
+        target = {'RMajNow': h['current_control']['House'], 'Forecast': h['control_scores']['House'] / 100, 'G_prior': (prior - mu) / sd,
+                  'G_current': (h['growth_pct'] - mu) / sd, 'Pres': float(horizon_cycle % 4 == 0)}
+        a = horizon_cycle - 4
+        if str(a) in b['political_inputs']['anchor_cycles']:
+            p = b['political_inputs']['anchor_cycles'][str(a)]
+            g = next(r for r in ind['history'] if r['cycle'] == a)
+            anchor = {'RMajNow': p['current_control']['House'], 'Forecast': p['House']['p_rep']}
+        else:
+            g = next(r for r in m['history'] if r['industry'] == BANKS and r['cycle'] == a)
+            anchor = {'RMajNow': g['current_control'], 'Forecast': g['forecast']}
+        anchor.update(G_prior=(g['prior_growth_pct'] - mu) / sd, G_current=(g['growth_pct'] - mu) / sd, Pres=float(a % 4 == 0))
+        return target, anchor
+
+    def test_the_flipped_bundle_is_consistent_and_accepted_by_the_loader(self):
+        self.assertEqual(contract.validate_model(self.bundle), [])
+        self.assertEqual(self.flipped['status'], 'ready')
+
+    def test_same_phase_anchors_2026_on_2022_and_2028_on_2024_one_step_each(self):
+        h0, h1 = self.share(self.flipped, 0), self.share(self.flipped, 1)
+        self.assertEqual((h0['anchor'], h0['anchor_cycle'], h0['steps']), ('same_phase', 2022, 1))
+        self.assertEqual((h1['anchor'], h1['anchor_cycle'], h1['steps']), ('same_phase', 2024, 1))
+        self.assertEqual(h0['anchor_label'], 'Mentat 2021–2022 (same phase)')
+        self.assertEqual(h1['anchor_label'], 'Mentat 2023–2024 (same phase)')
+        entry = self.bundle['share_models']['control_House']['anchors'][BANKS]
+        self.assertEqual(h0['anchor_reason'], entry['reason'])
+        self.assertEqual(h0['anchor_backtest'], entry['backtest'])
+
+    def test_the_anchor_input_block_reports_the_control_input_actually_used(self):
+        h0, h1 = self.share(self.flipped, 0)['anchor_input'], self.share(self.flipped, 1)['anchor_input']
+        row = next(r for r in self.bundle['share_models']['control_House']['history'] if r['industry'] == BANKS and r['cycle'] == 2022)
+        self.assertEqual((h0['cycle'], h0['source'], h0['p_rep'], h0['current_control'], h0['market']), (2022, 'model_history', row['forecast'], row['current_control'], None))
+        self.assertFalse(h0['partial_window'])
+        p2024 = self.bundle['political_inputs']['anchor_cycles']['2024']
+        self.assertEqual((h1['cycle'], h1['source'], h1['p_rep'], h1['current_control']), (2024, 'political_inputs', p2024['House']['p_rep'], p2024['current_control']['House']))
+        self.assertEqual(self.share(self.flipped, 0)['baseline_forecast'], row['forecast'])
+
+    def test_anchor_shares_come_from_the_snapshot_cycle_of_the_same_phase(self):
+        snap = contract.example('anchors')['industries'][BANKS]
+        for horizon, cycle in ((0, '2022'), (1, '2024')):
+            for bid, block in (('employee_candidate', 'candidate_receipts'), ('pac_candidate', 'pac_to_candidates')):
+                parts = snap[block]['cycles'][cycle]['House']
+                b = self.basis(self.flipped, horizon, bid)
+                with self.subTest(horizon=horizon, basis=bid):
+                    self.assertAlmostEqual(b['anchor_share'], parts['R'] / (parts['D'] + parts['R']), places=12)
+                    self.assertAlmostEqual(b['anchor_total_nominal'], parts['D'] + parts['R'], places=6)
+
+    def test_projected_share_is_the_anchor_share_plus_the_pooled_effect_of_the_input_deltas(self):
+        m = self.bundle['share_models']['control_House']
+        for horizon, cycle in ((0, 2026), (1, 2028)):
+            target, anchor = self.inputs(cycle)
+            effect, variance = pooled_change(m, target, anchor)
+            s = self.share(self.flipped, horizon)
+            with self.subTest(cycle=cycle):
+                self.assertAlmostEqual(s['change_pp'], effect * 100, places=9)
+                for bid in ('employee_candidate', 'pac_candidate'):
+                    b = self.basis(self.flipped, horizon, bid)
+                    self.assertAlmostEqual(b['raw_projected_cycle_R_share'], b['anchor_share'] + effect, places=12)
+                    coef = m['critical_95'] * math.sqrt(variance)
+                    self.assertAlmostEqual(b['cycle_coefficient_high'] - b['raw_projected_cycle_R_share'], coef, places=12)
+
+    def test_the_prediction_interval_uses_the_same_phase_residual_block_for_one_step(self):
+        m = self.bundle['share_models']['control_House']
+        block = m['anchors'][BANKS]['prediction']['same_phase']
+        self.assertEqual(block['sigma2'], SAME_PHASE_SIGMA2)
+        for horizon, cycle in ((0, 2026), (1, 2028)):
+            _effect, variance = pooled_change(m, *self.inputs(cycle))
+            half = block['critical_95'] * math.sqrt(variance + 1 * block['sigma2'])
+            b = self.basis(self.flipped, horizon, 'employee_candidate')
+            with self.subTest(cycle=cycle):
+                self.assertAlmostEqual(b['cycle_prediction_high'] - b['raw_projected_cycle_R_share'], half, places=12)
+                self.assertAlmostEqual(b['raw_projected_cycle_R_share'] - b['cycle_prediction_low'], half, places=12)
+
+    def test_2028_has_the_previous_cycle_point_but_not_its_chained_interval(self):
+        # previous_cycle chains 2028 through the open cycle from the same 2024 anchor: same point, two steps of the previous-cycle variance
+        flipped, base = self.basis(self.flipped, 1, 'employee_candidate'), self.basis(self.base, 1, 'employee_candidate')
+        self.assertEqual((self.share(self.base, 1)['anchor_cycle'], self.share(self.base, 1)['steps']), (2024, 2))
+        self.assertAlmostEqual(flipped['raw_projected_cycle_R_share'], base['raw_projected_cycle_R_share'], places=12)
+        self.assertNotAlmostEqual(flipped['cycle_prediction_high'], base['cycle_prediction_high'], places=6)
+
+    def test_the_senate_of_the_same_industry_and_the_other_industries_stay_on_previous_cycle(self):
+        for horizon in (0, 1):
+            senate = self.share(self.flipped, horizon, 'Senate')
+            with self.subTest(horizon=horizon):
+                self.assertEqual((senate['anchor'], senate['anchor_cycle'], senate['steps']), ('previous_cycle', 2024, horizon + 1))
+                self.assertEqual(senate, self.share(self.base, horizon, 'Senate'))
+                self.assertEqual(self.flipped['horizons'][horizon]['pac'], self.base['horizons'][horizon]['pac'])        # PAC always uses the previous cycle
+        cus_flipped, cus_base = run(scenario(CUS), bundle=self.bundle), run(scenario(CUS))
+        self.assertEqual(cus_flipped['horizons'][0]['shares'], cus_base['horizons'][0]['shares'])
+
+    def test_the_remainder_total_stays_on_the_previous_cycle_ratio_while_the_share_follows_the_anchor(self):
+        for bid in ('employee_candidate', 'pac_candidate'):
+            flipped, base = self.basis(self.flipped, 0, bid), self.basis(self.base, 0, bid)
+            with self.subTest(basis=bid):
+                self.assertAlmostEqual(flipped['projected_total_real_2025'], base['projected_total_real_2025'], places=6)
+                self.assertEqual(flipped['observed'], base['observed'])
+                if flipped['remainder_status'] == 'ready':
+                    total, share = flipped['projected_total_real_2025'], flipped['projected_cycle_R_share']
+                    self.assertAlmostEqual(flipped['projected_remaining_R_real_2025'], share * total - flipped['observed']['R_real_2025'], places=4)
+
+    def test_an_unavailable_snapshot_cycle_makes_the_basis_unavailable_and_names_the_cycle(self):
+        anchors = contract.example('anchors')
+        i = anchors['industries'][BANKS]
+        i['candidate_receipts']['cycles'].pop('2022')
+        i['candidate_receipts']['thin_base'].pop('2022', None)
+        self.assertEqual(contract.validate_kind(anchors, 'anchors') or contract.check_anchor_invariants(anchors), [])
+        out = run(self.request, bundle=self.bundle, anchors=anchors)
+        employee, pac = self.basis(out, 0, 'employee_candidate'), self.basis(out, 0, 'pac_candidate')
+        self.assertEqual(employee['status'], 'unavailable')
+        self.assertIn('2021–2022 anchor cycle', employee['reason'])
+        self.assertEqual(pac['status'], 'ready')
+        self.assertEqual(self.basis(out, 1, 'employee_candidate')['status'], 'ready')                  # 2028 anchors on 2024
+        self.assertEqual(self.share(out, 0, 'Senate'), self.share(self.base, 0, 'Senate'))               # previous_cycle never reads 2022
+        i['pac_to_candidates']['cycles'].pop('2022')
+        i['pac_to_candidates']['thin_base'].pop('2022', None)
+        self.assertEqual(contract.validate_kind(anchors, 'anchors') or contract.check_anchor_invariants(anchors), [])
+        both = run(self.request, bundle=self.bundle, anchors=anchors)
+        house = self.share(both, 0)
+        self.assertEqual(house['status'], 'unavailable')
+        self.assertIn('2021–2022 cycle', house['reason'])
+        json.dumps(both, allow_nan=False)
+
+    def test_same_phase_never_anchors_on_the_open_cycle(self):
+        class Later(date):
+            @classmethod
+            def today(cls):
+                return cls(2027, 3, 1)
+        mean = self.bundle['industries'][BANKS]['growth_mean']
+        horizons = {'2028': dict(self.request['horizons']['2026'], prior_growth_pct=mean), '2030': self.request['horizons']['2028']}
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=self.bundle), patch.object(gf, 'date', Later):
+            out = gf.project(scenario(BANKS, as_of='2027-03-01') | {'horizons': horizons})
+        h0, h1 = self.share(out, 0), self.share(out, 1)
+        self.assertEqual((h0['anchor_cycle'], h0['status']), (2024, 'ready'))
+        self.assertEqual((h1['anchor_cycle'], h1['status']), (2026, 'unavailable'))
+        self.assertIn('2025–2026 cycle is still open', h1['reason'])
+
+    def test_previous_cycle_reads_only_its_own_residual_block(self):
+        bundle = copy.deepcopy(contract.example('models'))
+        bundle['share_models']['control_House']['anchors'][BANKS]['prediction']['same_phase']['sigma2'] = 0.5     # never read while previous_cycle is chosen
+        self.assertEqual(contract.validate_model(bundle), [])
+        out = run(self.request, bundle=bundle)
+        for horizon in (0, 1):
+            self.assertEqual(self.share(out, horizon), self.share(self.base, horizon))
+
+    def test_the_example_keeps_previous_cycle_everywhere_with_its_recorded_choice(self):
+        b = contract.example('models')
+        for sector in (BANKS, CUS):
+            out = run(scenario(sector))
+            for chamber in ('House', 'Senate'):
+                entry = b['share_models']['control_' + chamber]['anchors'][sector]
+                for horizon in (0, 1):
+                    s = self.share(out, horizon, chamber)
+                    with self.subTest(sector=sector, chamber=chamber, horizon=horizon):
+                        self.assertEqual((s['anchor'], s['anchor_cycle'], s['steps']), ('previous_cycle', 2024, horizon + 1))
+                        self.assertEqual(s['anchor_label'], 'Mentat 2023–2024 (previous cycle)')
+                        self.assertEqual((s['anchor_reason'], s['anchor_backtest']), (entry['reason'], entry['backtest']))
+                        self.assertEqual(s['anchor_input']['source'], 'political_inputs')
+
+    def test_the_catalog_exposes_the_anchor_choices_and_options(self):
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=self.bundle):
+            catalog = gf.catalog('2026-09-30')
+        self.assertEqual(catalog['share_models']['control_House']['anchors'][BANKS]['anchor'], 'same_phase')
+        self.assertEqual(catalog['share_models']['control_Senate']['anchors'][BANKS]['anchor'], 'previous_cycle')
+        self.assertEqual({o['id'] for o in catalog['anchor_contract']['share']['anchor_options']}, {'previous_cycle', 'same_phase'})
+
+
+class AnchorContractRefusalTests(unittest.TestCase):
+    """The loader validates the bundle with contract.validate_model (schema + cross-field invariants) and the anchors this console implements."""
+
+    def refused(self, bundle, pattern):
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=bundle), self.assertRaisesRegex(ValueError, pattern):
+            gf.models()
+
+    def test_a_flip_without_the_matching_residual_block_or_backtest_is_refused(self):
+        bundle = copy.deepcopy(contract.example('models'))
+        bundle['share_models']['control_House']['anchors'][BANKS]['anchor'] = 'same_phase'
+        self.assertEqual(contract.validate_kind(bundle, 'models'), [])            # schema-valid: only the invariants catch it
+        self.assertNotEqual(contract.check_model_invariants(bundle), [])
+        self.refused(bundle, r'does not satisfy its contract \(share_models\.control_House\.anchors\.commercial_banks: .*same_phase')
+
+    def test_a_consistent_choice_whose_prediction_block_is_the_other_anchors_is_refused(self):
+        bundle = same_phase_bundle()
+        m = bundle['share_models']['control_House']
+        m['prediction']['industries'][BANKS] = copy.deepcopy(m['anchors'][BANKS]['prediction']['previous_cycle'])
+        self.refused(bundle, r'does not satisfy its contract .*is not the same_phase block')
+
+    def test_a_gain_that_does_not_follow_from_the_maes_is_refused(self):
+        bundle = same_phase_bundle()
+        bundle['share_models']['control_House']['anchors'][BANKS]['backtest']['same_phase_gain']['loeo'] = 0.9
+        self.refused(bundle, r'does not satisfy its contract .*same_phase_gain\.loeo does not follow')
+
+    def test_an_unknown_anchor_option_is_refused(self):
+        bundle = copy.deepcopy(contract.example('models'))
+        bundle['anchor_contract']['share']['anchor_options'][1]['id'] = 'two_cycles_back'
+        self.refused(bundle, r'does not satisfy its contract')
+
+    def test_anchor_options_the_console_does_not_implement_are_refused_even_when_schema_valid(self):
+        duplicate = copy.deepcopy(contract.example('models'))
+        duplicate['anchor_contract']['share']['anchor_options'][1] = copy.deepcopy(duplicate['anchor_contract']['share']['anchor_options'][0])
+        offset = copy.deepcopy(contract.example('models'))
+        next(o for o in offset['anchor_contract']['share']['anchor_options'] if o['id'] == 'same_phase')['cycle_offset'] = 6
+        for name, bundle, pattern in (('duplicate', duplicate, 'share anchor options'), ('offset', offset, 'share anchor offsets')):
+            with self.subTest(name):
+                self.assertEqual(contract.validate_model(bundle), [])            # the contract accepts it; the console does not implement it
+                self.refused(bundle, 'does not satisfy its contract .*' + pattern)
+
+
 class RenderFixtureTests(unittest.TestCase):
     """The golden payload the browser harness (test_giving_forecast_v2.cjs) renders: pinned to the calculator so the two cannot drift."""
 
@@ -678,6 +936,8 @@ class RenderFixtureTests(unittest.TestCase):
         shas['Banking Industry Spending Overview.xlsx'] = 'e' * 64
         with tempfile.TemporaryDirectory() as tmp, World(tmp, published=shas):
             runs['banks_stale'] = gf.project(scenario(BANKS))
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=same_phase_bundle('House', BANKS)):
+            runs['banks_same_phase_house'] = gf.project(scenario(BANKS))          # House on the same-phase anchor, Senate on the previous cycle
         return {'catalog': catalog, 'runs': runs}
 
     def test_the_render_payload_is_the_calculators_current_output(self):
