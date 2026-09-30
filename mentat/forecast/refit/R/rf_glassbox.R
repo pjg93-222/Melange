@@ -76,6 +76,7 @@ rf_gb_run <- function(run_id, events_dir = rf_glassbox_dir()) {
       dur <- if (!is.null(stamp$run)) as.integer(round(as.numeric(difftime(Sys.time(), stamp$run, units = "secs")) * 1000)) else -1
       emit("run.finish", status, "finish", summary, detail, duration_ms = dur)
     },
-    fail = function(summary, detail = "") emit("run.finish", "failed", "failure", summary, detail)
+    fail = function(summary, detail = "") emit("run.finish", "failed", "failure", summary, detail),
+    emit_event = function(kind, status, stage, summary, detail = "") emit(kind, status, stage, summary, detail)
   )
 }

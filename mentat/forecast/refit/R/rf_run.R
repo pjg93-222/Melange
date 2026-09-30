@@ -23,14 +23,12 @@ rf_build_panels <- function(inputs, reg) {
     seats_Senate = rf_share_panel(money, "seats", "Senate", seat_calls = calls, current_control = cc))
   cases <- rf_case_panels(share)
   lobby <- rf_lobby_panel(reg, inputs)
-  mk <- inputs[grepl("^market_daily:", inputs$role), ]
-  files <- data.frame(market = sub("^market_daily:([a-z]+):([a-z]+):2026$", "\\1", mk$role),
-                      chamber = tools::toTitleCase(sub("^market_daily:([a-z]+):([a-z]+):2026$", "\\2", mk$role)),
-                      path = mk$vault_path, stringsAsFactors = FALSE)
+  files <- rf_market_files(inputs, 2026)
   list(pac_panel = pac, recipients = attr(money, "recipients"), presidential = pres, fec = fec, fec_identities = unique(cw[c("cycle_end", "name_key")]),
        crosswalk = cw, money = money, iem_daily = daily, iem_jj = iem_jj, current_control = cc, seat_calls = calls, share = share,
        cases = cases, lobby = lobby,
-       market_window = rf_market_window(files, "2026-01-01", "2026-06-30"), market_ytd = rf_market_window(files, "2026-01-01", "2026-09-24")$markets)
+       market_window = rf_market_window(files, "2026-01-01", "2026-06-30"), market_ytd = rf_market_window(files, "2026-01-01", "2026-09-24")$markets,
+       control_inputs = rf_control_inputs(inputs))
 }
 
 # Panels, the frozen fits, the wild / selection p-values the v1 bundle stores, and the stepwise grid.

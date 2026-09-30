@@ -77,6 +77,7 @@ rf_market_mean <- function(path, start, end) {
   d <- utils::read.csv(path, stringsAsFactors = FALSE)
   if (!all(c("date", "p_dem_normalized") %in% names(d))) rf_raise("PanelError", paste("unexpected market file", basename(path)))
   q <- d[d$date >= start & d$date <= end, ]
+  if (!nrow(q)) return(list(days = 0L, p_rep = NA_real_, first = NA_character_, last = NA_character_))   # e.g. Kalshi 2024 starts in September
   list(days = nrow(q), p_rep = mean(1 - q$p_dem_normalized), first = min(q$date), last = max(q$date))
 }
 
@@ -90,8 +91,30 @@ rf_market_window <- function(daily_files, start, end) {
                p_rep = m$p_rep, sha256 = rf_sha256(daily_files$path[i]), stringsAsFactors = FALSE)
   })
   mk <- do.call(rbind, rows)
-  ctl <- do.call(rbind, lapply(split(mk, mk$chamber), function(q) data.frame(chamber = q$chamber[1], p_rep = mean(q$p_rep),
-                                                                              markets = paste(q$market, collapse = "+"), stringsAsFactors = FALSE)))
+  ctl <- do.call(rbind, lapply(split(mk, mk$chamber), function(q) { q <- q[q$days > 0L, ]   # markets without data in the window do not vote
+    data.frame(chamber = q$chamber[1], p_rep = mean(q$p_rep), markets = paste(q$market, collapse = "+"), stringsAsFactors = FALSE) }))
   rownames(ctl) <- NULL
   list(markets = mk, control = ctl)
 }
+
+# The daily market files of one calendar year as data.frame(market, chamber, path) (vault paths).
+rf_market_files <- function(inputs, year) {
+  mk <- inputs[grepl(sprintf("^market_daily:[a-z]+:[a-z]+:%d$", year), inputs$role), ]
+  parts <- strsplit(mk$role, ":", fixed = TRUE)
+  data.frame(market = vapply(parts, `[`, "", 2L), chamber = tools::toTitleCase(vapply(parts, `[`, "", 3L)), path = mk$vault_path, stringsAsFactors = FALSE)
+}
+
+# The control inputs of the previous-cycle anchor (spec ruling C4, Polymarket to Polymarket): the Jan-Jun mean Republican-control
+# probability of the previous cycle's market and of the target cycle's market. `primary` is Polymarket alone in both years (Kalshi has no
+# Jan-Jun 2024 data); the ruled equal-weight Kalshi + Polymarket 2026 figure is kept as a sensitivity.
+# -> list(previous = rf_market_window of 2024, target = rf_market_window of 2026, primary = data.frame(chamber, cycle, p_rep, days, first_date),
+#         sensitivity = blended 2026)
+rf_control_inputs <- function(inputs, previous_cycle = 2024L, target_cycle = 2026L) {
+  prev <- rf_market_window(rf_market_files(inputs, previous_cycle), sprintf("%d-01-01", previous_cycle), sprintf("%d-06-30", previous_cycle))
+  targ <- rf_market_window(rf_market_files(inputs, target_cycle), sprintf("%d-01-01", target_cycle), sprintf("%d-06-30", target_cycle))
+  poly <- function(w, cycle) { m <- w$markets[w$markets$market == "polymarket", ]
+    data.frame(chamber = m$chamber, cycle = cycle, p_rep = m$p_rep, days = m$days, first_date = m$first_date, last_date = m$last_date, sha256 = m$sha256, stringsAsFactors = FALSE) }
+  list(previous = prev, target = targ, primary = rbind(poly(prev, previous_cycle), poly(targ, target_cycle)),
+       sensitivity = data.frame(chamber = targ$control$chamber, cycle = target_cycle, p_rep = targ$control$p_rep, markets = targ$control$markets, stringsAsFactors = FALSE))
+}
+

@@ -20,9 +20,12 @@ rf_ref_cycle <- function(cy, cycles) {
 
 # Residuals of the calculator's anchored step on a training panel. `slopes` named by industry; `offset_fit` is the lm of
 # rf_offset_fit (share models). -> list(sigma2, pairs, df, critical_95, residuals)
-rf_step_sigma2 <- function(spec, panel, slopes, offset_fit = NULL, cycles = sort(unique(panel$cycle_end))) {
+rf_step_sigma2 <- function(spec, panel, slopes, offset_fit = NULL, cycles = sort(unique(panel$cycle_end)), sector = NULL, anchor = c("same_phase", "previous_cycle")) {
+  anchor <- match.arg(anchor)
   d <- panel
   d$sector <- droplevels(factor(d$sector))
+  if (!is.null(sector)) d <- d[d$sector == sector, ]
+  d$sector <- droplevels(d$sector)
   e <- numeric()
   if (spec$kind == "lobby") {
     e <- d$dy - slopes[as.character(d$sector)] * d$dg
@@ -35,7 +38,7 @@ rf_step_sigma2 <- function(spec, panel, slopes, offset_fit = NULL, cycles = sort
     if (is.null(offset_fit)) stop("rf_step_sigma2: share models need the offset fit", call. = FALSE)
     g <- stats::coef(offset_fit); g[is.na(g)] <- 0
     for (s in levels(d$sector)) for (t in cycles) {
-      r0 <- rf_ref_cycle(t, cycles)
+      r0 <- if (anchor == "previous_cycle") (if ((t - 2) %in% cycles) t - 2 else NA_real_) else rf_ref_cycle(t, cycles)
       if (is.na(r0)) next
       a <- d[d$sector == s & d$cycle_end == t, ]; r <- d[d$sector == s & d$cycle_end == r0, ]
       if (nrow(a) == 1L && nrow(r) == 1L) {

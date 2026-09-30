@@ -55,6 +55,8 @@ add("iem_zip", "{ZIPC}", member = "iem_contract_prices_raw.csv; predicted_house.
 for (m in c("kalshi", "polymarket")) for (ch in c("house", "senate")) {
   add(sprintf("market_daily:%s:%s:2026", m, ch), sprintf("{SGSA}/expected_control/daily_%s_%s_2026.csv", m, ch),
       vintage = "daily history to 2026-09-24", supplied_by = "sector growth study archive (build_receipt_02_expected_control_markets.json)")
+  add(sprintf("market_daily:%s:%s:2024", m, ch), sprintf("{SGSA}/expected_control/daily_%s_%s_2024.csv", m, ch),
+      vintage = "daily history of the 2024 market (Kalshi starts 2024-09-12: no Jan-Jun data)", supplied_by = "sector growth study archive (build_receipt_02_expected_control_markets.json)")
 }
 # Codex design files: parity references only (the pipeline rebuilds every one of them from the raw inputs above).
 refs <- c("{CHE}/outputs/stepwise/selected_models.csv", "{CHE}/work/stepwise/analysis_case_panels.csv",

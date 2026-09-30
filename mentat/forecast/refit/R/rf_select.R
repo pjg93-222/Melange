@@ -1,55 +1,56 @@
-# Slope-rule auto-pick (Paul's ruling of 2026-09-30, superseding the DL-everywhere default of SPEC 9 item 4):
+# Slope-rule auto-pick (Paul's rulings of 2026-09-30):
 #
 #   For each term (PAC, control House, control Senate, lobbying) run the no-leakage backtests for R0 pooled / R1 own / R2 DL blend in
 #   BOTH designs (leave-one-election-out and chronological, fold-restandardized growth, the calculator path with that term's anchor).
-#   Choose the rule with the lowest MAE in both designs. If the designs disagree, use R2. Record the full comparison table and the
-#   choice. When R2 resolves to the pooled slope (tau2 = 0) the pooled rule R0 is reported.
+#   A non-pooled rule is chosen only if it beats the POOLED rule R0 by at least RF$RULE_MIN_GAIN (5%) in EVERY design; lobbying has a
+#   single rolling-origin design, which then must clear the bar alone. If both R1 and R2 clear it, the one with the lower MAE in both
+#   designs is chosen and the DL blend R2 is used when the designs disagree. If neither clears it, the pooled slope R0 is used.
+#   The full comparison table and the choice are recorded for the receipt and the review packet.
 #
-# Lobbying has a single rolling-origin design, so its one design decides alone.
-# Library code: not wired into the v1 parity bundle.
-#
-# Interpretation notes (stated, not silent):
-#   * "lowest MAE in both designs": ties within RF$RULE_TIE_TOL are broken toward the simpler rule (R0, then R2, then R1).
-#   * min_gain (default RF$RULE_MIN_GAIN = 0, the literal rule): when > 0 a design only has a clear winner if the winner beats the
-#     best OTHER rule by that relative margin; a design without a clear winner counts as disagreeing, which resolves to R2.
-#   * "R2 resolves to the pooled slope" is judged on the full-sample fit (tau2 = 0, so every blended slope equals the pooled one),
-#     or on an exact MAE tie of R0 and R2 in every design.
+# On today's data: PAC -> R1 (own slopes, 51% and 56% better than pooled); control House, control Senate and lobbying -> R0 (no rule
+# beats pooled by 5% in both designs: e.g. Senate R1 is 1.2% better in leave-one-election-out, lobbying R1 0.8%).
+# Library code. Interpretation notes:
+#   * a rule "beats" R0 in a design when MAE_rule < MAE_R0 * (1 - min_gain) - tol; min_gain = 0 means strictly lower MAE;
+#   * R2 choosing pooled slopes (tau2 = 0 on the full sample) is flagged as resolved_to_pooled and reported as R0.
 
 # The choice from a comparison table (design, rule, MAE). Pure function, unit-tested.
-# -> list(choice, winner_by_design, reason)
+# -> list(choice, winner_by_design, qualifying, reason)
 rf_choose_rule <- function(table, designs = unique(table$design), min_gain = RF$RULE_MIN_GAIN, tol = RF$RULE_TIE_TOL) {
-  cand <- c("R0", "R2", "R1")                       # simplest first: used to break exact ties
-  winners <- stats::setNames(rep(NA_character_, length(designs)), designs)
-  for (ds in designs) {
-    t <- table[table$design == ds & table$rule %in% cand, ]
-    mae <- stats::setNames(t$MAE, t$rule)[cand]
-    best <- min(mae, na.rm = TRUE)
-    tied <- cand[!is.na(mae) & mae <= best + tol]
-    w <- tied[1]
-    if (min_gain > 0) {
-      others <- mae[setdiff(cand, tied)]
-      others <- others[!is.na(others)]
-      if (length(others) && (min(others) - best) / min(others) < min_gain) w <- NA_character_
-    }
-    winners[[ds]] <- w
+  mae <- function(ds, rule) table$MAE[table$design == ds & table$rule == rule]
+  # a rule beats pooled in a design when it is strictly lower AND at least min_gain (relative) lower
+  clears <- function(rule) all(vapply(designs, function(ds) mae(ds, rule) < mae(ds, "R0") - tol && mae(ds, rule) <= mae(ds, "R0") * (1 - min_gain) + tol, logical(1)))
+  winner <- vapply(designs, function(ds) {
+    m <- c(R0 = mae(ds, "R0"), R1 = mae(ds, "R1"), R2 = mae(ds, "R2"))
+    tied <- names(m)[m <= min(m) + tol]
+    c("R0", "R2", "R1")[c("R0", "R2", "R1") %in% tied][1]          # simplest tied rule: R0, then R2, then R1
+  }, "")
+  names(winner) <- designs
+  qual <- Filter(clears, c("R1", "R2"))
+  if (!length(qual)) {
+    return(list(choice = "R0", winner_by_design = winner, qualifying = character(),
+                reason = sprintf("no rule beats the pooled slope R0 by %g%% in %s: the pooled slope is used", 100 * min_gain,
+                                 if (length(designs) > 1L) "both designs" else paste("the", designs, "design"))))
   }
-  if (!anyNA(winners) && length(unique(winners)) == 1L) {
-    reason <- if (length(designs) > 1L) sprintf("%s has the lowest MAE in both designs (%s)", winners[[1]], paste(designs, collapse = ", "))
-              else sprintf("%s has the lowest MAE in the single design (%s)", winners[[1]], designs)
-    return(list(choice = winners[[1]], winner_by_design = winners, reason = reason))
+  if (length(qual) == 1L) {
+    return(list(choice = qual, winner_by_design = winner, qualifying = qual,
+                reason = sprintf("%s beats the pooled slope by %g%% or more in %s and is the only rule that does", qual, 100 * min_gain,
+                                 if (length(designs) > 1L) "both designs" else paste("the", designs, "design"))))
   }
-  list(choice = "R2", winner_by_design = winners,
-       reason = sprintf("designs disagree or have no clear winner (%s): the DL blend R2 is used", paste(sprintf("%s -> %s", designs, ifelse(is.na(winners), "none", winners)), collapse = "; ")))
+  best_everywhere <- all(vapply(designs, function(ds) mae(ds, "R1") < mae(ds, "R2") - tol, logical(1)))
+  r2_everywhere <- all(vapply(designs, function(ds) mae(ds, "R2") < mae(ds, "R1") - tol, logical(1)))
+  if (best_everywhere) return(list(choice = "R1", winner_by_design = winner, qualifying = qual, reason = "R1 has the lowest MAE in every design among the rules that beat pooled"))
+  if (r2_everywhere) return(list(choice = "R2", winner_by_design = winner, qualifying = qual, reason = "R2 has the lowest MAE in every design among the rules that beat pooled"))
+  list(choice = "R2", winner_by_design = winner, qualifying = qual, reason = "the designs disagree on R1 and R2: the DL blend R2 is used")
 }
 
-# Backtest one spec in its designs and pick the rule. `path` = the calculator path of the term's anchor ("prevchg" for PAC, "calc"
-# for control and lobbying). -> list(term, base, path, designs, table, winner_by_design, choice, reported_rule, tau2_full_sample, reason, min_gain)
+# Backtest one spec in its designs and pick the rule. `path` = the calculator path of the term's anchor ("prevchg" for PAC and the
+# previous-cycle share anchor, "calc" for lobbying). -> list(term, base, path, designs, table, winner_by_design, choice, reported_rule,
+# resolved_to_pooled, tau2_full_sample, reason, min_gain)
 rf_select_rule <- function(spec, path = spec$calc_path, designs = NULL, min_gain = RF$RULE_MIN_GAIN, tol = RF$RULE_TIE_TOL) {
   designs <- designs %||% if (spec$kind == "lobby") "rolling" else c("loeo", "chrono")
   tabs <- lapply(designs, function(ds) {
     m <- rf_backtest_metrics(rf_backtest(spec, spec$d, ds))
-    m <- m[m$path == path & m$rule %in% c(RF$RULES, "naive_prev"), c("term", "base", "design", "path", "rule", "n", "folds", "targets", "MAE", "RMSE", "units", "beats_naive")]
-    m
+    m[m$path == path & m$rule %in% c(RF$RULES, "naive_prev"), c("term", "base", "design", "path", "rule", "n", "folds", "targets", "MAE", "RMSE", "units", "beats_naive")]
   })
   tab <- do.call(rbind, tabs)
   rownames(tab) <- NULL
@@ -57,18 +58,18 @@ rf_select_rule <- function(spec, path = spec$calc_path, designs = NULL, min_gain
   pp <- rf_partial_pool(spec, spec$d)
   reported <- ch$choice
   resolved <- FALSE
-  if (ch$choice == "R2") {
-    tie_all <- all(vapply(designs, function(ds) abs(tab$MAE[tab$design == ds & tab$rule == "R0"] - tab$MAE[tab$design == ds & tab$rule == "R2"]) <= tol, logical(1)))
-    if (identical(pp$tau2, 0) || tie_all) { reported <- "R0"; resolved <- TRUE }
-  }
+  if (ch$choice == "R2" && identical(pp$tau2, 0)) { reported <- "R0"; resolved <- TRUE }
   list(term = spec$id, base = spec$base, path = path, designs = designs, table = tab, winner_by_design = ch$winner_by_design, choice = ch$choice,
-       reported_rule = reported, resolved_to_pooled = resolved, tau2_full_sample = pp$tau2, reason = ch$reason, min_gain = min_gain)
+       qualifying = ch$qualifying, reported_rule = reported, resolved_to_pooled = resolved, tau2_full_sample = pp$tau2, reason = ch$reason, min_gain = min_gain)
 }
 
-# Selection for every calculator term of a spec list (the four terms of the ruling) -> named list of rf_select_rule() results.
-rf_select_rules <- function(specs, min_gain = RF$RULE_MIN_GAIN) {
+# The calculator path of each term under the ruled anchors: PAC and the two shares use the previous-cycle anchor (prevchg), lobbying last year.
+RF_TERM_PATHS <- c(pac = "prevchg", control_House = "prevchg", control_Senate = "prevchg", lobby = "calc")
+
+# Selection for every calculator term (the four terms of the ruling) -> named list of rf_select_rule() results.
+rf_select_rules <- function(specs, min_gain = RF$RULE_MIN_GAIN, paths = RF_TERM_PATHS) {
   keys <- c(pac = "pac", control_House = "control_House.selected", control_Senate = "control_Senate.selected", lobby = "lobby")
-  out <- lapply(keys, function(k) rf_select_rule(specs[[k]], min_gain = min_gain))
+  out <- lapply(names(keys), function(nm) rf_select_rule(specs[[keys[[nm]]]], path = paths[[nm]], min_gain = min_gain))
   names(out) <- names(keys)
   out
 }

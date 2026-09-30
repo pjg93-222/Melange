@@ -91,7 +91,7 @@ rf_receipt <- function(run, bundle_path = NULL) {
        started_utc = run$started_utc, finished_utc = rf_now_utc(),
        inputs = lapply(seq_len(nrow(inp)), function(i) list(role = inp$role[i], path = inp$path[i], sha256 = inp$actual[i], status = inp$status[i], purpose = inp$purpose[i])),
        code = code, code_sha256 = rf_sha256_of_strings(vapply(code, function(x) x$sha256, "")),
-       R_version = R.version.string, packages = lapply(seq_len(nrow(run$packages)), function(i) list(package = run$packages$package[i], version = run$packages$version[i], lib = run$packages$lib[i])),
+       R_version = R.version.string, platform = rf_platform_info(), packages = lapply(seq_len(nrow(run$packages)), function(i) list(package = run$packages$package[i], version = run$packages$version[i], lib = run$packages$lib[i])),
        gates = lapply(seq_len(nrow(run$gates)), function(i) list(gate = run$gates$gate[i], status = run$gates$status[i], detail = run$gates$detail[i])),
        parity = run$parity, bundle_path = bundle_path, bundle_sha256 = if (!is.null(bundle_path) && file.exists(bundle_path)) rf_sha256(bundle_path) else NULL,
        decision = run$decision, published_to = list())

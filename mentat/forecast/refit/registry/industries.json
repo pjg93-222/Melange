@@ -47,7 +47,8 @@
       "label": "Auto manufacturers",
       "mentat_key": null,
       "mentat_workbook": null,
-      "calculator": true,
+      "calculator": false,
+      "display_note": "kept in estimation, not offered: no Mentat dataset (owner ruling R-A, 2026-09-30)",
       "opensecrets": {
         "codes": ["T2100"],
         "level": "industry",

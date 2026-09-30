@@ -41,6 +41,11 @@ test_ctx <- function() memo("ctx", rf_parity_context(test_inputs(), RF_TEST_REG,
 # Backtest specs (tailoring.R's eight term/base cells) once.
 test_specs <- function() memo("specs", rf_backtest_specs(test_ctx()))
 
+# The v2 context (auto-pick, own-slope PAC, previous-cycle shares, log lobbying, evidence) once; 999 draws for the random bootstrap blocks.
+test_v2 <- function() memo("v2", { v <- rf_v2_context(test_ctx(), run_id = "unit", packages = RF_TEST_PKGS, built_at_utc = "2026-09-30T12:00:00Z", b_random = 999L)
+                                   v$adequacy <- rf_gate_adequacy(test_ctx()); v })
+test_bundle2 <- function() memo("bundle2", rf_bundle_v2(test_v2()))
+
 # A Codex design file (parity reference) by name, read from the vault.
 ref_path <- function(name) rf_input_path(test_inputs(), paste0("parity_ref:", name))
 ref_csv <- function(name) utils::read.csv(ref_path(name), stringsAsFactors = FALSE, check.names = FALSE)

@@ -975,6 +975,54 @@
       "supplied_by": "sector growth study archive (build_receipt_02_expected_control_markets.json)"
     },
     {
+      "role": "market_daily:kalshi:house:2024",
+      "path": "{SGSA}/expected_control/daily_kalshi_house_2024.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "00ac00747894527793a99e76cc6fe3d620341c6aeb94f8aaa75bb7950624d301",
+      "bytes": 10541,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "daily history of the 2024 market (Kalshi starts 2024-09-12: no Jan-Jun data)",
+      "supplied_by": "sector growth study archive (build_receipt_02_expected_control_markets.json)"
+    },
+    {
+      "role": "market_daily:kalshi:senate:2024",
+      "path": "{SGSA}/expected_control/daily_kalshi_senate_2024.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "08a629918c588790ca4494a885723806dd78c2d30d55999eeb1d3ab59a14fd2b",
+      "bytes": 10263,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "daily history of the 2024 market (Kalshi starts 2024-09-12: no Jan-Jun data)",
+      "supplied_by": "sector growth study archive (build_receipt_02_expected_control_markets.json)"
+    },
+    {
+      "role": "market_daily:polymarket:house:2024",
+      "path": "{SGSA}/expected_control/daily_polymarket_house_2024.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "426cc3a9811038f527587a83b394fb7bb4ba34a09d66c0af92a0088a8445b3dd",
+      "bytes": 17961,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "daily history of the 2024 market (Kalshi starts 2024-09-12: no Jan-Jun data)",
+      "supplied_by": "sector growth study archive (build_receipt_02_expected_control_markets.json)"
+    },
+    {
+      "role": "market_daily:polymarket:senate:2024",
+      "path": "{SGSA}/expected_control/daily_polymarket_senate_2024.csv",
+      "member": null,
+      "sheet": null,
+      "sha256": "87a1efadb91162c46d421c3d2c68dac814cf3840d1200e211c1d5e9e828e3f65",
+      "bytes": 26697,
+      "pinned": true,
+      "purpose": "raw",
+      "vintage": "daily history of the 2024 market (Kalshi starts 2024-09-12: no Jan-Jun data)",
+      "supplied_by": "sector growth study archive (build_receipt_02_expected_control_markets.json)"
+    },
+    {
       "role": "parity_ref:selected_models.csv",
       "path": "{CHE}/outputs/stepwise/selected_models.csv",
       "member": null,

@@ -74,8 +74,7 @@ test_that("a changed pinned input stops the run at G1 and emits a failure event 
   expect_true(any(grepl("FAILED", readLines(file.path(runs, "unit-fail", "log.txt"), warn = FALSE))))
 })
 
-test_that("run_refit.R refuses the later-phase modes", {
+test_that("run_refit.R offers parity, detect, refit and rollback and refuses an unknown mode", {
   src <- readLines(file.path(.RF_HOME, "run_refit.R"), warn = FALSE)
-  expect_true(any(grepl("not implemented in Phase 1", src, fixed = TRUE)))
-  expect_true(any(grepl("--mode parity", src, fixed = TRUE)))
+  for (pat in c("--mode parity", "--mode detect", "--mode refit", "--rollback", "unknown mode")) expect_true(any(grepl(pat, src, fixed = TRUE)), info = pat)
 })

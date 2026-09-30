@@ -22,12 +22,12 @@ rf_backtest_specs <- function(ctx) {
   mk <- function(id, base, kind, d, y, f, others, restd, scale, unit, calc_path) list(id = id, base = base, kind = kind, d = d, y = y, f = f, others = others,
                                                                                   restd = restd, scale = scale, unit = unit, calc_path = calc_path)
   specs <- list(
-    control_House.full = mk("control_House", "full", "share", sh("control_House"), "RShare", "P_R", RF_FULL_RHS, TRUE, 100, "share pp", "calc"),
-    control_House.selected = mk("control_House", "selected", "share", sh("control_House"), "RShare", "P_R", "sector + RMajNow + G_prior + Pres", TRUE, 100, "share pp", "calc"),
-    control_Senate.full = mk("control_Senate", "full", "share", sh("control_Senate"), "RShare", "P_R", RF_FULL_RHS, TRUE, 100, "share pp", "calc"),
-    control_Senate.selected = mk("control_Senate", "selected", "share", sh("control_Senate"), "RShare", "P_R", "sector + RMajNow + G_prior", TRUE, 100, "share pp", "calc"),
-    seats_House.full = mk("seats_House", "full", "share", sh("seats_House"), "RShare", "pred_rep_net_change", RF_FULL_RHS, TRUE, 100, "share pp", "calc"),
-    seats_Senate.full = mk("seats_Senate", "full", "share", sh("seats_Senate"), "RShare", "pred_rep_net_change", RF_FULL_RHS, TRUE, 100, "share pp", "calc"),
+    control_House.full = mk("control_House", "full", "share", sh("control_House"), "RShare", "P_R", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
+    control_House.selected = mk("control_House", "selected", "share", sh("control_House"), "RShare", "P_R", "sector + RMajNow + G_prior + Pres", TRUE, 100, "share pp", "prevchg"),
+    control_Senate.full = mk("control_Senate", "full", "share", sh("control_Senate"), "RShare", "P_R", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
+    control_Senate.selected = mk("control_Senate", "selected", "share", sh("control_Senate"), "RShare", "P_R", "sector + RMajNow + G_prior", TRUE, 100, "share pp", "prevchg"),
+    seats_House.full = mk("seats_House", "full", "share", sh("seats_House"), "RShare", "pred_rep_net_change", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
+    seats_Senate.full = mk("seats_Senate", "full", "share", sh("seats_Senate"), "RShare", "pred_rep_net_change", RF_FULL_RHS, TRUE, 100, "share pp", "prevchg"),
     pac = mk("pac", "bundle", "pac", pac, "log_pac", "G_current", "sector + factor(cycle_end)", TRUE, 100, "log points x100", "prevchg"),
     lobby = mk("lobby", "bundle", "lobby", lob, "dy", "dg", "factor(year)", FALSE, 1, "$M 2025", "calc"))
   specs
@@ -72,12 +72,13 @@ rf_restandardize <- function(d, train_cycles) {
   var_s <- switch(rule, R0 = fa$se0^2, R1 = fa$se[[s]]^2, R2 = fa$W[[s]] * fa$se[[s]]^2 + (1 - fa$W[[s]])^2 * fa$se0^2)
   if (spec$kind == "lobby") return(a$dg^2 * var_s)
   if (spec$kind == "pac") return((a[[spec$f]] - pv[[spec$f]])^2 * var_s)
-  dF <- a[[spec$f]] - r[[spec$f]]
+  ref <- if (spec$calc_path == "prevchg") pv else r            # the anchor of the calculator path: previous cycle, or the same-phase reference
+  dF <- a[[spec$f]] - ref[[spec$f]]
   if (rule == "R0") {
-    dx <- as.vector(.rf_mm(fa$f0, a) - .rf_mm(fa$f0, r))
+    dx <- as.vector(.rf_mm(fa$f0, a) - .rf_mm(fa$f0, ref))
     return(as.numeric(t(dx) %*% fa$V0 %*% dx))
   }
-  dx <- as.vector(.rf_mm(fo, a) - .rf_mm(fo, r))
+  dx <- as.vector(.rf_mm(fo, a) - .rf_mm(fo, ref))
   as.numeric(t(dx) %*% stats::vcov(fo) %*% dx) + dF^2 * var_s
 }
 
@@ -99,7 +100,7 @@ rf_restandardize <- function(d, train_cycles) {
   for (rule in rules) {
     sl <- fa$rules[[rule]]
     fo <- rf_offset_fit(tr, spec, sl)
-    sg <- rf_step_sigma2(spec, tr, sl, fo, trc)
+    sg <- rf_step_sigma2(spec, tr, sl, fo, trc, anchor = if (spec$calc_path == "prevchg") "previous_cycle" else "same_phase")
     for (i in seq_len(nrow(tg))) {
       a <- tg[i, ]; s <- as.character(a$sector)
       if (!(s %in% names(sl))) next
