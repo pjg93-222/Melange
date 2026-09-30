@@ -137,6 +137,11 @@ class AccountingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Unknown analysis"):
             analyze([], {"panels": ["anything"]})
 
+    def test_non_finite_top_n_falls_back_to_the_default(self):
+        for value in (float("inf"), float("-inf"), float("nan")):
+            with self.subTest(value=value):
+                self.assertEqual(analyze([], {"top_n": value, "panels": []})["metadata"]["top_n"], 25)
+
 
 class FavoritesAndPortfolioTests(unittest.TestCase):
     def test_relative_preference_requires_real_positive_reference(self):
@@ -415,6 +420,176 @@ class ForecastTests(unittest.TestCase):
         quarter = next(row for row in result["rows"] if row["product"] == "Next-quarter baseline")
         self.assertEqual(quarter["period"], "2026-Q4")
         self.assertEqual(quarter["amount_cents"], 321)
+
+    def test_missing_completeness_record_is_named_in_the_withheld_reason(self):
+        for context in (None, {}, {"complete_cycles": []}, {"complete_cycles": None}):
+            with self.subTest(context=context):
+                result = panel(self.history(), "forecast", context, as_of="2026-09-20")
+                self.assertEqual(result["status"], "unavailable")
+                diagnostic = result["diagnostics"][0]
+                self.assertEqual(diagnostic["status"], "unavailable")
+                self.assertEqual(diagnostic["reason"], "No completeness record is connected, so the forecast is withheld.")
+                self.assertEqual(len(result["diagnostics"]), 1)
+
+    def test_insufficient_completeness_evidence_keeps_the_history_reason(self):
+        cycles = (2018, 2020, 2022)
+        result = panel(self.history(cycles), "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        self.assertEqual(result["status"], "unavailable")
+        self.assertEqual(result["diagnostics"][0]["reason"],
+                         "Need four consecutive explicitly complete cycles with valid event dates.")
+
+    def test_complete_cycles_read_is_unchanged_for_array_like_and_falsy_iterables(self):
+        import analysis_metrics
+
+        class FalsyCycles(list):
+            def __bool__(self):
+                return False
+
+        builders = [FalsyCycles]
+        try:
+            import numpy
+            builders.append(numpy.array)
+        except ImportError:
+            pass
+        for build in builders:
+            with self.subTest(container=build.__name__):
+                values = build([2022, 2024])
+                original = {analysis_metrics._cycle(value) for value in values} - {None}
+                self.assertEqual(analysis_metrics._complete_cycles({"complete_cycles": values}), original)
+                self.assertEqual(original, {2022, 2024})
+                cycles = build([2018, 2020, 2022, 2024])
+                self.assertEqual(panel(self.history(), "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")["status"], "ready")
+
+    def excluded(self, result):
+        return {label: row["reason"] for row in result["diagnostics"] if row["status"] == "excluded"
+                for label in row["excluded_cycles"]}
+
+    def test_cycles_dropped_from_history_are_disclosed_with_their_reason(self):
+        cycles = [2010, 2014, 2016, 2018, 2020, 2022, 2024]
+        result = panel(self.history(cycles), "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        self.assertEqual(result["diagnostics"][0]["training_cycles"],
+                         ["2013-2014", "2015-2016", "2017-2018", "2019-2020", "2021-2022", "2023-2024"])
+        self.assertEqual(result["diagnostics"][1:],
+                         [dict(funding_source="employee", status="excluded", excluded_cycles=["2009-2010"],
+                               reason="Older than a break in consecutive eligible cycles.")])
+
+    def test_every_observed_cycle_either_trains_or_is_excluded_once_with_its_rule(self):
+        cycles = [2016, 2018, 2020, 2022, 2024, 2026]
+        rows = self.history([2014, 2016, 2018, 2020, 2022, 2024, 2026]) + [fact(100, cycle=2016, when="invalid"), fact(100, cycle="bad")]
+        result = panel(rows, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        diagnostic = result["diagnostics"][0]
+        self.assertEqual(diagnostic["training_cycles"], ["2017-2018", "2019-2020", "2021-2022", "2023-2024"])
+        self.assertEqual(self.excluded(result), {
+            "Unknown": "No valid cycle on the selected records.",
+            "2013-2014": "Not listed as explicitly complete.",
+            "2015-2016": "Records include a missing, invalid or cycle-inconsistent event date.",
+            "2025-2026": "Cycle has not closed by the as-of date."})
+        observed = ["Unknown"] + [f"{cycle - 1}-{cycle}" for cycle in (2014, 2016, 2018, 2020, 2022, 2024, 2026)]
+        listed = diagnostic["training_cycles"] + [label for row in result["diagnostics"] if row["status"] == "excluded"
+                                                  for label in row["excluded_cycles"]]
+        self.assertEqual(sorted(listed), sorted(observed))
+
+    def test_disclosure_rows_follow_every_channel_diagnostic(self):
+        cycles = [2018, 2020, 2022, 2024]
+        rows = self.history() + [fact(100, cycle=cycle, channel="pac") for cycle in (2016, 2022, 2024)]
+        result = panel(rows, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        self.assertEqual([(row["funding_source"], row["status"]) for row in result["diagnostics"]],
+                         [("employee", "ready"), ("pac", "unavailable"), ("pac", "excluded")])
+        self.assertEqual(result["diagnostics"][2]["excluded_cycles"], ["2015-2016"])
+
+    def test_exclusions_without_as_of_are_named(self):
+        result = panel(self.history(), "forecast", {"complete_cycles": [2018, 2020, 2022, 2024]})
+        self.assertEqual(set(self.excluded(result).values()), {"No valid as-of date is set to establish a closed cycle."})
+        self.assertEqual(len(self.excluded(result)), 4)
+
+    def test_production_context_without_a_completeness_record_emits_only_the_withheld_reason(self):
+        rows = []
+        for channel in ("employee_original", "corporate_original"):
+            for cycle in range(2014, 2028, 2):
+                rows += [fact(1000 + 10 * n, company=f"K{n}", committee=f"C{n}", cycle=cycle, channel=channel) for n in range(3)]
+            rows += [fact(-50, cycle=2022, channel=channel), fact(100, cycle=2020, when="invalid", channel=channel),
+                     fact(900000, cycle=2026, when="2026-03-01", channel=channel)]
+        cycles = list(range(2014, 2028, 2))
+        context = {"source_scope": {"dataset": "example", "industry": "Example", "basis": "receipt", "as_of": "2026-09-20"},
+                   "provenance": {}, "cycles": cycles}
+        result = panel(rows, "forecast", context, as_of="2026-09-20")
+        self.assertEqual((result["status"], result["rows"]), ("unavailable", []))
+        self.assertEqual(result["diagnostics"], [
+            dict(funding_source=channel, status="unavailable", training_cycles=[], backtest_count=0,
+                 reason="No completeness record is connected, so the forecast is withheld.")
+            for channel in ("corporate_original", "employee_original")])
+
+    def test_warning_rows_never_accompany_an_unavailable_channel(self):
+        cycles = [2018, 2020, 2022, 2024]
+        risky = [fact(-500000, cycle=2022, when="2022-03-01"), fact(900000, cycle=2026, when="2026-03-01")]
+        rows = self.history() + risky + [fact(cycle * 100, cycle=cycle, channel="pac") for cycle in (2022, 2024)]
+        rows += [fact(row["amount_cents"], cycle=row["cycle"], when=row["date"], channel="pac") for row in risky]
+        result = panel(rows, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        by_status = {row["funding_source"]: row["status"] for row in result["diagnostics"] if row["status"] in ("ready", "unavailable")}
+        self.assertEqual(by_status, {"employee": "ready", "pac": "unavailable"})
+        self.assertEqual({row["funding_source"] for row in self.warnings(result)}, {"employee"})
+        only_pac = [row for row in rows if row["funding_source"] == "pac"]
+        result = panel(only_pac, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        self.assertEqual(result["status"], "unavailable")
+        self.assertEqual(self.warnings(result), [])
+
+    def test_pace_projection_basis_lists_only_the_cycles_used(self):
+        rows = []
+        for cycle in [2014, 2016, 2018, 2020, 2022, 2024]:
+            rows += [fact(100, cycle=cycle, when=f"{cycle}-02-01"), fact(100, cycle=cycle, when=f"{cycle}-12-01")]
+        rows = [row for row in rows if not (row["cycle"] == 2014 and row["date"].endswith("02-01"))]
+        rows.append(fact(100, cycle=2026, when="2026-02-01"))
+        context = {"complete_cycles": [2014, 2016, 2018, 2020, 2022, 2024], "verified_data_through": "2026-09-20"}
+        pace = next(row for row in panel(rows, "forecast", context, as_of="2026-09-20")["rows"]
+                    if row["product"] == "Current-cycle pace projection")
+        self.assertEqual(pace["forecast_basis_cycle"], "2017-2018, 2021-2022")
+        self.assertEqual(pace["historical_completion_share"], .5)
+
+    def test_non_finite_horizon_falls_back_to_the_default(self):
+        context = {"complete_cycles": [2018, 2020, 2022, 2024]}
+        expected = panel(self.history(), "forecast", context, as_of="2026-09-20")["rows"]
+        for value in (float("inf"), float("-inf"), float("nan")):
+            with self.subTest(value=value):
+                result = panel(self.history(), "forecast", context, as_of="2026-09-20", horizon=value)
+                self.assertEqual(result["rows"], expected)
+                self.assertEqual([row["period"] for row in result["rows"]], ["2025-2026", "2027-2028"])
+
+    def warnings(self, result):
+        return [row for row in result["diagnostics"] if row["status"] == "warning"]
+
+    def test_current_cycle_activity_above_the_baseline_is_flagged_without_changing_it(self):
+        cycles = [2018, 2020, 2022, 2024]
+        rows = self.history() + [fact(900000, cycle=2026, when="2026-03-01")]
+        result = panel(rows, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        self.assertEqual(self.warnings(result), [dict(
+            funding_source="employee", status="warning", product="Cycle baseline", period="2025-2026",
+            baseline_cents=202200, observed_cents=900000,
+            warning="Observed amount to date in the current cycle exceeds the baseline.")])
+        self.assertEqual(next(row for row in result["rows"] if row["product"] == "Cycle baseline")["amount_cents"], 202200)
+        self.assertEqual([column["key"] for column in result["columns"]],
+                         ["product", "period", "funding_source", "amount_cents", "forecast_basis_cycle", "backtest_count"])
+        for observed in (0, 100, 202200):
+            with self.subTest(observed=observed):
+                rows = self.history() + ([fact(observed, cycle=2026, when="2026-03-01")] if observed else [])
+                self.assertEqual(self.warnings(panel(rows, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")), [])
+
+    def test_zero_or_negative_basis_is_flagged_per_baseline_period(self):
+        cycles = [2018, 2020, 2022, 2024]
+        refunds = self.history() + [fact(-500000, cycle=2022, when="2022-03-01")]
+        result = panel(refunds, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        self.assertEqual(self.warnings(result), [dict(
+            funding_source="employee", status="warning", product="Cycle baseline", period="2025-2026",
+            forecast_basis_cycle="2021-2022", baseline_cents=-297800, warning="Historical basis amount is zero or negative.")])
+        zero = self.history() + [fact(-202200, cycle=2022, when="2022-03-01")]
+        self.assertEqual([row["period"] for row in self.warnings(panel(zero, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20"))],
+                         ["2025-2026"])
+        flat = [fact(0, cycle=cycle) for cycle in cycles]
+        self.assertEqual([row["period"] for row in self.warnings(panel(flat, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20"))],
+                         ["2025-2026", "2027-2028"])
+        quarter = self.history() + [fact(-321, cycle=2022, when="2022-11-01")]
+        result = panel(quarter, "forecast", {"complete_cycles": cycles}, as_of="2026-09-20")
+        self.assertEqual([(row["product"], row["period"], row["baseline_cents"]) for row in self.warnings(result)],
+                         [("Next-quarter baseline", "2026-Q4", -321)])
 
 
 if __name__ == "__main__":

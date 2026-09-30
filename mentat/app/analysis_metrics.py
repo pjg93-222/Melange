@@ -230,7 +230,8 @@ def _comparison(rows, request):
 
 
 def _complete_cycles(context):
-    return {_cycle(value) for value in context.get("complete_cycles", [])} - {None}
+    values = context.get("complete_cycles")
+    return {_cycle(value) for value in ([] if values is None else values)} - {None}
 
 
 def _company_coverage(context, cycle, company):
@@ -671,15 +672,31 @@ def _timing(rows, **_):
                    "Missing months and invalid dates are not replaced with zeros. Monthly or quarterly observations may be partial."], quarterly_series=quarters)
 
 
+def _excluded_reason(cycle, complete, bad_cycles, as_of):
+    """First rule that keeps an observed cycle out of forecast history; None if it stays eligible."""
+    if not cycle:
+        return "No valid cycle on the selected records."
+    if cycle not in complete:
+        return "Not listed as explicitly complete."
+    if cycle in bad_cycles:
+        return "Records include a missing, invalid or cycle-inconsistent event date."
+    if not as_of:
+        return "No valid as-of date is set to establish a closed cycle."
+    if date(cycle, 12, 31) >= as_of:
+        return "Cycle has not closed by the as-of date."
+    return None
+
+
 def _forecast(rows, request, context, as_of, **_):
     result, diagnostics, notices = [], [], ["This is a seasonal-naive historical baseline, not a validated prediction. It repeats the latest explicitly complete cycle from the same four-year election phase.",
                                            "At least four consecutive explicitly complete cycles are required; missing and partial periods are never filled with zero.",
                                            "No calibrated prediction interval is available. Backtests use the current source revision, not reconstructed historical filing vintages."]
     complete = _complete_cycles(context)
+    flags = []
     current_cycle = as_of.year + as_of.year % 2 if as_of else None
     try:
         horizon = max(1, min(4, int(request.get("horizon", 2))))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         horizon = 2
     for (channel,), group in sorted(_groups(rows, "funding_source").items()):
         cycles = _groups(group, "cycle")
@@ -693,9 +710,19 @@ def _forecast(rows, request, context, as_of, **_):
                 break
             suffix.append(cycle)
         history = list(reversed(suffix))
+        # With a completeness record, every observed cycle outside the history is listed once, under the
+        # first rule that removed it. Without one, the withheld reason below already says why.
+        excluded = defaultdict(list)
+        for (cycle,) in sorted(cycles, key=lambda key: key[0] or 0):
+            if complete and cycle not in history:
+                reason = _excluded_reason(cycle, complete, bad_cycles, as_of) or "Older than a break in consecutive eligible cycles."
+                excluded[reason].append(_label(cycle))
+        flags += [dict(funding_source=channel, status="excluded", excluded_cycles=labels, reason=reason) for reason, labels in excluded.items()]
         if len(history) < 4:
+            reason = ("Need four consecutive explicitly complete cycles with valid event dates." if complete
+                      else "No completeness record is connected, so the forecast is withheld.")
             diagnostics.append(dict(funding_source=channel, status="unavailable", training_cycles=[_label(cycle) for cycle in history],
-                                    reason="Need four consecutive explicitly complete cycles with valid event dates.", backtest_count=0))
+                                    reason=reason, backtest_count=0))
             continue
         totals = {cycle: _money(cycles[(cycle,)])["amount_cents"] for cycle in history}
         backtests = []
@@ -718,24 +745,35 @@ def _forecast(rows, request, context, as_of, **_):
                                amount_cents=totals[basis], forecast_basis_cycle=_label(basis),
                                method="Same-election-phase seasonal naive", backtest_count=len(backtests),
                                filters=_filters(funding_source=channel, cycle=_label(basis))))
+            if offset == 0:
+                current_baseline = totals[basis]
+            if totals[basis] <= 0:
+                flags.append(dict(funding_source=channel, status="warning", product="Cycle baseline", period=_label(target),
+                                  forecast_basis_cycle=_label(basis), baseline_cents=totals[basis],
+                                  warning="Historical basis amount is zero or negative."))
         # A same-stage projection requires explicit current-through coverage in addition
         # to complete history. A maximum observed date is insufficient evidence.
         through = _date(context.get("verified_data_through"))
         current = cycles.get((current_cycle,), [])
         same_phase = [cycle for cycle in history if cycle % 4 == current_cycle % 4]
-        fractions = []
+        fractions, used_cycles = [], []
         for cycle in same_phase:
             full = totals[cycle]
             partial = sum(row["amount_cents"] for row in cycles[(cycle,)] if row["temporal_date"] <= _cutoff(cycle, as_of))
             if full > 0 and 0 < partial <= full:
                 fractions.append((partial, full))
+                used_cycles.append(cycle)
         observed = _money(current)["amount_cents"]
+        if observed > max(current_baseline, 0):
+            flags.append(dict(funding_source=channel, status="warning", product="Cycle baseline", period=_label(current_cycle),
+                              baseline_cents=current_baseline, observed_cents=observed,
+                              warning="Observed amount to date in the current cycle exceeds the baseline."))
         if through and through >= as_of and len(fractions) >= 2 and observed > 0 and current_cycle not in bad_cycles:
             partial_sum, total_sum = map(sum, zip(*fractions))
             result.append(dict(funding_source=channel, product="Current-cycle pace projection", period=_label(current_cycle),
                                amount_cents=_rounded_ratio(observed * total_sum, partial_sum),
                                observed_cents=observed, historical_completion_share=_ratio(partial_sum, total_sum),
-                               forecast_basis_cycle=", ".join(_label(cycle) for cycle in same_phase),
+                               forecast_basis_cycle=", ".join(_label(cycle) for cycle in used_cycles),
                                method="Pooled same-phase historical completion share", backtest_count=0,
                                filters=_filters(funding_source=channel, cycle=_label(current_cycle))))
         else:
@@ -757,6 +795,10 @@ def _forecast(rows, request, context, as_of, **_):
                                filters=_filters(funding_source=channel, cycle=_label(basis_cycle)) +
                                        [{"field": "date", "op": "gte", "value": f"{basis_year}-{first_month:02d}-01"},
                                         {"field": "date", "op": "lte", "value": f"{basis_year}-{last_month:02d}-{calendar.monthrange(basis_year, last_month)[1]:02d}"}]))
+            if result[-1]["amount_cents"] <= 0:
+                flags.append(dict(funding_source=channel, status="warning", product="Next-quarter baseline", period=f"{next_year}-Q{next_quarter}",
+                                  baseline_cents=result[-1]["amount_cents"], warning="Historical basis amount is zero or negative."))
+    diagnostics.extend(flags)
     if not complete:
         notices.append("The source has no explicit complete-cycle evidence, so forecasts are withheld.")
     if not as_of:
@@ -781,7 +823,7 @@ def analyze(rows, request=None, context=None):
         raise ValueError("as_of must be an ISO calendar date (YYYY-MM-DD).")
     try:
         top_n = max(1, min(MAX_TOP_N, int(request.get("top_n", 25))))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         top_n = 25
     chosen = request.get("panels")
     if isinstance(chosen, dict):

@@ -1,8 +1,40 @@
 <section id="view-insights" role="tabpanel" aria-labelledby="tab-insights" hidden>
   <div class="insights-heading analysis-intro">
     <p class="insights-subtitle">Compare periods and explain observed changes.</p>
+    <button id="giving-forecast-open" type="button" class="secondary" aria-controls="giving-forecast" aria-expanded="false">Forecast giving</button>
     <div class="insights-export analysis-page-actions page-actions"><button id="insights-page-sources" type="button" class="secondary" aria-controls="insights-sources" aria-expanded="false">Sources</button><details id="insights-export-menu" class="insights-export-menu"><summary class="secondary">Export</summary><div class="insights-export-list" role="group" aria-label="Export"><button id="insights-export-csv" class="secondary" type="button" aria-label="Export CSV" disabled>CSV</button><button id="insights-export-json" class="secondary" type="button" aria-label="Export JSON" disabled>JSON</button></div></details><button id="insights-refresh" type="submit" form="insights-controls" class="primary">Refresh</button></div>
   </div>
+  <section id="giving-forecast" class="giving-forecast" aria-labelledby="gf-title" hidden>
+    <div class="gf-heading">
+      <div><h2 id="gf-title">Forecast giving</h2><p>Explore how growth and expected political power relate to later giving.</p></div>
+      <button id="gf-export" type="button" class="secondary" disabled>Export scenario</button>
+    </div>
+    <p class="gf-scope">Whole-industry scenarios for commercial banks, credit unions and auto manufacturers. Company and report filters do not apply.</p>
+    <p id="gf-load-status" role="status" aria-live="polite">Loading reviewed models…</p>
+    <form id="gf-form" hidden>
+      <div class="gf-settings">
+        <label>Research industry<select id="gf-industry"></select></label>
+        <label>As of<input id="gf-date" type="date" required></label>
+        <label>Political expectations<select id="gf-signal"><option value="control">Expected control</option><option value="seats">Expected seat gain</option></select></label>
+        <label>Political slopes<select id="gf-slopes"><option value="pooled">Pooled across industries</option><option value="industry">Industry-specific</option></select></label>
+      </div>
+      <p id="gf-model-note" class="gf-help"></p>
+      <div class="gf-horizons" id="gf-horizons"></div>
+      <details class="gf-disclosure">
+        <summary>Sources and remainder amounts</summary>
+        <p>Use comparable whole-industry amounts in constant 2025 dollars. PAC totals and PAC plus individual candidate giving are separate accounts.</p>
+        <div class="gf-settings gf-provenance">
+          <label>Assumption source<input id="gf-source" type="text" maxlength="500" placeholder="Forecast provider or scenario description"></label>
+          <label>Assumptions dated<input id="gf-source-date" type="date"></label>
+        </div>
+        <div id="gf-observed"></div>
+      </details>
+      <div class="gf-actions"><button id="gf-calculate" type="submit" class="primary">Calculate both horizons</button><button id="gf-reference" type="button" class="secondary">Use historical example</button><span class="gf-help">Blank inputs stay unknown.</span></div>
+    </form>
+    <p id="gf-status" role="status" aria-live="polite"></p>
+    <section id="gf-results" aria-label="Forecast comparison" aria-busy="false"></section>
+    <details class="gf-disclosure" id="gf-evidence"><summary>Model evidence and ordinary p-values</summary><div id="gf-evidence-content"></div></details>
+  </section>
   <form id="insights-controls" class="card insights-controls" aria-label="Insights scope">
     <div class="insights-filter-grid">
       <label class="insights-field">Industry<select id="insights-dataset" aria-label="Insights industry"><option value="">Loading industries…</option></select></label>

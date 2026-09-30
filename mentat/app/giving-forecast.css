@@ -1,0 +1,79 @@
+/* A local Insights extension. Shared chrome and observed analyses retain their identity. */
+#view-insights.forecast-mode > :is(.insights-controls,.insights-summary,.insights-status,.insights-layout){display:none}
+#view-insights.forecast-mode .insights-export{display:none}
+#view-insights .insights-heading > #giving-forecast-open{margin-left:auto;white-space:nowrap}
+.giving-forecast{color:var(--acu-plum);background:#fff;border-radius:var(--card-radius);box-shadow:var(--card-shadow);padding:28px;margin:12px 0 28px;min-width:0}
+.giving-forecast[hidden]{display:none}
+.giving-forecast h2{font-family:var(--font-serif);font-size:30px;margin:0 0 7px;text-wrap:balance}
+.giving-forecast h3{font-size:20px;margin:0 0 8px}
+.giving-forecast p{line-height:1.5;max-width:75ch;margin:8px 0 14px}
+.giving-forecast :is(input,select,button,summary){font-family:var(--font-sans);font-size:14px}
+.giving-forecast :is(input,select){display:block;width:100%;min-width:0;height:42px;margin-top:6px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--acu-plum);padding:8px 10px;caret-color:var(--acu-purple)}
+.giving-forecast input::placeholder{color:var(--muted);opacity:1}
+.giving-forecast label{font-size:13px;line-height:1.4;color:var(--acu-plum);display:block;min-width:0;white-space:normal;margin:0}
+.giving-forecast :is(button,summary):focus-visible,.giving-forecast :is(input,select):focus-visible{outline:3px solid var(--acu-teal);outline-offset:3px}
+.giving-forecast ::selection{background:var(--acu-lilac);color:var(--acu-plum)}
+.giving-forecast :is(table,input,.gf-value){font-variant-numeric:tabular-nums}
+.giving-forecast :is(button,summary){min-height:42px}
+.giving-forecast button:disabled{opacity:.5;cursor:not-allowed}
+.gf-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.gf-heading p{color:var(--muted);margin-bottom:8px}
+.gf-scope{font-size:13px;color:var(--muted)}
+.gf-settings{display:grid;grid-template-columns:1.2fr .8fr 1fr 1fr;gap:18px;margin:24px 0 12px}
+.gf-help{font-size:13px;color:var(--muted);line-height:1.5}
+.gf-horizons{display:grid;grid-template-columns:1fr 1fr;margin:24px 0 10px;gap:28px}
+.gf-horizon{border:0;border-top:2px solid var(--acu-purple);padding:18px 0 0;margin:0;min-width:0}
+.gf-horizon:last-child{border-color:var(--acu-teal)}
+.gf-horizon legend{float:left;width:100%;font-family:var(--font-serif);font-size:24px;line-height:1.15;margin:0 0 6px;padding:0}
+.gf-fields{clear:both;display:grid;grid-template-columns:1fr 1fr;gap:15px 18px}
+.gf-fields .gf-wide{grid-column:1/-1}
+.gf-fields small{display:block;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45}
+.gf-horizon > p{clear:both;color:var(--muted);font-size:13px}
+.gf-disclosure{border-top:1px solid var(--line);margin-top:24px;padding-top:6px}
+.gf-disclosure summary{font-weight:600;cursor:pointer;padding:12px 0;line-height:1.4}
+.gf-disclosure summary:hover{color:var(--acu-teal)}
+.gf-disclosure p{font-size:13px;color:var(--muted)}
+.gf-provenance{grid-template-columns:2fr 1fr;max-width:850px;margin-top:10px}
+.gf-recorded{margin:20px 0 0;border:0;padding:0}
+.gf-recorded legend{font-weight:600;margin-bottom:10px;font-size:14px}
+.gf-recorded .gf-fields{grid-template-columns:repeat(3,1fr)}
+.gf-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px}
+.gf-saved-outlook{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px}
+.gf-actions button{min-height:44px}
+#gf-status{font-size:14px;color:var(--acu-purple)}
+#gf-status.gf-error{color:var(--chart-negative)}
+.gf-comparison{margin-top:30px}
+.gf-table-wrap{overflow:auto;scrollbar-color:var(--acu-taupe) var(--acu-paper)}
+.gf-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px}
+.gf-table th,.gf-table td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:18px 16px;line-height:1.5;overflow-wrap:anywhere;white-space:normal}
+.gf-table thead th{background:var(--acu-paper);font-weight:600;border-top:1px solid var(--line)}
+.gf-table th:first-child{width:22%;padding-left:0}
+.gf-table thead th:first-child{padding-left:12px}
+.gf-table tbody th{font-weight:600}
+.gf-table small{font-size:12px;display:block;font-weight:400;line-height:1.5;color:var(--muted);margin-top:6px;white-space:normal;overflow-wrap:anywhere}
+.gf-value{display:block;font-size:24px;font-weight:500;line-height:1.25;color:var(--acu-plum);margin-bottom:6px}
+.gf-detail{font-size:13px;color:var(--muted);margin-top:7px}
+.gf-detail strong{color:var(--acu-plum);font-weight:600}
+.gf-material{font-size:12px;color:var(--muted);margin-top:10px}
+.gf-material b{font-weight:600;color:var(--acu-plum)}
+.gf-evidence-table{table-layout:auto;font-size:13px;min-width:650px}
+.gf-evidence-table th:first-child{width:auto;padding-left:12px}
+.gf-evidence-table :is(th,td){padding:10px 12px}
+.gf-evidence-table caption{text-align:left;font-weight:600;padding:18px 0 10px}
+.gf-notice{margin-top:18px!important;font-size:13px;color:var(--muted)}
+.gf-error{color:var(--chart-negative)}
+@media(max-width:1050px){.gf-settings{grid-template-columns:1fr 1fr}.gf-horizons{gap:22px}.giving-forecast{padding:22px}.gf-table :is(th,td){padding:16px 10px}.gf-value{font-size:22px}}
+@media(max-width:640px){
+  .giving-forecast{padding:18px 16px;margin-top:8px}.giving-forecast h2{font-size:27px}
+  .gf-heading{flex-wrap:wrap;gap:4px}.gf-heading button{margin-top:8px}
+  .gf-settings,.gf-horizons,.gf-provenance{grid-template-columns:1fr;gap:16px}
+  .gf-fields{gap:14px 12px}.gf-recorded .gf-fields{grid-template-columns:1fr}
+  .giving-forecast :is(input,select,button,summary){min-height:44px}
+  .gf-horizons{gap:28px}.gf-actions button{width:100%}
+  .gf-comparison .gf-table,.gf-comparison .gf-table tbody{display:block}
+  .gf-comparison .gf-table thead{display:none}
+  .gf-comparison .gf-table tr{display:block;border-top:1px solid var(--line);padding:16px 0}
+  .gf-comparison .gf-table th,.gf-comparison .gf-table td{display:block;width:100%;border:0;padding:8px 0}
+  .gf-comparison .gf-table td::before{content:attr(data-horizon);display:block;font-size:12px;font-weight:600;color:var(--acu-purple);margin-bottom:8px}
+  .gf-comparison .gf-table tbody th{font-size:20px}
+}

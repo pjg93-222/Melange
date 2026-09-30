@@ -101,6 +101,8 @@ from runtime_inputs import copy_fec_sources
 STATIC_ASSETS = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript"),
                  '/insights.js': ('insights.js', 'text/javascript'),
                  '/insights.css': ('insights.css', 'text/css'),
+                 '/giving-forecast.js': ('giving-forecast.js', 'text/javascript'),
+                 '/giving-forecast.css': ('giving-forecast.css', 'text/css'),
                  '/contribution-studio': ('contribution-studio.html', 'text/html; charset=utf-8'),
                  '/contribution-studio.css': ('contribution-studio.css', 'text/css'),
                  '/contribution-studio.js': ('contribution-studio.js', 'text/javascript'),
@@ -3028,6 +3030,9 @@ class Handler(BaseHTTPRequestHandler):
                 import analysis_data
                 import response_cache
                 return self.send_entry(response_cache.from_value(analysis_data.catalog(app.report_directory)))
+            if parsed.path == '/api/forecast/catalog':
+                import giving_forecast
+                return self.send(giving_forecast.catalog())
             if parsed.path == '/api/contributions/catalog':
                 # One scan of the report folder for this request: the semantic
                 # catalogue and the registry annotation below read the same list.
@@ -3278,7 +3283,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         analytical_paths = {'/api/contributions/query', '/api/contributions/records', '/api/contributions/geography',
-                            '/api/insights/query', '/api/insights/records'}
+                            '/api/insights/query', '/api/insights/records', '/api/forecast/project'}
         if getattr(self.server.app, 'read_only', False) and self.path.startswith('/api/studio/briefing'):
             self.discard_body()
             return self.send({'error': 'Read-only preview. Briefing changes are not saved.'}, 403)
@@ -3339,6 +3344,9 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length))
             if not isinstance(data, dict):
                 raise ValueError("Expected an upload or run request.")
+            if self.path == '/api/forecast/project':
+                import giving_forecast
+                return self.send(giving_forecast.project(data))
             # The body as the client sent it (scope_body and the readers change `data`), for record_access.
             started = time.perf_counter()
             sent = (json.loads(json.dumps(data)) if ACCESS_RECORDER is not None and

@@ -85,6 +85,9 @@ mentat/state/contribution-source-proofs/
 # *.json sweep above would drop it and both suites would fail on a fresh checkout.
 !mentat/app/studio-contract-examples.json
 
+# Reviewed coefficients and historical anchors required by the industry scenario calculator.
+!mentat/app/data/giving-models-v1.json
+
 # --- Mentat working-tree hygiene (2026-09-18) ---
 # Node dependency trees are never tracked, wherever they appear.
 node_modules/
