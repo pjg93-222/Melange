@@ -116,8 +116,8 @@ def test_migration_requires_hash_bound_evidence_and_original_fingerprint(tmp_pat
     with pytest.raises(ValueError, match='fingerprint does not match'):
         reuse(texts, corrupted)
     Path(sources[1]['path']).write_bytes(b'changed source')
-    with pytest.raises(ValueError, match='evidence hash mismatch'):
-        reuse(texts, published)
+    # QME 2026-10-01: evidence that no longer matches its hash is not reusable (the key is reclassified), not an error.
+    assert reuse(texts, published) is None
 
 
 @pytest.mark.parametrize('law,expected_classifications', [(LAW, 0), ('The authority is now permanent.', 1)])
