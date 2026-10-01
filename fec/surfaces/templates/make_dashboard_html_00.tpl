@@ -1078,7 +1078,8 @@ function runScenario(){
   const cu=+cusl.value*1000,co=+cosl.value*1000;
   document.getElementById('culab').textContent='$'+cusl.value+'k';document.getElementById('colab').textContent='$'+cosl.value+'k';
   let dThis=0,dAll=0;
-  for(let i=0;i<DATA.issues.length;i++){const c=baseCache[i],pfn=pflipOf(sel,c.nAsel,c.nBsel,c.mA,c.mB,EG.cu[sel]+cu,EG.ind[sel]+co);const d=c.tgsel*(pfn-c.pfbase);dAll+=d;if(i===issue)dThis=d;}
+  for(let i=0;i<DATA.issues.length;i++){const c=baseCache[i],pfn=pflipOf(sel,c.nAsel,c.nBsel,c.mA,c.mB,EG.cu[sel]+cu,EG.ind[sel]+co);const d=c.tgsel*(pfn-c.pfbase);if(i<DATA.issues.length-1)dAll+=d;if(i===issue)dThis=d;}   // QME 2026-10-01: the appended 'Overall CU stance' layer is last and is not one of the 17 issues; desk_roi excludes it too
+
   const lean=shiftLean(sel,cu)-shiftLean(sel,co)*(K.LOSSFRAME||1),defects=Math.abs(lean)>=K.DTHRESH;   // competitor leg x LOSSFRAME (psych parity 2026-07-09 = money_response loss-frame asymmetry)
   const sg=x=>(x>=0?'up':'down'),ar=x=>(x>=0?'+':'');
   document.getElementById('scout').innerHTML=

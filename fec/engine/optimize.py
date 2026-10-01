@@ -27,6 +27,7 @@ BUDGET=int(os.environ.get('BUDGET','2500000')); INC=int(os.environ.get('INC','50
 PMAX=int(os.environ.get('PMAX','10000'))   # per-member max above existing CU money = this PAC's FEC per-candidate per-cycle limit (see the 2026-09-30 ruling above)
 ONLY=os.environ.get('TOPIC')
 if BUDGET<0 or INC<=0 or PMAX<0: raise ValueError('BUDGET/PMAX must be nonnegative and INC must be positive')
+if 0<PMAX<INC: raise ValueError('INC (%d) exceeds PMAX (%d): no member could ever receive a full chunk, so the plan would silently fund nothing'%(INC,PMAX))   # QME 2026-10-01: the docstring's own BUDGET=1000000 INC=25000 example hit this with the default PMAX
 def scoped_output_path(explicit,default,selector):
     """A TOPIC probe gets its own artifact unless the caller explicitly supplies an output path."""
     if explicit: return explicit
@@ -36,6 +37,7 @@ def scoped_output_path(explicit,default,selector):
     return stem+'_topic_'+slug+ext
 OUTF=scoped_output_path(os.environ.get('OPT_OUT'),B+r'\optimize_result.json',ONLY)
 cats=[c for c in fm.cats if (not ONLY or ONLY.lower() in c.lower())]
+if ONLY and not cats: raise ValueError('TOPIC %r matches no category'%ONLY)   # QME 2026-10-01: a typo used to finish with base 0 and an empty plan under a topic-scoped filename
 members=fm.members
 # F1 SYSTEM-LEVEL STANCE GATE (Paul 2026-09-30, "F1. Yes"): inherit per_topic_flip's gate -- a member whose
 # overall tier is Skeptic, Highly Skeptical or Opponent is not a money target merely because some topic cells

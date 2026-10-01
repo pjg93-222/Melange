@@ -89,7 +89,7 @@ if __name__=='__main__':
             print('   CU +$%-7s -> lean shift %+.1f'%(f"{amt:,}",shift_lean('Jared Golden','cu',amt)))
     print('\nDefection triggers (competitor floods a persuadable member):')
     cnt=0
-    for m in sorted(C,key=lambda x:-(C[x].get('receipts') or 0),reverse=True):
+    for m in sorted(C,key=lambda x:-(C[x].get('receipts') or 0)):
         d=shift_lean(m,'comp',250000); nw=defection(m,d)
         if nw and OV.get(m) in ('Ally','Highly Persuadable','Persuadable','Lean Persuadable',
                                 'True Neutral','Neutral','Lean Skeptic'):

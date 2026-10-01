@@ -138,6 +138,11 @@ def _require_single_direction(value):
             raise MixedCategoryDirections(directions)
 
 
+def _mixed_rationale(directions):
+    return 'mixed category directions (+1 and -1): '+', '.join(
+        '%s %+d'%(category,direction) for category,direction in sorted(directions.items()))
+
+
 _STATUTE_DASHES = str.maketrans({char: '-' for char in '\u2010\u2011\u2012\u2013\u2014\u2212'})
 
 
@@ -509,8 +514,7 @@ def main(argv=None):
                 # bills"): an include whose categories carry both +1 and -1 is held the same way. A held bill
                 # that was admitted before stays in bill_catalog, which returns it to the retry pool above.
                 rationale=('below-high-confidence decision (%s)'%exc.confidence if isinstance(exc,BelowHighConfidence)
-                           else 'mixed category directions (+1 and -1): '+', '.join(
-                               '%s %+d'%(category,direction) for category,direction in sorted(exc.directions.items())))
+                           else _mixed_rationale(exc.directions))
                 decisions[key]={'canonical_key':key,'disposition':'hold','confidence':'low',
                                 'rationale':rationale,
                                 'categories':[],'authority':'automated_classifier_validation_gate',
@@ -531,6 +535,19 @@ def main(argv=None):
                 print(key,reason,flush=True)
         # Checkpoint is a resumable work queue, never a scoring authority.
         write_json(checkpoint_path,{'schema':'sentinel-admission-checkpoint-v1','decisions':decisions,'errors':errors})
+    # QME 2026-10-01: the loop above checks only the keys this run selected. An admitted include it did not select
+    # (a --keys run, or an admitted key on the ratified-exclusion list) would otherwise keep a mixed-direction verdict
+    # in bills, and SA.load refuses the whole generation for it. Same hold, same shape, as the in-loop branch.
+    for key in sorted(bills):
+        try:
+            _require_single_direction(decisions.get(key) or {})
+        except MixedCategoryDirections as exc:
+            decisions[key]={'canonical_key':key,'disposition':'hold','confidence':'low',
+                            'rationale':_mixed_rationale(exc.directions),
+                            'categories':[],'authority':'automated_classifier_validation_gate',
+                            'checked_at':stamp,'evidence':[]}
+            bills.pop(key,None)
+            print(key,'hold:',decisions[key]['rationale'],flush=True)
     # A failed refresh of a previously active bill cannot certify fresh inputs.
     # Keep the last-good generation and emit a failed run instead.
     memberships=[];unresolved=[]
