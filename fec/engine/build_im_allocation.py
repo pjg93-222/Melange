@@ -18,7 +18,7 @@ per-topic coalition row-sum -- both straight from the current model, no legacy t
 
 Run per_topic_flip.py and per_topic_coalition.py first (they write the inputs), then this, then write_im_sheet.py.
 """
-import json, sys, collections
+import json, sys, os, collections
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 pta=json.load(open(B+r'\per_topic_alloc.json'))
@@ -29,10 +29,18 @@ for t,d in pta.items():
 for t,d in ptc.items():
     for n,a in d.items(): coal[n]+=a
 out={'flip':{n:int(v) for n,v in flip.items() if v>0},'coalition':{n:int(v) for n,v in coal.items() if v>0}}
+# QME 2026-10-01 (fix 9): flip/coalition VALUES are unchanged by design (M4: per-topic row-sums; legacy audit G1/G2 assert equality). But each topic is an
+# independent $2M diagnostic scope with its own per-member $50k cap, so a row-sum is NOT a per-member spend and can exceed one PAC's per-candidate limit
+# (PMAX, read as optimize.py does). Label it, and list the over-limit members so no reader mistakes the sheet for a payable plan. Additive keys only.
+PMAX=int(os.environ.get('PMAX','10000'))
+out['basis']='per-topic diagnostic row-sums (each topic is an independent $2M scope); non-additive across topics and NOT a per-member spend -- see members_over_pmax'
+out['members_over_pmax']={'pmax':PMAX,'flip':{n:v for n,v in out['flip'].items() if v>PMAX},'coalition':{n:v for n,v in out['coalition'].items() if v>PMAX}}
 dump_atomic(out,B+r'\im_allocation.json')
 print('build_im_allocation — regenerated im_allocation.json from the LIVE per-topic model')
 print('  FLIP: %d members funded (sum across %d topics)'%(len(out['flip']),len(pta)))
 print('  COALITION: %d members funded (sum across %d topics)'%(len(out['coalition']),len(ptc)))
+print('  WARNING: %d FLIP and %d COALITION members have row-sums above PMAX $%s (diagnostic row-sums, not a per-member spend; see members_over_pmax)'%(
+    len(out['members_over_pmax']['flip']),len(out['members_over_pmax']['coalition']),f'{PMAX:,}'))
 print('\n  FLIP top-8 (live):')
 for n,v in flip.most_common(8): print('     %-24s $%s'%(n,f'{v:,}'))
 print('  COALITION top-8 (live):')

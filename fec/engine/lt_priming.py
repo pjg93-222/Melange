@@ -5,21 +5,42 @@ A member co-sponsors / flips when their PRO-influence clears their threshold:
     pressure(active pro neighbors) + money-influence  >=  theta(resistance)   [Linear Threshold]
 For each persuadable target we solve for the CHEAPEST balance of network pressure (which neighbors to
 recruit) and direct money (diminishing returns) that tips them over."""
-import json, sys, os
+import json, sys, os, re
 sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 B=MB_ROOT
 TOPIC=os.environ.get('TOPIC','Mortgage')
 CEDGE=float(os.environ.get('CEDGE','10000'))
-MAXSHIFT=18.0; HALF=0.10; RFLOOR=200000          # money curve (shared with money_response.py)
+MONEY_PARITY=os.environ.get('LT_MONEY_PARITY','1')!='0'   # QME 2026-10-01: 1 (default) = money term IS money_response.shift_lean (HALF from the HALF dial, pressure_mult applied); 0 = old hardcoded HALF=0.10, no pressure_mult. Mirrored in dashboard prime() via K.LTPAR/K.LTHALF.
+OPP_TARGET=os.environ.get('LT_OPP_TARGET','0')=='1'       # QME 2026-10-01: 0 (default) = a committed Opponent topic cell is never a target (the documented rule); 1 = old (Opponent cells were targets unless blocked overall). Mirrored via K.LTOPP.
+MAXSHIFT=18.0; RFLOOR=200000
+HALF=float(os.environ.get('HALF','0.10')) if MONEY_PARITY else 0.10   # money curve (shared with money_response.py: same HALF dial, QME 2026-10-01; was hardcoded 0.10)
 PRO={'Champion','Defender','Ally'}
-# requirement to flip, by current tier (units of pro-influence); committed opponents excluded
+# requirement to flip, by current tier (units of pro-influence); committed opponents excluded (QME 2026-10-01: enforced in prime(), LT_OPP_TARGET=1 reverts; 'Opponent' stays on the ladder for the dashboard's EG.theta)
 THETA={'Highly Persuadable':0.6,'Persuadable':0.8,'Lean Persuadable':0.9,
        'True Neutral':1.0,'Neutral':1.0,'Lean Skeptic':1.5,'Skeptic':2.0,
        'Highly Skeptical':2.5,'Opponent':3.0,'Ally':0.0}   # fixed ladder resistance
 C={m['member']:m for m in json.load(open(B+r'\data\engine\congestion.json'))}; members=list(C.keys())
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
 CS=json.load(open(B+r'\category_stance.json')); MAT=CS['matrix']; cats=CS['cats']
-cat=[c for c in cats if TOPIC.lower() in c.lower()][0]
+def pick_topic(topic,cats):
+    # QME 2026-10-01: exact (case-insensitive) match first, then a UNIQUE substring, else ValueError listing the candidates. The old
+    # [0] of a substring filter silently took the first hit and IndexError'd on no match.
+    t=topic.strip().lower(); ex=[c for c in cats if c.lower()==t]
+    if len(ex)==1: return ex[0]
+    sub=[c for c in cats if t and t in c.lower()]
+    if len(sub)==1: return sub[0]
+    raise ValueError('TOPIC %r %s; candidates: %s'%(topic,'is ambiguous' if sub else 'matches no category',sub or list(cats)))
+cat=pick_topic(TOPIC,cats)
+def scoped_output_path(explicit,default,selector):
+    # QME 2026-10-01 (optimize.py pattern): a non-default TOPIC run gets its own artifact so it cannot overwrite production; LT_OUT is an explicit override.
+    if explicit: return explicit
+    if not selector: return default
+    slug=re.sub(r'[^a-z0-9]+','_',selector.lower()).strip('_') or 'topic'
+    stem,ext=os.path.splitext(default)
+    return stem+'_topic_'+slug+ext
+try: _DEFCAT=pick_topic('Mortgage',cats)
+except ValueError: _DEFCAT=None
+OUTF=scoped_output_path(os.environ.get('LT_OUT'),B+r'\data\network\lt_priming.json',None if cat==_DEFCAT else cat)   # default TOPIC 'Mortgage' resolves uniquely to 'Mortgage & Housing' -> production path, zero delta
 adj=MBC.load_network()
 # L4: unify the diffusion kernel with the rest of the system (coalition/scenario/frontier use the
 # bridge-amplified P=(w*cpf)/(w*cpf+4); this module previously used the un-amplified P=w/(w+4)). Adopt the
@@ -48,17 +69,19 @@ def receipts(m):
     # ~5-10x cheaper to prime with money. Impute the MEDIAN so they read as typically movable.
     rr=C[m].get('receipts') or 0
     return max(rr,RFLOOR) if rr>0 else _RMED
-def money_units(m,dollars):                         # net_lean shift -> pro-influence units (MAXSHIFT pts == 1 unit)
-    r=dollars/receipts(m); return (MAXSHIFT*(r/(r+HALF)))/MAXSHIFT
-def dollars_for_units(m,u):                         # invert: $ needed for u units of pro-influence (diminishing)
-    u=min(u,0.98); return HALF*receipts(m)*u/(1-u)
+def pmult(m):                                       # QME 2026-10-01: money_response.shift_lean multiplies by pressure_mult; parity=0 -> 1.0 (old)
+    return max(MBC.rc(m,'pressure_mult'),1e-9) if MONEY_PARITY else 1.0
+def money_units(m,dollars):                         # net_lean shift -> pro-influence units (MAXSHIFT pts == 1 unit) = shift_lean/MAXSHIFT
+    r=dollars/receipts(m); return (MAXSHIFT*(r/(r+HALF))*pmult(m))/MAXSHIFT
+def dollars_for_units(m,u):                         # invert: $ needed for u units of pro-influence (diminishing); u/pm = saturating fraction
+    u=min(u/pmult(m),0.98); return HALF*receipts(m)*u/(1-u)
 proset={m for m in members if MAT.get(m,{}).get(cat) in PRO}
 # ---- stance-integrity gates (user-ratified 2026-07-04; 'Lean Skeptic' explicitly carved out of every one) ----
 # Root cause (the Warren sighting, July-1 artifact): single-cell myopia admitted a system-level Skeptic
 # (overall tier, CFPB/FoM/Tech Opponent) as a True-Neutral Mortgage target AND as a pro-pressure recruit,
 # and the net_lean resistance term only sees money-TAKERS — a PAC-free ideologue priced as CHEAP.
 # Mirrored in the dashboard's in-browser port (make_dashboard_html_00.tpl prime/cheapestFlips).
-BLOCK_OVERALL={'Skeptic','Highly Skeptical','Opponent'}   # kernel overall_tier read; overall 'Lean Skeptic' stays eligible
+BLOCK_OVERALL=MBC.STANCE_GATE_BLOCKED   # QME 2026-10-01: the kernel's one copy (== {'Skeptic','Highly Skeptical','Opponent'}, zero delta); overall 'Lean Skeptic' stays eligible
 BLOCK_RECRUIT_CELL={'Skeptic','Highly Skeptical','Opponent'}  # committed cells cannot be recruited as pressure sources
 COMMIT=0.25                                               # +theta per declared Opponent cell anywhere in the matrix — opposition breadth the money term can't see
 OVERALL_CAPS=(CS.get('gate') or {}).get('overall_capped') or {}
@@ -72,14 +95,17 @@ def recruit_cost(u):
 def prime(v):
     tier=MAT.get(v,{}).get(cat)
     if tier not in THETA or tier in PRO: return None
+    if tier=='Opponent' and not OPP_TARGET: return None               # QME 2026-10-01: committed Opponents are never targets (module comment + audit_full rule); LT_OPP_TARGET=1 restores
     if OVT.get(v) in BLOCK_OVERALL: return None                      # one mild topic cell can't make a system-level Skeptic a target
     theta=THETA[tier]+max(0,-(C[v].get('net_lean') or 0)/120)        # money-captured members resist more
     theta+=COMMIT*sum(1 for t in MAT.get(v,{}).values() if t=='Opponent')   # ideological commitment resists too (PAC-free opponents no longer read cheap)
-    pressure=sum(P[u].get(v,0)*xf(u,v) for u in proset if u in P[v])  # pro pull u->v read at receiver v (P[u][v], target's edge_mult; index was reversed until 2026-09-30); cross-party cues bridge-gated (Bakker)
+    pressure=sum(P[u].get(v,0)*xf(u,v) for u in sorted(proset) if u in P[v])  # QME 2026-10-01: sorted = fixed summation order (set order is PYTHONHASHSEED-dependent in the last bits); pro sources deliberately NOT filtered by overall tier (a pro topic cell pressures that topic by design); pro pull u->v read at receiver v (P[u][v], target's edge_mult; index was reversed until 2026-09-30); cross-party cues bridge-gated (Bakker)
     gap=theta-pressure
-    if gap<=1e-6: return {'v':v,'tier':tier,'theta':round(theta,2),'pressure':round(pressure,2),'gap':round(gap,2),'cost':0,'money':0,'recruits':[]}
-    money_only=dollars_for_units(v,min(0.97,gap))                     # $ to close whole gap with money alone
-    avg_rate=money_only/min(0.97,gap)                                 # money's average $ per influence-unit
+    pm=pmult(v); mcap=0.97*pm                                         # QME 2026-10-01: money alone can deliver < pm units (pm==1.0 -> exactly the old 0.97)
+    if gap<=1e-6: return {'topic':cat,'v':v,'tier':tier,'theta':round(theta,2),'pressure':round(pressure,2),'gap':round(gap,2),'cost':0,'money':0,'recruits':[],
+                          'units':{'theta':round(theta,9),'pressure':round(pressure,9),'recruit_pull':0.0,'money_units':0.0}}
+    money_only=dollars_for_units(v,min(mcap,gap))                     # $ to close whole gap with money alone
+    avg_rate=money_only/min(mcap,gap)                                 # money's average $ per influence-unit
     # recruit not-yet-pro neighbors that are cheaper per unit than money; each adds P[u][v].
     # Stance floors (2026-07-04): the model may not enlist as a pro-advocate a member its own stance law
     # calls opposed — no Skeptic/Opponent topic cell, no Skeptic-or-worse overall read (Lean Skeptic allowed).
@@ -109,16 +135,18 @@ def prime(v):
         if got>=gap: break
         if c<avg_rate: got+=add; cost+=c*add; recruits.append((u,round(add,2)))
     resid=max(0.0,gap-got)
-    if resid>0.97: return None                                       # money can't close (>1 unit residual) -> not primeable on money alone
+    if resid>mcap: return None                                       # money can't close (>1 unit residual) -> not primeable on money alone
     money=round(dollars_for_units(v,resid)) if resid>1e-6 else 0
     cost+=money
-    return {'v':v,'tier':tier,'theta':round(theta,2),'pressure':round(pressure,2),'gap':round(gap,2),
-            'cost':round(cost),'money':money,'recruits':recruits}
+    # QME 2026-10-01: 'units' = the recipe's own influence budget (full precision) so audit_full can check pressure+recruit_pull+money_units>=theta; 'topic' = the cell this artifact was solved for.
+    return {'topic':cat,'v':v,'tier':tier,'theta':round(theta,2),'pressure':round(pressure,2),'gap':round(gap,2),
+            'cost':round(cost),'money':money,'recruits':recruits,
+            'units':{'theta':round(theta,9),'pressure':round(pressure,9),'recruit_pull':round(got,9),'money_units':round(resid,9)}}
 res=[r for r in (prime(v) for v in members) if r and r['cost']>0]
 res.sort(key=lambda r:r['cost'])
 print('LT PRIMING — issue: %s | %d pro, %d primeable targets'%(cat,len(proset),len(res)))
 print('Cheapest members to tip into co-sponsoring (pressure + money balance):')
-MBC.dump_atomic(res,B+r'\data\network\lt_priming.json')
+MBC.dump_atomic(res,OUTF)
 print('%-22s %-18s %5s %5s   %10s = %9s money + pressure(recruit)'%('member','tier','gap','press','TOTAL$',''))
 for r in res[:14]:
     rc=', '.join('%s'%u.split()[-1] for u,a in r['recruits'][:3]) or '—'

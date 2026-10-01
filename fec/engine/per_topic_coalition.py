@@ -12,7 +12,20 @@ bm=wb['Blended Model']; nrm=wb['Legislative Score - Normalized']
 members=[m['member'] for m in C.values()]
 primacy_tier,primacy_rank,primacy_priority=MBC.primacy_engine_state(members)
 ind={n:(C[n]['banks'] or 0)+(C[n]['finserv'] or 0) for n in members}
+# QME 2026-10-01 (fix 2): raw ind=0 for members with NO FEC record read as "no industry bribe pressure" (PB=0), the H3 misread
+# per_topic_flip/flip_model/budget_frontier already closed with the R2-ratified median fill. Same rule here: verified PAC zeros survive
+# (industry_money_missing), only unobserved members get the positive-median. COAL_IMPUTE=0 (or global IMPUTE_IND0=0) restores raw ind exactly.
+_iv=sorted(v for v in ind.values() if v>0); _imed=_iv[len(_iv)//2] if _iv else 0
+if os.environ.get('COAL_IMPUTE','1')!='0' and os.environ.get('IMPUTE_IND0','1')!='0':
+    from engine.money_observation import industry_money_missing
+    ind={n:(_imed if industry_money_missing(C[n]) else ind[n]) for n in members}
 _CS_DOC=json.load(open(MB_ROOT+r'\category_stance.json')); CS=_CS_DOC['matrix']; CS_SCORES=_CS_DOC.get('scores') or {}
+# QME 2026-10-01 (fix 1): system-level stance-integrity gate (Paul 2026-09-30 "F1. Yes"), same kernel read per_topic_flip uses. A member whose overall tier
+# is Skeptic/Highly Skeptical/Opponent is not a coalition money target because one topic cell is Neutral. Gates only RECIPIENTS (cand); anti/pressure
+# seeds are untouched. COAL_STANCE_GATE=0 restores the ungated shortlist exactly.
+OVT=MBC.stance_gate_tiers(_CS_DOC,members); BLOCK_OVERALL=MBC.STANCE_GATE_BLOCKED; GATE_ON=os.environ.get('COAL_STANCE_GATE','1')!='0'
+def stance_pool(names,ovt,blocked,on):   # QME 2026-10-01: pure order-preserving gate filter (unit-tested via ast-lift)
+    return [n for n in names if not (on and ovt.get(n) in blocked)]
 bpf=MBC.bpf()
 BETA_C=0.8   # bipartisan members get a coalition-seed boost (natural cross-aisle bridges)
 prt=MBC.party()
@@ -24,11 +37,15 @@ from moneyball_core import gate
 P=MBC.build_P(adj)
 idx={n:i for i,n in enumerate(members)}; NM=len(members)
 _sm=MBC.sm64
+# QME 2026-10-01 (fix 3): the splitmix keys below did not depend on SEED, so SEED!=7 reruns shared identical edge/activation draws (only the
+# random.random() bx stream moved) and "seed sensitivity" was understated. _SO shifts every key by (SEED-7)*odd-golden-constant. It is EXACTLY 0 when
+# SEED==7 (the default), so default keys -- hence every default artifact byte -- are unchanged; no dial needed.
+_SO=(SEED-7)*0x9E3779B97F4A7C15
 def cascade(Aseeds,Bseeds,it):
     # HIGH-1 fix: edge (u,v) at iteration `it` always draws the SAME value regardless of which seeds changed,
     # so adding a seed no longer desyncs the stream -> marginal isolates the TRUE effect, not RNG noise.
     col={**dict.fromkeys(sorted(Aseeds),'A'),**dict.fromkeys(sorted(Bseeds),'B')}; fr=list(col.items())
-    off=it*NM*NM                      # loop-invariant, hoisted 2026-08-03: identical integer
+    off=it*NM*NM+_SO                  # QME 2026-10-01 +_SO (0 at SEED 7); loop-invariant, hoisted 2026-08-03: identical integer
                                       # key; verified byte-identical on a full re-run
     while fr:
         nf=[]
@@ -47,6 +64,22 @@ SW={sc:[nrm.cell(2,sc+o).value or 0 for o in (0,2,4)] for sc in blocks}
 def eng(sc,n):
     r=nrow.get(n); sw=SW[sc]
     return sum(sw[i]*(nrm.cell(r,sc+[0,2,4][i]).value or 0) for i in range(3)) if r else 0
+COAL_WATERFILL=os.environ.get('COAL_WATERFILL','1')!='0'
+def coal_waterfill(boost,cap,budget,unit,on=True):
+    """QME 2026-10-01 (fix 8): proportional split of `budget` by marginal, per-member cap. Old rule clipped each member at cap and DROPPED the excess, so
+    cap-heavy topics spent well under budget (Interchange $1.52M of $2M). Water-fill: members whose proportional share exceeds cap are pinned at cap and
+    their excess is re-split over the remaining members pro rata to marginal (iterated until none exceeds). No member over cap => identical to the old rule
+    (same float ops); if EVERY member caps, the shortfall is real headroom exhaustion and is left unspent. on=False (COAL_WATERFILL=0) = old clip."""
+    tot=sum(boost.values()) or 1; out={}
+    if not on: return {n:min(cap,round(budget*v/tot/unit)*unit) for n,v in boost.items()}
+    act=dict(boost); rem=budget
+    while act:
+        t=sum(act.values()) or 1; over=[n for n,v in act.items() if rem*v/t>cap]
+        if not over: break
+        for n in over: out[n]=cap; rem-=cap; del act[n]
+    t=sum(act.values()) or 1
+    for n,v in act.items(): out[n]=min(cap,round(rem*v/t/unit)*unit)
+    return out
 ALL={}; summ=[]
 for sc in blocks:
     cat=BLOCKCAT[sc]; cs={n:CS.get(n,{}).get(cat,'—') for n in members}
@@ -71,19 +104,19 @@ for sc in blocks:
         for it in range(MC):
             random.seed(1000003*SEED+it)   # CRN: base & every spread({n}) share draws -> marginal isolates the true effect, not noise
             # contingency-aware: lobbied seeds take w.p. personality seed_prob x stance gate (dedicated _sm stream)
-            s=Aseed|{n for n in ex if _sm((1<<62)+it*NM+idx[n])<gate(n,cs)}
+            s=Aseed|{n for n in ex if _sm((1<<62)+it*NM+idx[n]+_SO)<gate(n,cs)}
             bx=[n for i,n in enumerate(members) if random.random()<PB[i] and campT[n]=='neu' and n not in s]   # 5.A FIX: roll for EVERY member FIRST (CRN-stable -- base & spread({n}) share draws), THEN filter. The old order gated the draw behind `n not in s`, so adding a seed changed how many draws fired -> stream desync -> MC noise in the marginal.
             tot+=cascade(s,set(anti)|set(bx),it)
         return tot/MC
     ev={n:MBC.priority_base_signal(eng(sc,n),priority[n],0.15)*MBC.delivery_mult(n) for n in members}   # Direct issue engagement + tier/LOO-orientation coalition priority; x say-do delivery discount.
     # Allies are already unconditional A seeds in every spread() call. Evaluating/funding them has
     # exactly zero causal effect and used to consume most of the top-45 shortlist on Ally-rich topics.
-    cand=sorted([n for n in members if campT[n]=='neu'],key=lambda n:-ev[n])[:45]
+    cand=sorted(stance_pool([n for n in members if campT[n]=='neu'],OVT,BLOCK_OVERALL,GATE_ON),key=lambda n:-ev[n])[:45]   # QME 2026-10-01: stance-gated recipients dropped BEFORE the top-45 cut so the shortlist backfills (COAL_STANCE_GATE=0 = old)
     base=spread(set()); mg={n:max(0.0,spread({n})-base) for n in cand}
     pos={n:v for n,v in mg.items() if v>0}
-    boost={n:v*(1+BETA_C*bpf.get(n,0.24)) for n,v in pos.items()}; tot=sum(boost.values()) or 1   # bridges get a larger seed
+    boost={n:v*(1+BETA_C*bpf.get(n,0.24)) for n,v in pos.items()}   # bridges get a larger seed
     al={n:0 for n in members}
-    for n,v in boost.items(): al[n]=min(CAP,round(BUDGET*v/tot/1000)*1000)
+    al.update(coal_waterfill(boost,CAP,BUDGET,1000,COAL_WATERFILL))   # QME 2026-10-01: water-fill the CAP-clipped excess (was dropped); COAL_WATERFILL=0 = old clip
     top=sorted([(n,al[n]) for n in members if al[n]>0],key=lambda x:-x[1])
     ALL[labels[sc]]={n:a for n,a in top}
     # M2 fix 2026-07-02: spread is submodular, so summing INDIVIDUAL marginals overstates the joint gain.

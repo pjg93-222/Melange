@@ -236,6 +236,29 @@ def test_default_refresh_holds_the_mixed_include_before_fetch_and_still_collects
     assert generation['bills'][OTHER] == world.previous['bills'][OTHER]
 
 
+def test_unselected_mixed_include_is_held_too(tmp_path, monkeypatch):
+    """QME 2026-10-01: a --keys run selects only KEY. OTHER, an admitted include the run never selects, carries a
+    mixed-direction verdict (a legacy or hand-edited one). Without the post-loop sweep it stayed in bills, and
+    SA.load refuses the whole generation for it; now it is held with the same shape as KEY."""
+    world = World(tmp_path, monkeypatch, prior=MIXED)
+    mixed_other = published(OTHER, MIXED, world.other_texts, world.other_sources)
+    for relative in (SA.RELATIVE, Path('data/legislation/sentinel_admission_checkpoint.json')):
+        document = json.loads((tmp_path / relative).read_text(encoding='utf-8'))
+        document['decisions'][OTHER] = mixed_other
+        R.write_json(tmp_path / relative, document)
+    world.classifier(monkeypatch)  # tripwire
+    assert world.run() == 0
+    assert world.calls == [] and world.collected == []
+    generation, installed, checkpoint = world.outputs()
+    assert generation['status'] == 'PASS' and generation['errors'] == {} and installed == generation
+    assert generation['bills'] == {} and generation['memberships'] == []
+    for key in (KEY, OTHER):
+        hold = generation['decisions'][key]
+        assert (hold['disposition'], hold['authority'], hold['rationale']) == (
+            'hold', 'automated_classifier_validation_gate', MIXED_RATIONALE)
+        assert key in generation['bill_catalog']
+
+
 @pytest.mark.parametrize('site', ['up', 'down'])
 def test_single_direction_admitted_include_still_collects(tmp_path, monkeypatch, site):
     """Only a published include that fails the direction rule skips collect(). A single-direction admitted bill is

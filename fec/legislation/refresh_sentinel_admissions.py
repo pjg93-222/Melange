@@ -133,9 +133,26 @@ def _require_single_direction(value):
     """Refuse an include whose category directions hold both +1 and -1. A 0 beside one sign is fine; an exclude or
     a hold is left to the existing rules."""
     if value.get('disposition') == 'include':
-        directions = {row.get('category'): row.get('direction') for row in value.get('categories', [])}
-        if 1 in directions.values() and -1 in directions.values():
+        # QME 2026-10-01: walk the category ROWS, not a dict -- a dict collapses a repeated category, so [A:+1, A:-1]
+        # would escape. Only a real int counts (a bool True == 1 is not a +1), and `categories: None` is no rows.
+        rows = [(row.get('category'), row.get('direction')) for row in (value.get('categories') or [])
+                if type(row.get('direction')) is int]
+        if any(d == 1 for _, d in rows) and any(d == -1 for _, d in rows):
+            # Normal case keeps category -> direction; a category repeated with different signs keeps every sign
+            # (category -> list), so the rationale still shows both.
+            directions = {}
+            for category, direction in rows:
+                if category not in directions: directions[category] = direction
+                else:
+                    seen = directions[category]
+                    directions[category] = (seen if isinstance(seen, list) else [seen]) + [direction]
             raise MixedCategoryDirections(directions)
+
+
+def _mixed_rationale(directions):
+    return 'mixed category directions (+1 and -1): '+', '.join(
+        '%s %+d'%(category,direction) for category,signs in sorted(directions.items(),key=lambda kv:str(kv[0]))
+        for direction in (sorted(signs) if isinstance(signs,list) else [signs]))
 
 
 _STATUTE_DASHES = str.maketrans({char: '-' for char in '\u2010\u2011\u2012\u2013\u2014\u2212'})
@@ -227,7 +244,13 @@ def reusable_decision(key, texts, categories, *, published, checkpoint, model, t
         }
         if parameters != {'policy': POLICY, 'model': model, 'transport': transport}:
             continue
-        historical = bound_decision_texts(prior)
+        # QME 2026-10-01: cached evidence that cannot be read back (missing file, moved root) makes this source
+        # unusable, not the key an error: try the next source, else the caller classifies afresh. A hash mismatch
+        # (changed bytes) still raises -- it is the integrity alarm test_sentinel_decision_stability pins.
+        try:
+            historical = bound_decision_texts(prior)
+        except OSError:
+            continue
         normalized = evidence_fingerprint(historical, model=model, transport=transport)
         original = evidence_fingerprint(historical, model=model, transport=transport, legacy=True)
         if prior['evidence_fingerprint'] not in (normalized, original):
@@ -435,8 +458,11 @@ def main(argv=None):
         -int(k.split(':')[0]),-int(k.split(':')[2])))
     # Reserve a quarter of each bounded pass for oldest unresolved decisions.
     # Otherwise a large historical discovery backlog can starve held bills forever.
+    # QME 2026-10-01: a held key that raised a generic error last run never advanced checked_at and would be
+    # re-picked first forever; keys in the previous checkpoint's errors go behind every other held key.
+    prior_errors=checkpoint.get('errors') or {}
     retry=sorted((k for k in candidates if cached_decisions.get(k,{}).get('disposition')=='hold'),
-                 key=lambda k:(cached_decisions[k].get('checked_at',''),k))
+                 key=lambda k:(k in prior_errors,cached_decisions[k].get('checked_at',''),k))
     retry=retry[:max(1,args.limit//4)] if args.limit>1 else []
     selected=sorted(active)+list(dict.fromkeys(retry+[k for k in candidates if k not in retry]))[:args.limit]
     registry=json.loads((root/'source_data/legislation/acu_legislation_search_registry.json').read_text(encoding='utf-8'))
@@ -500,8 +526,7 @@ def main(argv=None):
         except Exception as exc:
             reason=f'{type(exc).__name__}: {exc}'
             classifier_validation_hold=(isinstance(exc,ValueError) and str(exc) in (
-                'exclusion needs affirmative official evidence, not absence',
-                'only high-confidence evidence may resolve a candidate'))
+                'exclusion needs affirmative official evidence, not absence',))
             if isinstance(exc,(BelowHighConfidence,MixedCategoryDirections)):
                 # Paul 2026-09-30 ("Hold low-confidence + longer timeout"): a decision below high confidence is a
                 # retryable HOLD for every key, a previously admitted bill included -- never admitted (it leaves
@@ -509,8 +534,7 @@ def main(argv=None):
                 # bills"): an include whose categories carry both +1 and -1 is held the same way. A held bill
                 # that was admitted before stays in bill_catalog, which returns it to the retry pool above.
                 rationale=('below-high-confidence decision (%s)'%exc.confidence if isinstance(exc,BelowHighConfidence)
-                           else 'mixed category directions (+1 and -1): '+', '.join(
-                               '%s %+d'%(category,direction) for category,direction in sorted(exc.directions.items())))
+                           else _mixed_rationale(exc.directions))
                 decisions[key]={'canonical_key':key,'disposition':'hold','confidence':'low',
                                 'rationale':rationale,
                                 'categories':[],'authority':'automated_classifier_validation_gate',
@@ -531,6 +555,21 @@ def main(argv=None):
                 print(key,reason,flush=True)
         # Checkpoint is a resumable work queue, never a scoring authority.
         write_json(checkpoint_path,{'schema':'sentinel-admission-checkpoint-v1','decisions':decisions,'errors':errors})
+    # QME 2026-10-01: the loop above checks only the keys this run selected. An admitted include it did not select
+    # (a --keys run, or an admitted key on the ratified-exclusion list) would otherwise keep a mixed-direction verdict
+    # in bills, and SA.load refuses the whole generation for it. Same hold, same shape, as the in-loop branch.
+    for key in sorted(bills):
+        try:
+            _require_single_direction(decisions.get(key) or {})
+        except MixedCategoryDirections as exc:
+            decisions[key]={'canonical_key':key,'disposition':'hold','confidence':'low',
+                            'rationale':_mixed_rationale(exc.directions),
+                            'categories':[],'authority':'automated_classifier_validation_gate',
+                            'checked_at':stamp,'evidence':[]}
+            bills.pop(key,None)
+            print(key,'hold:',decisions[key]['rationale'],flush=True)
+    # QME 2026-10-01: the sweep's holds land after the last in-loop write; write once more so checkpoint and generation agree.
+    write_json(checkpoint_path,{'schema':'sentinel-admission-checkpoint-v1','decisions':decisions,'errors':errors})
     # A failed refresh of a previously active bill cannot certify fresh inputs.
     # Keep the last-good generation and emit a failed run instead.
     memberships=[];unresolved=[]

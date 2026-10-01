@@ -28,6 +28,8 @@ DTHRESH=float(os.environ.get('DTHRESH','11.25'))  # net_lean shift needed to ris
 # (loss frame) moves lean more than an equal CU gift (K&T loss aversion, elite-attenuated per Linde-Vis).
 # Fallback = neutral (legacy) when the json is absent or RECEPT_LAYER=0.
 LOSSFRAME=float(os.environ.get('LOSSFRAME','1.10'))
+if HALF<=0: raise ValueError('HALF must be > 0 (got %g): shift_lean divides by r+HALF'%HALF)   # QME 2026-10-01: fail loud, not ZeroDivision deep in shift_lean
+if DTHRESH<=0: raise ValueError('DTHRESH must be > 0 (got %g): optimize.py and defection() divide by it'%DTHRESH)   # QME 2026-10-01
 rc=MC.rc
 COMMITTED={'Champion','Opponent'}                 # only the TERMINAL rungs are immune to money defection
 # defection() walks the FULL overall ladder (R&A col G vocabulary, pro -> anti; same 10-rung order as
@@ -48,6 +50,7 @@ def _money_overall_tier(m,cm):
     _base=MC.overall_tier(cm,m,_OVERALL_CAPS)
     if _tier.get(m,0)==1:
         # Today this floor equals assignment: overall_tier's ceiling is 'Ally' and deliberately omits 'Champion'.
+        if _base not in ORDER: return _base   # QME 2026-10-01: '—' (tier-1, no earned cells) or any off-ladder tier is non-promotable; ORDER.index used to raise ValueError at import
         return ORDER[min(ORDER.index(_base),ORDER.index('Ally'))]
     return _base
 OV={m:_money_overall_tier(m,cm) for m,cm in MAT.items()}
@@ -89,7 +92,7 @@ if __name__=='__main__':
             print('   CU +$%-7s -> lean shift %+.1f'%(f"{amt:,}",shift_lean('Jared Golden','cu',amt)))
     print('\nDefection triggers (competitor floods a persuadable member):')
     cnt=0
-    for m in sorted(C,key=lambda x:-(C[x].get('receipts') or 0),reverse=True):
+    for m in sorted(C,key=lambda x:-(C[x].get('receipts') or 0)):
         d=shift_lean(m,'comp',250000); nw=defection(m,d)
         if nw and OV.get(m) in ('Ally','Highly Persuadable','Persuadable','Lean Persuadable',
                                 'True Neutral','Neutral','Lean Skeptic'):
