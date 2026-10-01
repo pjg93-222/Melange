@@ -1,0 +1,6 @@
+{"parameters":[
+ {"name":"WM","bounds":[0.2625,0.4375],"status":"literature","nominal":0.35},
+ {"name":"BASE","bounds":[0.1125,0.1875],"status":"literature","nominal":0.15},
+ {"name":"HALFF","bounds":[0.075,0.125],"status":"literature","nominal":0.10},
+ {"name":"MAXSHIFT","bounds":[13.5,22.5],"status":"literature","nominal":18},
+ {"name":"HALF","bounds":[0.075,0.125],"status":"literature","nominal":0.10}]}
