@@ -70,10 +70,11 @@ def bpf():
         BP=json.load(open(p('bipartisan.json')))
         _c['bpf']={m:BP.get(m,24)/100.0 for m in congestion()}
     return _c['bpf']
+def recept_layer_on(): return os.environ.get('RECEPT_LAYER','1')!='0'   # QME 2026-10-01: single read, also recorded in optimize_result.json dials
 def receptivity():
     if 'rec' not in _c:
         try:
-            _c['rec']=json.load(open(p('member_receptivity.json')))['members'] if os.environ.get('RECEPT_LAYER','1')!='0' else {}
+            _c['rec']=json.load(open(p('member_receptivity.json')))['members'] if recept_layer_on() else {}
         except FileNotFoundError: _c['rec']={}
     return _c['rec']
 def rc(m,k,d=1.0): return receptivity().get(m,{}).get(k,d)
@@ -474,9 +475,15 @@ def blended_engine_priority(tier,category_scores,category=None,mode='flip'):
     return (primacy_engine_value(tier)
             +PRIORITY_ORIENTATION_ALPHA[mode]
             *engine_orientation(category_scores,category))
+_NONFINITE_WARNED={'priority_base_signal':0,'delivery_mult':0}   # QME 2026-10-01: one-time stderr warning per process per site
+def _warn_nonfinite(site,detail):
+    if not _NONFINITE_WARNED[site]: print('WARNING: moneyball_core.%s saw a non-finite input (%s); NaN is mapped to the floor/neutral value as before (further occurrences silent)'%(site,detail),file=sys.stderr)
+    _NONFINITE_WARNED[site]+=1
 def priority_base_signal(engagement,priority,base=0.15):
     """Replace only ``engagement + BASE*tier_priority`` and floor target mass."""
-    return max(0.0,float(engagement)+float(base)*float(priority))
+    total=float(engagement)+float(base)*float(priority)
+    if not math.isfinite(total): _warn_nonfinite('priority_base_signal','engagement=%r priority=%r base=%r'%(engagement,priority,base))   # QME 2026-10-01: max(0.0,nan) is 0.0 -- value kept, now announced
+    return max(0.0,total)
 blocks=[3,11,19,27,35,43,51,59,67,75,83,91,99,145,115,107,123,131,153]
 BLOCKCAT={3:'Examination & Supervision',11:'CU Capital Requirements',19:'NCUA Budget & Insurance',27:'Interchange',
  35:'Payments',43:'Technology & Emerging',51:'Fraud Prevention',59:'Data Privacy & Cyber',67:'Charter Modernization',
@@ -576,7 +583,14 @@ def overall_display_tier(cm,legislative_press_tier,member=None,overall_capped=No
 # lt_priming.py and the dashboard prime() (BLOCKOV) hold the same set as their own copies.
 STANCE_GATE_BLOCKED=frozenset({'Skeptic','Highly Skeptical','Opponent'})
 def stance_gate_tiers(cs_doc,members):
-    """Overall tier per member, read exactly as per_topic_flip's gate always has (category_stance.json)."""
+    """Overall tier per member, read exactly as per_topic_flip's gate always has (category_stance.json).
+
+    FAILS OPEN (QME 2026-10-01): a member with no matrix row is evaluated on an empty row ({}), so the tier
+    is '—' (overall_tier of no evidence), which is not in STANCE_GATE_BLOCKED, and the member stays ELIGIBLE
+    for money. Callers needing fail-closed must check `n in cs_doc['matrix']` themselves.
+    `caps` (the local overall_capped read below) is passed to overall_tier as `overall_capped`, which does
+    not consult it: the parameter is dead there today, kept because callers pass it. Gate results unchanged.
+    """
     caps=(cs_doc.get('gate') or {}).get('overall_capped') or {}
     matrix=cs_doc['matrix']
     return {n:overall_tier(matrix.get(n,{}),n,caps) for n in members}
@@ -813,7 +827,10 @@ def delivery_mult(m):
             raise RuntimeError(
                 'say_do_gap.json is present but invalid; refusing to treat malformed delivery evidence as neutral'
             ) from exc
-    return max(0.70,min(1.00,1-0.15*max(0.0,_DELIV.get(m,0.0)-1.0)))
+    gap=_DELIV.get(m,0.0)
+    if isinstance(gap,str) or not isinstance(gap,(int,float)): raise TypeError('say_do_gap.json gap for %r must be numeric, got %s %r'%(m,type(gap).__name__,gap))   # QME 2026-10-01: clear message (was an opaque str-minus-float TypeError)
+    if not math.isfinite(gap): _warn_nonfinite('delivery_mult','member=%r gap=%r'%(m,gap))   # QME 2026-10-01: max(0.0,nan) is 0.0 -> mult 1.0 kept, now announced
+    return max(0.70,min(1.00,1-0.15*max(0.0,gap-1.0)))
 
 # Nickname equivalence classes (QA3 2026-07-04, Bernie/Bernard-class resolver misses) — SINGLE COPY.
 # fetch_interviews.py carries the original inline; consolidate it to this import at next touch.

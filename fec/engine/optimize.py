@@ -26,6 +26,8 @@ fm=imp('fm','flip_model.py'); mr=imp('mr','money_response.py')
 BUDGET=int(os.environ.get('BUDGET','2500000')); INC=int(os.environ.get('INC','500'))   # TOTAL pot ~$2.5M (user 2026-07-01) -- THE joint allocation across all 17 issues (per-topic tools are per-issue diagnostics, not additive budgets). INC = allocation granularity ($500 = realistic contribution step)
 PMAX=int(os.environ.get('PMAX','10000'))   # per-member max above existing CU money = this PAC's FEC per-candidate per-cycle limit (see the 2026-09-30 ruling above)
 ONLY=os.environ.get('TOPIC')
+CONV_MAXSTEP=int(os.environ.get('CONV_MAXSTEP','1'))   # QME 2026-10-01: read once here (was re-read per shift_pro call; same value)
+if CONV_MAXSTEP<0: raise ValueError('CONV_MAXSTEP must be >= 0 (got %d): a negative step would move converted members AWAY from pro'%CONV_MAXSTEP)
 if BUDGET<0 or INC<=0 or PMAX<0: raise ValueError('BUDGET/PMAX must be nonnegative and INC must be positive')
 if 0<PMAX<INC: raise ValueError('INC (%d) exceeds PMAX (%d): no member could ever receive a full chunk, so the plan would silently fund nothing'%(INC,PMAX))   # QME 2026-10-01: the docstring's own BUDGET=1000000 INC=25000 example hit this with the default PMAX
 def scoped_output_path(explicit,default,selector):
@@ -91,7 +93,7 @@ def shift_pro(m,steps):                           # a converted member improves 
     # step != one fine step). A single money-triggered defection is one disposition nudge; cap the
     # per-category move at 1 fine tier so the magnitude is defensible and robust to DTHRESH/MAXSHIFT env
     # changes (env-tunable via CONV_MAXSTEP for callers who want a larger move).
-    steps=min(steps,int(os.environ.get('CONV_MAXSTEP','1')))
+    steps=min(steps,CONV_MAXSTEP)
     moved=[]
     for c in cats:
         t=MAT[m].get(c)
@@ -117,7 +119,7 @@ concavity_bad=concavity_violations() if not conversion_reachable else []
 fixed_state_concave=not conversion_reachable and not concavity_bad
 bound0=dd_bound(base) if fixed_state_concave else None   # the certificate excludes state-changing conversions/non-concave chunk sequences
 alloc=collections.Counter(); spent=0; conversions=[]; converted=set(); path=[(0,round(base,3))]
-selected_marginals=[]
+selected_marginals=[]; conv_idx=set()   # conv_idx: indices into selected_marginals of conversion steps
 pq=[(-marg(m),m,0) for m in members]; heapq.heapify(pq); step=0
 while spent+INC<=BUDGET and pq:
     neg,m,le=heapq.heappop(pq)
@@ -133,6 +135,7 @@ while spent+INC<=BUDGET and pq:
             if nv and mr.OV.get(m) not in ('Champion','Opponent'):
                 steps=int(abs(mr.shift_lean(m,'cu',added))//mr.DTHRESH)
                 contrib=sum(fm.topic_setup(c,MAT)[6][m] for c in cats)   # H1: bank m's flip at certainty (winning is a GAIN, not the old persuadability-loss)
+                conv_idx.add(len(selected_marginals)-1)   # QME 2026-10-01: this step's chunk is a conversion step -> dropped from the knee series below
                 mv=shift_pro(m,steps); converted.add(m); won.add(m); secured+=contrib; conversions.append((m,added,nv,mv))
                 fm._cache.clear(); cur=secured+unwon_winnability()       # re-optimize: m realized into `secured`, others' proximity updated
                 pq=[(-marg(x),x,0) for x in members]; heapq.heapify(pq); step=0; converted_now=True
@@ -146,10 +149,12 @@ while spent+INC<=BUDGET and pq:
 # diminishing-returns knee (last $ whose selected pre-conversion chunk marginal >= 20% of peak). A min-chunk thin spread
 # keeps every marginal near-flat, so a "knee" often does not exist within budget -- report that honestly rather
 # than implying the knee sits exactly at the full budget. Conversion jumps are excluded from the marginal series.
+sel_all=selected_marginals   # QME 2026-10-01: keep the step-indexed series so the knee $ stays at (step+1)*INC; conversion steps are skipped
+selected_marginals=[g for i,g in enumerate(sel_all) if i not in conv_idx]   # diagnostic list only (code now matches the comment above); alloc/path/final unchanged
 margs=selected_marginals; peak=max(margs) if margs else 0
 knee=0
-for i,g in enumerate(margs):
-    if g>=0.20*peak: knee=(i+1)*INC
+for i,g in enumerate(sel_all):
+    if i not in conv_idx and g>=0.20*peak: knee=(i+1)*INC
 knee_found = 0<knee<spent           # a real knee means returns fell off BEFORE the budget was exhausted
 top=sorted(alloc.items(),key=lambda kv:-kv[1])
 print('JOINT BUDGET OPTIMIZER — budget $%s, INC $%s%s'%(f'{BUDGET:,}',f'{INC:,}',' | issue: '+ONLY if ONLY else ' | all %d issues'%len(cats)))
@@ -193,7 +198,10 @@ guarantee=({'kind':'exact_discrete_separable_concave','certified_gain_ratio':1.0
                       if conversion_reachable or conversions else
                       'member chunk marginals are not diminishing'),
             'concavity_violations':len(concavity_bad)})
-dump_atomic({'budget':BUDGET,'spent':spent,'increment':INC,'per_member_cap':PMAX,
+dials={'BUDGET':BUDGET,'INC':INC,'PMAX':PMAX,'TOPIC':ONLY,'CONV_MAXSTEP':CONV_MAXSTEP,   # QME 2026-10-01: effective model dials (values actually used) so a result file is self-describing
+       'HALFF':fm.HALFF,'WM':fm.WM,'WP':fm.WP,'BASE':fm.BASE,'MAXSHIFT':mr.MAXSHIFT,'HALF':mr.HALF,'DTHRESH':mr.DTHRESH,'LOSSFRAME':mr.LOSSFRAME,
+       'IMPUTE_IND0':fm.IMPUTE_IND0,'PERS_NONE':fm.MC.PERS_NONE,'RECEPT_LAYER':'1' if fm.MC.recept_layer_on() else '0'}
+dump_atomic({'budget':BUDGET,'dials':dials,'spent':spent,'increment':INC,'per_member_cap':PMAX,
              'topic':ONLY,'issues':cats,'objective':'expected weighted flips',
              'stance_gate':{'rule':'per_topic_flip BLOCK_OVERALL via moneyball_core.stance_gate_tiers(category_stance.json)',
                             'blocked_tiers':sorted(STANCE_GATE_BLOCKED),'blocked_members':sorted(GATED),
