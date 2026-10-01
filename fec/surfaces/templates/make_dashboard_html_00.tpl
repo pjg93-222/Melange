@@ -610,7 +610,9 @@ function flipModel(i,tiers,cu,ind){
 }
 function pflipOf(u,nAu,nBu,mA,mB,cu,ind){const pm=PM?PM[u]:1;const a=K.WM*pm*(cu+1)/((cu+1)+K.HALFF*EG.rcp[u])+K.WP*nAu/mA;const b=K.WM*pm*(ind+1)/((ind+1)+K.HALFF*EG.rcp[u])+K.WP*nBu/mB;return (a+b)>0?a/(a+b):0;}
 function shiftLean(u,dollars){const r=dollars/EG.rcp[u];return K.MAXSHIFT*(r/(r+K.HALF))*(PM?PM[u]:1);}   // x pressure_mult (psych parity 2026-07-09 = money_response.shift_lean)
-function dollarsForUnits(u,units){units=Math.min(units,0.98);return K.HALF*EG.rcp[u]*units/(1-units);}
+// QME 2026-10-01 (mirrors lt_priming.py LT_MONEY_PARITY): prime()'s money term = money_response.shift_lean/MAXSHIFT = pm*r/(r+HALF), so the inverse divides the unit target by pressure_mult and uses the HALF dial (K.LTHALF; 0.10 when parity is off). K.LTPAR===0 -> old (pm 1, K.HALF). Old bundles lack K.LTPAR/LTHALF -> parity on.
+function ltPM(u){return K.LTPAR===0?1:Math.max(PM?PM[u]:1,1e-9);}
+function dollarsForUnits(u,units){units=Math.min(units/ltPM(u),0.98);const h=(K.LTHALF!=null&&K.LTPAR!==0)?K.LTHALF:(K.LTPAR===0?0.10:K.HALF);return h*EG.rcp[u]*units/(1-units);}
 // stance-integrity gates (2026-07-04, mirrors fec/engine/lt_priming.py; 'Lean Skeptic' carved out of every one):
 // overall Skeptic/Highly-Skeptical/Opponent can be neither target nor recruit; recruit pricing scales by
 // persuadability (True-Neutral-anchored, LS pinned flat); theta grows with declared-Opponent-cell breadth.
@@ -620,6 +622,7 @@ function rcost(u,i){const t=SCN[DATA.stance[u][i]];return t==='Lean Skeptic'?K.C
 function prime(v,i){   // lt_priming: cheapest pressure+money to flip member v on issue i
   const code=DATA.stance[v][i],tier=SCN[code];
   if(!(tier in THETA)||CAMP(code)==='pro')return null;
+  if(tier==='Opponent'&&!K.LTOPP)return null;   // QME 2026-10-01 = lt_priming.py: committed Opponent cells are never targets (K.LTOPP=1 <- LT_OPP_TARGET=1 restores)
   if(BLOCKOV[DATA.gen[v]])return null;   // one mild topic cell can't make a system-level Skeptic a target
   const _dp=domainPolicy(),_rp=rolePrior(v),theta=(THETA[tier]+Math.max(0,-(EG.nlraw[v])/120)+0.25*nOpp[v])*(_dp.lt_threshold_scale||1)*(_rp.target_resistance||1);   // domain sensitivity + jurisdiction-chair stubbornness raise the LT flip line
   // Bakker cross-cue signing (mirrors fec/engine/lt_priming.py xf(), default-on): cross-party pro-cues pass
@@ -628,14 +631,14 @@ function prime(v,i){   // lt_priming: cheapest pressure+money to flip member v o
   for(const u in PE[v]){const uu=+u;const pe=(PE[uu][v]||0)*((PTY[uu]===pv)?1:Math.sqrt((BPF[uu]||0)*(BPF[v]||0)));const c=CAMP(DATA.stance[uu][i]);if(c==='pro')pressure+=pe;else if(c!=='anti'&&!BLOCKOV[DATA.gen[uu]]&&pe>1e-6)cand.push([uu,pe]);}   // u's pull ON target v = PE[u][v] (receiver v's emult + target_resistance), mirrors lt_priming.py; index was reversed until 2026-09-30
   const gap=theta-pressure;
   if(gap<=1e-6)return {tier,theta,pressure,gap,money:0,recruits:[]};
-  const cap=Math.min(0.97,gap),avg=dollarsForUnits(v,cap)/cap;
+  const mcap=0.97*ltPM(v),cap=Math.min(mcap,gap),avg=dollarsForUnits(v,cap)/cap;
   // 2026-08-03 mirror of fec/engine/lt_priming.py: (1) the Math.max(0.1,add) divide-by-zero guard is gone —
   // the cand push already filters pe>1e-6, and below add=0.1 the guard stopped cancelling and became a
   // price; (2) the rate is rcost/add ($ per influence-unit), NOT rcost/add**2 — avg is $/unit, so the
   // old form compared $/unit**2 against $/unit and rejected recruits that are cheaper than money.
   cand.sort((a,b)=>rcost(a[0],i)/a[1]-rcost(b[0],i)/b[1]);
   let got=0;const recruits=[];for(const [u,add] of cand){if(got>=gap)break;if(rcost(u,i)/add<avg){got+=add;recruits.push(u);}}
-  const resid=Math.max(0,gap-got);if(resid>0.97)return {tier,theta,pressure,gap,money:null,recruits};
+  const resid=Math.max(0,gap-got);if(resid>mcap)return {tier,theta,pressure,gap,money:null,recruits};
   return {tier,theta,pressure,gap,money:resid>1e-6?Math.round(dollarsForUnits(v,resid)):0,recruits};
 }
 function cheapestFlips(i,n){   // batch: cheapest members to tip into co-sponsoring on issue i (lt_priming, sorted by $)

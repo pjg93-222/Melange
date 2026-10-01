@@ -260,9 +260,9 @@ def test_both_allocators_read_the_gate_from_the_kernel_helper():
 
 def test_every_copy_of_the_blocked_set_agrees():
     _source, tree = _tree(LT_PRIMING)
-    lt_priming = next(ast.literal_eval(node.value) for node in tree.body
-                      if isinstance(node, ast.Assign) and 'BLOCK_OVERALL' in _targets(node))
-    assert set(lt_priming) == set(MC.STANCE_GATE_BLOCKED)
+    lt_node = next(node.value for node in tree.body
+                   if isinstance(node, ast.Assign) and 'BLOCK_OVERALL' in _targets(node))
+    assert ast.unparse(lt_node) == 'MBC.STANCE_GATE_BLOCKED'   # QME 2026-10-01: lt_priming now reads the kernel's one copy (was a literal set)
     with open(DASH_TPL, encoding='utf-8') as handle:
         codes = re.search(r'const BLOCKOV=\{([^}]*)\}', handle.read()).group(1)
     letters = {pair.split(':')[0] for pair in codes.split(',')}

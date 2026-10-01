@@ -144,7 +144,11 @@ ck('MC route deterministic (same seed -> identical)', mc==mc2)
 print('\n[6] LT-priming validity')
 pr=json.load(open(B+r'\data\network\lt_priming.json'))
 ck('priming sorted cheapest-first', all(pr[i]['cost']<=pr[i+1]['cost'] for i in range(len(pr)-1)))
-ck('every recipe closes the gap (pressure+money)', all(p['cost']>0 and p['gap']>0 for p in pr))
+def _lt_closes(p,tol=1e-6):   # QME 2026-10-01: a recipe closes iff its OWN influence budget (network pressure + recruits' added pull + money's lean units) reaches theta; the old test only read cost>0 and gap>0 (tautological)
+    u=p.get('units')
+    return bool(u) and p['cost']>0 and p['gap']>0 and u['pressure']+u['recruit_pull']+u['money_units']>=u['theta']-tol
+_bad=[p['v'] for p in pr if not _lt_closes(p)]
+ck('every recipe closes the gap (pressure+recruit pull+money units >= theta)', not _bad, ('%d fail e.g. %s (artifact without units? re-run lt_priming)'%(len(_bad),_bad[:3])) if _bad else '')
 ck('no committed Opponents/Champions in primeable set', all(p['tier'] not in ('Champion','Defender','Opponent') for p in pr))
 print('\n[7] Scenario runner (end-to-end)')
 def scen():
