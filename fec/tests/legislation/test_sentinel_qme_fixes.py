@@ -84,14 +84,19 @@ def test_erroring_held_key_is_demoted_in_the_retry_order(tmp_path, monkeypatch):
     assert world.collected == [OTHER, h2, new]
 
 
-@pytest.mark.parametrize('damage', ['missing', 'tampered'])
-def test_unreadable_cached_evidence_falls_through_to_classify(tmp_path, monkeypatch, damage):
+def test_tampered_cached_evidence_still_raises(tmp_path, monkeypatch):
+    """Changed bytes are the integrity alarm (test_sentinel_decision_stability): never silently reclassified."""
     world = World(tmp_path, monkeypatch, prior={MH: 1})
-    path = Path(world.sources[0]['path'])
-    if damage == 'missing':
-        path.unlink()
-    else:
-        path.write_bytes(b'<bill>tampered</bill>')
+    Path(world.sources[0]['path']).write_bytes(b'<bill>tampered</bill>')
+    prior = world.previous['decisions'][KEY]
+    with pytest.raises(ValueError, match='hash mismatch'):
+        R.reusable_decision(KEY, world.texts, CATEGORIES, published=prior, checkpoint=prior,
+                            model=MODEL, transport=TRANSPORT)
+
+
+def test_unreadable_cached_evidence_falls_through_to_classify(tmp_path, monkeypatch):
+    world = World(tmp_path, monkeypatch, prior={MH: 1})
+    Path(world.sources[0]['path']).unlink()
     prior = world.previous['decisions'][KEY]
     assert R.reusable_decision(KEY, world.texts, CATEGORIES, published=prior, checkpoint=prior,
                                model=MODEL, transport=TRANSPORT) is None

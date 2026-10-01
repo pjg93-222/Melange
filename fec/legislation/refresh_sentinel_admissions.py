@@ -244,11 +244,12 @@ def reusable_decision(key, texts, categories, *, published, checkpoint, model, t
         }
         if parameters != {'policy': POLICY, 'model': model, 'transport': transport}:
             continue
-        # QME 2026-10-01: cached evidence that cannot be read back (missing file, hash mismatch, moved root) makes
-        # this source unusable, not the key an error: try the next source, else the caller classifies afresh.
+        # QME 2026-10-01: cached evidence that cannot be read back (missing file, moved root) makes this source
+        # unusable, not the key an error: try the next source, else the caller classifies afresh. A hash mismatch
+        # (changed bytes) still raises -- it is the integrity alarm test_sentinel_decision_stability pins.
         try:
             historical = bound_decision_texts(prior)
-        except (OSError, ValueError):
+        except OSError:
             continue
         normalized = evidence_fingerprint(historical, model=model, transport=transport)
         original = evidence_fingerprint(historical, model=model, transport=transport, legacy=True)
