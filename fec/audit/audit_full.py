@@ -1,6 +1,6 @@
 import os as _o,sys as _s;_s.path.insert(0,_o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))));from paths import ROOT as MB_ROOT  # centralized root (arch review 2026-07-02)
 """FULL-BODY AUDIT — every module in one report.
-Consolidates the integrity (22) + frontier (11) audits and adds correctness checks for the
+Consolidates the integrity (22) + frontier (15) audits and adds correctness checks for the
 new modules: money-response, electoral plays, co-sponsor routes, LT-priming, stance, determinism."""
 import json,sys,os,subprocess,re,collections,importlib.util,csv,copy,hashlib
 from pathlib import Path
@@ -40,7 +40,7 @@ def _file_sha256(path):
 
 
 print('========== FULL-BODY AUDIT ==========\n[1] Existing audits')
-for s,nm,exp in [(r'audit\legacy_workbook_audit.py','integrity (22)',22),(r'audit\audit_frontier.py','frontier (11)',11)]:   # S3-03 audit run-2: assert COUNT too — a silently-skipped check must fail here, not vanish
+for s,nm,exp in [(r'audit\legacy_workbook_audit.py','integrity (22)',22),(r'audit\audit_frontier.py','frontier (15)',15)]:   # QME 2026-10-01: frontier floor 11 -> 15 = the EXACT number of ck() calls in a full audit_frontier run (loops counted: 2 clamp-vs-raw + 2 marginals + 2 type + 1 tier + 1 base + 1 party-blind gates + 1 contest mix + 1 defend skew + 2 knee re-derive + 2 stance gate; the party-blind check is the only conditional one, so a skip drops the count below this floor). Keep in sync with fec/tests/audit/test_frontier_audit_floor.py.   # S3-03 audit run-2: assert COUNT too — a silently-skipped check must fail here, not vanish
     out=run(s); m=re.search(r'(\d+) passed, (\d+) FAILED',out)
     ck('%s sub-audit clean'%nm, bool(m) and m.group(2)=='0' and int(m.group(1))>=exp, out.strip().splitlines()[-1] if out else 'no output')
 print('\n[2] Money-response (diminishing returns + capacity)')
@@ -238,6 +238,25 @@ _blind_ok=all(_fm.ind0[n]>0 for n in _fm.ind_imputed)
 _realzero=[n for n in _fm.members if not _fm.industry_money_missing(_fm.C[n]) and ((_fm.C[n]['banks'] or 0)+(_fm.C[n]['finserv'] or 0))==0]
 _real_kept=all(_fm.ind0[n]==0 for n in _realzero)
 ck('imputation limited to no-FEC-record members; verified-real ind=0 zeros trusted', _blind_ok and _real_kept, 'blind %d imputed, %d real-zeros trusted'%(len(_fm.ind_imputed),len(_realzero)))
+# QME 2026-10-01: (1) stance gate on the money allocators' ARTIFACTS: no member whose overall tier is Skeptic/Highly Skeptical/Opponent (re-derived by the same
+# original kernel rule as _gated above) may hold money in per_topic_alloc.json (flip, always gated) or per_topic_coalition.json (gated since COAL_STANCE_GATE
+# landed; dial=0 reverts, then this check is waived because the artifact is knowingly ungated). An empty _gated means the tier read broke.
+_pta=json.load(open(B+r'\per_topic_alloc.json',encoding='utf-8')); _ptc=json.load(open(B+r'\data\lobbying\per_topic_coalition.json',encoding='utf-8'))
+_gf=sorted({m for d in _pta.values() for m,v in d.items() if v>0 and m in _gated})
+_gc=sorted({m for d in _ptc.values() for m,v in d.items() if v>0 and m in _gated})
+_coal_gate_on=os.environ.get('COAL_STANCE_GATE','1')!='0'
+ck('no stance-gated member (overall Skeptic/Highly Skeptical/Opponent) receives money in per_topic_alloc.json or per_topic_coalition.json',
+   bool(_gated) and not _gf and (not _coal_gate_on or not _gc),'flip %d %s; coalition %d %s'%(len(_gf),_gf[:3],len(_gc),_gc[:3]))
+# QME 2026-10-01: (2) imputation parity for the two engines that execute on import (cannot be imported here). Structural AST check of the shipped source -- not a
+# text grep: each must CALL industry_money_missing (the R2-ratified missing-vs-verified-zero test flip_model uses) and fill from the positive median.
+import ast as _ast
+def _imputes(path):
+    t=_ast.parse(open(path,encoding='utf-8').read())
+    calls=any(isinstance(n,_ast.Call) and getattr(n.func,'id',None)=='industry_money_missing' for n in _ast.walk(t))
+    med=any(isinstance(n,_ast.Name) and n.id=='_imed' for n in _ast.walk(t))
+    return calls and med
+_imp_bad=[f for f in ('per_topic_coalition.py','budget_frontier.py') if not _imputes(ENG+'\\'+f)]
+ck('coalition + frontier engines impute missing industry money like flip_model (industry_money_missing + median fill)',not _imp_bad,'missing in %s'%_imp_bad)
 # HIGH-1 regression: frontier cascade now uses edge-keyed CRN -> a single-topic run is deterministic across repeats
 def bf(): return subprocess.run([sys.executable,ENG+r'\budget_frontier.py'],capture_output=True,text=True,encoding='utf-8',errors='replace',env=dict(os.environ,TOPIC='Interchange',FRONTIER_OUT=_ASCRATCH+r'\_audit_tmp_frontier.json')).stdout   # scratch out (see _ASCRATCH above) -> don't clobber the all-topics production json, and don't land inside repo.data_money
 bf1=bf(); bf2=bf()

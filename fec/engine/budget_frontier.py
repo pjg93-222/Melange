@@ -30,6 +30,22 @@ if os.environ.get('IMPUTE_IND0','1')!='0':
     ind={n:(_imed if industry_money_missing(C[n]) else ind[n]) for n in members}
 _CS_DOC=json.load(open(os.environ.get('CATSTANCE',B+r'\category_stance.json')))   # scenario can override stance state
 CS=_CS_DOC['matrix']; CS_SCORES=_CS_DOC.get('scores') or {}
+# QME 2026-10-01 (fix 1): stance-integrity gate (Paul 2026-09-30 "F1. Yes"), same kernel read as per_topic_flip. A member whose overall tier is Skeptic/
+# Highly Skeptical/Opponent is not seeded as a CU target (neutral coalition cand, defend pool) merely because one topic cell is Neutral/at-risk-ally.
+# Gates RECIPIENTS only: the `anti` pressure set and contest plays (repl: money goes to the CHALLENGER, the gated incumbent is the opponent being
+# replaced) are untouched; at-risk allies stay in the held-draw model (atrisk) so base spread is unchanged -- only the defend POOL drops them.
+# FRONTIER_STANCE_GATE=0 restores the ungated pools exactly.
+OVT=MBC.stance_gate_tiers(_CS_DOC,members); BLOCK_OVERALL=MBC.STANCE_GATE_BLOCKED; GATE_ON=os.environ.get('FRONTIER_STANCE_GATE','1')!='0'
+def stance_pool(names,ovt,blocked,on):   # QME 2026-10-01: pure order-preserving gate filter (unit-tested via ast-lift)
+    return [n for n in names if not (on and ovt.get(n) in blocked)]
+# QME 2026-10-01 (fix 4): FRONTIER_CRN=1 draws the at-risk `held` rolls from splitmix in a private key space instead of random.random(), which in electoral
+# mode consumed stream positions BEFORE the bx rolls and shifted them vs coalition mode (no longer a common-random-number pair). FRONTIER_CRN=0 = old.
+CRN=os.environ.get('FRONTIER_CRN','1')!='0'
+# QME 2026-10-01 (fix 5): coalition scores candidates x delivery_mult (per_topic_coalition.py:78); the frontier ranked the same candidates without it.
+# FRONTIER_DELIVERY=0 = old (undiscounted) ranking.
+DELIV=os.environ.get('FRONTIER_DELIVERY','1')!='0'
+# QME 2026-10-01 (fix 7): knee/peak from the TRUE un-clamped path (clamped display curve hides MC dips so its marginals were biased up/zeroed). 0 = old.
+KNEE_RAW=os.environ.get('FRONTIER_KNEE_RAW','1')!='0'
 bpf=MBC.bpf()
 EL=json.load(open(B+r'\data\money\electoral.json')); lev={m:(EL.get(m,{}).get('leverage',1.0) if LEVON else 1.0) for m in members}
 ELECTORAL=os.environ.get('ELECTORAL','0')=='1' or '--electoral' in sys.argv   # toggleable mode: add contest plays to the frontier
@@ -46,6 +62,9 @@ from moneyball_core import gate
 P=MBC.build_P(adj)
 idx={n:i for i,n in enumerate(members)}; NM=len(members)
 _sm=MBC.sm64
+# QME 2026-10-01 (fix 3): the splitmix keys (edge + seed-activation) did not depend on SEED, so SEED!=7 reruns reused identical draws and understated seed
+# variance. _SO shifts every key by (SEED-7)*odd-golden-constant: EXACTLY 0 when SEED==7 (the default) => default keys and artifacts byte-identical; no dial.
+_SO=(SEED-7)*0x9E3779B97F4A7C15
 def cascade(A,Bs,it):
     # HIGH-1 fix: edge-keyed CRN (see scenario.py) -- adding a seed no longer desyncs the draw stream,
     # so a marginal spread(S+c)-spread(S) isolates the true effect instead of MC noise.
@@ -55,7 +74,7 @@ def cascade(A,Bs,it):
         for u,c in fr:
             iu=idx[u]*NM
             for v,p in P[u].items():
-                if v not in col and _sm(it*NM*NM+iu+idx[v])<p: col[v]=c; nf.append((v,c))
+                if v not in col and _sm(it*NM*NM+iu+idx[v]+_SO)<p: col[v]=c; nf.append((v,c))
         fr=nf
     return sum(1 for c in col.values() if c=='A')
 from moneyball_core import blocks,BLOCKCAT
@@ -87,11 +106,11 @@ for sc in blocks:
             random.seed(1000003*SEED+it)
             held=set()
             for m in atrisk:
-                r=random.random()
+                r=_sm((1<<61)+it*NM+idx[m]+_SO) if CRN else random.random()   # QME 2026-10-01 fix 4: private splitmix key space (2^61, below activation 2^62, above edge keys) keeps the bx random.random() stream identical across modes; FRONTIER_CRN=0 = old
                 if m in defended or r<(1-risk[m]): held.add(m)   # always draw (CRN); undefended at-risk ally holds only w.p. 1-risk
             # CONTINGENCY-AWARE seeding: a lobbied seed activates only w.p. personality seed_prob x
             # stance gate (dedicated CRN stream, offset past the edge keys — no draw collisions).
-            activated={n for n in ex if _sm((1<<62)+it*NM+idx[n])<gate(n,cs)}
+            activated={n for n in ex if _sm((1<<62)+it*NM+idx[n]+_SO)<gate(n,cs)}
             # A failed contest activation remains an opponent. The old anti-ex subtraction granted the
             # conversion even when the seed gate failed, inflating electoral frontier marginals.
             aa=anti-activated
@@ -99,13 +118,13 @@ for sc in blocks:
             bx=[n for n in members if random.random()<min(0.9,ind[n]/BSCALE) and campT[n]=='neu' and n not in s]  # roll for every member (CRN-stable), then filter
             tot+=cascade(s,aa|set(bx),it)
         return tot/MC
-    ev={n:MBC.priority_base_signal(eng(sc,n),priority[n],0.15) for n in members}
-    cand=sorted([n for n in members if campT[n]=='neu'],key=lambda n:-ev[n])[:45]   # coalition = activate Neutrals; Allies already in pro core / defend pool
+    ev={n:MBC.priority_base_signal(eng(sc,n),priority[n],0.15)*(MBC.delivery_mult(n) if DELIV else 1.0) for n in members}   # QME 2026-10-01 fix 5: x say-do delivery (FRONTIER_DELIVERY=0 = old); *1.0 is exact for the old path
+    cand=sorted(stance_pool([n for n in members if campT[n]=='neu'],OVT,BLOCK_OVERALL,GATE_ON),key=lambda n:-ev[n])[:45]   # QME 2026-10-01 fix 1: gate BEFORE the top-45 cut   # coalition = activate Neutrals; Allies already in pro core / defend pool
     # the inner `ELECTORAL and` was inert: the trailing `if ELECTORAL else []` already decides
     # whether the comprehension runs at all, so the test could never be False when reached
     # (dropped 2026-08-03; provably a no-op in both modes)
     repl=[n for n in members if EP.get(n,{}).get('play')=='contest' and campT[n]=='anti'] if ELECTORAL else []
-    rset=set(repl); dset=set(atrisk); pool=cand+repl+atrisk
+    rset=set(repl); dset=set(atrisk); pool=cand+repl+stance_pool(atrisk,OVT,BLOCK_OVERALL,GATE_ON)   # QME 2026-10-01 fix 1: gated at-risk allies leave the defend POOL only (dset/atrisk still drive held draws)
     fac={n:(REPFAC*lev[n] if n in rset else 1.0 if n in dset else lev[n]) for n in pool}
     # marg() already evaluates spread() at the post-add state. When a candidate is POPPED with a
     # current-iteration marginal (liter==it below) that state is exactly the state we are about to
@@ -120,7 +139,7 @@ for sc in blocks:
         sp=spread(S,D|{c}) if c in dset else spread(S|{c},D)
         _sp[c]=sp
         return max(0.0,sp-cur)*fac[c]
-    base=spread(set(),set()); cur=base; prev=base; S=set(); D=set(); path=[{'b':0,'spread':round(base,1),'seed':None}]
+    base=spread(set(),set()); cur=base; prev=base; S=set(); D=set(); path=[{'b':0,'spread':round(base,1),'spread_raw':round(base,1),'seed':None}]
     pq=[]
     for c in pool: heapq.heappush(pq,(-marg(c,set(),set(),base),c,0))
     it=0
@@ -131,11 +150,12 @@ for sc in blocks:
             if c in dset: D.add(c); typ='defend'
             else: S.add(c); typ='contest' if c in rset else 'coalition'
             it+=1; cur=_sp[c]; prev=max(prev,cur)        # == spread(S,D) at this exact state, from marg() above (see _sp); display curve clamped non-decreasing (dips are MC noise); cur stays true for marginals
-            path.append({'b':(len(S)+len(D))*CAP,'spread':round(prev,1),'seed':c,'type':typ})
+            path.append({'b':(len(S)+len(D))*CAP,'spread':round(prev,1),'spread_raw':round(cur,1),'seed':c,'type':typ})   # QME 2026-10-01 fix 7: spread_raw = true un-clamped spread; 'spread' (clamped) stays the display curve
         else:
             heapq.heappush(pq,(-marg(c,S,D,cur),c,it))
     # diminishing-returns knee: last seed whose marginal >= 25% of the best marginal
-    margs=[path[i]['spread']-path[i-1]['spread'] for i in range(1,len(path))]
+    _k='spread_raw' if KNEE_RAW else 'spread'   # QME 2026-10-01 fix 7: raw marginals (FRONTIER_KNEE_RAW=0 = old clamped); audit_frontier re-derives from the stored rounded path
+    margs=[path[i][_k]-path[i-1][_k] for i in range(1,len(path))]
     peak=max(margs) if margs else 0; knee=0
     for i,mg in enumerate(margs):
         if mg>=0.25*peak: knee=(i+1)*CAP
@@ -149,7 +169,10 @@ defend_ov=sorted([m for m in members if EP.get(m,{}).get('play')=='defend'],key=
 out={'mode':'electoral' if ELECTORAL else 'coalition','leverage':LEVON,'topic':ONLY,
      'defend_overview':[{'m':m,'v':EP[m]['value'],'party':EP[m].get('party'),'elavg':EP[m].get('elavg')} for m in defend_ov],
      'topics':frontier}
-_default=B+r'\data\money\budget_frontier%s.json'%('_electoral' if ELECTORAL else '')
+# QME 2026-10-01 fix 6: a SEED!=7 or MC!=20 sensitivity run with neither FRONTIER_OUT nor TOPIC used to overwrite the production artifact; it now gets a
+# _seed<S>_mc<M> tag (same convention as per_topic_coalition.py). Zero delta at the default SEED=7/MC=20 or whenever FRONTIER_OUT/TOPIC is set.
+_tag='' if (ONLY or (SEED==7 and MC==20)) else '_seed%d_mc%d'%(SEED,MC)
+_default=B+r'\data\money\budget_frontier%s%s.json'%('_electoral' if ELECTORAL else '',_tag)
 _outpath=scoped_output_path(os.environ.get('FRONTIER_OUT'),_default,ONLY)
 MBC.dump_atomic(out,_outpath)
 print('\nwrote %s (mode %s, leverage %s, %d topics)'%(os.path.basename(_outpath),'ELECTORAL' if ELECTORAL else 'coalition','ON' if LEVON else 'OFF',len(frontier)))

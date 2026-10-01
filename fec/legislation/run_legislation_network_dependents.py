@@ -591,7 +591,8 @@ def validate_output(path: Path, logical_name: str) -> None:
     if not value:
         raise NetworkDependentsError(f"empty output: {logical_name}")
     if logical_name == "im_allocation.json":
-        if set(value) != {"flip", "coalition"}:
+        # QME 2026-10-01: build_im_allocation.py now also writes the additive keys 'basis' and 'members_over_pmax'; require flip+coalition, tolerate extras.
+        if not {"flip", "coalition"} <= set(value):
             raise NetworkDependentsError("im_allocation schema mismatch")
     elif logical_name == "salience_advisory.json":
         if not isinstance(value.get("advisory"), list) or not value["advisory"]:
