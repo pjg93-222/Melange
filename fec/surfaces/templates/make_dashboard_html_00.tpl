@@ -392,6 +392,7 @@ function fundedOrdered(){
 function frontierSpread(){const f=DATA.frontier[issue];if(!f)return null;let sp=f.base;for(const [b,s,si] of f.path){if(b<=budget)sp=s;}return sp;}
 function computeFund(){ORD=fundedOrdered();FUND={};ORD.forEach(([i,v])=>FUND[i]=(mode==='flip'?v:50));SPREAD=(mode==='coal'&&DATA.frontier[issue])?frontierSpread():null;}
 function allocOf(i){return FUND[i]||0;}
+function kfmt(v){return String(+(+v).toFixed(3));}   // QME 2026-10-01: DATA flip/coal/opt.alloc are thousands of dollars, exact decimals when not whole ($500 -> 0.5); print them as is, no float noise
 function receptCol(v){ // pressure_mult 0.50 (resistant, blue) .. 1.0 (grey) .. 1.60 (susceptible, red)
   const t=Math.max(0,Math.min(1,(v-0.5)/1.1));
   const lerp=(a,b,k)=>Math.round(a+(b-a)*k);
@@ -519,7 +520,7 @@ cv.addEventListener('mousemove',e=>{
     if(s[8]!=null)parts.push(`${Number(s[8]).toLocaleString()} min verified voiceprint (standardized, not clip-based)`);
     return parts.length?parts.join(' · '):'audio coverage limited';};
   const sp=DATA.speech&&DATA.speech[i],speechLine=sp?`<br>Observed speech: <b>${sp[5]}</b> · ${sp[7].toLocaleString()} attributed public words · ${spAudio(sp)}${sp[0]>0?` · ${String(sp[6]).replaceAll('_',' ')}`:''} <span style=color:#8b949e>(descriptive only)</span>`:'';
-  tip.innerHTML=`<b>${DATA.name[i]}</b> (${DATA.party[i]}) · ${HONORS?'reporting ':''}rank ${DATA.rank[i]} · <b>${DATA.bp[i]}%</b> bipartisan<br>On <b>${DATA.issues[issue]}</b>: <b style=color:${publicColor(i)}>${mesc(publicLabel(i))}</b>${curveNote}${flipLine}<br>Reach on this issue: <b style=color:${centralCol(CENTPCT[i])}>top ${Math.max(1,100-Math.round(CENTPCT[i]*100))}% of Congress</b><br>${HONORS?`Overall priority: ${mesc(priorityLabel(i))} · ${mesc(priorityRankText(i))}<br>Stance: ${mesc(publicLabel(i,DATA.issues.length-1)+mixedRecordText(i))}<br><span style=color:#A49D8A>Standing names are not persuasion probabilities.</span>`:'Overall: '+mesc(publicLabel(i,DATA.issues.length-1))} · electoral: <b style=color:${ELCOL[DATA.play[i]]}>${pl}</b>${speechLine}<br>${mode==='coal'?'Coalition seed':'Persuasion target'}: <b>${a?(mode==='coal'?'enters @ $'+a+'k':'$'+a+'k'):'—'}</b>`;}
+  tip.innerHTML=`<b>${DATA.name[i]}</b> (${DATA.party[i]}) · ${HONORS?'reporting ':''}rank ${DATA.rank[i]} · <b>${DATA.bp[i]}%</b> bipartisan<br>On <b>${DATA.issues[issue]}</b>: <b style=color:${publicColor(i)}>${mesc(publicLabel(i))}</b>${curveNote}${flipLine}<br>Reach on this issue: <b style=color:${centralCol(CENTPCT[i])}>top ${Math.max(1,100-Math.round(CENTPCT[i]*100))}% of Congress</b><br>${HONORS?`Overall priority: ${mesc(priorityLabel(i))} · ${mesc(priorityRankText(i))}<br>Stance: ${mesc(publicLabel(i,DATA.issues.length-1)+mixedRecordText(i))}<br><span style=color:#A49D8A>Standing names are not persuasion probabilities.</span>`:'Overall: '+mesc(publicLabel(i,DATA.issues.length-1))} · electoral: <b style=color:${ELCOL[DATA.play[i]]}>${pl}</b>${speechLine}<br>${mode==='coal'?'Coalition seed':'Persuasion target'}: <b>${a?(mode==='coal'?'enters @ $'+kfmt(a)+'k':'$'+kfmt(a)+'k'):'—'}</b>`;}
  else tip.style.display='none';
  draw();
 });
@@ -580,7 +581,7 @@ for(const k in NETS){const s=NETS[k].sfx;
 function baseX(){return (BASE_XY[NETCFG]||BASE_XY.cu)[0];}
 function baseY(){return (BASE_XY[NETCFG]||BASE_XY.cu)[1];}
 function cpf(u,v){return (PTY[u]!==PTY[v]&&'DR'.indexOf(PTY[u])>=0&&'DR'.indexOf(PTY[v])>=0)?(K.DCROSS+(1-K.DCROSS)*Math.sqrt(BPF[u]*BPF[v])):1;}   // CALIBRATED: cross-party DIFFUSION damped 0.4-1.0x (homophily: Harmon; Andris; cross<within)
-function align(u,v){if(PTY[u]===PTY[v]&&'DR'.indexOf(PTY[u])>=0)return K.SRCPRO;if(PTY[u]!==PTY[v]&&'DR'.indexOf(PTY[u])>=0&&'DR'.indexOf(PTY[v])>=0)return K.SRCANTI;return 1;}   // SOURCE-ALIGNMENT for persuasion: co-partisan x1.7 / out x0.5 (Furnas/Bakker)
+function align(u,v){const a=PTY[u],b=PTY[v],ra=a==='D'||a==='R',rb=b==='D'||b==='R';if(a===b&&ra)return K.SRCPRO;if(a!==b&&ra&&rb)return K.SRCANTI;return 1;}   // QME 2026-10-01: explicit D/R checks (indexOf('') is 0, so '' or a bare-substring token used to count as a party). SOURCE-ALIGNMENT for persuasion: co-partisan x1.7 / out x0.5 (Furnas/Bakker)
 let PEBASE=Array.from({length:N},()=>({}));function buildPEBASE(){PEBASE=Array.from({length:N},()=>({}));for(let u=0;u<N;u++)for(const v in ADJ[u]){const wc=ADJ[u][v]*cpf(u,+v)*(EMU?EMU[+v]:1);PEBASE[u][v]=wc/(wc+6);}}buildPEBASE();   // = moneyball_core.build_P before the interactive-only issue/chair layer
 let PE=PEBASE.map(row=>({...row}));
 const IP=DATA.influence_policy||{domains:[],roles:[],role_priors:{'-':{source_shock:1,target_resistance:1}}},ROLEPRIORS=IP.role_priors||{'-':{source_shock:1,target_resistance:1}};
@@ -597,7 +598,7 @@ function configureIssueNetwork(){
   CENT=issueKatzScores();CENTPCT=midrankPercentiles(CENT);
 }
 const SCN={C:'Champion',F:'Defender',A:'Ally',H:'Highly Persuadable',P:'Persuadable',G:'Lean Persuadable',T:'True Neutral',L:'Lean Skeptic',N:'Neutral',S:'Skeptic',K:'Highly Skeptical',O:'Opponent','-':'—'};
-const CAMP=t=>('CFA'.indexOf(t)>=0?'pro':'OSK'.indexOf(t)>=0?'anti':'neu');
+const CAMP=t=>(t==='C'||t==='F'||t==='A'?'pro':t==='O'||t==='S'||t==='K'?'anti':'neu');   // QME 2026-10-01: exact one-letter tiers; 'CFA'.indexOf('') is 0, so '' / undefined used to read as pro
 const PERS=EG.pers,THETA=EG.theta;
 function baseTiers(i){const t=new Array(N);for(let u=0;u<N;u++)t[u]=DATA.stance[u][i];return t;}
 function flipModel(i,tiers,cu,ind){
@@ -1176,7 +1177,7 @@ function updateEngChk(){
   const note=` · issue IC ×${Number(d.ic_edge_scale||1).toFixed(2)} · LT ×${Number(d.lt_threshold_scale||1).toFixed(2)} · ${leaders} jurisdiction leaders`;
   const r=DATA.engine.refflip[issue];
   if(!r){el.textContent='—';el.title='Overall view — no per-issue self-check to run.'+note;return;}
-  const t=flipModel(issue,baseTiers(issue),EG.cu,EG.ind).total,ok=Math.abs(t-r)<=Math.max(0.2,0.03*r);
+  const t=flipModel(issue,baseTiers(issue),EG.cu,EG.ind).total,ok=Math.abs(t-r)<=Math.max(0.02,0.01*r);   // QME 2026-10-01: was max(0.2,3%) -- the 0.2 floor swamped small refflip; measured worst drift after D-077 is 0.23%. `if(!r)` above still skips the synthetic Overall layer (refflip 0)
   el.textContent=ok?'✓':'⚠ self-check failed';
   el.title=(ok?'Self-check passed':'SELF-CHECK FAILED')+` — this page computed ${t.toFixed(2)}, the published figure is ${r.toFixed(2)}.`+note;
 }
@@ -1226,7 +1227,7 @@ function refresh(){
    document.getElementById('tgtmode').textContent='· '+(mode==='coal'?'coalition (entry order)':'persuasion ($)');
    const arr=ORD.slice(0,16);
    document.getElementById('targets').innerHTML=arr.map(([i,v])=>
-     `<div class=tgt tabindex=0 data-i=${i}><span><span class=pill style=background:${publicColor(i)}></span>${mesc(DATA.name[i])}${mprof(i)}</span><small>${mode==='coal'&&useSlider?'@$'+v+'k':'$'+v+'k'}</small></div>`).join('')||'<div class=hint>no funded targets</div>';
+     `<div class=tgt tabindex=0 data-i=${i}><span><span class=pill style=background:${publicColor(i)}></span>${mesc(DATA.name[i])}${mprof(i)}</span><small>${mode==='coal'&&useSlider?'@$'+kfmt(v)+'k':'$'+kfmt(v)+'k'}</small></div>`).join('')||'<div class=hint>no funded targets</div>';
  }
  document.querySelectorAll('.tgt').forEach(el=>el.onclick=e=>rowSelect(e,el));
  if(sel>=0){renderMemberSummary(sel);cacheBaseline(sel);renderPrime();runScenario();}   // keep the member panel, issue stance, area centrality, and scenario in sync with issue/mode (cascade re-runs on issue change / shocks, not every refresh)

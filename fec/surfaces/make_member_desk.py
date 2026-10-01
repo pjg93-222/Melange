@@ -1182,10 +1182,16 @@ TIERNAME = {'C':'Champion','F':'Defender','A':'Ally','H':'Highly Persuadable','P
 NAME2LETTER = {v: k for k, v in TIERNAME.items()}   # 'Champion'->'C', '—'->'-'  (category_stance matrix uses names)
 
 # cosponsor adjacency (weighted, undirected) from the FULL engine network
-ADJ = {}
-for u, v, w in eng['adj']:
-    ADJ.setdefault(u, []).append((v, w))
-    ADJ.setdefault(v, []).append((u, w))
+def desk_adj(rows):
+    """QME 2026-10-01: ONE weight per ordered pair, last row wins -- exactly the browser's `ADJ[u][v]=w;ADJ[v][u]=w`
+    and flip_model's name-keyed dict (`adj[a][b]=w; adj[b][a]=w`). The old setdefault(...).append((v, w)) kept BOTH
+    rows of a duplicated or reciprocal pair and desk_roi summed them, double-counting that edge's pull."""
+    d = {}
+    for u, v, w in rows:
+        d.setdefault(u, {})[v] = w
+        d.setdefault(v, {})[u] = w
+    return {u: list(nb.items()) for u, nb in d.items()}
+ADJ = desk_adj(eng['adj'])                    # {u: [(v, w), ...]} one entry per neighbour
 
 # ---------- legislators.csv bio enrichment (bioguide -> fields) ----------
 LEG = {}
@@ -2524,12 +2530,14 @@ def desk_roi(eng, stance, tiername, adj, party, gated=frozenset(), chunk=10000.0
     WM, WP, HALFF, BASE = K['WM'], K['WP'], K['HALFF'], K['BASE']
     SRCPRO, SRCANTI = K['SRCPRO'], K['SRCANTI']
     Nn = len(stance)
+    # QME 2026-10-01: set membership, not `t in 'CFA'` (a substring test: '' and 'CF' matched). Same for single-char tokens.
+    DR, PRO, ANTI = frozenset('DR'), frozenset('CFA'), frozenset('OSK')
     def align(u, v):
         pu, pv = party[u], party[v]
-        if pu == pv and pu in 'DR': return SRCPRO
-        if pu != pv and pu in 'DR' and pv in 'DR': return SRCANTI
+        if pu == pv and pu in DR: return SRCPRO
+        if pu != pv and pu in DR and pv in DR: return SRCANTI
         return 1.0
-    def camp(t): return 'pro' if t in 'CFA' else ('anti' if t in 'OSK' else 'neu')   # = flip_model PRO / ANTI
+    def camp(t): return 'pro' if t in PRO else ('anti' if t in ANTI else 'neu')   # = flip_model PRO / ANTI
     def pf(cuA, indA, nAu, mA, nBu, mB, c, pm):
         au = WM * pm * (cuA + 1) / ((cuA + 1) + c) + WP * nAu / mA
         bu = WM * pm * (indA + 1) / ((indA + 1) + c) + WP * nBu / mB
@@ -2576,6 +2584,20 @@ def desk_plan_fields(planned):
     read -$25,500 while the plan adds $10,000; 72 of 389 funded members read gap <= 0)."""
     oa = round(planned or 0)
     return oa, max(0, oa)
+def desk_plan_for(opt_alloc, name):
+    """(opt_alloc, gap) for a desk row, looked up BY NAME in optimize_result's alloc (QME 2026-10-01: test seam)."""
+    return desk_plan_fields(opt_alloc.get(name, 0))
+def desk_roi_for(roi, si):
+    """rec['roi']: ROI[sna_idx] to 4 dp, 0 for a desk row with no SNA index (QME 2026-10-01: test seam)."""
+    return round(roi[si], 4) if si is not None else 0
+def desk_opt_reconcile(opt_alloc, desk_names):
+    """QME 2026-10-01: optimizer dollars the desk cannot place. OPT_ALLOC.get(rec['name'], 0) silently zeroed any
+    optimizer name that matched no desk row. Returns (matched$, total$, {name: $ unmatched}); the caller prints and
+    raises, because the desk must show every planned dollar."""
+    names = set(desk_names)
+    total = sum(round(v or 0) for v in opt_alloc.values())
+    unmatched = {n: round(v or 0) for n, v in opt_alloc.items() if n not in names and round(v or 0)}
+    return total - sum(unmatched.values()), total, unmatched
 # F1: the gate optimize.py applies -- same kernel helper, over the category_stance.json this build reads.
 _GATE_TIERS = MBC.stance_gate_tiers(CS, snames)
 ROI_GATED = frozenset(i for i, n in enumerate(snames) if _GATE_TIERS.get(n) in MBC.STANCE_GATE_BLOCKED)
@@ -2941,9 +2963,15 @@ def build_bundle():
         rec['eff_value'] = eff[i]                                       # +1 = high influence, low spend (undervalued)
         # Golovin-Krause optimizer suggestion ($): the plan's increment above existing CU money; gap = that
         # increment, never negative (F4a, 2026-09-30).
-        rec['opt_alloc'], rec['gap'] = desk_plan_fields(OPT_ALLOC.get(rec['name'], 0))
+        rec['opt_alloc'], rec['gap'] = desk_plan_for(OPT_ALLOC, rec['name'])
         si = rec.get('sna_idx')
-        rec['roi'] = round(ROI[si], 4) if si is not None else 0         # expected weighted flips from the next $10k
+        rec['roi'] = desk_roi_for(ROI, si)                                  # expected weighted flips from the next $10k
+    _m, _t, _um = desk_opt_reconcile(OPT_ALLOC, [rec['name'] for rec in members])
+    print('  optimizer dollars on desk rows: $%s of $%s planned (%d unmatched names)' % (format(_m, ',.0f'), format(_t, ',.0f'), len(_um)))
+    if _um:
+        print('  !! optimizer names with no desk row (planned $ the desk would not show):')
+        for _n, _v in sorted(_um.items(), key=lambda kv: -kv[1]): print('     %r  $%s' % (_n, format(_v, ',.0f')))
+        raise ValueError('make_member_desk: %d optimizer alloc name(s), $%s planned, match no desk row' % (len(_um), format(sum(_um.values()), ',.0f')))
 
     # ----- self-contained cosponsor graph (member-array indices) for the coalition builder -----
     midx = {m['name']: k for k, m in enumerate(members)}
@@ -2953,7 +2981,7 @@ def build_bundle():
     for u, v, w in eng['adj']:
         a = midx.get(snames[u]); b = midx.get(snames[v])
         if a is not None and b is not None and a != b:
-            cross=(PARTY_SNA[u]!=PARTY_SNA[v] and PARTY_SNA[u] in 'DR' and PARTY_SNA[v] in 'DR')
+            cross=(PARTY_SNA[u]!=PARTY_SNA[v] and PARTY_SNA[u] in frozenset('DR') and PARTY_SNA[v] in frozenset('DR'))
             cpf=dcross+(1-dcross)*(bpf[u]*bpf[v])**0.5 if cross else 1.0
             wc=w*cpf*emult[v]; probability=wc/(wc+6.0)
             adj_out.append([a, b, round(w, 2), round(probability, 6)])
