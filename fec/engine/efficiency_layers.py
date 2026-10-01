@@ -211,7 +211,7 @@ def build_payload(
 
     use_allocation = allocation_field_present and all(
         row.get("engine_allocation_dollars") is not None for row in rows
-    )
+    ) and any(row.get("engine_allocation_dollars") for row in rows)   # QME 2026-10-01: all-zero over the joined rows is absent too
     allocation_dollars = None
     allocation_shares = None
     if use_allocation:
@@ -362,7 +362,7 @@ def build_payload(
             "basis": allocation_basis,
             "fallback_used": allocation_fallback,
             "fallback_rule": (
-                "If no per-member allocation field exists, use z(engine.cu PAC dollars) "
+                "If no per-member allocation exists (field absent, empty, or all $0), use z(engine.cu PAC dollars) "
                 "and state the fallback."
             ),
         },
@@ -511,7 +511,9 @@ def _load_dashboard(path):
     allocation_field_present = False
     allocations = {name: None for name in names}
     opt = document.get("opt")
-    if isinstance(opt, dict) and isinstance(opt.get("alloc"), list):
+    # QME 2026-10-01: an EMPTY alloc list (or one that sums to $0) is no allocation at all, not an all-zero real
+    # one: it is treated as absent so the existing CU-PAC fallback basis runs and fallback_used is recorded True.
+    if isinstance(opt, dict) and isinstance(opt.get("alloc"), list) and opt["alloc"]:
         allocation_field_present = True
         allocations = {name: 0.0 for name in names}
         seen = set()
@@ -529,6 +531,9 @@ def _load_dashboard(path):
             allocations[names[index]] = 1000.0 * _number(
                 pair[1], f"dashboard allocation row {row_number} thousands", minimum=0.0
             )
+        if not any(value for value in allocations.values()):
+            allocation_field_present = False
+            allocations = {name: None for name in names}
 
     records = {}
     for index, name in enumerate(names):
@@ -833,7 +838,13 @@ def build_from_files():
             "structure": "sectors.credit_union.{champions,threats,mixed}",
             "board_counts": board_counts,
             "composite_field": "composite",
-            "absent_from_all_boards_fill": 0.0,
+            # QME 2026-10-01: was "absent_from_all_boards_fill": 0.0, which claimed a 0.0 composite was filled in; the
+            # code (alignment_raw -> None, `cu_board_present`) EXCLUDES them from the z population and the lobbying mean.
+            "absent_from_all_boards": "excluded",
+            "absent_from_all_boards_rule": (
+                "members on no champions_v2 board are excluded (no composite, no fill value): left out of the "
+                "alignment z population and the lobbying-score mean, displayed as em-dash"
+            ),
             "threat_board_members_excluded_from_lobbying_ranking": len(threat_names),
         },
         "signed_opposition_source": opposition_receipt,

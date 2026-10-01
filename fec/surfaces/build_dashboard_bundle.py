@@ -562,8 +562,16 @@ for _sec, _S in SECTORS.items():
               % (_sec, type(_e).__name__, str(_e)[:80]))
 
 
-flip=[{str(idx[n]):round(v/1000) for n,v in FL[lb].items() if v>=10000} for lb in source_issues]
-coal=[{str(idx[n]):round(v/1000) for n,v in CO[lb].items() if v>0} for lb in source_issues]
+def opt_alloc_thousands(dollars):
+    """opt.alloc keeps its unit (thousands of dollars) and loses nothing (F4c, 2026-09-30). A whole-thousand
+    amount stays an int, byte-identical to the old encoding; anything else keeps its exact dollars as a decimal
+    ($500 -> 0.5). The old round(v/1000) was Python half-even and zeroed every $500 allocation (47 of 389 on
+    the 2026-09-20 chain), which efficiency_layers then rebuilt as $0 and labelled from."""
+    dollars=int(round(dollars))
+    return dollars//1000 if dollars%1000==0 else round(dollars/1000.0,3)
+# QME 2026-10-01: flip/coal/Overall use the same dollar-preserving thousands as opt.alloc (F4c) -- half-even round(v/1000) sent 10500->10 and $500->0. Whole thousands stay ints (bytes unchanged); the rest are exact decimals ($500 -> 0.5).
+flip=[{str(idx[n]):opt_alloc_thousands(v) for n,v in FL[lb].items() if v>=10000} for lb in source_issues]
+coal=[{str(idx[n]):opt_alloc_thousands(v) for n,v in CO[lb].items() if v>0} for lb in source_issues]
 stats=[]
 for i,lb in enumerate(source_issues):
     col=[STANCE[k][i] for k in range(len(name))]
@@ -588,17 +596,18 @@ def frontier_for(lb):
     return {'base':t['base'],'knee':t.get('knee',0),'core':t.get('core_seeds',0),'path':pts}
 frontier=[frontier_for(lb) for lb in source_issues]
 # --- joint optimizer (cross-topic CU allocation; explicit fixed-state/replanning guarantee scope) ---
-def opt_alloc_thousands(dollars):
-    """opt.alloc keeps its unit (thousands of dollars) and loses nothing (F4c, 2026-09-30). A whole-thousand
-    amount stays an int, byte-identical to the old encoding; anything else keeps its exact dollars as a decimal
-    ($500 -> 0.5). The old round(v/1000) was Python half-even and zeroed every $500 allocation (47 of 389 on
-    the 2026-09-20 chain), which efficiency_layers then rebuilt as $0 and labelled from."""
-    dollars=int(round(dollars))
-    return dollars//1000 if dollars%1000==0 else round(dollars/1000.0,3)
 if not os.path.exists(B+r'\optimize_result.json'): print('  !! optimize_result.json MISSING — optimizer panel will be EMPTY (run optimize.py)')   # S3-05
 OPT=json.load(open(B+r'\optimize_result.json')) if os.path.exists(B+r'\optimize_result.json') else None
 opt=None
 if OPT:
+    # QME 2026-10-01: the old `if n in idx` filters dropped any optimizer name the bundle could not place, silently.
+    # The panel must show every planned dollar and conversion: print what is unmatched and fail loudly.
+    _oa_drop={n:v for n,v in OPT['alloc'].items() if n not in idx}
+    _cv_drop=[c[0] for c in OPT['conversions'] if c[0] not in idx]
+    if _oa_drop or _cv_drop:
+        print('  !! optimize_result names not in the bundle roster: alloc %d ($%s of $%s planned) %s; conversions %d %s'
+              %(len(_oa_drop),format(sum(_oa_drop.values()),',.0f'),format(sum(OPT['alloc'].values()),',.0f'),sorted(_oa_drop),len(_cv_drop),sorted(_cv_drop)))
+        raise ValueError('build_dashboard_bundle: %d optimizer alloc name(s) / %d conversion name(s) unmatched to the roster'%(len(_oa_drop),len(_cv_drop)))
     opt={'budget':OPT['budget'],'base':round(OPT['base'],1),'final':round(OPT['final'],1),
          'mode':OPT.get('mode','legacy'),'certificate':bool(OPT.get('certificate_valid')),
          'bound':OPT.get('opt_bound'),'guarantee':OPT.get('guarantee') or {},
@@ -668,8 +677,8 @@ try:
 except FileNotFoundError: print('  !! salience_advisory.json MISSING — advisory column will be EMPTY (run salience_shock.py --advise)')   # S3-05: was `except Exception: pass`, which also buried schema drift forever
 engine['adv']=[_advmap.get(issue_cat[i],'') for i in range(len(issues))]
 # ===== Overall CU stance as a selectable ISSUE layer (general stance, toggleable like Interchange) =====
-_ovf={str(k):round(sum(FL[lb].get(name[k],0) for lb in source_issues)/1000) for k in range(len(name)) if sum(FL[lb].get(name[k],0) for lb in source_issues)>=10000}
-_ovc={str(k):round(sum(CO[lb].get(name[k],0) for lb in source_issues)/1000) for k in range(len(name)) if sum(CO[lb].get(name[k],0) for lb in source_issues)>0}
+_ovf={str(k):opt_alloc_thousands(sum(FL[lb].get(name[k],0) for lb in source_issues)) for k in range(len(name)) if sum(FL[lb].get(name[k],0) for lb in source_issues)>=10000}
+_ovc={str(k):opt_alloc_thousands(sum(CO[lb].get(name[k],0) for lb in source_issues)) for k in range(len(name)) if sum(CO[lb].get(name[k],0) for lb in source_issues)>0}
 issues.append('Overall CU stance')
 engine['categories'].append(None)
 for k in range(len(name)): STANCE[k]=STANCE[k]+GEN[k]                                   # this issue's stance = overall (R&A col 7) tier

@@ -47,9 +47,12 @@ EFFICIENCY = os.path.join(FEC, 'engine', 'efficiency_layers.py')
 FLIP_MODEL = os.path.join(FEC, 'engine', 'flip_model.py')
 KERNEL = os.path.join(FEC, 'moneyball_core.py')
 DASH_TPL = os.path.join(FEC, 'surfaces', 'templates', 'make_dashboard_html_00.tpl')
-# The node lookup test_dashboard_honors uses for the same template.
-NODE = shutil.which('node') or os.path.join(os.path.expanduser('~'), '.cache', 'codex-runtimes',
-                                            'codex-primary-runtime', 'dependencies', 'node', 'bin', 'node.exe')
+# QME 2026-10-01: PATH first (shutil.which), the Windows codex runtime only as a fallback; NODE is None when neither exists.
+_NODE_FALLBACK = os.path.join(os.path.expanduser('~'), '.cache', 'codex-runtimes',
+                              'codex-primary-runtime', 'dependencies', 'node', 'bin', 'node.exe')
+NODE = shutil.which('node') or (_NODE_FALLBACK if os.path.isfile(_NODE_FALLBACK) else None)
+NODE_SKIP = ("node not found: shutil.which('node') returned None and the fallback %s does not exist; "
+             "install Node or put it on PATH -- the template-in-node parity checks are SKIPPED, not passed" % _NODE_FALLBACK)
 
 
 def _source(path):
@@ -78,8 +81,11 @@ def _lift(path, functions=(), assigns=(), classes=(), namespace=None):
     return ns
 
 
-DESK_NS = _lift(DESK, functions=('desk_roi', 'desk_eff_values', 'desk_plan_fields'), assigns=('TIERNAME',))
+DESK_NS = _lift(DESK, functions=('desk_roi', 'desk_eff_values', 'desk_plan_fields', 'desk_plan_for', 'desk_roi_for',
+                                 'desk_opt_reconcile', 'desk_adj'), assigns=('TIERNAME',))
 DESK_ROI, EFF_VALUES, PLAN = DESK_NS['desk_roi'], DESK_NS['desk_eff_values'], DESK_NS['desk_plan_fields']
+PLAN_FOR, ROI_FOR, RECONCILE, DESK_ADJ = (DESK_NS['desk_plan_for'], DESK_NS['desk_roi_for'],
+                                          DESK_NS['desk_opt_reconcile'], DESK_NS['desk_adj'])
 TIERNAME = DESK_NS['TIERNAME']
 LETTER = {name: letter for letter, name in TIERNAME.items()}
 ENCODE = _lift(BUNDLE, functions=('opt_alloc_thousands',))['opt_alloc_thousands']
@@ -97,10 +103,36 @@ def test_gap_is_the_plan_increment_and_never_negative():
     assert PLAN(10000) == (10000, 10000)
 
 
-def test_desk_no_longer_subtracts_invested_from_the_increment():
-    compact = _source(DESK).replace(' ', '')
-    assert "rec['opt_alloc'],rec['gap']=desk_plan_fields(OPT_ALLOC.get(rec['name'],0))" in compact
-    assert "oa-round(rec.get('invested')" not in compact
+def test_gap_and_opt_alloc_are_looked_up_by_name_not_by_invested():
+    # QME 2026-10-01: behavioural (was a source-text grep). The desk row's plan comes from optimize_result.alloc
+    # keyed by NAME; invested never enters, a name the optimizer did not fund reads (0, 0).
+    opt = {'Sherman': 10000, 'Half Grand': 500.4, 'Other': 7500}
+    assert PLAN_FOR(opt, 'Sherman') == (10000, 10000)
+    assert PLAN_FOR(opt, 'Half Grand') == (500, 500)
+    assert PLAN_FOR(opt, 'Unfunded') == (0, 0)
+    assert list(inspect.signature(PLAN_FOR).parameters) == ['opt_alloc', 'name']
+
+
+def test_desk_roi_for_indexes_by_sna_idx_and_rounds_to_four_places():
+    roi = [0.0, 0.123456, 0.5, 0.00004, 2.99996]
+    assert ROI_FOR(roi, 1) == 0.1235 and ROI_FOR(roi, 3) == 0.0 and ROI_FOR(roi, 4) == 3.0
+    assert ROI_FOR(roi, None) == 0                         # no SNA index -> 0, never roi[-1]
+    # Index alignment through a fixture: desk row k carries ROI of the member at ITS sna_idx, however rows are ordered.
+    eng, stance, adj, party = _desk_inputs()
+    full = DESK_ROI(eng, stance, TIERNAME, adj, party)
+    rows = list(reversed(range(len(NAMES))))               # desk order != SNA order
+    assert [ROI_FOR(full, si) for si in rows] == [round(full[si], 4) for si in rows]
+    assert ROI_FOR(full, rows[0]) == round(full[len(NAMES) - 1], 4)
+
+
+def test_unmatched_optimizer_dollars_are_reported_and_counted():
+    opt = {'Ann Pro': 10000, 'Ben Swing': 500, 'Zoe Ghost': 2500, 'Zero Ghost': 0}
+    matched, total, unmatched = RECONCILE(opt, ['Ann Pro', 'Ben Swing', 'Cal Swing'])
+    assert (matched, total, unmatched) == (10500, 13000, {'Zoe Ghost': 2500})   # a $0 unmatched name loses nothing
+    assert RECONCILE(opt, list(opt))[2] == {} and RECONCILE({}, [])[:2] == (0, 0)
+    # accent drift is the realistic failure: NFC vs NFD names do not match, so the caller must raise
+    nfd = 'Jose\u0301 Ruiz'
+    assert RECONCILE({'Jos\u00e9 Ruiz': 4000}, [nfd])[2] == {'Jos\u00e9 Ruiz': 4000}
 
 
 # ---------------------------------------------------------------- eff_value
@@ -260,7 +292,7 @@ def _desk_inputs(scale=1.0):
 SUB_ONE = 0.1
 
 
-def _engine_roi(anti=None, scale=1.0, floor_at_one=False):
+def _engine_roi(anti=None, scale=1.0, floor_at_one=False, edges=None):
     """flip_model's OWN topic_setup + pflip (lifted), summed like optimize.marg_at for one $10k chunk.
     Returns the ROI and each issue's (mAt, mBt). floor_at_one replays the desk/browser rule before
     2026-10-01, max(1, camp maximum), on the engine's own arithmetic: the negative control."""
@@ -275,7 +307,7 @@ def _engine_roi(anti=None, scale=1.0, floor_at_one=False):
         'eng': {k: {n: ENGAGEMENT[k][idx[n]] for n in NAMES} for k in range(len(ISSUES))},
         'topic_priority': lambda cat, mode: {n: PRIORITY[ISSUES.index(cat)][idx[n]] for n in NAMES},
     }
-    for a, b, w in EDGES:
+    for a, b, w in (EDGES if edges is None else edges):    # flip_model's name-keyed dict: last row wins
         namespace['adj'][a][b] = w * scale
         namespace['adj'][b][a] = w * scale
     fm = _lift(FLIP_MODEL, functions=('pflip', 'camp', 'topic_setup', '_stance_rows'),
@@ -315,9 +347,6 @@ def test_pre_ruling_floor_fails_the_sub_one_parity():
     desk = DESK_ROI(eng, stance, TIERNAME, adj, party)
     floored, _maxima = _engine_roi(scale=SUB_ONE, floor_at_one=True)
     assert max(abs(d - f) for d, f in zip(desk, floored)) > 1e-6       # the parity test can fail
-    compact = _source(DESK).replace(' ', '')
-    assert 'mA=max(nA)or1.0;mB=max(nB)or1.0' in compact
-    assert 'max(1.0,max(nA))' not in compact and 'max(1.0,max(nB))' not in compact
 
 
 # The system logic review's independent fixture (audits/qme_fix_round_20260930/SYSTEM_LOGIC_REVIEW.md,
@@ -363,12 +392,13 @@ def test_review_fixture_desk_equals_backend_algebra():
     assert REVIEW_FLOORED - REVIEW_BACKEND > 0.09
 
 
-def _browser_roi(eng, stance, adj, party):
+def _browser_roi(eng, stance, adj, party, rows=None):
     """The dashboard template's OWN flipModel and align, sliced from the .tpl as test_dashboard_honors
     does, run under node: the next-$10k finite difference per member over the real issues, plus each
-    issue's (mA, mB)."""
-    if not os.path.isfile(NODE):
-        pytest.skip('Node runtime unavailable')
+    issue's (mA, mB). With `rows` (raw [u, v, w] engine rows) ADJ is built by the template's OWN builder line,
+    `for(const [u,v,w] of EG.adj){ADJ[u][v]=w;ADJ[v][u]=w;}`, so duplicate rows resolve exactly as in the page."""
+    if not NODE:
+        pytest.skip(NODE_SKIP)
     source = _source(DASH_TPL)
     engine = source[source.index('const SCN='):source.index('// stance-integrity gates')]
     align = next(line for line in source.splitlines() if line.startswith('function align('))
@@ -379,15 +409,21 @@ def _browser_roi(eng, stance, adj, party):
                'K': eng['const'], 'PM': eng.get('pmult'), 'DM': eng.get('dmult'), 'BPF': eng['bpf'],
                'ADJ': [{str(v): w for v, w in adj.get(u, [])} for u in range(n)], 'PTY': list(party),
                'cu': eng['cu'], 'ind': eng['ind']}
+    build = ''
+    if rows is not None:
+        fixture['EG']['adj'] = rows
+        build = next(line for line in source.splitlines() if line.startswith('let ADJ=Array.from({length:N}'))
+        build = build.split('//')[0].replace('let ADJ=', 'ADJ=', 1)
     script = '''
-const F=__FIXTURE__;const DATA=F.DATA,EG=F.EG,K=F.K,PM=F.PM,DM=F.DM,BPF=F.BPF,ADJ=F.ADJ,PTY=F.PTY,N=DATA.stance.length;
+const F=__FIXTURE__;const DATA=F.DATA,EG=F.EG,K=F.K,PM=F.PM,DM=F.DM,BPF=F.BPF,PTY=F.PTY,N=DATA.stance.length;let ADJ=F.ADJ;
+__BUILD__
 __ALIGN__
 __ENGINE__
 const roi=new Array(N).fill(0),peaks=[];
 for(let i=0;i<EG.eng.length-1;i++){const t=baseTiers(i),base=flipModel(i,t,F.cu,F.ind);peaks.push([base.mA,base.mB]);
   for(let u=0;u<N;u++){const cu=F.cu.slice();cu[u]+=10000;roi[u]+=base.tg[u]*(flipModel(i,t,cu,F.ind).pf[u]-base.pf[u]);}}
 console.log(JSON.stringify({roi,peaks}));
-'''.replace('__FIXTURE__', json.dumps(fixture)).replace('__ALIGN__', align).replace('__ENGINE__', engine)
+'''.replace('__FIXTURE__', json.dumps(fixture)).replace('__BUILD__', build).replace('__ALIGN__', align).replace('__ENGINE__', engine)
     result = subprocess.run([NODE, '-e', script], capture_output=True, text=True, encoding='utf-8')
     assert result.returncode == 0, result.stderr
     out = json.loads(result.stdout)
@@ -407,10 +443,7 @@ def test_browser_flip_model_matches_the_desk_and_the_backend_peer_maximum():
         browser, peaks = _browser_roi(eng, stance, adj, party)
         assert abs(browser[2] - REVIEW_BACKEND) <= 1e-12, (weight, browser)
         assert peaks == [(weight, weight)]
-    # Negative control: the template no longer floors its maxima at 1.
-    source = _source(DASH_TPL).replace(' ', '')
-    assert 'constmA=Math.max(...nA)||1,mB=Math.max(...nB)||1;' in source
-    assert 'letmA=1,mB=1;' not in source
+    # (the template's no-floor rule is the peaks equality above at scale SUB_ONE, where a floor at 1 would show)
 
 
 def test_highly_skeptical_neighbours_count_as_anti_like_the_engine():
@@ -418,7 +451,6 @@ def test_highly_skeptical_neighbours_count_as_anti_like_the_engine():
     desk = DESK_ROI(eng, stance, TIERNAME, adj, party)
     pre_fix, _floors = _engine_roi(anti={'Opponent', 'Skeptic'})     # 'K' neutral, the old desk letters
     assert max(abs(d - p) for d, p in zip(desk, pre_fix)) > 1e-6         # the parity test can fail
-    assert "'anti'iftin'OSK'" in _source(DESK).replace(' ', '')
 
 
 def test_stance_gated_members_show_no_roi():
@@ -438,3 +470,127 @@ def test_desk_reads_the_gate_from_the_kernel_helper():
     assert '_GATE_TIERS=MBC.stance_gate_tiers(CS,snames)' in compact
     assert 'if_GATE_TIERS.get(n)inMBC.STANCE_GATE_BLOCKED' in compact
     assert 'ROI=desk_roi(eng,STANCE,TIERNAME,ADJ,PARTY_SNA,gated=ROI_GATED,chunk=CHUNK)' in compact
+
+
+
+# ---------------------------------------------------------------- adjacency duplicates
+def _rows(edges, scale=1.0):
+    idx = {n: i for i, n in enumerate(NAMES)}
+    return [[idx[a], idx[b], w * scale] for a, b, w in edges]
+
+
+def _append_adj(rows):
+    """The desk's rule before 2026-10-01: both directions of EVERY row appended, so a pair listed twice is summed."""
+    adj = {}
+    for u, v, w in rows:
+        adj.setdefault(u, []).append((v, w))
+        adj.setdefault(v, []).append((u, w))
+    return adj
+
+
+# Ann-Ben listed twice, the second time reversed and at another weight (a duplicated reciprocal row).
+DUP_EDGES = EDGES + [('Ben Swing', 'Ann Pro', 0.4)]
+
+
+def test_desk_adj_keeps_one_weight_per_pair_last_row_wins():
+    assert DESK_ADJ([[0, 1, 2.0], [1, 0, 0.4]]) == {0: [(1, 0.4)], 1: [(0, 0.4)]}
+    assert DESK_ADJ([[0, 1, 2.0], [0, 1, 3.0], [1, 2, 1.0]]) == {0: [(1, 3.0)], 1: [(0, 3.0), (2, 1.0)], 2: [(1, 1.0)]}
+    assert DESK_ADJ([]) == {}
+    assert _append_adj([[0, 1, 2.0], [1, 0, 0.4]])[0] == [(1, 2.0), (1, 0.4)]     # the old rule kept both
+
+
+def test_desk_browser_and_backend_agree_on_a_duplicated_reciprocal_row():
+    eng, stance, _adj, party = _desk_inputs()
+    rows = _rows(DUP_EDGES)
+    desk = DESK_ROI(eng, stance, TIERNAME, DESK_ADJ(rows), party)
+    backend, _maxima = _engine_roi(edges=DUP_EDGES)
+    assert all(abs(d - b) <= 1e-12 for d, b in zip(desk, backend)), list(zip(desk, backend))
+    browser, _peaks = _browser_roi(eng, stance, DESK_ADJ(rows), party, rows=rows)
+    assert all(abs(d - b) <= 1e-12 for d, b in zip(desk, browser)), list(zip(desk, browser))
+    # negative control: the pre-fix append rule double counts the Ann-Ben pair and is not the backend
+    old = DESK_ROI(eng, stance, TIERNAME, _append_adj(rows), party)
+    assert max(abs(o - b) for o, b in zip(old, backend)) > 1e-6
+    # and the duplicate is not a no-op: dropping it moves the backend
+    plain, _m = _engine_roi(edges=EDGES)
+    assert max(abs(a - b) for a, b in zip(plain, backend)) > 1e-6
+
+
+# ---------------------------------------------------------------- camp / party tokens
+def test_empty_or_multichar_tokens_are_neither_camp_nor_party():
+    eng, stance, adj, party = _desk_inputs()
+    base = DESK_ROI(eng, stance, TIERNAME, adj, party)
+    # a '' / 'DR' party token used to satisfy `pu in 'DR'` (substring) and score as co-partisan
+    for token in ('', 'DR'):
+        odd = DESK_ROI(eng, stance, TIERNAME, adj, [token] * len(NAMES))
+        neutral = DESK_ROI(eng, stance, TIERNAME, adj, ['?'] * len(NAMES))
+        assert odd == neutral, token
+    assert DESK_ROI(eng, stance, TIERNAME, adj, ['?'] * len(NAMES)) != base           # party does matter here
+    # a '' tier on a neighbour used to be 'pro' (`'' in 'CFA'`); it must equal a no-evidence '-' neighbour
+    rows = [list(row) for row in stance]
+    other = [list(row) for row in stance]
+    for row in rows: row[0] = ''
+    for row in other: row[0] = '-'
+    assert DESK_ROI(eng, rows, TIERNAME, adj, party) == DESK_ROI(eng, other, TIERNAME, adj, party)
+
+
+def test_template_camp_and_align_treat_empty_and_undefined_as_neutral():
+    if not NODE:
+        pytest.skip(NODE_SKIP)
+    source = _source(DASH_TPL)
+    camp = next(line for line in source.splitlines() if line.startswith('const CAMP='))
+    align = next(line for line in source.splitlines() if line.startswith('function align('))
+    script = ('const K={SRCPRO:1.7,SRCANTI:0.5};let PTY=[];\n' + camp + '\n' + align + '\n' +
+              'const out={camp:["C","F","A","O","S","K","T","H","-","","CF",undefined].map(CAMP),'
+              'align:[["D","D"],["D","R"],["R","D"],["I","D"],["","D"],["",""],["DR","DR"],[undefined,undefined]]'
+              '.map(([a,b])=>{PTY=[a,b];return align(0,1);})};console.log(JSON.stringify(out));')
+    result = subprocess.run([NODE, '-e', script], capture_output=True, text=True, encoding='utf-8')
+    assert result.returncode == 0, result.stderr
+    out = json.loads(result.stdout)
+    assert out['camp'] == ['pro', 'pro', 'pro', 'anti', 'anti', 'anti', 'neu', 'neu', 'neu', 'neu', 'neu', 'neu']
+    assert out['align'] == [1.7, 0.5, 0.5, 1, 1, 1, 1, 1]
+
+
+# ---------------------------------------------------------------- flip / coal thousands
+def test_flip_coal_and_overall_thousands_keep_the_dollars():
+    flip = {'a': 10500, 'b': 10000, 'c': 25500}
+    coal = {'a': 500, 'b': 3000, 'c': 1234}
+    assert {k: ENCODE(v) for k, v in flip.items()} == {'a': 10.5, 'b': 10, 'c': 25.5}
+    assert {k: ENCODE(v) for k, v in coal.items()} == {'a': 0.5, 'b': 3, 'c': 1.234}
+    assert round(10500 / 1000) == 10 and round(500 / 1000) == 0                # the old half-even loss
+    # Overall layer = sum over issues, encoded once from the dollar sum (not a sum of rounded thousands)
+    per_issue = [10500, 10500, 500]
+    assert ENCODE(sum(per_issue)) == 21.5 and sum(round(v / 1000) for v in per_issue) == 20
+    # the template's "$Nk" formatting prints exact thousands and no float noise
+    if NODE:
+        source = _source(DASH_TPL)
+        kfmt = next(line for line in source.splitlines() if line.startswith('function kfmt('))
+        script = kfmt + '\nconsole.log(JSON.stringify([10,10.5,0.5,1.234,0.30000000000000004].map(kfmt)));'
+        result = subprocess.run([NODE, '-e', script], capture_output=True, text=True, encoding='utf-8')
+        assert result.returncode == 0, result.stderr
+        assert json.loads(result.stdout) == ['10', '10.5', '0.5', '1.234', '0.3']
+
+
+def test_template_self_check_tolerance_is_tight_and_skips_a_zero_reference():
+    if not NODE:
+        pytest.skip(NODE_SKIP)
+    source = _source(DASH_TPL)
+    start = source.index('const t=flipModel(issue,baseTiers(issue),EG.cu,EG.ind).total,ok=')
+    expression = source[start:source.index(';', start)].split('ok=', 1)[1]
+    script = ('const ok=(t,r)=>' + expression + ';console.log(JSON.stringify([ok(1.0,1.01),ok(1.0,1.05),ok(0.5,0.51),'
+              'ok(0.5,0.55),ok(10,10.09),ok(10,10.2)]));')
+    result = subprocess.run([NODE, '-e', script], capture_output=True, text=True, encoding='utf-8')
+    assert result.returncode == 0, result.stderr
+    # old rule max(0.2, 3%) passed 0.55 vs 0.5 and 1.05 vs 1.0; the new max(0.02, 1%) fails both
+    assert json.loads(result.stdout) == [True, False, True, False, True, False]
+    assert 'if(!r){' in source[source.index('function updateEngChk'):start]              # refflip 0 (Overall) still skipped
+
+
+# ---------------------------------------------------------------- empty / all-zero allocation
+def test_empty_or_all_zero_allocation_is_absent_so_the_fallback_runs(tmp_path):
+    load = _load_dashboard()
+    for pairs in ([], [[0, 0], [1, 0.0]]):
+        _doc, records, present = load(_dashboard(tmp_path, pairs))
+        assert present is False, pairs
+        assert all(rec['engine_allocation_dollars'] is None for rec in records.values())
+    _doc, records, present = load(_dashboard(tmp_path, [[0, 0], [1, 0.5]]))
+    assert present is True and records['Planned Five Hundred']['engine_allocation_dollars'] == 500.0
