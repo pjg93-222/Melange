@@ -1,6 +1,7 @@
 """The anchor snapshot builder (mentat/forecast/anchors): built against synthetic Mentat data with hand-computed expectations, asserted
 against the shared contract (schema, invariants, negative controls), plus read-only and refusal guarantees. A run against the real
-Mentat tree (ADDENDUM section F numbers) is opt-in: MENTAT_ANCHORS_REAL=1 (credit unions) or =all (banks too)."""
+Mentat tree (ADDENDUM section F numbers, less the non_giving receipts left out of the forecast by the 2026-10-01 ruling) is opt-in:
+MENTAT_ANCHORS_REAL=1 (credit unions) or =all (banks and property & casualty too)."""
 import copy
 import hashlib
 import json
@@ -89,6 +90,8 @@ class World:
         (15, '2025-2026', '2026-07-20', 'D', 'employee_original', 80000, 'S'),
     ]
 
+    NO_SOURCE = frozenset()          # sub_ids of FACTS that have no row in the pinned source database (unmatched in the chamber join)
+
     def _source_db(self):
         path = self.project / '.cache' / 'report-repairs' / 'banking-20260910' / 'data' / 'mentat.db'
         path.parent.mkdir(parents=True)
@@ -97,7 +100,8 @@ class World:
         db.execute('CREATE TABLE corporate_giving(sub_id INTEGER, recipient_committee_type TEXT, scraped_at TEXT, industry TEXT)')
         db.execute('CREATE TABLE api_work_progress(cycle INTEGER, fetched_complete INTEGER, stored_complete INTEGER)')
         for sub, _c, _d, _p, _s, _v, t in self.FACTS:
-            db.execute('INSERT INTO contributions VALUES (?,?,?,?)', (sub, t, '2026-07-01T00:00:00', 'Banking'))
+            if sub not in self.NO_SOURCE:
+                db.execute('INSERT INTO contributions VALUES (?,?,?,?)', (sub, t, '2026-07-01T00:00:00', 'Banking'))
         db.execute('INSERT INTO corporate_giving VALUES (8, "H", ?, "Banking")', (self.SCRAPED,))
         for fetched, stored in ((1, 1), (1, 0), (1, 0)):
             db.execute('INSERT INTO api_work_progress VALUES (2026, ?, ?)', (fetched, stored))
@@ -185,13 +189,16 @@ class BuilderTests(unittest.TestCase):
         self.world = World(self.tmp.name)
 
     # --- numbers ----------------------------------------------------------------------------------------------------------------
-    def test_general_giving_is_the_included_receipt_amount_net_of_adjustments(self):
+    def test_general_giving_is_the_included_receipt_amount_net_of_adjustments_without_non_giving(self):
         snap, _ = self.world.build()
         g = snap['industries']['commercial_banks']['general_giving']
-        # 2023-24: 1,000 + 2,000 + 500 + 1,500 + 9,999 + 100 - 50 + 25 (the zero-receipt fact is not an included receipt)
-        self.assertEqual(g['cycles'], {'2022': 700.0, '2024': 15074.0, '2026': 2800.0})
+        # 2023-24: 1,000 + 2,000 + 500 + 1,500 + 9,999 + 100 - 50 (the zero-receipt fact is not an included receipt; the $25 non_giving receipt is left out
+        # of the forecast by the 2026-10-01 ruling but stays in the split of the Analysis Amount)
+        self.assertEqual(g['cycles'], {'2022': 700.0, '2024': 15049.0, '2026': 2800.0})
         self.assertEqual(g['by_funding_source']['2024'], {'employee_original': 15049.0, 'non_giving': 25.0})
-        self.assertEqual(sum(g['by_funding_source']['2024'].values()), g['cycles']['2024'])
+        self.assertEqual(g['excluded_non_giving'], {'2022': 0.0, '2024': 25.0, '2026': 0.0})
+        self.assertEqual(g['excluded_funding_sources'], ['non_giving'])
+        self.assertEqual(g['cycles']['2024'] + g['excluded_non_giving']['2024'], sum(g['by_funding_source']['2024'].values()))
 
     def test_observed_cuts_are_cumulative_month_ends_and_stop_at_the_coverage_end(self):
         snap, _ = self.world.build()
@@ -224,7 +231,8 @@ class BuilderTests(unittest.TestCase):
     def test_candidate_receipts_split_by_committee_type_and_party(self):
         snap, _ = self.world.build()
         c = snap['industries']['commercial_banks']['candidate_receipts']
-        self.assertEqual(c['cycles']['2024']['House'], {'D': 1000.0 - 50.0, 'R': 2000.0, 'other': 25.0})     # adjustment nets; other party kept apart
+        self.assertEqual(c['cycles']['2024']['House'], {'D': 1000.0 - 50.0, 'R': 2000.0, 'other': 0.0})      # adjustment nets; the $25 other-party receipt is non_giving: left out
+        self.assertEqual(c['excluded_non_giving']['2024']['House'], {'D': 0.0, 'R': 0.0, 'other': 25.0})     # ... and reported
         self.assertEqual(c['cycles']['2024']['Senate'], {'D': 500.0, 'R': 1500.0, 'other': 0.0})
         self.assertEqual(c['cycles']['2022']['Senate'], {'D': 0.0, 'R': 700.0, 'other': 0.0})             # no House row in 2022: only the chambers with rows exist
         last = c['observed'][-1]
@@ -311,16 +319,43 @@ class BuilderTests(unittest.TestCase):
         self.assertIn('sector_spend.csv was not found', lda['reason'])
         self.assertEqual(bga.validate_snapshot(snap), [])
 
+    RULED = {'general_giving': {'excluded_funding_sources': ['non_giving']}, 'candidate_receipts': {'excluded_funding_sources': ['non_giving']}}   # on the 2026-10-01 basis
+
     def test_a_partial_build_keeps_the_other_industries_of_the_published_snapshot(self):
-        old = {'schema_version': 1, 'kind': 'giving-anchors', 'industries': {'a': {'v': 'old a'}, 'b': {'v': 'old b'}}, 'unavailable': {'c': 'no index', 'b': 'stale reason'}}
+        old = {'schema_version': 1, 'kind': 'giving-anchors', 'industries': {'a': {'v': 'old a', **self.RULED}, 'b': {'v': 'old b'}},
+               'unavailable': {'c': 'no index', 'b': 'stale reason'}}
         new = {'schema_version': 1, 'kind': 'giving-anchors', 'industries': {'b': {'v': 'new b'}}, 'unavailable': {'d': 'new reason'}}
         with tempfile.TemporaryDirectory() as out:
             path = Path(out) / 'published.json'
             path.write_text(json.dumps(old))
             merged = bga.merge_with_published(new, path, ['b', 'd'])
-            self.assertEqual(merged['industries'], {'a': {'v': 'old a'}, 'b': {'v': 'new b'}})
+            self.assertEqual(merged['industries'], {'a': {'v': 'old a', **self.RULED}, 'b': {'v': 'new b'}})
             self.assertEqual(merged['unavailable'], {'c': 'no index', 'd': 'new reason'})
             self.assertEqual(bga.merge_with_published(new, Path(out) / 'absent.json', ['b']), new)       # nothing published yet: the partial build stands alone
+
+    def test_a_partial_build_does_not_mix_in_anchors_built_under_another_exclusion_rule(self):
+        def named(general, candidate):
+            return {'general_giving': {'excluded_funding_sources': general}, 'candidate_receipts': {'excluded_funding_sources': candidate}}
+        elsewhere = {'before_the_rule': {'v': 'no list at all', 'general_giving': {'cycles': {}}, 'candidate_receipts': {'cycles': {}}},
+                     'empty_list': {'v': 'names no source', **named([], [])},
+                     'another_bucket': {'v': 'left out another bucket', **named(['pac_activity'], ['pac_activity'])},
+                     'general_only': {'v': 'the candidate block predates the rule', 'general_giving': {'excluded_funding_sources': ['non_giving']}, 'candidate_receipts': {'cycles': {}}},
+                     'candidate_differs': {'v': 'the candidate block names another rule', **named(['non_giving'], [])},
+                     'not_a_list': {'v': 'a string, not a list', **named('non_giving', 'non_giving')}}
+        old = {'schema_version': 1, 'kind': 'giving-anchors', 'unavailable': {}, 'industries': {'same_rule': {'v': 'built under the rule', **self.RULED}, **elsewhere, 'redone': {'v': 'old'}}}
+        new = {'schema_version': 1, 'kind': 'giving-anchors', 'industries': {'redone': {'v': 'rebuilt', **self.RULED}}, 'unavailable': {}}
+        with tempfile.TemporaryDirectory() as out:
+            path = Path(out) / 'published.json'
+            path.write_text(json.dumps(old))
+            merged = bga.merge_with_published(new, path, ['redone'])
+            self.assertEqual(sorted(merged['industries']), ['redone', 'same_rule'])               # only an industry built under THIS rule is carried over ...
+            self.assertEqual(merged['industries']['redone']['v'], 'rebuilt')
+            self.assertEqual(merged['unavailable'], {k: bga.OTHER_RULE_REASON for k in elsewhere})   # ... the others are refused with the reason until they are rebuilt
+            self.assertIn('different exclusion rule', bga.OTHER_RULE_REASON)
+            with patch.object(ms, 'FORECAST_EXCLUDED_FUNDING_SOURCES', frozenset()):                # the comparison is with the CURRENT rule: now nothing is left out
+                merged = bga.merge_with_published(new, path, ['redone'])
+            self.assertEqual(sorted(merged['industries']), ['empty_list', 'redone'])
+            self.assertIn('same_rule', merged['unavailable'])
 
     def test_a_partial_build_does_not_drop_an_industry_reported_unavailable_by_the_full_build(self):
         with tempfile.TemporaryDirectory() as out, patch.dict(os.environ, {'ANCHORS_GLASSBOX_DIR': str(Path(out) / 'gb')}):
@@ -450,6 +485,241 @@ class BuilderTests(unittest.TestCase):
         self.assertEqual(snap['industries']['commercial_banks']['general_giving']['status'], 'ready')
 
 
+class ExclusionWorld(World):
+    """The World plus non_giving receipts in every place the forecast sums money, and receipts that must keep counting.
+    NO_SOURCE ids have no row in the pinned source database, so they are unmatched in the chamber join."""
+    FACTS = World.FACTS + [
+        (16, '2023-2024', '2024-10-10', 'D', 'non_giving', 12000, 'S'),          # anchor cycle, Senate D: left out of the 2024 Senate base
+        (17, '2023-2024', '2024-10-11', 'I', 'employee_original', 700, 'S'),     # an ordinary other-party receipt: still counts
+        (18, '2025-2026', '2025-04-20', 'D', 'non_giving', 4000, 'S'),           # open cycle, inside the observed window, Senate D
+        (19, '2025-2026', '2025-08-05', 'R', 'non_giving', 1500, 'Q'),           # open cycle, not a House / Senate committee: general giving only
+        (20, '2025-2026', '2026-07-25', 'R', 'non_giving', 900, 'H'),            # open cycle, after the coverage end (2026-06-30)
+        (23, '2025-2026', '2026-02-02', 'D', 'employee_original', 1100, 'H'),    # no source row: counted, outside the chamber split
+        (24, '2025-2026', '2026-02-03', 'D', 'non_giving', 1300, 'H'),           # no source row and non_giving: counted nowhere
+        (25, '2019-2020', '2020-05-05', 'D', 'non_giving', 5000, 'H'),           # a cycle whose only receipt is non_giving: its entries stay, at zero
+    ]
+    NO_SOURCE = frozenset({23, 24})
+
+
+class ControlWorld(ExclusionWorld):
+    """ExclusionWorld without its non_giving receipts: the forecast basis of the two must be identical."""
+    FACTS = [f for f in ExclusionWorld.FACTS if f[4] != 'non_giving']
+
+
+class ExclusionTests(unittest.TestCase):
+    """Owner ruling 2026-10-01 (D4, option b): receipts the accounting engine buckets as non_giving are left out of the forecast's general-giving levels,
+    observed cuts and employee candidate bases (in the forecast only), and the amounts left out are reported."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.world = ExclusionWorld(self.tmp.name)
+        self.snap, _ = self.world.build()
+        self.ind = self.snap['industries']['commercial_banks']
+
+    def cut(self, block, through):
+        return next(c for c in block['observed'] if c['through'] == through)
+
+    def test_general_giving_levels_leave_out_non_giving_and_say_what_was_left_out(self):
+        g = self.ind['general_giving']
+        # 2024: 15,049 ordinary + 7 other-party; the $25 and $120 non_giving receipts are left out. 2026: 2,800 + 11 (a receipt with no source row still counts).
+        # 2020: its only receipt is non_giving, so the cycle keeps its entry at zero.
+        self.assertEqual(g['cycles'], {'2020': 0.0, '2022': 700.0, '2024': 15056.0, '2026': 2811.0})
+        self.assertEqual(g['excluded_non_giving'], {'2020': 50.0, '2022': 0.0, '2024': 145.0, '2026': 77.0})
+        self.assertEqual(g['excluded_funding_sources'], ['non_giving'])
+        self.assertEqual(g['by_funding_source']['2024'], {'employee_original': 15056.0, 'non_giving': 145.0})     # the split of the Analysis Amount stays complete
+        self.assertEqual(g['by_funding_source']['2026'], {'employee_original': 2811.0, 'non_giving': 77.0})
+        for cycle, level in g['cycles'].items():
+            self.assertEqual(round(level + g['excluded_non_giving'][cycle], 2), round(sum(g['by_funding_source'].get(cycle, {}).values()), 2))
+
+    def test_observed_cuts_leave_out_non_giving_inside_the_window_and_after_it(self):
+        g = self.ind['general_giving']
+        by = {c['through']: c['amount'] for c in g['observed']}
+        self.assertEqual(by['2025-03-31'], 300.0)
+        self.assertEqual(by['2025-04-30'], 300.0)        # the $40 non_giving receipt of 2025-04-20 is not observed
+        self.assertEqual(by['2025-08-31'], 300.0)        # nor the $15 one of 2025-08-05 (not a candidate committee, still left out of general giving)
+        self.assertEqual(by['2025-09-30'], 700.0)
+        self.assertEqual(by['2026-01-31'], 1300.0)
+        self.assertEqual(by['2026-02-28'], 1311.0)       # the $11 receipt without a source row counts; the $13 non_giving one beside it does not
+        self.assertEqual(by['2026-06-30'], 2011.0)
+        # the open cycle holds every counted row to date: observed + what is dated after the coverage end ($800; the $9 non_giving one is not part of it)
+        self.assertEqual(g['cycles']['2026'], by['2026-06-30'] + 800.0)
+        self.assertTrue(any('dated after the coverage end ($800.00)' in f for f in self.ind['coverage']['flags']))
+
+    def test_candidate_bases_leave_out_non_giving_and_say_what_was_left_out(self):
+        c = self.ind['candidate_receipts']
+        self.assertEqual(c['cycles']['2024']['House'], {'D': 950.0, 'R': 2000.0, 'other': 0.0})
+        self.assertEqual(c['cycles']['2024']['Senate'], {'D': 500.0, 'R': 1500.0, 'other': 7.0})              # the ordinary other-party receipt counts, the $120 D one does not
+        self.assertEqual(c['excluded_non_giving']['2024'], {'House': {'D': 0.0, 'R': 0.0, 'other': 25.0}, 'Senate': {'D': 120.0, 'R': 0.0, 'other': 0.0}})
+        self.assertEqual(c['cycles']['2026'], {'House': {'D': 1000.0, 'R': 400.0, 'other': 0.0}, 'Senate': {'D': 800.0, 'R': 600.0, 'other': 0.0}})
+        self.assertEqual(c['excluded_non_giving']['2026'], {'House': {'D': 0.0, 'R': 9.0, 'other': 0.0}, 'Senate': {'D': 40.0, 'R': 0.0, 'other': 0.0}})
+        self.assertEqual(c['excluded_funding_sources'], ['non_giving'])
+        self.assertEqual(self.cut(c, '2025-04-30')['Senate'], {'D': 0.0, 'R': 0.0, 'other': 0.0})             # the non_giving Senate receipt of 2025-04-20 is not observed
+        self.assertEqual(self.cut(c, '2026-06-30')['House'], {'D': 1000.0, 'R': 400.0, 'other': 0.0})         # the July non_giving House receipt is after the coverage end
+        self.assertEqual(self.cut(c, '2026-06-30')['Senate'], {'D': 0.0, 'R': 600.0, 'other': 0.0})
+        # a cycle whose only receipt is non_giving keeps its entry (zeros), flagged thin, so a consumer reads "no giving" rather than "no data"
+        self.assertEqual(c['cycles']['2020'], {'House': {'D': 0.0, 'R': 0.0, 'other': 0.0}, 'Senate': {'D': 0.0, 'R': 0.0, 'other': 0.0}})
+        self.assertEqual(c['excluded_non_giving']['2020']['House'], {'D': 50.0, 'R': 0.0, 'other': 0.0})
+        self.assertEqual(c['thin_base']['2020'], {'House': True, 'Senate': True})
+
+    def test_the_forecast_basis_is_identical_to_a_world_without_the_non_giving_receipts(self):
+        with tempfile.TemporaryDirectory() as other:
+            control, _ = ControlWorld(other).build()
+        ctl = control['industries']['commercial_banks']
+
+        def without_2020(per_cycle):          # the all-non_giving cycle exists only in the world that has those receipts
+            return {cycle: value for cycle, value in per_cycle.items() if cycle != '2020'}
+        self.assertEqual(without_2020(self.ind['general_giving']['cycles']), ctl['general_giving']['cycles'])
+        self.assertEqual(self.ind['general_giving']['observed'], ctl['general_giving']['observed'])
+        self.assertEqual(without_2020(self.ind['candidate_receipts']['cycles']), ctl['candidate_receipts']['cycles'])
+        self.assertEqual(self.ind['candidate_receipts']['observed'], ctl['candidate_receipts']['observed'])
+        self.assertEqual(without_2020(self.ind['candidate_receipts']['thin_base']), ctl['candidate_receipts']['thin_base'])
+        self.assertEqual(ctl['general_giving']['excluded_non_giving'], {'2022': 0.0, '2024': 0.0, '2026': 0.0})     # nothing left out: nothing to report, no flag either
+        self.assertFalse(any('Excluded from the forecast' in f for f in ctl['flags']))
+
+    def test_the_flag_says_the_amounts_are_excluded_from_the_forecast_per_cycle(self):
+        flag = next(f for f in self.ind['flags'] if f.startswith('Excluded from the forecast (owner ruling 2026-10-01)'))
+        self.assertIn("receipts Mentat's accounting engine marks non-giving - FEC-reported interest, refunds, insurance claims and loans - ", flag)
+        self.assertIn('$50.00 in 2019-2020; $145.00 in 2023-2024; $77.00 in 2025-2026 to date', flag)
+        self.assertIn("They stay in the published workbook's Analysis Amount", flag)
+        self.assertFalse(any('stay inside the Analysis Amount' in f or 'reported, not changed' in f for f in self.ind['flags']))
+        self.assertIn('1 included facts ($11.00) have no source row', ' '.join(self.ind['flags']))        # only the counted unmatched receipt: the $13 non_giving one is not counted
+
+    def test_the_manifest_check_still_compares_the_full_analysis_amount(self):
+        cuts = fec_pas2.month_ends(2025, '2026-06-30')
+        agg = ms.index_aggregates(self.world.index, self.world.source_db, 2026, cuts)
+        db = ms.ro_connect(self.world.index)
+        try:
+            manifest = json.loads(db.execute("SELECT value FROM metadata WHERE key='manifest'").fetchone()[0])
+        finally:
+            db.close()
+        self.assertEqual(agg['analysis_cycles'], {k.split('-')[-1]: v for k, v in manifest['receipt_cycles'].items()})
+        for cycle, total in agg['analysis_cycles'].items():
+            self.assertEqual(agg['cycles'][cycle] + agg['excluded'][cycle], total)           # counted + left out = the published Analysis Amount, in exact cents
+        self.assertEqual(agg['excluded'], {'2020': 5000, '2022': 0, '2024': 14500, '2026': 7700})
+
+    def test_a_tampered_index_is_refused_even_when_only_a_non_giving_receipt_changes(self):
+        """The trust check compares the index with its own manifest on the FULL Analysis Amount (counted + left out), so a change confined to a receipt the
+        forecast leaves out is caught like any other, and so is a manifest that no longer matches its index."""
+        def edit_index(world, sql):
+            db = sqlite3.connect(world.index)                      # a writable handle on this test's own copy of the index
+            try:
+                db.execute(sql)
+                db.commit()
+            finally:
+                db.close()
+
+        def edit_manifest(world, delta):
+            db = sqlite3.connect(world.index)
+            try:
+                manifest = json.loads(db.execute("SELECT value FROM metadata WHERE key='manifest'").fetchone()[0])
+                manifest['receipt_cycles']['2023-2024'] += delta
+                db.execute("UPDATE metadata SET value=? WHERE key='manifest'", (json.dumps(manifest),))
+                db.commit()
+            finally:
+                db.close()
+        cases = {'a non_giving receipt +1 cent (sub_id 8)': lambda w: edit_index(w, "UPDATE facts SET receipt_cents = receipt_cents + 1 WHERE source_id = '8'"),
+                 'a non_giving receipt deleted (sub_id 8)': lambda w: edit_index(w, "DELETE FROM facts WHERE source_id = '8'"),
+                 'an ordinary receipt +1 cent (sub_id 1)': lambda w: edit_index(w, "UPDATE facts SET receipt_cents = receipt_cents + 1 WHERE source_id = '1'"),
+                 'the manifest total +1 cent': lambda w: edit_manifest(w, 1)}
+        for label, tamper in cases.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as tmp:
+                world = ExclusionWorld(tmp)
+                tamper(world)
+                snap, _ = world.build()
+                self.assertEqual(snap['industries'], {})
+                self.assertIn('not trustworthy', snap['unavailable']['commercial_banks'])
+        with tempfile.TemporaryDirectory() as tmp:                 # control: the same world, untouched, is trusted
+            snap, _ = ExclusionWorld(tmp).build()
+            self.assertIn('commercial_banks', snap['industries'])
+
+    def test_the_contract_wants_both_blocks_to_report_the_exclusion_completely(self):
+        def problems(edit):
+            doc = copy.deepcopy(self.snap)
+            edit(doc['industries']['commercial_banks'])
+            return contract.validate_kind(doc, 'anchors') or contract.check_anchor_invariants(doc)
+        self.assertEqual(problems(lambda i: None), [])
+        # a block that names what it left out but not the amounts (or the reverse) is refused, in either block
+        self.assertTrue(any('excluded_funding_sources is reported without excluded_non_giving' in p for p in problems(lambda i: i['general_giving'].pop('excluded_non_giving'))))
+        self.assertTrue(any('excluded_non_giving is reported without excluded_funding_sources' in p for p in problems(lambda i: i['general_giving'].pop('excluded_funding_sources'))))
+        self.assertTrue(any('candidate_receipts: excluded_funding_sources is reported without' in p for p in problems(lambda i: i['candidate_receipts'].pop('excluded_non_giving'))))
+        # the two blocks must agree on whether the exclusion is reported
+        self.assertTrue(any('must both report' in p for p in problems(lambda i: [i['candidate_receipts'].pop(k) for k in ('excluded_funding_sources', 'excluded_non_giving')])))
+        self.assertTrue(any('must both report' in p for p in problems(lambda i: [i['general_giving'].pop(k) for k in ('excluded_funding_sources', 'excluded_non_giving')])))
+        # the candidate block reports one entry per candidate cycle, and the same excluded sources as the general-giving block
+        self.assertTrue(any('its cycles differ from the candidate cycles' in p for p in problems(lambda i: i['candidate_receipts']['excluded_non_giving'].pop('2022'))))
+        self.assertTrue(any('its cycles differ from the candidate cycles' in p for p in problems(lambda i: i['candidate_receipts']['excluded_non_giving'].update({'1999': i['candidate_receipts']['excluded_non_giving']['2022']}))))
+        self.assertTrue(any('differs from general_giving.excluded_funding_sources' in p for p in problems(lambda i: i['candidate_receipts'].update(excluded_funding_sources=[]))))
+
+    def test_the_stored_label_and_the_module_docstring_describe_the_exclusion(self):
+        label = self.ind['general_giving']['label']
+        self.assertIn("all funding sources except those Mentat's accounting engine marks non-giving", label)
+        self.assertNotIn('without the receipts', label)            # it used to say "all funding sources ... without the receipts ...": self-contradictory
+        self.assertNotIn('all channels', bga.__doc__)              # PAC measure (2) is the Analysis Amount LESS the non_giving receipts, not "all channels"
+        self.assertIn('less the non_giving receipts', bga.__doc__)
+
+    def test_the_rule_is_one_named_constant_that_drives_every_sum(self):
+        self.assertEqual(ms.FORECAST_EXCLUDED_FUNDING_SOURCES, frozenset({'non_giving'}))
+        with patch.object(ms, 'FORECAST_EXCLUDED_FUNDING_SOURCES', frozenset()):                 # nothing excluded: every receipt counts again (the pre-ruling basis)
+            snap, _ = self.world.build()
+        ind = snap['industries']['commercial_banks']
+        self.assertEqual(ind['general_giving']['cycles'], {'2020': 50.0, '2022': 700.0, '2024': 15201.0, '2026': 2888.0})
+        self.assertEqual(ind['general_giving']['excluded_funding_sources'], [])
+        self.assertEqual(ind['general_giving']['excluded_non_giving'], {'2020': 0.0, '2022': 0.0, '2024': 0.0, '2026': 0.0})
+        self.assertEqual(self.cut(ind['general_giving'], '2026-06-30')['amount'], 2079.0)         # 2,011 + the $40, $15 and $13 non_giving receipts inside the window
+        self.assertEqual(ind['candidate_receipts']['cycles']['2024']['Senate']['D'], 620.0)
+        self.assertEqual(ind['candidate_receipts']['cycles']['2024']['House']['other'], 25.0)
+        self.assertEqual(self.cut(ind['candidate_receipts'], '2025-04-30')['Senate']['D'], 40.0)
+        self.assertTrue(any('dated after the coverage end ($809.00)' in f for f in ind['coverage']['flags']))
+        self.assertFalse(any('Excluded from the forecast' in f for f in ind['flags']))
+
+    def test_exactly_one_condition_holds_for_every_receipt(self):
+        db = sqlite3.connect(':memory:')
+        self.addCleanup(db.close)
+        db.execute('CREATE TABLE f(funding_source TEXT, receipt_cents INTEGER)')
+        db.executemany('INSERT INTO f VALUES (?, ?)', [(None, 1), ('', 2), ('non_giving', 4), ('employee_original', 8), ("it's", 16)])
+
+        def sums():
+            counted, excluded = ms.forecast_conditions('f')
+            return [db.execute(f'SELECT COALESCE(SUM(receipt_cents), 0) FROM f WHERE {cond}').fetchone()[0] for cond in (counted, excluded)]
+        self.assertEqual(sums(), [27, 4])                                                        # a NULL or empty source counts; only the named bucket is left out
+        with patch.object(ms, 'FORECAST_EXCLUDED_FUNDING_SOURCES', frozenset({"it's", 'non_giving'})):
+            self.assertEqual(sums(), [11, 20])                                                   # names are quoted, not interpolated raw
+        with patch.object(ms, 'FORECAST_EXCLUDED_FUNDING_SOURCES', frozenset()):
+            self.assertEqual(sums(), [31, 0])
+
+    def test_the_snapshot_validates_and_its_exclusion_adds_up(self):
+        self.assertEqual(contract.validate_kind(self.snap, 'anchors'), [])
+        self.assertEqual(contract.check_anchor_invariants(self.snap), [])
+        legacy = copy.deepcopy(self.snap)                                                        # a snapshot from before the ruling carries none of the new fields
+        for block in ('general_giving', 'candidate_receipts'):
+            for ind in legacy['industries'].values():
+                del ind[block]['excluded_funding_sources'], ind[block]['excluded_non_giving']
+        self.assertEqual(contract.validate_kind(legacy, 'anchors'), [])
+        self.assertEqual(contract.check_anchor_invariants(legacy), [])
+
+        def problems(edit):
+            doc = copy.deepcopy(self.snap)
+            edit(doc['industries']['commercial_banks']['general_giving'])
+            return contract.validate_kind(doc, 'anchors') or contract.check_anchor_invariants(doc)
+        self.assertTrue(any('excluded_non_giving' in p for p in problems(lambda g: g['excluded_non_giving'].update({'2024': g['excluded_non_giving']['2024'] + 1}))))
+        self.assertTrue(any('cycles + excluded_non_giving' in p for p in problems(lambda g: g['cycles'].update({'2024': g['cycles']['2024'] + 1}))))
+        self.assertTrue(any('cycles + excluded_non_giving' in p for p in problems(lambda g: g['by_funding_source']['2024'].update({'non_giving': 0.0}))))
+        self.assertTrue(problems(lambda g: g.update(excluded_non_giving=[1.0])))                  # typed: a per-cycle object of numbers
+        self.assertTrue(problems(lambda g: g.update(excluded_funding_sources='non_giving')))      # typed: a list of names
+
+    def test_the_full_build_passes_the_receipt_totals_check_and_writes_both_files(self):
+        with tempfile.TemporaryDirectory() as out, patch.dict(os.environ, {'ANCHORS_GLASSBOX_DIR': str(Path(out) / 'gb')}):
+            registry_path = Path(out) / 'registry.json'
+            registry_path.write_text(json.dumps(self.world.registry))
+            final, receipt, snapshot = bga.run_build(self.world.project, Path(out) / 'state', None, registry_path, self.world.fec,
+                                                     self.world.base / 'sector_spend.csv', self.world.base / '00_controls.xlsx', self.world.report)
+            self.assertEqual(list(snapshot['industries']), ['commercial_banks'])            # not refused as "index not trustworthy" although levels differ from the manifest
+            self.assertEqual(sorted(p.name for p in final.parent.iterdir()), sorted([bga.RECEIPT_NAME, bga.SNAPSHOT_NAME]))
+            self.assertEqual(receipt['snapshot_sha256'], hashlib.sha256(final.read_bytes()).hexdigest())
+            self.assertEqual(snapshot['industries']['commercial_banks']['general_giving']['excluded_non_giving']['2024'], 145.0)
+
+
 class PartsTests(unittest.TestCase):
     def test_an_undated_fec_row_is_in_the_cycle_total_and_in_no_observed_cut(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -509,7 +779,7 @@ class PartsTests(unittest.TestCase):
         self.assertIsNone(lda_mod.sector_levels(rows, 'missing'))
 
 
-@unittest.skipUnless(os.environ.get('MENTAT_ANCHORS_REAL'), 'set MENTAT_ANCHORS_REAL=1 (credit unions) or =all (banks too) to read the real Mentat tree')
+@unittest.skipUnless(os.environ.get('MENTAT_ANCHORS_REAL'), 'set MENTAT_ANCHORS_REAL=1 (credit unions) or =all (banks and property & casualty too) to read the real Mentat tree')
 class RealMentatTests(unittest.TestCase):
     """ADDENDUM section F, reproduced from the real published workbooks, indexes and FEC files (read-only)."""
     PROJECT = Path(os.environ.get('MENTAT_PROJECT_ROOT') or r'C:\Users\pgoff\Mentat\mentat')
@@ -519,24 +789,44 @@ class RealMentatTests(unittest.TestCase):
             _final, _receipt, snap = bga.run_build(self.PROJECT, Path(out) / 'state', [ident])
         return snap['industries'][ident]
 
-    def test_credit_unions_reproduce_section_f(self):
+    # Section F as published on 2026-09-30, less the receipts the accounting engine buckets as non_giving (owner ruling 2026-10-01, D4 option b). The amounts left out
+    # were measured separately from the index and the pinned source databases (credit unions: SchoolsFirst FCU's interest on Katie Porter's committee accounts).
+    def test_credit_unions_reproduce_section_f_without_non_giving(self):
         ind = self.build('credit_unions')
         self.assertEqual(ind['coverage']['coverage_end'], '2026-05-31')
-        self.assertEqual(ind['general_giving']['cycles'], {'2022': 369423.16, '2024': 779088.35, '2026': 273494.14})
-        self.assertEqual(ind['general_giving']['observed'][-1]['amount'], 272141.16)
+        self.assertEqual(ind['general_giving']['cycles'], {'2022': 258944.62, '2024': 620046.88, '2026': 270483.65})                 # section F: 369423.16 / 779088.35 / 273494.14
+        self.assertEqual(ind['general_giving']['excluded_non_giving'], {'2022': 110478.54, '2024': 159041.47, '2026': 3010.49})
+        self.assertEqual(ind['general_giving']['observed'][-1]['amount'], 269130.67)                                                  # section F: 272141.16
         house, senate = ind['candidate_receipts']['cycles']['2024']['House'], ind['candidate_receipts']['cycles']['2024']['Senate']
-        self.assertEqual((house['D'], house['R'], senate['D'], senate['R']), (30832.81, 24291.13, 176326.42, 16751.75))
+        self.assertEqual((house['D'], house['R'], senate['D'], senate['R']), (30832.81, 24291.13, 17284.95, 16751.75))               # section F Senate D: 176326.42
+        self.assertEqual(ind['candidate_receipts']['excluded_non_giving']['2024']['Senate']['D'], 159041.47)                          # all of it sits in the Senate employee D base
+        self.assertEqual(ind['candidate_receipts']['cycles']['2022']['House']['D'], 14421.13)                                         # section F: 124899.67
+        self.assertEqual(ind['candidate_receipts']['excluded_non_giving']['2022']['House']['D'], 110478.54)
+        self.assertEqual(ind['candidate_receipts']['thin_base']['2024'], {'House': True, 'Senate': True})                             # the Senate base was not thin while it held the interest
         self.assertEqual(ind['pac_to_candidates']['cycles']['2024']['to_house_senate'], 80800.0)
         self.assertEqual(ind['pac_to_candidates']['observed'][-1]['to_house_senate'], 54500.0)
 
     @unittest.skipUnless(os.environ.get('MENTAT_ANCHORS_REAL') == 'all', 'banks need the 861 MB join: MENTAT_ANCHORS_REAL=all')
-    def test_banks_reproduce_section_f(self):
+    def test_banks_reproduce_section_f_without_non_giving(self):
         ind = self.build('commercial_banks')
         self.assertEqual(ind['coverage']['coverage_end'], '2026-06-30')
-        self.assertEqual(ind['general_giving']['cycles']['2024'], 26107204.16)
-        self.assertEqual(ind['general_giving']['observed'][-1]['amount'], 11566804.77)
+        self.assertEqual(ind['general_giving']['cycles']['2022'], 16652458.77)
+        self.assertEqual(ind['general_giving']['cycles']['2024'], 25915482.79)                                                        # section F: 26107204.16
+        self.assertEqual(ind['general_giving']['excluded_non_giving'], {'2022': 0.0, '2024': 191721.37, '2026': 67940.35})
+        self.assertEqual(ind['general_giving']['observed'][-1]['amount'], 11498864.42)                                                # section F: 11566804.77
+        self.assertEqual(ind['candidate_receipts']['cycles']['2024']['Senate'], {'D': 751277.47, 'R': 795893.13, 'other': 36101.0})   # none of it reached a House / Senate committee
         self.assertEqual(ind['pac_to_candidates']['cycles']['2024']['to_house_senate'], 5692500.0)
         self.assertEqual(ind['pac_to_candidates']['observed'][-1]['to_house_senate'], 4673000.0)
+
+    @unittest.skipUnless(os.environ.get('MENTAT_ANCHORS_REAL') == 'all', 'property & casualty: MENTAT_ANCHORS_REAL=all')
+    def test_property_casualty_leaves_out_its_non_giving_receipts(self):
+        ind = self.build('property_casualty')
+        self.assertEqual(ind['general_giving']['cycles'], {'2022': 5156891.21, '2024': 7762490.48, '2026': 3532480.89})              # 5240339.66 / 7857445.42 / 3589580.51 before
+        self.assertEqual(ind['general_giving']['excluded_non_giving'], {'2022': 83448.45, '2024': 94954.94, '2026': 57099.62})
+        self.assertEqual(ind['general_giving']['observed'][-1]['amount'], 3532180.89)                                                 # 3589280.51 before
+        senate = ind['candidate_receipts']['cycles']['2024']['Senate']
+        self.assertEqual((senate['D'], senate['R'], senate['other']), (88516.96, 136741.02, 52.0))                                    # D was 159839.94: Progressive's claim payments to Fetterman for PA
+        self.assertEqual(ind['candidate_receipts']['excluded_non_giving']['2024']['Senate'], {'D': 71322.98, 'R': 4609.88, 'other': 5197.68})
 
 
 if __name__ == '__main__':

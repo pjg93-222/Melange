@@ -250,6 +250,34 @@ def check_anchor_invariants(snapshot, tolerance=0.011):
                 problems.append(tag + '.' + measure + '.observed: the last cut must be the coverage end')
             if any(not re.search(r'-(01|02|03|04|05|06|07|08|09|10|11|12)-\d\d$', d) for d in dates):
                 problems.append(tag + '.' + measure + '.observed: malformed cut date')
+        # Snapshots built from the 2026-10-01 ruling report what the forecast left out - the names (`excluded_funding_sources`) AND the amounts
+        # (`excluded_non_giving`) - in BOTH the general-giving and the candidate block; older snapshots carry none of it and are not checked.
+        general, candidates, reporting = ind['general_giving'], ind['candidate_receipts'], {}
+        for name, block in (('general_giving', general), ('candidate_receipts', candidates)):
+            if block['status'] != 'ready':
+                continue
+            present = [key for key in ('excluded_funding_sources', 'excluded_non_giving') if key in block]
+            reporting[name] = len(present) == 2
+            if len(present) == 1:
+                missing = 'excluded_non_giving' if present[0] == 'excluded_funding_sources' else 'excluded_funding_sources'
+                problems.append(tag + '.' + name + ': ' + present[0] + ' is reported without ' + missing + ' (a block that reports the exclusion reports both)')
+        if len(set(reporting.values())) > 1:
+            problems.append(tag + ': general_giving and candidate_receipts must both report the non_giving exclusion or neither')
+        if reporting.get('general_giving'):
+            left_out, split, dropped = general['excluded_non_giving'], general['by_funding_source'], set(general['excluded_funding_sources'])
+            for cyc in sorted(set(general['cycles']) | set(left_out) | set(split)):
+                parts = split.get(cyc, {})
+                if abs(general['cycles'].get(cyc, 0) + left_out.get(cyc, 0) - sum(parts.values())) > tolerance:
+                    problems.append(tag + '.general_giving.cycles.' + cyc + ': cycles + excluded_non_giving differs from the by_funding_source total')
+                if abs(left_out.get(cyc, 0) - sum(v for source, v in parts.items() if source in dropped)) > tolerance:
+                    problems.append(tag + '.general_giving.excluded_non_giving.' + cyc + ': differs from the excluded funding sources in by_funding_source')
+        if reporting.get('candidate_receipts'):
+            # The candidate amounts cannot be cross-checked against a by-source split (there is none), so check their shape: one entry per candidate cycle,
+            # and the same excluded sources as the general-giving block.
+            if set(candidates['excluded_non_giving']) != set(candidates['cycles']):
+                problems.append(tag + '.candidate_receipts.excluded_non_giving: its cycles differ from the candidate cycles')
+            if reporting.get('general_giving') and sorted(candidates['excluded_funding_sources']) != sorted(general['excluded_funding_sources']):
+                problems.append(tag + '.candidate_receipts.excluded_funding_sources: differs from general_giving.excluded_funding_sources')
         pac = ind['pac_to_candidates']
         if pac['committee_count'] != len(pac['committees']):
             problems.append(tag + '.pac_to_candidates: committee_count differs from the committee list')

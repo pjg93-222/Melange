@@ -356,7 +356,7 @@ def project(request):
 # ----------------------------------------------------------------------------------------------------------------------
 SLOPE_LABELS = {'R0': 'pooled slope', 'R1': 'industry-specific slope', 'R2': 'partially pooled slope'}
 PAC_MEASURES = (('pac_to_candidates', 'Roster companies\' PACs: own giving to House and Senate candidates'),
-                ('general_giving', 'Mentat general giving (all channels)'))
+                ('general_giving', 'Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)'))
 SHARE_BASES = (('employee_candidate', 'Employees\' candidate giving'), ('pac_candidate', 'Roster PACs\' candidate giving'))
 LOBBY_SERIES = (('income_total', 'Outside-firm fees'), ('expenses_total', 'In-house expenses'))
 SUPPORTED_CONTRACT = dict(pac_measures={'pac_to_candidates', 'general_giving'}, share_bases={'employee_candidate', 'pac_candidate'},
@@ -510,6 +510,92 @@ def _anchors_status(b, offered):
                 built_at_utc=snapshot['built_at_utc'], industries=out)
 
 
+# --- owner waivers shown on the card ---------------------------------------------------------------------------------------------
+# The refit's hard backtest gate (G6) lets the owner waive one cell by name (mentat/forecast/refit/registry/gate_waivers.json). A waiver the registry
+# marks show_warning is disclosed on the forecast card. The registry says WHICH cell was waived, by whom, when and why, and records the error of the
+# calculator the refit was compared with (`measured`); the error of the model in force comes from the active bundle itself, so the card never states a
+# figure that is not the one being served, and a waiver whose degradation no longer stands is not shown. Display only: no gate, no projection and no
+# number of the model reads any of this.
+WAIVER_FILE = Path(__file__).resolve().parents[1] / 'forecast' / 'refit' / 'registry' / 'gate_waivers.json'
+WAIVER_SLACK = 1e-9                  # the refit's own G6 tolerance (RF_G6_SLACK): a difference below it is no degradation
+WAIVER_LABELS = {'control_House': 'House share', 'control_Senate': 'Senate share', 'pac': 'PAC giving', 'lobby': 'Lobbying'}
+
+
+def waiver_path():
+    override = os.environ.get('MENTAT_GIVING_WAIVERS', '').strip()
+    return Path(override) if override else WAIVER_FILE
+
+
+@lru_cache(maxsize=4)
+def _load_waivers(path, stamp, size):
+    """The registry's waiver entries (plain objects), or none when the file is unreadable or is not a registry: the catalog never fails on them."""
+    try:
+        with Path(path).open(encoding='utf-8-sig') as stream:
+            registry = json.load(stream)
+    except (OSError, ValueError, RecursionError):                      # a registry nested beyond the parser's recursion limit is unreadable like any other
+        return ()
+    entries = registry.get('waivers') if isinstance(registry, dict) else None
+    return tuple(w for w in entries if isinstance(w, dict)) if isinstance(entries, list) else ()
+
+
+def _waiver_text(value):
+    """A text field of a registry entry as the response carries it: a string, or None. Anything else (a number such as NaN, which Python's json reads but a
+    browser's JSON.parse rejects, or an object) never reaches the response."""
+    return value if isinstance(value, str) else None
+
+
+def _figure(value):
+    """A registry figure as a finite float, or None (a bool, text, NaN, an infinity, or an integer too large for a float is no figure)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    try:
+        number = float(value)
+    except OverflowError:
+        return None
+    return number if math.isfinite(number) else None
+
+
+def _share_error_in_force(b, term, industry):
+    """The active bundle's own leave-one-election-out error (pp) of the anchor its calculator uses for one share model x industry; None when it records none."""
+    entry = (b['share_models'].get(term) or {}).get('anchors', {}).get(industry)
+    try:
+        return _figure(entry['backtest'][entry['anchor']]['loeo_mae'])
+    except (TypeError, KeyError):
+        return None
+
+
+def _v2_waivers(b, offered):
+    """The waivers the card shows: registry entries for a G6 cell of an industry this console offers, with show_warning true, each beside the error of
+    the model in force. [] when the registry cannot be read."""
+    path = waiver_path()
+    try:
+        stat = path.stat()
+    except OSError:
+        return []
+    labels = {row['id']: row['label'] for row in offered}
+    shown = []
+    for w in _load_waivers(str(path), stat.st_mtime_ns, stat.st_size):
+        term, industry, cell = w.get('term'), w.get('industry'), w.get('cell')
+        if (w.get('show_warning') is not True or w.get('gate', 'G6') != 'G6' or not isinstance(industry, str) or industry not in labels
+                or not isinstance(term, str) or not isinstance(cell, str)):
+            continue                 # (a list or an object as the industry is not hashable: its type is checked before the membership test)
+        measured = w['measured'] if isinstance(w.get('measured'), dict) else {}
+        comparator = _figure(measured.get('comparator_value'))
+        in_force = _share_error_in_force(b, term, industry) if term in b['share_models'] else None
+        if comparator is not None and in_force is not None and in_force <= comparator + WAIVER_SLACK:
+            continue                 # the model in force is no longer worse than the calculator it was compared with: nothing is waived any more
+        ruled = w.get('date') if isinstance(w.get('date'), str) else None
+        text = WAIVER_LABELS.get(term, term) + ' gate waived by owner' + (' on ' + ruled if ruled else '')
+        if comparator is not None and in_force is not None:
+            text += ': backtest error %.3f -> %.3f pp' % (comparator, in_force)
+        shown.append(dict(gate='G6', cell=cell, term=term, model_id=term if term in b['share_models'] else None, industry=industry, industry_label=labels[industry],
+                          chamber=term.split('_', 1)[1] if term in ('control_House', 'control_Senate') else None,
+                          metric=_waiver_text(measured.get('metric')), unit=_waiver_text(measured.get('unit')), comparator_label=_waiver_text(measured.get('comparator')),
+                          comparator_value=comparator, published_value=in_force, owner=_waiver_text(w.get('owner')), date=ruled, reason=_waiver_text(w.get('reason')),
+                          show_warning=True, source=_waiver_text(measured.get('source')), display_text=text))
+    return shown
+
+
 def _catalog_v2(b, today):
     cycle = today.year + today.year % 2
     offered, not_offered = _v2_offered(b)
@@ -520,6 +606,8 @@ def _catalog_v2(b, today):
                 industry_slopes=b['industry_slopes'], validation_metrics=b['validation_metrics'], backtests=b['backtests'], sources=b['sources'],
                 saved_outlook=b['saved_outlook'], political_inputs=b['political_inputs'], anchor_contract=b['anchor_contract'],
                 interval_labels=b['interval_labels'], inference=b['inference'], validation=b['validation'], anchors=_anchors_status(b, offered),
+                # Owner waivers of the refit gates that the card shows (refit/registry/gate_waivers.json, show_warning true), each beside the model in force.
+                waivers=_v2_waivers(b, offered),
                 scope='Mentat levels for the industry\'s tracked companies (the published Mentat report scope); the models only supply the relationships. '
                       'Report company, donor-role and subindustry filters do not apply.',
                 interval_label=b['interval_labels']['coefficient'] + '; ' + b['interval_labels']['prediction'])
@@ -581,6 +669,85 @@ def _next_day(iso):
     return (date.fromisoformat(iso) + timedelta(days=1)).isoformat()
 
 
+# --- the predictive conditioned on the giving already observed -------------------------------------------------------------------
+# The full-cycle prediction interval is point x exp(+/- crit_df x scale) on the log scale: a scaled Student t with the anchored-step
+# degrees of freedom. Giving already observed is a fact, so the predictive of the full cycle is that distribution conditioned on
+# full >= observed (truncated at observed). Its quantiles never fall below observed and the remainder's never below zero; nothing about
+# the slopes, the anchors or the residual variance changes. Pure stdlib (the console has no scipy): the t CDF through the regularized
+# incomplete beta (continued fraction, modified Lentz) and the quantile by bisection.
+def _betacf(a, b, x):
+    tiny = 1e-300
+    qab, qap, qam = a + b, a + 1., a - 1.
+    c, d = 1., 1. - qab * x / qap
+    d = 1. / (d if abs(d) > tiny else tiny)
+    h = d
+    for m in range(1, 400):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1. + aa * d
+        d = 1. / (d if abs(d) > tiny else tiny)
+        c = 1. + aa / c
+        c = c if abs(c) > tiny else tiny
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1. + aa * d
+        d = 1. / (d if abs(d) > tiny else tiny)
+        c = 1. + aa / c
+        c = c if abs(c) > tiny else tiny
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.) < 1e-15:
+            break
+    return h
+
+
+def _betainc(a, b, x, y):
+    """Regularized incomplete beta I_x(a, b), with y = 1 - x passed exactly (no cancellation near either end)."""
+    if x <= 0.:
+        return 0.
+    if y <= 0.:
+        return 1.
+    front = math.exp(math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b) + a * math.log(x) + b * math.log(y))
+    return front * _betacf(a, b, x) / a if x < (a + 1.) / (a + b + 2.) else 1. - front * _betacf(b, a, y) / b
+
+
+def _t_upper(z, df):
+    """P(T_df > z)."""
+    tail = .5 * _betainc(df / 2., .5, df / (df + z * z), z * z / (df + z * z))
+    return tail if z >= 0 else 1. - tail
+
+
+def _t_upper_inverse(u, df):
+    """z with P(T_df > z) = u, 0 < u < 1 (bisection; the upper tail keeps tiny probabilities exact)."""
+    lo, hi = -1e4, 1e4
+    for _ in range(200):
+        mid = .5 * (lo + hi)
+        if _t_upper(mid, df) > u:
+            lo = mid
+        else:
+            hi = mid
+    return .5 * (lo + hi)
+
+
+def _given_observed(point, half, crit, df, observed):
+    """Quantiles (2.5%, 50%, 97.5%) of the full-cycle predictive conditioned on full >= observed, and of the remainder (full - observed),
+    for the interval point x exp(+/- half) whose half-width is crit x scale. None when the inputs cannot define it."""
+    if not (point > 0 and half > 0 and crit > 0 and df >= 1 and observed >= 0):
+        return None
+    scale = half / crit
+    above = 1. if observed == 0 else _t_upper((math.log(observed) - math.log(point)) / scale, df)     # P(full >= observed)
+    if not above > 1e-12:
+        return None
+    z = {k: _t_upper_inverse((1. - k) * above, df) for k in (.025, .5, .975)}
+    if any(abs(v) > 9e3 for v in z.values()):
+        return None
+    q = {k: point * math.exp(scale * v) for k, v in z.items()}
+    return dict(prob_full_below_observed=1. - above, cycle_given_observed_low=q[.025], cycle_given_observed_median=q[.5],
+                cycle_given_observed_high=q[.975], remaining_given_observed_low=q[.025] - observed,
+                remaining_given_observed_median=q[.5] - observed, remaining_given_observed_high=q[.975] - observed,
+                given_observed_kind='95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)')
+
+
 # --- PAC ------------------------------------------------------------------------------------------------------------------
 def _v2_pac(ctx, assumptions, cycle):
     b, ind = ctx['b'], ctx['industry']
@@ -625,6 +792,16 @@ def _v2_pac(ctx, assumptions, cycle):
                       cycle_coefficient_high=base * math.exp(point + coef_half), cycle_prediction_low=base * math.exp(point - pred_half),
                       cycle_prediction_high=base * math.exp(point + pred_half))
         measure.update(anchor_cycle_nominal=level, anchor_cycle_real_2025=base, **values)
+        # The residual variance of the interval comes from OpenSecrets PAC aggregates. Check it against this measure's OWN last observed step
+        # (Mentat cycle A-2 -> A, 2025 USD): a step far outside the stated interval means the interval is not supported for this measure.
+        row_p = block['cycles'].get(str(ctx['anchor_cycle'] - 2))
+        level_p = (row_p or {}).get('to_house_senate') if mid == 'pac_to_candidates' else row_p
+        mult_p = ctx['snap_cpi'].get(str(ctx['anchor_cycle'] - 2))
+        if level_p and level_p > 0 and level > 0 and mult_p:
+            own = math.log(base / (level_p * mult_p))
+            measure.update(own_last_step_log=own, own_last_step_sigma_ratio=own / math.sqrt(step['sigma2']))
+            if abs(own) > step['critical_95'] * math.sqrt(step['sigma2']):
+                measure['flags'].append('interval_not_supported_by_own_history')
         if mid == 'pac_to_candidates' and block['single_pac']:
             measure['flags'].append('single_pac_thin_base')
             measure['flag_text'] = 'One PAC (' + block['committees'][0]['company'] + '): a thin base, not the industry\'s PAC giving.'
@@ -642,6 +819,12 @@ def _v2_pac(ctx, assumptions, cycle):
                                **_remainder(values['projected_cycle_real_2025'],
                                             dict(remaining_coefficient_low=values['cycle_coefficient_low'], remaining_coefficient_high=values['cycle_coefficient_high'],
                                                  remaining_prediction_low=values['cycle_prediction_low'], remaining_prediction_high=values['cycle_prediction_high']), observed_real))
+                # The unconditional interval above ignores that `observed` is already given; the conditional one is what a display must draw.
+                given = _given_observed(values['projected_cycle_real_2025'], pred_half, step['critical_95'], step['df'], observed_real)
+                if given:
+                    measure.update(given)
+                    if values['projected_cycle_real_2025'] < observed_real:
+                        measure['flags'].append('observed_exceeds_unconditional_projection')
         out['measures'].append(measure)
     return out
 
@@ -677,6 +860,24 @@ def _v2_share_effect(m, ind_id, target, anchor):
         d_forecast = 0.
     return (sum(a * c for a, c in zip(delta, beta)) + focal * d_forecast, _quad(cov, delta) + focal_var * d_forecast ** 2, crit,
             focal * d_forecast, focal_var * d_forecast ** 2, missing)
+
+
+def _v2_share_terms(m, ind_id, target, anchor):
+    """{term: pp contribution} of the modelled change, from the same terms and coefficients _v2_share_effect sums (intercept and industry
+    terms cancel). Lets a display say WHICH input moved the share when the political input did not."""
+    row = m['slopes'].get(ind_id)
+    out = {}
+    if m['application'] == 'offset' and row is not None and m['offset'] is not None:
+        terms, beta = m['offset']['terms'], m['offset']['beta']
+        if target.get('Forecast') is not None:
+            out['Forecast'] = 100 * row['applied']['beta'] * (target['Forecast'] - anchor['Forecast'])
+    else:
+        terms, beta = m['terms'], m['beta']
+    for term, coef in zip(terms, beta):
+        if term == 'Intercept' or term.startswith('industry:') or target.get(term) is None:
+            continue
+        out[term] = out.get(term, 0.) + 100 * coef * (target[term] - anchor[term])
+    return out
 
 
 def _share_anchor(ctx, m, ind_id, cycle):
@@ -729,7 +930,7 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
     rule = row['applied']['rule'] if row else m['slope_rule']
     out = dict(status='needs_inputs', chamber=chamber, model_id=m['id'], anchor_cycle=a, steps=k, slope_rule=rule, slope_label=SLOPE_LABELS[rule],
                ordinary_p=(row['applied']['ordinary_p'] if row and m['application'] == 'offset' else m['ordinary_p'].get('Forecast')),
-               specification=m['specification'], n=m['n'], training_cycles=m['training_cycles'], bases=[], combined_reference=None,
+               specification=m['specification'], n=m['n'], training_cycles=m['training_cycles'], bases=[],
                anchor=anchor_id, anchor_label='Mentat ' + _period(a) + ' (' + SHARE_ANCHORS[anchor_id]['label'] + ')',
                anchor_reason=entry['reason'] if entry else None, anchor_backtest=copy.deepcopy(entry['backtest']) if entry else None)
     if not ind['capabilities']['control']:
@@ -760,10 +961,16 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
                forecast=forecast, baseline_forecast=at_anchor['Forecast'], expected_advantaged_party='R' if favored == 1 else 'D' if favored == -1 else 'Neither',
                materiality=[dict(threshold_pp=t, toward_expected_party_pp=directed if favored else None, point_meets=directed >= t if favored else None,
                                  ordinary_interval_meets=directed_low >= t if favored else None) for t in (1, 3, 5)])
+    out['change_by_term_pp'] = _v2_share_terms(m, ind['id'], target, at_anchor)
     hist = [r for r in m['history'] if r['industry'] == ind['id']]
     fitted = [('Forecast', forecast, [r['forecast'] for r in m['history']]), ('G_prior', prior, [r['prior_growth_pct'] for r in hist]),
               ('G_current', growth, [r['growth_pct'] for r in hist])]
     out['extrapolation'] = any(x is not None and (x < min(xs) - 1e-9 or x > max(xs) + 1e-9) for term, x, xs in fitted if term in m['terms'])
+    # Name each input outside the fitted range (values as entered: control as a probability, growth in %), so the flag says which and how far.
+    out['extrapolated_inputs'] = [dict(term=term, value=x, fitted_min=min(xs), fitted_max=max(xs), fitted_cycles=m['training_cycles'])
+                                  for term, x, xs in fitted if term in m['terms'] and x is not None and (x < min(xs) - 1e-9 or x > max(xs) + 1e-9)]
+    fitted_shares = [r['share'] for r in m['history']]
+    out['fitted_share_range'] = [min(fitted_shares), max(fitted_shares)]
     pred_half = _half(step['critical_95'], var + k * step['sigma2'])
     coef_half = crit * math.sqrt(max(0., var))
     wstatus, wreason = _window(ctx, cycle)
@@ -790,6 +997,11 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
         basis['prediction_outside_share_range'] = basis['cycle_prediction_low'] < 0 or basis['cycle_prediction_high'] > 1
         if basis['thin_base']:
             basis['flags'].append('thin_base')
+        # The pp change was estimated on whole-industry shares inside [min, max] of the fitted rows; a Mentat anchor share outside that range
+        # (e.g. a 0-9% R base) is an extrapolation of the share itself, which the linear change can push below 0 or above 100%.
+        basis['anchor_share_outside_fitted_range'] = not (min(fitted_shares) - 1e-9 <= share_a <= max(fitted_shares) + 1e-9)
+        if basis['anchor_share_outside_fitted_range']:
+            basis['flags'].append('anchor_share_outside_fitted_range')
         if not 0 <= raw <= 1:
             basis.update(status='outside_share_range', reason='These assumptions put the linear share estimate outside 0-100%. Revise the scenario; the result is not clipped.')
             continue
@@ -803,12 +1015,54 @@ def _v2_chamber(ctx, assumptions, cycle, chamber, prior, growth, pac):
             basis.update(remainder_status=wstatus, remainder_reason=wreason)
     elif wstatus:
         totals = _v2_basis_totals(ctx, pac, chamber)
+        remaining = _v2_basis_remaining(ctx, pac, chamber)
         for bid, basis in bases.items():
             if basis['status'] == 'ready':
                 basis.update(_v2_share_remainder(ctx, chamber, basis['projected_cycle_R_share'], totals.get(bid), bid, growth is not None))
-        comb = _v2_combined(ctx, chamber, bases, totals, effect)
-        out['combined_reference'] = comb
+                allocation = _v2_remaining_allocation(ctx, chamber, basis, remaining.get(bid), bid)
+                if allocation:
+                    basis['remaining_allocation'] = allocation
     return out
+
+
+def _v2_basis_remaining(ctx, pac, chamber):
+    """{basis id: remaining two-party candidate giving (2025 USD)} = the measure's remainder conditioned on the giving already observed
+    (median) x the anchor-cycle share of that measure that went to the chamber's two-party candidates (the ratio _v2_basis_totals applies to
+    the full cycle). Never negative, unlike projected total - observed."""
+    measures = {m['id']: m for m in pac.get('measures', []) if m['status'] == 'ready'}
+    a = str(ctx['anchor_cycle'])
+    out = {}
+    general, cand = measures.get('general_giving'), ctx['snap']['candidate_receipts']
+    general_level = ctx['snap']['general_giving']['cycles'].get(a)
+    cand_part = cand['cycles'].get(a, {}).get(chamber) if cand['status'] == 'ready' else None
+    if general and general_level and cand_part and general.get('remaining_given_observed_median') is not None:
+        out['employee_candidate'] = general['remaining_given_observed_median'] * (cand_part['D'] + cand_part['R']) / general_level
+    pac_measure, block = measures.get('pac_to_candidates'), ctx['snap']['pac_to_candidates']
+    pac_row = block['cycles'].get(a) if block['status'] == 'ready' else None
+    if pac_measure and pac_row and pac_row['to_house_senate'] and pac_measure.get('remaining_given_observed_median') is not None:
+        part = pac_row[chamber]
+        out['pac_candidate'] = pac_measure['remaining_given_observed_median'] * (part['D'] + part['R']) / pac_row['to_house_senate']
+    return out
+
+
+def _v2_remaining_allocation(ctx, chamber, basis, remaining_total, bid):
+    """The projected R share applied to the REMAINING two-party money: observed D / R are facts and are not re-estimated, so the remaining
+    split is the model's share itself and both remaining amounts are non-negative. The implied full-cycle share mixes observed and projected."""
+    seen = _observed_dr(ctx, chamber, bid)
+    if remaining_total is None or seen is None:
+        return None
+    _through, d, r = seen
+    mult = ctx['open_multiplier']
+    observed_d, observed_r = d * mult, r * mult
+    share, low, high = basis['projected_cycle_R_share'], basis['cycle_prediction_low'], basis['cycle_prediction_high']
+    total = observed_d + observed_r + remaining_total
+    if total <= 0:
+        return None
+    return dict(rule='Projected R share applied to the remaining two-party money; observed giving is not re-estimated',
+                remaining_total_real_2025=remaining_total, remaining_R_real_2025=share * remaining_total, remaining_D_real_2025=(1 - share) * remaining_total,
+                remaining_R_share=share, implied_cycle_total_real_2025=total, implied_cycle_R_share=(observed_r + share * remaining_total) / total,
+                implied_cycle_R_share_prediction_low=(observed_r + low * remaining_total) / total,
+                implied_cycle_R_share_prediction_high=(observed_r + high * remaining_total) / total)
 
 
 def _v2_basis_totals(ctx, pac, chamber):
@@ -861,27 +1115,6 @@ def _v2_share_remainder(ctx, chamber, share, total, bid, growth_given):
                 remainder_starts=_next_day(through), **_split(share, total, d * m, r * m))
 
 
-def _v2_combined(ctx, chamber, bases, totals, effect):
-    """The combined reference of the earlier design (S1): employee and PAC candidate giving pooled into one base. Reference only; not a displayed outcome."""
-    if not all(bases[k]['status'] == 'ready' for k in ('employee_candidate', 'pac_candidate')) or set(totals) != {'employee_candidate', 'pac_candidate'}:
-        return None
-    e, p = bases['employee_candidate'], bases['pac_candidate']
-    seen_e, seen_p = _observed_dr(ctx, chamber, 'employee_candidate'), _observed_dr(ctx, chamber, 'pac_candidate')
-    if seen_e is None or seen_p is None:
-        return None
-    share_a = (e['anchor_R'] + p['anchor_R']) / (e['anchor_total_nominal'] + p['anchor_total_nominal'])
-    share = share_a + effect
-    out = dict(anchor_share=share_a, anchor_total_nominal=e['anchor_total_nominal'] + p['anchor_total_nominal'], raw_projected_cycle_R_share=share,
-               status='ready' if 0 <= share <= 1 else 'outside_share_range', note='Reference only (open point S1): employee and PAC candidate giving pooled into one base.')
-    if out['status'] == 'ready':
-        total = totals['employee_candidate'] + totals['pac_candidate']
-        m = ctx['open_multiplier']
-        d_all, r_all = seen_e[1] + seen_p[1], seen_e[2] + seen_p[2]
-        out.update(projected_total_real_2025=total, observed=dict(through=seen_e[0], D=d_all, R=r_all, D_real_2025=d_all * m, R_real_2025=r_all * m, face_value=ctx['face_value']),
-                   **_split(share, total, d_all * m, r_all * m))
-    return out
-
-
 # --- lobbying ------------------------------------------------------------------------------------------------------------------
 def _v2_lobbying(ctx, changes, cycle):
     b, ind = ctx['b'], ctx['industry']
@@ -929,10 +1162,16 @@ def _v2_lobbying(ctx, changes, cycle):
                 if ctx['as_of'] < covered:
                     s.update(remainder_status='no_observed', remainder_reason='The Melange LDA quarters run past the as-of date; use a later as-of date.')
                 else:
-                    s.update(observed=dict(through=lda['through'], through_quarter=partial['through_quarter'], amount_nominal=partial['total']),
+                    # The log refit is a real-terms change, so the projection is in the base year's dollars; the year's observed quarters are
+                    # nominal and are compared at face value (no CPI for that year yet), as the PAC remainder does.
+                    s.update(observed=dict(through=lda['through'], through_quarter=partial['through_quarter'], amount_nominal=partial['total'], face_value=True),
                              remainder_starts=_next_day(lda['through']),
                              **_remainder(s['projected'], dict(remaining_coefficient_low=s['coefficient_low'], remaining_coefficient_high=s['coefficient_high'],
                                                                remaining_prediction_low=s['prediction_low'], remaining_prediction_high=s['prediction_high']), partial['total']))
+                    given = _given_observed(s['projected'], pred_half, step['critical_95'], step['df'], partial['total'])
+                    if given:
+                        s.update(given)
+            s['dollars'] = 'base year ' + str(base_year) + ' dollars (real-terms change applied to the latest complete LDA year)'
             item['series'].append(s)
     return out
 
@@ -978,7 +1217,7 @@ def _project_v2(request, b):
     open_multiplier = snapshot['cpi']['multipliers'].get(str(open_cycle))
     ctx = dict(b=b, industry=industry, snap=entry, as_of=as_of, current=current, open_cycle=open_cycle, anchor_cycle=open_cycle - 2,
                coverage_end=entry['coverage']['coverage_end'], threshold=snapshot['thin_base_threshold_usd'], multiplier=multiplier,
-               open_multiplier=open_multiplier or 1., face_value=open_multiplier is None)
+               open_multiplier=open_multiplier or 1., face_value=open_multiplier is None, snap_cpi=snapshot['cpi']['multipliers'])
     changes_all = {}
     for cycle in (current, current + 2):
         changes_all.update(_mapping(_mapping(horizons.get(str(cycle)), str(cycle) + ' assumptions').get('annual_forecast_changes'), 'Annual growth-forecast changes'))

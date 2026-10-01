@@ -311,7 +311,7 @@ rf_v2_anchor_contract <- function() {
        pac = list(model = "pac_model", change = "relative_log", anchor_cycle_rule = "previous_cycle",
                   measures = list(list(id = "pac_to_candidates", anchor = "pac_to_candidates.cycles[A].to_house_senate",
                                        label = "Roster companies' PACs: own giving to House and Senate candidates (FEC committee-to-candidate, D-049)"),
-                                  list(id = "general_giving", anchor = "general_giving.cycles[A]", label = "Mentat general giving (included receipt amount, all channels)"))),
+                                  list(id = "general_giving", anchor = "general_giving.cycles[A]", label = "Mentat general giving (included receipt amount, all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)"))),
        share = list(models = list("control_House", "control_Senate"), change = "pp", anchor_cycle_rule = "by_industry_chamber",
                     anchor_options = list(list(id = "previous_cycle", cycle_offset = 2L, chained = TRUE, label = "Mentat's previous cycle; the next cycle is chained through the open cycle"),
                                           list(id = "same_phase", cycle_offset = 4L, chained = FALSE, label = "Mentat's cycle of the same phase (presidential or midterm); one step each, no chaining")),

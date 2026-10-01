@@ -139,13 +139,72 @@ test_that("G7 validates the bundle against the contract and fails a bad one", {
   expect_identical(g$status, "FAIL"); expect_match(g$detail, "capability 'pac' is false with no withheld reason")
 })
 
-test_that("G8 holds until a v2-capable calculator is configured, and follows the command's exit status", {
+test_that("G8 holds until a v2-capable calculator is configured, and follows the command's exit status (Windows included)", {
   p <- file.path(tempdir(), "g8_bundle.json"); writeLines("{}", p)
   expect_identical(rf_gate_consumer(p, cmd = "")$status, "HOLD")
   expect_match(rf_gate_consumer(p, cmd = "")$detail, "HOLD until the v2 calculator exists")
-  skip_on_os("windows")
+  skip_if(!nzchar(rf_g8_bash()), "no bash on this machine")
+  # The detail is asserted as well as the status: before the fix every command on Windows ended with exit status 127 (bash read VAR=value, which R puts after the
+  # command, as a script name), so "exit 3" held for the wrong reason. Here the status must be the command's own, and the variable must carry the bundle path.
   expect_identical(rf_gate_consumer(p, cmd = "test -n \"$MENTAT_GIVING_MODELS\"")$status, "PASS")
+  shown <- rf_gate_consumer(p, cmd = "echo \"[$MENTAT_GIVING_MODELS]\"")
+  expect_identical(shown$status, "PASS"); expect_match(shown$detail, "^exit status 0: \\[.*g8_bundle\\.json\\]$")
+  failed <- rf_gate_consumer(p, cmd = "exit 3")
+  expect_identical(failed$status, "HOLD"); expect_match(failed$detail, "^exit status 3:")
+  unknown <- rf_gate_consumer(p, cmd = "g8_no_such_command_xyz")
+  expect_identical(unknown$status, "HOLD"); expect_match(unknown$detail, "^exit status 127:")      # a missing command is the command's failure, not an R error
+  # A command that uses coreutils (cat, head, tr) must work from a plain Windows PATH, where Git's usr/bin is not listed: <Git>/bin/bash.exe is the launcher that sets PATH up,
+  # while the bash in usr/bin, started straight from R, answers "command not found" (exit status 127). The PATH of this check has no usr/bin entry on Windows.
+  plain <- if (.Platform$OS.type == "windows") c(PATH = paste(Filter(function(d) !grepl("usr[\\\\/]bin", d, ignore.case = TRUE), strsplit(Sys.getenv("PATH"), ";")[[1]]), collapse = ";")) else character()
+  with_plain_path <- function(code) if (length(plain)) rf_with_env(plain, code) else code
+  skip_if(!nzchar(with_plain_path(rf_g8_bash())), "no Git for Windows bash outside the PATH's usr/bin")
+  coreutils <- with_plain_path(rf_gate_consumer(p, cmd = "cat \"$MENTAT_GIVING_MODELS\" | head -c 2; echo abc | tr a-c A-C"))
+  expect_identical(coreutils$status, "PASS"); expect_identical(coreutils$detail, "exit status 0: {}ABC")
+})
+
+test_that("rf_with_env sets variables for the call only, and G8 leaves MENTAT_GIVING_MODELS as it found it", {
+  keep <- Sys.getenv("MENTAT_GIVING_MODELS", unset = NA)
+  on.exit({ if (is.na(keep)) Sys.unsetenv("MENTAT_GIVING_MODELS") else Sys.setenv(MENTAT_GIVING_MODELS = keep); Sys.unsetenv(c("RF_T_A", "RF_T_B")) }, add = TRUE)
+  Sys.setenv(RF_T_A = "a0"); Sys.unsetenv("RF_T_B")
+  expect_identical(rf_with_env(c(RF_T_A = "a1", RF_T_B = "b1"), paste(Sys.getenv("RF_T_A"), Sys.getenv("RF_T_B"))), "a1 b1")
+  expect_identical(Sys.getenv("RF_T_A"), "a0"); expect_true(is.na(Sys.getenv("RF_T_B", unset = NA)))        # the previous value is back, the unset one is unset again
+  expect_error(rf_with_env(c(RF_T_A = "a2", RF_T_B = "b2"), stop("boom")), "boom")                        # also when the call fails
+  expect_identical(Sys.getenv("RF_T_A"), "a0"); expect_true(is.na(Sys.getenv("RF_T_B", unset = NA)))
+  skip_if(!nzchar(rf_g8_bash()), "no bash on this machine")
+  p <- file.path(tempdir(), "g8_bundle.json"); writeLines("{}", p)
+  Sys.unsetenv("MENTAT_GIVING_MODELS")
+  expect_identical(rf_gate_consumer(p, cmd = "exit 0")$status, "PASS")
+  expect_true(is.na(Sys.getenv("MENTAT_GIVING_MODELS", unset = NA)))
+  Sys.setenv(MENTAT_GIVING_MODELS = "previous-value")
   expect_identical(rf_gate_consumer(p, cmd = "exit 3")$status, "HOLD")
+  expect_identical(Sys.getenv("MENTAT_GIVING_MODELS"), "previous-value")
+})
+
+test_that("rf_g8_bash picks Git for Windows' bash launcher (bin) before usr/bin, never the WSL launcher, and G8 holds with the reason when there is none", {
+  tree <- file.path(tempdir(), "g8_git_tree")
+  for (d in c("cmd", "bin", "usr/bin", "mingw64/bin")) dir.create(file.path(tree, "Git", d), recursive = TRUE, showWarnings = FALSE)
+  for (f in c("cmd/git.exe", "bin/bash.exe", "usr/bin/bash.exe", "mingw64/bin/git.exe")) file.create(file.path(tree, "Git", f))
+  launcher <- normalizePath(file.path(tree, "Git", "bin", "bash.exe"), winslash = "/")
+  for (git in file.path(tree, "Git", c("cmd/git.exe", "mingw64/bin/git.exe"))) {                            # git.exe in <Git>/cmd and in <Git>/mingw64/bin both lead to <Git>/bin/bash.exe
+    for (wsl in c("C:\\Windows\\System32\\bash.exe", "C:/Windows/Sysnative/bash.exe", "C:\\Users\\x\\AppData\\Local\\Microsoft\\WindowsApps\\bash.exe", ""))
+      expect_identical(rf_g8_bash(found = wsl, git = git, windows = TRUE), launcher, info = paste(wsl, git))   # the WSL launcher, or no bash on the PATH at all
+    expect_identical(rf_g8_bash(found = "D:/tools/msys64/usr/bin/bash.exe", git = git, windows = TRUE), "D:/tools/msys64/usr/bin/bash.exe")   # any other bash is kept
+  }
+  expect_identical(rf_g8_bash(found = "/usr/bin/bash", git = "", windows = FALSE), "/usr/bin/bash")
+  expect_identical(rf_g8_bash(found = "", git = "", windows = FALSE), "bash")
+  skip_on_os(c("mac", "linux", "solaris"))                                                               # no Git for Windows anywhere: "" and an explained HOLD
+  none <- file.path(tempdir(), "g8_nothing"); dir.create(none, showWarnings = FALSE)
+  no_folders <- c(ProgramFiles = none, ProgramW6432 = none, "ProgramFiles(x86)" = none, LOCALAPPDATA = none)   # the default install folders hold no Git either
+  # an installation without the launcher: the plain usr/bin bash is the fallback
+  usr_only <- file.path(tempdir(), "g8_git_usr_only")
+  for (d in c("cmd", "usr/bin")) dir.create(file.path(usr_only, "Git", d), recursive = TRUE, showWarnings = FALSE)
+  for (f in c("cmd/git.exe", "usr/bin/bash.exe")) file.create(file.path(usr_only, "Git", f))
+  expect_identical(rf_with_env(no_folders, rf_g8_bash(found = "", git = file.path(usr_only, "Git", "cmd", "git.exe"), windows = TRUE)),
+                   normalizePath(file.path(usr_only, "Git", "usr", "bin", "bash.exe"), winslash = "/"))
+  void <- c(PATH = none, no_folders)
+  expect_identical(rf_with_env(void, rf_g8_bash(found = Sys.which("bash"), git = Sys.which("git"), windows = TRUE)), "")
+  g <- rf_with_env(void, rf_gate_consumer(file.path(tempdir(), "g8_bundle.json"), cmd = "exit 0"))
+  expect_identical(g$status, "HOLD"); expect_match(g$detail, "no bash to run the G8 command")
 })
 
 test_that("G9 is a warning only: a calculator path that does not beat last-period naive is reported, not blocked", {

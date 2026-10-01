@@ -176,11 +176,14 @@ test('the historical example says which candidate mix does not reduce to the Men
   const catalog = JSON.parse(JSON.stringify(DATA.catalog));
   t.buildInputs();
   t.historicalExample();
-  assert.match(els['gf-status'].textContent, /so the projection equals the Mentat level\. Change them/);
+  // corrected 2026-10-01 (owner review: follows the run it describes; none is loaded in this harness): the model's change is zero and its projected amounts equal the Mentat level
+  // before any conditioning on the giving already observed; the party mixes still move (midterm cycle, auto-filled prior-cycle growth outside the fitted range)
+  assert.match(els['gf-status'].textContent, /The model's change in the amounts is zero \(growth and control as in 2023–2024\)\. The model's projected amounts equal the 2023–2024 Mentat level before any conditioning on the giving already observed\. Party mixes also move: 2026 is a midterm, and the blank prior-cycle growth uses 2024's growth, which is outside the range the share models were fitted on\. Change them to explore\./);
+  assert.doesNotMatch(els['gf-status'].textContent, /so the projection equals/);
   catalog.share_models.control_House.anchors.commercial_banks.anchor = 'same_phase';
   t.setCatalog(catalog);
   t.historicalExample();
-  assert.match(els['gf-status'].textContent, /equals the Mentat level \(except the 2026 House candidate mix, anchored on Mentat 2021–2022, the cycle of the same phase\)\./);
+  assert.match(els['gf-status'].textContent, /The model's change in the amounts is zero \(growth and control as in 2023–2024\)\. The model's projected amounts equal the 2023–2024 Mentat level before any conditioning on the giving already observed\. Party mixes also move: the blank prior-cycle growth uses 2024's growth, which is outside the range the share models were fitted on\. The 2026 House candidate mix is anchored on Mentat 2021–2022, the cycle of the same phase\. Change them to explore\./);
 });
 
 test('thin bases are flagged per basis and budget_inconsistent is flagged, not clipped', () => {
@@ -293,7 +296,7 @@ test('the request has no seat signal, slope selector, observed amounts or budget
   assert.equal(request.horizons[2028].control_scores.House, '');
 });
 
-test('the historical example loads the anchor cycle so the projection equals the Mentat level', () => {
+test('the historical example loads the anchor cycle, so the model change is zero', () => {
   const {t, els} = session();
   t.buildInputs();
   t.historicalExample();

@@ -17,7 +17,7 @@ Output: `mentat\state\giving-anchors\giving-anchors-v1.json` and `giving-anchors
 | Input | Where | Used for |
 |---|---|---|
 | Published workbook | report directory (`config/report-directory.json` or `MENTAT_REPORT_DIRECTORY`) | its sha256 is the freshness key |
-| Contribution-analytics index | `state/contribution-analytics/*.sqlite`, the newest whose `provenance.workbook_sha256` equals the workbook's | general giving (`receipt_cents`, the workbook's Analysis Amount), funding-source split, employees' D/R by cycle |
+| Contribution-analytics index | `state/contribution-analytics/*.sqlite`, the newest whose `provenance.workbook_sha256` equals the workbook's | general giving (`receipt_cents`, the workbook's Analysis Amount, less the non_giving receipts: see the first rule below), funding-source split, employees' D/R by cycle |
 | Pinned source database | `.cache/...` (registry globs), the file whose sha256 equals the index's `database_sha256` | FEC `recipient_committee_type` (H / S) joined on sub_id; the collection date (`MAX(scraped_at)`); work-unit progress |
 | FEC pas2 / cn / cm bulk files | `inputs/active_fec_sources.json` -> `fec_beneficiary/pas2YY`, `fec_beneficiary/cnYY`, `fec_committee_master/cmYY` | the roster companies' PACs' own giving to House / Senate candidates (D-049 `count_latest`) |
 | Melange LDA | `%LOCALAPPDATA%\Melange\lda_rebuild\derived\sector_spend\sector_spend.csv` | `income_total` and `expenses_total`, never summed; bank TOTAL for banks |
@@ -30,6 +30,16 @@ against the shared schema and invariants; an invalid build leaves the previous s
 
 ## Rules it implements
 
+* **Non-giving receipts are left out of the forecast** (owner ruling 2026-10-01, forecast-integrity decision D4 option b). Receipts that Mentat's accounting
+  engine buckets as `non_giving` (the index's `funding_source` is the engine's bucket; the FEC records them as interest, refunds, insurance claims, loans)
+  are in the workbook's Analysis Amount but are not giving. In the forecast only, `mentat_sources.FORECAST_EXCLUDED_FUNDING_SOURCES` (`{"non_giving"}`) leaves
+  them out of (1) each cycle's `general_giving.cycles`, (2) the monthly `observed` cuts and the observed-to-date amounts, and (3) the House / Senate employee
+  `candidate_receipts` (cycles, observed cuts, thin-base flags). The workbook, the index and every money-collection view are untouched.
+  `general_giving.by_funding_source` stays the full split of the Analysis Amount; `general_giving.excluded_non_giving` and `candidate_receipts.excluded_non_giving`
+  report what was left out, per cycle (levels + excluded = the published Analysis Amount), and the industry flag prints the amounts. The index's own
+  receipt-total check still compares the full Analysis Amount with the index manifest. A partial build (`--industry`) carries over only industries whose
+  published general-giving and candidate blocks both name exactly `FORECAST_EXCLUDED_FUNDING_SOURCES` as the sources they left out (anchors from before the
+  rule name none, and an empty list names none either); the others are listed as `unavailable` until rebuilt.
 * **Coverage end** (by rule, because none of the pinned databases has a verified coverage-through date): the last calendar quarter-end whose
   report due date (the 15th of the following month) was on or before the collection date. Banks, P&C, Community Banks: 2026-06-30. Credit
   unions are cut back to 2026-05-31 ("June incomplete") for as long as the rule end is 2026-06-30. Observed amounts are cumulative month-end
@@ -51,5 +61,6 @@ changed no publish or refresh script. `--check` exits 2 when a workbook was repu
 ## Tests
 
 `python -m pytest -p no:cacheprovider mentat/tests/test_giving_anchors.py` builds against a synthetic Mentat (hand-computed expectations,
-D-049 cases, coverage rule table, read-only and refusal guarantees, the shared negative controls). `MENTAT_ANCHORS_REAL=1` also re-derives
-the credit-union numbers of ADDENDUM section F from the real tree, `=all` the banks too (about four minutes).
+D-049 cases, the non_giving exclusion in every sum, coverage rule table, read-only and refusal guarantees, the shared negative controls).
+`MENTAT_ANCHORS_REAL=1` also re-derives the credit-union numbers of ADDENDUM section F (less the non_giving receipts) from the real tree, `=all` the
+banks and property & casualty too (about four minutes).

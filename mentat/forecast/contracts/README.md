@@ -40,7 +40,8 @@ Top level: `schema_version` (2), `model_version`, `built_on`, `built_at_utc`, `p
   refuses a bundle whose contract it does not implement (unknown measure ids or change kinds).
   * `pac`: `pac_model` applied as a **relative (log) change** to the **previous cycle's Mentat level**, twice, side by side:
     measure `pac_to_candidates` (the roster companies' PACs' own giving to House and Senate candidates, FEC pas2, D-049, direct +
-    in-kind, refunds netted, IE excluded) and measure `general_giving` (the console's included receipt amount = workbook Analysis Amount, all channels).
+    in-kind, refunds netted, IE excluded) and measure `general_giving` (the console's included receipt amount = workbook Analysis Amount, all channels; since the
+    owner ruling of 2026-10-01 the anchors' level leaves out the receipts the accounting engine buckets as non_giving: see "Anchor snapshot v1" below).
   * `share`: `control_House` / `control_Senate` give a **pp change** added to the previous cycle's Mentat R share, on two bases side by
     side: `employee_candidate` (employees' included giving to candidate committees) and `pac_candidate` (the roster PACs' own giving to candidates).
   * `lobbying`: `lobby_model.log_refit` applied as a relative change to the **latest complete year's** Melange-LDA level, both LDA series
@@ -107,8 +108,12 @@ and after each Mentat publish. A separate file from the model bundle, because an
 the sha256 of the workbook file now published in the report directory.
 
 * The example `giving-anchors-v1.example.json` is **real builder output** (the four Mentat datasets built from the published workbooks, indexes,
-  FEC files and Melange LDA file on 2026-09-30), not hand-made: every number in ADDENDUM section F comes from it, and
-  `MENTAT_ANCHORS_REAL=all python -m pytest mentat/tests/test_giving_anchors.py` re-derives banks and credit unions from the real tree and compares.
+  FEC files and Melange LDA file on 2026-09-30), not hand-made: every number in ADDENDUM section F comes from it. It was built BEFORE the owner ruling of
+  2026-10-01 (non_giving receipts left out of the forecast): its levels still include them and it carries none of the optional exclusion fields. It stays
+  as the fixture of the calculator's tests (`test_giving_forecast_v2.py` asserts the section F numbers against it) and proves that snapshots from before
+  the ruling remain valid. The live snapshot is built by the current builder.
+  `MENTAT_ANCHORS_REAL=all python -m pytest mentat/tests/test_giving_anchors.py` re-derives credit unions, banks and property & casualty from the real
+  tree and compares them with the section F numbers less the non_giving receipts.
 * Top: `schema_version` 1, `kind`, `built_at_utc`, `builder`, `unavailable` ({id: reason} for industries it could not anchor), `cpi` (`multipliers`: cycle end year -> `cpi[2025] / mean(cpi[t-1], cpi[t])`; a missing
   year means face value: 2026 CPI does not exist), `thin_base_threshold_usd` (100,000), `industries`.
 * `industries[id]` (`id` is the forecast industry id: `commercial_banks` = Mentat Banking, `credit_unions` = Credit Union, `property_casualty`;
@@ -118,9 +123,14 @@ the sha256 of the workbook file now published in the report directory.
     collection date), `coverage_end` (== the rule end, or earlier when a cut-back applies: credit unions 2026-05-31, reason "June incomplete"), `reason`, `flags`.
   * `general_giving`: `cycles {"2022","2024","2026"}` (dollars, nominal, net of negative adjustments; the open cycle holds every row to date),
     `by_funding_source`, `observed` = cumulative month-end cuts of the open cycle up to `coverage_end` ({through, amount}); rows dated after the
-    coverage end belong to the remainder window, never to observed.
+    coverage end belong to the remainder window, never to observed. **Owner ruling 2026-10-01 (D4 option b): `cycles` and `observed` leave out the receipts
+    the accounting engine buckets as `non_giving`** (the FEC records them as interest, refunds, insurance claims, loans; the workbook still counts them in its
+    Analysis Amount). `by_funding_source` stays the full split of the Analysis Amount. Optional `excluded_funding_sources` (the buckets left out) and
+    `excluded_non_giving` ({cycle: dollars}) report what was left out: `cycles` + `excluded_non_giving` = the sum of `by_funding_source`, per cycle.
   * `candidate_receipts`: employees' included giving to House / Senate candidate committees (index joined to the pinned source DB on `sub_id`;
     `recipient_committee_type` H or S; presidential P excluded), `{D, R, other}` per chamber per cycle; `observed` cuts; `thin_base` flags ($100K of D+R per chamber).
+    The same ruling applies: non_giving receipts are out of the cycles, the cuts and the thin-base totals; optional `excluded_funding_sources` and
+    `excluded_non_giving` ({cycle: {House, Senate}: {D, R, other}}) report them.
   * `pac_to_candidates`: the roster companies' PACs' own giving to candidates (FEC pas2, D-049 `count_latest`, 24K + 24Z signed, 24A/24E excluded;
     chamber from the CAND_ID prefix, party from the candidate master), `committees`, `inputs` (file sha256 + FEC last_modified), per cycle `{House, Senate, to_house_senate,
     presidential, no_candidate, all_recipients}`, `observed` cuts, `thin_base`, `single_pac` (true for credit unions: SchoolsFirst only).
@@ -128,4 +138,8 @@ the sha256 of the workbook file now published in the report directory.
     `status: unavailable` with a `reason` for industries without a Melange-LDA sector (P&C).
   * Every measure has `status` ready | unavailable (+ `reason`); a consumer never reads numbers from an unavailable block.
 * Cross-field invariants (`contract.py::check_anchor_invariants`): cut dates strictly increasing and ending on `coverage_end`; `to_house_senate` equals the House +
-  Senate parts; `all_recipients` equals its parts; thin-base flags agree with the dollars; `single_pac` agrees with the committee list; partial LDA totals equal their quarters. Each industry's anchor cycle (`current_cycle - 2`) has a CPI multiplier (a missing one must never read as 1.0); a ready LDA block carries both series over the same complete years.
+  Senate parts; `all_recipients` equals its parts; thin-base flags agree with the dollars; `single_pac` agrees with the committee list; partial LDA totals equal their quarters;
+  a ready block that reports one of `excluded_funding_sources` / `excluded_non_giving` reports both, and the general-giving and candidate blocks either both report them or neither;
+  when a general-giving block reports them, its levels + the excluded amounts equal the by-funding-source total and the excluded amount equals the excluded sources' share of
+  that split; the candidate block then has one `excluded_non_giving` entry per candidate cycle and the same `excluded_funding_sources` as the general-giving block (its amounts
+  have no by-source split to be checked against). Each industry's anchor cycle (`current_cycle - 2`) has a CPI multiplier (a missing one must never read as 1.0); a ready LDA block carries both series over the same complete years.

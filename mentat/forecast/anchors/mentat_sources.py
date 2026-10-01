@@ -4,6 +4,9 @@ EVERY SQLite file is opened `mode=ro&immutable=1` (plus PRAGMA query_only=ON), s
 database. No money-collection or receipt-counting code is imported, run or edited: the index is read as the console built it
 (`facts`, one row per FEC sub_id; `receipt_cents` = the published workbook's included Analysis Amount), and the FEC recipient committee
 type that the index lacks comes from the pinned source database, joined on sub_id (as the phase-2 design did, P08).
+
+ONE RULE, applied to the FORECAST only (owner ruling 2026-10-01, forecast-integrity decision D4 option b): FORECAST_EXCLUDED_FUNDING_SOURCES names the
+receipts the anchors leave out. The workbook, the index and every money-collection view still count them in the Analysis Amount.
 """
 import hashlib
 import json
@@ -11,6 +14,13 @@ from pathlib import Path
 import sqlite3
 
 STATE_INDEX_DIR = Path('state') / 'contribution-analytics'
+
+# Owner ruling 2026-10-01 (Paul, "D4, B"): receipts that Mentat's accounting engine buckets as non_giving (the FEC records them as interest,
+# refunds, insurance claims, loans) are not giving, so the FORECAST leaves them out of (1) every cycle's general-giving level, (2) the monthly
+# observed cuts and the observed-to-date amounts, and (3) the House / Senate employee candidate bases. The index column `funding_source` IS the
+# engine's bucket (the console index assigns it from the engine's decision, contribution_data.py), so the bucket name is the whole rule. Every
+# query below takes its "counted" and "excluded" conditions from forecast_conditions(); nothing else in the anchors names the bucket.
+FORECAST_EXCLUDED_FUNDING_SOURCES = frozenset({'non_giving'})
 
 
 def ro_uri(path):
@@ -117,26 +127,49 @@ def _cumulative(monthly, cuts):
     return out
 
 
+def _quote(value):
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def forecast_conditions(alias='f'):
+    """(counted, excluded): the two SQL conditions on `alias`.funding_source that split every included receipt by FORECAST_EXCLUDED_FUNDING_SOURCES.
+    Exactly one holds for any row (a NULL source counts), so counted + excluded = the published Analysis Amount."""
+    listed = ', '.join(_quote(source) for source in sorted(FORECAST_EXCLUDED_FUNDING_SOURCES))
+    excluded = f"COALESCE({alias}.funding_source, '') IN ({listed})"
+    return f'NOT ({excluded})', excluded
+
+
 def index_aggregates(index_path, source_db, open_cycle, cuts):
     """Everything the snapshot needs from one industry's index (+ its pinned source DB for chamber). Dollars are returned as integer CENTS.
 
-    {'cycles': {'2024': cents}, 'by_source': {'2024': {source: cents}}, 'general_cuts': [(cut, cents)], 'after_cut': cents,
-     'candidates': {'2024': {'House': {'D','R','other'}, 'Senate': {...}}}, 'candidate_cuts': [(cut, {'House':..., 'Senate':...})],
+    {'cycles': {'2024': cents}, 'analysis_cycles': {'2024': cents}, 'excluded': {'2024': cents}, 'by_source': {'2024': {source: cents}},
+     'general_cuts': [(cut, cents)], 'after_cut': cents,
+     'candidates': {'2024': {'House': {'D','R','other'}, 'Senate': {...}}}, 'candidates_excluded': {same shape}, 'candidate_cuts': [(cut, {'House':..., 'Senate':...})],
      'unmatched': (n, cents), 'type_conflicts': n}
-    `cuts` are month-end ISO dates of the open cycle (ending on the coverage end)."""
+    FORECAST BASIS (owner ruling 2026-10-01): `cycles`, `general_cuts`, `after_cut`, `candidates`, `candidate_cuts` and `unmatched` count only the receipts whose
+    funding source is NOT in FORECAST_EXCLUDED_FUNDING_SOURCES. `analysis_cycles` is the published Analysis Amount before that exclusion (what the index's own
+    manifest records), `excluded` / `candidates_excluded` what the rule left out (cycles + excluded = analysis_cycles), and `by_source` the full split by the
+    engine's bucket. `cuts` are month-end ISO dates of the open cycle (ending on the coverage end)."""
     label = f'{open_cycle - 1}-{open_cycle}'
+    counted, excluded = forecast_conditions('f')
+    kept_sum = f'SUM(CASE WHEN {counted} THEN f.receipt_cents ELSE 0 END)'
+    left_out_sum = f'SUM(CASE WHEN {excluded} THEN f.receipt_cents ELSE 0 END)'
     db = sqlite3.connect('file::memory:', uri=True)
     try:
         db.execute('ATTACH DATABASE ? AS idx', (ro_uri(index_path),))
         db.execute('ATTACH DATABASE ? AS src', (ro_uri(source_db),))
-        cycles = {_cycle_key(c): v for c, v in db.execute('SELECT cycle, SUM(receipt_cents) FROM idx.facts WHERE receipt_cents != 0 GROUP BY cycle')}
+        analysis, cycles, left_out = {}, {}, {}
+        for c, total, kept, dropped in db.execute(f'SELECT f.cycle, SUM(f.receipt_cents), {kept_sum}, {left_out_sum} FROM idx.facts f '
+                                                  'WHERE f.receipt_cents != 0 GROUP BY f.cycle'):
+            analysis[_cycle_key(c)], cycles[_cycle_key(c)], left_out[_cycle_key(c)] = total, kept, dropped
         by_source = {}
         for c, source, v in db.execute('SELECT cycle, funding_source, SUM(receipt_cents) FROM idx.facts WHERE receipt_cents != 0 GROUP BY 1, 2'):
             by_source.setdefault(_cycle_key(c), {})[source] = v
-        monthly = {m: v for m, v in db.execute('SELECT substr(date, 1, 7), SUM(receipt_cents) FROM idx.facts '
-                                               'WHERE cycle=? AND receipt_cents != 0 GROUP BY 1', (label,))}
+        monthly = {m: v for m, v in db.execute('SELECT substr(f.date, 1, 7), SUM(f.receipt_cents) FROM idx.facts f '
+                                               f'WHERE f.cycle=? AND f.receipt_cents != 0 AND {counted} GROUP BY 1', (label,))}
         last_cut = cuts[-1] if cuts else None
-        after_cut = db.execute('SELECT COALESCE(SUM(receipt_cents), 0) FROM idx.facts WHERE cycle=? AND receipt_cents != 0 AND date > ?',
+        after_cut = db.execute('SELECT COALESCE(SUM(f.receipt_cents), 0) FROM idx.facts f '
+                               f'WHERE f.cycle=? AND f.receipt_cents != 0 AND {counted} AND f.date > ?',
                                (label, last_cut)).fetchone()[0] if last_cut else 0
         tables = _tables(db, 'src')
         parts = [f'SELECT CAST(sub_id AS TEXT) AS sid, recipient_committee_type AS t FROM src.{t}'
@@ -147,20 +180,23 @@ def index_aggregates(index_path, source_db, open_cycle, cuts):
         db.execute('CREATE INDEX temp.rt_sid ON rt(sid)')
         conflicts = db.execute('SELECT COUNT(*) FROM rt WHERE nt > 1').fetchone()[0]
         unmatched = db.execute('SELECT COUNT(*), COALESCE(SUM(f.receipt_cents), 0) FROM idx.facts f LEFT JOIN rt ON rt.sid = f.source_id '
-                               'WHERE f.receipt_cents != 0 AND rt.sid IS NULL').fetchone()
+                               f'WHERE f.receipt_cents != 0 AND {counted} AND rt.sid IS NULL').fetchone()
 
         def party(p):
             return p if p in ('D', 'R') else 'other'
 
         def blank():
             return {'House': {'D': 0, 'R': 0, 'other': 0}, 'Senate': {'D': 0, 'R': 0, 'other': 0}}
-        candidates = {}
-        for c, chamber, p, v in db.execute("SELECT f.cycle, rt.t, f.party, SUM(f.receipt_cents) FROM idx.facts f JOIN rt ON rt.sid = f.source_id "
-                                           "WHERE f.receipt_cents != 0 AND rt.t IN ('H', 'S') GROUP BY 1, 2, 3"):
-            candidates.setdefault(_cycle_key(c), blank())['House' if chamber == 'H' else 'Senate'][party(p)] += v
+        # One pass over the join gives both sums, so a cycle that has candidate rows keeps its (possibly all-zero) entry once its excluded rows are left out.
+        candidates, candidates_excluded = {}, {}
+        for c, chamber, p, kept, dropped in db.execute(f'SELECT f.cycle, rt.t, f.party, {kept_sum}, {left_out_sum} FROM idx.facts f JOIN rt ON rt.sid = f.source_id '
+                                                       "WHERE f.receipt_cents != 0 AND rt.t IN ('H', 'S') GROUP BY 1, 2, 3"):
+            name = 'House' if chamber == 'H' else 'Senate'
+            candidates.setdefault(_cycle_key(c), blank())[name][party(p)] += kept
+            candidates_excluded.setdefault(_cycle_key(c), blank())[name][party(p)] += dropped
         monthly_c = {}
         for month, chamber, p, v in db.execute("SELECT substr(f.date, 1, 7), rt.t, f.party, SUM(f.receipt_cents) FROM idx.facts f JOIN rt ON rt.sid = f.source_id "
-                                               "WHERE f.cycle=? AND f.receipt_cents != 0 AND rt.t IN ('H', 'S') GROUP BY 1, 2, 3", (label,)):
+                                               f"WHERE f.cycle=? AND f.receipt_cents != 0 AND {counted} AND rt.t IN ('H', 'S') GROUP BY 1, 2, 3", (label,)):
             monthly_c.setdefault(month, blank())['House' if chamber == 'H' else 'Senate'][party(p)] += v
         candidate_cuts = []
         for cut in cuts:
@@ -171,7 +207,8 @@ def index_aggregates(index_path, source_db, open_cycle, cuts):
                         for k in ('D', 'R', 'other'):
                             running[chamber][k] += part[chamber][k]
             candidate_cuts.append((cut, running))
-        return {'cycles': cycles, 'by_source': by_source, 'general_cuts': _cumulative(monthly, cuts), 'after_cut': after_cut,
-                'candidates': candidates, 'candidate_cuts': candidate_cuts, 'unmatched': tuple(unmatched), 'type_conflicts': conflicts}
+        return {'cycles': cycles, 'analysis_cycles': analysis, 'excluded': left_out, 'by_source': by_source, 'general_cuts': _cumulative(monthly, cuts),
+                'after_cut': after_cut, 'candidates': candidates, 'candidates_excluded': candidates_excluded, 'candidate_cuts': candidate_cuts,
+                'unmatched': tuple(unmatched), 'type_conflicts': conflicts}
     finally:
         db.close()

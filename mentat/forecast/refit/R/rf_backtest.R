@@ -101,6 +101,9 @@ rf_restandardize <- function(d, train_cycles) {
     sl <- fa$rules[[rule]]
     fo <- rf_offset_fit(tr, spec, sl)
     sg <- rf_step_sigma2(spec, tr, sl, fo, trc, anchor = if (spec$calc_path == "prevchg") "previous_cycle" else "same_phase")
+    # The PUBLISHED PAC interval uses each industry's own anchored-step residual (rf_pac_v2: rf_step_sigma2(..., sector = s), df = pairs - 1),
+    # not the pooled one above; score that construction too, so the recorded coverage is the coverage of the interval the console draws.
+    sg_s <- if (spec$kind == "pac") lapply(stats::setNames(names(sl), names(sl)), function(s) rf_step_sigma2(spec, tr, sl, NULL, trc, sector = s)) else NULL
     for (i in seq_len(nrow(tg))) {
       a <- tg[i, ]; s <- as.character(a$sector)
       if (!(s %in% names(sl))) next
@@ -113,10 +116,11 @@ rf_restandardize <- function(d, train_cycles) {
       pr <- .rf_pred_one(fo, spec, sl[[s]], a, r, pvr, first_level)
       v <- .rf_vcoef(spec, fa, fo, rule, s, a, r, pvr)
       half <- if (is.na(sg$sigma2)) NA_real_ else sg$critical_95 * sqrt(v + sg$sigma2)
+      half_live <- if (is.null(sg_s)) half else if (is.na(sg_s[[s]]$sigma2)) NA_real_ else sg_s[[s]]$critical_95 * sqrt(v + sg_s[[s]]$sigma2)
       rows[[length(rows) + 1L]] <- data.frame(term = spec$id, base = spec$base, design = design, target = cy, sector = s, rule = rule,
         actual = actual, calc = pr[["calc"]], level = pr[["level"]], prevchg = pr[["prevchg"]], naive_prev = prev, anchor_only = anchor, slope = sl[[s]],
         scale = spec$scale, calc_path = spec$calc_path, low = pr[[spec$calc_path]] - half, high = pr[[spec$calc_path]] + half, sigma2_step = sg$sigma2,
-        stringsAsFactors = FALSE)
+        low_live = pr[[spec$calc_path]] - half_live, high_live = pr[[spec$calc_path]] + half_live, stringsAsFactors = FALSE)
     }
   }
   list(pred = if (length(rows)) do.call(rbind, rows) else NULL, slopes = slopes, feas = feas)
@@ -143,15 +147,17 @@ rf_backtest <- function(spec, panel = spec$d, design = c("loeo", "chrono", "roll
 # versus R0, per-industry MAE, prediction-interval coverage of the calculator path, and whether the rule beats last-period naive.
 rf_backtest_metrics <- function(pred) {
   unit <- attr(pred, "spec")$unit %||% NA_character_
+  if (!"low_live" %in% names(pred)) { pred$low_live <- pred$low; pred$high_live <- pred$high }     # e.g. the lobbying log backtest
   long <- do.call(rbind, lapply(c("calc", "level", "prevchg"), function(pth) {
     m <- pred
     if (pth == "prevchg" && all(m$term == "lobby")) return(NULL)
     m$path <- pth; m$pred <- m[[pth]]
     nv <- m[m$rule == "R0", ]
-    n1 <- nv; n1$rule <- "naive_prev"; n1$pred <- n1$naive_prev; n1$low <- NA_real_; n1$high <- NA_real_
-    n2 <- nv; n2$rule <- "anchor_only"; n2$pred <- n2$anchor_only; n2$low <- NA_real_; n2$high <- NA_real_
-    keep <- c("term", "base", "design", "path", "target", "sector", "rule", "actual", "pred", "scale", "calc_path", "low", "high")
+    n1 <- nv; n1$rule <- "naive_prev"; n1$pred <- n1$naive_prev; n1$low <- NA_real_; n1$high <- NA_real_; n1$low_live <- NA_real_; n1$high_live <- NA_real_
+    n2 <- nv; n2$rule <- "anchor_only"; n2$pred <- n2$anchor_only; n2$low <- NA_real_; n2$high <- NA_real_; n2$low_live <- NA_real_; n2$high_live <- NA_real_
+    keep <- c("term", "base", "design", "path", "target", "sector", "rule", "actual", "pred", "scale", "calc_path", "low", "high", "low_live", "high_live")
     m$low[m$path != m$calc_path] <- NA_real_; m$high[m$path != m$calc_path] <- NA_real_
+    m$low_live[m$path != m$calc_path] <- NA_real_; m$high_live[m$path != m$calc_path] <- NA_real_
     rbind(m[, keep], n1[, keep], n2[, keep])
   }))
   long$err <- (long$pred - long$actual) * long$scale
@@ -170,12 +176,16 @@ rf_backtest_metrics <- function(pred) {
       pn <- table(factor(q$sector, levels = secs))
       k0 <- match(paste(q$target, q$sector), k0_all)
       inside <- !is.na(q$low) & !is.na(q$high)
+      live <- !is.na(q$low_live) & !is.na(q$high_live)
       o <- data.frame(term = q$term[1], base = q$base[1], design = q$design[1], path = q$path[1], rule = rl, n = nrow(q), folds = length(fm0),
         targets = paste(range(as.integer(names(fm0))), collapse = "-"), MAE = mean(abs(q$err)), RMSE = sqrt(mean(q$err^2)), EW_MAE = mean(pm),
         EW_rel_R0 = mean(pm / pm0[secs]), dMAE_vs_R0 = mean(abs(q$err)) - mean(abs(R0$err)),
         fold_wins = sum(dd < -1e-12), fold_losses = sum(dd > 1e-12), fold_ties = length(dd) - sum(dd < -1e-12) - sum(dd > 1e-12),
         row_wins = sum(abs(q$err) < abs(R0$err[k0]) - 1e-12), row_losses = sum(abs(q$err) > abs(R0$err[k0]) + 1e-12),
         coverage_95 = if (any(inside)) mean(q$actual[inside] >= q$low[inside] & q$actual[inside] <= q$high[inside]) else NA_real_,
+        coverage_95_n = sum(inside),                                    # rows that HAVE an interval (aliased early folds have none)
+        coverage_95_live = if (any(live)) mean(q$actual[live] >= q$low_live[live] & q$actual[live] <= q$high_live[live]) else NA_real_,
+        coverage_95_live_n = sum(live),
         units = unit, stringsAsFactors = FALSE)
       for (s in secs) { o[[paste0("MAE_", s)]] <- pm[[s]]; o[[paste0("n_", s)]] <- as.integer(pn[[s]]) }
       o

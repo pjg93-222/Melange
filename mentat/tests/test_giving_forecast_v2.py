@@ -30,23 +30,63 @@ class Today(date):
         return cls(2026, 9, 30)
 
 
-class World:
-    """Bundle + anchors installed from the contract examples (optionally mutated) into a temp folder, with the published-workbook check patched."""
+# The shape of mentat/forecast/refit/registry/gate_waivers.json: the quiet banks-lobbying waiver and the three House-share waivers the card shows, each with the
+# error of the calculator the refit was compared with. The contract example's own House-share errors are 1.544 (banks), 1.477 (credit unions) and 0.852 (auto),
+# so these comparators sit below them: the model in the example is worse than the calculator it replaced, which is what a waiver is for.
+AUTO = 'auto_light_duty_manufacturing'
+COMPARATORS = {BANKS: 1.053, CUS: 1.022, AUTO: 0.512}
+RULING = 'Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: "Waive these three cells and publish".'
 
-    def __init__(self, tmp, bundle=None, anchors=None, published=None):
+
+def waiver_entry(term, industry, show_warning, comparator=None, gate='G6', date='2026-09-30'):
+    entry = dict(gate=gate, cell=term + ' / ' + industry, term=term, industry=industry, reason=RULING if term == 'control_House' else 'owner ruling: keep log refit',
+                 owner='Paul Goff', date=date, show_warning=show_warning)
+    if comparator is not None:
+        entry['measured'] = dict(metric='Leave-one-election-out mean absolute error of the House share change', unit='percentage points',
+                                 comparator='the previously published calculator (pooled slope, same-phase anchor) recomputed on the same folds',
+                                 comparator_value=comparator, model_value_at_ruling=comparator + 0.5, source='test registry')
+    return entry
+
+
+def waiver_registry(comparators=None):
+    comparators = COMPARATORS if comparators is None else comparators
+    return dict(schema=1, note='test registry', waivers=[waiver_entry('lobby', BANKS, False)] + [waiver_entry('control_House', industry, True, comparators[industry])
+                                                                                               for industry in (BANKS, CUS, AUTO)])
+
+
+def keys_of(node):
+    """Every dict key anywhere in a nested response."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            yield key
+            yield from keys_of(value)
+    elif isinstance(node, (list, tuple)):
+        for value in node:
+            yield from keys_of(value)
+
+
+class World:
+    """Bundle + anchors + waiver registry installed from the contract examples (optionally mutated) into a temp folder, with the published-workbook check patched.
+    `waivers`: a registry object, the verbatim text of a file, or False for no registry file at all (default: waiver_registry())."""
+
+    def __init__(self, tmp, bundle=None, anchors=None, published=None, waivers=None):
         self.dir = Path(tmp)
         self.bundle = bundle or contract.example('models')
         self.anchors = anchors or contract.example('anchors')
         (self.dir / 'models.json').write_text(json.dumps(self.bundle))
         (self.dir / 'anchors.json').write_text(json.dumps(self.anchors))
+        if waivers is not False:
+            (self.dir / 'waivers.json').write_text(waivers if isinstance(waivers, str) else json.dumps(waiver_registry() if waivers is None else waivers))
         shas = {i['mentat']['workbook']: i['mentat'].get('workbook_sha256') for i in self.anchors['industries'].values()}
         self.published = published if published is not None else shas
-        self.patches = [patch.dict(os.environ, {'MENTAT_GIVING_MODELS': str(self.dir / 'models.json'), 'MENTAT_GIVING_ANCHORS': str(self.dir / 'anchors.json')}),
+        self.patches = [patch.dict(os.environ, {'MENTAT_GIVING_MODELS': str(self.dir / 'models.json'), 'MENTAT_GIVING_ANCHORS': str(self.dir / 'anchors.json'),
+                                                'MENTAT_GIVING_WAIVERS': str(self.dir / 'waivers.json')}),
                         patch.object(gf, 'date', Today), patch.object(gf, '_published_workbook_sha256', lambda name: self.published.get(name))]
 
     def __enter__(self):
         gf._load.cache_clear()
         gf._load_anchors.cache_clear()
+        gf._load_waivers.cache_clear()
         for p in self.patches:
             p.start()
         return self
@@ -56,6 +96,7 @@ class World:
             p.stop()
         gf._load.cache_clear()
         gf._load_anchors.cache_clear()
+        gf._load_waivers.cache_clear()
 
 
 def scenario(sector=BANKS, growth='mean', scores=None, dg=(0, 0, 0), as_of='2026-09-30', control=(1, 1)):
@@ -242,22 +283,17 @@ class SectionFTests(unittest.TestCase):
         self.assertEqual(house['first_day'], '2024-02-21')
         self.assertEqual((senate['days'], senate['expected_days'], senate['partial_window']), (182, 182, False))
 
-    def test_combined_reference_remainder_reproduces_f3(self):
-        # F.3 (equal-weight inputs): projected two-party total, observed D / R, remaining D / R, remaining R share
-        expected = {(BANKS, 'House'): (7978102, 2637920, 2241699, 1546004, 1552479, 0.5010), (BANKS, 'Senate'): (2827597, 754284, 1082965, 166944, 823404, 0.8314),
-                    (CUS, 'Senate'): (232183, 12048, 4500, 177372, 38264, 0.1774)}
-        for (sector, chamber), (total, od, orr, rd, rr, share) in expected.items():
-            c = self.chamber(sector + ':eq', chamber)['combined_reference']
-            with self.subTest(sector=sector, chamber=chamber):
-                self.assertEqual(c['remainder_status'], 'ready')
-                for actual, e in ((c['projected_total_real_2025'], total), (c['observed']['D'], od), (c['observed']['R'], orr),
-                                  (c['projected_remaining_D_real_2025'], rd), (c['projected_remaining_R_real_2025'], rr)):
-                    self.assertLessEqual(abs(round(actual) - e), 1, f'{actual} vs {e}')
-                near(self, c['projected_remaining_R_share'], share, 4)
-        cu_house = self.chamber(CUS + ':eq', 'House')['combined_reference']
-        self.assertEqual(cu_house['remainder_status'], 'budget_inconsistent')           # observed R already exceeds the projected R total; not clipped
-        self.assertLess(cu_house['projected_remaining_R_real_2025'], 0)
-        self.assertLessEqual(abs(round(cu_house['projected_total_real_2025']) - 153466), 1)
+    def test_no_response_carries_a_combined_reference(self):
+        # Owner ruling 2026-10-01 (D7): employee giving and roster PAC candidate giving are separate accounts. The earlier design's combined reference
+        # (ADDENDUM F.3, "open point S1") pooled them into one base and one remainder; no response and no chamber carries it any more.
+        found = [str(key) for response in self.out.values() for key in keys_of(response) if 'combined' in str(key)]
+        self.assertEqual(found, [])
+        for key in (BANKS, CUS, BANKS + ':eq', CUS + ':eq'):
+            for chamber in ('House', 'Senate'):
+                with self.subTest(key=key, chamber=chamber):
+                    s = self.chamber(key, chamber)
+                    self.assertNotIn('combined_reference', s)
+                    self.assertEqual([b['id'] for b in s['bases']], ['employee_candidate', 'pac_candidate'])       # the two accounts stay side by side
 
     def test_each_basis_carries_its_own_remainder(self):
         for sector in (BANKS, CUS):
@@ -634,7 +670,7 @@ class UnusualButValidAnchorTests(unittest.TestCase):
         self.assertEqual(basis['status'], 'unavailable')
         self.assertIn('anchor cycle', basis['reason'])
         self.assertEqual(next(b for b in h['shares']['House']['bases'] if b['id'] == 'pac_candidate')['status'], 'ready')
-        self.assertIsNone(h['shares']['House']['combined_reference'])
+        self.assertNotIn('combined_reference', h['shares']['House'])
 
     def test_an_unavailable_pac_block_leaves_general_giving_and_the_employee_basis(self):
         def edit(i):
@@ -920,6 +956,136 @@ class AnchorContractRefusalTests(unittest.TestCase):
                 self.refused(bundle, 'does not satisfy its contract .*' + pattern)
 
 
+class WaiverTests(unittest.TestCase):
+    """Owner waivers of the refit's backtest gate (mentat/forecast/refit/registry/gate_waivers.json): the ones the registry marks to be shown reach the
+    catalog, beside the error of the model in force. Display only: nothing here changes a gate or a projection."""
+
+    @staticmethod
+    def shown(**world):
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, **world):
+            return gf.catalog('2026-09-30')['waivers']
+
+    @staticmethod
+    def example_error(industry=BANKS, chamber='House'):
+        """The contract example's recorded error of the anchor it uses (previous cycle) for one share model x industry."""
+        return contract.example('models')['share_models']['control_' + chamber]['anchors'][industry]['backtest']['previous_cycle']['loeo_mae']
+
+    def test_the_catalog_carries_the_visible_house_share_waivers_of_the_industries_it_offers(self):
+        waivers = self.shown()
+        # banks lobbying is quiet (show_warning false) and auto is not offered by the console: two cards, in the registry's order
+        self.assertEqual([(w['industry'], w['term'], w['chamber'], w['cell']) for w in waivers],
+                         [(BANKS, 'control_House', 'House', 'control_House / commercial_banks'), (CUS, 'control_House', 'House', 'control_House / credit_unions')])
+        banks = waivers[0]
+        self.assertEqual((banks['gate'], banks['owner'], banks['date'], banks['show_warning'], banks['industry_label'], banks['model_id']),
+                         ('G6', 'Paul Goff', '2026-09-30', True, 'Commercial banks', 'control_House'))
+        self.assertEqual(banks['reason'], RULING)
+        self.assertEqual((banks['metric'], banks['unit']), ('Leave-one-election-out mean absolute error of the House share change', 'percentage points'))
+        self.assertEqual((banks['comparator_value'], banks['published_value']), (1.053, self.example_error(BANKS)))
+        self.assertEqual(banks['comparator_label'], 'the previously published calculator (pooled slope, same-phase anchor) recomputed on the same folds')
+        self.assertNotIn('comparator', banks)                       # a reader that takes `comparator` before `comparator_value` as the figure must not find the label there
+        self.assertEqual(banks['display_text'], 'House share gate waived by owner on 2026-09-30: backtest error 1.053 -> 1.544 pp')
+        self.assertEqual(waivers[1]['display_text'], 'House share gate waived by owner on 2026-09-30: backtest error 1.022 -> 1.477 pp')
+        json.dumps(waivers, allow_nan=False)
+
+    def test_the_published_figure_is_the_error_of_the_anchor_the_model_in_force_uses(self):
+        bundle = same_phase_bundle('House', BANKS)                  # banks House on the same-phase anchor: its error is 20% below the previous cycle's
+        mae = bundle['share_models']['control_House']['anchors'][BANKS]['backtest']['same_phase']['loeo_mae']
+        banks = self.shown(bundle=bundle)[0]
+        self.assertAlmostEqual(mae, 0.8 * self.example_error(BANKS), places=9)
+        self.assertEqual(banks['published_value'], mae)
+        self.assertEqual(banks['display_text'], 'House share gate waived by owner on 2026-09-30: backtest error 1.053 -> %.3f pp' % mae)
+
+    def test_a_waiver_is_not_shown_once_the_model_in_force_is_no_worse_than_the_calculator_it_was_compared_with(self):
+        error = self.example_error(BANKS)
+        for label, comparator, expected in (('comparator above the error', error + 0.1, [CUS]), ('equal', error, [CUS]), ('inside the 1e-9 slack', error - 5e-10, [CUS]),
+                                            ('just outside the slack', error - 2e-9, [BANKS, CUS])):
+            with self.subTest(label):
+                self.assertEqual([w['industry'] for w in self.shown(waivers=waiver_registry({**COMPARATORS, BANKS: comparator}))], expected)
+
+    def test_only_a_g6_cell_marked_show_warning_of_an_offered_industry_is_shown(self):
+        registry = waiver_registry()
+        for entry in registry['waivers']:                           # the banks cell is the control: it stays shown while each variant below is not
+            entry['show_warning'] = entry['show_warning'] and entry['industry'] == BANKS and entry['term'] == 'control_House'
+        registry['waivers'] += [waiver_entry('control_Senate', CUS, True, 1.0, gate='G7'), waiver_entry('control_Senate', 'steel_mills', True, 1.0),
+                                waiver_entry('control_Senate', CUS, 'true', 1.0), waiver_entry('control_Senate', CUS, False, 1.0)]
+        self.assertEqual([w['cell'] for w in self.shown(waivers=registry)], ['control_House / commercial_banks'])
+
+    def test_a_shown_waiver_without_figures_still_names_its_cell_and_ruling(self):
+        registry = waiver_registry()
+        registry['waivers'] = [waiver_entry('pac', BANKS, True)]
+        (waiver,) = self.shown(waivers=registry)
+        self.assertEqual((waiver['term'], waiver['chamber'], waiver['model_id'], waiver['metric'], waiver['comparator_value'], waiver['published_value']),
+                         ('pac', None, None, None, None, None))
+        self.assertEqual((waiver['cell'], waiver['owner'], waiver['date']), ('pac / commercial_banks', 'Paul Goff', '2026-09-30'))
+        self.assertEqual(waiver['display_text'], 'PAC giving gate waived by owner on 2026-09-30')
+
+    def test_a_registry_that_is_missing_unreadable_or_malformed_leaves_the_catalog_whole_with_no_waivers(self):
+        banks = waiver_entry('control_House', BANKS, True, COMPARATORS[BANKS])
+        nested = '{"waivers": ' + '[' * 50000 + ']' * 50000 + '}'                    # far deeper than the JSON parser's recursion limit: unreadable like any other file
+        bad = dict(missing=False, not_json='{"waivers": [', not_an_object='[]', no_list=json.dumps({'waivers': {}}), not_objects=json.dumps({'waivers': ['x', 3, None]}),
+                   no_cell=json.dumps({'waivers': [{'term': 'control_House', 'industry': BANKS, 'show_warning': True}]}),
+                   industry_a_list={'waivers': [dict(banks, industry=[BANKS])]}, industry_an_object={'waivers': [dict(banks, industry={'id': BANKS})]},     # not hashable
+                   industry_a_number={'waivers': [dict(banks, industry=7)]}, nested_too_deeply=nested)
+        for label, waivers in bad.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as tmp, World(tmp, waivers=waivers):
+                catalog = gf.catalog('2026-09-30')
+                self.assertEqual(catalog['waivers'], [])
+                self.assertEqual([i['id'] for i in catalog['industries']], [BANKS, CUS, 'property_casualty'])
+                json.dumps(catalog, allow_nan=False)                                   # and the catalog is still the strict JSON a browser parses
+
+    def test_registry_fields_that_are_not_text_or_not_a_finite_figure_never_reach_the_response(self):
+        # Python's json reads NaN and Infinity, a browser's JSON.parse rejects them: the response passes through strings and finite figures only.
+        banks = waiver_entry('control_House', BANKS, True, COMPARATORS[BANKS])
+        measured, nan = banks['measured'], float('nan')
+        cases = dict(metric_nan=dict(banks, measured=dict(measured, metric=nan)), owner_nan=dict(banks, owner=nan), reason_an_object=dict(banks, reason={'text': 'x'}),
+                     unit_a_number=dict(banks, measured=dict(measured, unit=7)), source_a_list=dict(banks, measured=dict(measured, source=['a'])),
+                     comparator_label_true=dict(banks, measured=dict(measured, comparator=True)))
+        for label, entry in cases.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as tmp, World(tmp, waivers={'schema': 1, 'waivers': [entry]}):
+                catalog = gf.catalog('2026-09-30')
+                (waiver,) = catalog['waivers']                                           # still shown: the registry says so, and the figures are good
+                self.assertEqual(waiver['display_text'], 'House share gate waived by owner on 2026-09-30: backtest error 1.053 -> 1.544 pp')
+                for field in ('metric', 'owner', 'reason', 'unit', 'comparator_label', 'source'):
+                    self.assertTrue(waiver[field] is None or isinstance(waiver[field], str), (label, field))
+                if label in ('metric_nan', 'owner_nan'):
+                    self.assertIsNone(waiver[label.split('_')[0]])                       # the NaN is gone, not carried
+                json.dumps(catalog, allow_nan=False)
+        # the figure itself: NaN, an infinity, or an integer too large for a float is no figure (the entry is shown, without numbers)
+        for label, figure in (('nan', nan), ('infinity', float('inf')), ('integer beyond the float range', 10 ** 400), ('negative integer beyond the float range', -10 ** 400)):
+            with self.subTest(figure=label), tempfile.TemporaryDirectory() as tmp, World(tmp, waivers={'schema': 1, 'waivers': [dict(banks, measured=dict(measured, comparator_value=figure))]}):
+                catalog = gf.catalog('2026-09-30')
+                (waiver,) = catalog['waivers']
+                self.assertEqual((waiver['comparator_value'], waiver['display_text']), (None, 'House share gate waived by owner on 2026-09-30'))
+                json.dumps(catalog, allow_nan=False)
+
+    def test_waivers_are_display_only_no_projection_and_no_other_catalog_field_depends_on_the_registry(self):
+        self.assertEqual(run(scenario(BANKS)), run(scenario(BANKS), waivers=False))
+        with tempfile.TemporaryDirectory() as tmp, World(tmp):
+            with_registry = gf.catalog('2026-09-30')
+        with tempfile.TemporaryDirectory() as tmp, World(tmp, waivers=False):
+            without = gf.catalog('2026-09-30')
+        self.assertEqual(len(with_registry.pop('waivers')), 2)
+        self.assertEqual(without.pop('waivers'), [])
+        self.assertEqual(with_registry, without)
+
+    def test_the_checkouts_own_registry_lists_the_three_shown_house_waivers_with_the_figures_of_the_build_notes(self):
+        with patch.dict(os.environ, {'MENTAT_GIVING_WAIVERS': ''}):
+            path = gf.waiver_path()
+        self.assertEqual(path, gf.WAIVER_FILE)
+        stat = path.stat()
+        entries = {w['cell']: w for w in gf._load_waivers(str(path), stat.st_mtime_ns, stat.st_size)}
+        self.assertEqual(sorted(entries), ['control_House / auto_light_duty_manufacturing', 'control_House / commercial_banks', 'control_House / credit_unions', 'lobby / commercial_banks'])
+        self.assertIs(entries['lobby / commercial_banks']['show_warning'], False)
+        # forecast/BUILD_NOTES.md: House-share LOEO MAE 1.053 to 1.550 (banks), 1.522 to 1.836 (credit unions), 1.338 to 1.766 (auto)
+        figures = {'control_House / commercial_banks': (1.053, 1.550), 'control_House / credit_unions': (1.522, 1.836), 'control_House / auto_light_duty_manufacturing': (1.338, 1.766)}
+        for cell, (before, after) in figures.items():
+            with self.subTest(cell=cell):
+                w = entries[cell]
+                self.assertIs(w['show_warning'], True)
+                self.assertEqual((w['gate'], w['owner'], w['date']), ('G6', 'Paul Goff', '2026-09-30'))
+                self.assertEqual((round(w['measured']['comparator_value'], 3), round(w['measured']['model_value_at_ruling'], 3)), (before, after))
+
+
 class RenderFixtureTests(unittest.TestCase):
     """The golden payload the browser harness (test_giving_forecast_v2.cjs) renders: pinned to the calculator so the two cannot drift."""
 
@@ -939,6 +1105,12 @@ class RenderFixtureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, World(tmp, bundle=same_phase_bundle('House', BANKS)):
             runs['banks_same_phase_house'] = gf.project(scenario(BANKS))          # House on the same-phase anchor, Senate on the previous cycle
         return {'catalog': catalog, 'runs': runs}
+
+    def test_the_payload_and_its_golden_carry_no_combined_reference_and_the_two_shown_house_waivers(self):
+        payload = self.payload()
+        self.assertEqual([str(key) for key in keys_of(payload) if 'combined' in str(key)], [])
+        self.assertNotIn('combined_reference', GOLDEN.read_text(encoding='utf-8'))
+        self.assertEqual([w['cell'] for w in payload['catalog']['waivers']], ['control_House / commercial_banks', 'control_House / credit_unions'])
 
     def test_the_render_payload_is_the_calculators_current_output(self):
         payload = json.loads(json.dumps(self.payload()))

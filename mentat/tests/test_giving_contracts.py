@@ -96,6 +96,90 @@ class ContractTests(unittest.TestCase):
         self.assertNotIn('auto_light_duty_manufacturing', example['industries'])       # auto has no Mentat data
         self.assertEqual(example['industries']['community_banks']['forecast_industry'], None)   # separate, never merged into banks
 
+    def test_the_anchor_exclusion_fields_are_optional_and_typed(self):
+        import copy
+        example = contract.example('anchors')            # built before the 2026-10-01 ruling: carries none of the exclusion fields, and stays valid
+        self.assertEqual(contract.validate_kind(example, 'anchors'), [])
+        row = {'House': {'D': 1.0, 'R': 2.0, 'other': 0.0}, 'Senate': {'D': 0.0, 'R': 0.0, 'other': 0.0}}
+
+        def edited(edit):
+            doc = copy.deepcopy(example)
+            banks = doc['industries']['commercial_banks']
+            banks['general_giving'].update(excluded_funding_sources=['non_giving'], excluded_non_giving={'2024': 191721.37})
+            banks['candidate_receipts'].update(excluded_funding_sources=['non_giving'], excluded_non_giving={'2024': copy.deepcopy(row)})
+            edit(banks['general_giving'], banks['candidate_receipts'])
+            return contract.validate_kind(doc, 'anchors')
+        self.assertEqual(edited(lambda g, c: None), [])
+        self.assertTrue(edited(lambda g, c: g.update(excluded_non_giving=[191721.37])))                       # a per-cycle object, not a list
+        self.assertTrue(edited(lambda g, c: g.update(excluded_non_giving={'2024': 'a lot'})))                  # numbers
+        self.assertTrue(edited(lambda g, c: g.update(excluded_non_giving={'FY24': 1.0})))                      # cycle-year keys
+        self.assertTrue(edited(lambda g, c: g.update(excluded_funding_sources=[1])))                           # names
+        self.assertTrue(edited(lambda g, c: c['excluded_non_giving'].update({'2024': {'House': row['House']}})))   # both chambers, D / R / other each
+        self.assertTrue(edited(lambda g, c: g.update(surprise=1)))                                             # the blocks stay closed objects
+
+    @staticmethod
+    def _reporting_example():
+        """The anchors example (built BEFORE the 2026-10-01 ruling, so its levels still hold the non_giving receipts) rewritten as a snapshot of the current basis: levels after
+        the exclusion + what was left out = the by-source split of the Analysis Amount, and both the general-giving and the candidate block name and report what they left out."""
+        import copy
+        doc = copy.deepcopy(contract.example('anchors'))
+        general, candidates = doc['industries']['commercial_banks']['general_giving'], doc['industries']['commercial_banks']['candidate_receipts']
+        left_out = {cycle: split.get('non_giving', 0.0) for cycle, split in general['by_funding_source'].items()}
+        general.update(excluded_funding_sources=['non_giving'], excluded_non_giving=left_out,
+                       cycles={cycle: round(level - left_out.get(cycle, 0.0), 2) for cycle, level in general['cycles'].items()})
+        zero = {'House': {'D': 0.0, 'R': 0.0, 'other': 0.0}, 'Senate': {'D': 0.0, 'R': 0.0, 'other': 0.0}}
+        candidates.update(excluded_funding_sources=['non_giving'], excluded_non_giving={cycle: copy.deepcopy(zero) for cycle in candidates['cycles']})
+        return doc
+
+    def _problems(self, doc, edit):
+        import copy
+        mutated = copy.deepcopy(doc)
+        edit(mutated['industries']['commercial_banks'])
+        return self._anchor_validator(mutated)
+
+    def test_a_reported_anchor_exclusion_must_add_up_to_the_funding_source_split(self):
+        doc = self._reporting_example()
+        self.assertEqual(self._anchor_validator(doc), [])                     # levels after the exclusion + what was left out = the split of the Analysis Amount
+        self.assertTrue(any('cycles + excluded_non_giving' in p for p in self._problems(doc, lambda i: i['general_giving']['cycles'].update(
+            {'2026': i['general_giving']['cycles']['2026'] + 5}))))
+        self.assertTrue(any('excluded_non_giving.2024' in p for p in self._problems(doc, lambda i: i['general_giving']['excluded_non_giving'].update(
+            {'2024': i['general_giving']['excluded_non_giving']['2024'] + 5}))))
+        self.assertTrue(any('excluded_non_giving.2024' in p for p in self._problems(doc, lambda i: i['general_giving'].update(excluded_funding_sources=[]))))   # the names say what was left out
+
+    def test_a_block_that_reports_the_exclusion_reports_both_the_names_and_the_amounts(self):
+        doc = self._reporting_example()
+        for block in ('general_giving', 'candidate_receipts'):
+            with self.subTest(block=block):
+                names_only = self._problems(doc, lambda i: i[block].pop('excluded_non_giving'))
+                self.assertTrue(any(block + ': excluded_funding_sources is reported without excluded_non_giving' in p for p in names_only), names_only)
+                amounts_only = self._problems(doc, lambda i: i[block].pop('excluded_funding_sources'))
+                self.assertTrue(any(block + ': excluded_non_giving is reported without excluded_funding_sources' in p for p in amounts_only), amounts_only)
+        # the case a reviewer probed: pre-ruling levels (the example's own: they still hold the non_giving receipts) that merely name the bucket they claim to have left out
+        legacy = self._problems(contract.example('anchors'), lambda i: i['general_giving'].update(excluded_funding_sources=['non_giving']))
+        self.assertTrue(any('excluded_funding_sources is reported without excluded_non_giving' in p for p in legacy), legacy)
+
+    def test_the_general_giving_and_candidate_blocks_report_the_exclusion_together_or_not_at_all(self):
+        doc = self._reporting_example()
+        for block in ('general_giving', 'candidate_receipts'):
+            with self.subTest(block=block):
+                problems = self._problems(doc, lambda i: [i[block].pop(key) for key in ('excluded_funding_sources', 'excluded_non_giving')])
+                self.assertTrue(any('must both report the non_giving exclusion or neither' in p for p in problems), problems)
+        # neither block reporting is the pre-ruling format: valid (the example itself)
+        self.assertEqual(self._anchor_validator(contract.example('anchors')), [])
+
+    def test_the_candidate_exclusion_has_one_entry_per_candidate_cycle_and_the_general_blocks_sources(self):
+        doc = self._reporting_example()
+        cycles = doc['industries']['commercial_banks']['candidate_receipts']['cycles']
+        cycle = sorted(cycles)[0]
+        missing = self._problems(doc, lambda i: i['candidate_receipts']['excluded_non_giving'].pop(cycle))
+        self.assertTrue(any('candidate_receipts.excluded_non_giving: its cycles differ from the candidate cycles' in p for p in missing), missing)
+        extra = self._problems(doc, lambda i: i['candidate_receipts']['excluded_non_giving'].update({'1999': i['candidate_receipts']['excluded_non_giving'][cycle]}))
+        self.assertTrue(any('its cycles differ from the candidate cycles' in p for p in extra), extra)
+        for names in ([], ['non_giving', 'pac_activity'], ['pac_activity']):
+            with self.subTest(names=names):
+                problems = self._problems(doc, lambda i: i['candidate_receipts'].update(excluded_funding_sources=names))
+                self.assertTrue(any('candidate_receipts.excluded_funding_sources: differs from general_giving.excluded_funding_sources' in p for p in problems), problems)
+
     def _anchor_validator(self, doc):
         return contract.validate_kind(doc, 'anchors') or contract.check_anchor_invariants(doc)
 

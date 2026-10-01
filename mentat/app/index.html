@@ -458,40 +458,91 @@
 <section id="view-insights" role="tabpanel" aria-labelledby="tab-insights" hidden>
   <div class="insights-heading analysis-intro">
     <p class="insights-subtitle">Compare periods and explain observed changes.</p>
-    <button id="giving-forecast-open" type="button" class="secondary" aria-controls="giving-forecast" aria-expanded="false">Forecast giving</button>
-    <div class="insights-export analysis-page-actions page-actions"><button id="insights-page-sources" type="button" class="secondary" aria-controls="insights-sources" aria-expanded="false">Sources</button><details id="insights-export-menu" class="insights-export-menu"><summary class="secondary">Export</summary><div class="insights-export-list" role="group" aria-label="Export"><button id="insights-export-csv" class="secondary" type="button" aria-label="Export CSV" disabled>CSV</button><button id="insights-export-json" class="secondary" type="button" aria-label="Export JSON" disabled>JSON</button></div></details><button id="insights-refresh" type="submit" form="insights-controls" class="primary">Refresh</button></div>
+    <div class="insights-export analysis-page-actions page-actions"><div id="gf-view-switch" class="segmented gf-view-switch" role="group" aria-label="Insights view"><button id="gf-view-insights" type="button" aria-pressed="true">Observed insights</button><button id="giving-forecast-open" type="button" aria-pressed="false" aria-controls="giving-forecast" aria-expanded="false">Forecast giving</button></div><button id="gf-export" type="button" class="secondary" disabled hidden>Export scenario</button><button id="insights-page-sources" type="button" class="secondary" aria-controls="insights-sources" aria-expanded="false">Sources</button><details id="insights-export-menu" class="insights-export-menu"><summary class="secondary">Export</summary><div class="insights-export-list" role="group" aria-label="Export"><button id="insights-export-csv" class="secondary" type="button" aria-label="Export CSV" disabled>CSV</button><button id="insights-export-json" class="secondary" type="button" aria-label="Export JSON" disabled>JSON</button></div></details><button id="insights-refresh" type="submit" form="insights-controls" class="primary">Refresh</button></div>
   </div>
   <section id="giving-forecast" class="giving-forecast" aria-labelledby="gf-title" hidden>
-    <div class="gf-heading">
-      <div><h2 id="gf-title">Forecast giving</h2><p>Explore how growth and expected political power relate to later giving.</p></div>
-      <button id="gf-export" type="button" class="secondary" disabled>Export scenario</button>
-    </div>
-    <p id="gf-scope" class="gf-scope">Industry scenarios. Company and report filters do not apply.</p>
+    <h2 id="gf-title" class="gf-sr">Forecast giving</h2>
     <p id="gf-load-status" role="status" aria-live="polite">Loading reviewed models…</p>
-    <form id="gf-form" hidden>
-      <div class="gf-settings">
-        <label>Research industry<select id="gf-industry"></select></label>
-        <label>As of<input id="gf-date" type="date" required></label>
-        <label id="gf-signal-field">Political expectations<select id="gf-signal"><option value="control">Expected control</option><option value="seats">Expected seat gain</option></select></label>
-        <label id="gf-slopes-field">Political slopes<select id="gf-slopes"><option value="pooled">Pooled across industries</option><option value="industry">Industry-specific</option></select></label>
+    <form id="gf-form" class="gf-form" hidden>
+      <div class="gf-scope-card card">
+        <label class="gf-field gf-industry-field"><span>Research industry</span><select id="gf-industry"></select></label>
+        <label class="gf-field gf-date-field"><span>As of</span><span class="gf-date-wrap"><input id="gf-date" type="date" required><svg class="gf-calendar" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false"><rect x="3" y="4.5" width="14" height="12.5" rx="2.2"/><path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg></span></label>
+        <label id="gf-signal-field" class="gf-field"><span>Political expectations</span><select id="gf-signal"><option value="control">Expected control</option><option value="seats">Expected seat gain</option></select></label>
+        <label id="gf-slopes-field" class="gf-field"><span>Political slopes</span><select id="gf-slopes"><option value="pooled">Pooled across industries</option><option value="industry">Industry-specific</option></select></label>
+        <span class="gf-divider" aria-hidden="true"></span>
+        <span id="gf-example-pill" class="gf-pill" role="note" tabindex="0" hidden></span>
       </div>
-      <p id="gf-model-note" class="gf-help"></p>
-      <p id="gf-anchors-note" class="gf-help"></p>
-      <div class="gf-horizons" id="gf-horizons"></div>
-      <details class="gf-disclosure">
-        <summary id="gf-sources-summary">Sources and remainder amounts</summary>
-        <p id="gf-sources-note">Use comparable whole-industry amounts in constant 2025 dollars. PAC totals and PAC plus individual candidate giving are separate accounts.</p>
-        <div class="gf-settings gf-provenance">
+      <section class="gf-hero card" aria-labelledby="gf-hero-title">
+        <div class="gf-chart-col">
+          <div class="gf-chart-head">
+            <h2 id="gf-hero-title" class="gf-card-title">Giving by cycle</h2>
+            <div class="segmented gf-account" role="group" aria-label="Giving account"><button id="gf-account-pac" type="button" aria-pressed="false">PAC giving</button><button id="gf-account-general" type="button" aria-pressed="true">General giving</button></div>
+          </div>
+          <div class="gf-legend-row">
+            <span id="gf-basis" class="gf-basis">2025 dollars</span>
+            <ul class="gf-legend" aria-label="Legend"><li><i class="gf-sw gf-sw-observed" aria-hidden="true"></i>Observed</li><li><i class="gf-sw gf-sw-remainder" aria-hidden="true"></i>Remainder</li><li><i class="gf-sw gf-sw-projection" aria-hidden="true"></i>Projection</li><li><i class="gf-sw gf-sw-interval" aria-hidden="true"></i>Prediction interval</li></ul>
+          </div>
+          <div id="gf-progress" class="gf-progress" aria-hidden="true" hidden><span></span></div>
+          <div id="gf-chart-flags" class="gf-chips" hidden></div>
+          <div id="gf-alert" class="gf-alert" role="alert" hidden></div>
+          <div id="gf-chart" class="gf-chart" role="group" aria-label="Giving by cycle" aria-busy="false"></div>
+        </div>
+        <div class="gf-scenario" role="group" aria-labelledby="gf-scenario-title">
+          <div class="gf-scenario-head">
+            <h2 id="gf-scenario-title" class="gf-card-title">Scenario</h2>
+            <div class="segmented gf-tabs" role="tablist" aria-label="Scenario horizon"><button id="gf-tab-current" type="button" role="tab" aria-selected="true" aria-controls="gf-panel-current">Rest of 2026</button><button id="gf-tab-next" type="button" role="tab" aria-selected="false" aria-controls="gf-panel-next" tabindex="-1">2027&#8211;2028</button></div>
+          </div>
+          <div class="gf-horizons" id="gf-horizons"></div>
+          <button id="gf-calculate" type="submit" class="primary gf-calculate" aria-label="Calculate both horizons" title="Calculate both horizons">Calculate</button>
+          <button id="gf-reference" type="button" class="gf-text-button">Use historical example</button>
+        </div>
+      </section>
+      <div class="gf-row3">
+        <section id="gf-house" class="gf-mix card" aria-labelledby="gf-house-title">
+          <h2 id="gf-house-title" class="gf-card-title">House candidate mix</h2>
+          <div id="gf-house-body" class="gf-mix-body"></div>
+          <div id="gf-house-foot" class="gf-mix-foot"></div>
+        </section>
+        <section id="gf-senate" class="gf-mix card" aria-labelledby="gf-senate-title">
+          <h2 id="gf-senate-title" class="gf-card-title">Senate candidate mix</h2>
+          <div id="gf-senate-body" class="gf-mix-body"></div>
+          <div id="gf-senate-foot" class="gf-mix-foot"></div>
+        </section>
+        <section id="gf-lobby" class="gf-lobby-card card" aria-labelledby="gf-lobby-title">
+          <h2 id="gf-lobby-title" class="gf-card-title">Lobbying (Melange LDA)</h2>
+          <div id="gf-lobby-chart" class="gf-lobby-chart"></div>
+          <div id="gf-lobby-foot" class="gf-chips gf-lobby-foot" hidden></div>
+          <ul class="gf-legend gf-lobby-legend" aria-label="Lobbying series"><li><i class="gf-sw gf-sw-fees" aria-hidden="true"></i>Outside-firm fees</li><li><i class="gf-sw gf-sw-inhouse" aria-hidden="true"></i>In-house expenses</li></ul>
+        </section>
+      </div>
+      <p id="gf-footnote" class="gf-footnote"><svg class="gf-info" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="7.6"/><path d="M10 9v5M10 6.2v.2"/></svg><span id="gf-footnote-text">Mentat levels; OpenSecrets data only estimates the relationships.</span> <button id="gf-notes-toggle" type="button" class="gf-notes-link" aria-expanded="false" aria-controls="gf-notes">Sources and notes</button></p>
+      <section id="gf-notes" class="gf-notes card" aria-labelledby="gf-notes-title" hidden>
+        <h2 id="gf-notes-title" class="gf-card-title">Sources and notes</h2>
+        <p class="gf-help">Forecast giving: explore how growth and expected political power relate to later giving.</p>
+        <p id="gf-scope" class="gf-scope">Industry scenarios. Company and report filters do not apply.</p>
+        <p id="gf-model-note" class="gf-help"></p>
+        <div id="gf-anchors-note" class="gf-help"></div>
+        <p id="gf-example-note" class="gf-help" hidden></p>
+        <p id="gf-status-copy" class="gf-help"></p>
+        <h3 id="gf-sources-summary" class="gf-notes-heading">Sources and assumption notes</h3>
+        <p id="gf-sources-note" class="gf-help">Use comparable whole-industry amounts in constant 2025 dollars. PAC totals and PAC plus individual candidate giving are separate accounts.</p>
+        <div class="gf-provenance">
           <label>Assumption source<input id="gf-source" type="text" maxlength="500" placeholder="Forecast provider or scenario description"></label>
           <label>Assumptions dated<input id="gf-source-date" type="date"></label>
         </div>
         <div id="gf-observed"></div>
-      </details>
-      <div class="gf-actions"><button id="gf-calculate" type="submit" class="primary">Calculate both horizons</button><button id="gf-reference" type="button" class="secondary">Use historical example</button><span class="gf-help">Blank inputs stay unknown.</span></div>
+        <h3 class="gf-notes-heading">About the inputs</h3>
+        <div id="gf-input-notes" class="gf-input-notes"></div>
+        <div id="gf-conditioned" class="gf-conditioned" hidden></div>
+        <div id="gf-waivers" class="gf-waivers" hidden></div>
+        <h3 class="gf-notes-heading">Full numbers by outcome</h3>
+        <p id="gf-results-note" class="gf-help" hidden></p>
+        <section id="gf-results" aria-label="Forecast comparison" aria-busy="false"></section>
+        <details class="gf-disclosure" id="gf-evidence"><summary>Model evidence and ordinary p-values</summary><div id="gf-evidence-content"></div></details>
+      </section>
     </form>
-    <p id="gf-status" role="status" aria-live="polite"></p>
-    <section id="gf-results" aria-label="Forecast comparison" aria-busy="false"></section>
-    <details class="gf-disclosure" id="gf-evidence"><summary>Model evidence and ordinary p-values</summary><div id="gf-evidence-content"></div></details>
+    <p id="gf-status" class="gf-sr" role="status" aria-live="polite"></p>
+    <div id="gf-tip" class="gf-tip" role="tooltip" hidden></div>
   </section>
   <form id="insights-controls" class="card insights-controls" aria-label="Insights scope">
     <div class="insights-filter-grid">

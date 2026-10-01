@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "note": "Owner waivers of G6 (hard backtest gate) cells. A listed cell that fails is WAIVED, not HOLD; every other cell stays strict. show_warning false: the cell is not shown in the review packet's warning list or on the card; every waiver is still listed in the receipt's waiver section.",
+  "note": "Owner waivers of G6 (hard backtest gate) cells. A listed cell that fails is WAIVED, not HOLD; every other cell stays strict. show_warning false: the cell is not shown in the review packet's warning list or on the card; every waiver is still listed in the receipt's waiver section. A shown waiver may carry `measured` (the metric, the calculator the refit was compared with and its error `comparator_value`, the model's error when the owner ruled, and the source of both): the console puts the error of the model in force beside `comparator_value` on the card. The refit gates read only the other fields.",
   "waivers": [
     {
       "gate": "G6",
@@ -20,7 +20,15 @@
       "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
       "owner": "Paul Goff",
       "date": "2026-09-30",
-      "show_warning": true
+      "show_warning": true,
+      "measured": {
+        "metric": "Leave-one-election-out mean absolute error of the House share change",
+        "unit": "percentage points",
+        "comparator": "the previously published calculator (pooled slope, same-phase anchor) recomputed on the same folds",
+        "comparator_value": 1.05346532256982,
+        "model_value_at_ruling": 1.54982061704938,
+        "source": "pod-final-20260930 G6 measurement, recorded in the waiver rows of receipt pod-publish-20260930 (published_MAE 1.05346532256982, new_MAE 1.54982061704938) and in forecast/BUILD_NOTES.md"
+      }
     },
     {
       "gate": "G6",
@@ -30,7 +38,15 @@
       "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
       "owner": "Paul Goff",
       "date": "2026-09-30",
-      "show_warning": true
+      "show_warning": true,
+      "measured": {
+        "metric": "Leave-one-election-out mean absolute error of the House share change",
+        "unit": "percentage points",
+        "comparator": "the previously published calculator (pooled slope, same-phase anchor) recomputed on the same folds",
+        "comparator_value": 1.52193157891346,
+        "model_value_at_ruling": 1.83627749233309,
+        "source": "pod-final-20260930 G6 measurement, recorded in the waiver rows of receipt pod-publish-20260930 (published_MAE 1.52193157891346, new_MAE 1.83627749233309) and in forecast/BUILD_NOTES.md"
+      }
     },
     {
       "gate": "G6",
@@ -40,7 +56,15 @@
       "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
       "owner": "Paul Goff",
       "date": "2026-09-30",
-      "show_warning": true
+      "show_warning": true,
+      "measured": {
+        "metric": "Leave-one-election-out mean absolute error of the House share change",
+        "unit": "percentage points",
+        "comparator": "the previously published calculator (pooled slope, same-phase anchor) recomputed on the same folds",
+        "comparator_value": 1.33826878020482,
+        "model_value_at_ruling": 1.76552202686047,
+        "source": "pod-final-20260930 G6 measurement, recorded in the waiver rows of receipt pod-publish-20260930 (published_MAE 1.33826878020482, new_MAE 1.76552202686047) and in forecast/BUILD_NOTES.md"
+      }
     }
   ]
 }

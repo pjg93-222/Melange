@@ -2920,6 +2920,48 @@
     "stepwise_MAE": 11.94183167274799,
     "units": "share percentage points"
    }
+  ],
+  "waivers": [
+   {
+    "cell": "control_House / commercial_banks",
+    "chamber": "House",
+    "comparator_label": "the previously published calculator (pooled slope, same-phase anchor) recomputed on the same folds",
+    "comparator_value": 1.053,
+    "date": "2026-09-30",
+    "display_text": "House share gate waived by owner on 2026-09-30: backtest error 1.053 -> 1.544 pp",
+    "gate": "G6",
+    "industry": "commercial_banks",
+    "industry_label": "Commercial banks",
+    "metric": "Leave-one-election-out mean absolute error of the House share change",
+    "model_id": "control_House",
+    "owner": "Paul Goff",
+    "published_value": 1.544,
+    "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+    "show_warning": true,
+    "source": "test registry",
+    "term": "control_House",
+    "unit": "percentage points"
+   },
+   {
+    "cell": "control_House / credit_unions",
+    "chamber": "House",
+    "comparator_label": "the previously published calculator (pooled slope, same-phase anchor) recomputed on the same folds",
+    "comparator_value": 1.022,
+    "date": "2026-09-30",
+    "display_text": "House share gate waived by owner on 2026-09-30: backtest error 1.022 -> 1.477 pp",
+    "gate": "G6",
+    "industry": "credit_unions",
+    "industry_label": "Credit unions",
+    "metric": "Leave-one-election-out mean absolute error of the House share change",
+    "model_id": "control_House",
+    "owner": "Paul Goff",
+    "published_value": 1.477,
+    "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+    "show_warning": true,
+    "source": "test registry",
+    "term": "control_House",
+    "unit": "percentage points"
+   }
   ]
  },
  "runs": {
@@ -2979,15 +3021,22 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "cycle_given_observed_high": 32389656.22099718,
+          "cycle_given_observed_low": 17532198.74555574,
+          "cycle_given_observed_median": 23824825.032332137,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "observed": {
            "amount_nominal": 13367000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 32389257.2226584,
           "prediction_low": 17523803.404881377,
+          "prob_full_below_observed": 0.00017878506340718303,
           "projected": 23824000.0,
           "projected_remaining": 10457000.0,
           "remainder_reason": null,
@@ -2995,6 +3044,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 10457000.0,
           "remaining_coefficient_low": 10457000.0,
+          "remaining_given_observed_high": 19022656.22099718,
+          "remaining_given_observed_low": 4165198.74555574,
+          "remaining_given_observed_median": 10457825.032332137,
           "remaining_prediction_high": 19022257.2226584,
           "remaining_prediction_low": 4156803.404881377
          },
@@ -3002,15 +3054,22 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "cycle_given_observed_high": 89319975.75673874,
+          "cycle_given_observed_low": 48397541.571895726,
+          "cycle_given_observed_median": 65704247.078321286,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "observed": {
            "amount_nominal": 38975000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 89316437.07598391,
           "prediction_low": 48323543.617698826,
+          "prob_full_below_observed": 0.0005748989470836241,
           "projected": 65696931.0,
           "projected_remaining": 26721931.0,
           "remainder_reason": null,
@@ -3018,6 +3077,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 26721931.0,
           "remaining_coefficient_low": 26721931.0,
+          "remaining_given_observed_high": 50344975.75673874,
+          "remaining_given_observed_low": 9422541.571895726,
+          "remaining_given_observed_median": 26729247.078321286,
           "remaining_prediction_high": 50341437.07598391,
           "remaining_prediction_low": 9348543.617698826
          }
@@ -3058,9 +3120,13 @@
         "anchor_cycle_real_2025": 5926312.257438551,
         "cycle_coefficient_high": 9115504.23205721,
         "cycle_coefficient_low": 4937854.130465554,
+        "cycle_given_observed_high": 12497265.539506834,
+        "cycle_given_observed_low": 4865703.004701973,
+        "cycle_given_observed_median": 6903112.170180351,
         "cycle_prediction_high": 12265136.498471338,
         "cycle_prediction_low": 3669835.246362718,
         "flags": [],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
         "observed": {
@@ -3069,6 +3135,9 @@
          "face_value": true,
          "through": "2026-06-30"
         },
+        "own_last_step_log": 0.05519099440844183,
+        "own_last_step_sigma_ratio": 0.2880075345869496,
+        "prob_full_below_observed": 0.09198238580609475,
         "projected_cycle_real_2025": 6709026.026446754,
         "projected_remaining": 2036026.026446754,
         "remainder_reason": null,
@@ -3076,6 +3145,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 4442504.23205721,
         "remaining_coefficient_low": 264854.1304655541,
+        "remaining_given_observed_high": 7824265.539506834,
+        "remaining_given_observed_low": 192703.00470197294,
+        "remaining_given_observed_median": 2230112.1701803505,
         "remaining_prediction_high": 7592136.498471338,
         "remaining_prediction_low": -1003164.7536372822,
         "status": "ready"
@@ -3085,17 +3157,24 @@
         "anchor_cycle_real_2025": 27179524.641345404,
         "cycle_coefficient_high": 41805942.90868012,
         "cycle_coefficient_low": 22646212.717850417,
+        "cycle_given_observed_high": 56298662.273397736,
+        "cycle_given_observed_low": 17347662.816527847,
+        "cycle_given_observed_median": 30810885.530616827,
         "cycle_prediction_high": 56250930.630805224,
         "cycle_prediction_low": 16830766.448898617,
         "flags": [],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
         "observed": {
          "amount_nominal": 11566804.77,
          "amount_real_2025": 11566804.77,
          "face_value": true,
          "through": "2026-06-30"
         },
+        "own_last_step_log": 0.35704011611437636,
+        "own_last_step_sigma_ratio": 1.8631706982799205,
+        "prob_full_below_observed": 0.0043750920191362175,
         "projected_cycle_real_2025": 30769242.369292747,
         "projected_remaining": 19202437.599292748,
         "remainder_reason": null,
@@ -3103,6 +3182,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 30239138.13868012,
         "remaining_coefficient_low": 11079407.947850417,
+        "remaining_given_observed_high": 44731857.50339773,
+        "remaining_given_observed_low": 5780858.046527848,
+        "remaining_given_observed_median": 19244080.760616828,
         "remaining_prediction_high": 44684125.86080523,
         "remaining_prediction_low": 5263961.678898618,
         "status": "ready"
@@ -3167,12 +3249,15 @@
          "anchor_D": 1312602.53,
          "anchor_R": 686688.26,
          "anchor_share": 0.34346592473424037,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 1999290.79,
          "cycle_coefficient_high": 0.3547295260013078,
          "cycle_coefficient_low": 0.31342755109663323,
          "cycle_prediction_high": 0.37223929148788815,
          "cycle_prediction_low": 0.2959177856100529,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -3194,6 +3279,17 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.3025186501112089,
+          "implied_cycle_R_share_prediction_high": 0.32308976638627324,
+          "implied_cycle_R_share_prediction_low": 0.2819475338361445,
+          "implied_cycle_total_real_2025": 2733832.152106751,
+          "remaining_D_real_2025": 981376.7898207956,
+          "remaining_R_real_2025": 492335.72228595545,
+          "remaining_R_share": 0.3340785385489705,
+          "remaining_total_real_2025": 1473712.512106751,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         },
@@ -3201,6 +3297,7 @@
          "anchor_D": 2177000.0,
          "anchor_R": 2593000.0,
          "anchor_share": 0.5436058700209644,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 4770000.0,
          "cycle_coefficient_high": 0.5548694712880318,
          "cycle_coefficient_low": 0.5135674963833572,
@@ -3228,35 +3325,65 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.5293710382445422,
+          "implied_cycle_R_share_prediction_high": 0.5423645999984704,
+          "implied_cycle_R_share_prediction_low": 0.5163774764906139,
+          "implied_cycle_total_real_2025": 5488210.593194602,
+          "remaining_D_real_2025": 870410.8533704804,
+          "remaining_R_real_2025": 998299.7398241215,
+          "remaining_R_share": 0.5342184838356945,
+          "remaining_total_real_2025": 1868710.5931946018,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         }
        ],
        "chamber": "House",
-       "change_pp": -0.9387386185269878,
-       "combined_reference": {
-        "anchor_share": 0.4844951061704944,
-        "anchor_total_nominal": 6769290.79,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 2637920.15,
-         "D_real_2025": 2637920.15,
-         "R": 2241699.49,
-         "R_real_2025": 2241699.49,
-         "face_value": true,
-         "through": "2026-06-30"
-        },
-        "projected_remaining_D_real_2025": 1549724.225404526,
-        "projected_remaining_R_real_2025": 1548758.5659870077,
-        "projected_remaining_R_share": 0.49984417221547894,
-        "projected_total_real_2025": 7978102.431391533,
-        "raw_projected_cycle_R_share": 0.47510771998522455,
-        "remainder_reason": null,
-        "remainder_status": "ready",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": -0.9875691777072788,
+        "G_prior": 2.265381477651127,
+        "Pres": -2.216550918470836,
+        "RMajNow": 0.0
        },
+       "change_pp": -0.9387386185269878,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.17752326519337014
+        },
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 14.0964163491,
+         "fitted_min": -9.8695090859,
+         "term": "G_prior",
+         "value": 48.8853332525
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.17752326519337014,
        "materiality": [
         {
@@ -3339,6 +3466,7 @@
          "anchor_D": 751277.47,
          "anchor_R": 795893.13,
          "anchor_share": 0.5144184681379028,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 1547170.6,
          "cycle_coefficient_high": 0.7174141252444611,
          "cycle_coefficient_low": 0.5440709335672863,
@@ -3366,6 +3494,17 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.5237498251599372,
+          "implied_cycle_R_share_prediction_high": 0.6120584674962397,
+          "implied_cycle_R_share_prediction_low": 0.4354411828236347,
+          "implied_cycle_total_real_2025": 1987195.7639094787,
+          "remaining_D_real_2025": 421118.48000332137,
+          "remaining_R_real_2025": 719328.2639061572,
+          "remaining_R_share": 0.6307425294058737,
+          "remaining_total_real_2025": 1140446.7439094787,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         },
@@ -3373,6 +3512,7 @@
          "anchor_D": 302500.0,
          "anchor_R": 549500.0,
          "anchor_share": 0.6449530516431925,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 852000.0,
          "cycle_coefficient_high": 0.8479487087497508,
          "cycle_coefficient_low": 0.674605517072576,
@@ -3400,35 +3540,50 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.7669065922399481,
+          "implied_cycle_R_share_prediction_high": 0.805690498625072,
+          "implied_cycle_R_share_prediction_low": 0.7281226858548241,
+          "implied_cycle_total_real_2025": 1324282.2694762684,
+          "remaining_D_real_2025": 79681.46702843888,
+          "remaining_R_real_2025": 254100.80244782966,
+          "remaining_R_share": 0.7612771129111634,
+          "remaining_total_real_2025": 333782.26947626856,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         }
        ],
        "chamber": "Senate",
-       "change_pp": 11.632406126797095,
-       "combined_reference": {
-        "anchor_share": 0.5607742650731048,
-        "anchor_total_nominal": 2399170.6,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 754283.85,
-         "D_real_2025": 754283.85,
-         "R": 1082965.17,
-         "R_real_2025": 1082965.17,
-         "face_value": true,
-         "through": "2026-06-30"
-        },
-        "projected_remaining_D_real_2025": 158752.071423218,
-        "projected_remaining_R_real_2025": 831596.2730538792,
-        "projected_remaining_R_share": 0.8397007756830867,
-        "projected_total_real_2025": 2827597.364477097,
-        "raw_projected_cycle_R_share": 0.6770983263410757,
-        "remainder_reason": null,
-        "remainder_status": "ready",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": 6.34584608239895,
+        "G_prior": 10.025547057811554,
+        "RMajNow": -4.738987013413409
        },
+       "change_pp": 11.632406126797095,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 14.0964163491,
+         "fitted_min": -9.8695090859,
+         "term": "G_prior",
+         "value": 48.8853332525
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5571359723756907,
        "materiality": [
         {
@@ -3495,6 +3650,7 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 36783360.74126618,
@@ -3505,6 +3661,7 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 101433592.70345339,
@@ -3527,6 +3684,7 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 40555199.5899996,
@@ -3537,6 +3695,7 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 111834794.70934486,
@@ -3585,6 +3744,8 @@
         "flags": [],
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
+        "own_last_step_log": 0.05519099440844183,
+        "own_last_step_sigma_ratio": 0.2880075345869496,
         "projected_cycle_real_2025": 6709026.026446754,
         "status": "ready"
        },
@@ -3597,7 +3758,9 @@
         "cycle_prediction_low": 14120778.462905379,
         "flags": [],
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
+        "own_last_step_log": 0.35704011611437636,
+        "own_last_step_sigma_ratio": 1.8631706982799205,
         "projected_cycle_real_2025": 30769242.369292747,
         "status": "ready"
        }
@@ -3661,12 +3824,15 @@
          "anchor_D": 1312602.53,
          "anchor_R": 686688.26,
          "anchor_share": 0.34346592473424037,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 1999290.79,
          "cycle_coefficient_high": 0.3458650381491531,
          "cycle_coefficient_low": 0.331587159151803,
          "cycle_prediction_high": 0.38510448480068127,
          "cycle_prediction_low": 0.2923477125002748,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -3680,6 +3846,7 @@
          "anchor_D": 2177000.0,
          "anchor_R": 2593000.0,
          "anchor_share": 0.5436058700209644,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 4770000.0,
          "cycle_coefficient_high": 0.5460049834358771,
          "cycle_coefficient_low": 0.531727104438527,
@@ -3697,10 +3864,35 @@
         }
        ],
        "chamber": "House",
+       "change_by_term_pp": {
+        "Forecast": -0.9875691777072788,
+        "G_prior": 0.5135865693310464,
+        "Pres": 0.0,
+        "RMajNow": 0.0
+       },
        "change_pp": -0.4739826083762325,
-       "combined_reference": null,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.17752326519337014
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.17752326519337014,
        "materiality": [
         {
@@ -3783,6 +3975,7 @@
          "anchor_D": 751277.47,
          "anchor_R": 795893.13,
          "anchor_share": 0.5144184681379028,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 1547170.6,
          "cycle_coefficient_high": 0.6102594107908963,
          "cycle_coefficient_low": 0.49617271356137455,
@@ -3802,6 +3995,7 @@
          "anchor_D": 302500.0,
          "anchor_R": 549500.0,
          "anchor_share": 0.6449530516431925,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 852000.0,
          "cycle_coefficient_high": 0.740793994296186,
          "cycle_coefficient_low": 0.6267072970666642,
@@ -3819,10 +4013,19 @@
         }
        ],
        "chamber": "Senate",
+       "change_by_term_pp": {
+        "Forecast": 6.34584608239895,
+        "G_prior": 2.2729003348377144,
+        "RMajNow": -4.738987013413409
+       },
        "change_pp": 3.879759403823255,
-       "combined_reference": null,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [],
        "extrapolation": false,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5571359723756907,
        "materiality": [
         {
@@ -4051,7 +4254,6 @@
        "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "House",
-       "combined_reference": null,
        "model_id": "control_House",
        "n": 18,
        "ordinary_p": 0.007383125948010718,
@@ -4107,7 +4309,6 @@
        "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "Senate",
-       "combined_reference": null,
        "model_id": "control_Senate",
        "n": 18,
        "ordinary_p": 0.000721705456463732,
@@ -4224,7 +4425,6 @@
        "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "House",
-       "combined_reference": null,
        "model_id": "control_House",
        "n": 18,
        "ordinary_p": 0.007383125948010718,
@@ -4280,7 +4480,6 @@
        "anchor_reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (interim fixture numbers)",
        "bases": [],
        "chamber": "Senate",
-       "combined_reference": null,
        "model_id": "control_Senate",
        "n": 18,
        "ordinary_p": 0.000721705456463732,
@@ -4385,15 +4584,22 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "cycle_given_observed_high": 32389656.22099718,
+          "cycle_given_observed_low": 17532198.74555574,
+          "cycle_given_observed_median": 23824825.032332137,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "observed": {
            "amount_nominal": 13367000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 32389257.2226584,
           "prediction_low": 17523803.404881377,
+          "prob_full_below_observed": 0.00017878506340718303,
           "projected": 23824000.0,
           "projected_remaining": 10457000.0,
           "remainder_reason": null,
@@ -4401,6 +4607,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 10457000.0,
           "remaining_coefficient_low": 10457000.0,
+          "remaining_given_observed_high": 19022656.22099718,
+          "remaining_given_observed_low": 4165198.74555574,
+          "remaining_given_observed_median": 10457825.032332137,
           "remaining_prediction_high": 19022257.2226584,
           "remaining_prediction_low": 4156803.404881377
          },
@@ -4408,15 +4617,22 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "cycle_given_observed_high": 89319975.75673874,
+          "cycle_given_observed_low": 48397541.571895726,
+          "cycle_given_observed_median": 65704247.078321286,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "observed": {
            "amount_nominal": 38975000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 89316437.07598391,
           "prediction_low": 48323543.617698826,
+          "prob_full_below_observed": 0.0005748989470836241,
           "projected": 65696931.0,
           "projected_remaining": 26721931.0,
           "remainder_reason": null,
@@ -4424,6 +4640,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 26721931.0,
           "remaining_coefficient_low": 26721931.0,
+          "remaining_given_observed_high": 50344975.75673874,
+          "remaining_given_observed_low": 9422541.571895726,
+          "remaining_given_observed_median": 26729247.078321286,
           "remaining_prediction_high": 50341437.07598391,
           "remaining_prediction_low": 9348543.617698826
          }
@@ -4464,9 +4683,13 @@
         "anchor_cycle_real_2025": 5926312.257438551,
         "cycle_coefficient_high": 9115504.23205721,
         "cycle_coefficient_low": 4937854.130465554,
+        "cycle_given_observed_high": 12497265.539506834,
+        "cycle_given_observed_low": 4865703.004701973,
+        "cycle_given_observed_median": 6903112.170180351,
         "cycle_prediction_high": 12265136.498471338,
         "cycle_prediction_low": 3669835.246362718,
         "flags": [],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
         "observed": {
@@ -4475,6 +4698,9 @@
          "face_value": true,
          "through": "2026-06-30"
         },
+        "own_last_step_log": 0.05519099440844183,
+        "own_last_step_sigma_ratio": 0.2880075345869496,
+        "prob_full_below_observed": 0.09198238580609475,
         "projected_cycle_real_2025": 6709026.026446754,
         "projected_remaining": 2036026.026446754,
         "remainder_reason": null,
@@ -4482,6 +4708,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 4442504.23205721,
         "remaining_coefficient_low": 264854.1304655541,
+        "remaining_given_observed_high": 7824265.539506834,
+        "remaining_given_observed_low": 192703.00470197294,
+        "remaining_given_observed_median": 2230112.1701803505,
         "remaining_prediction_high": 7592136.498471338,
         "remaining_prediction_low": -1003164.7536372822,
         "status": "ready"
@@ -4491,17 +4720,24 @@
         "anchor_cycle_real_2025": 27179524.641345404,
         "cycle_coefficient_high": 41805942.90868012,
         "cycle_coefficient_low": 22646212.717850417,
+        "cycle_given_observed_high": 56298662.273397736,
+        "cycle_given_observed_low": 17347662.816527847,
+        "cycle_given_observed_median": 30810885.530616827,
         "cycle_prediction_high": 56250930.630805224,
         "cycle_prediction_low": 16830766.448898617,
         "flags": [],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
         "observed": {
          "amount_nominal": 11566804.77,
          "amount_real_2025": 11566804.77,
          "face_value": true,
          "through": "2026-06-30"
         },
+        "own_last_step_log": 0.35704011611437636,
+        "own_last_step_sigma_ratio": 1.8631706982799205,
+        "prob_full_below_observed": 0.0043750920191362175,
         "projected_cycle_real_2025": 30769242.369292747,
         "projected_remaining": 19202437.599292748,
         "remainder_reason": null,
@@ -4509,6 +4745,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 30239138.13868012,
         "remaining_coefficient_low": 11079407.947850417,
+        "remaining_given_observed_high": 44731857.50339773,
+        "remaining_given_observed_low": 5780858.046527848,
+        "remaining_given_observed_median": 19244080.760616828,
         "remaining_prediction_high": 44684125.86080523,
         "remaining_prediction_low": 5263961.678898618,
         "status": "ready"
@@ -4573,12 +4812,15 @@
          "anchor_D": 1312602.53,
          "anchor_R": 686688.26,
          "anchor_share": 0.34346592473424037,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 1999290.79,
          "cycle_coefficient_high": 0.3551122406340733,
          "cycle_coefficient_low": 0.3139773903830958,
          "cycle_prediction_high": 0.37266269060786383,
          "cycle_prediction_low": 0.2964269404093053,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -4600,6 +4842,17 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.3027700035781584,
+          "implied_cycle_R_share_prediction_high": 0.32331800592184323,
+          "implied_cycle_R_share_prediction_low": 0.2822220012344737,
+          "implied_cycle_total_real_2025": 2733832.152106751,
+          "remaining_D_real_2025": 980689.6316313053,
+          "remaining_R_real_2025": 493022.8804754457,
+          "remaining_R_share": 0.33454481550858456,
+          "remaining_total_real_2025": 1473712.512106751,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         },
@@ -4607,6 +4860,7 @@
          "anchor_D": 2177000.0,
          "anchor_R": 2593000.0,
          "anchor_share": 0.5436058700209644,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 4770000.0,
          "cycle_coefficient_high": 0.5552521859207973,
          "cycle_coefficient_low": 0.5141173356698199,
@@ -4634,35 +4888,65 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.5295298034156298,
+          "implied_cycle_R_share_prediction_high": 0.5425087654613682,
+          "implied_cycle_R_share_prediction_low": 0.5165508413698915,
+          "implied_cycle_total_real_2025": 5488210.593194602,
+          "remaining_D_real_2025": 869539.5166766869,
+          "remaining_R_real_2025": 999171.0765179149,
+          "remaining_R_share": 0.5346847607953086,
+          "remaining_total_real_2025": 1868710.5931946018,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         }
        ],
        "chamber": "House",
-       "change_pp": -0.8921109225655788,
-       "combined_reference": {
-        "anchor_share": 0.4844951061704944,
-        "anchor_total_nominal": 6769290.79,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 2637920.15,
-         "D_real_2025": 2637920.15,
-         "R": 2241699.49,
-         "R_real_2025": 2241699.49,
-         "face_value": true,
-         "through": "2026-06-30"
-        },
-        "projected_remaining_D_real_2025": 1546004.2200593268,
-        "projected_remaining_R_real_2025": 1552478.5713322065,
-        "projected_remaining_R_share": 0.5010447615347207,
-        "projected_total_real_2025": 7978102.431391533,
-        "raw_projected_cycle_R_share": 0.4755739969448386,
-        "remainder_reason": null,
-        "remainder_status": "ready",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": -0.9409414817458697,
+        "G_prior": 2.265381477651127,
+        "Pres": -2.216550918470836,
+        "RMajNow": 0.0
        },
+       "change_pp": -0.8921109225655788,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.1903485027624309
+        },
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 14.0964163491,
+         "fitted_min": -9.8695090859,
+         "term": "G_prior",
+         "value": 48.8853332525
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.1903485027624309,
        "materiality": [
         {
@@ -4745,6 +5029,7 @@
          "anchor_D": 751277.47,
          "anchor_R": 795893.13,
          "anchor_share": 0.5144184681379028,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 1547170.6,
          "cycle_coefficient_high": 0.7140443227478334,
          "cycle_coefficient_low": 0.5416465301006782,
@@ -4772,6 +5057,17 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.5220871849097102,
+          "implied_cycle_R_share_prediction_high": 0.6102480411930667,
+          "implied_cycle_R_share_prediction_low": 0.43392632862635344,
+          "implied_cycle_total_real_2025": 1987195.7639094787,
+          "remaining_D_real_2025": 424422.471665478,
+          "remaining_R_real_2025": 716024.2722440007,
+          "remaining_R_share": 0.6278454264242558,
+          "remaining_total_real_2025": 1140446.7439094787,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         },
@@ -4779,6 +5075,7 @@
          "anchor_D": 302500.0,
          "anchor_R": 549500.0,
          "anchor_share": 0.6449530516431925,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 852000.0,
          "cycle_coefficient_high": 0.844578906253123,
          "cycle_coefficient_low": 0.6721811136059679,
@@ -4806,35 +5103,50 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.7661763841639211,
+          "implied_cycle_R_share_prediction_high": 0.8048953850053651,
+          "implied_cycle_R_share_prediction_low": 0.7274573833224772,
+          "implied_cycle_total_real_2025": 1324282.2694762684,
+          "remaining_D_real_2025": 80648.46863654979,
+          "remaining_R_real_2025": 253133.80083971878,
+          "remaining_R_share": 0.7583800099295455,
+          "remaining_total_real_2025": 333782.26947626856,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         }
        ],
        "chamber": "Senate",
-       "change_pp": 11.342695828635298,
-       "combined_reference": {
-        "anchor_share": 0.5607742650731048,
-        "anchor_total_nominal": 2399170.6,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 754283.85,
-         "D_real_2025": 754283.85,
-         "R": 1082965.17,
-         "R_real_2025": 1082965.17,
-         "face_value": true,
-         "through": "2026-06-30"
-        },
-        "projected_remaining_D_real_2025": 166943.9121786597,
-        "projected_remaining_R_real_2025": 823404.4322984375,
-        "projected_remaining_R_share": 0.8314290995590992,
-        "projected_total_real_2025": 2827597.364477097,
-        "raw_projected_cycle_R_share": 0.6742012233594578,
-        "remainder_reason": null,
-        "remainder_status": "ready",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": 6.056135784237153,
+        "G_prior": 10.025547057811554,
+        "RMajNow": -4.738987013413409
        },
+       "change_pp": 11.342695828635298,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 14.0964163491,
+         "fitted_min": -9.8695090859,
+         "term": "G_prior",
+         "value": 48.8853332525
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5639529612999999,
        "materiality": [
         {
@@ -4901,6 +5213,7 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 36783360.74126618,
@@ -4911,6 +5224,7 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 101433592.70345339,
@@ -4933,6 +5247,7 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 40555199.5899996,
@@ -4943,6 +5258,7 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 111834794.70934486,
@@ -4991,6 +5307,8 @@
         "flags": [],
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
+        "own_last_step_log": 0.05519099440844183,
+        "own_last_step_sigma_ratio": 0.2880075345869496,
         "projected_cycle_real_2025": 6709026.026446754,
         "status": "ready"
        },
@@ -5003,7 +5321,9 @@
         "cycle_prediction_low": 14120778.462905379,
         "flags": [],
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
+        "own_last_step_log": 0.35704011611437636,
+        "own_last_step_sigma_ratio": 1.8631706982799205,
         "projected_cycle_real_2025": 30769242.369292747,
         "status": "ready"
        }
@@ -5067,12 +5387,15 @@
          "anchor_D": 1312602.53,
          "anchor_R": 686688.26,
          "anchor_share": 0.34346592473424037,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 1999290.79,
          "cycle_coefficient_high": 0.34608042733472477,
          "cycle_coefficient_low": 0.3323043238854595,
          "cycle_prediction_high": 0.38553472040124126,
          "cycle_prediction_low": 0.292850030818943,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -5086,6 +5409,7 @@
          "anchor_D": 2177000.0,
          "anchor_R": 2593000.0,
          "anchor_share": 0.5436058700209644,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 4770000.0,
          "cycle_coefficient_high": 0.5462203726214487,
          "cycle_coefficient_low": 0.5324442691721836,
@@ -5103,10 +5427,35 @@
         }
        ],
        "chamber": "House",
+       "change_by_term_pp": {
+        "Forecast": -0.9409414817458697,
+        "G_prior": 0.5135865693310464,
+        "Pres": 0.0,
+        "RMajNow": 0.0
+       },
        "change_pp": -0.4273549124148234,
-       "combined_reference": null,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.1903485027624309
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.1903485027624309,
        "materiality": [
         {
@@ -5189,6 +5538,7 @@
          "anchor_D": 751277.47,
          "anchor_R": 795893.13,
          "anchor_share": 0.5144184681379028,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 1547170.6,
          "cycle_coefficient_high": 0.6067741092320769,
          "cycle_coefficient_low": 0.493863809156958,
@@ -5208,6 +5558,7 @@
          "anchor_D": 302500.0,
          "anchor_R": 549500.0,
          "anchor_share": 0.6449530516431925,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 852000.0,
          "cycle_coefficient_high": 0.7373086927373664,
          "cycle_coefficient_low": 0.6243983926622476,
@@ -5225,10 +5576,19 @@
         }
        ],
        "chamber": "Senate",
+       "change_by_term_pp": {
+        "Forecast": 6.056135784237153,
+        "G_prior": 2.2729003348377144,
+        "RMajNow": -4.738987013413409
+       },
        "change_pp": 3.590049105661458,
-       "combined_reference": null,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [],
        "extrapolation": false,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5639529612999999,
        "materiality": [
         {
@@ -5390,15 +5750,22 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "cycle_given_observed_high": 32389656.22099718,
+          "cycle_given_observed_low": 17532198.74555574,
+          "cycle_given_observed_median": 23824825.032332137,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "observed": {
            "amount_nominal": 13367000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 32389257.2226584,
           "prediction_low": 17523803.404881377,
+          "prob_full_below_observed": 0.00017878506340718303,
           "projected": 23824000.0,
           "projected_remaining": 10457000.0,
           "remainder_reason": null,
@@ -5406,6 +5773,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 10457000.0,
           "remaining_coefficient_low": 10457000.0,
+          "remaining_given_observed_high": 19022656.22099718,
+          "remaining_given_observed_low": 4165198.74555574,
+          "remaining_given_observed_median": 10457825.032332137,
           "remaining_prediction_high": 19022257.2226584,
           "remaining_prediction_low": 4156803.404881377
          },
@@ -5413,15 +5783,22 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "cycle_given_observed_high": 89319975.75673874,
+          "cycle_given_observed_low": 48397541.571895726,
+          "cycle_given_observed_median": 65704247.078321286,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "observed": {
            "amount_nominal": 38975000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 89316437.07598391,
           "prediction_low": 48323543.617698826,
+          "prob_full_below_observed": 0.0005748989470836241,
           "projected": 65696931.0,
           "projected_remaining": 26721931.0,
           "remainder_reason": null,
@@ -5429,6 +5806,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 26721931.0,
           "remaining_coefficient_low": 26721931.0,
+          "remaining_given_observed_high": 50344975.75673874,
+          "remaining_given_observed_low": 9422541.571895726,
+          "remaining_given_observed_median": 26729247.078321286,
           "remaining_prediction_high": 50341437.07598391,
           "remaining_prediction_low": 9348543.617698826
          }
@@ -5469,9 +5849,13 @@
         "anchor_cycle_real_2025": 5926312.257438551,
         "cycle_coefficient_high": 9115504.23205721,
         "cycle_coefficient_low": 4937854.130465554,
+        "cycle_given_observed_high": 12497265.539506834,
+        "cycle_given_observed_low": 4865703.004701973,
+        "cycle_given_observed_median": 6903112.170180351,
         "cycle_prediction_high": 12265136.498471338,
         "cycle_prediction_low": 3669835.246362718,
         "flags": [],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
         "observed": {
@@ -5480,6 +5864,9 @@
          "face_value": true,
          "through": "2026-06-30"
         },
+        "own_last_step_log": 0.05519099440844183,
+        "own_last_step_sigma_ratio": 0.2880075345869496,
+        "prob_full_below_observed": 0.09198238580609475,
         "projected_cycle_real_2025": 6709026.026446754,
         "projected_remaining": 2036026.026446754,
         "remainder_reason": null,
@@ -5487,6 +5874,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 4442504.23205721,
         "remaining_coefficient_low": 264854.1304655541,
+        "remaining_given_observed_high": 7824265.539506834,
+        "remaining_given_observed_low": 192703.00470197294,
+        "remaining_given_observed_median": 2230112.1701803505,
         "remaining_prediction_high": 7592136.498471338,
         "remaining_prediction_low": -1003164.7536372822,
         "status": "ready"
@@ -5496,17 +5886,24 @@
         "anchor_cycle_real_2025": 27179524.641345404,
         "cycle_coefficient_high": 41805942.90868012,
         "cycle_coefficient_low": 22646212.717850417,
+        "cycle_given_observed_high": 56298662.273397736,
+        "cycle_given_observed_low": 17347662.816527847,
+        "cycle_given_observed_median": 30810885.530616827,
         "cycle_prediction_high": 56250930.630805224,
         "cycle_prediction_low": 16830766.448898617,
         "flags": [],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
         "observed": {
          "amount_nominal": 11566804.77,
          "amount_real_2025": 11566804.77,
          "face_value": true,
          "through": "2026-06-30"
         },
+        "own_last_step_log": 0.35704011611437636,
+        "own_last_step_sigma_ratio": 1.8631706982799205,
+        "prob_full_below_observed": 0.0043750920191362175,
         "projected_cycle_real_2025": 30769242.369292747,
         "projected_remaining": 19202437.599292748,
         "remainder_reason": null,
@@ -5514,6 +5911,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 30239138.13868012,
         "remaining_coefficient_low": 11079407.947850417,
+        "remaining_given_observed_high": 44731857.50339773,
+        "remaining_given_observed_low": 5780858.046527848,
+        "remaining_given_observed_median": 19244080.760616828,
         "remaining_prediction_high": 44684125.86080523,
         "remaining_prediction_low": 5263961.678898618,
         "status": "ready"
@@ -5578,12 +5978,15 @@
          "anchor_D": 1145626.0,
          "anchor_R": 724679.59,
          "anchor_share": 0.387465873959132,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 1870305.5899999999,
          "cycle_coefficient_high": 0.5138623127874883,
          "cycle_coefficient_low": 0.4579632682645352,
          "cycle_prediction_high": 0.538055959416339,
          "cycle_prediction_low": 0.43376962163568455,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -5605,6 +6008,17 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.38436714133350297,
+          "implied_cycle_R_share_prediction_high": 0.412475684996417,
+          "implied_cycle_R_share_prediction_low": 0.35625859767058904,
+          "implied_cycle_total_real_2025": 2733832.152106751,
+          "remaining_D_real_2025": 757616.7529158607,
+          "remaining_R_real_2025": 716095.7591908904,
+          "remaining_R_share": 0.4859127905260118,
+          "remaining_total_real_2025": 1473712.512106751,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         },
@@ -5612,6 +6026,7 @@
          "anchor_D": 2113500.0,
          "anchor_R": 1802700.0,
          "anchor_share": 0.46031867626781064,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 3916200.0,
          "cycle_coefficient_high": 0.5867151150961669,
          "cycle_coefficient_low": 0.5308160705732139,
@@ -5639,35 +6054,65 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.5377292165323082,
+          "implied_cycle_R_share_prediction_high": 0.5554837269348274,
+          "implied_cycle_R_share_prediction_low": 0.519974706129789,
+          "implied_cycle_total_real_2025": 5488210.593194602,
+          "remaining_D_real_2025": 824539.4107517542,
+          "remaining_R_real_2025": 1044171.1824428476,
+          "remaining_R_share": 0.5587655928346904,
+          "remaining_total_real_2025": 1868710.5931946018,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         }
        ],
        "chamber": "House",
-       "change_pp": 9.844691656687976,
-       "combined_reference": {
-        "anchor_share": 0.43677130362886246,
-        "anchor_total_nominal": 5786505.59,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 2637920.15,
-         "D_real_2025": 2637920.15,
-         "R": 2241699.49,
-         "R_real_2025": 2241699.49,
-         "face_value": true,
-         "through": "2026-06-30"
-        },
-        "projected_remaining_D_real_2025": 1070156.4975228328,
-        "projected_remaining_R_real_2025": 2028326.2938687,
-        "projected_remaining_R_share": 0.6546191895930382,
-        "projected_total_real_2025": 7978102.431391533,
-        "raw_projected_cycle_R_share": 0.5352182201957423,
-        "remainder_reason": null,
-        "remainder_status": "ready",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": -2.4844129249484888,
+        "G_prior": 1.914406516783809,
+        "Pres": 0.0,
+        "RMajNow": 10.414698064852656
        },
+       "change_pp": 9.844691656687976,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.17752326519337014
+        },
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 14.0964163491,
+         "fitted_min": -9.8695090859,
+         "term": "G_prior",
+         "value": 48.8853332525
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.17752326519337014,
        "materiality": [
         {
@@ -5750,6 +6195,7 @@
          "anchor_D": 751277.47,
          "anchor_R": 795893.13,
          "anchor_share": 0.5144184681379028,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 1547170.6,
          "cycle_coefficient_high": 0.7174141252444611,
          "cycle_coefficient_low": 0.5440709335672863,
@@ -5777,6 +6223,17 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.5237498251599372,
+          "implied_cycle_R_share_prediction_high": 0.6120584674962397,
+          "implied_cycle_R_share_prediction_low": 0.4354411828236347,
+          "implied_cycle_total_real_2025": 1987195.7639094787,
+          "remaining_D_real_2025": 421118.48000332137,
+          "remaining_R_real_2025": 719328.2639061572,
+          "remaining_R_share": 0.6307425294058737,
+          "remaining_total_real_2025": 1140446.7439094787,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         },
@@ -5784,6 +6241,7 @@
          "anchor_D": 302500.0,
          "anchor_R": 549500.0,
          "anchor_share": 0.6449530516431925,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 852000.0,
          "cycle_coefficient_high": 0.8479487087497508,
          "cycle_coefficient_low": 0.674605517072576,
@@ -5811,35 +6269,50 @@
          "remainder_reason": null,
          "remainder_starts": "2026-07-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.7669065922399481,
+          "implied_cycle_R_share_prediction_high": 0.805690498625072,
+          "implied_cycle_R_share_prediction_low": 0.7281226858548241,
+          "implied_cycle_total_real_2025": 1324282.2694762684,
+          "remaining_D_real_2025": 79681.46702843888,
+          "remaining_R_real_2025": 254100.80244782966,
+          "remaining_R_share": 0.7612771129111634,
+          "remaining_total_real_2025": 333782.26947626856,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         }
        ],
        "chamber": "Senate",
-       "change_pp": 11.632406126797095,
-       "combined_reference": {
-        "anchor_share": 0.5607742650731048,
-        "anchor_total_nominal": 2399170.6,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 754283.85,
-         "D_real_2025": 754283.85,
-         "R": 1082965.17,
-         "R_real_2025": 1082965.17,
-         "face_value": true,
-         "through": "2026-06-30"
-        },
-        "projected_remaining_D_real_2025": 158752.071423218,
-        "projected_remaining_R_real_2025": 831596.2730538792,
-        "projected_remaining_R_share": 0.8397007756830867,
-        "projected_total_real_2025": 2827597.364477097,
-        "raw_projected_cycle_R_share": 0.6770983263410757,
-        "remainder_reason": null,
-        "remainder_status": "ready",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": 6.34584608239895,
+        "G_prior": 10.025547057811554,
+        "RMajNow": -4.738987013413409
        },
+       "change_pp": 11.632406126797095,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 14.0964163491,
+         "fitted_min": -9.8695090859,
+         "term": "G_prior",
+         "value": 48.8853332525
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5571359723756907,
        "materiality": [
         {
@@ -5906,6 +6379,7 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 36783360.74126618,
@@ -5916,6 +6390,7 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 101433592.70345339,
@@ -5938,6 +6413,7 @@
           "base_level": 23824000.0,
           "coefficient_high": 23824000.0,
           "coefficient_low": 23824000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 40555199.5899996,
@@ -5948,6 +6424,7 @@
           "base_level": 65696931.0,
           "coefficient_high": 65696931.0,
           "coefficient_low": 65696931.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 111834794.70934486,
@@ -5996,6 +6473,8 @@
         "flags": [],
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
+        "own_last_step_log": 0.05519099440844183,
+        "own_last_step_sigma_ratio": 0.2880075345869496,
         "projected_cycle_real_2025": 6709026.026446754,
         "status": "ready"
        },
@@ -6008,7 +6487,9 @@
         "cycle_prediction_low": 14120778.462905379,
         "flags": [],
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
+        "own_last_step_log": 0.35704011611437636,
+        "own_last_step_sigma_ratio": 1.8631706982799205,
         "projected_cycle_real_2025": 30769242.369292747,
         "status": "ready"
        }
@@ -6072,12 +6553,15 @@
          "anchor_D": 1312602.53,
          "anchor_R": 686688.26,
          "anchor_share": 0.34346592473424037,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 1999290.79,
          "cycle_coefficient_high": 0.3458650381491531,
          "cycle_coefficient_low": 0.331587159151803,
          "cycle_prediction_high": 0.38332092710816457,
          "cycle_prediction_low": 0.2941312701927915,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -6091,6 +6575,7 @@
          "anchor_D": 2177000.0,
          "anchor_R": 2593000.0,
          "anchor_share": 0.5436058700209644,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 4770000.0,
          "cycle_coefficient_high": 0.5460049834358771,
          "cycle_coefficient_low": 0.531727104438527,
@@ -6108,10 +6593,35 @@
         }
        ],
        "chamber": "House",
+       "change_by_term_pp": {
+        "Forecast": -0.9875691777072788,
+        "G_prior": 0.5135865693310464,
+        "Pres": 0.0,
+        "RMajNow": 0.0
+       },
        "change_pp": -0.4739826083762325,
-       "combined_reference": null,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.17752326519337014
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.17752326519337014,
        "materiality": [
         {
@@ -6194,6 +6704,7 @@
          "anchor_D": 751277.47,
          "anchor_R": 795893.13,
          "anchor_share": 0.5144184681379028,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 1547170.6,
          "cycle_coefficient_high": 0.6102594107908963,
          "cycle_coefficient_low": 0.49617271356137455,
@@ -6213,6 +6724,7 @@
          "anchor_D": 302500.0,
          "anchor_R": 549500.0,
          "anchor_share": 0.6449530516431925,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 852000.0,
          "cycle_coefficient_high": 0.740793994296186,
          "cycle_coefficient_low": 0.6267072970666642,
@@ -6230,10 +6742,19 @@
         }
        ],
        "chamber": "Senate",
+       "change_by_term_pp": {
+        "Forecast": 6.34584608239895,
+        "G_prior": 2.2729003348377144,
+        "RMajNow": -4.738987013413409
+       },
        "change_pp": 3.879759403823255,
-       "combined_reference": null,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [],
        "extrapolation": false,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5571359723756907,
        "materiality": [
         {
@@ -6460,15 +6981,22 @@
           "base_level": 2054500.0,
           "coefficient_high": 2054500.0,
           "coefficient_low": 2054500.0,
+          "cycle_given_observed_high": 2793595.273970511,
+          "cycle_given_observed_low": 1520490.7610926612,
+          "cycle_given_observed_median": 2055443.972181792,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "observed": {
            "amount_nominal": 1311000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 2793138.388345856,
           "prediction_low": 1511192.6668623567,
+          "prob_full_below_observed": 0.0023715654405043196,
           "projected": 2054500.0,
           "projected_remaining": 743500.0,
           "remainder_reason": null,
@@ -6476,6 +7004,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 743500.0,
           "remaining_coefficient_low": 743500.0,
+          "remaining_given_observed_high": 1482595.2739705108,
+          "remaining_given_observed_low": 209490.76109266118,
+          "remaining_given_observed_median": 744443.9721817919,
           "remaining_prediction_high": 1482138.3883458562,
           "remaining_prediction_low": 200192.6668623567
          },
@@ -6483,15 +7014,22 @@
           "base_level": 6233000.0,
           "coefficient_high": 6233000.0,
           "coefficient_low": 6233000.0,
+          "cycle_given_observed_high": 8473967.84739632,
+          "cycle_given_observed_low": 4586086.703846021,
+          "cycle_given_observed_median": 6233136.2448052615,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
+          "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "observed": {
            "amount_nominal": 3424000.0,
+           "face_value": true,
            "through": "2026-06-30",
            "through_quarter": "Q2"
           },
           "prediction_high": 8473901.95889984,
           "prediction_low": 4584698.901218335,
+          "prob_full_below_observed": 0.00011284973561609402,
           "projected": 6233000.0,
           "projected_remaining": 2809000.0,
           "remainder_reason": null,
@@ -6499,6 +7037,9 @@
           "remainder_status": "ready",
           "remaining_coefficient_high": 2809000.0,
           "remaining_coefficient_low": 2809000.0,
+          "remaining_given_observed_high": 5049967.84739632,
+          "remaining_given_observed_low": 1162086.7038460206,
+          "remaining_given_observed_median": 2809136.2448052615,
           "remaining_prediction_high": 5049901.958899841,
           "remaining_prediction_low": 1160698.9012183351
          }
@@ -6539,12 +7080,17 @@
         "anchor_cycle_real_2025": 84118.75808538162,
         "cycle_coefficient_high": 122382.32290175669,
         "cycle_coefficient_low": 73297.97897606921,
+        "cycle_given_observed_high": 139303.76951076844,
+        "cycle_given_observed_low": 66395.01191266986,
+        "cycle_given_observed_median": 94844.23180237273,
         "cycle_prediction_high": 139181.8266490837,
         "cycle_prediction_low": 64450.77742593724,
         "flag_text": "One PAC (SchoolsFirst Federal Credit Union): a thin base, not the industry's PAC giving.",
         "flags": [
+         "interval_not_supported_by_own_history",
          "single_pac_thin_base"
         ],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
         "observed": {
@@ -6553,6 +7099,9 @@
          "face_value": true,
          "through": "2026-05-31"
         },
+        "own_last_step_log": 0.702051402752921,
+        "own_last_step_sigma_ratio": 7.170141485562445,
+        "prob_full_below_observed": 0.007069362001355439,
         "projected_cycle_real_2025": 94712.07384011542,
         "projected_remaining": 40212.07384011542,
         "remainder_reason": null,
@@ -6560,6 +7109,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 67882.32290175669,
         "remaining_coefficient_low": 18797.978976069207,
+        "remaining_given_observed_high": 84803.76951076844,
+        "remaining_given_observed_low": 11895.011912669856,
+        "remaining_given_observed_median": 40344.23180237273,
         "remaining_prediction_high": 84681.8266490837,
         "remaining_prediction_low": 9950.777425937238,
         "status": "ready"
@@ -6569,17 +7121,26 @@
         "anchor_cycle_real_2025": 811088.4212968951,
         "cycle_coefficient_high": 1180032.6982511985,
         "cycle_coefficient_low": 706752.4937970353,
+        "cycle_given_observed_high": 1342055.4320731584,
+        "cycle_given_observed_low": 622144.6165992426,
+        "cycle_given_observed_median": 913273.3592034915,
         "cycle_prediction_high": 1342016.580124018,
         "cycle_prediction_low": 621446.1613983996,
-        "flags": [],
+        "flags": [
+         "interval_not_supported_by_own_history"
+        ],
+        "given_observed_kind": "95% prediction interval conditioned on the giving already observed (the full cycle cannot fall below it)",
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
         "observed": {
          "amount_nominal": 272141.16,
          "amount_real_2025": 272141.16,
          "face_value": true,
          "through": "2026-05-31"
         },
+        "own_last_step_log": 0.6535683898242353,
+        "own_last_step_sigma_ratio": 6.674978224037883,
+        "prob_full_below_observed": 0.00023457163886797527,
         "projected_cycle_real_2025": 913231.1056085853,
         "projected_remaining": 641089.9456085854,
         "remainder_reason": null,
@@ -6587,6 +7148,9 @@
         "remainder_status": "ready",
         "remaining_coefficient_high": 907891.5382511986,
         "remaining_coefficient_low": 434611.33379703533,
+        "remaining_given_observed_high": 1069914.2720731585,
+        "remaining_given_observed_low": 350003.4565992426,
+        "remaining_given_observed_median": 641132.1992034914,
         "remaining_prediction_high": 1069875.420124018,
         "remaining_prediction_low": 349305.00139839965,
         "status": "ready"
@@ -6651,6 +7215,7 @@
          "anchor_D": 30832.81,
          "anchor_R": 24291.13,
          "anchor_share": 0.44066389303812464,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 55123.94,
          "cycle_coefficient_high": 0.44711024538797534,
          "cycle_coefficient_low": 0.4091986178569729,
@@ -6680,6 +7245,17 @@
          "remainder_reason": "The projected total and share are incompatible with the giving already observed (a remaining amount is negative). Revise the scenario; no clipping is applied.",
          "remainder_starts": "2026-06-01",
          "remainder_status": "budget_inconsistent",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.5995075887592564,
+          "implied_cycle_R_share_prediction_high": 0.6150751843980835,
+          "implied_cycle_R_share_prediction_low": 0.5839399931204292,
+          "implied_cycle_total_real_2025": 108736.47333222261,
+          "remaining_D_real_2025": 25940.592394636653,
+          "remaining_R_real_2025": 19422.340937585956,
+          "remaining_R_share": 0.42815443162247413,
+          "remaining_total_real_2025": 45362.93333222261,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": true
         },
@@ -6687,13 +7263,15 @@
          "anchor_D": 45000.0,
          "anchor_R": 30800.0,
          "anchor_share": 0.40633245382585753,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 75800.0,
          "cycle_coefficient_high": 0.4127788061757082,
          "cycle_coefficient_low": 0.3748671786447058,
          "cycle_prediction_high": 0.43113904152085236,
          "cycle_prediction_low": 0.3565069432995617,
          "flags": [
-          "thin_base"
+          "thin_base",
+          "anchor_share_outside_fitted_range"
          ],
          "id": "pac_candidate",
          "interval_outside_share_range": false,
@@ -6716,35 +7294,65 @@
          "remainder_reason": null,
          "remainder_starts": "2026-06-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.4969254627508404,
+          "implied_cycle_R_share_prediction_high": 0.513094477713975,
+          "implied_cycle_R_share_prediction_low": 0.48075644778770565,
+          "implied_cycle_total_real_2025": 87347.68280470115,
+          "remaining_D_real_2025": 22942.395106761403,
+          "remaining_R_real_2025": 14905.28769793974,
+          "remaining_R_share": 0.393822992410207,
+          "remaining_total_real_2025": 37847.682804701144,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": true
         }
        ],
        "chamber": "House",
-       "change_pp": -1.2509461415650518,
-       "combined_reference": {
-        "anchor_share": 0.42078729069717885,
-        "anchor_total_nominal": 130923.94,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 38607.54,
-         "D_real_2025": 38607.54,
-         "R": 74266.0,
-         "R_real_2025": 74266.0,
-         "face_value": true,
-         "through": "2026-05-31"
-        },
-        "projected_remaining_D_real_2025": 52201.87826637725,
-        "projected_remaining_R_real_2025": -11609.10796045098,
-        "projected_remaining_R_share": null,
-        "projected_total_real_2025": 153466.31030592628,
-        "raw_projected_cycle_R_share": 0.40827782928152834,
-        "remainder_reason": "The projected total and share are incompatible with the giving already observed (a remaining amount is negative). Revise the scenario; no clipping is applied.",
-        "remainder_status": "budget_inconsistent",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": -0.9875691777072788,
+        "G_prior": 1.9531739546130629,
+        "Pres": -2.216550918470836,
+        "RMajNow": 0.0
        },
+       "change_pp": -1.2509461415650518,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.17752326519337014
+        },
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 17.1906336617,
+         "fitted_min": -9.6911879127,
+         "term": "G_prior",
+         "value": 34.8042488413
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.17752326519337014,
        "materiality": [
         {
@@ -6827,12 +7435,15 @@
          "anchor_D": 176326.42,
          "anchor_R": 16751.75,
          "anchor_share": 0.08676149147259889,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 193078.17,
          "cycle_coefficient_high": 0.2680727991682835,
          "cycle_coefficient_low": 0.1104645391535492,
          "cycle_prediction_high": 0.3389886458089297,
          "cycle_prediction_low": 0.03954869251290305,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -6854,6 +7465,17 @@
          "remainder_reason": null,
          "remainder_starts": "2026-06-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.20284803124829134,
+          "implied_cycle_R_share_prediction_high": 0.3424241090760495,
+          "implied_cycle_R_share_prediction_low": 0.0632719534205332,
+          "implied_cycle_total_real_2025": 170436.58074454663,
+          "remaining_D_real_2025": 128816.35588782492,
+          "remaining_R_real_2025": 30072.724856721725,
+          "remaining_R_share": 0.18926866916091636,
+          "remaining_total_real_2025": 158889.08074454663,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": false
         },
@@ -6861,13 +7483,15 @@
          "anchor_D": 5000.0,
          "anchor_R": 0.0,
          "anchor_share": 0.0,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 5000.0,
          "cycle_coefficient_high": 0.18131130769568465,
          "cycle_coefficient_low": 0.023703047680950315,
          "cycle_prediction_high": 0.2522271543363308,
          "cycle_prediction_low": -0.04721279895969584,
          "flags": [
-          "thin_base"
+          "thin_base",
+          "anchor_share_outside_fitted_range"
          ],
          "id": "pac_candidate",
          "interval_outside_share_range": false,
@@ -6890,35 +7514,50 @@
          "remainder_reason": null,
          "remainder_starts": "2026-06-01",
          "remainder_status": "ready",
+         "remaining_allocation": {
+          "implied_cycle_R_share": 0.03413760008657293,
+          "implied_cycle_R_share_prediction_high": 0.0839983103611415,
+          "implied_cycle_R_share_prediction_low": -0.01572311018799563,
+          "implied_cycle_total_real_2025": 7496.54899767158,
+          "remaining_D_real_2025": 2240.634805959668,
+          "remaining_R_real_2025": 255.91419171191154,
+          "remaining_R_share": 0.10250717768831748,
+          "remaining_total_real_2025": 2496.54899767158,
+          "rule": "Projected R share applied to the remaining two-party money; observed giving is not re-estimated"
+         },
          "status": "ready",
          "thin_base": true
         }
        ],
        "chamber": "Senate",
-       "change_pp": 10.250717768831748,
-       "combined_reference": {
-        "anchor_share": 0.08457140935823468,
-        "anchor_total_nominal": 198078.17,
-        "note": "Reference only (open point S1): employee and PAC candidate giving pooled into one base.",
-        "observed": {
-         "D": 12047.5,
-         "D_real_2025": 12047.5,
-         "R": 4500.0,
-         "R_real_2025": 4500.0,
-         "face_value": true,
-         "through": "2026-05-31"
-        },
-        "projected_remaining_D_real_2025": 176699.11153425334,
-        "projected_remaining_R_real_2025": 38936.48578202065,
-        "projected_remaining_R_share": 0.18056613224630197,
-        "projected_total_real_2025": 232183.09731627398,
-        "raw_projected_cycle_R_share": 0.18707858704655217,
-        "remainder_reason": null,
-        "remainder_status": "ready",
-        "status": "ready"
+       "change_by_term_pp": {
+        "Forecast": 6.34584608239895,
+        "G_prior": 8.64385869984621,
+        "RMajNow": -4.738987013413409
        },
+       "change_pp": 10.250717768831748,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 17.1906336617,
+         "fitted_min": -9.6911879127,
+         "term": "G_prior",
+         "value": 34.8042488413
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5571359723756907,
        "materiality": [
         {
@@ -6985,6 +7624,7 @@
           "base_level": 2054500.0,
           "coefficient_high": 2054500.0,
           "coefficient_low": 2054500.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 3172070.7959591746,
@@ -6995,6 +7635,7 @@
           "base_level": 6233000.0,
           "coefficient_high": 6233000.0,
           "coefficient_low": 6233000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 9623517.776205176,
@@ -7017,6 +7658,7 @@
           "base_level": 2054500.0,
           "coefficient_high": 2054500.0,
           "coefficient_low": 2054500.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "income_total",
           "label": "Outside-firm fees",
           "prediction_high": 3497341.2339512333,
@@ -7027,6 +7669,7 @@
           "base_level": 6233000.0,
           "coefficient_high": 6233000.0,
           "coefficient_low": 6233000.0,
+          "dollars": "base year 2025 dollars (real-terms change applied to the latest complete LDA year)",
           "id": "expenses_total",
           "label": "In-house expenses",
           "prediction_high": 10610332.397769792,
@@ -7074,10 +7717,13 @@
         "cycle_prediction_low": 59794.839110326924,
         "flag_text": "One PAC (SchoolsFirst Federal Credit Union): a thin base, not the industry's PAC giving.",
         "flags": [
+         "interval_not_supported_by_own_history",
          "single_pac_thin_base"
         ],
         "id": "pac_to_candidates",
         "label": "Roster companies' PACs: own giving to House and Senate candidates",
+        "own_last_step_log": 0.702051402752921,
+        "own_last_step_sigma_ratio": 7.170141485562445,
         "projected_cycle_real_2025": 94712.07384011542,
         "status": "ready"
        },
@@ -7088,9 +7734,13 @@
         "cycle_coefficient_low": 706752.4937970353,
         "cycle_prediction_high": 1446512.9966802192,
         "cycle_prediction_low": 576552.7542200504,
-        "flags": [],
+        "flags": [
+         "interval_not_supported_by_own_history"
+        ],
         "id": "general_giving",
-        "label": "Mentat general giving (all channels)",
+        "label": "Mentat general giving (all channels), excluding receipts Mentat marks non-giving (FEC interest, refunds, insurance claims, loans)",
+        "own_last_step_log": 0.6535683898242353,
+        "own_last_step_sigma_ratio": 6.674978224037883,
         "projected_cycle_real_2025": 913231.1056085853,
         "status": "ready"
        }
@@ -7154,6 +7804,7 @@
          "anchor_D": 30832.81,
          "anchor_R": 24291.13,
          "anchor_share": 0.44066389303812464,
+         "anchor_share_outside_fitted_range": false,
          "anchor_total_nominal": 55123.94,
          "cycle_coefficient_high": 0.4433235132607238,
          "cycle_coefficient_low": 0.42890972188174087,
@@ -7175,13 +7826,15 @@
          "anchor_D": 45000.0,
          "anchor_R": 30800.0,
          "anchor_share": 0.40633245382585753,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 75800.0,
          "cycle_coefficient_high": 0.40899207404845667,
          "cycle_coefficient_low": 0.39457828266947376,
          "cycle_prediction_high": 0.4481735437268811,
          "cycle_prediction_low": 0.3553968129910493,
          "flags": [
-          "thin_base"
+          "thin_base",
+          "anchor_share_outside_fitted_range"
          ],
          "id": "pac_candidate",
          "interval_outside_share_range": false,
@@ -7194,10 +7847,35 @@
         }
        ],
        "chamber": "House",
+       "change_by_term_pp": {
+        "Forecast": -0.9875691777072788,
+        "G_prior": 0.532841631018048,
+        "Pres": 0.0,
+        "RMajNow": 0.0
+       },
        "change_pp": -0.45472754668923077,
-       "combined_reference": null,
        "expected_advantaged_party": "D",
+       "extrapolated_inputs": [
+        {
+         "fitted_cycles": [
+          2012,
+          2014,
+          2016,
+          2018,
+          2020,
+          2022
+         ],
+         "fitted_max": 0.93219318824138,
+         "fitted_min": 0.2308353648255959,
+         "term": "Forecast",
+         "value": 0.17752326519337014
+        }
+       ],
        "extrapolation": true,
+       "fitted_share_range": [
+        0.4284788908083443,
+        0.7280908130813499
+       ],
        "forecast": 0.17752326519337014,
        "materiality": [
         {
@@ -7280,12 +7958,15 @@
          "anchor_D": 176326.42,
          "anchor_R": 16751.75,
          "anchor_share": 0.08676149147259889,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 193078.17,
          "cycle_coefficient_high": 0.1835115075829891,
          "cycle_coefficient_low": 0.06931094617382047,
          "cycle_prediction_high": 0.3160325897704087,
          "cycle_prediction_low": -0.06321013601359912,
-         "flags": [],
+         "flags": [
+          "anchor_share_outside_fitted_range"
+         ],
          "id": "employee_candidate",
          "interval_outside_share_range": false,
          "label": "Employees' candidate giving",
@@ -7299,13 +7980,15 @@
          "anchor_D": 5000.0,
          "anchor_R": 0.0,
          "anchor_share": 0.0,
+         "anchor_share_outside_fitted_range": true,
          "anchor_total_nominal": 5000.0,
          "cycle_coefficient_high": 0.09675001611039022,
          "cycle_coefficient_low": -0.017450545298778403,
          "cycle_prediction_high": 0.2292710982978098,
          "cycle_prediction_low": -0.149971627486198,
          "flags": [
-          "thin_base"
+          "thin_base",
+          "anchor_share_outside_fitted_range"
          ],
          "id": "pac_candidate",
          "interval_outside_share_range": true,
@@ -7318,10 +8001,19 @@
         }
        ],
        "chamber": "Senate",
+       "change_by_term_pp": {
+        "Forecast": 6.34584608239895,
+        "G_prior": 2.3581144715950506,
+        "RMajNow": -4.738987013413409
+       },
        "change_pp": 3.9649735405805906,
-       "combined_reference": null,
        "expected_advantaged_party": "R",
+       "extrapolated_inputs": [],
        "extrapolation": false,
+       "fitted_share_range": [
+        0.4083020304240258,
+        0.712235939736202
+       ],
        "forecast": 0.5571359723756907,
        "materiality": [
         {
@@ -7492,7 +8184,6 @@
        "anchor_reason": null,
        "bases": [],
        "chamber": "House",
-       "combined_reference": null,
        "model_id": "control_House",
        "n": 18,
        "ordinary_p": 0.007383125948010718,
@@ -7519,7 +8210,6 @@
        "anchor_reason": null,
        "bases": [],
        "chamber": "Senate",
-       "combined_reference": null,
        "model_id": "control_Senate",
        "n": 18,
        "ordinary_p": 0.000721705456463732,
@@ -7573,7 +8263,6 @@
        "anchor_reason": null,
        "bases": [],
        "chamber": "House",
-       "combined_reference": null,
        "model_id": "control_House",
        "n": 18,
        "ordinary_p": 0.007383125948010718,
@@ -7600,7 +8289,6 @@
        "anchor_reason": null,
        "bases": [],
        "chamber": "Senate",
-       "combined_reference": null,
        "model_id": "control_Senate",
        "n": 18,
        "ordinary_p": 0.000721705456463732,

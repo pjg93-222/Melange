@@ -197,21 +197,66 @@ rf_g8_default_cmd <- function() {
   if (file.exists(script) && file.exists(app) && nzchar(py)) sprintf("%s %s", shQuote(normalizePath(py, winslash = "/")), shQuote(normalizePath(script, winslash = "/"))) else ""
 }
 
+# Run `code` with environment variables set in THIS process, then restore each previous value (or remove the variable). A child process inherits them on
+# every platform; system2(env = ) does not work on Windows, where R puts VAR=value after the command and bash reads it as a script name (exit status 127).
+rf_with_env <- function(vars, code) {
+  old <- Sys.getenv(names(vars), unset = NA, names = TRUE)
+  on.exit({
+    gone <- names(old)[is.na(old)]
+    if (length(gone)) Sys.unsetenv(gone)
+    kept <- old[!is.na(old)]
+    if (length(kept)) do.call(Sys.setenv, as.list(kept))
+  }, add = TRUE)
+  do.call(Sys.setenv, as.list(vars))
+  code
+}
+
+# The bash that runs the G8 command. On Windows `bash` on the PATH can be the WSL launcher (C:\Windows\System32\bash.exe), which does not run a Windows command
+# line, and from a plain Windows shell it is often not on the PATH at all; the command is written for Git for Windows' bash.exe, which is found from the git
+# installation (git.exe sits in <Git>/cmd, <Git>/bin or <Git>/mingw64/bin) or the default install folders. <Git>/bin/bash.exe is preferred: it is the launcher that
+# sets up PATH, so a command that uses cat, head or tr works; <Git>/usr/bin/bash.exe, started straight from R, has no /usr/bin on its PATH and is the fallback.
+# "" when there is none (G8 then holds, with the reason).
+rf_g8_bash <- function(found = Sys.which("bash"), git = Sys.which("git"), windows = .Platform$OS.type == "windows") {
+  found <- unname(found)
+  if (!windows) return(if (nzchar(found)) found else "bash")
+  norm <- function(p) normalizePath(p, winslash = "/", mustWork = FALSE)
+  wsl <- nzchar(found) && grepl("/(windows/(system32|sysnative)|microsoft/windowsapps)/bash\\.exe$", tolower(norm(found)))
+  if (nzchar(found) && !wsl) return(norm(found))
+  roots <- character()
+  git <- unname(git)
+  if (nzchar(git)) { d <- dirname(norm(git)); roots <- c(d, dirname(d), dirname(dirname(d))) }
+  lad <- Sys.getenv("LOCALAPPDATA")
+  pf <- c(Sys.getenv(c("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)")), if (nzchar(lad)) file.path(lad, "Programs"))
+  roots <- unique(c(roots, file.path(pf[nzchar(pf)], "Git")))
+  cand <- c(file.path(roots, "bin/bash.exe"), file.path(roots, "usr/bin/bash.exe"))        # every launcher first, the plain usr/bin bash only when there is none
+  hit <- cand[file.exists(cand)]
+  if (length(hit)) norm(hit[[1]]) else ""
+}
+
 # The staged bundle is loaded by the v2-capable calculator: the command runs with MENTAT_GIVING_MODELS set to the path (MENTAT_G8_CMD, or the default
 # above: tools/g8_consumer_smoke.py, which loads the bundle through giving_forecast and projects every offered industry); exit status 0 = PASS. Without a command: HOLD.
 rf_gate_consumer <- function(bundle_path, cmd = rf_g8_default_cmd()) {
   if (!nzchar(cmd)) return(.rf_gate("G8 consumer smoke", "HOLD", "no v2-capable calculator reachable (MENTAT_G8_CMD unset and mentat/app/giving_forecast.py not beside the pipeline): HOLD until the v2 calculator exists"))
-  out <- suppressWarnings(system2("bash", c("-c", shQuote(cmd)), env = paste0("MENTAT_GIVING_MODELS=", bundle_path), stdout = TRUE, stderr = TRUE))
+  bash <- rf_g8_bash()
+  if (!nzchar(bash)) return(.rf_gate("G8 consumer smoke", "HOLD", "no bash to run the G8 command (on Windows: Git for Windows' bash.exe; the WSL launcher in System32 does not count): HOLD until one is installed"))
+  out <- suppressWarnings(rf_with_env(c(MENTAT_GIVING_MODELS = bundle_path), system2(bash, c("-c", shQuote(cmd)), stdout = TRUE, stderr = TRUE)))
   st <- attr(out, "status") %||% 0L
   .rf_gate("G8 consumer smoke", if (st == 0L) "PASS" else "HOLD", sprintf("exit status %d: %s", st, paste(utils::tail(out, 2), collapse = " | ")))
 }
 
-rf_gate_naive <- function(v) {
+# Both designs of the rulings of 2026-09-30 (leave-one-election-out AND chronological): a path that loses to last-period naive in either one
+# is reported. Warning only, as before; the chronological design is the one that matches how the calculator is used (data up to the anchor).
+rf_gate_naive <- function(v, designs = c("loeo", "chrono")) {
   bt <- v$backtests
   rule <- c(pac = v$selection$pac$reported_rule, control_House = v$selection$control_House$reported_rule, control_Senate = v$selection$control_Senate$reported_rule)
   path_of <- function(id) if (!is.null(v$anchors) && all(vapply(v$anchors$entries[[id]], function(e) identical(e$anchor, "same_phase"), logical(1)))) "calc" else "prevchg"
-  cells <- list(pac = c("pac", "bundle", "loeo", "prevchg", rule[["pac"]]), control_House = c("control_House", "selected", "loeo", path_of("control_House"), rule[["control_House"]]),
-                control_Senate = c("control_Senate", "selected", "loeo", path_of("control_Senate"), rule[["control_Senate"]]), lobby_log = c("lobby", "log", "rolling", "calc", "R0"))
+  cells <- list()
+  for (ds in designs) {
+    cells[[paste0("pac/", ds)]] <- c("pac", "bundle", ds, "prevchg", rule[["pac"]])
+    cells[[paste0("control_House/", ds)]] <- c("control_House", "selected", ds, path_of("control_House"), rule[["control_House"]])
+    cells[[paste0("control_Senate/", ds)]] <- c("control_Senate", "selected", ds, path_of("control_Senate"), rule[["control_Senate"]])
+  }
+  cells[["lobby_log/rolling"]] <- c("lobby", "log", "rolling", "calc", "R0")
   lose <- character()
   for (nm in names(cells)) {
     c <- cells[[nm]]

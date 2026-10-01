@@ -4,8 +4,11 @@
 
 Owner rulings of 2026-09-30 implemented here: the forecast applies to MENTAT data (levels always from Mentat; OpenSecrets only estimated the
 relationships); PAC shown as (1) the roster companies' PACs' own giving to candidates (FEC pas2, D-049) and (2) Mentat general giving (the
-workbook's included Analysis Amount, all channels); shares on the employee and PAC bases; Melange LDA levels, both series; coverage end by rule;
-thin-base flags; Community Banks separate; auto has no Mentat data and no entry.
+workbook's included Analysis Amount, less the non_giving receipts: see the 2026-10-01 ruling below); shares on the employee and PAC bases;
+Melange LDA levels, both series; coverage end by rule; thin-base flags; Community Banks separate; auto has no Mentat data and no entry.
+Owner ruling of 2026-10-01 (D4, option b), in the FORECAST only: receipts the accounting engine buckets as non_giving (FEC-reported interest, refunds,
+insurance claims, loans) are left out of the general-giving levels, the monthly observed cuts and the employee House / Senate candidate bases
+(mentat_sources.FORECAST_EXCLUDED_FUNDING_SOURCES); each block reports what was left out (`excluded_non_giving`, per cycle). The workbook is untouched.
 
 READ-ONLY toward everything but its own two output files. SQLite files are opened immutable; FEC files and the LDA / CPI inputs are only read;
 no money-collection or receipt-counting code is imported or run. The snapshot is written atomically (temporary file + replace) only after it
@@ -51,6 +54,16 @@ def utc_now():
 
 def dollars(cents):
     return round(cents / 100, 2)
+
+
+def _usd(cents):
+    """'$1,234.56' (or '-$1,234.56') from integer cents."""
+    return ('-' if cents < 0 else '') + '$' + format(abs(dollars(cents)), ',.2f')
+
+
+def _cycle_label(cycle, open_cycle):
+    """'2024' -> '2023-2024'; the open cycle holds every row to date: '2025-2026 to date'."""
+    return f'{int(cycle) - 1}-{cycle}' + (' to date' if int(cycle) == int(open_cycle) else '')
 
 
 def code_sha256():
@@ -120,7 +133,7 @@ def mentat_side(spec, ctx):
     cuts = fec_pas2.month_ends(open_cycle - 1, cov['coverage_end'])
     agg = ms.index_aggregates(index_path, source, open_cycle, cuts)
     expected = {k.split('-')[-1]: v for k, v in manifest['receipt_cycles'].items()}
-    if agg['cycles'] != expected:
+    if agg['analysis_cycles'] != expected:       # the manifest records the Analysis Amount BEFORE the forecast's non_giving exclusion (agg['cycles'] is after it)
         raise Unavailable('The index receipt totals differ from its own manifest; the index is not trustworthy.')
     progress = ms.work_progress(source, open_cycle)
     return dict(workbook=workbook, workbook_sha=workbook_sha, index_path=index_path, manifest=manifest, source=source,
@@ -136,20 +149,30 @@ def _thin(cycles, threshold):
 
 
 def general_and_candidates(side, threshold):
+    """The general-giving and employee-candidate blocks on the FORECAST basis: receipts whose funding source is in ms.FORECAST_EXCLUDED_FUNDING_SOURCES (the
+    accounting engine's non_giving bucket; owner ruling 2026-10-01) are left out of the levels, the observed cuts and the candidate bases. `by_funding_source`
+    stays the full split of the Analysis Amount, and `excluded_non_giving` reports what was left out, so cycles + excluded = the published Analysis Amount."""
     agg = side['agg']
+    left_out = sorted(ms.FORECAST_EXCLUDED_FUNDING_SOURCES)
     general = {
         'status': 'ready', 'reason': None, 'basis': 'receipt',
-        'label': 'Published included receipt view (workbook Analysis Amount), all funding sources and recipient categories, net of negative adjustments',
+        'label': "Published included receipt view (workbook Analysis Amount), all funding sources except those Mentat's accounting engine marks non-giving "
+                 '(owner ruling 2026-10-01), all recipient categories, net of negative adjustments',
         'cycles': {cy: dollars(v) for cy, v in sorted(agg['cycles'].items())},
         'by_funding_source': {cy: {k: dollars(v) for k, v in sorted(src.items())} for cy, src in sorted(agg['by_source'].items())},
-        'observed': [{'through': cut, 'amount': dollars(v)} for cut, v in agg['general_cuts']]}
+        'observed': [{'through': cut, 'amount': dollars(v)} for cut, v in agg['general_cuts']],
+        'excluded_funding_sources': left_out,
+        'excluded_non_giving': {cy: dollars(v) for cy, v in sorted(agg['excluded'].items())}}
     cycles = {cy: _chambers(blocks) for cy, blocks in sorted(agg['candidates'].items())}
     candidates = {
         'status': 'ready', 'reason': None,
         'basis': 'Employees\' included giving to House (committee type H) and Senate (S) candidate committees: the index joined to the pinned source '
-                 'database on sub_id; party D / R from the index, anything else "other"; presidential (P) committees excluded',
+                 'database on sub_id; party D / R from the index, anything else "other"; presidential (P) committees excluded; receipts the accounting '
+                 'engine buckets as non_giving left out (owner ruling 2026-10-01)',
         'cycles': cycles, 'observed': [dict(through=cut, **_chambers(blocks)) for cut, blocks in agg['candidate_cuts']],
-        'thin_base': _thin(cycles, threshold)}
+        'thin_base': _thin(cycles, threshold),
+        'excluded_funding_sources': left_out,
+        'excluded_non_giving': {cy: _chambers(blocks) for cy, blocks in sorted(agg['candidates_excluded'].items())}}
     return general, candidates
 
 
@@ -290,10 +313,12 @@ def industry_flags(spec, side, pac_note, cpi_multipliers):
         coverage_flags.append('Coverage cut back from ' + side['cov']['rule_coverage_end'] + ' to ' + side['cov']['coverage_end'] + ': ' + side['cov']['reason'] + '.')
     if str(side['open_cycle']) not in cpi_multipliers:
         coverage_flags.append(f"No {side['open_cycle']} CPI exists yet: {side['open_cycle'] - 1}-{side['open_cycle']} observed amounts are compared at face value.")
-    non_giving = {cy: v for cy, src in side['agg']['by_source'].items() for k, v in src.items() if k == 'non_giving' and v}
-    if non_giving:
-        flags.append('Included receipts the accounting engine buckets as non_giving stay inside the Analysis Amount (reported, not changed): ' +
-                     '; '.join(f'{cy} ${format(dollars(v), ",.2f")}' for cy, v in sorted(non_giving.items())) + '.')
+    left_out = {cy: v for cy, v in side['agg']['excluded'].items() if v}
+    if left_out:
+        flags.append("Excluded from the forecast (owner ruling 2026-10-01): receipts Mentat's accounting engine marks non-giving - FEC-reported interest, refunds, "
+                     'insurance claims and loans - ' + '; '.join(f'{_usd(v)} in {_cycle_label(cy, side["open_cycle"])}' for cy, v in sorted(left_out.items())) +
+                     ". They stay in the published workbook's Analysis Amount; the general-giving levels, observed amounts and employee House and Senate "
+                     'candidate bases of this forecast leave them out.')
     if side['agg']['type_conflicts']:
         flags.append(f"{side['agg']['type_conflicts']} sub_ids carry conflicting recipient committee types in the pinned source database.")
     if side['agg']['unmatched'][0]:
@@ -397,18 +422,37 @@ def build_snapshot(project_root, registry, options):
     return snapshot, inputs
 
 
+OTHER_RULE_REASON = ('Its anchors in the published snapshot were built under a different exclusion rule than this build (receipts the accounting engine buckets as '
+                     'non_giving are left out of the forecast: owner ruling 2026-10-01), so they are on another basis; rebuild it (a full build, or --industry <id>).')
+
+
+def _excluded_sources(block):
+    """The funding sources a published block says it left out, sorted; None when it names none or is not a list of names (anchors from before the ruling)."""
+    names = block.get('excluded_funding_sources') if isinstance(block, dict) else None
+    return sorted(names) if isinstance(names, list) and all(isinstance(name, str) for name in names) else None
+
+
 def merge_with_published(snapshot, published_path, only):
     """A partial build (--industry) replaces only the industries it built: the others keep the anchors of the published snapshot, so one flag
-    cannot wipe them. No valid published snapshot means the partial build stands alone."""
+    cannot wipe them. No valid published snapshot means the partial build stands alone. An industry whose published anchors were not built under
+    the current exclusion rule is not carried over: its general-giving AND candidate blocks must both name exactly the funding sources this build
+    leaves out (`excluded_funding_sources` equal to sorted(ms.FORECAST_EXCLUDED_FUNDING_SOURCES)). Anchors from before the 2026-10-01 ruling name
+    none and an empty list names none either; mixing two bases in one snapshot would make its levels and shares incomparable, so such an industry
+    is listed as unavailable until it is rebuilt."""
     try:
         old = read_json(published_path)
     except (OSError, ValueError):
         return snapshot
     if old.get('schema_version') != 1 or old.get('kind') != 'giving-anchors':
         return snapshot
-    industries = {k: v for k, v in old['industries'].items() if k not in only}
+    rule = sorted(ms.FORECAST_EXCLUDED_FUNDING_SOURCES)
+    carried = {k: v for k, v in old['industries'].items() if k not in only}
+    industries = {k: v for k, v in carried.items()
+                  if isinstance(v, dict) and all(_excluded_sources(v.get(block)) == rule for block in ('general_giving', 'candidate_receipts'))}
+    other_rule = {k: OTHER_RULE_REASON for k in carried if k not in industries}
     industries.update(snapshot['industries'])
     unavailable = {k: v for k, v in old.get('unavailable', {}).items() if k not in only and k not in industries}
+    unavailable.update({k: v for k, v in other_rule.items() if k not in industries})
     unavailable.update({k: v for k, v in snapshot['unavailable'].items() if k not in industries})
     return {**snapshot, 'industries': industries, 'unavailable': unavailable}
 

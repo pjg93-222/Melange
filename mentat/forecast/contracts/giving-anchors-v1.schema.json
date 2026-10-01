@@ -242,6 +242,23 @@
                 "items": {
                   "$ref": "#/$defs/cut_money"
                 }
+              },
+              "excluded_funding_sources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Funding sources (the accounting engine's buckets) this snapshot leaves out of `cycles`, `observed` and the candidate bases (owner ruling 2026-10-01: non_giving). Absent in snapshots built before that ruling, whose levels still include them."
+              },
+              "excluded_non_giving": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "propertyNames": {
+                  "pattern": "^\\d{4}$"
+                },
+                "description": "Dollars per cycle the exclusion left out (the excluded sources' share of the published Analysis Amount): cycles + excluded_non_giving = the sum of by_funding_source. by_funding_source is the full split, including the excluded sources."
               }
             },
             "required": [
@@ -293,6 +310,23 @@
                 "propertyNames": {
                   "pattern": "^\\d{4}$"
                 }
+              },
+              "excluded_funding_sources": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Funding sources left out of `cycles` and `observed` (owner ruling 2026-10-01: non_giving). Absent in snapshots built before that ruling."
+              },
+              "excluded_non_giving": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/$defs/chambers"
+                },
+                "propertyNames": {
+                  "pattern": "^\\d{4}$"
+                },
+                "description": "Dollars per cycle, chamber and party that the exclusion left out of the employee candidate base (cycles + excluded_non_giving = what `cycles` would hold if these receipts counted)."
               }
             },
             "required": [
