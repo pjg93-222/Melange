@@ -1,0 +1,57 @@
+"""Verify published board and reporting authority against the repair baseline."""
+import hashlib
+import json
+from pathlib import Path
+import sys
+from unittest.mock import patch
+
+OUT = Path(__file__).resolve().parent
+ROOT = OUT.parents[1]
+sys.path.insert(0, str(ROOT/'fec'))
+import tier_util as TU
+read = lambda p: json.loads(p.read_text(encoding='utf-8'))
+before = read(OUT/'before.json')
+candidate = read(OUT/'cumulative_candidate_receipt.json')
+grade = read(ROOT/TU.PER_AREA_GRADE_PATH)
+names = sorted(grade['members'])
+tier, rank, conduct = TU.legislative_press_tiers(names, root=str(ROOT), with_detail=True)
+with patch.object(TU, 'load_open_breaches', return_value={}), patch.object(TU, 'load_delivery_credit', return_value={}):
+    natural_tier, natural_rank = TU.legislative_press_tiers(names, root=str(ROOT))
+desk = read(ROOT/'member_desk_bundle.json')
+dashboard = read(ROOT/'dashboard_data.json')
+desk_rank = {m['name']:m['tierrank'] for m in desk['members']}
+desk_tier = {m['name']:m['tier'] for m in desk['members']}
+dash_rank = {m:h['rank'] for m,h in zip(dashboard['name'],dashboard['overall_honors'])}
+dash_tier = {m:h['priority_tier'] for m,h in zip(dashboard['name'],dashboard['overall_honors'])}
+old = read(OUT/'baseline/ranks_python.json')
+new = read(ROOT/'ranks_python.json')
+official_movers = [{'member':m,'before':old['rank'].get(m),'after':r} for m,r in new['rank'].items() if old['rank'].get(m) != r]
+honors_movers = [{'member':m,'before':before['board'][m],'rank':rank[m],'tier':tier[m]} for m in names
+                 if before['board'][m]['rank'] != rank[m] or before['board'][m]['tier'] != tier[m]]
+receipt = {'members':len(names), 'canonical_desk_dashboard_rank_exact':rank == desk_rank == dash_rank,
+    'canonical_desk_dashboard_tier_exact':tier == desk_tier == dash_tier,
+    'honors_movers':honors_movers, 'reporting_rank_movers':official_movers,
+    'reporting_score_exact':old['score'] == new['score'], 'reporting_percentiles_exact':old['pcts'] == new['pcts'],
+    'conduct_details_exact':conduct == before['conduct'],
+    'diagnostics':{m:{'rank':rank[m], 'tier':tier[m], 'natural_rank':natural_rank[m], 'natural_tier':natural_tier[m]}
+                   for m in ('Young Kim','Steve Daines','Andy Barr','Jared Golden','Henry Cuellar')},
+    'hashes':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in before['hashes']}}
+receipt['canonical_matches_cumulative_candidate'] = all(
+    rank[m] == candidate['board'][m]['rank'] and tier[m] == candidate['board'][m]['tier'] for m in names)
+receipt['factor_matches_candidate'] = read(ROOT/TU.PRIMACY_PATH) == read(OUT/'cumulative_candidate'/TU.PRIMACY_PATH)
+receipt['grade_members_match_candidate'] = grade['members'] == read(OUT/'cumulative_candidate'/TU.PER_AREA_GRADE_PATH)['members']
+industry = read(ROOT/'data/lobbying/industry_tiers.json')['industries']
+receipt['all_industry_fields_match_candidate'] = industry == candidate['industries']
+key = lambda r: (r['bill'],str(r['congress']),r['role'])
+act_sets = lambda b: {m['name']: sorted(key(r) for r in m['bills']) for m in b['members']}
+receipt['published_memberships_match_candidate'] = act_sets(desk) == act_sets(read(OUT/'cumulative_candidate/member_desk_bundle.json'))
+receipt['cu_top50_exact'] = all(rank[m] == b['rank'] for m,b in before['board'].items() if b['rank'] <= 50)
+receipt['cu_tier_movers'] = sum(tier[m] != b['tier'] for m,b in before['board'].items())
+receipt['status'] = 'PASS' if (receipt['canonical_desk_dashboard_rank_exact'] and receipt['canonical_desk_dashboard_tier_exact']
+    and not official_movers and receipt['conduct_details_exact'] and receipt['reporting_score_exact']
+    and receipt['reporting_percentiles_exact'] and receipt['canonical_matches_cumulative_candidate']
+    and receipt['factor_matches_candidate'] and receipt['grade_members_match_candidate']
+    and receipt['all_industry_fields_match_candidate'] and receipt['published_memberships_match_candidate']) else 'FAIL'
+(OUT/'publication_receipt.json').write_text(json.dumps(receipt, indent=2), encoding='utf-8')
+print(json.dumps({k:v for k,v in receipt.items() if k != 'honors_movers'}, indent=2))
+assert receipt['status'] == 'PASS'

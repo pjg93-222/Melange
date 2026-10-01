@@ -1,0 +1,25 @@
+F1 FRESH-GOLD SAMPLING RULE v1 (freeze artifact; sha256 pinned in
+stance_valence_folcot_prereg.md at lock; DRAFT until Paul signs the LOCK block)
+
+POPULATION: items entering the two-hop stance pipeline after the METHOD FREEZE DATE (the
+lock date recorded in the prereg), drawn from the live press-release and tweet streams
+exactly as the production pipeline ingests them. No item published before the freeze date
+is eligible (labels must postdate the frozen method).
+
+FRAME: every (item, extracted-target) pair the stance hop emits whose target is NOT covered
+by the curated valence registry at freeze time (registry-uncovered = the candidate's actual
+operating regime). Registry-covered pairs are excluded by construction.
+
+SAMPLE: the FIRST n >= 150 eligible pairs in ingestion order, stratified only by source mix
+constraint: the batch must contain at least 30% press-derived and at least 30% tweet-derived
+pairs; ingestion order is otherwise untouched (no cherry-picking; the stream decides).
+If the stream yields fewer than 150 eligible pairs within 21 days of the lock, the look
+window extends until 150 accrue; the prereg's stopping rules govern abandonment.
+
+ADJUDICATION: Paul labels each pair PRO_CU / ANTI_CU / NEUTRAL seeing only (text, target) -
+never the model output. Labels are recorded in a batch file whose sha256 enters the RESULT.
+The batch file is immutable once scoring begins.
+
+BLINDING: the candidate prompt and the production comparator run on the identical batch
+after all labels are recorded. No prompt iteration after the first scored item (that is
+the look).

@@ -1,0 +1,72 @@
+{
+  "scope": "Counts of active primary-ledger credit_union cells selected by the exact production loader, with frozen prior admitted-act join; no ranking calculation.",
+  "ledger": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\lobbying\\industry_axes.ndjson",
+  "loader_source": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\engine\\per_area_grade.py",
+  "ledger_sha256_before": "9bcd987086c1081b992ee03202e4c9b93647f135da5304bd82f4f07707f89c24",
+  "ledger_sha256_after": "9bcd987086c1081b992ee03202e4c9b93647f135da5304bd82f4f07707f89c24",
+  "loader_source_sha256": "7d19734a1c9506bb1bf8097fc257bf754b7399877e032b54aa164d76f8973b81",
+  "all_ledger_rows": 31,
+  "active_cu_rows": 15,
+  "unique_selected_cu_cells": 15,
+  "duplicate_active_cu_keys": 0,
+  "sign_counts": {
+    "negative": 1,
+    "zero": 0,
+    "positive": 14
+  },
+  "cell_value_counts": {
+    "-1.0": 1,
+    "0.15": 2,
+    "0.3": 3,
+    "0.5": 9
+  },
+  "negative_keys": [
+    {
+      "bill": "S.Amdt.2239",
+      "congress": "119",
+      "cell": -1.0
+    }
+  ],
+  "min_cell": -1.0,
+  "max_cell": 0.5,
+  "frozen_routing_join": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\tmp\\primacy_promotion_20260920\\refresh_purity\\legislation_routing_audit.json",
+    "sha256": "b4f68bbadbf1fddbef82aa9e304e658b1367e7920fe05494db64a91d9fdb733a",
+    "stats": {
+      "rows": 10847,
+      "accepted": 8182,
+      "outside_window": 11,
+      "kept": 8171
+    },
+    "sha256_matches_baseline_grade_input": true,
+    "negative_cell_acts": [
+      {
+        "member": "Josh Hawley",
+        "area": "Credit Card Mandates",
+        "bill": "S.Amdt.2239",
+        "congress": "119",
+        "role": "sponsor",
+        "sign": -1,
+        "cell": -1.0
+      }
+    ],
+    "negative_cell_members": [
+      "Josh Hawley"
+    ],
+    "limitation": "Frozen prior routing snapshot only; no live regenerated routing inputs or ranking effects read/calculated.",
+    "negative_cell_existing_tags": [
+      {
+        "bill": "S.Amdt.2239",
+        "congress": "119",
+        "class": "crypto_primary",
+        "title": "Amendment to S.1582"
+      }
+    ],
+    "tag_sha256": "7a2dd6abe3075a5d8ee710f99ddd92d9a2994e2f01728d0aefeb91c36c0b9dcb",
+    "tag_hash_matches_baseline_grade_input": true,
+    "axis_hash_matches_baseline_grade_input": true,
+    "negative_cell_members_present_in_baseline_grade": {
+      "Josh Hawley": true
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+ "built_utc": "2026-08-18T02:41:10Z",
+ "config": "holistic",
+ "vintage": "AUG",
+ "base": "holistic_network_BASE_20260817.xlsx",
+ "base_sha256_16": "a7e927335b8f8287",
+ "dials": {
+  "ENG_CAP": 2.0,
+  "HCOI_W": 0.2,
+  "SOC_CAP": 2.0,
+  "SOC_REINF": 0.3,
+  "COAP_W": 0.05,
+  "COAP_CAP": 0.5,
+  "COAP_FLOOR": 2
+ },
+ "admission": "untied-only / isolates-only KEPT (D10 keep-rules; vacuity measured at MEA-4, not assumed)",
+ "layer_scope": {
+  "cosponsor": "all-bills",
+  "engagement": "cu-corpus",
+  "hcoi": "cu-corpus",
+  "social": "cu-boolean-vendor",
+  "coappear": "all-interviews"
+ },
+ "bpf": "cu-scoped (D12: cross-party physics consumes CU-defined bipartisan.json until separately ruled)",
+ "admitted": {
+  "engagement": 21,
+  "hcoi": 0,
+  "social_new": 171,
+  "social_reinforced": 559,
+  "coappear": 198
+ },
+ "layer_inputs_sha256_16": {
+  "press_engagement.json": "076bda18ba2cfd4f",
+  "press_hcoi.json": "96453304b2649664",
+  "social_interactions.json": "9aa288d253264a25",
+  "co_appearance.json": "fbc4bfa485ee4ad0"
+ }
+}

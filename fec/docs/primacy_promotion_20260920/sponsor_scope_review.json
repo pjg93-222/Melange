@@ -1,0 +1,289 @@
+{
+  "scope": "Read-only primary sources and frozen cumulative candidate desk; no membership or policy changes.",
+  "manual_withdrawals_file_present": false,
+  "mechanism": "Cumulative shaper and CRU merge accepted original/cosponsor only. Separate sentinel admissions supplies nine history sponsors, but does not manage these three legacy in-scope acts. Official movement pass removes invalid memberships; it does not append missing sponsors.",
+  "category_exclusion_note": "118:hr:4686 exclusion is explicitly membership_edge/cdfi_fund, not a whole-act exclusion; its Mortgage & Housing classification remains in scope.",
+  "limitations": "No alternative score or ranking computed. Frozen cumulative candidate inspected, not concurrently changing live desk.",
+  "findings": [
+    {
+      "member": "Anna Luna",
+      "bill": "H.R.4686",
+      "congress": "118",
+      "repository_key": "118:hr:4686",
+      "history_rows": [
+        {
+          "member": "Anna Luna",
+          "bioguide": "L000596",
+          "bill": "H.R.4686",
+          "congress": "118",
+          "repository_key": "118:hr:4686",
+          "role": "sponsor",
+          "title": "Flood Insurance Affordability Act",
+          "areas": [
+            "Mortgage & Housing"
+          ],
+          "action": "Introduced"
+        }
+      ],
+      "beneficiary_tags": [
+        {
+          "bill": "H.R.4686",
+          "congress": "118",
+          "title": "Flood Insurance Affordability Act",
+          "class": "shared",
+          "rationale": "areas Mortgage & Housing",
+          "areas": [
+            "Mortgage & Housing"
+          ]
+        }
+      ],
+      "global_desk_membership_count": 11,
+      "global_desk_roles": {
+        "original": 10,
+        "cosponsor": 1
+      },
+      "member_desk_memberships": [],
+      "admission_catalog": null,
+      "admission_included_bill": null,
+      "admission_decision": null,
+      "admission_memberships": [],
+      "official_member_facts": [
+        {
+          "member": "Anna Luna",
+          "bioguide": "L000596",
+          "bill": "H.R.4686",
+          "congress": "118",
+          "repository_key": "118:hr:4686",
+          "role": "sponsor",
+          "withdrawn": false,
+          "title": "Flood Insurance Affordability Act",
+          "areas": [
+            "Mortgage & Housing"
+          ],
+          "action": "Introduced"
+        }
+      ],
+      "repository_sponsor": {
+        "bioguide": "L000596",
+        "date": "",
+        "district": "13",
+        "name": "Rep. Luna, Anna Paulina [R-FL-13]",
+        "party": "R",
+        "state": "FL",
+        "withdrawn_date": ""
+      },
+      "repository_title": "Flood Insurance Affordability Act",
+      "bill_rule_exclusion": null,
+      "bill_override": null,
+      "override_included": true,
+      "manual_withdrawals": [],
+      "culling_matches": {
+        "legislation_adjudication_ledger.ndjson": [
+          {
+            "reason": "Stemmed 'AFFORD Act' title-alias probe matched only the measure's name form, never the category. Official title: 'Flood Insurance Affordability Act'. Operative subject: To establish a grace period for nonpayment of premiums for flood insurance coverage under the national flood insurance program until the Administrator of the Federal Emergency Management Agency implements the option for monthly pa. Complete operative-text review found no provision touching CDFI Fund: CDFI/MDI certification, CDFI Fund appropriations, the CDFI Bond Guarantee Program, and underserved-community lending by depository institutions; the measure affirmatively legislates on other subject matter. Alias provenance is not disposition evidence.",
+            "canonical_key": "118:hr:4686",
+            "action": "exclude_membership_edge_false_positive",
+            "category_ids": [
+              "cdfi_fund"
+            ],
+            "decision_scope": "membership_edge",
+            "ratified_disposition": "exclude_false_positive",
+            "integration_state": "excluded_false_positive"
+          }
+        ],
+        "legislation_exclusion_ledger.ndjson": [
+          {
+            "reason": "Stemmed 'AFFORD Act' title-alias probe matched only the measure's name form, never the category. Official title: 'Flood Insurance Affordability Act'. Operative subject: To establish a grace period for nonpayment of premiums for flood insurance coverage under the national flood insurance program until the Administrator of the Federal Emergency Management Agency implements the option for monthly pa. Complete operative-text review found no provision touching CDFI Fund: CDFI/MDI certification, CDFI Fund appropriations, the CDFI Bond Guarantee Program, and underserved-community lending by depository institutions; the measure affirmatively legislates on other subject matter. Alias provenance is not disposition evidence.",
+            "canonical_key": "118:hr:4686",
+            "action": "exclude_membership_edge_false_positive",
+            "category_ids": [
+              "cdfi_fund"
+            ],
+            "decision_scope": "membership_edge",
+            "ratified_disposition": "exclude_false_positive",
+            "integration_state": "excluded_false_positive"
+          }
+        ]
+      },
+      "conclusion": "Existing in-scope classified act; verified nonwithdrawn sponsor missing from this member desk."
+    },
+    {
+      "member": "Anna Luna",
+      "bill": "H.R.6410",
+      "congress": "118",
+      "repository_key": "118:hr:6410",
+      "history_rows": [
+        {
+          "member": "Anna Luna",
+          "bioguide": "L000596",
+          "bill": "H.R.6410",
+          "congress": "118",
+          "repository_key": "118:hr:6410",
+          "role": "sponsor",
+          "title": "U.S. Data on U.S. Soil Act",
+          "areas": [
+            "Data Privacy & Cyber"
+          ],
+          "action": "Introduced"
+        }
+      ],
+      "beneficiary_tags": [
+        {
+          "bill": "H.R.6410",
+          "congress": "118",
+          "title": "U.S. Data on U.S. Soil Act",
+          "class": "shared",
+          "rationale": "areas Data Privacy & Cyber",
+          "areas": [
+            "Data Privacy & Cyber"
+          ]
+        }
+      ],
+      "global_desk_membership_count": 3,
+      "global_desk_roles": {
+        "cosponsor": 1,
+        "original": 2
+      },
+      "member_desk_memberships": [],
+      "admission_catalog": null,
+      "admission_included_bill": null,
+      "admission_decision": null,
+      "admission_memberships": [],
+      "official_member_facts": [
+        {
+          "member": "Anna Luna",
+          "bioguide": "L000596",
+          "bill": "H.R.6410",
+          "congress": "118",
+          "repository_key": "118:hr:6410",
+          "role": "sponsor",
+          "withdrawn": false,
+          "title": "U.S. Data on U.S. Soil Act",
+          "areas": [
+            "Data Privacy & Cyber"
+          ],
+          "action": "Introduced"
+        }
+      ],
+      "repository_sponsor": {
+        "bioguide": "L000596",
+        "date": "",
+        "district": "13",
+        "name": "Rep. Luna, Anna Paulina [R-FL-13]",
+        "party": "R",
+        "state": "FL",
+        "withdrawn_date": ""
+      },
+      "repository_title": "U.S. Data on U.S. Soil Act",
+      "bill_rule_exclusion": null,
+      "bill_override": null,
+      "override_included": true,
+      "manual_withdrawals": [],
+      "culling_matches": {},
+      "conclusion": "Existing in-scope classified act; verified nonwithdrawn sponsor missing from this member desk."
+    },
+    {
+      "member": "Riley Moore",
+      "bill": "H.R.1181",
+      "congress": "119",
+      "repository_key": "119:hr:1181",
+      "history_rows": [
+        {
+          "member": "Riley Moore",
+          "bioguide": "M001235",
+          "bill": "H.R.1181",
+          "congress": "119",
+          "repository_key": "119:hr:1181",
+          "role": "sponsor",
+          "title": "Protecting Privacy in Purchases Act",
+          "areas": [
+            "Data Privacy & Cyber"
+          ],
+          "action": "Introduced in House"
+        }
+      ],
+      "beneficiary_tags": [
+        {
+          "bill": "H.R.1181",
+          "congress": "119",
+          "title": "Protecting Privacy in Purchases Act",
+          "class": "shared",
+          "rationale": "areas Data Privacy & Cyber",
+          "areas": [
+            "Data Privacy & Cyber"
+          ]
+        }
+      ],
+      "global_desk_membership_count": 129,
+      "global_desk_roles": {
+        "original": 26,
+        "cosponsor": 103
+      },
+      "member_desk_memberships": [],
+      "admission_catalog": null,
+      "admission_included_bill": null,
+      "admission_decision": null,
+      "admission_memberships": [],
+      "official_member_facts": [
+        {
+          "member": "Riley Moore",
+          "bioguide": "M001235",
+          "bill": "H.R.1181",
+          "congress": "119",
+          "repository_key": "119:hr:1181",
+          "role": "sponsor",
+          "withdrawn": false,
+          "title": "Protecting Privacy in Purchases Act",
+          "areas": [
+            "Data Privacy & Cyber"
+          ],
+          "action": "Introduced in House"
+        }
+      ],
+      "repository_sponsor": {
+        "bioguide": "M001235",
+        "date": "",
+        "district": "2",
+        "name": "Rep. Moore, Riley [R-WV-2]",
+        "party": "R",
+        "state": "WV",
+        "withdrawn_date": ""
+      },
+      "repository_title": "Protecting Privacy in Purchases Act",
+      "bill_rule_exclusion": null,
+      "bill_override": null,
+      "override_included": true,
+      "manual_withdrawals": [],
+      "culling_matches": {},
+      "conclusion": "Existing in-scope classified act; verified nonwithdrawn sponsor missing from this member desk."
+    }
+  ],
+  "source_hashes": {
+    "data\\members\\sentinel_verified_membership_history.ndjson": "2351e2827bcc69708c86d4105895170d8f2410d36c8c5ca557a816922e3f7b99",
+    "bill_beneficiary_tags.ndjson": "7a2dd6abe3075a5d8ee710f99ddd92d9a2994e2f01728d0aefeb91c36c0b9dcb",
+    "data\\legislation\\sentinel_admissions.json": "2eed6f0059d49194ba011ebd2a8d15babbab80191b6c92e10c7f1dbc90b86b41",
+    "data\\legislation\\official_membership_movements.json": "f709dcb541912fe9d527c8185bf35b9b0a9c90658309d8c5536dead7b557747a",
+    "tmp\\primacy_math_repair_20260920\\cumulative_candidate\\member_desk_bundle.json": "d2bc8c5f64fa7b53940595297f4daf89838af87f8b3dba7c9d3084c0b3c88e21",
+    "bill_repository_live.json": "6c477d0959ff0157c1c7144a7efbb059bbd223445136d7954a0cf2b2fb7a25d3",
+    "data\\legislation\\bill_overrides.csv": "7bffeaa78b9658fb424b390734a529a76c84cd903dc9aa60dab42230b5576ee7",
+    "legislation_adjudication_ledger.ndjson": "47dacc6df80d6a190c40aea6ab2321fff061f462d63a5f9604172451cd4b101d",
+    "legislation_exclusion_ledger.ndjson": "29492cf2974ad9b07a747de353dc15777b3a77e506d418dc6a811798421b9fe5",
+    "legislation_hold_ledger.ndjson": "da80bcf1b8bb057cbbc4501027ac084b7ef3066d87e66c9eef9d3322157cbb64",
+    "legislation_membership_edges.ndjson": "e8df0f448b0ddb2bc226a12329fd90da1599fc06e9054874e082641754148eba",
+    "legislation_source_supersessions.ndjson": "87818e480e2a210d340b738f30509ee0eee1deab80ac6351f97e95aee46fc103"
+  },
+  "sources_unchanged": {
+    "data\\members\\sentinel_verified_membership_history.ndjson": true,
+    "bill_beneficiary_tags.ndjson": true,
+    "data\\legislation\\sentinel_admissions.json": true,
+    "data\\legislation\\official_membership_movements.json": true,
+    "tmp\\primacy_math_repair_20260920\\cumulative_candidate\\member_desk_bundle.json": true,
+    "bill_repository_live.json": true,
+    "data\\legislation\\bill_overrides.csv": true,
+    "legislation_adjudication_ledger.ndjson": true,
+    "legislation_exclusion_ledger.ndjson": true,
+    "legislation_hold_ledger.ndjson": true,
+    "legislation_membership_edges.ndjson": true,
+    "legislation_source_supersessions.ndjson": true
+  }
+}

@@ -1,0 +1,87 @@
+# --- secrets (never track) ---
+fec/govinfo_key.txt
+*.key
+
+# --- data artifacts: generated/derived, regenerable from pipeline ---
+*.json
+*.jsonl
+*.csv
+*.tab
+*.bak
+fec/liwc/rkh/
+fec/liwc/bl2025/
+*.db
+*.db-wal
+*.db-shm
+*.pkl
+*.wav
+audio_pilot/
+*.xlsx
+*.html
+!fec/surfaces/staffer_live/index.html
+!fec/surfaces/approved/clean/index.html
+*.txt
+_stance_ft/
+stance_ft_composed/
+backups/
+archive/
+baseline/
+deploy/
+.claude/*
+
+# --- keep: code, docs, config, small source-of-truth text ---
+!*.md
+!formal_visibility_roles.json
+!tweet_image_annotations.json
+!tier_overrides.json
+!fec/staffer_network/schemas/working_history_corpus_receipt.schema.json
+!fec/staffer_network/schemas/*.json
+!requirements*.txt
+!quorum_query.txt
+!fec/retiring_members.txt
+!.claude/launch.json
+!.mcp.json
+
+# python bytecode (mistakenly tracked in baseline)
+__pycache__/
+*.pyc
+
+# track project slash commands + exclude logs
+!.claude/commands/
+!.claude/commands/*.md
+
+# track the skill library (16-skill handoff library, 2026-07-10)
+!.claude/skills/
+!.claude/skills/**
+.claude/skills/**/__pycache__/
+*.log
+fec/lep/
+fec/votesmart_api_key.txt
+!source_data/interview_n_affective.json
+!source_data/wj_n_labels.json
+!audits/legfix2/*.json
+
+# hand-curated hearings media map (config, not data)
+!hearings_media_map.csv
+
+# RStudio per-user state
+.Rproj.user
+
+# mentat data planes (inputs are 373M of FEC bulk + xlsx; caches/backups regenerable)
+mentat/inputs/
+mentat/.cache/
+mentat-backup-*/
+.agents/
+!audits/legfix3/*.json
+
+# vendored deps inside audit artifact workspaces (never source)
+node_modules/
+
+.venv-politico/
+
+# --- generation artifacts and raw scrape payloads (never source) ---
+*.gz
+*.ndjson
+*.bin
+!fec/config/primacy_press_v1.ndjson
+!fec/config/primacy_press_v1.json

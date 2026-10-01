@@ -1,0 +1,165 @@
+{
+  "status": "PASS",
+  "members": 533,
+  "cases": [
+    {
+      "mode": "factor",
+      "minimum": 0.5,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "factor",
+      "minimum": 0.75,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "factor",
+      "minimum": 1.0,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "per_area_v1",
+      "minimum": 0.5,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "per_area_v1",
+      "minimum": 0.75,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "per_area_v1",
+      "minimum": 1.0,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "legxfactor",
+      "minimum": 0.5,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "legxfactor",
+      "minimum": 0.75,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    },
+    {
+      "mode": "legxfactor",
+      "minimum": 1.0,
+      "rank_movers_vs_off": 0,
+      "tier_movers_vs_off": 0,
+      "conduct_exact": true,
+      "tier_one_count": 13
+    }
+  ],
+  "dial": "PRIMACY_T1_MIN_AFFIRMATIVE=0",
+  "dial_factor_bytes_exact": true,
+  "prior_producer_commit": "41d3b8ba5",
+  "prior_producer_sha256": "38fb68c93531a80b672f56ca3d764c574ba58ed0cd457fcb8bbdee370a27559c",
+  "prior_factor_sha256": "a34a09e53cc4467e2ac46674df00d5137a451d843476079fbc3337c666661af7",
+  "final_factor_sha256": "16add0c7ad9e6df7f0c173de9c8b6a55e2ed5af5670e05e72d71281f2bb0d0c0",
+  "positive_gate_qualifiers": 115,
+  "tier_one": [
+    {
+      "member": "Alex Padilla",
+      "rank": 1,
+      "affirmative_credit": 8.0,
+      "raw_factor": 0.833333
+    },
+    {
+      "member": "Vicente Gonzalez",
+      "rank": 2,
+      "affirmative_credit": 6.0,
+      "raw_factor": 0.76
+    },
+    {
+      "member": "Maxine Waters",
+      "rank": 3,
+      "affirmative_credit": 5.0,
+      "raw_factor": 0.654687
+    },
+    {
+      "member": "Brian Fitzpatrick",
+      "rank": 4,
+      "affirmative_credit": 4.0,
+      "raw_factor": 0.635577
+    },
+    {
+      "member": "Brad Sherman",
+      "rank": 5,
+      "affirmative_credit": 4.0,
+      "raw_factor": 0.656522
+    },
+    {
+      "member": "Juan Vargas",
+      "rank": 6,
+      "affirmative_credit": 4.0,
+      "raw_factor": 0.788
+    },
+    {
+      "member": "Tim Scott",
+      "rank": 7,
+      "affirmative_credit": 4.5,
+      "raw_factor": 0.606849
+    },
+    {
+      "member": "William Timmons",
+      "rank": 8,
+      "affirmative_credit": 3.75,
+      "raw_factor": 0.577083
+    },
+    {
+      "member": "Scott Fitzgerald",
+      "rank": 9,
+      "affirmative_credit": 3.5,
+      "raw_factor": 0.574242
+    },
+    {
+      "member": "Bill Huizenga",
+      "rank": 10,
+      "affirmative_credit": 2.75,
+      "raw_factor": 0.557258
+    },
+    {
+      "member": "Young Kim",
+      "rank": 11,
+      "affirmative_credit": 3.25,
+      "raw_factor": 0.556061
+    },
+    {
+      "member": "Kevin Cramer",
+      "rank": 12,
+      "affirmative_credit": 4.75,
+      "raw_factor": 0.583529
+    },
+    {
+      "member": "Juan Ciscomani",
+      "rank": 13,
+      "affirmative_credit": 1.0,
+      "raw_factor": 0.684211
+    }
+  ]
+}

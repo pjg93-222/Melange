@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "members": 533,
+  "rank_movers": 0,
+  "tier_movers": 0,
+  "score_movers": 0,
+  "conduct_all_fields_exact": true,
+  "grade_document_exact": true,
+  "input_hashes": {
+    "ranks_python.json": "02ffdb612cc5958a35abe2fd1da0fbc6f8a58a3e849365c8535608eca8db68fb",
+    "data/engine/primacy_factors.json": "60f51063e301eb86ee7a94ea39b0c412195e0a2a056b1d6e34d2dd2309858e0c",
+    "data/engine/per_area_grade.json": "7a73ffd26f37a7c1589a55ed9465934c1995d413bb4e491ba78c9dcff3c65845",
+    "member_desk_bundle.json": "ed3901e71f6ebbc1642a2d41f46ca2f9288234962720a05e4ccf00291cae370b",
+    "data/lobbying/industry_tiers.json": "c182f1c53f7ec0170a24182da8c12bbe560a0355222a3e3a3623c0b1e3b2141d",
+    "dashboard_data.json": "92ad881c9b634cf3e096e4b845709ae1d1e5a3739212ccf5dcf58d1c0d57b59c"
+  },
+  "industry_all_fields_exact": {
+    "credit_union": 533,
+    "bank": 533,
+    "crypto": 533,
+    "fintech": 533
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "non_cu": {
+    "bank": {
+      "all_fields_exact": true,
+      "members": 533
+    },
+    "crypto": {
+      "all_fields_exact": true,
+      "members": 533
+    },
+    "fintech": {
+      "all_fields_exact": true,
+      "members": 533
+    }
+  },
+  "cu": {
+    "canonical_board_exact": true,
+    "members": 533
+  }
+}

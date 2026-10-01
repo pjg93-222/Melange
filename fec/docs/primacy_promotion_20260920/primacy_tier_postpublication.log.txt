@@ -1,0 +1,101 @@
+test_defaults_are_pinned (__main__.ACURelevanceAxis.test_defaults_are_pinned) ... ok
+test_disabled_flag_leaves_class_weight_untouched (__main__.ACURelevanceAxis.test_disabled_flag_leaves_class_weight_untouched) ... ok
+test_monitor_and_empty_positions_are_noops (__main__.ACURelevanceAxis.test_monitor_and_empty_positions_are_noops) ... ok
+test_oppose_forces_negative_one (__main__.ACURelevanceAxis.test_oppose_forces_negative_one) ... ok
+test_support_floors_low_class_weight (__main__.ACURelevanceAxis.test_support_floors_low_class_weight) ... ok
+test_amendment_is_half_an_act_in_both_terms (__main__.AmendmentMeasureWeight.test_amendment_is_half_an_act_in_both_terms) ... ok
+test_amendment_weight_moves_the_ratio_when_classes_differ (__main__.AmendmentMeasureWeight.test_amendment_weight_moves_the_ratio_when_classes_differ) ... ok
+test_display_ids_map_to_the_right_measure_kind (__main__.AmendmentMeasureWeight.test_display_ids_map_to_the_right_measure_kind) ... ok
+test_duplicate_tag_fails_loud (__main__.AmendmentMeasureWeight.test_duplicate_tag_fails_loud) ... ok
+test_ratified_amendment_weight (__main__.AmendmentMeasureWeight.test_ratified_amendment_weight) ... ok
+test_unclassified_act_fails_loud (__main__.AmendmentMeasureWeight.test_unclassified_act_fails_loud) ... ok
+test_unparseable_id_fails_open_to_bill_weight (__main__.AmendmentMeasureWeight.test_unparseable_id_fails_open_to_bill_weight) ... ok
+test_ceiling_never_promotes (__main__.ConductLadder.test_ceiling_never_promotes) ... ok
+test_delivery_offsets_but_never_overpromotes (__main__.ConductLadder.test_delivery_offsets_but_never_overpromotes) ... ok
+test_live_ledgers_reproduce_known_cases (__main__.ConductLadder.test_live_ledgers_reproduce_known_cases) ... ok
+test_thresholds (__main__.ConductLadder.test_thresholds) ... ok
+test_matching_promotion_supersedes_staged_gate_for_surfaces (__main__.CullingSurfaceStatus.test_matching_promotion_supersedes_staged_gate_for_surfaces) ... ok
+test_absent_evidence_map_stands_the_gate_down (__main__.EvidenceFloor.test_absent_evidence_map_stands_the_gate_down) ... ok
+test_cu_credit_loader_absent_root_fails_open (__main__.EvidenceFloor.test_cu_credit_loader_absent_root_fails_open) ... ok
+test_default_floor_is_three_quarters_credit (__main__.EvidenceFloor.test_default_floor_is_three_quarters_credit) ... ok
+test_exempt_placement_is_never_displaced (__main__.EvidenceFloor.test_exempt_placement_is_never_displaced) ... ok
+test_member_exactly_at_the_floor_qualifies (__main__.EvidenceFloor.test_member_exactly_at_the_floor_qualifies) ... ok
+test_qualified_members_keep_pure_factor_order (__main__.EvidenceFloor.test_qualified_members_keep_pure_factor_order) ... ok
+test_sub_floor_member_reseats_below_the_tiers (__main__.EvidenceFloor.test_sub_floor_member_reseats_below_the_tiers) ... ok
+test_zero_minimum_disables_the_gate (__main__.EvidenceFloor.test_zero_minimum_disables_the_gate) ... ok
+test_adjudication_ledger_is_unique_and_class_priced (__main__.EvidenceLedgerContract.test_adjudication_ledger_is_unique_and_class_priced) ... ok
+test_closed_delivery_is_excluded (__main__.EvidenceLedgerContract.test_closed_delivery_is_excluded) ... ok
+test_delivery_is_class_priced (__main__.EvidenceLedgerContract.test_delivery_is_class_priced) ... ok
+test_grievance_weighting_and_explanations (__main__.EvidenceLedgerContract.test_grievance_weighting_and_explanations) ... ok
+test_malformed_primacy_artifact_fails_loud (__main__.EvidenceLedgerContract.test_malformed_primacy_artifact_fails_loud) ... ok
+test_missing_artifacts_fail_open (__main__.EvidenceLedgerContract.test_missing_artifacts_fail_open) ... ok
+test_severity_two_events_are_not_free (__main__.EvidenceLedgerContract.test_severity_two_events_are_not_free) ... ok
+test_adjudicated_credit_uses_the_same_factor_math (__main__.FactorKernelContract.test_adjudicated_credit_uses_the_same_factor_math) ... ok
+test_adjudication_unknown_member_fails_loud (__main__.FactorKernelContract.test_adjudication_unknown_member_fails_loud) ... ok
+test_member_with_no_acts_uses_baseline (__main__.FactorKernelContract.test_member_with_no_acts_uses_baseline) ... ok
+test_oppose_offsets_cu_primary (__main__.FactorKernelContract.test_oppose_offsets_cu_primary) ... ok
+test_producer_is_deterministic (__main__.FactorKernelContract.test_producer_is_deterministic) ... ok
+test_pure_cu_author_scores_one (__main__.FactorKernelContract.test_pure_cu_author_scores_one) ... ok
+test_role_weights_are_applied (__main__.FactorKernelContract.test_role_weights_are_applied) ... ok
+test_shrinkage_is_contained_between_raw_and_baseline (__main__.FactorKernelContract.test_shrinkage_is_contained_between_raw_and_baseline) ... ok
+test_category_scorer_declares_utf8_for_identity_ledgers (__main__.IdentityBoundary.test_category_scorer_declares_utf8_for_identity_ledgers) ... ok
+test_buckets_are_sizes_not_cutoffs (__main__.LadderBoundaryContract.test_buckets_are_sizes_not_cutoffs) ... ok
+test_ceiling_is_monotone (__main__.LadderBoundaryContract.test_ceiling_is_monotone) ... ok
+test_delivery_without_grievance_never_promotes (__main__.LadderBoundaryContract.test_delivery_without_grievance_never_promotes) ... ok
+test_empty_ladder_is_identity (__main__.LadderBoundaryContract.test_empty_ladder_is_identity) ... ok
+test_member_already_below_floor_does_not_move (__main__.LadderBoundaryContract.test_member_already_below_floor_does_not_move) ... ok
+test_more_delivery_is_never_worse (__main__.LadderBoundaryContract.test_more_delivery_is_never_worse) ... ok
+test_untiered_rung_moves_member_below_tier_three (__main__.LadderBoundaryContract.test_untiered_rung_moves_member_below_tier_three) ... ok
+test_the_board_of_record_is_what_tier_util_seats_today (__main__.PerAreaRatifiedMembers.test_the_board_of_record_is_what_tier_util_seats_today)
+board-of-record receipt: Tier 1 in rank order = Alex Padilla, Vicente Gonzalez, Maxine Waters, Brian Fitzpatrick, Brad Sherman, Juan Vargas, Tim Scott, William Timmons, Scott Fitzgerald, Bill Huizenga, Young Kim, Kevin Cramer, Juan Ciscomani
+13 seats, and the published board equals the live recomputation. ... ok
+test_the_gate_and_buckets_are_unchanged_under_the_new_board (__main__.PerAreaRatifiedMembers.test_the_gate_and_buckets_are_unchanged_under_the_new_board) ... ok
+test_the_ledger_still_credits_all_five (__main__.PerAreaRatifiedMembers.test_the_ledger_still_credits_all_five) ... ok
+test_the_per_area_board_promotes_the_adjudicated_pair (__main__.PerAreaRatifiedMembers.test_the_per_area_board_promotes_the_adjudicated_pair)
+adjudicated receipt: Bill Huizenga per_area t1 r10 / factor t2 r16; Young Kim per_area t1 r11 / factor t2 r17; Mike Crapo per_area t2 r17 / factor t1 r10; Mike Rounds per_area t2 r25 / factor t1 r13; Catherine Cortez Masto per_area t3 r54 / factor t2 r18
+The 2026-07-29 factor-only directive pushed Huizenga and Kim OUT of ... ok
+test_tier_is_exactly_the_fixed_bucket_of_the_seated_rank (__main__.PerAreaRatifiedMembers.test_tier_is_exactly_the_fixed_bucket_of_the_seated_rank)
+The invariant honors_views.py:187 now RUNS under this mode. ... ok
+test_coalition_orientation_is_stronger_than_flip (__main__.PrimacyEnginePolicy.test_coalition_orientation_is_stronger_than_flip) ... ok
+test_current_topic_cannot_leak_into_its_priority (__main__.PrimacyEnginePolicy.test_current_topic_cannot_leak_into_its_priority) ... ok
+test_discrete_engine_levels_are_exact_and_monotone (__main__.PrimacyEnginePolicy.test_discrete_engine_levels_are_exact_and_monotone) ... ok
+test_industry_tiers_precedes_lobby_network_family_build (__main__.PrimacyEnginePolicy.test_industry_tiers_precedes_lobby_network_family_build) ... ok
+test_invalid_engine_tiers_fail_loud (__main__.PrimacyEnginePolicy.test_invalid_engine_tiers_fail_loud) ... ok
+test_invalid_orientation_score_fails_loud (__main__.PrimacyEnginePolicy.test_invalid_orientation_score_fails_loud) ... ok
+test_missing_orientation_is_exactly_neutral (__main__.PrimacyEnginePolicy.test_missing_orientation_is_exactly_neutral) ... ok
+test_nonnegative_floor_is_after_engagement_and_priority (__main__.PrimacyEnginePolicy.test_nonnegative_floor_is_after_engagement_and_priority) ... ok
+test_other_topic_orientation_adjusts_without_upper_clipping (__main__.PrimacyEnginePolicy.test_other_topic_orientation_adjusts_without_upper_clipping) ... ok
+test_pipeline_builds_primacy_before_allocation_engines (__main__.PrimacyEnginePolicy.test_pipeline_builds_primacy_before_allocation_engines) ... ok
+test_responsiveness_follows_primacy_and_precedes_member_desk (__main__.PrimacyEnginePolicy.test_responsiveness_follows_primacy_and_precedes_member_desk) ... ok
+test_default_board_basis_is_the_per_area_board (__main__.PrimacyFactors.test_default_board_basis_is_the_per_area_board) ... ok
+test_missing_factor_fails_loud_under_factor_only (__main__.PrimacyFactors.test_missing_factor_fails_loud_under_factor_only) ... ok
+test_missing_factor_stays_neutral_under_revert (__main__.PrimacyFactors.test_missing_factor_stays_neutral_under_revert) ... ok
+test_per_area_missing_grade_fails_loud (__main__.PrimacyFactors.test_per_area_missing_grade_fails_loud) ... ok
+test_per_area_score_moves_the_last_fifth_on_the_grade (__main__.PrimacyFactors.test_per_area_score_moves_the_last_fifth_on_the_grade) ... ok
+test_rankable_roster_is_identical_under_both_modes (__main__.PrimacyFactors.test_rankable_roster_is_identical_under_both_modes) ... ok
+test_ratified_beneficiary_weights (__main__.PrimacyFactors.test_ratified_beneficiary_weights) ... ok
+test_revert_switch_restores_legislative_times_factor (__main__.PrimacyFactors.test_revert_switch_restores_legislative_times_factor) ... ok
+test_role_mass_is_sponsor_original_later_four_two_one (__main__.PrimacyFactors.test_role_mass_is_sponsor_original_later_four_two_one) ... ok
+test_score_is_the_factor_alone (__main__.PrimacyFactors.test_score_is_the_factor_alone) ... ok
+test_unknown_board_mode_fails_loud (__main__.PrimacyFactors.test_unknown_board_mode_fails_loud) ... ok
+test_only_missing_sponsor_amendments_are_materialized (__main__.PrimacyMembershipBoundary.test_only_missing_sponsor_amendments_are_materialized) ... ok
+test_frozen_board_fixture_replays_its_own_533_evidence_inputs (__main__.ProductionPrimacyClosure.test_frozen_board_fixture_replays_its_own_533_evidence_inputs) ... ok
+test_ratified_members_qualify_by_score_without_positions (__main__.ProductionPrimacyClosure.test_ratified_members_qualify_by_score_without_positions) ... ok
+test_registry_reconciliation_closes_all_55_anchors (__main__.ProductionPrimacyClosure.test_registry_reconciliation_closes_all_55_anchors) ... ok
+test_complete_weight_table (__main__.RatifiedActContract.test_complete_weight_table) ... ok
+test_letter_override_outside_weight_range_raises (__main__.RatifiedActContract.test_letter_override_outside_weight_range_raises) ... ok
+test_letters_use_letter_weight (__main__.RatifiedActContract.test_letters_use_letter_weight) ... ok
+test_oppose_is_the_only_negative_class (__main__.RatifiedActContract.test_oppose_is_the_only_negative_class) ... ok
+test_ratified_letter_override_uses_full_primary_weight (__main__.RatifiedActContract.test_ratified_letter_override_uses_full_primary_weight) ... ok
+test_unknown_class_raises (__main__.RatifiedActContract.test_unknown_class_raises) ... ok
+test_full_evidence_member_is_untouched (__main__.UncertaintyPenalty.test_full_evidence_member_is_untouched) ... ok
+test_ranked_loader_absent_root_fails_open (__main__.UncertaintyPenalty.test_ranked_loader_absent_root_fails_open) ... ok
+test_ranked_loader_prefers_factor_ranked (__main__.UncertaintyPenalty.test_ranked_loader_prefers_factor_ranked) ... ok
+test_ratified_penalty_strength (__main__.UncertaintyPenalty.test_ratified_penalty_strength) ... ok
+test_thin_evidence_estimate_respects_ratified_dock (__main__.UncertaintyPenalty.test_thin_evidence_estimate_respects_ratified_dock) ... ok
+
+----------------------------------------------------------------------
+Ran 90 tests in 3.525s
+
+OK
+90 passed, 0 failed

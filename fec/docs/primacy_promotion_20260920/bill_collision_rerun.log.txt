@@ -1,0 +1,36 @@
+PASS test_bill_type_key_documents_informal_s_r_limitation
+PASS test_bill_type_key_edge_cases
+PASS test_c14_clean_pass_requires_three_nonempty_direction_sources
+PASS test_c14_collision_unkeyable_and_clean_decisions
+PASS test_c14_congress_filled_rows_clear_only_their_cross_congress_warning
+PASS test_c14_lists_empty_title_reintroduction_class
+PASS test_c14_lists_same_title_reintroduction_class
+PASS test_c14_scans_valence_families_without_inventing_bill_ids
+PASS test_c14_warns_on_informal_senate_style_direction_ids
+PASS test_c14_warns_when_legacy_key_parses_but_typed_key_does_not
+PASS test_c15_disagree_agree_and_single_instance_decisions
+PASS test_c15_folds_unicode_apostrophes_and_punctuation
+PASS test_candidate_csv_fields_are_formula_neutralized
+PASS test_candidate_same_congress_distinct_titles_are_ambiguous
+PASS test_candidate_unique_ambiguous_absent_resolution
+PASS test_canonical_category_aliases_case_variants_and_junk
+PASS test_canonical_category_exhaustive_identity_and_numbered_prefixes
+PASS test_congress_normalization_rejects_non_integral_values
+PASS test_direction_registry_exact_blank_fallback_and_type_separation
+PASS test_e16_primary_weight_cannot_be_reproduced_by_variant_hypothesis
+PASS test_e19c_near_miss_bands_and_current_cu_cw_residuals
+PASS test_e19d_new_weight_or_structural_findings_are_nonmatching
+PASS test_evidence_flag_precedence
+PASS test_evidence_numeric_poison_never_matches_zero
+PASS test_key_collisions_fail_closed_for_untyped_legacy_ids
+FAIL test_legdir_v1_fixed_path_and_legacy_parity
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\legislation\test_bill_collision_guards.py", line 636, in main
+    function()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\legislation\test_bill_collision_guards.py", line 547, in test_legdir_v1_fixed_path_and_legacy_parity
+    with open(backup, 'rb') as handle:
+         ^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\backups\\bill_directions.PRE-LEGFIX3.csv'
+PASS test_wiring_conflicts_keep_the_earlier_source
+PASS test_wiring_quarantines_fail_closed_before_precedence
+test_bill_collision_guards: 27 passed, 1 failed

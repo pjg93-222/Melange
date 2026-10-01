@@ -1,0 +1,475 @@
+{
+  "status": "PUBLISHED_WITH_BROAD_GATE_FAILURES_DISCLOSED",
+  "completed_at_utc": "2026-09-20T20:25:17.699528+00:00",
+  "runtime_commit": "fb0aee7b0",
+  "repair_commits": [
+    "78dc3ea8a",
+    "fed4676ac",
+    "c19e54b83",
+    "41d3b8ba5",
+    "c38f97e53",
+    "fb0aee7b0"
+  ],
+  "publication": {
+    "members": 533,
+    "canonical_desk_dashboard_rank_exact": true,
+    "canonical_desk_dashboard_tier_exact": true,
+    "reporting_rank_movers": [],
+    "reporting_score_exact": true,
+    "reporting_percentiles_exact": true,
+    "conduct_details_exact": true,
+    "diagnostics": {
+      "Young Kim": {
+        "rank": 11,
+        "tier": 1,
+        "natural_rank": 11,
+        "natural_tier": 1
+      },
+      "Steve Daines": {
+        "rank": 29,
+        "tier": 2,
+        "natural_rank": 30,
+        "natural_tier": 2
+      },
+      "Andy Barr": {
+        "rank": 38,
+        "tier": 3,
+        "natural_rank": 15,
+        "natural_tier": 2
+      },
+      "Jared Golden": {
+        "rank": 37,
+        "tier": 2,
+        "natural_rank": 38,
+        "natural_tier": 3
+      },
+      "Henry Cuellar": {
+        "rank": 47,
+        "tier": 3,
+        "natural_rank": 47,
+        "natural_tier": 3
+      }
+    },
+    "hashes": {
+      "dashboard_data.json": "84f99935bcd878d10b38b964223d10bf1cf2a513dea73c5a245750b37d593e25",
+      "data/engine/per_area_grade.json": "546f3f12634ace9ab20e9c0d0ab833e451296b05c3910758937b7c3749d17d3d",
+      "data/engine/primacy_factors.json": "16add0c7ad9e6df7f0c173de9c8b6a55e2ed5af5670e05e72d71281f2bb0d0c0",
+      "data/lobbying/industry_tiers.json": "011be2f6854182e6a7a93dd9c686b79c30caecca36733466cecefef78b23c2fb",
+      "member_desk_bundle.json": "3d94b895fd05c8226c30d72b88a730884a13fb218de030c0373d9d43b20be89f",
+      "ranks_python.json": "dd7bc3fef3dce97e33fd615b00e421562cd2eb3a5f51cc9115296678f644aa75"
+    },
+    "canonical_matches_cumulative_candidate": true,
+    "factor_matches_candidate": true,
+    "grade_members_match_candidate": true,
+    "all_industry_fields_match_candidate": true,
+    "published_memberships_match_candidate": true,
+    "cu_top50_exact": true,
+    "cu_tier_movers": 0,
+    "status": "PASS"
+  },
+  "memberships": {
+    "added": 44,
+    "removed": 0
+  },
+  "movement": {
+    "credit_union": {
+      "rank_movers": 125,
+      "tier_movers": 0
+    },
+    "bank": {
+      "rank_movers": 364,
+      "tier_movers": 2
+    },
+    "crypto": {
+      "rank_movers": 426,
+      "tier_movers": 2
+    },
+    "fintech": {
+      "rank_movers": 388,
+      "tier_movers": 2
+    }
+  },
+  "focused_live_tests": {
+    "passed": 235,
+    "subtests_passed": 1374,
+    "exit": 0
+  },
+  "explicit_industry_tests": {
+    "passed": 37,
+    "subtests_passed": 556,
+    "exit": 0
+  },
+  "kernel": {
+    "passed": 254,
+    "failed": 6,
+    "failures": [
+      "FAIL  test_bill_collision_guards suite clean  :: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\backups\\\\bill_directions.PRE-LEGFIX3.csv'",
+      "FAIL  test_primacy_tier suite clean  :: FAILED (failures=1)",
+      "FAIL  test_refresh_tick suite clean  :: FAILED (failures=1)",
+      "FAIL  test_make_staffer_network_html suite clean  :: unrecognised verdict",
+      "FAIL  test_rendered_desk suite clean  :: rendered desk: 30 passed, 1 failed",
+      "FAIL  test_measurement_layers suite clean  :: 1 failed, 6 passed in 0.82s"
+    ],
+    "timing": "Ran after merge during downstream generation; affected publication suite rerun after publication."
+  },
+  "full_body_audit": {
+    "passed": 554,
+    "failed": 14,
+    "exit": 1,
+    "failures": [
+      "FAIL  pillar snapshot vintage <= 14 days (stale-basis tripwire) :: stamped 2026-09-03T21:04:35-04:00 (16d)",
+      "FAIL  personal-texture artifact precision/schema/provenance (no volume reward) :: 480 members, 4727 details, 0 malformed, 0 local-to-narrative leaks, 0 invalid display admissions, candidates=8646 classified=5894 gate=5957",
+      "FAIL  A2 repo.data_stance size_class agrees :: manifest(2026-09-18T17:35:12.600760+00:00): size_class=large (766148698 bytes) / disk: size_class=huge (1242147593 bytes)",
+      "FAIL  A2 repo.data_stance file_count within tolerance :: manifest(2026-09-18T17:35:12.600760+00:00): file_count=172 / disk: file_count=223 (drift +51, tolerance +/-43 for class DERIVED)",
+      "FAIL  A2b repo.data_stance sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['big5_gold_anchored.json size: manifest=210518 bytes / disk=210498 bytes']",
+      "FAIL  A2b repo.data_legislation sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['bank_anchor_reconciliation.json sha256: manifest=a8e092489e859fc9... / disk=0afb35165c8bb445...']",
+      "FAIL  A2b repo.data_network sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['co_appearance.json size: manifest=325679 bytes / disk=312182 bytes']",
+      "FAIL  A2b repo.data_engine sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['per_area_grade.json size: manifest=1105448 bytes / disk=1110160 bytes']",
+      "FAIL  A2b repo.worktrees sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 2 disagree :: ['charming-chatterjee-d81c90/audits/legfix5/opus_adjudication/packets/10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59/packets.ndjson: manifest recorded it at 2759907661 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.claude\\\\worktrees\\\\charming-chatterjee-d81c90\\\\audits\\\\legfix5\\\\opus_adjudication\\\\packets\\\\10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59\\\\packets.ndjson', 'evidence-csv-fetch-streaming-8bedff/audits/legfix5/opus_adjudication/packets/10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59/packets.ndjson: manifest recorded it at 2759907661 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.claude\\\\worktrees\\\\evidence-csv-fetch-streaming-8bedff\\\\audits\\\\legfix5\\\\opus_adjudication\\\\packets\\\\10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59\\\\packets.ndjson']",
+      "FAIL  A2 repo.git size_class agrees :: manifest(2026-09-18T17:35:12.600760+00:00): size_class=massive (15266046823 bytes) / disk: size_class=huge (9168642602 bytes)",
+      "FAIL  A2b repo.git sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['codex-worktree-backups/20260901-113507/preserved-unmerged-branches.bundle: manifest recorded it at 3172264589 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.git\\\\codex-worktree-backups\\\\20260901-113507\\\\preserved-unmerged-branches.bundle']",
+      "FAIL  A2b local.lda_derived sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['cosponsor_sc/cosponsor_scores.csv size: manifest=166926312 bytes / disk=167424467 bytes']",
+      "FAIL  A2b local.billstatus sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['billstatus119/BILLSTATUS-119.receipt.json size: manifest=3912 bytes / disk=3905 bytes']",
+      "FAIL  A2b mirror.melange sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['objects/pack/pack-9b083bbd2d8969998b964c529280f2f294b3136f.pack: manifest recorded it at 30602415 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\GitMirrors\\\\melange-systems.git\\\\objects\\\\pack\\\\pack-9b083bbd2d8969998b964c529280f2f294b3136f.pack']"
+    ],
+    "execution": "Standalone final audit after the original pipeline terminal session was lost during an environment reset."
+  },
+  "reruns": {
+    "primacy_tier_postpublication": {
+      "exit": 0,
+      "tail": [
+        "test_unknown_class_raises (__main__.RatifiedActContract.test_unknown_class_raises) ... ok",
+        "test_full_evidence_member_is_untouched (__main__.UncertaintyPenalty.test_full_evidence_member_is_untouched) ... ok",
+        "test_ranked_loader_absent_root_fails_open (__main__.UncertaintyPenalty.test_ranked_loader_absent_root_fails_open) ... ok",
+        "test_ranked_loader_prefers_factor_ranked (__main__.UncertaintyPenalty.test_ranked_loader_prefers_factor_ranked) ... ok",
+        "test_ratified_penalty_strength (__main__.UncertaintyPenalty.test_ratified_penalty_strength) ... ok",
+        "test_thin_evidence_estimate_respects_ratified_dock (__main__.UncertaintyPenalty.test_thin_evidence_estimate_respects_ratified_dock) ... ok",
+        "",
+        "----------------------------------------------------------------------",
+        "Ran 90 tests in 3.525s",
+        "",
+        "OK",
+        "90 passed, 0 failed"
+      ]
+    },
+    "rendered_desk_postpublication": {
+      "exit": 0,
+      "tail": [
+        "  OK   C6 a board that reads a deferred field fails A5d",
+        "  OK   C6 A5d compares a non-empty board, not two blanks",
+        "  OK   C6 leaves the index assertions green -- only the rendered markup is wrong",
+        "  OK   C4 a bundle with no bills and no staffdir fails the contract",
+        "  OK   C4 no assertion is reported as passing on the degenerate bundle",
+        "  OK   C5a an unsplit artifact makes A1 skip, not pass",
+        "  OK   C5a the skip carries a reason",
+        "  OK   C5a nothing downstream of A1 reports a pass",
+        "  OK   C5b an artifact that does not actually defer makes A1 skip, not pass",
+        "  OK   C5b the skip names the structures that were already populated",
+        "",
+        "rendered desk: 31 passed, 0 failed"
+      ]
+    },
+    "refresh_tick_rerun": {
+      "exit": 1,
+      "tail": [
+        "FAIL: test_nothing_was_written_under_the_repository (__main__.RefreshTickTest.test_nothing_was_written_under_the_repository)",
+        "Negative control for the whole file: every tick ran in a temp root.",
+        "----------------------------------------------------------------------",
+        "Traceback (most recent call last):",
+        "  File \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\infra\\test_refresh_tick.py\", line 1889, in test_nothing_was_written_under_the_repository",
+        "    self.assertFalse(os.path.exists(os.path.join(REPO_ROOT, '.pipeline_run.lock')),",
+        "AssertionError: True is not false : the suite left a writer lease in the repository",
+        "",
+        "----------------------------------------------------------------------",
+        "Ran 64 tests in 392.882s",
+        "",
+        "FAILED (failures=1)"
+      ]
+    },
+    "refresh_tick_idle_postpublication": {
+      "exit": 0,
+      "tail": [
+        ".",
+        "----------------------------------------------------------------------",
+        "Ran 1 test in 0.000s",
+        "",
+        "OK"
+      ]
+    },
+    "bill_collision_rerun": {
+      "exit": 1,
+      "tail": [
+        "PASS test_key_collisions_fail_closed_for_untyped_legacy_ids",
+        "FAIL test_legdir_v1_fixed_path_and_legacy_parity",
+        "Traceback (most recent call last):",
+        "  File \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\legislation\\test_bill_collision_guards.py\", line 636, in main",
+        "    function()",
+        "  File \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\legislation\\test_bill_collision_guards.py\", line 547, in test_legdir_v1_fixed_path_and_legacy_parity",
+        "    with open(backup, 'rb') as handle:",
+        "         ^^^^^^^^^^^^^^^^^^",
+        "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\backups\\\\bill_directions.PRE-LEGFIX3.csv'",
+        "PASS test_wiring_conflicts_keep_the_earlier_source",
+        "PASS test_wiring_quarantines_fail_closed_before_precedence",
+        "test_bill_collision_guards: 27 passed, 1 failed"
+      ]
+    },
+    "staffer_html_rerun": {
+      "exit": 1,
+      "tail": [
+        "  OK   the network surface carries no organisations island",
+        "[i] offices and organisations are each independently optional",
+        "FAIL  an absent offices artifact still renders  :: got 1 want 0",
+        "  OK   the builder says it rendered an empty offices directory",
+        "Traceback (most recent call last):",
+        "  File \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\surfaces\\test_make_staffer_network_html.py\", line 945, in <module>",
+        "    sys.exit(main())",
+        "             ^^^^^^",
+        "  File \"C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\surfaces\\test_make_staffer_network_html.py\", line 805, in main",
+        "    no_offices_page = open(out_no_offices, encoding='utf-8').read()",
+        "                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\pgoff\\\\AppData\\\\Local\\\\Temp\\\\mb_staffer_html_b0v2hx05\\\\no-offices.html'"
+      ]
+    },
+    "measurement_layers_postpublication": {
+      "exit": 0,
+      "tail": [
+        "........                                                                 [100%]",
+        "8 passed in 0.58s"
+      ]
+    }
+  },
+  "pipeline": {
+    "exit": null,
+    "terminal_status": "Unavailable after environment reset during final audit; not inferred from completed stages.",
+    "final_suffix_log": "math_repair_pipeline.log.txt",
+    "completed_prefix_receipt": "interrupted_pipeline_recovery_receipt.json",
+    "scope": "Source prefix completed in the recovered full run. Final canonical suffix from build_primacy_surfaces.py completed all production stages, package generation and source-to-dashboard verification. The remaining full-body audit was executed separately; its exit and full output are recorded above."
+  },
+  "affirmative_gate": {
+    "status": "PASS",
+    "members": 533,
+    "cases": [
+      {
+        "mode": "factor",
+        "minimum": 0.5,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "factor",
+        "minimum": 0.75,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "factor",
+        "minimum": 1.0,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "per_area_v1",
+        "minimum": 0.5,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "per_area_v1",
+        "minimum": 0.75,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "per_area_v1",
+        "minimum": 1.0,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "legxfactor",
+        "minimum": 0.5,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "legxfactor",
+        "minimum": 0.75,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      },
+      {
+        "mode": "legxfactor",
+        "minimum": 1.0,
+        "rank_movers_vs_off": 0,
+        "tier_movers_vs_off": 0,
+        "conduct_exact": true,
+        "tier_one_count": 13
+      }
+    ],
+    "dial": "PRIMACY_T1_MIN_AFFIRMATIVE=0",
+    "dial_factor_bytes_exact": true,
+    "prior_producer_commit": "41d3b8ba5",
+    "prior_producer_sha256": "38fb68c93531a80b672f56ca3d764c574ba58ed0cd457fcb8bbdee370a27559c",
+    "prior_factor_sha256": "a34a09e53cc4467e2ac46674df00d5137a451d843476079fbc3337c666661af7",
+    "final_factor_sha256": "16add0c7ad9e6df7f0c173de9c8b6a55e2ed5af5670e05e72d71281f2bb0d0c0",
+    "positive_gate_qualifiers": 115,
+    "tier_one": [
+      {
+        "member": "Alex Padilla",
+        "rank": 1,
+        "affirmative_credit": 8.0,
+        "raw_factor": 0.833333
+      },
+      {
+        "member": "Vicente Gonzalez",
+        "rank": 2,
+        "affirmative_credit": 6.0,
+        "raw_factor": 0.76
+      },
+      {
+        "member": "Maxine Waters",
+        "rank": 3,
+        "affirmative_credit": 5.0,
+        "raw_factor": 0.654687
+      },
+      {
+        "member": "Brian Fitzpatrick",
+        "rank": 4,
+        "affirmative_credit": 4.0,
+        "raw_factor": 0.635577
+      },
+      {
+        "member": "Brad Sherman",
+        "rank": 5,
+        "affirmative_credit": 4.0,
+        "raw_factor": 0.656522
+      },
+      {
+        "member": "Juan Vargas",
+        "rank": 6,
+        "affirmative_credit": 4.0,
+        "raw_factor": 0.788
+      },
+      {
+        "member": "Tim Scott",
+        "rank": 7,
+        "affirmative_credit": 4.5,
+        "raw_factor": 0.606849
+      },
+      {
+        "member": "William Timmons",
+        "rank": 8,
+        "affirmative_credit": 3.75,
+        "raw_factor": 0.577083
+      },
+      {
+        "member": "Scott Fitzgerald",
+        "rank": 9,
+        "affirmative_credit": 3.5,
+        "raw_factor": 0.574242
+      },
+      {
+        "member": "Bill Huizenga",
+        "rank": 10,
+        "affirmative_credit": 2.75,
+        "raw_factor": 0.557258
+      },
+      {
+        "member": "Young Kim",
+        "rank": 11,
+        "affirmative_credit": 3.25,
+        "raw_factor": 0.556061
+      },
+      {
+        "member": "Kevin Cramer",
+        "rank": 12,
+        "affirmative_credit": 4.75,
+        "raw_factor": 0.583529
+      },
+      {
+        "member": "Juan Ciscomani",
+        "rank": 13,
+        "affirmative_credit": 1.0,
+        "raw_factor": 0.684211
+      }
+    ]
+  },
+  "membership_revert": {
+    "status": "PASS",
+    "dial": "DESK_MEMBERSHIP_SOURCE=delta",
+    "comparison": "Interrupted live delta generation, same current inputs",
+    "members": 533,
+    "all_desk_bill_fields_exact": true,
+    "factor_bytes_exact": true,
+    "grade_document_exact": true,
+    "warning": "This historical dial reintroduces the demonstrated membership oscillation."
+  },
+  "source_receipt_migration": {
+    "status": "PASS",
+    "source_bundle_hash_exact": true,
+    "legacy_seed_hash_exact": true,
+    "current_identities_exact": true,
+    "repository_hash_exact": true,
+    "identity_binding": {
+      "count": 473,
+      "sha256": "3c362f5695915738773ed38d76323c63d622d18adfebce5b2f7507e3b082d958"
+    },
+    "completed_at_preserved": "2026-09-20T10:43:56Z",
+    "source_receipt_sha256": "15758d10f90b197166ec2e902e993974c417e1705827b7322fd2ca6f416afe70",
+    "migrated_receipt_sha256": "b40b8b6e8d6834ad8ab0e90489fe20070dfe1564cb14dc24c333efd94cd5154d"
+  },
+  "independent_review": "Approved runtime and bounded receipt migration; final candidate source changes and unchanged CU top 50 independently recomputed. No remaining implementation blockers.",
+  "inventory_followup": {
+    "check": "A2 repo.data_stance file_count within tolerance",
+    "repeated_by": "Independent reviewer using system_manifest_check._observe",
+    "expected": 172,
+    "observed": 223,
+    "growth": 51,
+    "tolerance": 43,
+    "growth_accounting": {
+      "five_newer_rank_honors_generations": 47,
+      "new_workbook_backups": 4
+    },
+    "verdict": "FAIL reproduced; accumulated publication/workbook evidence exceeds the declared tolerance. Manifest unchanged."
+  },
+  "limits": [
+    "Broad-gate failures are not waived.",
+    "Historical classified media and existing source/display limitations remain.",
+    "Direction symmetry, substantive-event counting and chamber alternatives are documented proposals, not new defaults.",
+    "No prospective predictive validation was performed."
+  ],
+  "evidence_sha256": {
+    "math_repair_publication_receipt.json": "9440771fc0ade88f8f765f9c8a720daf9405af894ebc4b732f3b07b06a0f4d32",
+    "math_repair_baseline.json": "04debe3236b39f0c9f3d2df14dab0bc8d7985db3e9eb333fb320d4e95fa3a957",
+    "math_repair_pipeline.log.txt": "a461d9561d37e48f30568120bde641cadf7937605d29b441c220d4efa63a9557",
+    "math_repair_kernel.log.txt": "048860e41e242627038d4578fbb122b48bbd2e90e862aa6b71b5b57c63da5183",
+    "math_repair_audit.log.txt": "e7d4deb814af6a279be1c74b7a255cc66fae181b78738094bf027a7aaf21d638",
+    "math_repair_focused.log.txt": "396a6f6f3b79af0e002cd086902cc81d906d0021654b66405b9ef2f3c746ebe7",
+    "math_repair_audit_integration.log.txt": "f342f9eb99f35283075aa79c76f21b5e30b707100ee7511d0cf47b8a102d50d2",
+    "math_repair_audit_gate_off.log.txt": "9ded60a2bdc569bd567d6904192c986c0b58ed4b2fde423088383343b59a72a4",
+    "math_repair_industry.log.txt": "838f4979ee0ab0c8246f50dcb713c2bf05956d70d7c46962c701d605eaced06a",
+    "primacy_tier_postpublication.log.txt": "4829e4fd6ff72809b8fbee3d926a4c3b30dd46366a18fcc10c6e39850a14b84a",
+    "rendered_desk_postpublication.log.txt": "431f6a37939fd7f17cb815206aba128eff9b415ba1e91ee2492672d14d022518",
+    "refresh_tick_rerun.log.txt": "d5bcd29d64e9f326bb1efaf3d7996a290939d1174bce1bb98899658f410344e6",
+    "refresh_tick_idle_postpublication.log.txt": "1a52ff93b2b7c8bc576900f70c9062f5baedb573cf55507ec33070c999cd9b12",
+    "bill_collision_rerun.log.txt": "ccfbf62e64d69f8c15004c24b430fcdf7afd0676f7915a2ab89f2a23579d2deb",
+    "staffer_html_rerun.log.txt": "16da6bee0e0857aca352ee77639ac8b0693217e879c93254006edcf1f6eef259",
+    "measurement_layers_postpublication.log.txt": "a734ccc5064b47fa27f760467b71eba37be672c0d2898879fa24b7d9bef24790"
+  }
+}

@@ -1,0 +1,1310 @@
+{
+  "schema": "interrupted-pipeline-recovery-v1",
+  "run_id": "moneyball-pipeline-20260920T172945",
+  "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+  "root": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+  "reported_process_id": 62736,
+  "process_id_limit": "Event payloads do not include a process ID; identification is by exact run_id, correlation_id, cwd, and reported time window.",
+  "first_event_utc": "2026-09-20T17:29:45.4726067Z",
+  "last_event_utc": "2026-09-20T18:25:28.3098211Z",
+  "event_count": 73,
+  "completed_step_count": 34,
+  "completed_steps": [
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1729456478975Z-3c8b8ad81d",
+      "timestamp_utc": "2026-09-20T17:29:45.6478975Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "calibration_guard.py",
+      "summary": "calibration guard: OK (3 checked)",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 142,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1729465420732Z-a3c42a3dcd",
+      "timestamp_utc": "2026-09-20T17:29:46.5420732Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "apply_fec_money_refresh.py",
+      "summary": "FEC money applied to 533 members",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 890,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1745263721356Z-a5eb5df08b",
+      "timestamp_utc": "2026-09-20T17:45:26.3721356Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "audit_collection.py",
+      "summary": "}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 939782,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1745329832332Z-b962ea8637",
+      "timestamp_utc": "2026-09-20T17:45:32.9832332Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_press_engine_feed.py",
+      "summary": "press refresh feed: 291 stance rows + 21877 typed official mentions from 3 accepted runs",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 6595,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1745425309393Z-8bb5c8a6b0",
+      "timestamp_utc": "2026-09-20T17:45:42.5309393Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "b5_audio_manifest_adapter.py",
+      "summary": "accepted-audio candidate intake: 6911 total = 784 queued + 6127 excluded; active audio unchanged",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 9547,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1745478752210Z-28aedb1d6d",
+      "timestamp_utc": "2026-09-20T17:45:47.8752210Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "b5_audio_descriptors_candidate.py",
+      "summary": "b5_audio_descriptors_v2.json.candidate: 0 verified members, 0 accepted clips, 784 rejected; consumed by nothing",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 5344,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1757050033042Z-5898794337",
+      "timestamp_utc": "2026-09-20T17:57:05.0033042Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "coop_v2_candidate.py",
+      "summary": "wrote coop_v2_candidate.json (A-slot criterion values; consumed by receptivity_layer + desk radar)",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 6059,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1758233310082Z-160aec5909",
+      "timestamp_utc": "2026-09-20T17:58:23.3310082Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_electoral.py",
+      "summary": "LEAST leverage (safe): [('Schiff', 119, 'x1.00'), ('Padilla', 119, 'x1.00'), ('Evans', 93.8, 'x1.00'), ('Pfluger', 93.2, 'x1.00'), ('Ivey', 89.3, 'x1.01'), ('Moran', 89.0, 'x1.01')]",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 78324,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1758236413624Z-9cc55ff884",
+      "timestamp_utc": "2026-09-20T17:58:23.6413624Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "receptivity_layer.py",
+      "summary": "wrote member_receptivity.json",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 310,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1758474889717Z-dc39e0c3e8",
+      "timestamp_utc": "2026-09-20T17:58:47.4889717Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "verify_collector_roster_updates.py",
+      "summary": "collector roster verification: 75 accepted, 13 queued, 5237 already present, 910 unresolvable, 0 excluded (473 repository bills over 653 ledger acts)",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 23847,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1802333590796Z-69a271d6e5",
+      "timestamp_utc": "2026-09-20T18:02:33.3590796Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "sync_sentinel_bill_ledger.py",
+      "summary": "{\"discovery_candidates\": 18583, \"discovery_only_ids\": 18135, \"discovery_pending_review\": 14006, \"installed\": true, \"ledger_rows_excluding_header\": 18912, \"output\": \"C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 225866,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1803098659267Z-3deb9ec298",
+      "timestamp_utc": "2026-09-20T18:03:09.8659267Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_archive_legislative.py",
+      "summary": "   Examination & Supervision  +1.6",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 36501,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1803307815487Z-c1f5657142",
+      "timestamp_utc": "2026-09-20T18:03:30.7819564Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "extract_cu_speeches.py",
+      "summary": "  Telephone Consumer Protection Act        1",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 20915,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1803453991063Z-3c654a2738",
+      "timestamp_utc": "2026-09-20T18:03:45.3991063Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "speech_stance_stack.py",
+      "summary": "scored 316 floor speeches -> speech_stance_final.csv | gold 215 | labels {'neutral': 142, 'support': 105, 'oppose': 69} | tiers {'gold': 215, 'majority': 49, 'unanimous': 49, 'review': 3}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 14616,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1803591601040Z-9047d733c0",
+      "timestamp_utc": "2026-09-20T18:03:59.1601040Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "hearing_stance_stack.py",
+      "summary": "scored 808 hearing rows -> data/stance/hearing_stance_final.csv | gold 261 | labels {'neutral': 208, 'oppose': 293, 'support': 307} | tiers {'gold': 261, 'majority': 349, 'unanimous': 143, 'review': 5",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 13760,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1804104331698Z-620161700c",
+      "timestamp_utc": "2026-09-20T18:04:10.4331698Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "extract_cu_interviews.py",
+      "summary": "  Member Business Lending                  1",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 11273,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1804166824105Z-9aecab6935",
+      "timestamp_utc": "2026-09-20T18:04:16.6824105Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "interview_stance_stack.py",
+      "summary": "scored 37 interviews -> data/stance/interview_stance_final.csv | gold 37 | labels {'oppose': 19, 'neutral': 12, 'support': 6} | tiers {'gold': 37}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 6249,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1804220641255Z-e66b370172",
+      "timestamp_utc": "2026-09-20T18:04:22.0641255Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "bluesky_stance_stack.py",
+      "summary": "scored 15 Bluesky posts -> data/stance/bluesky_stance_final.csv | gold 15 | labels {'oppose': 13, 'support': 2} | tiers {'gold': 15}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 5379,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1804493097913Z-ebe9663c28",
+      "timestamp_utc": "2026-09-20T18:04:49.3097913Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "tweet_stance_stack.py",
+      "summary": "  tiers: {'majority': 6262, 'review': 794, 'unanimous': 2409}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 27245,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1805067342377Z-cfadf4ddcd",
+      "timestamp_utc": "2026-09-20T18:05:06.7342377Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "press_stance_stack.py",
+      "summary": "labels: {np.str_('support'): 1627, np.str_('neutral'): 816, np.str_('unrelated'): 29, np.str_('oppose'): 196} | tiers: {'majority': 1536, 'unanimous': 799, 'review': 333} | changed vs DEBATE: 526 (20%",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 17424,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1805182349691Z-9d0962c1e4",
+      "timestamp_utc": "2026-09-20T18:05:18.2349691Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "press_engagement_layer.py",
+      "summary": "wrote press_engagement.json (65 directed edges) — candidate augmentation layer for the cascade",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 11498,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1805217736988Z-cf35f9e136",
+      "timestamp_utc": "2026-09-20T18:05:21.7736988Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "press_hcoi.py",
+      "summary": "wrote press_hcoi.json (6 communities, 1900 edges — candidate 2nd graph layer for the cascade)",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 3538,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1805234157901Z-d133513861",
+      "timestamp_utc": "2026-09-20T18:05:23.4157901Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_multilayer_network.py",
+      "summary": "wrote congress_cosponsor_network_AUG20260920.xlsx  -> ALL loaders pick it up by mtime; regenerate pipeline + audit_full to validate",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 1642,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1817329714069Z-ca3000e1bc",
+      "timestamp_utc": "2026-09-20T18:17:32.9714069Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "member_reference_layer.py",
+      "summary": "member_references.json: 7944 substantive directed edges | positive 6022 | negative 1156",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 729554,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1817332581744Z-0d9e7053e9",
+      "timestamp_utc": "2026-09-20T18:17:33.2581744Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "honors_workbook.py",
+      "summary": "{\"status\": \"ROLLED_BACK\", \"scope\": \"whole-file\", \"after_sha256\": \"c91fd3169b65e162c8e7e7a769764cde6a74d685e2504bc8262887ae35b96dc0\"}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 279,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1818424481645Z-e0f4fc65a2",
+      "timestamp_utc": "2026-09-20T18:18:42.4481645Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_media_blend.py",
+      "summary": "wrote media blend into Press Release - Raw: 0 cells changed (formulas untouched)",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 69186,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1818521037750Z-bb0ee189ca",
+      "timestamp_utc": "2026-09-20T18:18:52.1037750Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_vote_category.py",
+      "summary": "}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 9649,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1819286816304Z-58abf47821",
+      "timestamp_utc": "2026-09-20T18:19:28.6816304Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "per_category_stance.py",
+      "summary": "Interchange DEFENDERS: []",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 36570,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1819468537509Z-1a4db8d2df",
+      "timestamp_utc": "2026-09-20T18:19:46.8537509Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "committee_scores.py",
+      "summary": "committee scores: 390 scanned, 0 repaired, max 11.575 (clean; not rewritten)",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 18169,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1820225127995Z-a4dcfc0f8a",
+      "timestamp_utc": "2026-09-20T18:20:22.5127995Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "compute_pillars.py",
+      "summary": "!! ROLE REGISTRY EXPIRES IN 105 DAYS (2027-01-03) - CHAIN WILL FATAL HERE !! wrote ranks_python.json (rank authority): 533 members | 19 formal-office contexts display-only | 8 committee overlaps noted",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 35659,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1820226646788Z-17e50b08ee",
+      "timestamp_utc": "2026-09-20T18:20:22.6646788Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "legislation_culling_status.py",
+      "summary": "data/legislation/legislation_culling_status.json | phase=production | status=PASS_PRODUCTION_CULLING_INTEGRATED",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 151,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1824467518823Z-78bea66396",
+      "timestamp_utc": "2026-09-20T18:24:46.7518823Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_primacy_surfaces.py",
+      "summary": "primacy engine inputs: complete | official rank authority byte-identical",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 264087,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1825249690850Z-7d7c3fd267",
+      "timestamp_utc": "2026-09-20T18:25:24.9690850Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "build_rank_honors.py",
+      "summary": "}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 38207,
+      "bytes": -1,
+      "metadata": null
+    },
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1825283055623Z-8f8f5a9399",
+      "timestamp_utc": "2026-09-20T18:25:28.3055623Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "completed",
+      "stage": "audit_rank_honors.py",
+      "summary": "}",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 3333,
+      "bytes": -1,
+      "metadata": null
+    }
+  ],
+  "failed_steps": [
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1756589187703Z-f87721795c",
+      "timestamp_utc": "2026-09-20T17:56:58.9187703Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "failed",
+      "stage": "build_descriptive_speech.py",
+      "summary": "build_descriptive_speech.py finished",
+      "detail": "SPEECH DESCRIPTIVE BUILD FAILED: local YouTube verification input receipt is stale\n",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 671043,
+      "bytes": -1,
+      "metadata": null
+    }
+  ],
+  "tolerated_failures": [
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1756589434583Z-f8bc031dfd",
+      "timestamp_utc": "2026-09-20T17:56:58.9434583Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.tolerated_failure",
+      "status": "completed",
+      "stage": "build_descriptive_speech.py",
+      "summary": "tolerated display-only failure at build_descriptive_speech.py; last-good artifact retained",
+      "detail": "SPEECH DESCRIPTIVE BUILD FAILED: local YouTube verification input receipt is stale",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": 671068,
+      "bytes": -1,
+      "metadata": {
+        "step": "build_descriptive_speech.py",
+        "returncode": 2,
+        "tolerated": true,
+        "last_good_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data/speech/speech_descriptive_v1.json",
+        "receipt": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data/engine/chain_tolerated_failures.json"
+      }
+    }
+  ],
+  "steps_started_without_terminal_event": [
+    {
+      "schema_version": 1,
+      "id": "evt-20260920T1825283055623Z-05e5f7e068",
+      "timestamp_utc": "2026-09-20T18:25:28.3098211Z",
+      "run_id": "moneyball-pipeline-20260920T172945",
+      "correlation_id": "corr-20260920T1729454603767Z-c21776d992",
+      "parent_id": "",
+      "lane": "claude",
+      "source": "moneyball-pipeline",
+      "kind": "pipeline.step",
+      "status": "running",
+      "stage": "sync_stance_g.py",
+      "summary": "sync_stance_g.py",
+      "detail": "",
+      "cwd": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+      "duration_ms": -1,
+      "bytes": -1,
+      "metadata": null
+    }
+  ],
+  "pipeline_terminal_event_found": false,
+  "unobserved_chain_steps": [
+    "build_district_industry.py",
+    "build_electoral_plays.py",
+    "per_topic_flip.py",
+    "per_topic_coalition.py",
+    "lt_priming.py",
+    "budget_frontier.py",
+    "budget_frontier.py",
+    "optimize.py",
+    "build_im_allocation.py",
+    "salience_shock.py",
+    "personal_texture_layer.py",
+    "communication_style.py",
+    "validate_communication_style.py",
+    "b5_external_gold_validate.py",
+    "b5_gold_multitrait_validate.py",
+    "b5_profile_basis.py",
+    "validate_guarded_profile_artifacts.py",
+    "build_member_longform_turn_features.py",
+    "build_member_narrative_ledger.py",
+    "regenerate_member_profiles.py",
+    "build_dashboard_bundle.py",
+    "make_dashboard_html.py",
+    "coalition_pricing.py",
+    "contest_screen.py",
+    "champions_v2.py",
+    "efficiency_layers.py",
+    "industry_tiers.py",
+    "org_mentions.py",
+    "refresh_cosponsor_forecast.py",
+    "make_lobby_network_html.py",
+    "make_lobby_interactions_html.py",
+    "build_staffer_network_section.py",
+    "build_staffer_groups_section.py",
+    "make_staffer_network_html.py",
+    "bill_lobbying_sidecar.py",
+    "make_member_desk.py",
+    "make_combined.py",
+    "sync_live_dashboard_alias.py",
+    "make_email_package.py",
+    "audit_source_to_dashboard.py",
+    "audit_full.py"
+  ],
+  "coverage_limit": "Optional-input skips emit stdout only, so absence of an event does not prove nonexecution for optional steps. Completion events certify process exit zero, not present artifact validity after a discovered source defect.",
+  "recovered_events_file": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\tmp\\primacy_math_repair_20260920\\interrupted_pipeline_recovered_events.json",
+  "recovered_events_sha256": "fc8593010d552436f53a0c88aedd12c47ea93d619ff3f177fbd974689524ae3b",
+  "history_binding_observation": {
+    "history_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\members\\sentinel_verified_membership_history.ndjson",
+    "history_sha256": "2351e2827bcc69708c86d4105895170d8f2410d36c8c5ca557a816922e3f7b99",
+    "receipt_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine\\sentinel_verified_membership_history_receipt.json",
+    "receipt_sha256": "84700942485f875d85fcdceadc77348c90d16bb9b4fac8566701aaecfcc6de00",
+    "receipt_status": "PASS",
+    "receipt_history_block": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\members\\sentinel_verified_membership_history.ndjson",
+      "sha256": "2351e2827bcc69708c86d4105895170d8f2410d36c8c5ca557a816922e3f7b99",
+      "verified_interaction_rows": 291,
+      "verified_memberships": 279
+    },
+    "history_hash_matches_receipt": true,
+    "limit": "Hash match only; use the cumulative reader/provenance validator for full admissibility and row-by-row ledger parity."
+  },
+  "resume_recommendation": {
+    "command": "python -B -u fec/run_pipeline.py --from build_primacy_surfaces.py",
+    "chain_step_number": 34,
+    "chain_length": 79,
+    "remaining_step_count": 46,
+    "reason": "The reader-only repair first affects the analytic desk rebuild inside build_primacy_surfaces. Its factor/grade outputs and the honors generation already produced during the interrupted run must be replaced before downstream workbook, allocation, and surface consumers.",
+    "preconditions": [
+      "Repaired cumulative reader is installed and active in the canonical ROOT process.",
+      "The cumulative history and receipt pass the repaired reader/provenance checks and retain the accepted baseline memberships.",
+      "Upstream membership source artifacts, votes, stance outputs and reporting ranks have not changed since their successful steps; otherwise resume from the earliest changed producer.",
+      "No surviving child writer from the interrupted sync_stance_g step remains; allow pipeline_run_lock to arbitrate the next writer."
+    ],
+    "do_not_resume_at": "sync_stance_g.py or final make_member_desk.py: they would consume or leave the source-drift factor/grade generation.",
+    "if_upstream_sources_changed": "If collector verification or cumulative-history materialization itself is changed, resume at verify_collector_roster_updates.py or sync_sentinel_bill_ledger.py as appropriate, not at build_primacy_surfaces.py.",
+    "runner_semantics": "--from selects a unique case-sensitive basename/prefix and only slices CHAIN. It runs dependency preflight and the exclusive lock, but does not infer dependencies, rerun calibration_guard, verify past completion, or undo an interrupted child write. Existing earlier tolerated-failure receipts remain.",
+    "steps_to_replay": [
+      {
+        "step_number": 34,
+        "script": "build_primacy_surfaces.py",
+        "args": [
+          "--engine-inputs-only"
+        ]
+      },
+      {
+        "step_number": 35,
+        "script": "build_rank_honors.py",
+        "args": [
+          "--publish"
+        ]
+      },
+      {
+        "step_number": 36,
+        "script": "audit_rank_honors.py",
+        "args": []
+      },
+      {
+        "step_number": 37,
+        "script": "sync_stance_g.py",
+        "args": []
+      },
+      {
+        "step_number": 38,
+        "script": "honors_workbook.py",
+        "args": []
+      },
+      {
+        "step_number": 39,
+        "script": "build_electoral_plays.py",
+        "args": []
+      },
+      {
+        "step_number": 40,
+        "script": "per_topic_flip.py",
+        "args": []
+      },
+      {
+        "step_number": 41,
+        "script": "per_topic_coalition.py",
+        "args": []
+      },
+      {
+        "step_number": 42,
+        "script": "lt_priming.py",
+        "args": []
+      },
+      {
+        "step_number": 43,
+        "script": "budget_frontier.py",
+        "args": []
+      },
+      {
+        "step_number": 44,
+        "script": "budget_frontier.py",
+        "args": [
+          "--electoral"
+        ]
+      },
+      {
+        "step_number": 45,
+        "script": "optimize.py",
+        "args": []
+      },
+      {
+        "step_number": 46,
+        "script": "build_im_allocation.py",
+        "args": []
+      },
+      {
+        "step_number": 47,
+        "script": "salience_shock.py",
+        "args": [
+          "--advise"
+        ]
+      },
+      {
+        "step_number": 48,
+        "script": "personal_texture_layer.py",
+        "args": [
+          "--refresh-local"
+        ]
+      },
+      {
+        "step_number": 49,
+        "script": "communication_style.py",
+        "args": []
+      },
+      {
+        "step_number": 50,
+        "script": "validate_communication_style.py",
+        "args": []
+      },
+      {
+        "step_number": 51,
+        "script": "b5_external_gold_validate.py",
+        "args": []
+      },
+      {
+        "step_number": 52,
+        "script": "b5_gold_multitrait_validate.py",
+        "args": []
+      },
+      {
+        "step_number": 53,
+        "script": "b5_profile_basis.py",
+        "args": []
+      },
+      {
+        "step_number": 54,
+        "script": "validate_guarded_profile_artifacts.py",
+        "args": []
+      },
+      {
+        "step_number": 55,
+        "script": "build_member_longform_turn_features.py",
+        "args": [
+          "--if-current"
+        ]
+      },
+      {
+        "step_number": 56,
+        "script": "build_member_narrative_ledger.py",
+        "args": []
+      },
+      {
+        "step_number": 57,
+        "script": "regenerate_member_profiles.py",
+        "args": [
+          "--activate"
+        ]
+      },
+      {
+        "step_number": 58,
+        "script": "build_dashboard_bundle.py",
+        "args": []
+      },
+      {
+        "step_number": 59,
+        "script": "make_dashboard_html.py",
+        "args": []
+      },
+      {
+        "step_number": 60,
+        "script": "coalition_pricing.py",
+        "args": []
+      },
+      {
+        "step_number": 61,
+        "script": "contest_screen.py",
+        "args": []
+      },
+      {
+        "step_number": 62,
+        "script": "champions_v2.py",
+        "args": []
+      },
+      {
+        "step_number": 63,
+        "script": "efficiency_layers.py",
+        "args": []
+      },
+      {
+        "step_number": 64,
+        "script": "industry_tiers.py",
+        "args": []
+      },
+      {
+        "step_number": 65,
+        "script": "org_mentions.py",
+        "args": []
+      },
+      {
+        "step_number": 66,
+        "script": "refresh_cosponsor_forecast.py",
+        "args": []
+      },
+      {
+        "step_number": 67,
+        "script": "make_lobby_network_html.py",
+        "args": []
+      },
+      {
+        "step_number": 68,
+        "script": "make_lobby_interactions_html.py",
+        "args": []
+      },
+      {
+        "step_number": 69,
+        "script": "build_staffer_network_section.py",
+        "args": [
+          "--max-bytes",
+          "6000000"
+        ]
+      },
+      {
+        "step_number": 70,
+        "script": "build_staffer_groups_section.py",
+        "args": [
+          "--part",
+          "both",
+          "--max-bytes",
+          "5000000"
+        ]
+      },
+      {
+        "step_number": 71,
+        "script": "make_staffer_network_html.py",
+        "args": [
+          "--template",
+          "make_staffer_network_html_01.tpl",
+          "--sdata",
+          "provenance"
+        ]
+      },
+      {
+        "step_number": 72,
+        "script": "bill_lobbying_sidecar.py",
+        "args": []
+      },
+      {
+        "step_number": 73,
+        "script": "make_member_desk.py",
+        "args": []
+      },
+      {
+        "step_number": 74,
+        "script": "make_combined.py",
+        "args": []
+      },
+      {
+        "step_number": 75,
+        "script": "audit_rank_honors.py",
+        "args": [
+          "--surfaces"
+        ]
+      },
+      {
+        "step_number": 76,
+        "script": "sync_live_dashboard_alias.py",
+        "args": []
+      },
+      {
+        "step_number": 77,
+        "script": "make_email_package.py",
+        "args": []
+      },
+      {
+        "step_number": 78,
+        "script": "audit_source_to_dashboard.py",
+        "args": []
+      },
+      {
+        "step_number": 79,
+        "script": "audit_full.py",
+        "args": []
+      }
+    ]
+  },
+  "interrupted_chain_step": {
+    "step_number": 37,
+    "script": "sync_stance_g.py",
+    "args": []
+  },
+  "unstarted_suffix_after_interrupted_step": [
+    {
+      "step_number": 38,
+      "script": "honors_workbook.py",
+      "args": []
+    },
+    {
+      "step_number": 39,
+      "script": "build_electoral_plays.py",
+      "args": []
+    },
+    {
+      "step_number": 40,
+      "script": "per_topic_flip.py",
+      "args": []
+    },
+    {
+      "step_number": 41,
+      "script": "per_topic_coalition.py",
+      "args": []
+    },
+    {
+      "step_number": 42,
+      "script": "lt_priming.py",
+      "args": []
+    },
+    {
+      "step_number": 43,
+      "script": "budget_frontier.py",
+      "args": []
+    },
+    {
+      "step_number": 44,
+      "script": "budget_frontier.py",
+      "args": [
+        "--electoral"
+      ]
+    },
+    {
+      "step_number": 45,
+      "script": "optimize.py",
+      "args": []
+    },
+    {
+      "step_number": 46,
+      "script": "build_im_allocation.py",
+      "args": []
+    },
+    {
+      "step_number": 47,
+      "script": "salience_shock.py",
+      "args": [
+        "--advise"
+      ]
+    },
+    {
+      "step_number": 48,
+      "script": "personal_texture_layer.py",
+      "args": [
+        "--refresh-local"
+      ]
+    },
+    {
+      "step_number": 49,
+      "script": "communication_style.py",
+      "args": []
+    },
+    {
+      "step_number": 50,
+      "script": "validate_communication_style.py",
+      "args": []
+    },
+    {
+      "step_number": 51,
+      "script": "b5_external_gold_validate.py",
+      "args": []
+    },
+    {
+      "step_number": 52,
+      "script": "b5_gold_multitrait_validate.py",
+      "args": []
+    },
+    {
+      "step_number": 53,
+      "script": "b5_profile_basis.py",
+      "args": []
+    },
+    {
+      "step_number": 54,
+      "script": "validate_guarded_profile_artifacts.py",
+      "args": []
+    },
+    {
+      "step_number": 55,
+      "script": "build_member_longform_turn_features.py",
+      "args": [
+        "--if-current"
+      ]
+    },
+    {
+      "step_number": 56,
+      "script": "build_member_narrative_ledger.py",
+      "args": []
+    },
+    {
+      "step_number": 57,
+      "script": "regenerate_member_profiles.py",
+      "args": [
+        "--activate"
+      ]
+    },
+    {
+      "step_number": 58,
+      "script": "build_dashboard_bundle.py",
+      "args": []
+    },
+    {
+      "step_number": 59,
+      "script": "make_dashboard_html.py",
+      "args": []
+    },
+    {
+      "step_number": 60,
+      "script": "coalition_pricing.py",
+      "args": []
+    },
+    {
+      "step_number": 61,
+      "script": "contest_screen.py",
+      "args": []
+    },
+    {
+      "step_number": 62,
+      "script": "champions_v2.py",
+      "args": []
+    },
+    {
+      "step_number": 63,
+      "script": "efficiency_layers.py",
+      "args": []
+    },
+    {
+      "step_number": 64,
+      "script": "industry_tiers.py",
+      "args": []
+    },
+    {
+      "step_number": 65,
+      "script": "org_mentions.py",
+      "args": []
+    },
+    {
+      "step_number": 66,
+      "script": "refresh_cosponsor_forecast.py",
+      "args": []
+    },
+    {
+      "step_number": 67,
+      "script": "make_lobby_network_html.py",
+      "args": []
+    },
+    {
+      "step_number": 68,
+      "script": "make_lobby_interactions_html.py",
+      "args": []
+    },
+    {
+      "step_number": 69,
+      "script": "build_staffer_network_section.py",
+      "args": [
+        "--max-bytes",
+        "6000000"
+      ]
+    },
+    {
+      "step_number": 70,
+      "script": "build_staffer_groups_section.py",
+      "args": [
+        "--part",
+        "both",
+        "--max-bytes",
+        "5000000"
+      ]
+    },
+    {
+      "step_number": 71,
+      "script": "make_staffer_network_html.py",
+      "args": [
+        "--template",
+        "make_staffer_network_html_01.tpl",
+        "--sdata",
+        "provenance"
+      ]
+    },
+    {
+      "step_number": 72,
+      "script": "bill_lobbying_sidecar.py",
+      "args": []
+    },
+    {
+      "step_number": 73,
+      "script": "make_member_desk.py",
+      "args": []
+    },
+    {
+      "step_number": 74,
+      "script": "make_combined.py",
+      "args": []
+    },
+    {
+      "step_number": 75,
+      "script": "audit_rank_honors.py",
+      "args": [
+        "--surfaces"
+      ]
+    },
+    {
+      "step_number": 76,
+      "script": "sync_live_dashboard_alias.py",
+      "args": []
+    },
+    {
+      "step_number": 77,
+      "script": "make_email_package.py",
+      "args": []
+    },
+    {
+      "step_number": 78,
+      "script": "audit_source_to_dashboard.py",
+      "args": []
+    },
+    {
+      "step_number": 79,
+      "script": "audit_full.py",
+      "args": []
+    }
+  ]
+}

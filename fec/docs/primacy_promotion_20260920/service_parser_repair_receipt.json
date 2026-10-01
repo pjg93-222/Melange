@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "members": 533,
+  "grade_document_exact_before_after": true,
+  "grade_bytes_exact_before_after": true,
+  "grade_document_matches_live": true,
+  "live_inputs_unchanged": true,
+  "full_spine_identical_on_current_sources": true,
+  "changed_spine_people": [],
+  "source_sha256": {
+    "root_before": "7d19734a1c9506bb1bf8097fc257bf754b7399877e032b54aa164d76f8973b81",
+    "worktree_after": "434860741850613e4da6a6071d11ac581d7a70d43159de6095a97185f8010f6f"
+  },
+  "grade_sha256": "c3906ff9871de214ee0e42e7daa8e49540f51f5f7941748255ed340f61f4010e",
+  "input_sha256": {
+    "data/engine/congestion.json": "59625520af3bc74205ebc5b1b79769e7b74ca1156fe1825ce8ffd5595bc1116f",
+    "data/engine/primacy_factors.json": "959372a82fa67d987bc4c6cb95bfe946c61a9802c45cfaf3919b3f052892a2ae",
+    "ranks_python.json": "dd7bc3fef3dce97e33fd615b00e421562cd2eb3a5f51cc9115296678f644aa75",
+    "legislation_routing_audit.json": "4a9c372d9290e89da829900c990a3d57e4fe673a354096e760102b4aaff1bb4f",
+    "data/lobbying/industry_axes.ndjson": "9bcd987086c1081b992ee03202e4c9b93647f135da5304bd82f4f07707f89c24",
+    "vote_category_lean.json": "32ab79b9a5f74131527ca24be51e4fdb84325a0a233fa2c47ac0ee53e0945db2",
+    "press_stance_final.csv": "78f4babdec8eb4a97b5b9397611715c08f06809f7205e1ca9e2d169a2fb6fef9",
+    "data/stance/tweet_stance_final.csv": "c2045becad4a4d12cf855439d4229f598a07abd406602e95909125a3f202fcfa",
+    "data/stance/bluesky_stance_final.csv": "cf8261b966de0be4b62fe1ba9a690448e32f8e9078de893472928c3572d31ab1",
+    "data/staffer_network/reference/congress-legislators/750c0608efb6ef1fc3257ba72c99af3771d35088/legislators-current.yaml": "a4fde6aa9a67b210ea05b8671d88be0c40f5fe2162ed0c502d568294189429bb",
+    "data/staffer_network/reference/congress-legislators/750c0608efb6ef1fc3257ba72c99af3771d35088/legislators-historical.yaml": "9641615f336b3113d6f89152e3441128cbdc3f61ccf87c65da3a015076c78c91",
+    "bill_beneficiary_tags.ndjson": "7a2dd6abe3075a5d8ee710f99ddd92d9a2994e2f01728d0aefeb91c36c0b9dcb",
+    "data/legislation/sentinel_admissions.json": "2eed6f0059d49194ba011ebd2a8d15babbab80191b6c92e10c7f1dbc90b86b41",
+    "fec/config/primacy_press_v1.ndjson": "575478340702136c9d1858f6f38d20495aafa4712ceb8c3cc4a073387caa78d5",
+    "fec/config/primacy_press_v1.json": "9c51ac4f799db96c070bbd13ba62dd5fa04d7d8a536c22058f0e32b65c63db32",
+    "data/engine/per_area_grade.json": "c3906ff9871de214ee0e42e7daa8e49540f51f5f7941748255ed340f61f4010e"
+  }
+}

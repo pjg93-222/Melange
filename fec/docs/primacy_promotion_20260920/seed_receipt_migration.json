@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "source_bundle_hash_exact": true,
+  "legacy_seed_hash_exact": true,
+  "current_identities_exact": true,
+  "repository_hash_exact": true,
+  "identity_binding": {
+    "count": 473,
+    "sha256": "3c362f5695915738773ed38d76323c63d622d18adfebce5b2f7507e3b082d958"
+  },
+  "completed_at_preserved": "2026-09-20T10:43:56Z",
+  "source_receipt_sha256": "15758d10f90b197166ec2e902e993974c417e1705827b7322fd2ca6f416afe70",
+  "migrated_receipt_sha256": "b40b8b6e8d6834ad8ab0e90489fe20070dfe1564cb14dc24c333efd94cd5154d"
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "sorensen2021",
+    "type": "article-journal",
+    "title": "Modelling the behaviour of credit unions",
+    "author": [{"family": "Sørensen", "given": "Ane"}],
+    "issued": {"date-parts": [[2021]]},
+    "container-title": "J. Bank. Financ.",
+    "DOI": "10.5555/qme.clean1"
+  },
+  {
+    "id": "vilhuber2022",
+    "type": "dataset",
+    "title": "Data and Code for: Lobbying Disclosure and Stock Returns",
+    "author": [{"family": "Vilhuber", "given": "Lars"}],
+    "issued": {"date-parts": [[2022, 3, 1]]},
+    "URL": "https://doi.org/10.5555/qme.dataset"
+  },
+  {
+    "id": "wilkinson2016",
+    "type": "article-journal",
+    "title": "The FAIR Guiding Principles for scientific data management and stewardship",
+    "author": [{"family": "Wilkinson", "given": "Mark D."}],
+    "issued": {"date-parts": [[2016]]},
+    "container-title": "Scientific Data",
+    "DOI": "10.5555/qme.addendum"
+  }
+]

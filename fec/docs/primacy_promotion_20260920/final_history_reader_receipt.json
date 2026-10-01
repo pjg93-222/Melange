@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "rows": 279,
+  "metrics": {
+    "verified_memberships": 279,
+    "verified_interaction_rows": 291,
+    "role_interactions": {
+      "original": 53,
+      "cosponsor": 224,
+      "sponsor": 14
+    },
+    "history_sha256": "2351e2827bcc69708c86d4105895170d8f2410d36c8c5ca557a816922e3f7b99",
+    "receipt_sha256": "84700942485f875d85fcdceadc77348c90d16bb9b4fac8566701aaecfcc6de00",
+    "current_delta_sha256": "7e8dce0812e6a162a3760ea1727a575fb72672c19ed94a2c5ab7a78672e8957a"
+  },
+  "reader_source_sha256": "a82c3b5caac96b35cb3a501a9673fc7738633c12c5cd4eb68193e2bfd345bf67"
+}

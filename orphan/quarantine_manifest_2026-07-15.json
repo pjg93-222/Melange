@@ -1,0 +1,26 @@
+{
+  "schema": "moneyball-quarantine-v1",
+  "moved_on": "2026-07-15",
+  "reason": "remove unconsumed human trust traps from live workspace without deleting provenance",
+  "groups": {
+    "snapshots/congress_scrapes": {
+      "former_location": "Documents/",
+      "count": 65,
+      "contract": "timestamped intermediates; no production consumer"
+    },
+    "stale_workbooks": {
+      "former_location": "Documents/",
+      "files": [
+        "Backup.xlsx",
+        "Moneyball Main Version.xlsx",
+        "Moneyball Main Version - Blended.xlsx"
+      ],
+      "contract": "look-alikes only; ranks_python.json and generated audit workbook are the review authorities"
+    },
+    "research_audio": {
+      "former_location": "project root",
+      "files": ["audio_mfcc_30member_scores.csv"],
+      "contract": "orphaned diagnostic; no rank, profile, or UI consumer"
+    }
+  }
+}

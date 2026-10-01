@@ -1,0 +1,2421 @@
+{
+  "status": "PASS",
+  "factor_document_exact": true,
+  "grade_document_exact": true,
+  "seats_exact": 533,
+  "changed_replay_inputs": [
+    "member_desk_bundle.json",
+    "ranks_python.json"
+  ],
+  "date_before": "2026-09-19",
+  "date_after": "2026-09-20",
+  "unchanged_inputs": "All other inputs retained from the approved frozen diagnostic replay",
+  "bill_role_members_changed": 191,
+  "bill_role_changes": [
+    {
+      "member": "Aaron Bean",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Abraham Hamadeh",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Adam Smith",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Addison McDowell",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Adelita Grijalva",
+      "removed": [
+        [
+          "H.R.4936",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Adrian Smith",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Adriano Espaillat",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Alan Armstrong",
+      "removed": [],
+      "added": [
+        [
+          "S.978",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Ami Bera",
+      "removed": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Andrew Clyde",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Andy Barr",
+      "removed": [
+        [
+          "H.R.4936",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Andy Biggs",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Andy Harris",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Angus King",
+      "removed": [],
+      "added": [
+        [
+          "S.3623",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Ann Wagner",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Anna Luna",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1122",
+          "118",
+          "cosponsor"
+        ],
+        [
+          "H.R.1919",
+          "119",
+          "original"
+        ],
+        [
+          "H.R.1944",
+          "119",
+          "original"
+        ],
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.2808",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.5403",
+          "118",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Ashley Hinson",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "August Pfluger",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Austin Scott",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Barry Loudermilk",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Barry Moore",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Ben Cline",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Bernie Moreno",
+      "removed": [],
+      "added": [
+        [
+          "S.3623",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Beth Van Duyne",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Bill Huizenga",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Blake Moore",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Brad Finstad",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Brad Knott",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Brandon Gill",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Brett Guthrie",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Brian Babin",
+      "removed": [],
+      "added": [
+        [
+          "H.J.Res.122",
+          "118",
+          "cosponsor"
+        ],
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Brian Jack",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Bruce Westerman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Burgess Owens",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Charles Fleischmann",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Chuck Edwards",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Claudia Tenney",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Clay Higgins",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Cory Mills",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Craig Goldman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Cynthia Lummis",
+      "removed": [],
+      "added": [
+        [
+          "S.3623",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Dale Strong",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Dan Crenshaw",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Dan Newhouse",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Daniel Meuser",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Daniel Webster",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ],
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Darrell Issa",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "David Joyce",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "David Kustoff",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "David McCormick",
+      "removed": [],
+      "added": [
+        [
+          "S.427",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "David Rouzer",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "David Taylor",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "David Valadao",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Deb Fischer",
+      "removed": [
+        [
+          "S.2019",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Derek Schmidt",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Derrick Van Orden",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.507",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Diana Harshbarger",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Don Bacon",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Dwight Evans",
+      "removed": [],
+      "added": [
+        [
+          "H.R.5974",
+          "117",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Earl Carter",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Elise Stefanik",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Erin Houchin",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Gabe Evans",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "George Whitesides",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Glenn Grothman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Glenn Thompson",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Greg Landsman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Gregory Murphy",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Gregory Steube",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Gus Bilirakis",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Guy Reschenthaler",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Harold Rogers",
+      "removed": [],
+      "added": [
+        [
+          "H.R.800",
+          "118",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jack Bergman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jack Reed",
+      "removed": [],
+      "added": [
+        [
+          "S.3940",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jacky Rosen",
+      "removed": [],
+      "added": [
+        [
+          "S.978",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jahana Hayes",
+      "removed": [
+        [
+          "H.R.5689",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Jake Ellzey",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "James Comer",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "James McGovern",
+      "removed": [],
+      "added": [
+        [
+          "H.R.7035",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Janelle Bynum",
+      "removed": [],
+      "added": [
+        [
+          "H.R.4936",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.7647",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jason Crow",
+      "removed": [],
+      "added": [
+        [
+          "H.R.4936",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jeff Hurd",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jefferson Shreve",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jefferson Van Drew",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jennifer McClellan",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jimmy Patronis",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Jodey Arrington",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Joe Wilson",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "John Carter",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "John Cornyn",
+      "removed": [],
+      "added": [
+        [
+          "S.3940",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "John Joyce",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "John McGuire",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "John Moolenaar",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "John Rose",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "John Rutherford",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Josh Brecheen",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Josh Hawley",
+      "removed": [],
+      "added": [
+        [
+          "S.381",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Julia Letlow",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Julie Fedorchak",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Julie Johnson",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Kat Cammack",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Kevin Hern",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Lance Gooden",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Laurel Lee",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Lauren Boebert",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Lisa McClain",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Margaret Hassan",
+      "removed": [],
+      "added": [
+        [
+          "S.1514",
+          "118",
+          "cosponsor"
+        ],
+        [
+          "S.1913",
+          "117",
+          "original"
+        ],
+        [
+          "S.2019",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "S.255",
+          "117",
+          "cosponsor"
+        ],
+        [
+          "S.3324",
+          "118",
+          "original"
+        ],
+        [
+          "S.349",
+          "117",
+          "cosponsor"
+        ],
+        [
+          "S.522",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "S.919",
+          "117",
+          "original"
+        ],
+        [
+          "S.978",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Marilyn Strickland",
+      "removed": [
+        [
+          "H.R.4167",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Mark Alford",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mark Amodei",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mark Harris",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mark Messmer",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Marlin Stutzman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Martin Heinrich",
+      "removed": [],
+      "added": [
+        [
+          "S.3549",
+          "118",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mary Miller",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Matt Van Epps",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Max Miller",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Michael Baumgartner",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Michael Cloud",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Michael Guest",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Michael Rulli",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Michelle Fischbach",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mike Bost",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Mike Carey",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mike Collins",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Mike Ezell",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mike Haridopolos",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mike Kelly",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Mike Kennedy",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Mike Rogers",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Monica De La Cruz",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Morgan Griffith",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Nathaniel Moran",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Nicholas Begich",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Nicholas Langworthy",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Nick LaLota",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Pablo Hern\u00e1ndez Rivera",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1027",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.5689",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Pat Fallon",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Pat Harrigan",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Paul Gosar",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Pete Sessions",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.8395",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Pete Stauber",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Peter Welch",
+      "removed": [],
+      "added": [
+        [
+          "S.3549",
+          "118",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Ralph Norman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Randy Feenstra",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Randy Fine",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Randy Weber",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Richard Blumenthal",
+      "removed": [],
+      "added": [
+        [
+          "S.3660",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Richard Hudson",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Riley Moore",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Robert Aderholt",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Robert Bresnahan",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Robert Latta",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Robert Wittman",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Roger Williams",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Ron Estes",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Ronny Jackson",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Ruben Gallego",
+      "removed": [],
+      "added": [
+        [
+          "S.3940",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Rudy Yakym",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Russell Fry",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Ryan Zinke",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Sam Graves",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Sam Liccardo",
+      "removed": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Sara Jacobs",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Sarah McBride",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1027",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Scott DesJarlais",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Scott Fitzgerald",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Scott Franklin",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Scott Perry",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ],
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Sharice Davids",
+      "removed": [],
+      "added": [
+        [
+          "H.R.6449",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.800",
+          "118",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Sheri Biggs",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Stephen Lynch",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Steve Womack",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Steven Horsford",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Thomas Tiffany",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Tim Moore",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "original"
+        ]
+      ]
+    },
+    {
+      "member": "Tim Walberg",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Timothy Kennedy",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Todd Young",
+      "removed": [
+        [
+          "S.401",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Tom Emmer",
+      "removed": [],
+      "added": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Tony Wied",
+      "removed": [
+        [
+          "H.R.7035",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Tracey Mann",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Trent Kelly",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Troy Balderson",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": []
+    },
+    {
+      "member": "Troy Carter",
+      "removed": [],
+      "added": [
+        [
+          "H.R.2094",
+          "119",
+          "cosponsor"
+        ],
+        [
+          "H.R.5484",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Troy Downing",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Troy Nehls",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Warren Davidson",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Wesley Hunt",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "William Timmons",
+      "removed": [],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    },
+    {
+      "member": "Zachary Nunn",
+      "removed": [
+        [
+          "H.R.987",
+          "119",
+          "cosponsor"
+        ]
+      ],
+      "added": [
+        [
+          "H.R.1181",
+          "119",
+          "cosponsor"
+        ]
+      ]
+    }
+  ],
+  "roster_baseline_before": 0.482222,
+  "roster_baseline_after": 0.481361,
+  "agenda_credit_members_changed": 173,
+  "hashes": {
+    "member_desk_bundle.json": "ed3901e71f6ebbc1642a2d41f46ca2f9288234962720a05e4ccf00291cae370b",
+    "ranks_python.json": "02ffdb612cc5958a35abe2fd1da0fbc6f8a58a3e849365c8535608eca8db68fb",
+    "data/engine/per_area_grade.json": "7a73ffd26f37a7c1589a55ed9465934c1995d413bb4e491ba78c9dcff3c65845",
+    "data/engine/primacy_factors.json": "60f51063e301eb86ee7a94ea39b0c412195e0a2a056b1d6e34d2dd2309858e0c"
+  }
+}

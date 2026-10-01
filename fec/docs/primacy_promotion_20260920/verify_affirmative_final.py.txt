@@ -1,0 +1,63 @@
+"""Frozen-input affirmative eligibility/dial proof; no production writes."""
+import hashlib, importlib.util, json, os, subprocess, sys
+from pathlib import Path
+from unittest.mock import patch
+
+OUT = Path(__file__).resolve().parent
+ROOT = OUT.parents[1]
+WT = ROOT / '.claude/worktrees/codex-primacy-diagnostic-20260920'
+STAGE = OUT / 'cumulative_candidate'
+os.environ['MONEYBALL_ROOT'] = str(STAGE)
+sys.path.insert(0, str(WT / 'fec'))
+from engine import primacy_factors as PF
+import tier_util as TU
+
+def require(condition, message):
+    if not condition:
+        raise RuntimeError(message)
+
+factor_path = STAGE / 'data/engine/primacy_factors.json'
+original = factor_path.read_bytes()
+factor = json.loads(original)
+members = sorted(factor['members'])
+cases = []
+for mode in ('factor', 'per_area_v1', 'legxfactor'):
+    outputs = {}
+    for minimum in (0, .5, .75, 1.0):
+        with patch.object(TU, 'PRIMACY_T1_MIN_AFFIRMATIVE', minimum):
+            outputs[minimum] = TU.legislative_press_tiers(members, root=str(STAGE), mode=mode, with_detail=True)
+    for minimum in (.5, .75, 1.0):
+        cases.append({'mode': mode, 'minimum': minimum,
+                      'rank_movers_vs_off': sum(outputs[0][1][m] != outputs[minimum][1][m] for m in members),
+                      'tier_movers_vs_off': sum(outputs[0][0][m] != outputs[minimum][0][m] for m in members),
+                      'conduct_exact': outputs[0][2] == outputs[minimum][2],
+                      'tier_one_count': sum(t == 1 for t in outputs[minimum][0].values())})
+require(all(c['rank_movers_vs_off'] == c['tier_movers_vs_off'] == 0 and c['conduct_exact'] and c['tier_one_count'] == 13 for c in cases), 'Gate changed current boards')
+
+old_source = subprocess.check_output(['git', 'show', '41d3b8ba5:fec/engine/primacy_factors.py'], cwd=WT)
+old_path = OUT / 'primacy_factors_pre_affirmative.py'
+old_path.write_bytes(old_source)
+spec = importlib.util.spec_from_file_location('primacy_factors_pre_affirmative', old_path)
+old = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(old)
+try:
+    old.main(str(STAGE))
+    previous_bytes = factor_path.read_bytes()
+    with patch.object(PF, 'PRIMACY_T1_MIN_AFFIRMATIVE', 0):
+        PF.main(str(STAGE))
+    require(factor_path.read_bytes() == previous_bytes, 'Dial off is not byte-exact')
+finally:
+    factor_path.write_bytes(original)
+
+affirmative = TU.load_primacy_affirmative_evidence(str(STAGE))
+tier, rank = TU.legislative_press_tiers(members, root=str(STAGE))
+receipt = {'status': 'PASS', 'members': len(members), 'cases': cases,
+           'dial': 'PRIMACY_T1_MIN_AFFIRMATIVE=0', 'dial_factor_bytes_exact': True,
+           'prior_producer_commit': '41d3b8ba5',
+           'prior_producer_sha256': hashlib.sha256(old_source).hexdigest(),
+           'prior_factor_sha256': hashlib.sha256(previous_bytes).hexdigest(),
+           'final_factor_sha256': hashlib.sha256(original).hexdigest(),
+           'positive_gate_qualifiers': sum(a >= .75 and raw > 0 for a, raw in affirmative.values()),
+           'tier_one': [{'member': m, 'rank': rank[m], 'affirmative_credit': affirmative[m][0], 'raw_factor': affirmative[m][1]} for m in sorted(members, key=rank.get) if tier[m] == 1]}
+(OUT / 'affirmative_final_receipt.json').write_text(json.dumps(receipt, indent=2), encoding='utf-8')
+print(json.dumps(receipt, indent=2))

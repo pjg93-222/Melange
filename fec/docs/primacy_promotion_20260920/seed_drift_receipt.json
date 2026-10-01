@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "identity_count": 473,
+  "source_bundle_hash_exact": true,
+  "legacy_seed_hash_exact": true,
+  "identities_exact": true,
+  "metadata_changes": [
+    {
+      "bill": "H.R.1181",
+      "congress": 119,
+      "fields": {
+        "sponsor": {
+          "before": "Blake Moore",
+          "after": "Rep. Moore, Riley [R-WV-2]"
+        },
+        "action": {
+          "before": "Introduced in House",
+          "after": "Received in the Senate and Read twice and referred to the Committee on Banking, Housing, and Urban Affairs."
+        }
+      }
+    },
+    {
+      "bill": "H.R.8395",
+      "congress": 119,
+      "fields": {
+        "sponsor": {
+          "before": "Kim, Young [Rep.-R-CA-40]",
+          "after": "Rep. Kim, Young [R-CA-40]"
+        },
+        "action": {
+          "before": "Introduced",
+          "after": "Referred to the House Committee on Financial Services."
+        }
+      }
+    },
+    {
+      "bill": "S.3623",
+      "congress": 119,
+      "fields": {
+        "sponsor": {
+          "before": "Marshall, Roger [Sen.-R-KS]",
+          "after": "Sen. Marshall, Roger [R-KS]"
+        },
+        "action": {
+          "before": "Introduced",
+          "after": "Read twice and referred to the Committee on Banking, Housing, and Urban Affairs."
+        }
+      }
+    }
+  ]
+}

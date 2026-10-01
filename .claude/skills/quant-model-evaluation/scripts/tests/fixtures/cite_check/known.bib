@@ -1,0 +1,77 @@
+% Synthetic references for the cite_check tests. Every DOI uses the 10.5555 test prefix (plus one arXiv id);
+% the registry answers come from mocks in test_cite_check.py, never from the network.
+@string{jfe = "Journal of Financial Economics"}
+
+@comment{ @article{ignored, title = {must not be parsed}} }
+
+@article{verified2020,
+  author  = {M{\"u}ller, J{\"o}rg and Smith, John},
+  title   = {{Campaign} Contributions and Roll-Call Votes: A Panel Study},
+  journal = jfe,
+  year    = {2020},
+  doi     = {https://doi.org/10.5555/QME.verified}
+}
+
+@article{yeardrift2020,
+  author  = {Garcia, Ana},
+  title   = {Lobbying Intensity and Bank Capital},
+  journal = {Review of Financial Studies},
+  year    = 2020,
+  doi     = {10.5555/qme.yeardrift}
+}
+
+@article{hijack2021,
+  author  = {Nguyen, Linh},
+  title   = {Deposit Insurance and Credit Union Lending},
+  journal = {Journal of Banking and Finance},
+  year    = {2021},
+  doi     = {10.5555/qme.hijack}
+}
+
+@article{retracted2019,
+  author  = {Lee, Kim},
+  title   = {Donor Networks Predict Legislative Success},
+  journal = {American Political Science Review},
+  year    = {2019},
+  doi     = {10.5555/qme.retracted}
+}
+
+@article{corrected2018,
+  author  = {Okafor, Chidi},
+  title   = "Regulatory Shocks and Fintech Entry",
+  journal = {Journal of Finance},
+  year    = {2018},
+  doi     = {10.5555/qme.corrected}
+}
+
+@article{ratelimited2022,
+  author  = {Brown, Pat},
+  title   = {Rate Limits Are Not Evidence},
+  journal = {Journal of Examples},
+  year    = {2022},
+  doi     = {10.5555/qme.ratelimited}
+}
+
+@article{unregistered2023,
+  author  = {Doe, Jane},
+  title   = {A Paper Whose DOI Was Never Registered},
+  journal = {Journal of Nothing},
+  year    = {2023},
+  doi     = {10.5555/qme.missing}
+}
+
+@misc{chen2021arxiv,
+  author        = {Chen, Wei and others},
+  title         = {Scalable Influence Maximization Under Uncertainty},
+  year          = {2021},
+  eprint        = {2106.07039},
+  archiveprefix = {arXiv}
+}
+
+@misc{nodoi2019,
+  author    = {{World Bank}},
+  title     = {Global Financial Development Report},
+  publisher = {World Bank},
+  url       = {https://www.worldbank.org/en/publication/gfdr},
+  year      = {2019}
+}

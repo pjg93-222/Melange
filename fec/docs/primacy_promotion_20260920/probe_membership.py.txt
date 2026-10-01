@@ -1,0 +1,39 @@
+"""Read live source through the desk loader; write isolated projection only."""
+import hashlib, json, os, shutil, sys
+from pathlib import Path
+
+OUT = Path(__file__).resolve().parent
+ROOT = OUT.parents[1]
+WT = ROOT / '.claude/worktrees/codex-primacy-diagnostic-20260920'
+mode = sys.argv[1] if len(sys.argv) > 1 else 'cumulative'
+assert mode in ('delta', 'cumulative')
+STAGE = OUT / (mode + '_candidate')
+os.environ['MONEYBALL_ROOT'] = str(ROOT)
+os.environ['DESK_MEMBERSHIP_SOURCE'] = mode
+sys.path.insert(0, str(WT/'fec'))
+from surfaces import make_member_desk as MD
+
+baseline = json.loads((OUT/'baseline/member_desk_bundle.json').read_text(encoding='utf-8'))
+names = [m['name'] for m in baseline['members']]
+_, bills, _, _, audit, _ = MD.load_press_and_bills(names)
+# The factor's only desk input is the roster's bill records. Keep every other
+# field frozen so differences cannot be attributed to unrelated display data.
+for row in baseline['members']:
+    row['bills'] = bills.get(row['name'], [])
+STAGE.mkdir(exist_ok=True)
+source = ROOT/'tmp/primacy_promotion_20260920/refresh_purity'
+for p in source.rglob('*'):
+    if p.is_file() and p.parts[len(source.parts)] != 'fec':
+        rel = p.relative_to(source)
+        live = ROOT/rel
+        target = STAGE/rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(live if live.is_file() else p, target)
+shutil.copytree(WT/'fec/config', STAGE/'fec/config', dirs_exist_ok=True)
+(STAGE/'member_desk_bundle.json').write_text(json.dumps(baseline, ensure_ascii=False), encoding='utf-8')
+(OUT/(mode+'_loader_audit.json')).write_text(json.dumps(audit, indent=2), encoding='utf-8')
+actual = {m['name']:m['bills'] for m in baseline['members']}
+if mode == 'delta':
+    old = json.loads((OUT/'failed_regeneration/member_desk_bundle.json').read_text(encoding='utf-8'))
+    assert actual == {m['name']:m['bills'] for m in old['members']}, 'Historical delta projection changed'
+print(mode.upper()+'_CANDIDATE_READY', len(names), sum(map(len,bills.values())), flush=True)

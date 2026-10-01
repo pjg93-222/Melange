@@ -1,0 +1,90 @@
+{
+  "scope": "Algebra and synthetic fixtures, not validity research or an alternative ranking run.",
+  "current_method": "diagnostic_v1",
+  "healthy_properties": {
+    "fixed_mass_shrink_monotone": true,
+    "shrink_convex_bounds": true,
+    "positive_factor_grade_monotone": true,
+    "score_factor_monotone": true
+  },
+  "current_domain": {
+    "members": 533,
+    "negative_factors": 0,
+    "factor_min": 0.177189,
+    "factor_max": 0.762939,
+    "below_media_floor": 243,
+    "grade_percentile_bounds": true,
+    "years_basis": {
+      "service_dates": 533
+    },
+    "area_weight_sum": 17.45
+  },
+  "production_function_counterexamples": {
+    "negative_factor_grade": {
+      "factor": -0.5,
+      "grade0": -0.4,
+      "grade1": -0.5
+    },
+    "signed_tensor": {
+      "A": 0.6000000000000001,
+      "B": -0.2
+    },
+    "media_floor": {
+      "four_occurrences": {
+        "stat": 0.0,
+        "percentile": 1.0
+      },
+      "five_occurrences": {
+        "stat": -0.8,
+        "percentile": 0.0
+      }
+    },
+    "sequential_floors": {
+      "evidence_pass": [
+        "A",
+        "B",
+        "C"
+      ],
+      "conduct_pass": [
+        "B",
+        "C",
+        "A"
+      ],
+      "excluded_C_in_protected_first_two": true
+    },
+    "insufficient_qualifiers": {
+      "order": [
+        "A",
+        "B",
+        "C"
+      ],
+      "excluded_B_in_protected_first_two": true
+    }
+  },
+  "source_hashes": {
+    "fec/tier_util.py": "d41b14cb2cdb04b1ec85cfce1bd739bd4834f73f9b150c574eafec2ca8292257",
+    "fec/engine/per_area_grade.py": "37daefdc7101bf1efef93cb901f1295a66c2025bc39b26364d254ae4f78a78f1",
+    "fec/engine/primacy_factors.py": "1bbfa9c6b90637d2a9f6ed9acaf0c1d6860cd334be316d64ac77b3cd8858ff99"
+  },
+  "live_artifacts_before": {
+    "ranks_python.json": "02ffdb612cc5958a35abe2fd1da0fbc6f8a58a3e849365c8535608eca8db68fb",
+    "data/engine/primacy_factors.json": "60f51063e301eb86ee7a94ea39b0c412195e0a2a056b1d6e34d2dd2309858e0c",
+    "data/engine/per_area_grade.json": "7a73ffd26f37a7c1589a55ed9465934c1995d413bb4e491ba78c9dcff3c65845",
+    "dashboard_data.json": "92ad881c9b634cf3e096e4b845709ae1d1e5a3739212ccf5dcf58d1c0d57b59c",
+    "member_desk_bundle.json": "ed3901e71f6ebbc1642a2d41f46ca2f9288234962720a05e4ccf00291cae370b"
+  },
+  "live_artifacts_after": {
+    "ranks_python.json": "02ffdb612cc5958a35abe2fd1da0fbc6f8a58a3e849365c8535608eca8db68fb",
+    "data/engine/primacy_factors.json": "60f51063e301eb86ee7a94ea39b0c412195e0a2a056b1d6e34d2dd2309858e0c",
+    "data/engine/per_area_grade.json": "7a73ffd26f37a7c1589a55ed9465934c1995d413bb4e491ba78c9dcff3c65845",
+    "dashboard_data.json": "92ad881c9b634cf3e096e4b845709ae1d1e5a3739212ccf5dcf58d1c0d57b59c",
+    "member_desk_bundle.json": "ed3901e71f6ebbc1642a2d41f46ca2f9288234962720a05e4ccf00291cae370b"
+  },
+  "scratch_joint_seating_candidate": {
+    "current_rank_movers": 0,
+    "members": 533,
+    "all_current_floors_hold": true,
+    "synthetic_infeasible_case_refused": true,
+    "status": "scratch candidate only; no production edit"
+  }
+}

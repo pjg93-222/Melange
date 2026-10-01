@@ -1,0 +1,193 @@
+{
+  "status": "PASS",
+  "scope": "Old and repaired tier_util only, same frozen inputs; existing environment dials exercised in isolated subprocesses.",
+  "old_commit": "5f3d1ef3f",
+  "new_commit": "78dc3ea8a",
+  "source_hashes": {
+    "before": "da0ac8d0048f50eb43cb0276c6d1b33f8de3400e42f5e200d2d3bcf4ddadaa23",
+    "after": "ac884c08cc164abb7b9da1f7f38f72c98d151aab216215ee5bae0ef6fac00741"
+  },
+  "new_git_blob_sha256": "b535c99ac82b03acfc512c80492ff8404beff30e3d64bd3685d998133ad3a687",
+  "paths_adapter_sha256": "66b6d2e40956c56830de4e6d009d24c0f327b26a6aedb6e7f25be96f8146a9f9",
+  "runner_sha256": "587f267a8bf373f0b6d69bdb65d07f0861491526aaddbb13a28fd9320a53cba2",
+  "frozen_input_hashes": {
+    "ranks_python.json": "02ffdb612cc5958a35abe2fd1da0fbc6f8a58a3e849365c8535608eca8db68fb",
+    "data/engine/primacy_factors.json": "60f51063e301eb86ee7a94ea39b0c412195e0a2a056b1d6e34d2dd2309858e0c",
+    "data/engine/per_area_grade.json": "7a73ffd26f37a7c1589a55ed9465934c1995d413bb4e491ba78c9dcff3c65845"
+  },
+  "primary_input_hashes": {
+    "grievance_ledger.ndjson": "06f19eb43a92870f5763bef75bab4cebfa3ce996e003dfa9441ba3772e7d5c52",
+    "delivery_ledger.ndjson": "8b2be17486e470a3977395827d8e5c5ce526bbbbec424edcb679bde19177f2b7",
+    "tier_overrides.json": "563629ecdef8d97dd03867a63795a2efe328bc39e57f29895620cd3a493a6454"
+  },
+  "frozen_inputs_unchanged": {
+    "ranks_python.json": true,
+    "data/engine/primacy_factors.json": true,
+    "data/engine/per_area_grade.json": true
+  },
+  "primary_inputs_unchanged": {
+    "grievance_ledger.ndjson": true,
+    "delivery_ledger.ndjson": true,
+    "tier_overrides.json": true
+  },
+  "dial_effects_floor_on_to_off": {
+    "factor": {
+      "tiers": 33,
+      "ranks": 92,
+      "scores": 0,
+      "conduct": 0
+    },
+    "legxfactor": {
+      "tiers": 0,
+      "ranks": 0,
+      "scores": 0,
+      "conduct": 0
+    },
+    "per_area_v1": {
+      "tiers": 54,
+      "ranks": 137,
+      "scores": 0,
+      "conduct": 0
+    }
+  },
+  "cases": [
+    {
+      "case": "factor_floor_on",
+      "members": 533,
+      "parity": {
+        "tiers": true,
+        "ranks": true,
+        "scores": true,
+        "conduct": true,
+        "members": true,
+        "mode": true,
+        "minimum_cu_credit": true,
+        "resolved_root": true,
+        "override_path": true
+      },
+      "changes": {
+        "tiers": [],
+        "ranks": [],
+        "scores": [],
+        "conduct": []
+      },
+      "canonical_output_byte_identical": true,
+      "after_sha256": "cee6627c16df42e08d25323e3ecf8013908cc378f07537cb8e1c0be3b3175281"
+    },
+    {
+      "case": "factor_floor_off",
+      "members": 533,
+      "parity": {
+        "tiers": true,
+        "ranks": true,
+        "scores": true,
+        "conduct": true,
+        "members": true,
+        "mode": true,
+        "minimum_cu_credit": true,
+        "resolved_root": true,
+        "override_path": true
+      },
+      "changes": {
+        "tiers": [],
+        "ranks": [],
+        "scores": [],
+        "conduct": []
+      },
+      "canonical_output_byte_identical": true,
+      "after_sha256": "8f9677c40693e1dea46e14382e4b605096e33671ee4ada53e1995b7b49dd306e"
+    },
+    {
+      "case": "legxfactor_floor_on",
+      "members": 533,
+      "parity": {
+        "tiers": true,
+        "ranks": true,
+        "scores": true,
+        "conduct": true,
+        "members": true,
+        "mode": true,
+        "minimum_cu_credit": true,
+        "resolved_root": true,
+        "override_path": true
+      },
+      "changes": {
+        "tiers": [],
+        "ranks": [],
+        "scores": [],
+        "conduct": []
+      },
+      "canonical_output_byte_identical": true,
+      "after_sha256": "41359cae5cebdf5f90c7a9694ee0a29bb8e5e8ebe1be9957adaf40a2d6baa1d5"
+    },
+    {
+      "case": "legxfactor_floor_off",
+      "members": 533,
+      "parity": {
+        "tiers": true,
+        "ranks": true,
+        "scores": true,
+        "conduct": true,
+        "members": true,
+        "mode": true,
+        "minimum_cu_credit": true,
+        "resolved_root": true,
+        "override_path": true
+      },
+      "changes": {
+        "tiers": [],
+        "ranks": [],
+        "scores": [],
+        "conduct": []
+      },
+      "canonical_output_byte_identical": true,
+      "after_sha256": "65b24294045d6480bd0727dd18e4167cd72eca1c87e99b4ac6f7cdc126c2fb37"
+    },
+    {
+      "case": "per_area_v1_floor_on",
+      "members": 533,
+      "parity": {
+        "tiers": true,
+        "ranks": true,
+        "scores": true,
+        "conduct": true,
+        "members": true,
+        "mode": true,
+        "minimum_cu_credit": true,
+        "resolved_root": true,
+        "override_path": true
+      },
+      "changes": {
+        "tiers": [],
+        "ranks": [],
+        "scores": [],
+        "conduct": []
+      },
+      "canonical_output_byte_identical": true,
+      "after_sha256": "9da13664365380d696cd96657fe0c2ebfbf421e3ba8c7eba322692892d522281"
+    },
+    {
+      "case": "per_area_v1_floor_off",
+      "members": 533,
+      "parity": {
+        "tiers": true,
+        "ranks": true,
+        "scores": true,
+        "conduct": true,
+        "members": true,
+        "mode": true,
+        "minimum_cu_credit": true,
+        "resolved_root": true,
+        "override_path": true
+      },
+      "changes": {
+        "tiers": [],
+        "ranks": [],
+        "scores": [],
+        "conduct": []
+      },
+      "canonical_output_byte_identical": true,
+      "after_sha256": "7f33f3ba923147300c3c0667fa98a8fa902c3ed5884d44ae32c4cc632fa95a48"
+    }
+  ]
+}

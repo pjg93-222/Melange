@@ -1,0 +1,4 @@
+label,mode,estimate,se,dof,r2dz-bench,r2yz-bench,kd,rr,lo,hi,beta_short,r2_short,beta_long,r2_long,rmax,note
+darfur,sensemakr,0.097315819285,0.0232565378098,783,0.00908106519033,0.109033915428,1;2;3,,,,,,,,,synthetic copy of a published example
+evalue-book,evalue,,,,,,,3.9,1.8,8.7,,,,,,worked example
+oster-hand,oster,,,,,,,,,,1.0,0.10,0.6,0.30,0.39,hand-solved: delta 3.3333 and beta* 0.42

@@ -1,0 +1,37 @@
+"""Add an identity binding proven from the receipt's exact original source."""
+import copy,hashlib,json,os,sys
+from pathlib import Path
+OUT=Path(__file__).resolve().parent;ROOT=OUT.parents[1]
+os.environ['MONEYBALL_ROOT']=str(ROOT)
+sys.path.insert(0,str(ROOT/'.claude/worktrees/codex-primacy-diagnostic-20260920/fec'))
+from legislation import congress_bill_repository as C,sentinel_admissions as SA
+from moneyball_core import dump_atomic
+read=lambda p:json.loads(p.read_text(encoding='utf-8'))
+receipt_path=ROOT/'data/engine/congress_bill_refresh_receipt.json'
+baseline=OUT/'baseline/member_desk_bundle.json';live=ROOT/'member_desk_bundle.json'
+repository=ROOT/'bill_repository_live.json'
+r=read(receipt_path);before=copy.deepcopy(r)
+def require(condition, message):
+    if not condition: raise RuntimeError(message)
+require(C.sha256_file(baseline)==r['bundle']['sha256'],'Original bundle hash mismatch')
+require(C.sha256_file(repository)==r['repository']['sha256'],'Repository hash mismatch')
+# Preserve all seed-bearing information; media/display panels are irrelevant.
+project=lambda b:{'members':[{'name':m['name'],'bills':m['bills']} for m in b['members']]}
+admissions=SA.load(ROOT)
+old=SA.augment_bundle(project(read(baseline)),admissions)
+new=SA.augment_bundle(project(read(live)),admissions)
+require(C.seed_fingerprint(old)==r['seeds'],'Original logical seed mismatch')
+require(C.seed_identity_keys(old)==C.seed_identity_keys(new),'Bill identities changed')
+require(set(C.seed_identity_keys(new)).issubset(read(repository)['bills']),'Repository coverage mismatch')
+identity=C.seed_identity_fingerprint(old)
+r['seed_identities']=identity
+require({k:v for k,v in r.items() if k!='seed_identities'}==before,'Migration would change an existing receipt field')
+proof={'status':'READY','source_bundle_hash_exact':True,'legacy_seed_hash_exact':True,
+       'current_identities_exact':True,'repository_hash_exact':True,'identity_binding':identity,
+       'completed_at_preserved':r['completed_at'],'source_receipt_sha256':C.sha256_file(receipt_path)}
+if '--apply' in sys.argv:
+    (OUT/'refresh_receipt_before_identity_migration.json').write_text(json.dumps(before,indent=2),encoding='utf-8')
+    dump_atomic(r,str(receipt_path),indent=2,sort_keys=True)
+    proof['status']='PASS';proof['migrated_receipt_sha256']=C.sha256_file(receipt_path)
+(OUT/'seed_receipt_migration.json').write_text(json.dumps(proof,indent=2),encoding='utf-8')
+print(json.dumps(proof,indent=2))

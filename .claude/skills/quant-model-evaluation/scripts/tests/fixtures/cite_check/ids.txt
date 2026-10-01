@@ -1,0 +1,9 @@
+# one identifier per line; words after it are context for the identity check
+10.5555/qme.verified Muller Smith 2020 campaign contributions roll-call votes
+https://doi.org/10.5555/QME.verified
+doi:10.5555/qme.yeardrift
+
+arXiv:2106.07039
+2106.07039v3
+10.12/bad
+PMID:12345678

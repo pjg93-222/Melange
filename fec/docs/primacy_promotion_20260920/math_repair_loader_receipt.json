@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "loaders": {
+    "load_primacy_factors": {
+      "same": true,
+      "members": 533,
+      "changed_members": []
+    },
+    "load_primacy_ranked": {
+      "same": true,
+      "members": 533,
+      "changed_members": []
+    },
+    "load_primacy_cu_credit": {
+      "same": true,
+      "members": 533,
+      "changed_members": []
+    },
+    "load_open_breaches": {
+      "same": true,
+      "members": 2,
+      "changed_members": []
+    },
+    "load_delivery_credit": {
+      "same": true,
+      "members": 3,
+      "changed_members": []
+    }
+  },
+  "input_hashes": {
+    "data\\engine\\primacy_factors.json": "60f51063e301eb86ee7a94ea39b0c412195e0a2a056b1d6e34d2dd2309858e0c",
+    "grievance_ledger.ndjson": "06f19eb43a92870f5763bef75bab4cebfa3ce996e003dfa9441ba3772e7d5c52",
+    "delivery_ledger.ndjson": "8b2be17486e470a3977395827d8e5c5ce526bbbbec424edcb679bde19177f2b7"
+  },
+  "inputs_unchanged": true
+}

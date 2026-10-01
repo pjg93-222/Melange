@@ -1,0 +1,66 @@
+"""Score the isolated cumulative-membership candidate with unchanged policy."""
+import hashlib, json, os, shutil, sys
+from pathlib import Path
+from unittest.mock import patch
+
+OUT = Path(__file__).resolve().parent
+ROOT = OUT.parents[1]
+WT = ROOT / '.claude/worktrees/codex-primacy-diagnostic-20260920'
+STAGE = OUT / 'cumulative_candidate'
+os.environ['MONEYBALL_ROOT'] = str(STAGE)
+sys.path.insert(0, str(WT/'fec'))
+from engine import primacy_factors as PF, per_area_grade as PAG
+from lobbying import industry_tiers as IT
+from legislation import sentinel_admissions as SA
+import tier_util as TU
+
+read = lambda p: json.loads(p.read_text(encoding='utf-8'))
+for rel in (IT.VALENCE_PATH, IT.AXES_PATH):
+    target = STAGE/rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(ROOT/rel, target)
+before = read(OUT/'before.json')
+before_grade = read(OUT/'before_grade.json')
+factor = PF.main(str(STAGE))
+grade = PAG.main(['--root', str(STAGE), '--as-of', before_grade['as_of']])
+assert grade['members'] == before_grade['members'], 'Membership-only repair changed grade values'
+bundle = read(STAGE/'member_desk_bundle.json')
+old_bundle = read(OUT/'baseline/member_desk_bundle.json')
+members = sorted(grade['members'])
+tiers, ranks, conduct = TU.legislative_press_tiers(members, root=str(STAGE), with_detail=True)
+scores = TU.primacy_scores(read(STAGE/'ranks_python.json')['pcts'], TU.load_primacy_ranked(str(STAGE)),
+                          mode='per_area_v1', grades={m:g[1] for m,g in TU.load_per_area_grade(str(STAGE)).items()})
+board = {m:{'rank':ranks[m], 'tier':tiers[m], 'score':scores[m]} for m in members}
+with patch.object(TU,'load_open_breaches',return_value={}), patch.object(TU,'load_delivery_credit',return_value={}):
+    nt,nr = TU.legislative_press_tiers(members,root=str(STAGE))
+key = lambda r: (r['bill'], str(r['congress']), r['role'])
+old_acts = {m['name']:{key(r) for r in m['bills']} for m in old_bundle['members']}
+new_acts = {m['name']:{key(r) for r in m['bills']} for m in bundle['members']}
+changes = [{'member':m, 'added':sorted(new_acts[m]-old_acts[m]), 'removed':sorted(old_acts[m]-new_acts[m])}
+           for m in members if new_acts[m] != old_acts[m]]
+tags = SA.effective_tags(PF.load_tags(str(STAGE/IT.TAGS_PATH)), SA.load(str(STAGE)))
+records,names = IT._validate_bundle(bundle,tags)
+valence,_ = IT._load_valence_ledger(str(STAGE/IT.VALENCE_PATH),tags)
+axes,_ = IT._load_industry_axes(str(STAGE/IT.AXES_PATH),tags)
+industries = {'credit_union':IT._canonical_cu_board(records,names,factor,tags)}
+for industry in ('bank','crypto','fintech'):
+    industries[industry] = IT._build_industry(industry=industry,bundle=bundle,records=records,
+        member_names=names,pcts=read(STAGE/'ranks_python.json')['pcts'],tags=tags,
+        valence_rows=valence.get(industry,{}),axes_rows=axes.get(industry,{}))
+movers = [{'member':m,'before':before['board'][m],'after':board[m]} for m in members
+          if before['board'][m]['rank']!=ranks[m] or before['board'][m]['tier']!=tiers[m]]
+receipt = {'status':'PASS','board':board,'conduct':conduct,'industries':industries,
+    'rank_movers':len(movers), 'tier_movers':sum(r['before']['tier']!=r['after']['tier'] for r in movers),
+    'movers':movers,'membership_changes':changes,
+    'added_acts':sum(len(r['added']) for r in changes),'removed_acts':sum(len(r['removed']) for r in changes),
+    'grade_members_exact':True,'reporting_rank_score_percentiles_exact':all(read(STAGE/'ranks_python.json')[f]==read(OUT/'baseline/ranks_python.json')[f] for f in ('rank','score','pcts')),
+    'diagnostics':{m:{**board[m],'natural_rank':nr[m],'natural_tier':nt[m]} for m in ('Young Kim','Steve Daines','Andy Barr','Jared Golden','Henry Cuellar')},
+    'hashes':{str(p.relative_to(STAGE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in STAGE.rglob('*') if p.is_file()}}
+(OUT/'cumulative_candidate_receipt.json').write_text(json.dumps(receipt,indent=2),encoding='utf-8')
+md=['# Stable membership candidate — complete CU placement comparison','',
+    'Corrected source persistence only; scoring coefficients, classifications, conduct and seating policy are unchanged.','',
+    '| Member | Accepted rank | Corrected rank | Accepted tier | Corrected tier |','|---|---:|---:|---:|---:|']
+for row in sorted(movers,key=lambda r:r['after']['rank']):
+    a,b=row['before'],row['after'];md.append(f"| {row['member']} | {a['rank']} | {b['rank']} | {a['tier']} | {b['tier']} |")
+(OUT/'CUMULATIVE_MEMBERSHIP_MOVERS.md').write_text('\n'.join(md)+'\n',encoding='utf-8')
+print(json.dumps({k:v for k,v in receipt.items() if k not in ('board','conduct','industries','movers','membership_changes','hashes')},indent=2))

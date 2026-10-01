@@ -1,0 +1,132 @@
+{
+ "candidate": {
+  "coverage_n": 279,
+  "panels": {
+   "academic_experts": {
+    "bars": {
+     "dominance": false,
+     "n": true,
+     "p": true,
+     "partial": true,
+     "r": true
+    },
+    "heterotrait": {
+     "A": 0.3382401813565794,
+     "C": 0.4746686976996359,
+     "E": 0.09902695118025485,
+     "N": -0.2706084241451128
+    },
+    "max_abs_heterotrait": 0.4746686976996359,
+    "n": 49,
+    "partial_female_party": 0.1337394102651493,
+    "pass": false,
+    "permutation_p_one_sided": 0.0021,
+    "permutations": 9999,
+    "r": 0.40206804452903566,
+    "seed": 20260916
+   },
+   "senate_insiders": {
+    "bars": {
+     "dominance": false,
+     "n": true,
+     "p": false,
+     "partial": false,
+     "r": false
+    },
+    "heterotrait": {
+     "A": 0.06772378581207979,
+     "C": -0.12589641620586428,
+     "E": 0.2540925076909067,
+     "N": 0.11760704439261116
+    },
+    "max_abs_heterotrait": 0.2540925076909067,
+    "n": 44,
+    "partial_female_party": 0.02270060372816812,
+    "pass": false,
+    "permutation_p_one_sided": 0.1131,
+    "permutations": 9999,
+    "r": 0.1839780589050428,
+    "seed": 20260917
+   }
+  },
+  "weights": {
+   "new": 0.3,
+   "original": 0.7
+  }
+ },
+ "criteria_sha256": "879f21fafc064eeacdb778c5d021897ce6227c29734edb2c686ad056b751c5bd",
+ "gold_sha256": "ff5a948361f478cf7d7da2ce84e333594b242cb65574760dd285a8dbd57afe7a",
+ "method": {
+  "chamber_context": "constant Senate; excluded per preregistration",
+  "one_look": true,
+  "panel_controls": [
+   "female",
+   "republican"
+  ],
+  "permutations": 9999,
+  "readiness_path": "PRIMARY_250",
+  "seeds": {
+   "academic_experts": 20260916,
+   "senate_insiders": 20260917
+  }
+ },
+ "original_same_roster_context": {
+  "panels": {
+   "academic_experts": {
+    "bars": {
+     "dominance": true,
+     "n": true,
+     "p": true,
+     "partial": true,
+     "r": true
+    },
+    "heterotrait": {
+     "A": 0.3956875312516976,
+     "C": 0.4247735569538193,
+     "E": 0.0974449207990223,
+     "N": -0.2795851108496599
+    },
+    "max_abs_heterotrait": 0.4247735569538193,
+    "n": 49,
+    "partial_female_party": 0.25152608181765146,
+    "pass": true,
+    "permutation_p_one_sided": 0.0002,
+    "permutations": 9999,
+    "r": 0.5033871803261039,
+    "seed": 20260916
+   },
+   "senate_insiders": {
+    "bars": {
+     "dominance": true,
+     "n": true,
+     "p": true,
+     "partial": false,
+     "r": true
+    },
+    "heterotrait": {
+     "A": 0.130486136205911,
+     "C": -0.10180440074310262,
+     "E": 0.17418385536503128,
+     "N": 0.08012692583158068
+    },
+    "max_abs_heterotrait": 0.17418385536503128,
+    "n": 44,
+    "partial_female_party": 0.06959585634397063,
+    "pass": false,
+    "permutation_p_one_sided": 0.0698,
+    "permutations": 9999,
+    "r": 0.2246642561213622,
+    "seed": 20260917
+   }
+  },
+  "status_unchanged": true
+ },
+ "original_score_sha256": "2b351af4c8fd077cc7fd10b05001a2843f850a3a83f956d5ac75b644a4317c13",
+ "pass": false,
+ "prior_result_sha256": "fc3bdbfa59671f61891c34d38e13839f57092c2110d760a12e221e7fc43ba5e9",
+ "production_consumers": 0,
+ "schema": "b5-o-coverage-result-v1",
+ "status": "DUAL_PANEL_SUCCESSOR_MISS",
+ "stopped_criterion_sha256": "eb16cde3c160f7fc14280a3c6b0ae4754a913606fcd2e78fa7a4fd1c8dea8e12",
+ "unmatched_historic_names": 90
+}

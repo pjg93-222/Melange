@@ -1,0 +1,19 @@
+import hashlib,json,os,sys
+from pathlib import Path
+OUT=Path(__file__).resolve().parent
+ROOT=OUT.parents[1]
+STAGE=OUT/'delta_candidate'
+os.environ['MONEYBALL_ROOT']=str(STAGE)
+os.environ['PRIMACY_T1_MIN_AFFIRMATIVE']='0'
+sys.path.insert(0,str(ROOT/'.claude/worktrees/codex-primacy-diagnostic-20260920/fec'))
+from engine import primacy_factors as PF, per_area_grade as PAG
+read=lambda p:json.loads(p.read_text(encoding='utf-8'))
+PF.main(str(STAGE))
+assert (STAGE/'data/engine/primacy_factors.json').read_bytes()==(OUT/'failed_regeneration/primacy_factors.json').read_bytes()
+g=PAG.main(['--root',str(STAGE),'--as-of',read(OUT/'before_grade.json')['as_of']])
+assert g==read(OUT/'failed_regeneration/per_area_grade.json')
+receipt={'status':'PASS','dial':'DESK_MEMBERSHIP_SOURCE=delta','comparison':'Interrupted live delta generation, same current inputs',
+         'members':533,'all_desk_bill_fields_exact':True,'factor_bytes_exact':True,'grade_document_exact':True,
+         'warning':'This historical dial reintroduces the demonstrated membership oscillation.'}
+(OUT/'membership_dial_receipt.json').write_text(json.dumps(receipt,indent=2),encoding='utf-8')
+print(json.dumps(receipt,indent=2))

@@ -1,0 +1,174 @@
+{
+ "built_utc": "2026-08-18T02:37:19Z",
+ "config": "holistic",
+ "vintage": "BASE",
+ "dials": {
+  "congresses": [
+   117,
+   118,
+   119
+  ],
+  "decay": 0.8,
+  "newest": 119,
+  "ow": 1.0,
+  "rw": 0.2,
+  "types": [
+   "hconres",
+   "hjres",
+   "hr",
+   "hres",
+   "s",
+   "sconres",
+   "sjres",
+   "sres"
+  ]
+ },
+ "formula": "w = role * SUCCESS(3.0 if passed-latest-action) * decay^age * 1/sqrt(C_fullbill); scraper parity :1773-1788,:1923-1951",
+ "scope": {
+  "cosponsorship": "all-bills"
+ },
+ "bpf": "n/a (base vintage; kernel-side concern)",
+ "roster": {
+  "members": 533,
+  "with_bioguide": 533,
+  "source": "data/engine/congestion.json"
+ },
+ "stats": {
+  "counters": {
+   "bills_no_cosponsor": 10997,
+   "bills_contributing": 37076,
+   "ties_cosponsor_off_roster": 76161,
+   "ties_kept": 410406,
+   "bills_sponsor_off_roster": 7122,
+   "ties_withdrawn_included": 695,
+   "cosponsor_duplicate_items_collapsed": 9,
+   "edges": 93952
+  },
+  "bills_by_congress": {
+   "117": 17828,
+   "118": 19315,
+   "119": 18052
+  },
+  "bills_tie_capable_by_congress": {
+   "117": 14320,
+   "118": 15659,
+   "119": 14219
+  },
+  "sponsor_dropped_by_congress": {
+   "117": 4219,
+   "118": 2695,
+   "119": 208
+  },
+  "sponsor_dropped_share_of_tie_capable": {
+   "117": 0.294622905027933,
+   "118": 0.17210549843540457,
+   "119": 0.014628314227442155
+  }
+ },
+ "isolates": {
+  "count": 0,
+  "bioguides": []
+ },
+ "inputs": {
+  "billstatus_zips": {
+   "BILLSTATUS-117-hconres.zip": {
+    "sha256": "b2ffeb3405df10b506374abb213981ff171b66da8f0107eb44e121c6995e6e1c",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-117-hjres.zip": {
+    "sha256": "55855f0441d0e691691e5cd8f12b46375314ab4994e9744575f5e4eb343810f4",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-117-hr.zip": {
+    "sha256": "658b2d280e4e7972c86bfd810ebff0c9bb61c115b242de8c8774034dea08de03",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-117-hres.zip": {
+    "sha256": "2a915021d570e1de5592d5126be42ce3f02251a9252961c7ac98eb51d6796e72",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-117-s.zip": {
+    "sha256": "69561f19333de31afd2e288700757f3794ecffa35287b9fb86bb2d5d313a1294",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-117-sconres.zip": {
+    "sha256": "11af595b554ce90238f127319c2c0996706723df5fe126c6595b2d4c3bfb9223",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-117-sjres.zip": {
+    "sha256": "857969d43fb4fa63f608bafbe43c297be05b65ffbb5f2c4d7180e7d2cb2f72a9",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-117-sres.zip": {
+    "sha256": "142052385a64f95bd08932bce3c467a9ccacc6d7fadc976e4a163b19ce9d2997",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-hconres.zip": {
+    "sha256": "64b54d875805f69d89527eec817cb3491f5d2d30c8fe12bf8b5f28af8e2a75ef",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-hjres.zip": {
+    "sha256": "010db05723a7ae43db92455f0415d9ce5c4be3a89feac56bbbd2a78da4a2af83",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-hr.zip": {
+    "sha256": "8e7ca7dab50a7b9b977f021ec1b3231f8fedf82c33494553857b892fadfdba98",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-hres.zip": {
+    "sha256": "b71a85e04d980fde4c4ad95919f214c4154575ddb874afb365b547e82b634e43",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-s.zip": {
+    "sha256": "269261c0989db3ced789680ee2202747df9a7298f1ac8d2b074d3356b06e399c",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-sconres.zip": {
+    "sha256": "14ef985ad95416a2ce4abf4467237cd09801b3c229d4f9536d8f06d63998b420",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-sjres.zip": {
+    "sha256": "da94d59404d5eba1e35939ecc276d012fc56c2b1171a3467fc89456cf9c28569",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-118-sres.zip": {
+    "sha256": "13b1a37342075cae276a2c2f97f53721bbe6b192c2eeadb4db73adadba427b59",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-hconres.zip": {
+    "sha256": "5851f95cd58bffc0d8cb8d5fd2219a516f3ab529d7bd26a2e01ae1f695383c21",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-hjres.zip": {
+    "sha256": "2fd8701b2242aedd8bb7abd762d2bb46aea9601171d8a13349aab399ae140ec9",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-hr.zip": {
+    "sha256": "ed522d0dcd31a344a163e1c081a158e8a0c381c1e6587cbdf81f043daa7df31a",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-hres.zip": {
+    "sha256": "6613ad7030878f1a13977ef89859e4f5fdcdadb53e1d8ccb1f6a53a0a894dc80",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-s.zip": {
+    "sha256": "e22a37a8ee4ecd4695b3527654569ed9423d34f3decff8db6d04766ad749e1a7",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-sconres.zip": {
+    "sha256": "138f4d6bbcb7d9a8884482e7bff37f9eb1cf75bb0718c6f4df1f25341c49140c",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-sjres.zip": {
+    "sha256": "53e1b6aff3a3275b91178752cd5752e0cc301fdfae0b148f89df2ec01eb95211",
+    "mtime_utc": "2026-08-01"
+   },
+   "BILLSTATUS-119-sres.zip": {
+    "sha256": "3de36aed1385566684e5b78c3290624f1f612591fe83d4e98b9c33cf4dd1b55b",
+    "mtime_utc": "2026-08-01"
+   }
+  }
+ },
+ "output": "holistic_network_BASE_20260817.xlsx",
+ "output_canonical_rows_sha256": "e5630b802c5495d87bef63f3fd5e4045db842a5e08b3feec5a7f920b2ff46dbe"
+}

@@ -1,0 +1,163 @@
+[a] render make_staffer_network_html_00.tpl
+  OK   00 :: the builder exits 0
+  OK   00 :: the builder names what it wrote
+  OK   00 :: the page exists
+  OK   00 :: the page is a complete document
+  [b] data island
+  OK   00 :: no __DATA__ token survives
+  OK   00 :: the app reads its data from SDATA
+  OK   00 :: the fixture generation is embedded
+  OK   00 :: a fixture member name is embedded
+  OK   00 :: a top_staff office name round-trips in the embedded payload
+  OK   00 :: the template's JS reads co_tenure_office_name
+  OK   00 :: the template's JS reads co_tenure_office_size
+  OK   00 :: the relabelled column states the one-sentence definition, including WHERE the named office comes from
+  [c] make_combined.extract() contract
+  OK   00 :: exactly one <style>
+  OK   00 :: exactly one </style>
+  OK   00 :: exactly one <script tag of any kind
+  OK   00 :: exactly one </script>
+  OK   00 :: extract() finds a stylesheet
+  OK   00 :: extract() finds body markup
+  OK   00 :: extract() finds the app script
+  OK   00 :: the body carries no <script
+  [d] id namespace
+  OK   00 :: the chunk declares ids at all
+  OK   00 :: every id in the merged chunk is prefixed stf-
+  [e] no external loads
+  OK   00 :: no element carries a non-data src=
+  OK   00 :: no stylesheet link
+  OK   00 :: no CSS @import
+  OK   00 :: no font load
+  OK   00 :: off-document references are local live navigation and the SVG namespace
+  OK   00 :: the live probe is a fetch, never a script load
+  [f] owner language law
+  OK   00 :: the zero-overlap rejection is labelled verbatim
+  OK   00 :: the legend denies a member-to-member reading
+  OK   00 :: the exploratory / review-required flag ships
+  OK   00 :: the language note ships exactly once
+  OK   00 :: the receipt statement ships exactly 1 time(s)
+  OK   00 :: no advisory vocabulary in the template outside the payload: 'influence'
+  OK   00 :: no advisory vocabulary in the template outside the payload: 'persuad'
+  OK   00 :: no advisory vocabulary in the template outside the payload: 'recommend'
+  OK   00 :: no advisory vocabulary in the template outside the payload: 'should'
+[a] render make_staffer_network_html_01.tpl
+  OK   01 :: the builder exits 0
+  OK   01 :: the builder names what it wrote
+  OK   01 :: the page exists
+  OK   01 :: the page is a complete document
+  [b] data island
+  OK   01 :: no __DATA__ token survives
+  OK   01 :: the app reads its data from SDATA
+  OK   01 :: the fixture generation is embedded
+  [c] make_combined.extract() contract
+  OK   01 :: exactly one <style>
+  OK   01 :: exactly one </style>
+  OK   01 :: exactly one <script tag of any kind
+  OK   01 :: exactly one </script>
+  OK   01 :: extract() finds a stylesheet
+  OK   01 :: extract() finds body markup
+  OK   01 :: extract() finds the app script
+  OK   01 :: the body carries no <script
+  [d] id namespace
+  OK   01 :: the chunk declares ids at all
+  OK   01 :: every id in the merged chunk is prefixed stf-
+  [e] no external loads
+  OK   01 :: no element carries a non-data src=
+  OK   01 :: no stylesheet link
+  OK   01 :: no CSS @import
+  OK   01 :: no font load
+  OK   01 :: off-document references are local live navigation and the SVG namespace
+  OK   01 :: the live probe is a fetch, never a script load
+  [f] owner language law
+  OK   01 :: the zero-overlap rejection is labelled verbatim
+  OK   01 :: the legend denies a member-to-member reading
+  OK   01 :: the exploratory / review-required flag ships
+  OK   01 :: the language note ships exactly once
+  OK   01 :: the receipt statement ships exactly 1 time(s)
+  OK   01 :: no advisory vocabulary in the template outside the payload: 'influence'
+  OK   01 :: no advisory vocabulary in the template outside the payload: 'persuad'
+  OK   01 :: no advisory vocabulary in the template outside the payload: 'recommend'
+  OK   01 :: no advisory vocabulary in the template outside the payload: 'should'
+[h] the _01 template carries its own three payloads
+  OK   no __OFFICES__ token survives
+  OK   no __ORGS__ token survives
+  OK   no __CLIENTS__ token survives
+  OK   the app reads its offices from GDATA
+  OK   the app reads its organisations from ODATA
+  OK   the app reads its clients from CDATA
+  OK   the page carries exactly one const GDATA= line
+  OK   the page carries exactly one const ODATA= line
+  OK   the page carries exactly one const CDATA= line
+  OK   an office name is embedded
+  OK   an organisation name is embedded
+  OK   the offices island is one decodable JSON value
+  OK   the organisations island is one decodable JSON value
+  OK   the clients island is one decodable JSON value
+  OK   the offices island round-trips to the fixture payload exactly
+  OK   the organisations island round-trips to the fixture payload exactly
+  OK   the clients island round-trips to the fixture payload exactly
+  OK   the LDA status line ships in the owner vocabulary, character for character
+  OK   the employer line ships on the CARD now, not the per-person row
+  OK   the card states engagement once too
+  OK   the per-person row keeps registrant_tier, which actually varies person to person
+  OK   ...and employer_as_of, the period the card employer is on file as of
+  OK   employer_line no longer rides on the per-person row at all
+  OK   the office people_count and more both survive the transport (owner ruling 2026-09-07, item 1: more is current-only now, not mixed)
+  OK   earlier_count survives the transport, uncapped and unnamed
+  OK   no departed person leaks into an office people list
+  OK   provenance scope drops the member map, keeping meta and global
+  OK   there is no canvas on the groups surface
+[h2] the Sources and method fold states the new office and org policy
+  OK   the current-day office note ships (a full data value, baked into GDATA)
+  OK   the organisation cap sentence template ships (rendered client-side from OMETA.org_cap)
+  OK   the fixture org_cap value itself reaches the page, inside ODATA
+[h3] the banned-word scan is chrome-only, not a payload grep (owner ruling 2026-09-07, item 3)
+  OK   the raw page really does carry the banned word inside payload data (proving the exemption below is not vacuous)
+  OK   a registrant name containing a banned token is exempt once it is payload data, not template
+  OK   stripping the islands actually removed the banned word, not just coincidentally missed it
+[h4] rule 6: a single-filer row and an empty-lobbyists row render different sentences
+  OK   the single-filer sentence fragment ships in the template
+  OK   the empty-lobbyists sentence ships in the template
+  OK   the single-filer fixture row carries no lobbyists key at all
+  OK   the empty-lobbyists fixture row carries the key, not an absence
+  OK   the empty-lobbyists fixture row is an empty array, not a name-only line
+[h5] the CLIENT half is a normalized third artifact, and the page resolves a client card out of it by index
+  OK   no client card is left in the organisations artifact
+  OK   and the organisations meta says where the client ties went
+  OK   every client the ruling reaches is in the clients island
+  OK   TIE COUNT CONSERVED: the tie arrays hold exactly the ties the meta counts
+  OK   and that equals what the ledger reached -- nothing thresholded
+  OK   nothing was dropped, and the island says so in its own counters
+  OK   a filer who files for two clients has their name written ONCE
+  OK   and their id once as well
+  OK   that filer really is tied to two clients (the check above is not vacuous)
+  OK   the whole rendered page carries that filer's name exactly once, in the island: nothing about the transport duplicates it either
+  OK   every value in the tie arrays is an integer, never a name
+  OK   every tie index resolves to a filer in this island
+  OK   every period code resolves to a label
+  OK   every employer index resolves to a registrant
+  OK   NEGATIVE CONTROL: a dangling tie index fails the same check -- the check above is a measurement, not a tautology
+  OK   the client's own name is embedded in the page
+  OK   the second client's name is embedded too
+  OK   the template states how many lobbyists represent a client organisation
+  OK   a client card's roster is built by index lookup out of the tables, not from names on the row
+  OK   a contract filer's own line states their employer
+  OK   ...and their client count, derived from the tie arrays rather than stored a second time
+  OK   a client is reachable by search on its own name
+  OK   ...and by the name of a lobbyist who files for it
+  OK   the search-miss control string is genuinely absent from the page
+  OK   the network surface is untouched and still carries its canvas
+  OK   the network surface carries no offices island
+  OK   the network surface carries no organisations island
+[i] offices and organisations are each independently optional
+FAIL  an absent offices artifact still renders  :: got 1 want 0
+  OK   the builder says it rendered an empty offices directory
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\surfaces\test_make_staffer_network_html.py", line 945, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\tests\surfaces\test_make_staffer_network_html.py", line 805, in main
+    no_offices_page = open(out_no_offices, encoding='utf-8').read()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\pgoff\\AppData\\Local\\Temp\\mb_staffer_html_b0v2hx05\\no-offices.html'

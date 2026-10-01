@@ -1,0 +1,69 @@
+"""Frozen same-input replay for the mathematical boundary repair, no live writes."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import sys
+
+OUT = Path(__file__).resolve().parent
+ROOT = OUT.parents[1]
+WT = ROOT / '.claude/worktrees/codex-primacy-diagnostic-20260920'
+label = sys.argv[1]
+code = ROOT if label in ('before', 'published') else WT
+os.environ['MONEYBALL_ROOT'] = str(ROOT)
+sys.path.insert(0, str(code / 'fec'))
+import tier_util as TU
+from engine import per_area_grade as PAG
+from lobbying import industry_tiers as IT
+from legislation import sentinel_admissions as SA
+
+read = lambda relative: json.loads((ROOT / relative).read_text(encoding='utf-8'))
+sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+paths = ['ranks_python.json', TU.PRIMACY_PATH, TU.PER_AREA_GRADE_PATH,
+         IT.BUNDLE_PATH, 'data/lobbying/industry_tiers.json', 'dashboard_data.json']
+available = [p for p in paths if (ROOT / p).is_file()]
+hashes = {p: sha(ROOT / p) for p in available}
+if label == 'before':
+    for relative in available:
+        target = OUT / 'baseline' / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / relative, target)
+bundle, ranks, factors = read(IT.BUNDLE_PATH), read(IT.RANKS_PATH), read(IT.FACTOR_PATH)
+tags = IT.primacy_factors.load_tags(str(ROOT / IT.TAGS_PATH))
+tags = SA.effective_tags(tags, SA.load(str(ROOT)))
+records, names = IT._validate_bundle(bundle, tags)
+valence, _ = IT._load_valence_ledger(str(ROOT / IT.VALENCE_PATH), tags)
+axes, _ = IT._load_industry_axes(str(ROOT / IT.AXES_PATH), tags)
+tiers, ranks_by_member, conduct = TU.legislative_press_tiers(names, root=str(ROOT), with_detail=True)
+grades = TU.load_per_area_grade(str(ROOT))
+score = TU.primacy_scores(ranks['pcts'], TU.load_primacy_ranked(str(ROOT)),
+                         mode='per_area_v1', grades={m:g[1] for m,g in grades.items()})
+board = {m:{'rank':ranks_by_member[m], 'tier':tiers[m], 'score':score[m]} for m in sorted(names)}
+industry = {'credit_union': IT._canonical_cu_board(records, names, factors, tags)}
+for name in ('bank', 'crypto', 'fintech'):
+    industry[name] = IT._build_industry(industry=name, bundle=bundle, records=records,
+        member_names=names, pcts=ranks['pcts'], tags=tags,
+        valence_rows=valence.get(name, {}), axes_rows=axes.get(name, {}))
+grade = PAG.main(['--root', str(ROOT), '--as-of', read(TU.PER_AREA_GRADE_PATH)['as_of'],
+                  '--out', str(OUT / (label + '_grade.json'))])
+receipt = {'hashes':hashes, 'board':board, 'conduct':conduct, 'industries':industry,
+           'grade_matches_published':grade == read(TU.PER_AREA_GRADE_PATH)}
+target = OUT / (label + '.json')
+target.write_text(json.dumps(receipt, indent=2, sort_keys=True), encoding='utf-8')
+assert receipt['grade_matches_published'], 'Grade replay differs from live input artifact'
+if label != 'before':
+    before = json.loads((OUT / 'before.json').read_text(encoding='utf-8'))
+    for field in ('board', 'conduct', 'industries'):
+        assert receipt[field] == before[field], field + ' changed'
+    if label == 'candidate':
+        assert receipt['hashes'] == before['hashes'], 'Live inputs changed during proof'
+        assert (OUT / 'before_grade.json').read_bytes() == (OUT / 'candidate_grade.json').read_bytes()
+    proof = {'status':'PASS', 'members':len(board), 'rank_movers':0, 'tier_movers':0,
+             'score_movers':0, 'conduct_all_fields_exact':True,
+             'grade_document_exact':True, 'input_hashes':hashes,
+             'industry_all_fields_exact':{name:len(value['rows']) for name,value in industry.items()}}
+    (OUT / (label + '_receipt.json')).write_text(json.dumps(proof, indent=2), encoding='utf-8')
+    print(json.dumps(proof, indent=2))
+else:
+    print('Baseline saved:', len(board), 'members; grade exact; industry boards', list(industry))

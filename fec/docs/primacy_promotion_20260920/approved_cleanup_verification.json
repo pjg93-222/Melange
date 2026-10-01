@@ -1,0 +1,28 @@
+{
+  "owner_approval": "Yes, in response to the exact four-row cleanup request",
+  "removed_exactly_approved_rowids": [
+    103939,
+    189056,
+    190576,
+    193063
+  ],
+  "schemas_equal": true,
+  "all_other_rowids_and_values_equal": true,
+  "table_counts": {
+    "cr_fetch_log": 7433,
+    "cspan_attribution_audit": 862,
+    "cspan_fetch_log": 862,
+    "fetch_log": 214,
+    "hearing_antag": 33955,
+    "hearing_antag2": 961,
+    "hearing_meta": 7174,
+    "hearing_meta2": 114,
+    "interactions": 411,
+    "iv_fetch_log": 168979,
+    "members": 515,
+    "posts": 30203,
+    "speeches": 271251,
+    "speeches_turn_split_ledger": 5477,
+    "yt_fetch_log": 0
+  }
+}

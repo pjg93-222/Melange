@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "codex": {
+      "command": "cmd",
+      "args": ["/c", "%USERPROFILE%\\.codex\\bin\\codex-mcp.cmd"],
+      "timeout": 3600000
+    }
+  }
+}

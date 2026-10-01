@@ -1,0 +1,120 @@
+{
+  "sentinel_changes": [
+    {
+      "store": "repo.data_stance",
+      "rel": "big5_gold_anchored.json",
+      "bytes_before": 210518,
+      "bytes_after": 210498,
+      "hash_before": "27be16cd4b3b2f67b23307a7d1e0179f7add81a78cad54a378ecdb3cacfa9352",
+      "hash_after": "00933395dd7965a010221590a015ed2b743c52aaa799f4955c068aa4517e86c9",
+      "content_matches": false
+    },
+    {
+      "store": "repo.data_legislation",
+      "rel": "bank_anchor_reconciliation.json",
+      "bytes_before": 6558,
+      "bytes_after": 6558,
+      "hash_before": "a8e092489e859fc9d91a3c1ebab5126e01563c860e1f74eccef883322ae1e0d9",
+      "hash_after": "5462a78cef575db0aa384cd94862671eb683ce5024076d6e5e9a995fdc674649",
+      "content_matches": false
+    },
+    {
+      "store": "repo.data_network",
+      "rel": "co_appearance.json",
+      "bytes_before": 325679,
+      "bytes_after": 312182,
+      "hash_before": "812e85bb64363de911a66f4140561127df75e6e6f653e2a790ce4388d51016e6",
+      "hash_after": "801dc355f99b6cb082617dd7d3042725fdd2df5aaccc646e22b125ab513b693e",
+      "content_matches": false
+    },
+    {
+      "store": "repo.data_engine",
+      "rel": "per_area_grade.json",
+      "bytes_before": 1105448,
+      "bytes_after": 1110160,
+      "hash_before": "250c003469bea2dbbf4721b020681a0d8a79b6da04029c40b6f56d24a388c4f0",
+      "hash_after": "7a73ffd26f37a7c1589a55ed9465934c1995d413bb4e491ba78c9dcff3c65845",
+      "content_matches": false
+    },
+    {
+      "store": "repo.worktrees",
+      "rel": "charming-chatterjee-d81c90/audits/legfix5/opus_adjudication/packets/10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59/packets.ndjson",
+      "change": "missing"
+    },
+    {
+      "store": "repo.worktrees",
+      "rel": "evidence-csv-fetch-streaming-8bedff/audits/legfix5/opus_adjudication/packets/10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59/packets.ndjson",
+      "change": "missing"
+    },
+    {
+      "store": "repo.git",
+      "rel": "objects/pack/pack-bba249f8840f597f4c4919e5d533dc09cc81a1cb.pack",
+      "bytes_before": 4197655067,
+      "bytes_after": 4197655067,
+      "hash_before": null,
+      "hash_after": null,
+      "content_matches": null
+    },
+    {
+      "store": "repo.git",
+      "rel": "objects/pack/pack-773759518f981592e0b390f1c01f950e2de2e289.pack",
+      "bytes_before": 3258855802,
+      "bytes_after": 3258855802,
+      "hash_before": null,
+      "hash_after": null,
+      "content_matches": null
+    },
+    {
+      "store": "repo.git",
+      "rel": "codex-worktree-backups/20260901-113507/preserved-unmerged-branches.bundle",
+      "change": "missing"
+    },
+    {
+      "store": "local.lda_derived",
+      "rel": "cosponsor_sc/cosponsor_scores.csv",
+      "bytes_before": 166926312,
+      "bytes_after": 167424467,
+      "hash_before": null,
+      "hash_after": null,
+      "content_matches": null
+    },
+    {
+      "store": "local.billstatus",
+      "rel": "billstatus119/BILLSTATUS-119.receipt.json",
+      "bytes_before": 3912,
+      "bytes_after": 3903,
+      "hash_before": "fef75da9439147a84836b599c31089beb3c0d5b8c2c5c68b4257f6fae89d67b0",
+      "hash_after": "546065e996e36de7c378374c53bd053ba2938757c961ada887ef87ff1f269148",
+      "content_matches": false
+    },
+    {
+      "store": "mirror.melange",
+      "rel": "objects/pack/pack-9b083bbd2d8969998b964c529280f2f294b3136f.pack",
+      "change": "missing"
+    }
+  ],
+  "personal_texture": {
+    "members": 480,
+    "details": 4727,
+    "malformed": 0,
+    "local_narrative_leaks": 0,
+    "invalid_display_admissions": 0,
+    "provenance": {
+      "method": "wide regex catch-net; cached Fable semantic judgments plus conservative verbatim local-explicit fallback",
+      "model": "mixed: claude-fable-5 + local_explicit_v6",
+      "candidate_count": 8641,
+      "classified_count": 5894,
+      "candidate_member_count": 496,
+      "semantic_gate_count": 5953,
+      "semantic_cap_per_member_category": 12,
+      "display_policy": "Fable-kept rows plus exact INTERVIEW sentences passing local_explicit_v6; local rows remain narrative-ineligible",
+      "rejected_count": 1096,
+      "member_count": 480,
+      "source_policy": "member-attributed text only; reposts excluded; evidence and locator retained; display-only"
+    }
+  },
+  "pillar_snapshot": {
+    "stamped": "2026-09-03T21:04:35-04:00",
+    "live_legislative_policy": true
+  }
+}

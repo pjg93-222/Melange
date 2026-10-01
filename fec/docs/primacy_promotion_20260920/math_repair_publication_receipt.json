@@ -1,0 +1,1309 @@
+{
+  "members": 533,
+  "canonical_desk_dashboard_rank_exact": true,
+  "canonical_desk_dashboard_tier_exact": true,
+  "honors_movers": [
+    {
+      "member": "Aaron Bean",
+      "before": {
+        "rank": 279,
+        "score": 0.429962293152,
+        "tier": 0
+      },
+      "rank": 278,
+      "tier": 0
+    },
+    {
+      "member": "Adam Gray",
+      "before": {
+        "rank": 324,
+        "score": 0.419195429356,
+        "tier": 0
+      },
+      "rank": 322,
+      "tier": 0
+    },
+    {
+      "member": "Adelita Grijalva",
+      "before": {
+        "rank": 337,
+        "score": 0.414594064872,
+        "tier": 0
+      },
+      "rank": 336,
+      "tier": 0
+    },
+    {
+      "member": "Alma Adams",
+      "before": {
+        "rank": 295,
+        "score": 0.42622878336000003,
+        "tier": 0
+      },
+      "rank": 294,
+      "tier": 0
+    },
+    {
+      "member": "Ami Bera",
+      "before": {
+        "rank": 327,
+        "score": 0.418328282784,
+        "tier": 0
+      },
+      "rank": 325,
+      "tier": 0
+    },
+    {
+      "member": "Analilia Mejia",
+      "before": {
+        "rank": 357,
+        "score": 0.40982497906800003,
+        "tier": 0
+      },
+      "rank": 358,
+      "tier": 0
+    },
+    {
+      "member": "Andr\u00e9 Carson",
+      "before": {
+        "rank": 325,
+        "score": 0.4187777507940001,
+        "tier": 0
+      },
+      "rank": 324,
+      "tier": 0
+    },
+    {
+      "member": "Anna Luna",
+      "before": {
+        "rank": 503,
+        "score": 0.37398138816,
+        "tier": 0
+      },
+      "rank": 499,
+      "tier": 0
+    },
+    {
+      "member": "April McClain Delaney",
+      "before": {
+        "rank": 332,
+        "score": 0.41695252872,
+        "tier": 0
+      },
+      "rank": 331,
+      "tier": 0
+    },
+    {
+      "member": "August Pfluger",
+      "before": {
+        "rank": 363,
+        "score": 0.408568097784,
+        "tier": 0
+      },
+      "rank": 365,
+      "tier": 0
+    },
+    {
+      "member": "Austin Scott",
+      "before": {
+        "rank": 320,
+        "score": 0.4205766530680001,
+        "tier": 0
+      },
+      "rank": 319,
+      "tier": 0
+    },
+    {
+      "member": "Ben Cline",
+      "before": {
+        "rank": 191,
+        "score": 0.44719031543200005,
+        "tier": 0
+      },
+      "rank": 192,
+      "tier": 0
+    },
+    {
+      "member": "Bennie Thompson",
+      "before": {
+        "rank": 192,
+        "score": 0.44714447941600005,
+        "tier": 0
+      },
+      "rank": 193,
+      "tier": 0
+    },
+    {
+      "member": "Blake Moore",
+      "before": {
+        "rank": 73,
+        "score": 0.46054247786,
+        "tier": 3
+      },
+      "rank": 74,
+      "tier": 3
+    },
+    {
+      "member": "Brad Knott",
+      "before": {
+        "rank": 298,
+        "score": 0.425679249072,
+        "tier": 0
+      },
+      "rank": 297,
+      "tier": 0
+    },
+    {
+      "member": "Bradley Schneider",
+      "before": {
+        "rank": 375,
+        "score": 0.40615115020000003,
+        "tier": 0
+      },
+      "rank": 376,
+      "tier": 0
+    },
+    {
+      "member": "Brian Jack",
+      "before": {
+        "rank": 273,
+        "score": 0.43079893236,
+        "tier": 0
+      },
+      "rank": 272,
+      "tier": 0
+    },
+    {
+      "member": "Brian Mast",
+      "before": {
+        "rank": 331,
+        "score": 0.41709373850200004,
+        "tier": 0
+      },
+      "rank": 330,
+      "tier": 0
+    },
+    {
+      "member": "Bryan Steil",
+      "before": {
+        "rank": 368,
+        "score": 0.40801421536199994,
+        "tier": 0
+      },
+      "rank": 370,
+      "tier": 0
+    },
+    {
+      "member": "Byron Donalds",
+      "before": {
+        "rank": 359,
+        "score": 0.40959060027599997,
+        "tier": 0
+      },
+      "rank": 360,
+      "tier": 0
+    },
+    {
+      "member": "Carol Miller",
+      "before": {
+        "rank": 261,
+        "score": 0.433447785844,
+        "tier": 0
+      },
+      "rank": 260,
+      "tier": 0
+    },
+    {
+      "member": "Charles Fleischmann",
+      "before": {
+        "rank": 322,
+        "score": 0.41992692079000005,
+        "tier": 0
+      },
+      "rank": 321,
+      "tier": 0
+    },
+    {
+      "member": "Chrissy Houlahan",
+      "before": {
+        "rank": 292,
+        "score": 0.426502733116,
+        "tier": 0
+      },
+      "rank": 293,
+      "tier": 0
+    },
+    {
+      "member": "Christian Menefee",
+      "before": {
+        "rank": 370,
+        "score": 0.407373888856,
+        "tier": 0
+      },
+      "rank": 371,
+      "tier": 0
+    },
+    {
+      "member": "Claudia Tenney",
+      "before": {
+        "rank": 309,
+        "score": 0.4243761,
+        "tier": 0
+      },
+      "rank": 308,
+      "tier": 0
+    },
+    {
+      "member": "Dan Crenshaw",
+      "before": {
+        "rank": 321,
+        "score": 0.42031259305999996,
+        "tier": 0
+      },
+      "rank": 320,
+      "tier": 0
+    },
+    {
+      "member": "Dan Newhouse",
+      "before": {
+        "rank": 251,
+        "score": 0.43529297061800004,
+        "tier": 0
+      },
+      "rank": 250,
+      "tier": 0
+    },
+    {
+      "member": "Dave Min",
+      "before": {
+        "rank": 351,
+        "score": 0.41079656169000006,
+        "tier": 0
+      },
+      "rank": 352,
+      "tier": 0
+    },
+    {
+      "member": "David Taylor",
+      "before": {
+        "rank": 314,
+        "score": 0.422349366664,
+        "tier": 0
+      },
+      "rank": 312,
+      "tier": 0
+    },
+    {
+      "member": "Debbie Wasserman Schultz",
+      "before": {
+        "rank": 379,
+        "score": 0.404761061952,
+        "tier": 0
+      },
+      "rank": 380,
+      "tier": 0
+    },
+    {
+      "member": "Derrick Van Orden",
+      "before": {
+        "rank": 202,
+        "score": 0.445964557804,
+        "tier": 0
+      },
+      "rank": 201,
+      "tier": 0
+    },
+    {
+      "member": "Diana Harshbarger",
+      "before": {
+        "rank": 499,
+        "score": 0.37624957458,
+        "tier": 0
+      },
+      "rank": 501,
+      "tier": 0
+    },
+    {
+      "member": "Donald Norcross",
+      "before": {
+        "rank": 376,
+        "score": 0.40558776379,
+        "tier": 0
+      },
+      "rank": 378,
+      "tier": 0
+    },
+    {
+      "member": "Dwight Evans",
+      "before": {
+        "rank": 190,
+        "score": 0.44731701224000003,
+        "tier": 0
+      },
+      "rank": 191,
+      "tier": 0
+    },
+    {
+      "member": "Eleanor Norton",
+      "before": {
+        "rank": 340,
+        "score": 0.41428404919600004,
+        "tier": 0
+      },
+      "rank": 338,
+      "tier": 0
+    },
+    {
+      "member": "Emanuel Cleaver",
+      "before": {
+        "rank": 353,
+        "score": 0.41026283760000004,
+        "tier": 0
+      },
+      "rank": 354,
+      "tier": 0
+    },
+    {
+      "member": "Emily Randall",
+      "before": {
+        "rank": 423,
+        "score": 0.39614455324000003,
+        "tier": 0
+      },
+      "rank": 424,
+      "tier": 0
+    },
+    {
+      "member": "Eugene Vindman",
+      "before": {
+        "rank": 258,
+        "score": 0.434620089736,
+        "tier": 0
+      },
+      "rank": 257,
+      "tier": 0
+    },
+    {
+      "member": "Frank Mrvan",
+      "before": {
+        "rank": 330,
+        "score": 0.41797685094,
+        "tier": 0
+      },
+      "rank": 328,
+      "tier": 0
+    },
+    {
+      "member": "Gary Peters",
+      "before": {
+        "rank": 74,
+        "score": 0.47575985699,
+        "tier": 3
+      },
+      "rank": 73,
+      "tier": 3
+    },
+    {
+      "member": "Gregory Steube",
+      "before": {
+        "rank": 349,
+        "score": 0.41113592942800004,
+        "tier": 0
+      },
+      "rank": 351,
+      "tier": 0
+    },
+    {
+      "member": "Gus Bilirakis",
+      "before": {
+        "rank": 185,
+        "score": 0.44905999538400004,
+        "tier": 0
+      },
+      "rank": 182,
+      "tier": 0
+    },
+    {
+      "member": "Guy Reschenthaler",
+      "before": {
+        "rank": 244,
+        "score": 0.4362821025,
+        "tier": 0
+      },
+      "rank": 242,
+      "tier": 0
+    },
+    {
+      "member": "Hakeem Jeffries",
+      "before": {
+        "rank": 367,
+        "score": 0.408447188488,
+        "tier": 0
+      },
+      "rank": 369,
+      "tier": 0
+    },
+    {
+      "member": "Herbert Conaway",
+      "before": {
+        "rank": 269,
+        "score": 0.43148525,
+        "tier": 0
+      },
+      "rank": 268,
+      "tier": 0
+    },
+    {
+      "member": "Hillary Scholten",
+      "before": {
+        "rank": 336,
+        "score": 0.415570904168,
+        "tier": 0
+      },
+      "rank": 335,
+      "tier": 0
+    },
+    {
+      "member": "Jahana Hayes",
+      "before": {
+        "rank": 424,
+        "score": 0.39596150053400003,
+        "tier": 0
+      },
+      "rank": 422,
+      "tier": 0
+    },
+    {
+      "member": "Jake Ellzey",
+      "before": {
+        "rank": 335,
+        "score": 0.41579050629200004,
+        "tier": 0
+      },
+      "rank": 333,
+      "tier": 0
+    },
+    {
+      "member": "James Comer",
+      "before": {
+        "rank": 267,
+        "score": 0.43154601915,
+        "tier": 0
+      },
+      "rank": 266,
+      "tier": 0
+    },
+    {
+      "member": "Janice Schakowsky",
+      "before": {
+        "rank": 508,
+        "score": 0.370812691724,
+        "tier": 0
+      },
+      "rank": 509,
+      "tier": 0
+    },
+    {
+      "member": "Jared Moskowitz",
+      "before": {
+        "rank": 362,
+        "score": 0.40888130264000005,
+        "tier": 0
+      },
+      "rank": 364,
+      "tier": 0
+    },
+    {
+      "member": "Jason Crow",
+      "before": {
+        "rank": 297,
+        "score": 0.42622121485000003,
+        "tier": 0
+      },
+      "rank": 295,
+      "tier": 0
+    },
+    {
+      "member": "Jeff Crank",
+      "before": {
+        "rank": 310,
+        "score": 0.423998258424,
+        "tier": 0
+      },
+      "rank": 309,
+      "tier": 0
+    },
+    {
+      "member": "Jefferson Shreve",
+      "before": {
+        "rank": 242,
+        "score": 0.43654661170200004,
+        "tier": 0
+      },
+      "rank": 244,
+      "tier": 0
+    },
+    {
+      "member": "Jennifer Kiggans",
+      "before": {
+        "rank": 256,
+        "score": 0.434733122684,
+        "tier": 0
+      },
+      "rank": 255,
+      "tier": 0
+    },
+    {
+      "member": "Jes\u00fas Garc\u00eda",
+      "before": {
+        "rank": 308,
+        "score": 0.424377346218,
+        "tier": 0
+      },
+      "rank": 306,
+      "tier": 0
+    },
+    {
+      "member": "Jodey Arrington",
+      "before": {
+        "rank": 277,
+        "score": 0.43004350482000003,
+        "tier": 0
+      },
+      "rank": 276,
+      "tier": 0
+    },
+    {
+      "member": "Joe Wilson",
+      "before": {
+        "rank": 328,
+        "score": 0.41808865000000006,
+        "tier": 0
+      },
+      "rank": 327,
+      "tier": 0
+    },
+    {
+      "member": "John Carter",
+      "before": {
+        "rank": 444,
+        "score": 0.39270603833600004,
+        "tier": 0
+      },
+      "rank": 443,
+      "tier": 0
+    },
+    {
+      "member": "John James",
+      "before": {
+        "rank": 268,
+        "score": 0.431497191104,
+        "tier": 0
+      },
+      "rank": 267,
+      "tier": 0
+    },
+    {
+      "member": "John Larson",
+      "before": {
+        "rank": 300,
+        "score": 0.42530207840400003,
+        "tier": 0
+      },
+      "rank": 299,
+      "tier": 0
+    },
+    {
+      "member": "Josh Brecheen",
+      "before": {
+        "rank": 338,
+        "score": 0.41446827168,
+        "tier": 0
+      },
+      "rank": 337,
+      "tier": 0
+    },
+    {
+      "member": "Josh Riley",
+      "before": {
+        "rank": 276,
+        "score": 0.43006895657599997,
+        "tier": 0
+      },
+      "rank": 274,
+      "tier": 0
+    },
+    {
+      "member": "Judy Chu",
+      "before": {
+        "rank": 319,
+        "score": 0.42073008428,
+        "tier": 0
+      },
+      "rank": 317,
+      "tier": 0
+    },
+    {
+      "member": "Julia Letlow",
+      "before": {
+        "rank": 133,
+        "score": 0.46384947481,
+        "tier": 0
+      },
+      "rank": 134,
+      "tier": 0
+    },
+    {
+      "member": "Julie Fedorchak",
+      "before": {
+        "rank": 289,
+        "score": 0.426959170464,
+        "tier": 0
+      },
+      "rank": 287,
+      "tier": 0
+    },
+    {
+      "member": "Kevin Hern",
+      "before": {
+        "rank": 341,
+        "score": 0.41410421976000006,
+        "tier": 0
+      },
+      "rank": 340,
+      "tier": 0
+    },
+    {
+      "member": "Kevin Kiley",
+      "before": {
+        "rank": 266,
+        "score": 0.43164934656200005,
+        "tier": 0
+      },
+      "rank": 265,
+      "tier": 0
+    },
+    {
+      "member": "Laura Friedman",
+      "before": {
+        "rank": 201,
+        "score": 0.44599569768,
+        "tier": 0
+      },
+      "rank": 202,
+      "tier": 0
+    },
+    {
+      "member": "Laura Gillen",
+      "before": {
+        "rank": 312,
+        "score": 0.42245201373200003,
+        "tier": 0
+      },
+      "rank": 311,
+      "tier": 0
+    },
+    {
+      "member": "Laurel Lee",
+      "before": {
+        "rank": 263,
+        "score": 0.43333588455000005,
+        "tier": 0
+      },
+      "rank": 262,
+      "tier": 0
+    },
+    {
+      "member": "Lloyd Doggett",
+      "before": {
+        "rank": 274,
+        "score": 0.43041682523,
+        "tier": 0
+      },
+      "rank": 273,
+      "tier": 0
+    },
+    {
+      "member": "Lloyd Smucker",
+      "before": {
+        "rank": 285,
+        "score": 0.42879372442200003,
+        "tier": 0
+      },
+      "rank": 284,
+      "tier": 0
+    },
+    {
+      "member": "Lois Frankel",
+      "before": {
+        "rank": 364,
+        "score": 0.408541613844,
+        "tier": 0
+      },
+      "rank": 367,
+      "tier": 0
+    },
+    {
+      "member": "Lori Trahan",
+      "before": {
+        "rank": 257,
+        "score": 0.43465975774199994,
+        "tier": 0
+      },
+      "rank": 256,
+      "tier": 0
+    },
+    {
+      "member": "Madeleine Dean",
+      "before": {
+        "rank": 360,
+        "score": 0.409161006526,
+        "tier": 0
+      },
+      "rank": 362,
+      "tier": 0
+    },
+    {
+      "member": "Marcy Kaptur",
+      "before": {
+        "rank": 281,
+        "score": 0.429557025724,
+        "tier": 0
+      },
+      "rank": 279,
+      "tier": 0
+    },
+    {
+      "member": "Marie Gluesenkamp Perez",
+      "before": {
+        "rank": 315,
+        "score": 0.422338854744,
+        "tier": 0
+      },
+      "rank": 314,
+      "tier": 0
+    },
+    {
+      "member": "Marilyn Strickland",
+      "before": {
+        "rank": 380,
+        "score": 0.40455045000000006,
+        "tier": 0
+      },
+      "rank": 348,
+      "tier": 0
+    },
+    {
+      "member": "Mark DeSaulnier",
+      "before": {
+        "rank": 422,
+        "score": 0.39621432524,
+        "tier": 0
+      },
+      "rank": 423,
+      "tier": 0
+    },
+    {
+      "member": "Mark Harris",
+      "before": {
+        "rank": 278,
+        "score": 0.429990529824,
+        "tier": 0
+      },
+      "rank": 277,
+      "tier": 0
+    },
+    {
+      "member": "Matt Van Epps",
+      "before": {
+        "rank": 284,
+        "score": 0.428989885922,
+        "tier": 0
+      },
+      "rank": 281,
+      "tier": 0
+    },
+    {
+      "member": "Max Miller",
+      "before": {
+        "rank": 305,
+        "score": 0.424876064314,
+        "tier": 0
+      },
+      "rank": 301,
+      "tier": 0
+    },
+    {
+      "member": "Michael Baumgartner",
+      "before": {
+        "rank": 306,
+        "score": 0.424869857776,
+        "tier": 0
+      },
+      "rank": 305,
+      "tier": 0
+    },
+    {
+      "member": "Michael Guest",
+      "before": {
+        "rank": 299,
+        "score": 0.4253263875,
+        "tier": 0
+      },
+      "rank": 298,
+      "tier": 0
+    },
+    {
+      "member": "Michael Rulli",
+      "before": {
+        "rank": 400,
+        "score": 0.401657233752,
+        "tier": 0
+      },
+      "rank": 399,
+      "tier": 0
+    },
+    {
+      "member": "Mike Kelly",
+      "before": {
+        "rank": 294,
+        "score": 0.42628605697599997,
+        "tier": 0
+      },
+      "rank": 292,
+      "tier": 0
+    },
+    {
+      "member": "Mike Quigley",
+      "before": {
+        "rank": 373,
+        "score": 0.407007008992,
+        "tier": 0
+      },
+      "rank": 374,
+      "tier": 0
+    },
+    {
+      "member": "Monica De La Cruz",
+      "before": {
+        "rank": 265,
+        "score": 0.433101616384,
+        "tier": 0
+      },
+      "rank": 263,
+      "tier": 0
+    },
+    {
+      "member": "Morgan Luttrell",
+      "before": {
+        "rank": 272,
+        "score": 0.43099619857,
+        "tier": 0
+      },
+      "rank": 271,
+      "tier": 0
+    },
+    {
+      "member": "Neal Dunn",
+      "before": {
+        "rank": 365,
+        "score": 0.4085182971,
+        "tier": 0
+      },
+      "rank": 368,
+      "tier": 0
+    },
+    {
+      "member": "Nellie Pou",
+      "before": {
+        "rank": 354,
+        "score": 0.41008396194400004,
+        "tier": 0
+      },
+      "rank": 355,
+      "tier": 0
+    },
+    {
+      "member": "Nicholas Begich",
+      "before": {
+        "rank": 183,
+        "score": 0.44915015835600003,
+        "tier": 0
+      },
+      "rank": 185,
+      "tier": 0
+    },
+    {
+      "member": "Nydia Vel\u00e1zquez",
+      "before": {
+        "rank": 352,
+        "score": 0.410735988272,
+        "tier": 0
+      },
+      "rank": 353,
+      "tier": 0
+    },
+    {
+      "member": "Patrick Ryan",
+      "before": {
+        "rank": 348,
+        "score": 0.4117113,
+        "tier": 0
+      },
+      "rank": 349,
+      "tier": 0
+    },
+    {
+      "member": "Pete Stauber",
+      "before": {
+        "rank": 134,
+        "score": 0.463645812834,
+        "tier": 0
+      },
+      "rank": 133,
+      "tier": 0
+    },
+    {
+      "member": "Raja Krishnamoorthi",
+      "before": {
+        "rank": 378,
+        "score": 0.40511332703999997,
+        "tier": 0
+      },
+      "rank": 379,
+      "tier": 0
+    },
+    {
+      "member": "Richard Hudson",
+      "before": {
+        "rank": 333,
+        "score": 0.416851904656,
+        "tier": 0
+      },
+      "rank": 332,
+      "tier": 0
+    },
+    {
+      "member": "Riley Moore",
+      "before": {
+        "rank": 369,
+        "score": 0.40766490356400004,
+        "tier": 0
+      },
+      "rank": 363,
+      "tier": 0
+    },
+    {
+      "member": "Robert Onder",
+      "before": {
+        "rank": 317,
+        "score": 0.422086323204,
+        "tier": 0
+      },
+      "rank": 316,
+      "tier": 0
+    },
+    {
+      "member": "Ron Estes",
+      "before": {
+        "rank": 316,
+        "score": 0.422191116792,
+        "tier": 0
+      },
+      "rank": 315,
+      "tier": 0
+    },
+    {
+      "member": "Rosa DeLauro",
+      "before": {
+        "rank": 501,
+        "score": 0.374794359136,
+        "tier": 0
+      },
+      "rank": 502,
+      "tier": 0
+    },
+    {
+      "member": "Sam Liccardo",
+      "before": {
+        "rank": 193,
+        "score": 0.44711024852,
+        "tier": 0
+      },
+      "rank": 190,
+      "tier": 0
+    },
+    {
+      "member": "Scott DesJarlais",
+      "before": {
+        "rank": 342,
+        "score": 0.41368888890000005,
+        "tier": 0
+      },
+      "rank": 341,
+      "tier": 0
+    },
+    {
+      "member": "Scott Franklin",
+      "before": {
+        "rank": 399,
+        "score": 0.40176276940800004,
+        "tier": 0
+      },
+      "rank": 400,
+      "tier": 0
+    },
+    {
+      "member": "Scott Perry",
+      "before": {
+        "rank": 371,
+        "score": 0.4070441631,
+        "tier": 0
+      },
+      "rank": 373,
+      "tier": 0
+    },
+    {
+      "member": "Sean Casten",
+      "before": {
+        "rank": 290,
+        "score": 0.42683782187800007,
+        "tier": 0
+      },
+      "rank": 289,
+      "tier": 0
+    },
+    {
+      "member": "Seth Moulton",
+      "before": {
+        "rank": 502,
+        "score": 0.37423993974400005,
+        "tier": 0
+      },
+      "rank": 503,
+      "tier": 0
+    },
+    {
+      "member": "Shomari Figures",
+      "before": {
+        "rank": 311,
+        "score": 0.42285388953600006,
+        "tier": 0
+      },
+      "rank": 310,
+      "tier": 0
+    },
+    {
+      "member": "Shri Thanedar",
+      "before": {
+        "rank": 374,
+        "score": 0.406485080064,
+        "tier": 0
+      },
+      "rank": 375,
+      "tier": 0
+    },
+    {
+      "member": "Stephanie Bice",
+      "before": {
+        "rank": 301,
+        "score": 0.425197045152,
+        "tier": 0
+      },
+      "rank": 300,
+      "tier": 0
+    },
+    {
+      "member": "Sylvia Garcia",
+      "before": {
+        "rank": 260,
+        "score": 0.43377445501600004,
+        "tier": 0
+      },
+      "rank": 258,
+      "tier": 0
+    },
+    {
+      "member": "Terri Sewell",
+      "before": {
+        "rank": 443,
+        "score": 0.39286283920200005,
+        "tier": 0
+      },
+      "rank": 444,
+      "tier": 0
+    },
+    {
+      "member": "Thomas Suozzi",
+      "before": {
+        "rank": 262,
+        "score": 0.43340460327999997,
+        "tier": 0
+      },
+      "rank": 261,
+      "tier": 0
+    },
+    {
+      "member": "Thomas Tiffany",
+      "before": {
+        "rank": 509,
+        "score": 0.370569114824,
+        "tier": 0
+      },
+      "rank": 508,
+      "tier": 0
+    },
+    {
+      "member": "Tim Walberg",
+      "before": {
+        "rank": 287,
+        "score": 0.42787727068799997,
+        "tier": 0
+      },
+      "rank": 285,
+      "tier": 0
+    },
+    {
+      "member": "Timothy Kennedy",
+      "before": {
+        "rank": 358,
+        "score": 0.409731584768,
+        "tier": 0
+      },
+      "rank": 359,
+      "tier": 0
+    },
+    {
+      "member": "Tom Barrett",
+      "before": {
+        "rank": 250,
+        "score": 0.435733978016,
+        "tier": 0
+      },
+      "rank": 249,
+      "tier": 0
+    },
+    {
+      "member": "Tony Wied",
+      "before": {
+        "rank": 249,
+        "score": 0.43590723696,
+        "tier": 0
+      },
+      "rank": 342,
+      "tier": 0
+    },
+    {
+      "member": "Tracey Mann",
+      "before": {
+        "rank": 255,
+        "score": 0.4348643373,
+        "tier": 0
+      },
+      "rank": 253,
+      "tier": 0
+    },
+    {
+      "member": "Troy Balderson",
+      "before": {
+        "rank": 293,
+        "score": 0.42633434186,
+        "tier": 0
+      },
+      "rank": 290,
+      "tier": 0
+    },
+    {
+      "member": "Veronica Escobar",
+      "before": {
+        "rank": 182,
+        "score": 0.449278776848,
+        "tier": 0
+      },
+      "rank": 183,
+      "tier": 0
+    },
+    {
+      "member": "Victoria Spartz",
+      "before": {
+        "rank": 271,
+        "score": 0.431215360872,
+        "tier": 0
+      },
+      "rank": 269,
+      "tier": 0
+    },
+    {
+      "member": "Wesley Hunt",
+      "before": {
+        "rank": 253,
+        "score": 0.43495594205000004,
+        "tier": 0
+      },
+      "rank": 251,
+      "tier": 0
+    },
+    {
+      "member": "William Keating",
+      "before": {
+        "rank": 355,
+        "score": 0.40997672870400004,
+        "tier": 0
+      },
+      "rank": 357,
+      "tier": 0
+    }
+  ],
+  "reporting_rank_movers": [],
+  "reporting_score_exact": true,
+  "reporting_percentiles_exact": true,
+  "conduct_details_exact": true,
+  "diagnostics": {
+    "Young Kim": {
+      "rank": 11,
+      "tier": 1,
+      "natural_rank": 11,
+      "natural_tier": 1
+    },
+    "Steve Daines": {
+      "rank": 29,
+      "tier": 2,
+      "natural_rank": 30,
+      "natural_tier": 2
+    },
+    "Andy Barr": {
+      "rank": 38,
+      "tier": 3,
+      "natural_rank": 15,
+      "natural_tier": 2
+    },
+    "Jared Golden": {
+      "rank": 37,
+      "tier": 2,
+      "natural_rank": 38,
+      "natural_tier": 3
+    },
+    "Henry Cuellar": {
+      "rank": 47,
+      "tier": 3,
+      "natural_rank": 47,
+      "natural_tier": 3
+    }
+  },
+  "hashes": {
+    "dashboard_data.json": "84f99935bcd878d10b38b964223d10bf1cf2a513dea73c5a245750b37d593e25",
+    "data/engine/per_area_grade.json": "546f3f12634ace9ab20e9c0d0ab833e451296b05c3910758937b7c3749d17d3d",
+    "data/engine/primacy_factors.json": "16add0c7ad9e6df7f0c173de9c8b6a55e2ed5af5670e05e72d71281f2bb0d0c0",
+    "data/lobbying/industry_tiers.json": "011be2f6854182e6a7a93dd9c686b79c30caecca36733466cecefef78b23c2fb",
+    "member_desk_bundle.json": "3d94b895fd05c8226c30d72b88a730884a13fb218de030c0373d9d43b20be89f",
+    "ranks_python.json": "dd7bc3fef3dce97e33fd615b00e421562cd2eb3a5f51cc9115296678f644aa75"
+  },
+  "canonical_matches_cumulative_candidate": true,
+  "factor_matches_candidate": true,
+  "grade_members_match_candidate": true,
+  "all_industry_fields_match_candidate": true,
+  "published_memberships_match_candidate": true,
+  "cu_top50_exact": true,
+  "cu_tier_movers": 0,
+  "status": "PASS"
+}

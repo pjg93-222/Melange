@@ -1,0 +1,45 @@
+  build_primacy_surfaces.py --engine-inputs-only OK 125.5s  primacy engine inputs (+ affirmative evidence schema seed): complete | official rank autho
+  build_rank_honors.py --publish OK  14.0s  }
+  audit_rank_honors.py         OK   2.2s  }
+  sync_stance_g.py             OK 448.1s  SAVED.
+  honors_workbook.py           OK  26.5s  {"schema": "honors-workbook-v1", "status": "PASS", "generation_id": "10e2495118893be8fbab0
+  build_electoral_plays.py     OK  16.1s  Warnock now: none | 4 contest / 114 defend / 415 none
+  per_topic_flip.py            OK  15.2s  wrote per_topic_alloc.json  (mode: baseline, 19 sub-categories)
+  per_topic_coalition.py       OK  50.0s  wrote per_topic_coalition.json (seed 7, MC 20, 19 sub-categories)
+  lt_priming.py                OK   1.7s     Nikema Williams        [Lean Persuadable] 0.62 0.57  $96,385   = $96,385  + recruit —
+  budget_frontier.py           OK 108.2s  wrote budget_frontier.json (mode coalition, leverage ON, 18 topics)
+  budget_frontier.py --electoral OK 168.6s  wrote budget_frontier_electoral.json (mode ELECTORAL, leverage ON, 18 topics)
+  optimize.py                  OK  38.3s  wrote optimize_result.json (frontier + allocation + conversions)
+  build_im_allocation.py       OK   0.6s       Vicente Gonzalez         $387,000
+  salience_shock.py --advise   OK  21.7s  wrote salience_advisory.json
+  personal_texture_layer.py --refresh-local OK 186.9s  PERSONAL TEXTURE: 480 members | 4727 retained details | 8646 candidates | 5894 classified 
+  communication_style.py       OK   0.8s  communication_style.json: 533 members, 268 with measured facets; missing evidence explicit
+  validate_communication_style.py  OK   0.2s  validated locked communication_style.json: 533 members | schema communication-style-v1 | p
+  b5_external_gold_validate.py  OK   1.9s  external gold PASS: E 509 members | insiders r=+0.529 | academics r=+0.484
+  b5_gold_multitrait_validate.py  OK  45.9s    N ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED n=454 insider=+0.374 academic=+0.123 weights={'
+  b5_profile_basis.py          OK   0.6s  profile_basis_v2.json: 533 guarded profiles
+  validate_guarded_profile_artifacts.py  OK   0.3s  validated guarded profile artifacts: audio 0 verified members | all broad gold traits acti
+  build_member_longform_turn_features.py --if-current OK   1.3s  PASS_MEASUREMENT_ONLY: current source and producer hashes verified; existing measurement r
+  build_member_narrative_ledger.py  OK   4.3s  basis_sha256=45e88149a06d0bc74797e98de42c8f8649423ef7f49f53e62280cbfabb2beb6d
+  regenerate_member_profiles.py --activate OK   5.4s  {"activated": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\member_narratives_v2.
+  build_dashboard_bundle.py    OK  85.6s  wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\dashboard_data.json  (12206.0 KB)  n
+  make_dashboard_html.py       OK   4.1s  wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Dashboard.html (12360 KB)
+  coalition_pricing.py         OK   2.7s  wrote coalition_pricing.json (533 members)
+  contest_screen.py            OK  11.2s  contest screen: 15 rows | panel 752 members | 5511 bytes -> C:\Users\pgoff\AppData\Local\M
+  champions_v2.py              OK   3.5s  champions v2: 133 champions | 30 threats | 110 mixed | 266117 bytes -> C:\Users\pgoff\AppD
+  efficiency_layers.py         OK   0.9s  efficiency layers: 533 members | 25 lobbying adversaries | moves no rank -> C:\Users\pgoff
+  industry_tiers.py            OK   2.9s  industry tiers: canonical CU primacy + industry evidence boards | 502464 bytes -> C:\Users
+  org_mentions.py              OK 256.6s  org mentions: 495 members | 74 orgs | 572244 bytes -> C:\Users\pgoff\AppData\Local\Melange
+  refresh_cosponsor_forecast.py  OK 371.8s  cosponsor forecast refresh RAN � 6 input hash(es) differ
+  make_lobby_network_html.py   OK  21.5s  industry HTML: C:\Users\pgoff\OneDrive\Desktop\Melange Systems\lobby-screen.html (109,159 
+  make_lobby_interactions_html.py  OK   5.7s    ledger_rows=44,496 rendered_rows=29,122 dropped_unsectored_rows=15,374 organizations=259
+  build_staffer_network_section.py --max-bytes 6000000 OK  29.8s  move_labels cells=5912 map_entries=467 unresolved=31 key_spelled=215 ledger=1268 office_ke
+  build_staffer_groups_section.py --part both --max-bytes 5000000 OK  51.4s  seconds=49.7
+  make_staffer_network_html.py --template make_staffer_network_html_01.tpl --sdata provenance OK   1.1s  clients: clients=41203 contract_filers=11021 ties=132738 dropped=0 bytes=3892182
+  bill_lobbying_sidecar.py     OK   9.4s  bill lobbying sidecar: 2961 bills | 6013408 bytes -> C:\Users\pgoff\OneDrive\Desktop\Melan
+  make_member_desk.py          OK 226.2s  wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\cu-member-desk.html (18368 KB)
+  make_combined.py             OK  19.1s  sizes: Moneyball.html 106559803 B, Moneyball_Email.html 94445168 B (staffer surface merged
+  audit_rank_honors.py --surfaces OK  10.8s  }
+  sync_live_dashboard_alias.py  OK  23.6s  {"schema": "live-dashboard-alias-v1", "status": "PASS", "checked_at": "2026-09-20T20:01:45
+  make_email_package.py        OK 519.7s    all-in-one: Moneyball_Email.html (94445168 B) zipped as Moneyball.html
+  audit_source_to_dashboard.py  OK  13.5s  }

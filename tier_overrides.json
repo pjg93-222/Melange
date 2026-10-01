@@ -1,0 +1,54 @@
+{
+ "_README": "2026-07-29 (Melange Systems, primacy integration; FACTOR-ONLY as of the same-day user directive). SIX deliberate things here, all load-bearing. (1) Tier sizes are owned by fec/tier_util.py and are 13 / 24 / 48, with cumulative boundaries 13 / 37 / 85. (2) placements is empty: no member has a fixed tier or display slot. The 2026-07-29 Sherman/Huizenga/Kim/Cortez Masto/Scott adjudication is consumed by fec/engine/primacy_factors.py from primacy_adjudication_ledger.ndjson and therefore changes the factor and score math rather than display order. (3) All older standing pins remain retired: Barr T1 #1 and the prior Young Kim/Crapo/Fitzgerald/Moore/Waters/Vargas/Velazquez tier pins. (4) The old 'demotions' array remains removed; the conduct ladder derives ceilings from grievance_ledger.ndjson and delivery_ledger.ndjson - but see (6): under factor-only the ladder is currently INERT. (5) Allocation engines anchor general priority at T1=1, T2=2/3, T3=1/3, untiered=0 and add a small fixed-importance signed orientation adjustment that excludes the current topic; issue engagement, issue movability, network influence, money, and receptivity remain separate inputs. (6) BOARD BASIS CHANGED 2026-07-29 by user directive: the score is now the shrunk beneficiary-primacy factor ALONE - the Legislative percentile no longer multiplies it, because 30% of that percentile is a legislative-efficiency term that could not be reconstructed from its documented inputs and that ranked 113 members holding no success-rate data above members holding real data. Two consequences were accepted with the directive and are NOT bugs: the conduct ladder no longer binds anyone (no member scores high enough for a ceiling to bite, so a grievance cure earns nothing back), and the five-member adjudication in (2) no longer seats Huizenga (slot 18) or Kim (slot 14) inside Tier 1. Revert with PRIMACY_BOARD=legxfactor, which reproduces the old product exactly. (7) EVIDENCE FLOOR added same day, user-ratified as 'purity ranks, evidence qualifies': a member must hold PRIMACY_MIN_CUPRIM (production 0.75) of cu_primary role-credit to OCCUPY a tier seat. Ranking among the qualified stays pure factor - this is an eligibility gate, NOT a volume term in the score; volume scoring was considered and rejected. At adoption it removed 14 thin-evidence members from Tier 2/3 (Magaziner 0.50, Maloy 0.50, Bentz 0.25 ...), left Tier 1 untouched, and seated the next-highest qualified factors (McClain, Smith, Foster ...). Factor-mode only: PRIMACY_BOARD=legxfactor restores the entire previous board, floor included; PRIMACY_MIN_CUPRIM=0 disables just the gate. Explicit placements are exempt - a pinned seat beats the gate. (8) UNCERTAINTY PENALTY added same day, user-ratified as 'certainty outranks estimation': the board ranks on factor_ranked = factor_shrunk - K*(1-lambda)*|factor_raw - baseline| with K=0.25 (PRIMACY_UNCERT_K in fec/engine/primacy_factors.py; 0 restores pure factor_shrunk ranking). A full-evidence member (lambda=1) is mathematically untouched; a thin-sample estimate is discounted by the unverified share of its distance from baseline, so it cannot outrank a fully-measured value at a tier boundary. This seated Young Kim in Tier 1 (slot 13) on her measured factor with NO adjudication re-size, moved Rounds to 15 (his raw 0.6043 on 11.75 credits re-takes a seat organically as evidence accumulates), and left Huizenga at 16 (structural bank/crypto ballast, not noise). K=0.25 was ratified over 0.5-1.0 explicitly because higher K evicts Juan Vargas, and Paul's binding constraint is 'Vargas needs to be in' - thin in volume (6.25 credits), not in CU purity (4.0 cu_primary).",
+ "weights": {
+  "legislation": 0.84,
+  "press": 0.16,
+  "_DO_NOT_SET_THESE_TO_1_0_AND_0_0": "READ BEFORE EDITING. These two numbers are VESTIGIAL and the board does not read them. The primacy tier policy is expressed entirely in CODE - legislative_press_tiers() scores on the beneficiary-primacy factor alone (2026-07-29 factor-only directive) and never calls load_tier_weights(); it did not call it under the previous Leg% x factor board either. These two numbers must stay as they are. tier_util.load_tier_weights() RAISES on any non-positive weight ('tier weights must be positive and sum to 1.0'), and fec/tests/test_audit_completion_20260716.py:96 asserts against them. Writing 1.00/0.00 here breaks the load and the test suite for no benefit.",
+  "note": "Paul 2026-07-19 chose 0.84 Legislation / 0.16 Press after a 95/5 probe: at 95/5 Fitzpatrick reached Tier 1 but Tim Scott fell to slot 26, so the pin-removal condition failed. A sweep of 0.50-0.99 found only 0.83/0.84/0.85 keep BOTH Fitzpatrick and Scott in Tier 1; 0.84/0.16 chosen. Supersedes the earlier ratified 80/20, itself preferred after testing 60/40 and 70/30."
+ },
+ "placements": [],
+ "_conduct_mirror": {
+  "_note": "Informational mirror of the two ledgers as of 2026-07-29. NOT read by any code - the ladder reads the ledgers directly. Kept here so a reader of this file is not misled into thinking the board is unconstrained.",
+  "source_of_truth": [
+   "grievance_ledger.ndjson",
+   "delivery_ledger.ndjson"
+  ],
+  "mechanism": "net = sum(severity * leverage_mult) - sum(act_weight * instrument_mult); net>=3 caps at Tier 2, >=6 at Tier 3, >=9 untiered. A ceiling never promotes.",
+  "open": [
+   {
+    "member": "Andy Barr",
+    "grievance_events": [
+     "MS-2026-002",
+     "MS-2026-003"
+    ],
+    "gross": 7.25,
+    "delivery_events": [],
+    "delivered": 0.0,
+    "net": 7.25,
+    "ceiling": 3,
+    "slot": "17 -> 43",
+    "cure": "H.R.4167 (or any of the four excluded asks) reported out of the Financial Institutions subcommittee"
+   },
+   {
+    "member": "French Hill",
+    "grievance_events": [
+     "MS-2026-001",
+     "MS-2026-004"
+    ],
+    "gross": 8.0,
+    "delivery_events": [
+     "DL-HR975-H001072",
+     "DL-HR4437-H001072",
+     "DL-HR4544-H001072",
+     "DL-HR3390-H001072",
+     "DL-HR6644-H001072"
+    ],
+    "delivered": 3.0,
+    "net": 5.0,
+    "ceiling": 2,
+    "slot": "73 -> 73 (unmoved; his own score already put him in Tier 3)",
+    "cure": "any of H.R.4167 / H.R.7647 / H.R.507 / H.R.1791 attached to or reported through an FSC vehicle under his control"
+   }
+  ]
+ }
+}

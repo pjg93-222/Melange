@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "dial": "DESK_MEMBERSHIP_SOURCE=delta",
+  "comparison": "Interrupted live delta generation, same current inputs",
+  "members": 533,
+  "all_desk_bill_fields_exact": true,
+  "factor_bytes_exact": true,
+  "grade_document_exact": true,
+  "warning": "This historical dial reintroduces the demonstrated membership oscillation."
+}

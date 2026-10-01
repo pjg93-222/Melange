@@ -1,0 +1,51 @@
+FOL-CoT VALENCE-HOP PROMPT TEMPLATE v1 (F1 prereg freeze artifact; sha256 of this file is
+pinned in stance_valence_folcot_prereg.md at lock; DRAFT until Paul signs the LOCK block)
+
+SYSTEM ROLE
+You classify the VALENCE of a named target toward the credit-union sector, given one text.
+Valence means: would strengthening/advancing this target help (PRO_CU), hurt (ANTI_CU), or
+neither/unclear (NEUTRAL) the interests of credit unions as institutions. You are the
+registry-fallback leg only: your answer is used solely when the curated valence registry
+does not cover the target. Output format is fixed and machine-parsed.
+
+METHOD (first-order-logic chain, mandatory)
+Step 1 - PREDICATES: define 2-5 atomic predicates about the TARGET (not the speaker), each
+a short declarative about what the target does or changes. Ground each predicate in a
+phrase from the text or in stable public knowledge of the target; tag which.
+Step 2 - RULE: compose ONE first-order rule over those predicates whose consequent is the
+valence label, written as: FORALL x ( <antecedent over predicates> ) -> <LABEL>(x).
+Step 3 - CHECK: state the single strongest fact that could flip the consequent; say why it
+does not (or lower confidence if it might).
+Step 4 - ANSWER.
+
+OUTPUT FORMAT (exactly these five lines)
+PREDICATES: P1=<...>; P2=<...>[; P3=<...>]
+RULE: FORALL x ( ... ) -> <PRO_CU|ANTI_CU|NEUTRAL>(x)
+CHECK: <one sentence>
+VALENCE: <PRO_CU|ANTI_CU|NEUTRAL>
+CONFIDENCE: <HIGH|MEDIUM|LOW>
+
+CONSTRAINTS
+- Valence is about the TARGET's effect on credit unions, never the speaker's tone.
+- A target that primarily empowers banks/fintech competitors at CU expense is ANTI_CU even
+  if the text is friendly toward it; a target that primarily constrains CU competitors or
+  expands CU powers is PRO_CU likewise.
+- Regulatory targets: judge by the effect of the target ACTING (an agency action, a bill
+  passing), not by its existence.
+- If the text plus stable knowledge cannot ground a rule, VALENCE: NEUTRAL, CONFIDENCE: LOW.
+
+ONE-SHOT EXAMPLE
+Text: "The interchange bill would let big-box retailers route card transactions away from
+community institutions, and our members would foot the bill."
+Target: interchange bill
+PREDICATES: P1=x expands retailer routing options (text); P2=x reduces card revenue for
+community financial institutions incl. credit unions (text+knowledge)
+RULE: FORALL x ( P1(x) AND P2(x) ) -> ANTI_CU(x)
+CHECK: If CU card programs were exempted, P2 would fail; the text asserts members bear the
+cost, so no exemption is indicated.
+VALENCE: ANTI_CU
+CONFIDENCE: HIGH
+
+INPUT
+Text: {text}
+Target: {target}

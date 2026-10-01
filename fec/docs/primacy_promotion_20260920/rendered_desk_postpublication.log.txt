@@ -1,0 +1,36 @@
+[rendered desk: live artifacts]
+  OK   audit runs clean against the shipped artifacts
+  OK   A1 passes on the shipped artifacts
+  OK   A2 passes on the shipped artifacts
+  OK   A3 passes on the shipped artifacts
+  OK   A4 passes on the shipped artifacts
+  OK   A5b passes on the shipped artifacts
+  OK   A5c passes on the shipped artifacts
+  OK   A5d passes on the shipped artifacts
+  OK   A6 passes on the shipped artifacts
+  OK   expectations were derived from the bundle, not from the page
+
+[rendered desk: negative controls]
+  OK   C1 dropping rebuildBillRepository fails A2
+  OK   C1 A2 failure names both sources
+  OK   C1 also fails A5b naming the field that stopped being rebuilt
+  OK   C1 also fails A4 on the observed call list
+  OK   C2 dropping rebuildStaffIndex fails A3
+  OK   C2 A3 failure names both sources
+  OK   C2 also fails A5b naming the field that stopped being rebuilt
+  OK   C3 a new unrebuilt index over a deferred field fails A5
+  OK   C3 A5b names the deferred field that is never rebuilt
+  OK   C3 A5c names the stale binding
+  OK   C3 leaves A2 and A3 green -- the guard fired on the new index, not on collateral damage
+  OK   C6 a board that reads a deferred field fails A5d
+  OK   C6 A5d compares a non-empty board, not two blanks
+  OK   C6 leaves the index assertions green -- only the rendered markup is wrong
+  OK   C4 a bundle with no bills and no staffdir fails the contract
+  OK   C4 no assertion is reported as passing on the degenerate bundle
+  OK   C5a an unsplit artifact makes A1 skip, not pass
+  OK   C5a the skip carries a reason
+  OK   C5a nothing downstream of A1 reports a pass
+  OK   C5b an artifact that does not actually defer makes A1 skip, not pass
+  OK   C5b the skip names the structures that were already populated
+
+rendered desk: 31 passed, 0 failed

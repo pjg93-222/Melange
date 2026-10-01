@@ -1,0 +1,378 @@
+{
+  "publication": {
+    "method": "diagnostic_v1",
+    "as_of": "2026-09-20",
+    "board_members": 533,
+    "published_surfaces_match": true,
+    "approved_rank_matches": 195,
+    "rank_movers": 511,
+    "tier_movers": 29,
+    "official_rank_movers": [
+      {
+        "member": "Bill Foster",
+        "before": 14,
+        "after": 12,
+        "score_before": 0.591191431160487,
+        "score_after": 0.5942758780058136,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 0.030844468000000014,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Barry Loudermilk",
+        "before": 12,
+        "after": 13,
+        "score_before": 0.592988519467027,
+        "score_after": 0.5929395477475726,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -0.0004897170000000006,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Cynthia Lummis",
+        "before": 13,
+        "after": 14,
+        "score_before": 0.5927900982488995,
+        "score_after": 0.5914230160675725,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -0.013670822,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Mike Flood",
+        "before": 27,
+        "after": 26,
+        "score_before": 0.5560591057749316,
+        "score_after": 0.5563877081474965,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 0.0032860239999999985,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "John Boozman",
+        "before": 26,
+        "after": 27,
+        "score_before": 0.5563253965268847,
+        "score_after": 0.5563091538091062,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -0.00016242800000000612,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "John Kennedy",
+        "before": 34,
+        "after": 33,
+        "score_before": 0.541671745670744,
+        "score_after": 0.5419365112609241,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 0.0026476559999999982,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Joyce Beatty",
+        "before": 33,
+        "after": 34,
+        "score_before": 0.5416953027011043,
+        "score_after": 0.5416876212251527,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -7.681499999999397e-05,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Brad Sherman",
+        "before": 54,
+        "after": 53,
+        "score_before": 0.511662035081103,
+        "score_after": 0.5129896224590702,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 0.013275872999999994,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "John Barrasso",
+        "before": 53,
+        "after": 54,
+        "score_before": 0.5117375584025269,
+        "score_after": 0.5117344769227651,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -3.081500000000001e-05,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Brad Finstad",
+        "before": 76,
+        "after": 75,
+        "score_before": 0.48126713956384404,
+        "score_after": 0.4812671116616069,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -2.790000000000019e-07,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Elizabeth Warren",
+        "before": 75,
+        "after": 76,
+        "score_before": 0.48145803230605616,
+        "score_after": 0.48091200649489957,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -0.005460258000000051,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Marlin Stutzman",
+        "before": 156,
+        "after": 153,
+        "score_before": 0.38824771860284657,
+        "score_after": 0.3909748834501933,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 0.027271647999999996,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Guy Reschenthaler",
+        "before": 153,
+        "after": 154,
+        "score_before": 0.3904410579363745,
+        "score_after": 0.39043959028361397,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -1.4675999999999925e-05,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Madeleine Dean",
+        "before": 154,
+        "after": 155,
+        "score_before": 0.3897290053738492,
+        "score_after": 0.38972913466862563,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 1.293000000000084e-06,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Derek Schmidt",
+        "before": 155,
+        "after": 156,
+        "score_before": 0.3891567133443504,
+        "score_after": 0.38915663882417123,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -7.450000000000208e-07,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Teresa Leger Fernandez",
+        "before": 196,
+        "after": 195,
+        "score_before": 0.352901875100562,
+        "score_after": 0.3529034628389182,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 1.587699999999921e-05,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Robert Menendez",
+        "before": 197,
+        "after": 196,
+        "score_before": 0.35269550515083836,
+        "score_after": 0.3526952741018209,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -2.3099999999997255e-06,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Ron Wyden",
+        "before": 195,
+        "after": 197,
+        "score_before": 0.3550883056050965,
+        "score_after": 0.35238232676686904,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -0.027059788,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Steve Cohen",
+        "before": 259,
+        "after": 258,
+        "score_before": 0.29661718648006186,
+        "score_after": 0.29661825642317374,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 1.0699999999998905e-05,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Patty Murray",
+        "before": 260,
+        "after": 259,
+        "score_before": 0.29582459703064223,
+        "score_after": 0.2958268400518467,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": 2.2430000000000366e-05,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      },
+      {
+        "member": "Jack Reed",
+        "before": 258,
+        "after": 260,
+        "score_before": 0.29665353768238945,
+        "score_after": 0.2950283020503046,
+        "percentile_deltas": {
+          "leg": 0.0,
+          "press": -0.016252355999999996,
+          "inf": 0.0,
+          "dem": 0.0
+        }
+      }
+    ],
+    "top13": [
+      "Alex Padilla",
+      "Vicente Gonzalez",
+      "Maxine Waters",
+      "Brian Fitzpatrick",
+      "Brad Sherman",
+      "Juan Vargas",
+      "Tim Scott",
+      "William Timmons",
+      "Scott Fitzgerald",
+      "Bill Huizenga",
+      "Young Kim",
+      "Kevin Cramer",
+      "Juan Ciscomani"
+    ],
+    "diagnostics": [
+      {
+        "member": "Young Kim",
+        "old_rank": 10,
+        "rank": 11,
+        "old_tier": 1,
+        "tier": 1,
+        "approved_rank": 11,
+        "natural_rank": 11,
+        "natural_tier": 1
+      },
+      {
+        "member": "Steve Daines",
+        "old_rank": 26,
+        "rank": 29,
+        "old_tier": 2,
+        "tier": 2,
+        "approved_rank": 29,
+        "natural_rank": 30,
+        "natural_tier": 2
+      },
+      {
+        "member": "Jared Golden",
+        "old_rank": 354,
+        "rank": 37,
+        "old_tier": 0,
+        "tier": 2,
+        "approved_rank": 37,
+        "natural_rank": 38,
+        "natural_tier": 3
+      },
+      {
+        "member": "Andy Barr",
+        "old_rank": 38,
+        "rank": 38,
+        "old_tier": 3,
+        "tier": 3,
+        "approved_rank": 38,
+        "natural_rank": 15,
+        "natural_tier": 2
+      },
+      {
+        "member": "Henry Cuellar",
+        "old_rank": 229,
+        "rank": 47,
+        "old_tier": 0,
+        "tier": 3,
+        "approved_rank": 47,
+        "natural_rank": 47,
+        "natural_tier": 3
+      }
+    ],
+    "hashes": {
+      "ranks_python.json": "02ffdb612cc5958a35abe2fd1da0fbc6f8a58a3e849365c8535608eca8db68fb",
+      "data/engine/primacy_factors.json": "60f51063e301eb86ee7a94ea39b0c412195e0a2a056b1d6e34d2dd2309858e0c",
+      "data/engine/per_area_grade.json": "7a73ffd26f37a7c1589a55ed9465934c1995d413bb4e491ba78c9dcff3c65845",
+      "dashboard_data.json": "92ad881c9b634cf3e096e4b845709ae1d1e5a3739212ccf5dcf58d1c0d57b59c",
+      "member_desk_bundle.json": "ed3901e71f6ebbc1642a2d41f46ca2f9288234962720a05e4ccf00291cae370b"
+    }
+  },
+  "kernel": {
+    "passed": 252,
+    "failed": 2,
+    "log": "kernel_after_regeneration.log"
+  },
+  "full_body_audit": {
+    "passed": 555,
+    "failed": 13,
+    "log": "pipeline_after_industry_repair.log",
+    "failure_summary": [
+      "audit_full.py                !! 157.5s    FAILURES: ['pillar snapshot vintage <= 14 days (stale-basis tripwire)', 'personal-textur",
+      "FAILURES: ['pillar snapshot vintage <= 14 days (stale-basis tripwire)', 'personal-texture artifact precision/schema/provenance (no volume reward)', 'A2 repo.data_stance size_class agrees', 'A2b repo.data_stance sentinels unchanged', 'A2b repo.data_legislation sentinels unchanged', 'A2b repo.data_network sentinels unchanged', 'A2b repo.data_engine sentinels unchanged', 'A2b repo.worktrees sentinels unchanged', 'A2 repo.git size_class agrees', 'A2b repo.git sentinels unchanged', 'A2b local.lda_derived sentinels unchanged', 'A2b local.billstatus sentinels unchanged', 'A2b mirror.melange sentinels unchanged']"
+    ]
+  },
+  "limitations": [
+    "Descriptive speech retained its last-good artifact after stale local YouTube verification input receipt.",
+    "District industry regeneration skipped because its LODES input is absent."
+  ]
+}

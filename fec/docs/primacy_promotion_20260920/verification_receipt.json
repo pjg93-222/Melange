@@ -1,0 +1,159 @@
+{
+  "status": "COMMITTED_PUBLICATION_BLOCKED",
+  "implementation_commit": "fd740c4a0",
+  "kernel_summary": "KERNEL TESTS \u2014 250 passed, 3 FAILED",
+  "kernel_failures": [
+    "FAIL  test_bill_collision_guards suite clean  :: FileNotFoundError: [Errno 2] No such file or directory: 'C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\backups\\\\bill_directions.PRE-LEGFIX3.csv'",
+    "FAIL  test_per_area_board suite clean  :: FAILED (failures=1, skipped=8)",
+    "FAIL  test_make_staffer_network_html suite clean  :: unrecognised verdict"
+  ],
+  "audit_summary": "FULL-BODY AUDIT \u2014 549 passed, 19 FAILED",
+  "audit_failures": [
+    "FAIL  own-source channel sidecars preserve source row identity :: speech:311/311 identity=True values=True fresh=True; hearing:808/790 identity=False values=False fresh=False; interview:37/37 identity=True values=True fresh=False",
+    "FAIL  interview DB projection -> extract -> stance chain is receipt/hash bound :: extract_current=True stance_current=False",
+    "FAIL  transcript-appendix passages stay a negligible share of pillar-feeding gold hearings :: hearings_cu/hearing_stance_final row counts differ",
+    "FAIL  pillar snapshot vintage <= 14 days (stale-basis tripwire) :: stamped 2026-09-03T21:04:35-04:00 (16d)",
+    "FAIL  personal-texture artifact precision/schema/provenance (no volume reward) :: 480 members, 4727 details, 0 malformed, 0 local-to-narrative leaks, 0 invalid display admissions, candidates=8618 classified=5894 gate=5938",
+    "FAIL  accepted audio manifest is fully partitioned into a candidate-only review intake :: total=6911 queued=784 excluded=6127 hash=False",
+    "FAIL  press refresh feed is hash-bound and keeps official mentions out of stance/speech :: tone=291 mentions=21877 outputs=True source_errors=['current accepted intake is absent or differs from cumulative ledger']",
+    "FAIL  vote_category_lean.json is hash-bound and fresh vs bills archive :: ['incomplete vote input hash coverage', 'declared vote coverage dates differ from source rollcalls']",
+    "FAIL  primacy artifact carries the ratified uncertainty penalty :: artifact K=0.25",
+    "FAIL  champions threat boards fresh vs live crown set :: bank: Pete Sessions (S000250); champions_v2 runs before make_member_desk -- rerun chain",
+    "FAIL  cosponsor_forecast_freshness :: changed C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\raw\\billstatus119\\BILLSTATUS-119-hconres.zip; changed C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\raw\\billstatus119\\BILLSTATUS-119-hjres.zip; changed C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\raw\\billstatus119\\BILLSTATUS-119-hr.zip; changed C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\raw\\billstatus119\\BILLSTATUS-119-hres.zip; changed C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\raw\\billstatus119\\BILLSTATUS-119-s.zip (+3 more)",
+    "FAIL  A2b repo.data_legislation sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['bank_anchor_reconciliation.json sha256: manifest=a8e092489e859fc9... / disk=a03ed1a66529b8b3...']",
+    "FAIL  A2b repo.data_network sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['co_appearance.json size: manifest=325679 bytes / disk=312182 bytes']",
+    "FAIL  A2b repo.data_engine sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['per_area_grade.json size: manifest=1105448 bytes / disk=1105693 bytes']",
+    "FAIL  A2b repo.worktrees sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 2 disagree :: ['charming-chatterjee-d81c90/audits/legfix5/opus_adjudication/packets/10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59/packets.ndjson: manifest recorded it at 2759907661 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.claude\\\\worktrees\\\\charming-chatterjee-d81c90\\\\audits\\\\legfix5\\\\opus_adjudication\\\\packets\\\\10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59\\\\packets.ndjson', 'evidence-csv-fetch-streaming-8bedff/audits/legfix5/opus_adjudication/packets/10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59/packets.ndjson: manifest recorded it at 2759907661 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.claude\\\\worktrees\\\\evidence-csv-fetch-streaming-8bedff\\\\audits\\\\legfix5\\\\opus_adjudication\\\\packets\\\\10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59\\\\packets.ndjson']",
+    "FAIL  A2 repo.git size_class agrees :: manifest(2026-09-18T17:35:12.600760+00:00): size_class=massive (15266046823 bytes) / disk: size_class=huge (9151015111 bytes)",
+    "FAIL  A2b repo.git sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['codex-worktree-backups/20260901-113507/preserved-unmerged-branches.bundle: manifest recorded it at 3172264589 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.git\\\\codex-worktree-backups\\\\20260901-113507\\\\preserved-unmerged-branches.bundle']",
+    "FAIL  A2b local.billstatus sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['billstatus119/BILLSTATUS-119.receipt.json size: manifest=3912 bytes / disk=3903 bytes']",
+    "FAIL  A2b mirror.melange sentinels unchanged :: manifest(2026-09-18T17:35:12.600760+00:00): 3 sentinel(s) recorded / disk: 1 disagree :: ['objects/pack/pack-9b083bbd2d8969998b964c529280f2f294b3136f.pack: manifest recorded it at 30602415 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\GitMirrors\\\\melange-systems.git\\\\objects\\\\pack\\\\pack-9b083bbd2d8969998b964c529280f2f294b3136f.pack']"
+  ],
+  "pipeline_exit": "1",
+  "kernel_exit": "1",
+  "audit_exit": "1",
+  "diagnostic": {
+    "mode": "diagnostic_v1",
+    "grade_date": "2026-09-19",
+    "seats_exact": 533,
+    "grade_percentiles_exact": 533,
+    "rollback_bytes_exact": false,
+    "top13": [
+      "Alex Padilla",
+      "Vicente Gonzalez",
+      "Maxine Waters",
+      "Brian Fitzpatrick",
+      "Brad Sherman",
+      "Juan Vargas",
+      "Tim Scott",
+      "William Timmons",
+      "Scott Fitzgerald",
+      "Bill Huizenga",
+      "Young Kim",
+      "Kevin Cramer",
+      "Juan Ciscomani"
+    ]
+  },
+  "legacy": {
+    "mode": "legacy",
+    "grade_date": "2026-09-19",
+    "seats_exact": 533,
+    "grade_percentiles_exact": 533,
+    "rollback_bytes_exact": true,
+    "top13": [
+      "Alex Padilla",
+      "Vicente Gonzalez",
+      "Maxine Waters",
+      "Brian Fitzpatrick",
+      "William Timmons",
+      "Scott Fitzgerald",
+      "Tim Scott",
+      "Brad Sherman",
+      "Bill Huizenga",
+      "Young Kim",
+      "Dan Sullivan",
+      "Juan Vargas",
+      "Pete Sessions"
+    ]
+  },
+  "published_artifacts": [
+    {
+      "path": "ranks_python.json",
+      "sha256": "31884d5d3dc1d38fdc99f462b2736a87980660f690cb55d3d04ea9199138d98c",
+      "current_sha256": "31884d5d3dc1d38fdc99f462b2736a87980660f690cb55d3d04ea9199138d98c",
+      "unchanged": true
+    },
+    {
+      "path": "data/engine/primacy_factors.json",
+      "sha256": "f9c1b7ff9b07ad6808962a128d4aeccbe0075668978eebe908a4b4e14e8e64e6",
+      "current_sha256": "f9c1b7ff9b07ad6808962a128d4aeccbe0075668978eebe908a4b4e14e8e64e6",
+      "unchanged": true
+    },
+    {
+      "path": "data/engine/per_area_grade.json",
+      "sha256": "181e02863eafb710c365821199da7c00e4558c861c1148b37d7c24c9afee6cf9",
+      "current_sha256": "181e02863eafb710c365821199da7c00e4558c861c1148b37d7c24c9afee6cf9",
+      "unchanged": true
+    },
+    {
+      "path": "data/lobbying/industry_tiers.json",
+      "sha256": "1aeb8b0e098e51e7f16652422dcdc98d9f6a9eb8fbc044ef4a04af2f2af10fe3",
+      "current_sha256": "1aeb8b0e098e51e7f16652422dcdc98d9f6a9eb8fbc044ef4a04af2f2af10fe3",
+      "unchanged": true
+    },
+    {
+      "path": "member_desk_bundle.json",
+      "sha256": "8a58fe2c7a851d41231a03430adfef5bfc08c29381dde83ea12c6e50b9aefa2e",
+      "current_sha256": "8a58fe2c7a851d41231a03430adfef5bfc08c29381dde83ea12c6e50b9aefa2e",
+      "unchanged": true
+    },
+    {
+      "path": "dashboard_data.json",
+      "sha256": "7222effbefe2e0c474252f21f67d024ee573371fd695e310b88c2f87acfc9318",
+      "current_sha256": "7222effbefe2e0c474252f21f67d024ee573371fd695e310b88c2f87acfc9318",
+      "unchanged": true
+    },
+    {
+      "path": "Moneyball Main Version - Blended.xlsx",
+      "sha256": "1f1bacbc83462f02925fa8791cb8d3009ec6c72e1e645c3f48fa0995aa32a732",
+      "current_sha256": "1f1bacbc83462f02925fa8791cb8d3009ec6c72e1e645c3f48fa0995aa32a732",
+      "unchanged": true
+    }
+  ],
+  "official_rank_changes": [],
+  "live_database_sha256": "dfb6fdd0c05be74e9e0394d593ec8316c572e636161ec9d6708dc58f7f8a1efe",
+  "live_database_file_byte_unchanged": false,
+  "live_database_records_unchanged": true,
+  "database_preservation": {
+    "schemas_equal": true,
+    "all_tables_rowid_and_values_equal": true,
+    "tables": {
+      "cr_fetch_log": 7433,
+      "cspan_attribution_audit": 862,
+      "cspan_fetch_log": 862,
+      "fetch_log": 214,
+      "hearing_antag": 33955,
+      "hearing_antag2": 961,
+      "hearing_meta": 7174,
+      "hearing_meta2": 114,
+      "interactions": 411,
+      "iv_fetch_log": 168979,
+      "members": 515,
+      "posts": 30203,
+      "speeches": 271255,
+      "speeches_turn_split_ledger": 5477,
+      "yt_fetch_log": 0
+    },
+    "live_sha256": "dfb6fdd0c05be74e9e0394d593ec8316c572e636161ec9d6708dc58f7f8a1efe",
+    "snapshot_sha256": "72fb1a9cdbe4b195c0c891d3b4d180d2138664d95794e1a3b597600b577f366c",
+    "physical_difference_count_vs_sqlite_backup": 5,
+    "first_physical_difference_offsets": [
+      26,
+      27,
+      43,
+      94,
+      95
+    ]
+  },
+  "cleanup_owner_approval": "PENDING"
+}

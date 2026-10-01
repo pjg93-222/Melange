@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static-preview",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8802"],
+      "port": 8802
+    },
+    {
+      "name": "moneyball-ui-audit",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8802", "--directory", "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems"],
+      "port": 8802
+    }
+  ]
+}
