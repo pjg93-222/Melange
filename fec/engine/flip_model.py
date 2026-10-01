@@ -13,7 +13,7 @@ and cancels in the money-only limit -- it reweights money-vs-peer channels; it i
 level effect on pflip and must not be analyzed as an additive predictor.
 Expected flips on a topic = sum_n tgt(n)*pflip(n).  Faithful to per_topic_flip.py.
 """
-import json, os, openpyxl
+import json, os, sys, openpyxl
 B=MB_ROOT
 WM,WP=0.35,0.65; CAP=50000; BASE=0.15   # CALIBRATED: money is the minority partner to peer/network influence (money buys access/effort > votes — Ansolabehere; Hall&Wayman; Kalla&Broockman)
 # M5: '—' = member has taken NO recorded position on THIS issue, which is 59.8% of matrix cells.
@@ -29,6 +29,7 @@ PRO={'Champion','Defender','Ally'}; ANTI={'Opponent','Highly Skeptical','Skeptic
 C={m['member']:m for m in json.load(open(B+r'\data\engine\congestion.json'))}
 members=[m['member'] for m in C.values()]
 HALFF=float(os.environ.get('HALFF','0.10'))   # capacity scale: money == HALFF*receipts -> half the max money-pull (reconciles with money_response)
+if HALFF<=0: raise ValueError('HALFF must be > 0 (got %g): pflip divides by (cu+1)+HALFF*R'%HALFF)   # QME 2026-10-01: fail loud, not ZeroDivision in pflip
 _rv=sorted((C[n].get('receipts') or 0) for n in members if (C[n].get('receipts') or 0)>0); _RMED=_rv[len(_rv)//2] if _rv else 200000
 R={n:(max((C[n].get('receipts') or 0),200000) if (C[n].get('receipts') or 0)>0 else _RMED) for n in members}   # HIGH-2: receipts=0 is MISSING data -> impute MEDIAN (floor only real small fundraisers). Flooring no-record members to $200k had made them the CHEAPEST to convert / most winnable. Matches money_response.receipts().
 bio2name={m['bioguide']:m['member'] for m in C.values() if m['bioguide']}
@@ -38,7 +39,8 @@ cu0={n:(C[n]['cu'] or 0) for n in members}; ind0={n:(C[n]['banks'] or 0)+(C[n]['
 # IMPUTE_IND0=0 disables the existing median fallback for unobserved members.
 _iv=sorted(v for v in ind0.values() if v>0); _imed=_iv[len(_iv)//2] if _iv else 0
 from engine.money_observation import industry_money_missing
-ind_imputed={n for n in members if industry_money_missing(C[n])} if os.environ.get('IMPUTE_IND0','1')!='0' else set()
+IMPUTE_IND0=os.environ.get('IMPUTE_IND0','1')   # QME 2026-10-01: effective value recorded in optimize_result.json dials ('0' disables the median fallback)
+ind_imputed={n for n in members if industry_money_missing(C[n])} if IMPUTE_IND0!='0' else set()
 ind0={n:(_imed if n in ind_imputed else ind0[n]) for n in members}
 nodata=set(ind_imputed)   # truly-blind members (no FEC record): winnability is imputed, not measured
 wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
@@ -70,6 +72,13 @@ for sc in set(cat2sc.values()):
             r=nrow.get(n)
             if r: d[n]+=sum(sw[i]*(nrm.cell(r,blk+[0,2,4][i]).value or 0) for i in range(3))
     eng[sc]=d
+# QME 2026-10-01: engagement is read data_only=True with `or 0`, so an uncached formula cell or a member absent from the sheet is SILENTLY 0.
+# Values unchanged; only count + warn (members with zero engagement on every issue, members with no sheet row).
+_eng_missing=sorted(n for n in members if n not in nrow)
+_eng_zero=sorted(n for n in members if all(eng[sc][n]==0 for sc in eng))
+if _eng_missing or _eng_zero:
+    print('WARNING: flip_model engagement: %d members have zero engagement on ALL issues (first: %s); %d members missing from Legislative Score - Normalized rows (first: %s) -- uncached formula cells read as 0 under data_only=True'%(
+        len(_eng_zero),', '.join(_eng_zero[:5]) or '-',len(_eng_missing),', '.join(_eng_missing[:5]) or '-'),file=sys.stderr)
 def camp(t): return 'pro' if t in PRO else 'anti' if t in ANTI else 'neu'
 # RECEPTIVITY LAYER (2026-07-02): pressure_mult scales how hard MONEY pressure lands on this member
 # (Byrne susceptibility x F&H electoral incentive x Linde-Vis PT domain); peer channel is handled by
