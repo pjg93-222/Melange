@@ -1,0 +1,8 @@
+{
+  "pluginId": "code-review@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:08:44.589Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "745b7f054d9f2ce3d90ce6482ba2beae1044a3caf965411f06ca5d4f67e8886c",
+    "commands\\code-review.md": "3e0bacaf847b99684b1399a823d5f2f1ed1b6b2717fe5dc7ea713865ce1af52d"
+  }
+}

@@ -1,0 +1,36 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Debug output
+debug/
+*.debug
+
+# Skill evals (development-only, not used at runtime)
+**/evals/
+
+# Local-only agent reference notes (do NOT commit)
+CLAUDE.md
+AGENTS.md
+SDK-CLI-FEEDBACK.md

@@ -1,0 +1,8 @@
+{
+  "pluginId": "data-scientist@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:09:03.128Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "88b2801220a4d046da033d6fb69f00380b9f2c1b2495d5e215e7b52c10aa7b4d",
+    "agents\\data-scientist.md": "0deca34b2fa077c6bdb7a5ae9ce3f366f4a01a833ca398a7be890de1ed2eab29"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "pluginId": "agent-manager-skill@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:08:10.653Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "a7e84f47f3deebb50d7ca4f8175a6b88ceb2e5b83581bb6584ba66d4a1f1e270",
+    "commands\\agent-manager-skill.md": "0bb531577b4ad9f226996810890baf2933dac19f44dfa00dc7348d919c7b8d02"
+  }
+}

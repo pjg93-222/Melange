@@ -1,0 +1,19 @@
+{
+  "pluginId": "fable-baton@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:09:16.364Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "0df10845f6737672149efb41827f7e9a8f4c799ea5cf272dea66a733d85abef0",
+    "agents\\architect.md": "2a75de371de0269bc2b35bb158dd5e111825a4daf6dc668f0ceccf1b3f6e082b",
+    "agents\\executor.md": "7fb31eb3c0f07930c7691dfcea5c6abb04e7ba1eaeb20b48d62a8e71cb1e4160",
+    "agents\\scout.md": "57dfafdd1a0bd914d5c2340b52d79bb4765dcd7400efb50c598715265e2ca8ca",
+    "agents\\verifier.md": "0412160e147a7ace6b11462e9c181d29e4b4f4696707439c05ff3082c85d77c0",
+    "hooks\\hooks.json": "05ef9456a16e51c267d35dace0b3fd9dfb8656469d01cc2f41baf0907b864337",
+    "hooks\\inline-counter.sh": "16849de65a5f71684dced8c58b78befaad1d6ada29340a308d0a7e59cf879a08",
+    "hooks\\prompt-nudge.sh": "99733492dd6ee804e3e8f91ac9eb838b0846d51aacaffe18994dd37462e2c587",
+    "hooks\\session-start.sh": "b430bb90c03335842bb0e92990a8488895a6e5c780a9fdeddea6c8dbbd1362c6",
+    "LICENSE": "1dad962baf5365e4f304fd6e09f27cd2058d14237e871b4a986cd77fa6b601ec",
+    "policy\\orchestration.md": "a6fbb7b37c08f091a394f7665abe7958550a19a1619d390de29d323ba16822ed",
+    "README.md": "bfb3e1732e45721d96ea09cedb39ca369d8dcd01645cf501a464a324bd6b5b91",
+    "skills\\baton-setup\\SKILL.md": "adfd5cfee72892daae3ad2558636ce23ba9c57d595a5737bc7f88a67ec053f38"
+  }
+}

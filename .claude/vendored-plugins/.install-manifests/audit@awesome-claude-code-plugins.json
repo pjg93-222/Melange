@@ -1,0 +1,8 @@
+{
+  "pluginId": "audit@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:08:30.105Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "669159f678304cf3732144a89740e155038425509d25e6ed7a1ee859e6e2f98d",
+    "commands\\audit.md": "088fe8682cb823b969e05ad1bf07a0953a2afef2b840f904b2da59d99ad51807"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "pluginId": "app-starter@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:08:23.553Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "6c03b5a334d373672915a22bc2e73668588d5c9f767dc345201142ed4e83d146",
+    "skills\\fastapi-app\\references\\best-practices.md": "fd512d38904c18e8b01fbb23ff5e597056604493629cd4b2fa4848e148670ec5",
+    "skills\\fastapi-app\\references\\quality-gates.md": "226711a607bfea2c8b8a993659a12661332dda1821a8f5b862b2a0a4a11fcf48",
+    "skills\\fastapi-app\\references\\stack.md": "c5b8b70e91c2909603f7c48b516636c4852c3c39592a523453a80e0003bbc6e8",
+    "skills\\fastapi-app\\references\\structure.md": "0c34be93f4e4f18713b8604e86f299f884dcf4f8c9ffe0e4973a75bb60a45902",
+    "skills\\fastapi-app\\scripts\\check-latest.sh": "f095f368ecbcd56986dc730bf36afdd7d590b648ea1c0f7d813a53979dc9a560",
+    "skills\\fastapi-app\\SKILL.md": "020453ba1d5d9d071a2887d5bc2e9091b1cf8326f5317ac00dfccad37681776c",
+    "skills\\flutter-app\\references\\architecture.md": "454fd40fed6c88960fb9fe811ff5d38e3a7c212d1ef7b5355a5bc54a87d9de22",
+    "skills\\flutter-app\\references\\best-practices.md": "21e31ec4990a417c81b4047a82554a4e8b3ad94a66bead26de530bfad04ce827",
+    "skills\\flutter-app\\references\\quality-gates.md": "8907476885b413ebee407cda4e7d45350ea400b3b41f8cd0cf2eaac57b9d780e",
+    "skills\\flutter-app\\references\\stack.md": "ca6b1c7672113ab2ba3b6f21e2c5ba4867379064da920ed3213b312359a8b6c5",
+    "skills\\flutter-app\\scripts\\check-latest.sh": "51a24ef8eccc9ca138922c63a0b34c6a3042b75d61d98290556cf0aaaad86e08",
+    "skills\\flutter-app\\SKILL.md": "266470b07dd1fcf9c7a3e7c998d32e2996ad06a36fd0ea46beed49de7880a28e",
+    "skills\\nextjs-app\\references\\quality-gates.md": "ba0103dcb5b0dd5c71915d98023810a7eaaebb8bd447444963b9e884030e02ac",
+    "skills\\nextjs-app\\references\\stack.md": "b834a4d59de4682e74ca53d1580003df46e05583b87a9a128824a665bff9bcf8",
+    "skills\\nextjs-app\\references\\structure.md": "4f7208caad5db41458ec72c0dc4bc1d73fc58e5793667148e79ad8450a646e1c",
+    "skills\\nextjs-app\\references\\variants.md": "c963da5a2c2411591a2c1bdf2019b2c21b86fd8b474c7beda742ef2b3d8a2d71",
+    "skills\\nextjs-app\\scripts\\check-latest.sh": "a38a5088c80e8b10565e184651d6ca0c80de6e7cca490c3a626062d23a772dc3",
+    "skills\\nextjs-app\\SKILL.md": "f668ea81d98311ec20187ee06f40c8fe0e8c134ca947a1824d893dd61fea8dcf",
+    "skills\\shared\\docs-and-context.md": "683f559b1f8493249cf089cfdd2cb9a4ec20f051b4c26f5ea6f8c400064fb84a",
+    "skills\\shared\\git-and-ci.md": "4785e85a2c4e889cf560e461169f3e1fea809f84fc3b009f265608549da20f50",
+    "skills\\shared\\hardening.md": "9565d7ba957ed119c8a0a6cc271eaeb9198e307431b6eabfa82e14eba771bbd3",
+    "skills\\shared\\house-rules.md": "b5ab0894676296b48f0d2b6a385e230751dce9a5972ffb5893708adb98ef91df",
+    "skills\\shared\\no-ai-attribution.md": "23da598c70990e1a7d040f1c1cdb205b0211b081895a5030d49206dddcfda47f",
+    "skills\\shared\\open-source-docs.md": "3b0c488b9b925e0046bbe31c6f624d73ec28c99a5b37ad7e9c608d289f1005b9"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "pluginId": "performance-benchmarker@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:09:38.199Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "56fc3449ffb985c40ef6adbf720dd3cd171a159278d88653194df9a4011230d3",
+    "agents\\performance-benchmarker.md": "49963b1fb60a1d981d2f2bc8d7e09cd2c643a455e1894bfa6661de5661e2c818"
+  }
+}
