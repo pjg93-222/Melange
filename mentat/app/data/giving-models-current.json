@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "active": "versions/7bc7bcf175f7a3c291cc67300f981d610ef7b52059eefb7cb21e2dc4e020e0bb/giving-models-v2.json",
+  "sha256": "7bc7bcf175f7a3c291cc67300f981d610ef7b52059eefb7cb21e2dc4e020e0bb",
+  "model_version": "refit-20260930-377f7324-c3f221343515",
+  "model_schema_version": 2,
+  "switched_at_utc": "2026-09-30T21:53:03Z",
+  "previous": {
+    "active": "versions/cdb459f4fcd3bfa9e68954665e954e03258bc2407cf23d3f4c193e0863b8b469/giving-models-v2.json",
+    "sha256": "cdb459f4fcd3bfa9e68954665e954e03258bc2407cf23d3f4c193e0863b8b469",
+    "model_version": "refit-20260930-377f7324-f7de8fa1626d"
+  }
+}

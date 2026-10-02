@@ -1,0 +1,1184 @@
+/* Chart Studio: shelves, marks and Show Me over the existing SVG engine.
+   Same-origin reads only; every chart is built and drawn locally. The rules
+   live in chart-studio-core.js, the drawing in charts.js / grouped-chart.js. */
+(() => {
+  'use strict';
+  const core = globalThis.MentatStudioCore;
+  const math = globalThis.MentatCharts;
+  const paint = globalThis.MentatChartRender;
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = id => document.getElementById('studio-' + id);
+  const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits: 3});
+  const compact = n => Math.abs(n) >= 1e5
+    ? Number(n).toLocaleString('en-US', {notation: 'compact', maximumFractionDigits: 1})
+    : Number(n).toLocaleString('en-US', {maximumFractionDigits: 2});
+  const STORE = 'mentat-chart-studio-v1';
+  const ZONES = [['columns', 'Columns'], ['rows', 'Rows'], ['color', 'Colour'], ['size', 'Size'],
+    ['label', 'Label'], ['detail', 'Detail'], ['tooltip', 'Tooltip'], ['filters', 'Filters'], ['pages', 'Pages']];
+  const OPERATORS = [['equals', 'Equals'], ['contains', 'Contains'], ['gte', 'At least'], ['lte', 'At most']];
+  const ANALYTICS = [
+    {id: 'annual', group: 'transform', label: 'Period totals', hint: 'Group dated rows into calendar years or election cycles'},
+    {id: 'yoy', group: 'transform', label: 'Year-over-year %', hint: 'Percentage change from the previous calendar year'},
+    {id: 'change', group: 'transform', label: 'Period change', hint: 'Difference from the preceding period'},
+    {id: 'forecast', group: 'transform', label: 'Same-phase forecast', hint: 'Repeat the last completed value from the matching election phase'},
+    {id: 'totals', group: 'flag', label: 'Totals', hint: 'Add a grand total of the plotted marks'},
+    {id: 'average', group: 'flag', label: 'Average line', hint: 'Dashed reference line at the mean of the marks'},
+    {id: 'median', group: 'flag', label: 'Median line', hint: 'Dashed reference line at the median of the marks'}
+  ];
+
+  let sheets = [core.createSheet('Sheet 1', 's1')];
+  let active = 0;
+  let data = null;
+  let sourceKey = '';
+  let history = [], future = [];
+  let dragging = null, dropped = false;
+  let selection = [];
+  let dataSourceTab = false;
+  let loadedSources = false, revision = 0;
+  let pageTimer = 0;
+  let hoverTile = '';
+  let lastResult = null, lastConfig = null, lastTitle = '', lastScope = '';
+
+  const sheet = () => sheets[active];
+  const columns = () => (data && data.columns) || [];
+
+  /* ------------------------------------------------------------ storage */
+
+  function readStore() {
+    try { return JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch { return {}; }
+  }
+  function persist() {
+    if (!sourceKey) return;
+    try {
+      const store = readStore();
+      // Entries written before the key named the worksheet are keyed by a bare
+      // workbook digest and can never be matched again, so drop them rather
+      // than let them use up the twelve-worksheet cap.
+      for (const key of Object.keys(store)) if (!key.includes('|')) delete store[key];
+      store[sourceKey] = {sheets, active};
+      const keys = Object.keys(store);
+      // Keep the file small: only the twelve most recent worksheets are kept.
+      if (keys.length > 12) delete store[keys[0]];
+      localStorage.setItem(STORE, JSON.stringify(store));
+    } catch { /* private browsing or a full quota simply means no persistence */ }
+  }
+  function restore(key) {
+    const saved = readStore()[key];
+    if (saved && Array.isArray(saved.sheets) && saved.sheets.length) {
+      sheets = saved.sheets.map(s => Object.assign(core.createSheet(s.name, s.id), s));
+      active = Math.min(Math.max(0, saved.active | 0), sheets.length - 1);
+      return true;
+    }
+    sheets = [core.createSheet('Sheet 1', 's1')];
+    active = 0;
+    return false;
+  }
+
+  /* ---------------------------------------------------------------- focus */
+
+  function focusMemory() {
+    const node = document.activeElement;
+    if (!node || node === document.body) return null;
+    if (node.classList && node.classList.contains('studio-pill')) {
+      return {zone: node.dataset.zone || '', column: node.dataset.column};
+    }
+    return node.id ? {id: node.id} : null;
+  }
+  function focusRestore(memory) {
+    if (!memory) return;
+    if (memory.id) {
+      const node = document.getElementById(memory.id);
+      if (node) node.focus();
+      return;
+    }
+    const selector = '.studio-pill[data-column="' + memory.column + '"]';
+    const scope = memory.zone ? el(memory.zone) : null;
+    const node = (scope && scope.querySelector(selector)) ||
+      document.getElementById('studio-pane-data').querySelector(selector) ||
+      document.getElementById('studio-grid').querySelector(selector);
+    if (node) node.focus();
+  }
+
+  /* -------------------------------------------------------------- history */
+
+  function commit(change) {
+    history.push(JSON.stringify({sheets, active}));
+    if (history.length > 50) history.shift();
+    future = [];
+    const memory = focusMemory();
+    change();
+    persist();
+    renderAll();
+    focusRestore(memory);
+  }
+  function step(from, to) {
+    if (!from.length) return;
+    to.push(JSON.stringify({sheets, active}));
+    const snapshot = JSON.parse(from.pop());
+    const memory = focusMemory();
+    sheets = snapshot.sheets;
+    active = Math.min(snapshot.active, sheets.length - 1);
+    persist();
+    renderAll();
+    focusRestore(memory);
+  }
+
+  /* --------------------------------------------------------------- source */
+
+  const fill = (node, items) => node.replaceChildren(...items.map(([value, label]) => new Option(label, value)));
+  function sourceFields() {
+    return {run: el('run').value, report: el('report').value, sheet: el('sheet').value, header: Number(el('header').value) || 0};
+  }
+  function status(message) { el('loading').textContent = message; }
+  function failure(message) {
+    el('error').textContent = message || '';
+    el('error').hidden = !message;
+  }
+
+  async function loadRuns() {
+    const ticket = ++revision;
+    status('Choosing a report folder…');
+    try {
+      const body = await api('/api/report-sources');
+      if (ticket !== revision) return;
+      fill(el('run'), body.runs.map(r => [r.id, r.name]));
+      await loadReports();
+    } catch (e) { if (ticket === revision) { status('Report folders unavailable.'); failure(e.message); } }
+  }
+  async function loadReports() {
+    const ticket = ++revision;
+    status('Reading reports…');
+    try {
+      if (!el('run').value) { status('No report folder is available.'); return; }
+      const body = await api('/api/reports?id=' + encodeURIComponent(el('run').value));
+      if (ticket !== revision) return;
+      fill(el('report'), body.reports.map(r => [r.index, r.name]));
+      if (!body.reports.length) { status('This folder has no completed reports.'); return; }
+      await loadSheets();
+    } catch (e) { if (ticket === revision) { status('Reports unavailable.'); failure(e.message); } }
+  }
+  async function loadSheets() {
+    const ticket = ++revision;
+    status('Reading worksheets…');
+    try {
+      const body = await api(requestPath());
+      if (ticket !== revision) return;
+      fill(el('sheet'), (body.sheets || []).map(s => [s, s]));
+      const preferred = ['Candidate Funding', 'Funding Cohorts', 'Allocation Estimates', 'Beneficiary Summary']
+        .find(s => (body.sheets || []).includes(s));
+      if (preferred) el('sheet').value = preferred;
+      await scan(false);
+    } catch (e) { if (ticket === revision) { status('Worksheets unavailable.'); failure(e.message); } }
+  }
+  function requestPath(withSheet, header) {
+    const params = new URLSearchParams({id: el('run').value, index: el('report').value});
+    if (withSheet) params.set('sheet', el('sheet').value);
+    if (header) params.set('header', header);
+    return '/api/report-data?' + params;
+  }
+  async function scan(manual) {
+    const ticket = ++revision;
+    status('Scanning columns…');
+    failure('');
+    try {
+      if (manual && !el('header').reportValidity()) throw new Error('Enter a header row from 1 to 100.');
+      const body = await api(requestPath(true, manual ? Number(el('header').value) : 0));
+      if (ticket !== revision) return;
+      data = body;
+      el('header').value = data.header_row;
+      const fields = sourceFields();
+      const key = core.sourceKey(fields, data);
+      if (key !== sourceKey) {
+        sourceKey = key;
+        history = []; future = [];
+        // A field picked in the previous worksheet still drives Show Me, so the
+        // selection belongs to the source it was made in.
+        selection = [];
+        restore(key);
+      }
+      const record = {run: fields.run, runName: text(el('run')), report: fields.report, reportName: text(el('report')),
+        sheet: data.sheet, header: data.header_row, sha256: data.sha256};
+      for (const s of sheets) s.source = Object.assign({}, record);
+      const subject = core.subjectField(core.classifyFields(data.columns).fields);
+      if (subject) for (const s of sheets) defaultSubject(s, subject);
+      status(fmt(data.row_count) + ' rows · ' + data.columns.length + ' columns scanned');
+      persist();
+      renderAll();
+    } catch (e) { if (ticket === revision) { status('Column scan unavailable.'); failure(e.message); } }
+  }
+  const text = select => select.selectedOptions[0] ? select.selectedOptions[0].textContent : '';
+
+  /* ---------------------------------------------------------------- pills */
+
+  function fieldLabel(field, aggregation) {
+    if (field.role !== 'measure' || !aggregation) return field.name;
+    const label = core.AGGREGATIONS.find(a => a[0] === aggregation);
+    return (label ? label[1] : 'Sum').toUpperCase() + '(' + field.name + ')';
+  }
+  function fieldTooltip(field) {
+    const kind = field.role === 'measure' ? 'measure' : field.isTime ? 'date dimension' : 'dimension';
+    return [field.name, 'detected type: ' + field.type + ' (' + kind + ')',
+      'distinct values: ' + (field.distinct == null ? 'unknown' : fmt(field.distinct)),
+      'missing values: ' + (field.missing == null ? 'unknown' : fmt(field.missing))].join(' · ');
+  }
+  function pillNode(field, options) {
+    const settings = options || {};
+    const node = document.createElement('span');
+    node.className = 'studio-pill' + (field.role === 'measure' ? ' is-measure' : '') +
+      (selection.includes(field.index) && !settings.zone ? ' is-selected' : '');
+    node.draggable = true;
+    node.tabIndex = 0;
+    node.dataset.column = String(field.index);
+    if (settings.zone) node.dataset.zone = settings.zone;
+    if (settings.position != null) node.dataset.position = String(settings.position);
+    node.title = fieldTooltip(field) + (settings.zone ? ' · Enter to move it, Delete to remove it' : ' · Enter to send it to a shelf');
+    node.setAttribute('role', 'button');
+    node.setAttribute('aria-label', fieldLabel(field, settings.aggregation) +
+      (settings.zone ? ', on ' + settings.zone : ', field') + '. Press Enter for actions.');
+    const glyph = document.createElement('span');
+    glyph.className = 'studio-glyph';
+    glyph.textContent = field.glyph === '#' ? '#' : field.glyph === 'cal' ? '▦' : 'Abc';
+    const name = document.createElement('span');
+    name.className = 'studio-pill-name';
+    name.textContent = fieldLabel(field, settings.aggregation);
+    node.append(glyph, name);
+    if (settings.zone && field.role === 'measure' && ['columns', 'rows'].includes(settings.zone)) {
+      const menu = document.createElement('button');
+      menu.type = 'button';
+      menu.className = 'studio-pill-menu';
+      menu.textContent = '▾';
+      menu.setAttribute('aria-label', 'Aggregation for ' + field.name);
+      menu.onclick = event => { event.stopPropagation(); aggregationMenu(node, settings.zone, settings.position); };
+      node.append(menu);
+      node.oncontextmenu = event => { event.preventDefault(); aggregationMenu(node, settings.zone, settings.position); };
+    }
+    node.addEventListener('dragstart', event => {
+      dragging = settings.zone
+        ? {kind: 'pill', column: field.index, zone: settings.zone, position: settings.position}
+        : {kind: 'field', column: field.index};
+      dropped = false;
+      node.dataset.dragging = 'true';
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', field.name);
+    });
+    node.addEventListener('dragend', () => {
+      node.removeAttribute('data-dragging');
+      if (dragging && dragging.kind === 'pill' && !dropped) commit(() => removeFrom(dragging.zone, dragging.position));
+      dragging = null;
+    });
+    node.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); sendMenu(node, field, settings); }
+      else if ((event.key === 'Delete' || event.key === 'Backspace') && settings.zone) {
+        event.preventDefault();
+        commit(() => removeFrom(settings.zone, settings.position));
+      }
+    });
+    node.addEventListener('click', event => {
+      if (settings.zone === 'filters') { filterEditor(node, settings.position); return; }
+      if (settings.zone) return;
+      if (event.ctrlKey || event.metaKey) {
+        selection = selection.includes(field.index) ? selection.filter(i => i !== field.index) : selection.concat(field.index);
+      } else {
+        selection = selection.length === 1 && selection[0] === field.index ? [] : [field.index];
+      }
+      const memory = focusMemory();
+      renderFields();
+      renderShowMe();
+      focusRestore(memory);
+    });
+    return node;
+  }
+
+  function popup(anchor, items) {
+    document.querySelectorAll('.studio-send').forEach(node => node.remove());
+    const menu = document.createElement('div');
+    menu.className = 'studio-send';
+    for (const [label, action] of items) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.onclick = () => {
+        menu.remove();
+        if (anchor.isConnected) anchor.focus();
+        action();
+      };
+      menu.append(button);
+    }
+    const box = anchor.getBoundingClientRect();
+    menu.style.left = Math.round(box.left + window.scrollX) + 'px';
+    menu.style.top = Math.round(box.bottom + window.scrollY + 4) + 'px';
+    document.body.append(menu);
+    const first = menu.querySelector('button');
+    if (first) first.focus();
+    const dismiss = () => {
+      menu.remove();
+      document.removeEventListener('mousedown', outside);
+      document.removeEventListener('keydown', escape);
+    };
+    const outside = event => { if (!menu.contains(event.target)) dismiss(); };
+    const escape = event => { if (event.key === 'Escape') { dismiss(); anchor.focus(); } };
+    document.addEventListener('mousedown', outside);
+    document.addEventListener('keydown', escape);
+    return menu;
+  }
+  function sendMenu(anchor, field, settings) {
+    const items = ZONES.map(([zone, label]) => ['Send to ' + label, () => commit(() => {
+      if (settings.zone) removeFrom(settings.zone, settings.position);
+      place(zone, field.index, null, settings.aggregation);
+    })]);
+    if (settings.zone) items.push(['Remove from ' + settings.zone, () => commit(() => removeFrom(settings.zone, settings.position))]);
+    popup(anchor, items);
+  }
+  function aggregationMenu(anchor, zone, position) {
+    popup(anchor, core.AGGREGATIONS.map(([id, label]) => [label, () => commit(() => {
+      const pills = core.shelf(sheet()[zone]);
+      if (pills[position]) { pills[position].aggregation = id; sheet()[zone] = pills; }
+    })]));
+  }
+
+  /* ----------------------------------------------------------- shelf edits */
+
+  function removeFrom(zone, position) {
+    const state = sheet();
+    if (zone === 'columns' || zone === 'rows') state[zone] = core.shelf(state[zone]).filter((_, i) => i !== position);
+    else if (zone === 'filters') state.filters = state.filters.filter((_, i) => i !== position);
+    else if (zone === 'detail' || zone === 'tooltip') state.marks[zone] = core.shelf(state.marks[zone]).filter((_, i) => i !== position);
+    else if (zone === 'pages') { state.pages = null; state.pageMember = ''; }
+    else state.marks[zone] = null;
+  }
+  // The one shelf that can refuse a drop: a column carries a single filter.
+  // The drop handler asks before it removes the pill it is moving.
+  const canPlace = (zone, column) => zone !== 'filters' ||
+    !sheet().filters.some(f => Number(f.column) === column);
+  function place(zone, column, position, aggregation) {
+    const state = sheet();
+    const entry = {column, aggregation: aggregation || 'sum'};
+    if (zone === 'columns' || zone === 'rows' || zone === 'detail' || zone === 'tooltip') {
+      const list = zone === 'columns' || zone === 'rows' ? core.shelf(state[zone]) : core.shelf(state.marks[zone]);
+      const existing = list.findIndex(p => p.column === column);
+      if (existing !== -1) list.splice(existing, 1);
+      const at = position == null || position > list.length ? list.length : position;
+      list.splice(at, 0, entry);
+      if (zone === 'columns' || zone === 'rows') state[zone] = list; else state.marks[zone] = list;
+    } else if (zone === 'filters') {
+      if (!canPlace(zone, column)) return false;
+      state.filters = state.filters.concat({column, op: 'equals', value: firstMember(column)});
+    } else if (zone === 'pages') {
+      state.pages = entry;
+      state.pageMember = firstMember(column);
+    } else {
+      state.marks[zone] = entry;
+      if (zone === 'label') state.showLabels = true;
+    }
+    return true;
+  }
+  function members(column) {
+    if (!data) return [];
+    const seen = [];
+    for (const row of data.rows) {
+      const value = String(row[column] == null ? '' : row[column]);
+      if (value !== '' && !seen.includes(value)) seen.push(value);
+      if (seen.length >= 500) break;
+    }
+    return seen.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+  }
+  const firstMember = column => members(column)[0] || '';
+
+  function dropTarget(node, zone) {
+    node.dataset.zone = zone;
+    node.addEventListener('dragover', event => {
+      if (!dragging) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      node.classList.add('is-over');
+    });
+    node.addEventListener('dragleave', () => node.classList.remove('is-over'));
+    node.addEventListener('drop', event => {
+      event.preventDefault();
+      node.classList.remove('is-over');
+      if (!dragging) return;
+      dropped = true;
+      const move = dragging;
+      dragging = null;
+      const before = event.target.closest ? event.target.closest('.studio-pill') : null;
+      let at = before && before.dataset.position != null && before.parentElement === node ? Number(before.dataset.position) : null;
+      if (move.kind === 'analytics') { applyAnalytics(move.id); return; }
+      // Filters are ANDed, so their order carries no meaning: a filter pill
+      // dropped back onto the Filters shelf — onto itself, another filter or the
+      // empty shelf — is a silent no-op. Origin is dragging.zone; the live drag
+      // marker on the still-attached pill is a fallback, so this can never fall
+      // through to the "already has a filter" refusal on the pill's own column.
+      // A pill from Columns/Rows/marks is in another shelf, so its column is
+      // still refused with the note below.
+      if (zone === 'filters' && move.kind === 'pill' &&
+          (move.zone === 'filters' || el('filters').querySelector('.studio-pill[data-dragging="true"]'))) return;
+      if (move.kind === 'pill' && move.zone === zone) {
+        if (at === move.position) return; // dropping a pill on itself is not an edit
+        // The target position was read while the pill was still on this shelf,
+        // so everything after it shifts down by one once the pill leaves.
+        if (at != null && move.position < at) at -= 1;
+      }
+      // Decide before removing: a shelf that refuses the drop must not cost the
+      // user the pill they were dragging.
+      if (move.kind === 'pill' && !canPlace(zone, move.column)) {
+        const field = core.fieldAt(core.classifyFields(columns()), move.column);
+        el('note').textContent = (field ? field.name : 'That field') + ' already has a filter.';
+        return;
+      }
+      commit(() => {
+        const aggregation = move.zone ? (core.shelf(sheet()[move.zone] || (sheet().marks || {})[move.zone])[move.position] || {}).aggregation : 'sum';
+        if (move.kind === 'pill') removeFrom(move.zone, move.position);
+        place(zone, move.column, at, aggregation);
+      });
+    });
+  }
+
+  /* -------------------------------------------------------------- rendering */
+
+  function renderFields() {
+    const meta = core.classifyFields(columns());
+    const query = el('search').value.trim().toLowerCase();
+    const matches = field => !query || field.name.toLowerCase().includes(query);
+    const into = (node, fields) => node.replaceChildren(...fields.filter(matches).map(f => pillNode(f, {})));
+    into(el('dimensions'), meta.dimensions);
+    into(el('measures'), meta.measures);
+    into(el('hidden'), meta.hidden);
+    el('hidden-block').hidden = !el('show-hidden').checked || !meta.hidden.length;
+    el('hidden-note').hidden = !meta.hidden.length;
+    el('hidden-note').textContent = meta.hidden.length + ' identifier field' + (meta.hidden.length === 1 ? '' : 's') + ' hidden';
+  }
+
+  function renderShelves() {
+    const meta = core.classifyFields(columns());
+    const state = sheet();
+    const shelfInto = (node, zone, list, placeholder) => {
+      const pills = core.shelf(list)
+        .map((p, position) => ({p, position, field: core.fieldAt(meta, p.column)}))
+        .filter(item => item.field)
+        .map(item => pillNode(item.field, {zone, position: item.position, aggregation: item.p.aggregation}));
+      node.replaceChildren(...pills);
+      node.dataset.placeholder = placeholder;
+      node.dataset.empty = pills.length ? 'false' : 'true';
+    };
+    shelfInto(el('columns'), 'columns', state.columns, 'Drop a field here');
+    shelfInto(el('rows'), 'rows', state.rows, 'Drop a field here');
+    shelfInto(el('detail'), 'detail', state.marks.detail, 'Detail');
+    shelfInto(el('tooltip'), 'tooltip', state.marks.tooltip, 'Tooltip');
+    for (const zone of ['color', 'size', 'label']) {
+      shelfInto(el(zone), zone, state.marks[zone] == null ? [] : [state.marks[zone]], zone === 'color' ? 'Colour' : zone === 'size' ? 'Size' : 'Label');
+    }
+    shelfInto(el('pages'), 'pages', state.pages == null ? [] : [state.pages], 'One dimension');
+    const filterPills = state.filters.map((filter, position) => {
+      const field = core.fieldAt(meta, Number(filter.column));
+      if (!field) return null;
+      const node = pillNode(field, {zone: 'filters', position});
+      const operator = OPERATORS.find(o => o[0] === filter.op);
+      node.querySelector('.studio-pill-name').textContent =
+        field.name + ' ' + (operator ? operator[1].toLowerCase() : filter.op) + ' ' + filter.value;
+      return node;
+    }).filter(Boolean);
+    el('filters').replaceChildren(...filterPills);
+    el('filters').dataset.placeholder = 'Drop a field to filter';
+    el('filters').dataset.empty = filterPills.length ? 'false' : 'true';
+    el('mark').value = state.marks.type;
+    renderPager();
+  }
+
+  function renderPager() {
+    const state = sheet();
+    const pill = core.pill(state.pages);
+    el('pager').hidden = !pill;
+    if (!pill) { stopPlay(); return; }
+    const list = members(pill.column);
+    const at = Math.max(0, list.indexOf(state.pageMember));
+    el('pager-label').textContent = list.length ? (at + 1) + ' of ' + list.length + ' · ' + state.pageMember : 'No members';
+    el('pager-prev').disabled = !list.length;
+    el('pager-next').disabled = !list.length;
+  }
+  function stepPage(delta) {
+    const pill = core.pill(sheet().pages);
+    if (!pill) return;
+    const list = members(pill.column);
+    if (!list.length) return;
+    const at = (list.indexOf(sheet().pageMember) + delta + list.length) % list.length;
+    commit(() => { sheet().pageMember = list[at]; });
+  }
+  function stopPlay() {
+    if (pageTimer) clearInterval(pageTimer);
+    pageTimer = 0;
+    el('pager-play').setAttribute('aria-pressed', 'false');
+    el('pager-play').textContent = '▶';
+  }
+  function togglePlay() {
+    if (pageTimer) { stopPlay(); return; }
+    pageTimer = setInterval(() => stepPage(1), 1400);
+    el('pager-play').setAttribute('aria-pressed', 'true');
+    el('pager-play').textContent = '❚❚';
+  }
+
+  /* --------------------------------------------------------------- show me */
+
+  const GLYPHS = {
+    'text-table': 'table', 'heat-map': 'grid', 'highlight-table': 'grid', 'symbol-map': 'map', 'filled-map': 'map',
+    'pie-chart': 'pie', 'horizontal-bars': 'barsh', 'stacked-bars': 'stack', 'side-by-side-bars': 'side',
+    'treemap': 'tree', 'circle-views': 'circles', 'side-by-side-circles': 'circles2', 'lines-continuous': 'line',
+    'lines-discrete': 'linestep', 'dual-lines': 'line2', 'area-continuous': 'area', 'area-discrete': 'area',
+    'dual-combination': 'combo', 'scatter-plot': 'scatter', 'histogram': 'hist', 'box-and-whisker': 'box',
+    'gantt': 'gantt', 'bullet-graph': 'bullet', 'packed-bubbles': 'bubbles'
+  };
+  const SHAPES = {
+    table: [['r', 2, 3, 28, 5], ['r', 2, 10, 28, 5], ['r', 2, 17, 28, 5]],
+    grid: [['r', 2, 3, 8, 8], ['r', 12, 3, 8, 8], ['r', 22, 3, 8, 8], ['r', 2, 13, 8, 8], ['r', 12, 13, 8, 8], ['r', 22, 13, 8, 8]],
+    map: [['p', '4,16 10,5 18,9 24,4 29,14 20,21 9,20']],
+    pie: [['c', 16, 12, 10], ['l', 16, 12, 16, 2], ['l', 16, 12, 25, 17]],
+    barsh: [['r', 2, 3, 26, 4], ['r', 2, 10, 18, 4], ['r', 2, 17, 10, 4]],
+    stack: [['r', 4, 10, 7, 12], ['r', 4, 4, 7, 6], ['r', 14, 13, 7, 9], ['r', 14, 6, 7, 7], ['r', 24, 8, 5, 14]],
+    side: [['r', 3, 9, 4, 13], ['r', 8, 5, 4, 17], ['r', 15, 12, 4, 10], ['r', 20, 7, 4, 15], ['r', 26, 10, 4, 12]],
+    tree: [['r', 2, 3, 16, 12], ['r', 19, 3, 11, 7], ['r', 19, 11, 11, 4], ['r', 2, 16, 9, 6], ['r', 12, 16, 18, 6]],
+    circles: [['c', 6, 17, 3], ['c', 13, 10, 3], ['c', 20, 14, 3], ['c', 27, 6, 3]],
+    circles2: [['c', 6, 17, 3], ['c', 11, 8, 3], ['c', 19, 15, 3], ['c', 24, 6, 3]],
+    line: [['pl', '2,20 9,12 16,15 23,6 30,9']],
+    linestep: [['pl', '2,20 9,20 9,12 16,12 16,15 23,15 23,6 30,6']],
+    line2: [['pl', '2,20 9,12 16,15 23,6 30,9'], ['pl', '2,13 9,17 16,8 23,14 30,4']],
+    area: [['p', '2,21 2,14 9,8 16,13 23,5 30,10 30,21']],
+    combo: [['r', 3, 12, 5, 10], ['r', 12, 8, 5, 14], ['r', 21, 14, 5, 8], ['pl', '5,9 14,4 23,11 29,6']],
+    scatter: [['c', 5, 18, 2], ['c', 11, 11, 2], ['c', 15, 16, 2], ['c', 21, 7, 2], ['c', 26, 12, 2], ['c', 9, 6, 2]],
+    hist: [['r', 3, 15, 4, 7], ['r', 8, 9, 4, 13], ['r', 13, 4, 4, 18], ['r', 18, 8, 4, 14], ['r', 23, 14, 4, 8]],
+    box: [['l', 8, 4, 8, 20], ['r', 4, 8, 9, 8], ['l', 22, 6, 22, 21], ['r', 18, 10, 9, 6]],
+    gantt: [['r', 3, 4, 12, 4], ['r', 9, 10, 14, 4], ['r', 16, 16, 12, 4]],
+    bullet: [['r', 2, 9, 28, 7], ['r', 2, 9, 17, 7], ['l', 23, 6, 23, 19]],
+    bubbles: [['c', 10, 13, 7], ['c', 22, 9, 5], ['c', 23, 19, 3], ['c', 5, 5, 3]]
+  };
+  function glyphSvg(kind) {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 32 24');
+    svg.setAttribute('aria-hidden', 'true');
+    for (const shape of SHAPES[kind] || SHAPES.table) {
+      let node;
+      if (shape[0] === 'r') {
+        node = document.createElementNS(NS, 'rect');
+        node.setAttribute('x', shape[1]); node.setAttribute('y', shape[2]);
+        node.setAttribute('width', shape[3]); node.setAttribute('height', shape[4]);
+        node.setAttribute('fill', 'currentColor');
+      } else if (shape[0] === 'c') {
+        node = document.createElementNS(NS, 'circle');
+        node.setAttribute('cx', shape[1]); node.setAttribute('cy', shape[2]); node.setAttribute('r', shape[3]);
+        node.setAttribute('fill', 'currentColor');
+      } else if (shape[0] === 'l') {
+        node = document.createElementNS(NS, 'line');
+        node.setAttribute('x1', shape[1]); node.setAttribute('y1', shape[2]);
+        node.setAttribute('x2', shape[3]); node.setAttribute('y2', shape[4]);
+        node.setAttribute('stroke', 'currentColor'); node.setAttribute('stroke-width', '1.6');
+      } else {
+        node = document.createElementNS(NS, shape[0] === 'p' ? 'polygon' : 'polyline');
+        node.setAttribute('points', shape[1]);
+        node.setAttribute('fill', shape[0] === 'p' ? 'currentColor' : 'none');
+        node.setAttribute('stroke', 'currentColor');
+        node.setAttribute('stroke-width', '1.6');
+      }
+      svg.append(node);
+    }
+    return svg;
+  }
+
+  function renderShowMe() {
+    const selectionCounts = core.showMeSelection(sheet(), columns(), selection);
+    const tiles = core.showMeEligibility(selectionCounts);
+    const recommended = data ? core.recommendedTile(columns()) : '';
+    el('showme-grid').replaceChildren(...tiles.map(tile => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'studio-tile' + (tile.id === recommended && tile.enabled ? ' is-recommended' : '');
+      button.disabled = !tile.enabled || !data;
+      button.dataset.tile = tile.id;
+      const caption = document.createElement('span');
+      caption.textContent = tile.label;
+      button.append(glyphSvg(GLYPHS[tile.id]), caption);
+      button.title = tile.enabled
+        ? tile.label + ': ' + tile.requirement + (tile.note ? ' · ' + tile.note : '')
+        : tile.label + ': ' + tile.reason;
+      button.setAttribute('aria-label', button.title);
+      const describe = () => {
+        hoverTile = tile.id;
+        el('showme-foot').textContent = tile.label + ' — ' + tile.requirement +
+          (tile.enabled ? (tile.note ? ' · ' + tile.note : '') : ' · ' + tile.reason);
+      };
+      button.addEventListener('mouseenter', describe);
+      button.addEventListener('focus', describe);
+      button.onclick = () => commit(() => {
+        const next = core.showMeApply(tile.id, sheet(), columns(), selection);
+        sheets[active] = next;
+      });
+      return button;
+    }));
+    if (!hoverTile) el('showme-foot').textContent = recommended
+      ? 'Suggested from the scanned columns: ' + (tiles.find(t => t.id === recommended) || {}).label
+      : 'Choose fields to see what fits.';
+  }
+
+  /* ------------------------------------------------------------- analytics */
+
+  function renderAnalytics() {
+    const state = sheet();
+    el('analytics-list').replaceChildren(...ANALYTICS.map(item => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'studio-analytics-item';
+      button.draggable = true;
+      const on = item.group === 'transform' ? state.analytics.transform === item.id : !!state.analytics[item.id];
+      button.setAttribute('aria-pressed', String(on));
+      const title = document.createElement('span');
+      title.textContent = item.label;
+      const hint = document.createElement('small');
+      hint.textContent = item.hint;
+      button.append(title, hint);
+      button.onclick = () => applyAnalytics(item.id);
+      button.addEventListener('dragstart', event => {
+        dragging = {kind: 'analytics', id: item.id};
+        dropped = false;
+        event.dataTransfer.effectAllowed = 'copy';
+        event.dataTransfer.setData('text/plain', item.label);
+      });
+      button.addEventListener('dragend', () => { dragging = null; });
+      return button;
+    }));
+  }
+  function applyAnalytics(id) {
+    const item = ANALYTICS.find(a => a.id === id);
+    if (!item) return;
+    commit(() => {
+      const analytics = sheet().analytics;
+      if (item.group === 'transform') analytics.transform = analytics.transform === id ? 'none' : id;
+      else analytics[id] = !analytics[id];
+    });
+  }
+
+  /* ---------------------------------------------------------------- sheets */
+
+  function renderSheets() {
+    el('sheet-source').setAttribute('aria-selected', String(dataSourceTab));
+    el('sheet-tabs').replaceChildren(...sheets.map((state, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = state.name;
+      button.setAttribute('aria-selected', String(!dataSourceTab && index === active));
+      button.title = 'Double-click to rename this sheet';
+      button.onclick = () => {
+        // Selecting the sheet that is already showing changes nothing, and the
+        // re-render would replace this button between the two clicks of a
+        // double-click, leaving the rename to run on a detached node.
+        if (!dataSourceTab && index === active) return;
+        dataSourceTab = false; active = index; persist(); renderAll();
+      };
+      button.ondblclick = () => renameSheet(button, index);
+      return button;
+    }));
+  }
+  function renameSheet(button, index) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = sheets[index].name;
+    input.setAttribute('aria-label', 'Sheet name');
+    let done = false;
+    const finish = keep => {
+      // Enter commits and then blurs, so the name would otherwise be committed
+      // twice; a detached input means the tab was replaced under us and there
+      // is nothing left to put back.
+      if (done || !input.isConnected) return;
+      done = true;
+      const name = input.value.trim();
+      input.replaceWith(button);
+      if (keep && name) commit(() => { sheets[index].name = name; });
+    };
+    input.onkeydown = event => {
+      if (event.key === 'Enter') { event.preventDefault(); finish(true); }
+      if (event.key === 'Escape') { event.preventDefault(); finish(false); }
+    };
+    input.onblur = () => finish(true);
+    button.replaceWith(input);
+    input.focus();
+    input.select();
+  }
+  function nextName() {
+    let n = sheets.length + 1;
+    while (sheets.some(s => s.name === 'Sheet ' + n)) n++;
+    return 'Sheet ' + n;
+  }
+
+  /* -------------------------------------------------------------- the view */
+
+  function overlayLabels(svg, result) {
+    const values = core.markValues(result);
+    if (!values.length) return false;
+    const marks = [...svg.querySelectorAll('rect,circle')].filter(node => node.querySelector(':scope > title'));
+    if (marks.length !== values.length) return false;
+    const sideways = ['horizontal', 'groupedhorizontal'].includes(result.type);
+    marks.forEach((mark, index) => {
+      const value = values[index];
+      if (typeof value !== 'number' || !Number.isFinite(value)) return;
+      const label = document.createElementNS(NS, 'text');
+      label.textContent = compact(value);
+      label.setAttribute('fill', MentatTheme.ink);
+      label.setAttribute('font-family', MentatTheme.sans);
+      label.setAttribute('font-size', '10');
+      label.setAttribute('data-mark-label', 'true');
+      if (mark.tagName === 'circle') {
+        label.setAttribute('x', mark.getAttribute('cx'));
+        label.setAttribute('y', Number(mark.getAttribute('cy')) - 8);
+        label.setAttribute('text-anchor', 'middle');
+      } else if (sideways) {
+        label.setAttribute('x', Number(mark.getAttribute('x')) + Number(mark.getAttribute('width')) + 4);
+        label.setAttribute('y', Number(mark.getAttribute('y')) + Number(mark.getAttribute('height')) / 2 + 3);
+      } else {
+        label.setAttribute('x', Number(mark.getAttribute('x')) + Number(mark.getAttribute('width')) / 2);
+        label.setAttribute('y', Number(mark.getAttribute('y')) - 4);
+        label.setAttribute('text-anchor', 'middle');
+      }
+      svg.append(label);
+    });
+    return true;
+  }
+  function overlayReference(svg, plot, lines) {
+    if (!plot || !lines.length || plot.max === plot.min) return;
+    for (const line of lines) {
+      if (line.value < plot.min || line.value > plot.max) continue;
+      const at = plot.p0 + (line.value - plot.min) / (plot.max - plot.min) * (plot.p1 - plot.p0);
+      const rule = document.createElementNS(NS, 'line');
+      const vertical = plot.orient === 'vertical';
+      rule.setAttribute('x1', vertical ? plot.from : at);
+      rule.setAttribute('x2', vertical ? plot.to : at);
+      rule.setAttribute('y1', vertical ? at : plot.from);
+      rule.setAttribute('y2', vertical ? at : plot.to);
+      rule.setAttribute('stroke', MentatTheme.ink);
+      rule.setAttribute('stroke-width', '1.5');
+      rule.setAttribute('stroke-dasharray', '7 5');
+      const note = document.createElementNS(NS, 'text');
+      note.textContent = line.label + ' ' + compact(line.value);
+      note.setAttribute('x', vertical ? plot.to : at + 4);
+      note.setAttribute('y', vertical ? at - 5 : plot.from + 12);
+      note.setAttribute('text-anchor', vertical ? 'end' : 'start');
+      note.setAttribute('fill', MentatTheme.ink);
+      note.setAttribute('font-family', MentatTheme.sans);
+      note.setAttribute('font-size', '11');
+      svg.append(rule, note);
+    }
+  }
+  function overlayTotal(svg, total) {
+    if (total == null) return false;
+    const box = String(svg.getAttribute('viewBox') || '0 0 960 620').split(' ').map(Number);
+    const note = document.createElementNS(NS, 'text');
+    note.textContent = 'Grand total ' + compact(total);
+    note.setAttribute('x', box[2] - 28);
+    note.setAttribute('y', 88);
+    note.setAttribute('text-anchor', 'end');
+    note.setAttribute('fill', MentatTheme.ink);
+    note.setAttribute('font-family', MentatTheme.sans);
+    note.setAttribute('font-size', '12');
+    note.setAttribute('font-weight', '600');
+    svg.append(note);
+    return true;
+  }
+
+  function renderTable(result, config) {
+    const rows = paint.tableRows(result, config, data);
+    const table = document.createElement('table');
+    const head = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    for (const cell of rows[0]) {
+      const th = document.createElement('th');
+      th.textContent = String(cell);
+      headRow.append(th);
+    }
+    head.append(headRow);
+    const body = document.createElement('tbody');
+    for (const row of rows.slice(1, 401)) {
+      const tr = document.createElement('tr');
+      for (const cell of row) {
+        const td = document.createElement('td');
+        td.textContent = typeof cell === 'number' ? fmt(cell) : String(cell == null ? '' : cell);
+        tr.append(td);
+      }
+      body.append(tr);
+    }
+    table.append(head, body);
+    el('table').replaceChildren(table);
+    if (rows.length > 401) {
+      const note = document.createElement('p');
+      note.className = 'studio-note';
+      note.textContent = 'Showing the first 400 of ' + fmt(rows.length - 1) + ' rows. Download the data CSV for every value.';
+      el('table').prepend(note);
+    }
+  }
+
+  function renderView() {
+    lastResult = null; lastConfig = null;
+    el('canvas').replaceChildren();
+    el('table').replaceChildren();
+    el('status').replaceChildren();
+    if (!data) {
+      el('title').textContent = 'Chart Studio';
+      el('note').textContent = 'Choose a report worksheet in the Data pane to begin.';
+      return;
+    }
+    const report = core.compileReport(sheet(), columns());
+    const markName = (core.MARK_TYPES.find(m => m[0] === report.markType) || ['', 'Automatic'])[1];
+    // Provisional only: measureLabel reads the built result to tell an
+    // aggregated view from one that plots individual values, so a box,
+    // histogram or scatter title would read "· Sum" without it. The real title
+    // is set again below, once math.build has produced that result.
+    el('title').textContent = report.config
+      ? paint.measureLabel(report.config, null, data) + ' · ' + markName
+      : 'Build a view';
+    if (!report.config || report.issues.length) {
+      el('note').textContent = report.issues.join(' ') || 'Drag a field onto Columns or Rows.';
+      el('canvas').hidden = false;
+      el('table').hidden = true;
+      return;
+    }
+    let result;
+    try {
+      result = math.build(data, report.config);
+    } catch (e) {
+      el('note').textContent = e.message;
+      el('table').hidden = true;
+      return;
+    }
+    result = core.sortResult(result, sheet().sort);
+    lastResult = result; lastConfig = report.config;
+    const measure = paint.measureLabel(report.config, result, data);
+    el('title').textContent = measure + ' · ' + markName;
+    const source = sheet().source;
+    const filterText = report.config.filters
+      .map(f => (core.fieldAt(report.fields, f.column) || {name: 'field'}).name + ' ' + f.op + ' ' + f.value).join('; ');
+    lastTitle = el('title').textContent;
+    lastScope = [source.reportName + ' / ' + data.sheet,
+      result.selected + ' of ' + data.row_count + ' rows selected; ' + result.excluded + ' rows excluded for missing or non-numeric values.',
+      'Group/X: ' + (core.fieldAt(report.fields, report.config.x) || {name: 'All rows'}).name + '.',
+      ['box', 'scatter', 'histogram'].includes(result.type) ? 'Individual worksheet values.' : 'Aggregation: ' + report.config.aggregation + '.',
+      'Worksheet rows: ' + (report.config.start || 'first data row') + '–' + (report.config.end || 'last data row') + '.',
+      'Row count limit: ' + (report.config.limit || 'all matching rows') + ' (after filters).',
+      'Filters: ' + (filterText || 'none') + '.',
+      'Sort: ' + sheet().sort + '.',
+      'SHA-256: ' + data.sha256 + '.'].join(' ');
+    if (result.note) lastScope += ' ' + result.note;
+    const notes = report.notes.slice();
+
+    if (report.renderMode === 'table') {
+      el('canvas').hidden = true;
+      el('table').hidden = false;
+      renderTable(result, report.config);
+    } else {
+      el('canvas').hidden = false;
+      el('table').hidden = true;
+      const drawn = paint.chartSVG(result, measure, report.config, data, lastTitle, lastScope);
+      if (sheet().showLabels && !overlayLabels(drawn.svg, result)) notes.push('Mark labels are unavailable for this view.');
+      const analytics = sheet().analytics;
+      const references = core.referenceValues(result, analytics);
+      if (references.length && !drawn.plot) notes.push('Reference lines need a value axis; this view has none.');
+      // Say why a requested overlay is missing, but only when it was requested.
+      if ((analytics.average || analytics.median) && result.series) notes.push('Reference lines need a single series.');
+      overlayReference(drawn.svg, drawn.plot, references);
+      if (analytics.totals) {
+        const refusal = core.totalNote(result, report.config);
+        if (refusal) notes.push(refusal);
+        else if (!overlayTotal(drawn.svg, core.grandTotal(result, report.config))) {
+          notes.push('A grand total is not defined for this view.');
+        }
+      }
+      el('canvas').className = 'studio-canvas fit-' + sheet().fit;
+      el('canvas').replaceChildren(drawn.svg);
+    }
+    el('note').textContent = notes.concat(result.note ? [result.note] : []).join(' ') ||
+      source.reportName + ' / ' + data.sheet + ' · ' + fmt(result.selected) + ' rows selected';
+    renderStatus(result, report.config);
+  }
+
+  function renderStatus(result, config) {
+    const summary = core.rowsToMarksSummary(result, config, columns());
+    if (!summary) return;
+    const parts = [
+      fmt(summary.marks) + ' mark' + (summary.marks === 1 ? '' : 's'),
+      summary.viewRows + ' row' + (summary.viewRows === 1 ? '' : 's') + ' by ' + summary.viewColumns + ' column' + (summary.viewColumns === 1 ? '' : 's'),
+      summary.total == null ? '' : summary.measureLabel + ': ' + fmt(summary.total)
+    ].filter(Boolean);
+    const nodes = parts.map(part => {
+      const span = document.createElement('span');
+      span.textContent = part;
+      return span;
+    });
+    const badge = document.createElement('span');
+    badge.className = 'studio-local';
+    badge.textContent = 'LOCAL ONLY';
+    badge.title = 'Every value is read from the local report file and drawn in this browser.';
+    nodes.push(badge);
+    if (parts.length > 2) nodes[2].title = 'Total of the plotted marks, each aggregated as ' + config.aggregation + '.';
+    el('status').replaceChildren(...nodes);
+  }
+
+  function renderDataSource() {
+    const worksheet = !dataSourceTab;
+    el('grid').hidden = !worksheet;
+    el('datasource').hidden = worksheet;
+    if (worksheet || !data) return;
+    const meta = core.classifyFields(columns());
+    const source = sheet().source;
+    const list = document.createElement('dl');
+    const pairs = [['Report folder', source.runName], ['Report', source.reportName], ['Worksheet', data.sheet],
+      ['Header row', data.header_row], ['Rows', fmt(data.row_count)], ['Columns', columns().length],
+      ['Dimensions', meta.dimensions.length + ' (' + meta.hidden.length + ' identifier fields hidden)'],
+      ['Measures', meta.measures.length], ['SHA-256', data.sha256], ['Note', data.note]];
+    for (const [term, value] of pairs) {
+      const dt = document.createElement('dt');
+      dt.textContent = term;
+      const dd = document.createElement('dd');
+      dd.textContent = String(value == null ? '' : value);
+      list.append(dt, dd);
+    }
+    const table = document.createElement('table');
+    const head = document.createElement('thead');
+    head.innerHTML = '<tr><th>Column</th><th>Detected type</th><th>Role</th><th>Distinct</th><th>Missing</th></tr>';
+    const body = document.createElement('tbody');
+    for (const field of meta.fields) {
+      const tr = document.createElement('tr');
+      for (const cell of [field.name, field.type, field.hidden ? 'hidden identifier' : field.role,
+        field.distinct == null ? '' : fmt(field.distinct), field.missing == null ? '' : fmt(field.missing)]) {
+        const td = document.createElement('td');
+        td.textContent = String(cell);
+        tr.append(td);
+      }
+      body.append(tr);
+    }
+    table.append(head, body);
+    const heading = document.createElement('h3');
+    heading.textContent = 'Scanned columns';
+    el('datasource').replaceChildren(list, heading, table);
+  }
+
+  // Sort is switched off for a time view: chronological order is the meaning of
+  // the axis, and core.sortResult refuses to reorder one, so a pressed-looking
+  // button would promise something the view never does.
+  const SORT_BUTTONS = [['sort-asc', 'asc', 'Sort the grouping smallest first'],
+    ['sort-desc', 'desc', 'Sort the grouping largest first']];
+  function renderSortButtons(view) {
+    const locked = core.sortLocked(view);
+    for (const [id, direction, hint] of SORT_BUTTONS) {
+      el(id).disabled = locked;
+      el(id).title = locked ? 'Time views keep chronological order' : hint;
+      el(id).setAttribute('aria-pressed', String(!locked && sheet().sort === direction));
+    }
+  }
+
+  // The classic dialog picks the first subject by itself, so the studio settles
+  // on one too. That is a derived default, not a user edit: it is written
+  // straight to the sheet with no commit, so it costs no undo step.
+  function defaultSubject(state, field) {
+    const list = members(field.index);
+    if (!list.includes(String(state.params.subject || ''))) state.params.subject = list[0] || '';
+    return list;
+  }
+
+  // Time analysis adds one subject's periods together and the engine refuses a
+  // worksheet holding several, so the studio offers the same Subject choice the
+  // classic dialog does. The control appears only where that column exists.
+  function renderSubjectParam() {
+    const field = data ? core.subjectField(core.classifyFields(columns()).fields) : null;
+    el('param-subject-label').hidden = !field;
+    if (!field) return;
+    const list = defaultSubject(sheet(), field);
+    fill(el('param-subject'), list.length ? list.map(m => [m, m]) : [['', 'Choose a subject…']]);
+    el('param-subject').value = String(sheet().params.subject || '');
+  }
+
+  function renderToolbar() {
+    const state = sheet();
+    el('undo').disabled = !history.length;
+    el('redo').disabled = !future.length;
+    renderSortButtons(data ? core.compileReport(state, columns()).config : null);
+    el('labels').setAttribute('aria-pressed', String(!!state.showLabels));
+    el('fit').value = state.fit;
+    el('showme-toggle').setAttribute('aria-pressed', String(!el('showme').hidden));
+    el('param-start').value = state.params.start || '';
+    el('param-end').value = state.params.end || '';
+    el('param-limit').value = state.params.limit || '';
+    el('param-horizon').value = state.analytics.horizon || 2;
+    el('param-period').value = state.analytics.period || '';
+    renderSubjectParam();
+  }
+
+  function renderAll() {
+    renderToolbar();
+    renderFields();
+    renderShelves();
+    renderAnalytics();
+    renderShowMe();
+    renderSheets();
+    renderDataSource();
+    if (!dataSourceTab) renderView();
+  }
+
+  /* ------------------------------------------------------------- downloads */
+
+  function download(format) {
+    if (!lastResult) { failure('Build a view before downloading.'); return; }
+    failure('');
+    if (format === 'csv') {
+      const quote = v => '"' + String(typeof v === 'string' && /^[=+\-@\t\r]/.test(v) ? "'" + v : v).replaceAll('"', '""') + '"';
+      const rows = [['Chart', lastTitle], ['Scope', lastScope], ...paint.tableRows(lastResult, lastConfig, data)];
+      MentatExport.download('\uFEFF' + rows.map(r => r.map(quote).join(',')).join('\r\n'),
+        'text/csv;charset=utf-8', 'mentat-chart-studio.csv');
+      return;
+    }
+    const svg = el('canvas').firstChild;
+    if (!svg) { failure('This view has no image to export. Download the data CSV instead.'); return; }
+    MentatExport.image(svg, format, lastTitle, lastScope, 'mentat-chart-studio').catch(e => failure(e.message));
+  }
+
+  /* --------------------------------------------------------------- filters */
+
+  function filterEditor(anchor, position) {
+    const filter = sheet().filters[position];
+    if (!filter) return;
+    const menu = popup(anchor, []);
+    const form = document.createElement('div');
+    form.className = 'studio-filter-editor';
+    const operator = document.createElement('select');
+    operator.setAttribute('aria-label', 'Filter operation');
+    for (const [id, label] of OPERATORS) operator.append(new Option(label, id));
+    operator.value = filter.op;
+    const value = document.createElement('input');
+    value.type = 'text';
+    value.setAttribute('aria-label', 'Filter value');
+    value.value = filter.value;
+    const actions = document.createElement('div');
+    actions.className = 'studio-editor-actions';
+    const apply = document.createElement('button');
+    apply.type = 'button';
+    apply.textContent = 'Apply';
+    apply.onclick = () => {
+      menu.remove();
+      commit(() => {
+        sheet().filters[position] = {column: Number(filter.column), op: operator.value, value: value.value};
+      });
+    };
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'Remove';
+    remove.onclick = () => { menu.remove(); commit(() => removeFrom('filters', position)); };
+    actions.append(apply, remove);
+    form.append(operator, value, actions);
+    menu.append(form);
+    operator.focus();
+  }
+
+  /* ----------------------------------------------------------------- wiring */
+
+  fill(el('mark'), core.MARK_TYPES);
+  for (const [zone] of ZONES) dropTarget(el(zone), zone);
+  // The view applies Analytics objects dropped on it. It also accepts a pill and
+  // does nothing with it: the drop has to fire so that dragend does not read the
+  // gesture as "dragged off the shelves" and delete the field. The effect stays
+  // 'move' because a dropEffect of 'none' cancels the drop event itself.
+  el('canvas-wrap').addEventListener('dragover', event => {
+    if (!dragging) return;
+    if (dragging.kind === 'analytics') {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      el('canvas-wrap').classList.add('is-over');
+      return;
+    }
+    if (dragging.kind !== 'pill') return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  });
+  el('canvas-wrap').addEventListener('dragleave', () => el('canvas-wrap').classList.remove('is-over'));
+  el('canvas-wrap').addEventListener('drop', event => {
+    el('canvas-wrap').classList.remove('is-over');
+    if (!dragging) return;
+    event.preventDefault();
+    dropped = true;
+    const move = dragging;
+    dragging = null;
+    if (move.kind === 'analytics') applyAnalytics(move.id);
+  });
+
+  el('undo').onclick = () => step(history, future);
+  el('redo').onclick = () => step(future, history);
+  el('swap').onclick = () => commit(() => { sheets[active] = core.swapShelves(sheet()); });
+  el('sort-asc').onclick = () => commit(() => { sheet().sort = sheet().sort === 'asc' ? 'none' : 'asc'; });
+  el('sort-desc').onclick = () => commit(() => { sheet().sort = sheet().sort === 'desc' ? 'none' : 'desc'; });
+  el('labels').onclick = () => commit(() => { sheet().showLabels = !sheet().showLabels; });
+  el('fit').onchange = () => commit(() => { sheet().fit = el('fit').value; });
+  el('clear').onclick = () => commit(() => { sheets[active] = core.clearSheet(sheet()); });
+  el('duplicate').onclick = () => commit(() => {
+    const copy = JSON.parse(JSON.stringify(sheet()));
+    copy.id = 's' + Date.now();
+    copy.name = nextName();
+    sheets.splice(active + 1, 0, copy);
+    active += 1;
+    dataSourceTab = false;
+  });
+  el('new-sheet').onclick = () => commit(() => {
+    const fresh = core.createSheet(nextName(), 's' + Date.now());
+    fresh.source = Object.assign({}, sheet().source);
+    sheets.push(fresh);
+    active = sheets.length - 1;
+    dataSourceTab = false;
+  });
+  el('sheet-source').onclick = () => { dataSourceTab = true; renderAll(); };
+  el('download-png').onclick = () => download('png');
+  el('download-svg').onclick = () => download('svg');
+  el('download-csv').onclick = () => download('csv');
+  el('showme-toggle').onclick = () => { el('showme').hidden = !el('showme').hidden; renderToolbar(); };
+  el('showme-close').onclick = () => { el('showme').hidden = true; renderToolbar(); };
+  el('classic').onclick = () => {
+    // The classic dialog only scans its report list while the Graph view is
+    // showing (charts.js activate()), so go there first and then open it.
+    if (typeof showView === 'function') showView('graph');
+    const dialog = document.getElementById('graph-builder');
+    dialog.showModal();
+    dialog.dispatchEvent(new Event('mentat:open'));
+  };
+  el('mark').onchange = () => commit(() => { sheet().marks.type = el('mark').value; });
+  el('search').oninput = renderFields;
+  el('show-hidden').onchange = renderFields;
+  el('run').onchange = loadReports;
+  el('report').onchange = loadSheets;
+  el('sheet').onchange = () => scan(false);
+  el('rescan').onclick = () => scan(true);
+  el('pager-prev').onclick = () => stepPage(-1);
+  el('pager-next').onclick = () => stepPage(1);
+  el('pager-play').onclick = togglePlay;
+  for (const [id, apply] of [
+    ['param-start', v => { sheet().params.start = v; }],
+    ['param-end', v => { sheet().params.end = v; }],
+    ['param-limit', v => { sheet().params.limit = v; }],
+    ['param-horizon', v => { sheet().analytics.horizon = v || 2; }]
+  ]) el(id).onchange = () => commit(() => apply(Number(el(id).value) || 0));
+  el('param-period').onchange = () => commit(() => { sheet().analytics.period = el('param-period').value; });
+  el('param-subject').onchange = () => commit(() => { sheet().params.subject = el('param-subject').value; });
+  for (const id of ['tab-data', 'tab-analytics']) el(id).onclick = () => {
+    const wantData = id === 'tab-data';
+    el('tab-data').setAttribute('aria-selected', String(wantData));
+    el('tab-analytics').setAttribute('aria-selected', String(!wantData));
+    el('pane-data').hidden = !wantData;
+    el('pane-analytics').hidden = wantData;
+  };
+
+  function activate() {
+    const view = document.getElementById('view-chart-studio');
+    if (!view || view.hidden) { stopPlay(); return; }
+    if (!loadedSources) { loadedSources = true; loadRuns(); }
+  }
+  // The Graph tab's "Create chart" button now opens Chart Studio; the classic
+  // dialog stays one click away in the Chart Studio toolbar.
+  const openBuilder = document.getElementById('graph-open-builder');
+  if (openBuilder) {
+    openBuilder.textContent = 'Create chart';
+    openBuilder.removeAttribute('aria-haspopup');
+    openBuilder.onclick = () => { if (typeof showView === 'function') showView('chart-studio'); else location.hash = '#chart-studio'; };
+  }
+  window.addEventListener('mentat:view', activate);
+  window.addEventListener('hashchange', activate);
+  renderAll();
+  activate();
+})();

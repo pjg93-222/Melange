@@ -1,0 +1,135 @@
+<section id="view-insights" role="tabpanel" aria-labelledby="tab-insights" hidden>
+  <div class="insights-heading analysis-intro">
+    <p class="insights-subtitle">Compare periods and explain observed changes.</p>
+    <div class="insights-export analysis-page-actions page-actions"><div id="gf-view-switch" class="segmented gf-view-switch" role="group" aria-label="Insights view"><button id="gf-view-insights" type="button" aria-pressed="true">Observed insights</button><button id="giving-forecast-open" type="button" aria-pressed="false" aria-controls="giving-forecast" aria-expanded="false">Forecast giving</button></div><button id="gf-export" type="button" class="secondary" disabled hidden>Export scenario</button><button id="insights-page-sources" type="button" class="secondary" aria-controls="insights-sources" aria-expanded="false">Sources</button><details id="insights-export-menu" class="insights-export-menu"><summary class="secondary">Export</summary><div class="insights-export-list" role="group" aria-label="Export"><button id="insights-export-csv" class="secondary" type="button" aria-label="Export CSV" disabled>CSV</button><button id="insights-export-json" class="secondary" type="button" aria-label="Export JSON" disabled>JSON</button></div></details><button id="insights-refresh" type="submit" form="insights-controls" class="primary">Refresh</button></div>
+  </div>
+  <section id="giving-forecast" class="giving-forecast" aria-labelledby="gf-title" hidden>
+    <h2 id="gf-title" class="gf-sr">Forecast giving</h2>
+    <p id="gf-load-status" role="status" aria-live="polite">Loading reviewed models…</p>
+    <form id="gf-form" class="gf-form" hidden>
+      <div class="gf-scope-card card">
+        <label class="gf-field gf-industry-field"><span>Research industry</span><select id="gf-industry"></select></label>
+        <label class="gf-field gf-date-field"><span>As of</span><span class="gf-date-wrap"><input id="gf-date" type="date" required><svg class="gf-calendar" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false"><rect x="3" y="4.5" width="14" height="12.5" rx="2.2"/><path d="M3 8.5h14M7 2.8v3.4M13 2.8v3.4"/></svg></span></label>
+        <label id="gf-signal-field" class="gf-field"><span>Political expectations</span><select id="gf-signal"><option value="control">Expected control</option><option value="seats">Expected seat gain</option></select></label>
+        <label id="gf-slopes-field" class="gf-field"><span>Political slopes</span><select id="gf-slopes"><option value="pooled">Pooled across industries</option><option value="industry">Industry-specific</option></select></label>
+        <span class="gf-divider" aria-hidden="true"></span>
+        <span id="gf-example-pill" class="gf-pill" role="note" tabindex="0" hidden></span>
+      </div>
+      <section class="gf-hero card" aria-labelledby="gf-hero-title">
+        <div class="gf-chart-col">
+          <div class="gf-chart-head">
+            <h2 id="gf-hero-title" class="gf-card-title">Giving by cycle</h2>
+            <div class="segmented gf-account" role="group" aria-label="Giving account"><button id="gf-account-pac" type="button" aria-pressed="false">PAC giving</button><button id="gf-account-general" type="button" aria-pressed="true">General giving</button></div>
+          </div>
+          <div class="gf-legend-row">
+            <span id="gf-basis" class="gf-basis">2025 dollars</span>
+            <ul class="gf-legend" aria-label="Legend"><li><i class="gf-sw gf-sw-observed" aria-hidden="true"></i>Observed</li><li><i class="gf-sw gf-sw-remainder" aria-hidden="true"></i>Remainder</li><li><i class="gf-sw gf-sw-projection" aria-hidden="true"></i>Projection</li><li><i class="gf-sw gf-sw-interval" aria-hidden="true"></i>Prediction interval</li></ul>
+          </div>
+          <div id="gf-progress" class="gf-progress" aria-hidden="true" hidden><span></span></div>
+          <div id="gf-chart-flags" class="gf-chips" hidden></div>
+          <div id="gf-alert" class="gf-alert" role="alert" hidden></div>
+          <div id="gf-chart" class="gf-chart" role="group" aria-label="Giving by cycle" aria-busy="false"></div>
+        </div>
+        <div class="gf-scenario" role="group" aria-labelledby="gf-scenario-title">
+          <div class="gf-scenario-head">
+            <h2 id="gf-scenario-title" class="gf-card-title">Scenario</h2>
+            <div class="segmented gf-tabs" role="tablist" aria-label="Scenario horizon"><button id="gf-tab-current" type="button" role="tab" aria-selected="true" aria-controls="gf-panel-current">Rest of 2026</button><button id="gf-tab-next" type="button" role="tab" aria-selected="false" aria-controls="gf-panel-next" tabindex="-1">2027&#8211;2028</button></div>
+          </div>
+          <div class="gf-horizons" id="gf-horizons"></div>
+          <button id="gf-calculate" type="submit" class="primary gf-calculate" aria-label="Calculate both horizons" title="Calculate both horizons">Calculate</button>
+          <button id="gf-reference" type="button" class="gf-text-button">Use historical example</button>
+        </div>
+      </section>
+      <div class="gf-row3">
+        <section id="gf-house" class="gf-mix card" aria-labelledby="gf-house-title">
+          <h2 id="gf-house-title" class="gf-card-title">House candidate mix</h2>
+          <div id="gf-house-body" class="gf-mix-body"></div>
+          <div id="gf-house-foot" class="gf-mix-foot"></div>
+        </section>
+        <section id="gf-senate" class="gf-mix card" aria-labelledby="gf-senate-title">
+          <h2 id="gf-senate-title" class="gf-card-title">Senate candidate mix</h2>
+          <div id="gf-senate-body" class="gf-mix-body"></div>
+          <div id="gf-senate-foot" class="gf-mix-foot"></div>
+        </section>
+        <section id="gf-lobby" class="gf-lobby-card card" aria-labelledby="gf-lobby-title">
+          <h2 id="gf-lobby-title" class="gf-card-title">Lobbying (Melange LDA)</h2>
+          <div id="gf-lobby-chart" class="gf-lobby-chart"></div>
+          <div id="gf-lobby-foot" class="gf-chips gf-lobby-foot" hidden></div>
+          <ul class="gf-legend gf-lobby-legend" aria-label="Lobbying series"><li><i class="gf-sw gf-sw-fees" aria-hidden="true"></i>Outside-firm fees</li><li><i class="gf-sw gf-sw-inhouse" aria-hidden="true"></i>In-house expenses</li></ul>
+        </section>
+      </div>
+      <p id="gf-footnote" class="gf-footnote"><svg class="gf-info" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="7.6"/><path d="M10 9v5M10 6.2v.2"/></svg><span id="gf-footnote-text">Mentat levels; OpenSecrets data only estimates the relationships.</span> <button id="gf-notes-toggle" type="button" class="gf-notes-link" aria-expanded="false" aria-controls="gf-notes">Sources and notes</button></p>
+      <section id="gf-notes" class="gf-notes card" aria-labelledby="gf-notes-title" hidden>
+        <h2 id="gf-notes-title" class="gf-card-title">Sources and notes</h2>
+        <p class="gf-help">Forecast giving: explore how growth and expected political power relate to later giving.</p>
+        <p id="gf-scope" class="gf-scope">Industry scenarios. Company and report filters do not apply.</p>
+        <p id="gf-model-note" class="gf-help"></p>
+        <div id="gf-anchors-note" class="gf-help"></div>
+        <p id="gf-example-note" class="gf-help" hidden></p>
+        <p id="gf-status-copy" class="gf-help"></p>
+        <h3 id="gf-sources-summary" class="gf-notes-heading">Sources and assumption notes</h3>
+        <p id="gf-sources-note" class="gf-help">Use comparable whole-industry amounts in constant 2025 dollars. PAC totals and PAC plus individual candidate giving are separate accounts.</p>
+        <div class="gf-provenance">
+          <label>Assumption source<input id="gf-source" type="text" maxlength="500" placeholder="Forecast provider or scenario description"></label>
+          <label>Assumptions dated<input id="gf-source-date" type="date"></label>
+        </div>
+        <div id="gf-observed"></div>
+        <h3 class="gf-notes-heading">About the inputs</h3>
+        <div id="gf-input-notes" class="gf-input-notes"></div>
+        <div id="gf-conditioned" class="gf-conditioned" hidden></div>
+        <div id="gf-waivers" class="gf-waivers" hidden></div>
+        <h3 class="gf-notes-heading">Full numbers by outcome</h3>
+        <p id="gf-results-note" class="gf-help" hidden></p>
+        <section id="gf-results" aria-label="Forecast comparison" aria-busy="false"></section>
+        <details class="gf-disclosure" id="gf-evidence"><summary>Model evidence and ordinary p-values</summary><div id="gf-evidence-content"></div></details>
+      </section>
+    </form>
+    <p id="gf-status" class="gf-sr" role="status" aria-live="polite"></p>
+    <div id="gf-tip" class="gf-tip" role="tooltip" hidden></div>
+  </section>
+  <form id="insights-controls" class="card insights-controls" aria-label="Insights scope">
+    <div class="insights-filter-grid">
+      <label class="insights-field">Industry<select id="insights-dataset" aria-label="Insights industry"><option value="">Loading industries…</option></select></label>
+      <label class="insights-field">Company<select id="insights-company"><option value="">All covered companies</option></select></label>
+      <label class="insights-field">Basis<select id="insights-basis"><option value="receipt">Reported receipts</option><option value="original_observed">Observed original giving</option><option value="original_supported">Supported original giving</option><option value="pac_activity">PAC activity</option></select></label>
+      <label class="insights-field">Funding<select id="insights-funding-source"><option value="">All reported sources</option></select></label>
+    </div>
+    <div class="insights-periods" role="group" aria-label="Periods compared">
+      <label class="chip-select insights-period" for="insights-baseline-cycle"><span class="insights-visually-hidden">Compare from</span><span class="insights-period-text" aria-hidden="true">Automatic</span><select id="insights-baseline-cycle"><option value="">Automatic</option></select></label>
+      <span class="insights-period-arrow" aria-hidden="true">&#8594;</span>
+      <label class="chip-select insights-period" for="insights-current-cycle"><span class="insights-visually-hidden">Compare to</span><span class="insights-period-text" aria-hidden="true">Automatic</span><select id="insights-current-cycle"><option value="">Automatic</option></select></label>
+      <button id="insights-swap-periods" type="button" class="icon-button insights-swap" aria-label="Swap periods" title="Swap periods"><svg width="17" height="17" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4 7.5h11.5M12.5 4.5l3 3-3 3M16 12.5H4.5M7.5 9.5l-3 3 3 3"/></svg></button>
+      <button id="insights-more-options" type="button" class="icon-button insights-more" aria-label="More options" title="More options" aria-expanded="false" aria-controls="insights-options"><svg width="17" height="17" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="4.5" cy="10" r="1.4"/><circle cx="10" cy="10" r="1.4"/><circle cx="15.5" cy="10" r="1.4"/></svg></button>
+    </div>
+    <div id="insights-options" class="insights-comparison-options" hidden>
+      <label class="insights-field">Contributions through<input id="insights-as-of" type="date" title="Include contribution dates up to this day. Blank uses today."></label>
+      <label class="insights-field">Compare industry<select id="insights-comparison-dataset"><option value="">No industry comparison</option></select></label>
+      <label class="insights-toggle insights-setting" for="insights-show-forecast"><span class="insights-toggle-label">Show the historical-baseline forecast card</span><input id="insights-show-forecast" type="checkbox" role="switch"></label>
+    </div>
+  </form>
+  <section id="insights-summary" class="card insights-summary" aria-label="Period summary"><dl>
+    <div><dt id="insights-summary-left-label">Net giving</dt><dd id="insights-summary-left">—</dd></div>
+    <div><dt id="insights-summary-right-label">Net giving</dt><dd id="insights-summary-right">—</dd></div>
+    <div><dt>Change</dt><dd id="insights-summary-change">—</dd></div>
+    <div><dt>Recipients</dt><dd id="insights-summary-recipients">—</dd></div>
+  </dl></section>
+  <div id="insights-status" class="insights-status insights-visually-hidden" role="status" aria-live="polite">Open Insights to load available industries.</div>
+  <div class="insights-layout">
+    <section id="insights-analyses" class="card insights-rail" aria-labelledby="insights-rail-title">
+      <h2 id="insights-rail-title" class="card-title insights-rail-title">Analyses</h2>
+      <div id="insights-toggles" class="insights-toggles" role="group" aria-labelledby="insights-rail-title"></div>
+      <p id="insights-preference-note" class="insights-preference-note" hidden></p>
+      <div class="insights-rail-footer"><button id="insights-core-only" type="button" class="insights-text-button">Core three</button><span class="insights-rail-divider" aria-hidden="true"></span><button id="insights-enable-all" type="button" class="insights-text-button">All</button></div>
+    </section>
+    <div class="insights-main">
+      <section id="insights-results" class="insights-results insights-analysis-view" aria-label="Analysis cards" aria-busy="false"></section>
+      <section id="insights-sources" class="card insights-sources insights-analysis-view" aria-labelledby="insights-sources-title" tabindex="-1" hidden>
+        <div class="insights-panel-heading"><h3 id="insights-sources-title" class="card-title">Contributing records</h3><button id="insights-sources-close" class="secondary" type="button">Back to analyses</button></div>
+        <div id="insights-scope" class="insights-scope" hidden></div>
+        <p id="insights-sources-status" role="status" aria-live="polite"></p>
+        <div id="insights-sources-table"></div>
+        <div class="insights-source-actions"><button id="insights-sources-prev" class="secondary" type="button">Previous page</button><button id="insights-sources-next" class="secondary" type="button">Next page</button><button id="insights-sources-retry" class="secondary" type="button" hidden>Retry records</button></div>
+      </section>
+    </div>
+  </div>
+</section>
