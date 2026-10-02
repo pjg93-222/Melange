@@ -1,0 +1,160 @@
+script <- sub("^--file=", "", grep("^--file=", commandArgs(FALSE), value = TRUE)[[1L]])
+project_root <- normalizePath(file.path(dirname(script), ".."), winslash = "/")
+for (file in c("paths.R", "schema.R", "ingest.R", "collect.R", "fec_api.R", "report.R")) {
+  source(file.path(project_root, "R", file), local = .GlobalEnv)
+}
+suppressPackageStartupMessages(library(data.table))
+rows <- data.table(
+  contributor_name = c("ACME", "ACME EXCHANGE", "ACME", "ACME EXCHANGE", "ACME"),
+  filing_form = c("F3X", "F3X", "F3X", "", "F3X"),
+  line_number = c("11AI", "17", "17", "", "11AI"),
+  receipt_type_full = c("IN-KIND - USDC NOT LIQUIDATED", "25M USDC SOLD VIA ACME - PURCHASER UNKNOWN",
+                        "CONTRIBUTION PREVIOUSLY DISCLOSED", "", ""),
+  is_memo_leg = c(0L, 0L, 1L, 0L, 0L)
+)
+roles <- fec_receipt_role(rows)
+stopifnot(identical(roles, c("contribution", "asset_liquidation", "unverified_disclosure_memo", "unverified_receipt_role", "contribution")))
+stopifnot(identical(fec_receipt_role_excluded(roles), c(FALSE, TRUE, FALSE, FALSE, FALSE)))
+stopifnot(inherits(try(fec_assert_receipt_evidence(rows), silent=TRUE), "try-error"))
+unlinked <- data.table(filing_form="F3X", line_number="11AI", memo_code="X",
+                      memo_text="CONTRIBUTION PREVIOUSLY DISCLOSED")
+stopifnot(!fec_receipt_role_excluded(fec_receipt_role(unlinked)),
+          inherits(try(fec_assert_receipt_evidence(unlinked), silent=TRUE), "try-error"))
+stopifnot(identical(fec_receipt_role(data.table(contributor_name=c("ACME", "ACME EXCHANGE", "ACME PROCESSOR"))),
+                    rep("unverified_receipt_role", 3L)))
+form_rows <- data.table(filing_form=c("F3P","F3P","F4","F4","F3X"),
+                       line_number=c("17AI","20A","14A","17A","12"))
+stopifnot(identical(fec_receipt_role(form_rows), c("contribution","other_receipt","contribution","other_receipt","transfer_receipt")))
+stopifnot(identical(fec_receipt_countable(form_rows), c(TRUE,FALSE,TRUE,FALSE,TRUE)))
+connection <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+init_schema(connection)
+for (table in c("contributions", "corporate_giving")) {
+  stopifnot(all(c("filing_form", "receipt_type_full", "memo_text", "line_number", "back_reference_transaction_id") %in% DBI::dbListFields(connection, table)))
+}
+unit <- list(industry = "Crypto", company = "Acme", company_variants = "Acme", exclusions = character(), cycle = 2024L)
+api_rows <- list(list(sub_id = "fixture-1", contributor_name = "ACME", committee_id = "C00000001", entity_type = "ORG",
+                     contribution_receipt_amount = 10, contribution_receipt_date = "2024-01-01", filing_form = "F3X",
+                     line_number = "17", receipt_type_full = "CONTRIBUTION PREVIOUSLY DISCLOSED", memo_code = "X",
+                     memoed_subtotal = TRUE, transaction_id = "MEMO1", back_reference_transaction_id = "ORIGINAL1"))
+corporate <- fec_api_corporate_records(connection, unit, api_rows, match_overrides = data.frame(), home_states = data.frame())
+stopifnot(corporate$is_memo_leg == 1L, corporate$receipt_type_full == "CONTRIBUTION PREVIOUSLY DISCLOSED")
+# Mimic an old browser row, then hydrate the same sub-ID from the API.
+legacy <- copy(corporate)
+legacy[, `:=`(filing_form = "", receipt_type_full = "", memo_code = "", memoed_subtotal = 0L, is_memo_leg = 0L)]
+checkpoint_corporate_page(connection, legacy, "Acme", 2024L, "fixture", 1L, 1L)
+checkpoint_corporate_page(connection, corporate, "Acme", 2024L, "fixture", 1L, 1L)
+stored <- DBI::dbReadTable(connection, "corporate_giving")
+stopifnot(nrow(stored) == 1L, stored$is_memo_leg == 1L, stored$memoed_subtotal == 1L,
+          stored$back_reference_transaction_id == "ORIGINAL1", stored$receipt_type_full == "CONTRIBUTION PREVIOUSLY DISCLOSED")
+DBI::dbDisconnect(connection)
+memos <- data.frame(sub_id=c("parent", "memo"), company="Acme", committee_id="C1",
+  contributor_name="PERSON, ONE", contribution_receipt_date=c("2022-01-01","2024-01-01"),
+  contribution_receipt_amount=c(100,90), is_memo_leg=c(0L,1L),
+  transaction_id=c("SA11AI.42","MEMO1"), receipt_type_full=c("","[SA11AI:42]"),
+  file_num=c(1,2), report_year=c(2022,2024), report_type="Q1", company_match_status="accepted",
+  filing_form="F3X", line_number="11AI")
+stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
+missing_file <- memos; missing_file$file_num <- 0
+stopifnot(!any(mentat_memo_duplicate_plan(missing_file)$duplicate_memo))
+memos$file_num <- 2; memos$report_year <- 2024
+memos$contribution_receipt_date <- "2024-01-01"
+plan <- mentat_memo_duplicate_plan(memos)
+stopifnot(plan$duplicate_memo[2] == 1L, plan$duplicate_of_sub_id[2] == "parent")
+memos$receipt_type_full <- ""
+memos$back_reference_transaction_id <- c("", "SA11AI.42")
+plan <- mentat_memo_duplicate_plan(memos)
+stopifnot(plan$duplicate_memo[2] == 1L, plan$duplicate_reason[2] == "fec_structured_back_reference")
+memos$contribution_receipt_amount[2] <- 150
+stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
+memos$contribution_receipt_amount[2] <- -90
+stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
+memos$contribution_receipt_amount[2] <- 90
+memos$contributor_name[2] <- "PERSON, DIFFERENT"
+stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
+memos$contributor_name[2] <- "PERSON, ONE"
+memos$company_match_status[1] <- "rejected"
+stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
+memos$company_match_status[1] <- "accepted"; memos$line_number[1] <- "17"
+stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
+memos$line_number[1] <- "11AI"
+ambiguous <- rbind(memos,memos[1,]); ambiguous$sub_id[3] <- "second-parent"
+stopifnot(!any(mentat_memo_duplicate_plan(ambiguous)$duplicate_memo))
+memos$back_reference_transaction_id <- ""; memos$contribution_receipt_amount <- 100
+stopifnot(!any(mentat_memo_duplicate_plan(memos)$duplicate_memo))
+qa <- data.table(company_match_status="accepted", excluded_reason="", duplicate_memo=0L,
+                 filing_form="F3X", line_number=c("11AI","17"), contribution_receipt_amount=c(100,190000),
+                 memo_text=c("", "RETURN OF ERRONEOUS DEBIT MADE BY PROCESSOR"))
+stopifnot(sum(qa$contribution_receipt_amount[fec_receipt_countable(qa)]) == 100)
+specials <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
+  "NON-CONTRIBUTION ACCOUNT", "LEGAL PROCEEDINGS ACCOUNT CONTRIBUTION", "HEADQUARTERS ACCOUNT",
+  "NON-CONTRIBUTION", "OTHER FEDERAL RECEIPTS (DIVIDENDS, INTEREST, ETC.)", "INTEREST",
+  "NON-CONTRIBUTION ACCOUNT; 1500000 USDC LIQUIDATED VIA EXCHANGE - PURCHASER UNKNOWN",
+  "NON-CONTRIBUTION ACCOUNT; REFUND FOR PROCESSING FEES", "LEGAL PROCEEDINGS ACCOUNT CONTRIBUTION"),
+  memo_text=c(rep("",8),"IMPERMISSIBLE CONTRIBUTION; SEE JUNE MONTHLY REPORT FOR REFUND"))
+stopifnot(identical(fec_receipt_role(specials), c(rep("contribution",3),
+  "unverified_other_receipt","unverified_other_receipt","other_receipt","asset_liquidation",
+  "unverified_other_receipt","unverified_refund_adjustment")))
+stopifnot(identical(fec_receipt_countable(specials), c(TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE)))
+stopifnot(identical(fec_receipt_countable(specials,verified_only=TRUE), c(TRUE,TRUE,TRUE,rep(FALSE,6))))
+explicit_income <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
+  "NON-CONTRIBUTION: INTEREST", "NONCONTRIBUTION ACCOUNT - INTEREST", "HEADQUARTERS INTEREST INCOME",
+  "RECOUNT INTEREST INCOME", "PAC BANK INTEREST", "CD INTEREST INCOME", "MONTHLY INTEREST",
+  "INVESTMENT ACCOUNT INTEREST", "INTEREST/DIVIDENDS", "INVESTMENT INCOME"))
+stopifnot(all(fec_receipt_role(explicit_income) == "other_receipt"),
+          !any(fec_receipt_countable(explicit_income)))
+account_income <- data.table(filing_form="F3X", line_number="17", receipt_type_full="INTEREST INCOME",
+  memo_text=c("NON-CONTRIBUTION ACCOUNT", "NONCONTRIBUTION ACCOUNT", "HEADQUARTERS ACCOUNT",
+              "LEGAL PROCEEDINGS ACCOUNT", "RECOUNT ACCOUNT", "CONVENTION ACCOUNT", "NON-CONTRIBUTION"))
+stopifnot(all(fec_receipt_role(account_income) == "other_receipt"))
+ambiguous_income <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
+  "OTHER FEDERAL RECEIPTS (DIVIDENDS, INTEREST, ETC.)", "INVESTMENT OPPORTUNITY",
+  "INTEREST IN PUBLIC POLICY"))
+stopifnot(all(fec_receipt_role(ambiguous_income) == "unverified_other_receipt"))
+explicit_financial_events <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
+  "INTEREST RECEIVED", "INVESTMENT CHANGE IN VALUE", "PAC INVESTMENT CHANGE IN VALUE",
+  "INVESTMENT LOSS", "BANK INTEREST LOST", "GAIN ON SALE OF STOCK", "LOSS ON SALE OF BOND",
+  "REINVESTED DIVIDEND", "UNREALIZED INVESTMENT GAINS", "NET INVESTMENT EARNINGS",
+  "INTEREST/DIVIDENDS INCOME PLUS UNREALIZED LOSS ON INVESTMENTS",
+  "INTEREST, DIVIDENDS, CAPITAL GAIN (LOSS)", "SALE OF INVESTMENT",
+  "NET INVESTMENT EARNINGS/LOSS", "SERVICE FEE", "JANUARY INTEREST",
+  "PROCEEDS FROM SALE OF 8 SHS VANGUARD REAL ESTATE", "CREDIT CARD REWARDS",
+  "MUTUAL FUND INVESTMENT ACTIVITY FOR PERIOD 1-1-26 THROUGH 3-31-26",
+  "INTEREST FOR THE MONTH OF AUGUST 2023", "NTEREST INCOME",
+  "DUPLICATE BANK FEE CREDIT", "ONE TIME ADJUSTMENT",
+  "COMMERCIAL CARD REBATE", "VENDOR REFUND", "RETURN OF FRAUDULENT DISBURSEMENT - SEE MEMO TEXT",
+  "REFUND OF 9/18/22 FRAUDULENT DISBURSEMENT",
+  "CREDIT FOR UNAUTHORIZED DISBURSEMENT ON 2/20/2024",
+  "RETURNED EXAMPLE CONSULTING BILL PAYMENT",
+  "REFUND OF ERRONEOUS BANK FEES FROM MAY 2023",
+  "REFUND OF UNAUTHORIZED TRANSACTION THAT OCCURRED ON 07/31/2023",
+  "BANK ERRONEOUSLY DEPOSITED 251 17 INTO PAC ACCOUNT THIS ERROR WILL BE REVERSED",
+  "REVERSAL OF 08/27 ARKPAC FOR SEN. JOHN BOOZMAN CONTRIBUTION",
+  "BANK REFUND OF STOLEN 7/26/21 CONTRIBUTION TO EXAMPLE FOR CONGRESS",
+  "CREDIT FOR UNAUTHORIZED ACTIVITY", "RECOVERED FUNDS FROM BANK FRAUD", "NON-CONTRIBUTION AMOUNT",
+  "REFUND OF BANK FEES ERRONEOUSLY CHARGED", "REFUND OF MERCHANT FEES",
+  "REFUND OF CHECK ORDER FEE", "BANK STOP PAYMENT FEE REFUND", "BANK FEE REVERSAL",
+  "BANK FEE REFUND", "INTEREST DISTRIBUTION FUND", "INTEREST (DISTRIBUTION FUND)",
+  "INTEREST EARNE", "INTEREST EARNER", "JULY INTEREST EARNED",
+  "OCTOBER MONTHLY INTEREST", "ACCOUNT INTEREST", "INTEREST FROM BANK ACCT",
+  "INTEREST ON DEPOSIT ACCT", "INTEREST ON BANK ACCOUNT", "CASH BACK REWARD",
+  "JPM TEST DEPOSIT", "NON-CONTRIBUTORY ACCOUNT RECEIPT",
+  "BANK ERROR DEPOSIT. HOPE TO HAVE THE BANK REVERSE THE ERROR IN APRIL 2022.",
+  "BANK DEPOSIT ERROR - REFUNDED 08/10/2022", "INTEREST ($0.32)", "TEST DEPOSIT"))
+stopifnot(all(fec_receipt_role(explicit_financial_events) == "other_receipt"))
+stopifnot(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
+  receipt_type_full="JFC TRANSFER: EXAMPLE JOINT FUNDRAISING COMMITTEE")) == "transfer_receipt")
+stopifnot(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
+  receipt_type_full="TRANSFER", memo_text="TRANSFER FROM EXAMPLE JFC")) == "transfer_receipt")
+stopifnot(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
+  receipt_type_full="REVERSAL OF EXAMPLE CONTRIBUTION", memo_text="CONTRIBUTION")) ==
+  "unverified_other_receipt")
+stopifnot(fec_receipt_role(data.table(filing_form="F3X", line_number="17",
+  receipt_type_full="CONTRIBUTION", memo_text="BANK FEE REFUND")) ==
+  "unverified_other_receipt")
+conflicting_income <- data.table(filing_form="F3X", line_number="17", receipt_type_full=c(
+  "CONTRIBUTION", "HEADQUARTERS ACCOUNT CONTRIBUTION", "NON-CONTRIBUTION ACCOUNT DONATION"),
+  memo_text="INTEREST INCOME")
+stopifnot(all(fec_receipt_role(conflicting_income) == "unverified_other_receipt"))
+conflicting_income[, c("receipt_type_full", "memo_text") := .(memo_text, receipt_type_full)]
+stopifnot(all(fec_receipt_role(conflicting_income) == "unverified_other_receipt"))
+cat("test_receipt_roles: PASS\n")

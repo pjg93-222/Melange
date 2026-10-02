@@ -1,0 +1,244 @@
+"""The warmer process: below-normal priority without EcoQoS (review finding H1), and a prompt exit once its
+console is gone, even while a build thread is still running (review finding H3).
+
+PREWARM_UNDER_TEST points this suite, and its children, at a variant of prewarm.py (the negative controls).
+Children write to real files and are killed and waited on with a timeout (brain DE-026).
+"""
+import contextlib
+import importlib.util
+import io
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+from unittest import mock
+
+TESTS = Path(__file__).resolve().parent
+APP = TESTS.parent / 'app'
+if str(APP) not in sys.path:
+    sys.path.insert(0, str(APP))
+PREWARM = Path(os.environ.get('PREWARM_UNDER_TEST') or APP / 'prewarm.py')
+_spec = importlib.util.spec_from_file_location('prewarm', str(PREWARM))
+prewarm = importlib.util.module_from_spec(_spec)
+sys.modules['prewarm'] = prewarm
+_spec.loader.exec_module(prewarm)
+import proclock  # noqa: E402
+
+WINDOWS = os.name == 'nt'
+NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
+BELOW_NORMAL = 0x00004000
+UNTHROTTLED = {'control': 1, 'state': 0}   # ControlMask EXECUTION_SPEED, StateMask 0: EcoQoS off
+
+# A warmer-like process: prewarm under test lowers its own priority, as Warmer.run does, then reports.
+PRIORITY_CHILD = r'''
+import importlib.util, json, sys, time
+spec = importlib.util.spec_from_file_location('prewarm', sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+sys.modules['prewarm'] = module
+spec.loader.exec_module(module)
+print(json.dumps({'set': module.set_below_normal_priority(), 'throttling': module.power_throttling()}), flush=True)
+time.sleep(60)
+'''
+
+# An orphaned warmer: prewarm.main as the CLI runs it, a Warmer whose task starts a long build on a
+# non-daemon pool thread (analysis_data._pool) under a cross-process marker (analysis_data._run), and
+# polls until its console is gone (warm_insights). The build would run for ten minutes.
+ORPHAN_CHILD = r'''
+import sys, threading, time
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+tests, state_root, marker, parent = sys.argv[1], Path(sys.argv[2]), Path(sys.argv[3]), int(sys.argv[4])
+sys.path.insert(0, tests)
+import test_prewarm as base   # prewarm from PREWARM_UNDER_TEST or the app folder; FakeBackend
+prewarm = base.prewarm
+import proclock
+pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix='mentat-insights')
+
+
+class Backend(base.FakeBackend):
+    def warm(self, task, deadline=None, should_stop=None, retry=False, sleep=None):
+        claimed = threading.Event()
+
+        def build():
+            body = proclock.claim(marker, 'build')
+            claimed.set()
+            try:
+                end = time.monotonic() + 600
+                while time.monotonic() < end:
+                    sum(range(20000))
+            finally:
+                proclock.release(marker, body)
+        pool.submit(build)
+        claimed.wait(60)
+        while True:
+            if should_stop and should_stop():
+                raise prewarm.Stop('parent_gone', 'The warmer is stopping.')
+            time.sleep(0.1)
+
+
+def op_run(options):
+    state = prewarm.StateDir(Path(options.state_root))
+    warmer = prewarm.Warmer(Backend(state_root, datasets=('Alpha',)), state, op='run', parent_pid=options.parent_pid,
+                            once=True, set_priority=False, free_bytes=lambda: 8 * 1024 ** 3,
+                            console_probe=lambda url: (False, {}), code_stamps=lambda: {},
+                            emitter=lambda *args, **fields: None)
+    return warmer.run()
+
+
+prewarm.OPS['run'] = op_run
+sys.exit(prewarm.main(['run', '--parent-pid', str(parent), '--state-root', str(state_root)], hard_exit=True))
+'''
+
+
+def kill_tree(child):
+    if child.poll() is None:
+        if WINDOWS:
+            killer = subprocess.Popen(['taskkill', '/F', '/T', '/PID', str(child.pid)], stdin=subprocess.DEVNULL,
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=NO_WINDOW)
+            try:
+                killer.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                killer.kill()
+        else:
+            child.kill()
+    try:
+        child.wait(timeout=30)
+    except subprocess.TimeoutExpired:
+        pass
+
+
+def priority_class(handle):
+    import ctypes
+    from ctypes import wintypes
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.GetPriorityClass.restype = wintypes.DWORD
+    kernel.GetPriorityClass.argtypes = (wintypes.HANDLE,)
+    return kernel.GetPriorityClass(int(handle))
+
+
+class Case(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.addCleanup(self._tmp.cleanup)
+        self.dir = Path(self._tmp.name)
+        self.count = 0
+
+    def spawn(self, arguments, **kwargs):
+        """(child, stdout file, stderr file); the child is killed at cleanup."""
+        self.count += 1
+        out, err = self.dir / f'child-{self.count}.out', self.dir / f'child-{self.count}.err'
+        with open(out, 'wb') as stdout, open(err, 'wb') as stderr:
+            child = subprocess.Popen(arguments, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr, **kwargs)
+        self.addCleanup(kill_tree, child)
+        return child, out, err
+
+    def first_line(self, out, err, timeout=60):
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            text = out.read_text(encoding='utf-8', errors='replace')
+            if '\n' in text:
+                return json.loads(text.splitlines()[0])
+            time.sleep(.05)
+        self.fail('the child printed nothing: ' + err.read_text(encoding='utf-8', errors='replace')[-2000:])
+
+
+@unittest.skipUnless(WINDOWS, 'Windows priority classes and power throttling')
+class SchedulingTests(Case):
+    def test_a_process_has_no_explicit_policy_until_one_is_set(self):
+        # The read-back itself: a below-normal child nobody configured has no explicit policy.
+        child, _, _ = self.spawn([sys.executable, '-c', 'import time; time.sleep(60)'],
+                                 creationflags=BELOW_NORMAL | NO_WINDOW)
+        self.assertEqual(prewarm.power_throttling(child._handle), {'control': 0, 'state': 0})
+        self.assertEqual(priority_class(child._handle), BELOW_NORMAL)
+
+    def test_the_warmer_runs_below_normal_with_ecoqos_off(self):
+        child, out, err = self.spawn([sys.executable, '-c', PRIORITY_CHILD, str(PREWARM)], creationflags=NO_WINDOW)
+        line = self.first_line(out, err)
+        self.assertEqual(line['set'], {'priority': 'below_normal', 'ecoqos_off': True})
+        self.assertEqual(line['throttling'], UNTHROTTLED)
+        self.assertEqual(prewarm.power_throttling(child._handle), UNTHROTTLED)   # read back by another process
+        self.assertEqual(priority_class(child._handle), BELOW_NORMAL)
+
+    def test_the_console_turns_ecoqos_off_for_the_warmer_it_launches(self):
+        # The warmer sets it itself only after its imports; the console sets it at launch. A stand-in
+        # child that never sets anything shows the console's call alone.
+        launched, real = [], subprocess.Popen
+
+        def popen(command, **kwargs):
+            child = real([sys.executable, '-c', 'import time; time.sleep(60)'], **kwargs)
+            launched.append((command, child))
+            return child
+
+        with mock.patch.object(prewarm.subprocess, 'Popen', popen), mock.patch.object(prewarm, 'emit') as emitted:
+            pid = prewarm.launch_warmer(data_root=self.dir / 'data', read_only=False, console_port=8899,
+                                        state_root=self.dir / 'state')
+        self.assertEqual(len(launched), 1)
+        command, child = launched[0]
+        self.addCleanup(kill_tree, child)
+        self.assertEqual((pid, command[2]), (child.pid, 'run'))
+        self.assertEqual(prewarm.power_throttling(child._handle), UNTHROTTLED)
+        self.assertEqual(priority_class(child._handle), BELOW_NORMAL)
+        self.assertIs(emitted.call_args.kwargs['metadata']['ecoqos_off'], True)
+
+
+class OrphanTests(Case):
+    def test_an_orphaned_warmer_exits_within_seconds_while_its_build_thread_runs(self):
+        console, _, _ = self.spawn([sys.executable, '-c', 'import time; time.sleep(120)'], creationflags=NO_WINDOW)
+        deadline = time.monotonic() + 30
+        while not proclock.process_started(console.pid) and time.monotonic() < deadline:
+            time.sleep(.02)
+        marker = self.dir / 'building' / 'build.lock'
+        state_root = self.dir / 'state'
+        environment = {**os.environ, 'GLASSBOX_EVENTS_DIR': str(self.dir / 'events')}
+        warmer, out, err = self.spawn([sys.executable, '-c', ORPHAN_CHILD, str(TESTS), str(state_root), str(marker),
+                                       str(console.pid)], creationflags=NO_WINDOW, env=environment)
+        deadline = time.monotonic() + 60
+        while time.monotonic() < deadline:
+            with contextlib.suppress(OSError, ValueError):
+                if json.loads(marker.read_bytes())['pid'] == warmer.pid:
+                    break
+            self.assertIsNone(warmer.poll(), err.read_text(encoding='utf-8', errors='replace')[-2000:])
+            time.sleep(.05)
+        else:
+            self.fail('the build never started: ' + err.read_text(encoding='utf-8', errors='replace')[-2000:])
+        time.sleep(1)
+        self.assertIsNone(warmer.poll(), 'the warmer must run while its console does')
+        kill_tree(console)
+        began = time.monotonic()
+        try:
+            code = warmer.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            self.fail('the orphaned warmer outlived its console by 30 s: its build thread kept it alive')
+        self.assertLess(time.monotonic() - began, 10)
+        self.assertEqual(code, 0, err.read_text(encoding='utf-8', errors='replace')[-2000:])
+        report = json.loads([line for line in out.read_text(encoding='utf-8').splitlines() if line.startswith('{')][-1])
+        self.assertEqual((report['status'], report['metrics']['root_cause_hint']), ('success', 'parent_gone'))
+        self.assertFalse(marker.exists(), 'the build marker the warmer held must be released before it exits')
+        lock = json.loads((state_root / 'prewarm' / 'warmer.lock').read_text(encoding='utf-8'))
+        self.assertEqual(lock['pid'], warmer.pid)
+        self.assertIn('released_utc', lock)
+        rows = prewarm.Ledger(prewarm.StateDir(state_root)).read()
+        self.assertTrue(any(row.get('root_cause_hint') == 'parent_gone' for row in rows), rows)
+        self.assertIn('exiting now after parent_gone', err.read_text(encoding='utf-8', errors='replace'))
+
+    def test_main_never_ends_an_in_process_caller(self):
+        stopped = {'run': lambda options: prewarm.op_result('success', 'stopped', metrics={'root_cause_hint': 'parent_gone'})}
+        with mock.patch.dict(prewarm.OPS, stopped), mock.patch.object(prewarm, 'exit_now') as ending, \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(prewarm.main(['run']), 0)
+            ending.assert_not_called()
+            prewarm.main(['run'], hard_exit=True)
+            ending.assert_called_once_with(0, 'parent_gone', None)
+            ending.reset_mock()
+            finished = {'run': lambda options: prewarm.op_result('success', 'done', metrics={'root_cause_hint': None})}
+            with mock.patch.dict(prewarm.OPS, finished):
+                prewarm.main(['run'], hard_exit=True)
+            ending.assert_not_called()
+
+
+if __name__ == '__main__':
+    unittest.main()

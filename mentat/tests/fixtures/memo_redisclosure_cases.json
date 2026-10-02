@@ -1,0 +1,1462 @@
+{
+ "name": "memo_redisclosure_cases",
+ "version": 1,
+ "rule": "F13 memo re-disclosure (Paul approved 2026-09-26, \"Approve F13\"). A memo row whose own text states that it re-discloses a gift already itemized (receipt role unverified_disclosure_memo: a memo matching fec_receipt_rules.json disclosure_pattern) is a duplicate of the counted parent it restates - same company, same recipient committee, same contributor (contributor_id when both rows carry one, else the normalised name), the same nonzero amount to the cent, dated on or before the memo, not itself a memo - and counts once, via the parent (reason memo_redisclosure_of_counted_parent, parent sub_id recorded). Several parents: the latest-dated, then the lowest sub_id. A memo that calls the gift unitemized restates no itemized parent. With no parent the memo stays counted and flagged disclosure_memo_unmatched (D-040). A memo without the statement is untouched. A counted parent: company match accepted or blank, no excluded_reason, a giving role.",
+ "format": {
+  "defaults": "merged under every row",
+  "rows": "receipt rows as the Mentat tables hold them (memo_code X / is_memo_leg 1 marks a memo)",
+  "expect": "sub_id -> {counted: stays in the total, duplicate_of: parent sub_id or \"\", flagged: counted re-disclosure memo carrying disclosure_memo_unmatched}",
+  "statements": "receipt_type_full / memo_text -> states (a re-disclosure statement) and unitemized, for the shared patterns; real phrases name the saved industry they come from"
+ },
+ "defaults": {
+  "company": "Coinbase",
+  "committee_id": "C00835959",
+  "filing_form": "F3X",
+  "company_match_status": "accepted",
+  "excluded_reason": ""
+ },
+ "statements": [
+  {
+   "receipt_type_full": "15,500,000 USDC. CONTRIBUTION DISCLOSEDON ON LINE 11(A)",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "Crypto: Coinbase -> FAIRSHAKE"
+  },
+  {
+   "receipt_type_full": "5,000 USDC. CONTRIBUTION DISCLOSED ON LINE 11(A)",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "Crypto: Pollak -> FAIRSHAKE"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "25000 USDC, CONTRIBUTION DISCLOSED ON LINE 11(A)",
+   "states": true,
+   "unitemized": false,
+   "source": "Crypto: Pirestani -> GMI PAC"
+  },
+  {
+   "receipt_type_full": "5,000 USDC DISCLOSED ON LINE 11A",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "the DISCLOSED ON LINE form without CONTRIBUTION"
+  },
+  {
+   "receipt_type_full": "24,999,995 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "Crypto: Coinbase -> FAIRSHAKE"
+  },
+  {
+   "receipt_type_full": "236.20702457 Bitcoins (BTC) contribution - previously disclosed (aggregate YTD from 2024)",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "Crypto: Coinbase -> FAIRSHAKE (2025 filings)"
+  },
+  {
+   "receipt_type_full": "5000 STABLECOIN PREVIOUSLY DISCLOSED",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "Crypto: Coinbase Innovation PAC"
+  },
+  {
+   "receipt_type_full": "0.264408 ETHER SIMULTANEOUSLY CONVERTED TO USDC",
+   "memo_text": "PREVIOUSLY DISCLOSED",
+   "states": true,
+   "unitemized": false,
+   "source": "Crypto: Trump National Committee JFC"
+  },
+  {
+   "receipt_type_full": "5 USDC CONTRIBUTION PREVIOUSLY DISCLOSED (UNITEMIZED)",
+   "memo_text": "",
+   "states": true,
+   "unitemized": true,
+   "source": "Crypto: Coinbase -> FAIRSHAKE"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "ORIGINAL CONTRIBUTION AS PREVIOUSLY REPORTED",
+   "states": true,
+   "unitemized": false,
+   "source": "Banking, Telecom, Credit Arms"
+  },
+  {
+   "receipt_type_full": "PREVIOUSLY REPORTED CONTRIBUTION. ORIGINALLY DESIGNATED FOR TIM SCOTT FOR SENATE PRIMARY 2028",
+   "memo_text": "SEE REDESIGNATION BELOW",
+   "states": true,
+   "unitemized": false,
+   "source": "Banking: Tim Scott for America"
+  },
+  {
+   "receipt_type_full": "REDESIGNATED CONTRIBUTION AS ORIGINALLY REPORTED",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "Banking: Friends of Simitian"
+  },
+  {
+   "receipt_type_full": "LEGAL PROCEEDINGS ACCOUNT CONTRIBUTION",
+   "memo_text": "2021 AGGREGATE; LEGAL PROCEEDINGS ACCOUNT; MEMO - ORIGINALLY DISCLOSED IN M06 REPORT. SEE $38500.0",
+   "states": true,
+   "unitemized": false,
+   "source": "Banking: RNC"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "REATTRIBUTING TO SPOUSE FROM PREVIOUSLY REPORTED CONTRIBUTION",
+   "states": true,
+   "unitemized": false,
+   "source": "Community Banks"
+  },
+  {
+   "receipt_type_full": "5 USDC CONTRIBUTION PREVIOUSLY REPORTED",
+   "memo_text": "",
+   "states": true,
+   "unitemized": false,
+   "source": "the CONTRIBUTION PREVIOUSLY REPORTED form"
+  },
+  {
+   "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED - NOT ITEMIZED",
+   "memo_text": "",
+   "states": true,
+   "unitemized": true,
+   "source": "unitemized guard, NOT ITEMIZED form"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "* FINAL TRANSFER. SOME ALLOCATIONS PREVIOUSLY REPORTED.",
+   "states": false,
+   "unitemized": false,
+   "source": "Banking: JFC transfer memo (partial allocations)"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "* FINAL TRANSFER - ADDITIONAL ALLOCATIONS PREVIOUSLY REPORTED",
+   "states": false,
+   "unitemized": false,
+   "source": "Banking: JFC transfer memo"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "* ORIGINALLY RECEIVED 12/31/2022",
+   "states": false,
+   "unitemized": false,
+   "source": "Telecom: a receipt date, not a re-disclosure"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "TRANSFER SUBITEMIZATION MEMO",
+   "states": false,
+   "unitemized": false,
+   "source": "Telecom, Fintech, Banking"
+  },
+  {
+   "receipt_type_full": null,
+   "memo_text": "*LLC - MEMBERS BELOW IF ITEMIZED. PERMISSIBLE FUNDS.",
+   "states": false,
+   "unitemized": false,
+   "source": "Fintech"
+  },
+  {
+   "receipt_type_full": "2.692 BITCOINS LIQUIDATED",
+   "memo_text": "",
+   "states": false,
+   "unitemized": false,
+   "source": "test_rules.R MEMO_EXACT"
+  },
+  {
+   "receipt_type_full": "CONTRIBUTION NOT PREVIOUSLY DISCLOSED",
+   "memo_text": "",
+   "states": false,
+   "unitemized": false,
+   "source": "negation"
+  },
+  {
+   "receipt_type_full": "NOT PREVIOUSLY REPORTED CONTRIBUTION",
+   "memo_text": "",
+   "states": false,
+   "unitemized": false,
+   "source": "negation"
+  },
+  {
+   "receipt_type_full": "HAS NOT BEEN PREVIOUSLY DISCLOSED",
+   "memo_text": "",
+   "states": false,
+   "unitemized": false,
+   "source": "negation"
+  },
+  {
+   "receipt_type_full": "PAST INTEREST EARNED NOT PREVIOUSLY REPORTED",
+   "memo_text": "",
+   "states": false,
+   "unitemized": false,
+   "source": "fec_receipt_rules non-giving description"
+  },
+  {
+   "receipt_type_full": "EARMARKED THROUGH ACTBLUE",
+   "memo_text": "",
+   "states": false,
+   "unitemized": false,
+   "source": "an earmark"
+  },
+  {
+   "receipt_type_full": "",
+   "memo_text": "",
+   "states": false,
+   "unitemized": false,
+   "source": "blank"
+  }
+ ],
+ "cases": [
+  {
+   "name": "fairshake_15_5m_disclosedon_typo",
+   "about": "Real FAIRSHAKE rows. The memo states \"CONTRIBUTION DISCLOSEDON ON LINE 11(A)\" (the filer's typo); its FEC back reference points at the sale (an asset liquidation, never a parent), so F13 finds the counted line 11AI gift.",
+   "rows": [
+    {
+     "sub_id": "4021420241824800115",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2023-12-20",
+     "contribution_receipt_amount": 15500000,
+     "line_number": "11AI",
+     "receipt_type_full": "IN-KIND - 15,500,000 US DOLLAR COIN (USDC)",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "transaction_id": "SA11AI.4390",
+     "file_num": "1752853"
+    },
+    {
+     "sub_id": "4021420241824800142",
+     "contributor_name": "COINBASE COMMERCE (EXCHANGE)",
+     "contribution_receipt_date": "2023-12-21",
+     "contribution_receipt_amount": 15500000,
+     "line_number": "17",
+     "receipt_type_full": "15,500,000 USDC SOLD VIA COINBASE -  PURCHASER UNKNOWN",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "transaction_id": "SA17.4457",
+     "file_num": "1752853"
+    },
+    {
+     "sub_id": "4021420241824800143",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2023-12-21",
+     "contribution_receipt_amount": 15500000,
+     "line_number": "17",
+     "receipt_type_full": "15,500,000 USDC. CONTRIBUTION DISCLOSEDON ON LINE 11(A)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "transaction_id": "SA17.4457.0",
+     "back_reference_transaction_id": "SA17.4457",
+     "file_num": "1752853"
+    }
+   ],
+   "expect": {
+    "4021420241824800115": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4021420241824800142": {
+     "counted": false,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4021420241824800143": {
+     "counted": false,
+     "duplicate_of": "4021420241824800115",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "fairshake_four_bitcoin_memos",
+   "about": "Real FAIRSHAKE rows: the four 2025-filed $23M memos state \"previously disclosed\"; all restate the one counted in-kind gift, which counts once.",
+   "rows": [
+    {
+     "sub_id": "4020420251141540904",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-12-20",
+     "contribution_receipt_amount": 23000000,
+     "line_number": "11AI",
+     "receipt_type_full": "IN-KIND - 236.20702457 BITCOIN - NOT LIQUIDATED",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "4030420261386079659",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-12-20",
+     "contribution_receipt_amount": 23000000,
+     "line_number": "17",
+     "receipt_type_full": "236.20702457 Bitcoins (BTC) contribution - previously disclosed (aggregate YTD from 2024)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    },
+    {
+     "sub_id": "4030420261386079661",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-12-20",
+     "contribution_receipt_amount": 23000000,
+     "line_number": "17",
+     "receipt_type_full": "236.20702457 Bitcoins (BTC) contribution - previously disclosed (aggregate YTD from 2024)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    },
+    {
+     "sub_id": "4081520251218411849",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-12-20",
+     "contribution_receipt_amount": 23000000,
+     "line_number": "17",
+     "receipt_type_full": "236.20702457 BITCOINS (BTC) CONTRIBUTION - PREVIOUSLY DISCLOSED (AGGREGATE YTD FROM 2024)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    },
+    {
+     "sub_id": "4081520251218411851",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-12-20",
+     "contribution_receipt_amount": 23000000,
+     "line_number": "17",
+     "receipt_type_full": "236.20702457 BITCOINS (BTC) CONTRIBUTION - PREVIOUSLY DISCLOSED (AGGREGATE YTD FROM 2024)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "4020420251141540904": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4030420261386079659": {
+     "counted": false,
+     "duplicate_of": "4020420251141540904",
+     "flagged": false
+    },
+    "4030420261386079661": {
+     "counted": false,
+     "duplicate_of": "4020420251141540904",
+     "flagged": false
+    },
+    "4081520251218411849": {
+     "counted": false,
+     "duplicate_of": "4020420251141540904",
+     "flagged": false
+    },
+    "4081520251218411851": {
+     "counted": false,
+     "duplicate_of": "4020420251141540904",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "fairshake_usdc_previously_disclosed",
+   "about": "Real FAIRSHAKE rows: the $24,999,995 memo restates the same-day counted gift.",
+   "rows": [
+    {
+     "sub_id": "4062620241962823148",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-30",
+     "contribution_receipt_amount": 24999995,
+     "line_number": "11AI",
+     "receipt_type_full": "24,999,995 USDC RECEIVED, NOT LIQUIDATED",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "4081220242011729506",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-30",
+     "contribution_receipt_amount": 24999995,
+     "line_number": "17",
+     "receipt_type_full": "24,999,995 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "4062620241962823148": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4081220242011729506": {
+     "counted": false,
+     "duplicate_of": "4062620241962823148",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "unitemized_memo_without_parent",
+   "about": "Real FAIRSHAKE row: \"5 USDC CONTRIBUTION PREVIOUSLY DISCLOSED (UNITEMIZED)\" says re-disclosure but has no itemized parent. Counted and flagged (D-040).",
+   "rows": [
+    {
+     "sub_id": "4081220242011729505",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-29",
+     "contribution_receipt_amount": 5,
+     "line_number": "17",
+     "receipt_type_full": "5 USDC CONTRIBUTION PREVIOUSLY DISCLOSED (UNITEMIZED)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "4081220242011729505": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "unitemized_memo_beside_a_same_amount_parent",
+   "about": "A memo that calls its gift unitemized restates no itemized row, even when one with the same donor and amount exists.",
+   "rows": [
+    {
+     "sub_id": "4081220242011729505",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-29",
+     "contribution_receipt_amount": 5,
+     "line_number": "17",
+     "receipt_type_full": "5 USDC CONTRIBUTION PREVIOUSLY DISCLOSED (UNITEMIZED)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    },
+    {
+     "sub_id": "F13-P5",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-01",
+     "contribution_receipt_amount": 5,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    }
+   ],
+   "expect": {
+    "4081220242011729505": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    },
+    "F13-P5": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "contribution_disclosed_on_line_11a",
+   "about": "Real FAIRSHAKE rows (contributions table): Pollak's memo states \"CONTRIBUTION DISCLOSED ON LINE 11(A)\"; the sale proceeds stay out as an asset liquidation.",
+   "rows": [
+    {
+     "sub_id": "4021420241824800132",
+     "contributor_name": "POLLAK, JESSE",
+     "contribution_receipt_date": "2023-12-20",
+     "contribution_receipt_amount": 5000,
+     "line_number": "11AI",
+     "receipt_type_full": "IN-KIND - 5,000 US DOLLAR COIN (USDC)",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "4021420241824800140",
+     "contributor_name": "COINBASE COMMERCE (EXCHANGE)",
+     "contribution_receipt_date": "2023-12-20",
+     "contribution_receipt_amount": 5000,
+     "line_number": "17",
+     "receipt_type_full": "PROCEEDS FROM SALE OF 5,000 USDC VIA COINBASE - PURCHASER UNKNOWN",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "4021420241824800141",
+     "contributor_name": "POLLAK, JESSE",
+     "contribution_receipt_date": "2023-12-20",
+     "contribution_receipt_amount": 5000,
+     "line_number": "17",
+     "receipt_type_full": "5,000 USDC. CONTRIBUTION DISCLOSED ON LINE 11(A)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "4021420241824800132": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4021420241824800140": {
+     "counted": false,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4021420241824800141": {
+     "counted": false,
+     "duplicate_of": "4021420241824800132",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "no_statement_is_untouched",
+   "about": "Negative control (test_rules.R MEMO_EXACT): all five financial fields match but the memo says nothing about a re-disclosure. A clue, not proof: it stays counted and is not an F13 memo.",
+   "rows": [
+    {
+     "sub_id": "F13-P7",
+     "contributor_name": "WINKLEVOSS, TYLER",
+     "contribution_receipt_date": "2024-07-19",
+     "contribution_receipt_amount": 176952.05,
+     "line_number": "11AI",
+     "receipt_type_full": "2.692 BITCOINS LIQUIDATED",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "company": "Gemini",
+     "committee_id": "C00825851"
+    },
+    {
+     "sub_id": "F13-M7",
+     "contributor_name": "WINKLEVOSS, TYLER",
+     "contribution_receipt_date": "2024-07-19",
+     "contribution_receipt_amount": 176952.05,
+     "line_number": "17",
+     "receipt_type_full": "2.692 BITCOINS LIQUIDATED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "company": "Gemini",
+     "committee_id": "C00825851"
+    }
+   ],
+   "expect": {
+    "F13-P7": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M7": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "d040c_blank_rows_untouched",
+   "about": "D-040(c): the Coinbase receipts to FAIRSHAKE with a blank line number and blank description are giving and count. F13 runs over the same rows and touches none of them.",
+   "rows": [
+    {
+     "sub_id": "4030420261386079660",
+     "contributor_name": "COINBASE COMMERCE (EXCHANGE)",
+     "contribution_receipt_date": "2025-07-10",
+     "contribution_receipt_amount": 5175000,
+     "line_number": "",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "transaction_id": "876629BF651C491EAF3B"
+    },
+    {
+     "sub_id": "4030420261386079658",
+     "contributor_name": "COINBASE COMMERCE (EXCHANGE)",
+     "contribution_receipt_date": "2025-07-13",
+     "contribution_receipt_amount": 6000000,
+     "line_number": "",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "transaction_id": "370D8DC9123B47ABA632"
+    },
+    {
+     "sub_id": "4030420261386079642",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2025-10-07",
+     "contribution_receipt_amount": 8092475,
+     "line_number": "",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "transaction_id": "E966384FC6024738878E"
+    },
+    {
+     "sub_id": "4081220242011729505",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-29",
+     "contribution_receipt_amount": 5,
+     "line_number": "17",
+     "receipt_type_full": "5 USDC CONTRIBUTION PREVIOUSLY DISCLOSED (UNITEMIZED)",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "4030420261386079660": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4030420261386079658": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4030420261386079642": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4081220242011729505": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "d040c_row_restated_by_a_memo_stays_counted",
+   "about": "A D-040(c) row is a counted parent: a memo restating it is the duplicate, and the D-040(c) row itself is never touched (synthetic memo; no saved memo restates these rows).",
+   "rows": [
+    {
+     "sub_id": "4030420261386079642",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2025-10-07",
+     "contribution_receipt_amount": 8092475,
+     "line_number": "",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "transaction_id": "E966384FC6024738878E"
+    },
+    {
+     "sub_id": "F13-M9",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2025-10-08",
+     "contribution_receipt_amount": 8092475,
+     "line_number": "17",
+     "receipt_type_full": "8,092,475 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "4030420261386079642": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M9": {
+     "counted": false,
+     "duplicate_of": "4030420261386079642",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "parent_dated_after_the_memo",
+   "about": "A parent must be dated on or before the memo.",
+   "rows": [
+    {
+     "sub_id": "F13-P10",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-06-02",
+     "contribution_receipt_amount": 1000,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M10",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-06-01",
+     "contribution_receipt_amount": 1000,
+     "line_number": "17",
+     "receipt_type_full": "1,000 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P10": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M10": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "different_contributor",
+   "about": "Same committee, date and amount, another donor: no parent.",
+   "rows": [
+    {
+     "sub_id": "F13-P11",
+     "contributor_name": "LEE, JUSTIN",
+     "contribution_receipt_date": "2024-05-26",
+     "contribution_receipt_amount": 300,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "committee_id": "C00873893"
+    },
+    {
+     "sub_id": "F13-M11",
+     "contributor_name": "SEGAL, ZACHARY",
+     "contribution_receipt_date": "2024-05-26",
+     "contribution_receipt_amount": 300,
+     "line_number": "17",
+     "receipt_type_full": "0.1329 ETHER SIMULTANEOUSLY CONVERTED TO USDC",
+     "memo_text": "PREVIOUSLY DISCLOSED",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "committee_id": "C00873893"
+    }
+   ],
+   "expect": {
+    "F13-P11": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M11": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "different_committee",
+   "about": "A gift to another committee is not the parent.",
+   "rows": [
+    {
+     "sub_id": "F13-P12",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-30",
+     "contribution_receipt_amount": 24999995,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "committee_id": "C00873893"
+    },
+    {
+     "sub_id": "F13-M12",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-30",
+     "contribution_receipt_amount": 24999995,
+     "line_number": "17",
+     "receipt_type_full": "24,999,995 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P12": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M12": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "amount_differs_by_a_cent",
+   "about": "The amount must match to the cent.",
+   "rows": [
+    {
+     "sub_id": "F13-P13",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-30",
+     "contribution_receipt_amount": 24999995.0,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M13",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-05-30",
+     "contribution_receipt_amount": 24999994.99,
+     "line_number": "17",
+     "receipt_type_full": "24,999,995 USDC CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P13": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M13": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "only_candidate_is_itself_a_memo",
+   "about": "A memo is never a parent.",
+   "rows": [
+    {
+     "sub_id": "F13-P14",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-01-01",
+     "contribution_receipt_amount": 700,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    },
+    {
+     "sub_id": "F13-M14",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-01-02",
+     "contribution_receipt_amount": 700,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P14": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M14": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "only_candidate_is_a_sale",
+   "about": "Sale proceeds (asset_liquidation) are not counted, so they are never a parent.",
+   "rows": [
+    {
+     "sub_id": "F13-S15",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-01-01",
+     "contribution_receipt_amount": 1000,
+     "line_number": "17",
+     "receipt_type_full": "1,000 USDC SOLD VIA COINBASE - PURCHASER UNKNOWN",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M15",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-01-02",
+     "contribution_receipt_amount": 1000,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-S15": {
+     "counted": false,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M15": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "parent_company_match_not_accepted",
+   "about": "A parent whose company match is not accepted is ambiguous attribution: it may count provisionally, but it cannot prove the memo a duplicate (D-040).",
+   "rows": [
+    {
+     "sub_id": "F13-P16",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 2500,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "company_match_status": "rejected"
+    },
+    {
+     "sub_id": "F13-M16",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 2500,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P16": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M16": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "memo_under_attribution_review",
+   "about": "A memo whose own company match is under review is not tested; it stays counted and flagged.",
+   "rows": [
+    {
+     "sub_id": "F13-P17",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 2500,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M17",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 2500,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "company_match_status": "review"
+    }
+   ],
+   "expect": {
+    "F13-P17": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M17": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "contributor_id_decides_when_both_rows_carry_one",
+   "about": "The FEC contributor_id identifies the donor when both rows carry one; otherwise the normalised name does.",
+   "rows": [
+    {
+     "sub_id": "F13-P18",
+     "contributor_name": "ACME PAC",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 5000,
+     "line_number": "11C",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "contributor_id": "C00111111"
+    },
+    {
+     "sub_id": "F13-M18a",
+     "contributor_name": "ACME POLITICAL ACTION COMMITTEE",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 5000,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "contributor_id": "C00111111"
+    },
+    {
+     "sub_id": "F13-M18b",
+     "contributor_name": "ACME PAC",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 5000,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "contributor_id": "C00222222"
+    },
+    {
+     "sub_id": "F13-M18c",
+     "contributor_name": "ACME PAC",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 5000,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P18": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M18a": {
+     "counted": false,
+     "duplicate_of": "F13-P18",
+     "flagged": false
+    },
+    "F13-M18b": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    },
+    "F13-M18c": {
+     "counted": false,
+     "duplicate_of": "F13-P18",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "negated_statement_is_untouched",
+   "about": "Negative control: \"NOT PREVIOUSLY DISCLOSED\" is not a re-disclosure.",
+   "rows": [
+    {
+     "sub_id": "F13-P19",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-04-01",
+     "contribution_receipt_amount": 900,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M19",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-04-01",
+     "contribution_receipt_amount": 900,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION NOT PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P19": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M19": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "jfc_allocation_memo_is_untouched",
+   "about": "Negative control (Banking wording): \"SOME ALLOCATIONS PREVIOUSLY REPORTED\" on a JFC transfer memo does not say this row restates a gift.",
+   "rows": [
+    {
+     "sub_id": "F13-P20",
+     "contributor_name": "EXAMPLE VICTORY FUND",
+     "contribution_receipt_date": "2024-06-30",
+     "contribution_receipt_amount": 1375.96,
+     "line_number": "12",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "filing_form": "F3",
+     "committee_id": "C00000020"
+    },
+    {
+     "sub_id": "F13-M20",
+     "contributor_name": "EXAMPLE VICTORY FUND",
+     "contribution_receipt_date": "2024-06-30",
+     "contribution_receipt_amount": 1375.96,
+     "line_number": "12",
+     "receipt_type_full": "",
+     "memo_text": "* FINAL TRANSFER. SOME ALLOCATIONS PREVIOUSLY REPORTED.",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "filing_form": "F3",
+     "committee_id": "C00000020"
+    }
+   ],
+   "expect": {
+    "F13-P20": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M20": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "original_contribution_as_previously_reported",
+   "about": "Real Credit Arms rows: \"ORIGINAL CONTRIBUTION AS PREVIOUSLY REPORTED\" restates the counted earmarked gift.",
+   "rows": [
+    {
+     "sub_id": "4121920251299510442",
+     "contributor_name": "DHRUNA, CHET",
+     "contribution_receipt_date": "2025-08-19",
+     "contribution_receipt_amount": 3500,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "EARMARK VIA ACTBLUE ON 2025-08-27",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "filing_form": "F3",
+     "company": "Ford Motor Credit Company",
+     "committee_id": "C00917229"
+    },
+    {
+     "sub_id": "4031120261420752087",
+     "contributor_name": "DHRUNA, CHET",
+     "contribution_receipt_date": "2025-08-19",
+     "contribution_receipt_amount": 3500,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "ORIGINAL CONTRIBUTION AS PREVIOUSLY REPORTED",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "filing_form": "F3",
+     "company": "Ford Motor Credit Company",
+     "committee_id": "C00917229"
+    }
+   ],
+   "expect": {
+    "4121920251299510442": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4031120261420752087": {
+     "counted": false,
+     "duplicate_of": "4121920251299510442",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "previously_reported_contribution_redesignated",
+   "about": "Real Banking rows: the presidential report's memo restates the Senate report's counted gift before a redesignation.",
+   "rows": [
+    {
+     "sub_id": "4071920231754558810",
+     "contributor_name": "MCINTOSH, BRENT",
+     "contribution_receipt_date": "2023-03-20",
+     "contribution_receipt_amount": 3300,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "EARMARKED (NON-DIRECTED) THROUGH WINRED",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "filing_form": "F3",
+     "company": "Citibank",
+     "committee_id": "C00540302"
+    },
+    {
+     "sub_id": "4101820231805549375",
+     "contributor_name": "MCINTOSH, BRENT",
+     "contribution_receipt_date": "2023-03-20",
+     "contribution_receipt_amount": 3300,
+     "line_number": "17A",
+     "receipt_type_full": "PREVIOUSLY REPORTED CONTRIBUTION. ORIGINALLY DESIGNATED FOR TIM SCOTT FOR SENATE PRIMARY 2028",
+     "memo_text": "SEE REDESIGNATION BELOW",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "filing_form": "F3P",
+     "company": "Citibank",
+     "committee_id": "C00540302"
+    }
+   ],
+   "expect": {
+    "4071920231754558810": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "4101820231805549375": {
+     "counted": false,
+     "duplicate_of": "4071920231754558810",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "originally_disclosed_in_an_earlier_report",
+   "about": "Banking wording (the saved rows are under attribution review; accepted here to test the phrase).",
+   "rows": [
+    {
+     "sub_id": "F13-P22",
+     "contributor_name": "PERKINS, JAMES I. MR.",
+     "contribution_receipt_date": "2021-05-19",
+     "contribution_receipt_amount": 38500,
+     "line_number": "17",
+     "receipt_type_full": "LEGAL PROCEEDINGS ACCOUNT CONTRIBUTION",
+     "memo_text": "LEGAL PROCEEDINGS ACCOUNT",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "company": "Citibank",
+     "committee_id": "C00003418"
+    },
+    {
+     "sub_id": "F13-M22",
+     "contributor_name": "PERKINS, JAMES I. MR.",
+     "contribution_receipt_date": "2021-05-19",
+     "contribution_receipt_amount": 38500,
+     "line_number": "17",
+     "receipt_type_full": "LEGAL PROCEEDINGS ACCOUNT CONTRIBUTION",
+     "memo_text": "2021 AGGREGATE; LEGAL PROCEEDINGS ACCOUNT; MEMO - ORIGINALLY DISCLOSED IN M06 REPORT. SEE $38500.0",
+     "memo_code": "X",
+     "is_memo_leg": 1,
+     "company": "Citibank",
+     "committee_id": "C00003418"
+    }
+   ],
+   "expect": {
+    "F13-P22": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M22": {
+     "counted": false,
+     "duplicate_of": "F13-P22",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "several_parents_latest_then_lowest_sub_id",
+   "about": "With several matching parents the latest-dated one is recorded, then the lowest sub_id.",
+   "rows": [
+    {
+     "sub_id": "F13-P23a",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-01-05",
+     "contribution_receipt_amount": 100,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-P23c",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 100,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-P23b",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 100,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M23",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-03-01",
+     "contribution_receipt_amount": 100,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P23a": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-P23b": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-P23c": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M23": {
+     "counted": false,
+     "duplicate_of": "F13-P23b",
+     "flagged": false
+    }
+   }
+  },
+  {
+   "name": "different_company",
+   "about": "The parent must be counted for the same company.",
+   "rows": [
+    {
+     "sub_id": "F13-P24",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 2500,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0,
+     "company": "Ripple"
+    },
+    {
+     "sub_id": "F13-M24",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 2500,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P24": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M24": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  },
+  {
+   "name": "zero_amount_restates_nothing",
+   "about": "A row with no money has nothing to count twice.",
+   "rows": [
+    {
+     "sub_id": "F13-P25",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 0,
+     "line_number": "11AI",
+     "receipt_type_full": "",
+     "memo_text": "",
+     "memo_code": "",
+     "is_memo_leg": 0
+    },
+    {
+     "sub_id": "F13-M25",
+     "contributor_name": "COINBASE",
+     "contribution_receipt_date": "2024-02-01",
+     "contribution_receipt_amount": 0,
+     "line_number": "17",
+     "receipt_type_full": "CONTRIBUTION PREVIOUSLY DISCLOSED",
+     "memo_text": "",
+     "memo_code": "X",
+     "is_memo_leg": 1
+    }
+   ],
+   "expect": {
+    "F13-P25": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": false
+    },
+    "F13-M25": {
+     "counted": true,
+     "duplicate_of": "",
+     "flagged": true
+    }
+   }
+  }
+ ]
+}
