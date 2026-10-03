@@ -1,0 +1,25 @@
+{
+  "version": 3,
+  "source": "https://www.fec.gov/campaign-finance-data/about-campaign-finance-data/about-receipts-data/",
+  "special_account_sources": [
+    "https://www.fec.gov/updates/fec-statement-on-carey-v-fec/",
+    "https://www.fec.gov/help-candidates-and-committees/filing-political-party-reports/additional-national-party-accounts-receipts/"
+  ],
+  "non_giving_sources": [
+    "https://www.fec.gov/help-candidates-and-committees/filing-reports/investment-income-and-loss/"
+  ],
+  "forms": {
+    "F3": {"contribution": ["11A", "11AI", "11B", "11C", "11D"], "transfer_receipt": ["12"], "other_receipt": ["13A", "13B", "14"], "unverified_other_receipt": ["15"]},
+    "F3X": {"contribution": ["11A", "11AI", "11B", "11C"], "transfer_receipt": ["12"], "other_receipt": ["13", "14", "15", "16"], "unverified_other_receipt": ["17"]},
+    "F3P": {"contribution": ["17", "17A", "17AI", "17C", "17D"], "transfer_receipt": ["18"], "other_receipt": ["19A", "19B", "20A", "20B", "20C"], "unverified_other_receipt": ["21"]},
+    "F4": {"contribution": ["14A"], "transfer_receipt": ["15"], "other_receipt": ["13", "16A", "16B", "17A", "18A"], "unverified_other_receipt": ["19A"]}
+  },
+  "special_account_pattern": "\\b(NON ?CONTRIBUTION ACCOUNT|HEADQUARTERS ACCOUNT|LEGAL PROCEEDINGS ACCOUNT|RECOUNT ACCOUNT|CONVENTION ACCOUNT)\\b",
+  "non_giving_exact_pattern": "^((NON ?CONTRIBUTION( ACCOUNT)?|HEADQUARTERS( ACCOUNT)?|LEGAL PROCEEDINGS( ACCOUNT)?|RECOUNT( ACCOUNT)?|CONVENTION( ACCOUNT)?|PAC) )?((BANK |DEPOSIT |SAVINGS |CHECKING |CD |MONTHLY |INVESTMENT ACCOUNT )?INTEREST( INCOME| EARNED| PAYMENT)?|DIVIDENDS?( INCOME| PAYMENT)?|INTEREST DIVIDENDS|INVESTMENT INCOME)$",
+  "giving_event_pattern": "(?<!NON )\\b(CONTRIBUTION|DONATION)\\b",
+  "non_giving_event_pattern": "\\bRETURN OF ERRONEOUS DEBIT\\b|\\bREFUND (OF |FOR )?(PROCESSING|ADMINISTRATIVE) FEES?\\b",
+  "refund_review_pattern": "\\bIMPERMISSIBLE CONTRIBUTION\\b|\\bSEE .*\\bREFUND\\b",
+  "sale_identity_pattern": "PURCHASER UNKNOWN",
+  "sale_event_pattern": "\\bSOLD\\b|\\bLIQUIDATED\\b|PROCEEDS.*SALE",
+  "disclosure_pattern": "PREVIOUSLY DISCLOSED|CONTRIBUTION DISCLOSED"
+}
