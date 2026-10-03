@@ -1,0 +1,32 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_arms\\2022-2024-2026",
+  "baseline_token": null,
+  "changed_decisions": 434958,
+  "counts": {
+    "added": 434958,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\tmp\\production-all-20260728T204300\\runs\\20260728T204315-41296\\industries\\credit-arms\\data\\mentat.db",
+  "database_sha256": "ce2d9c6b79da586c2176a755a81a2d46e0270acaf037c2049aeb95910661de38",
+  "delta_cents": 2393244525,
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_arms\\2022-2024-2026",
+  "dollar_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_arms\\2022-2024-2026\\6b1d060685a64581be01862bef0fb005.dollar-changes.jsonl",
+  "industry": "Credit Arms",
+  "payload": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\credit_arms\\industry_data-ce2d9c6b79da586c.json",
+  "payload_sha256": "4da6a44bcead8067a253fabe46a4b12bc7609e448fc9b5cd4bbb1eba2c96154f",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_arms\\2022-2024-2026\\6b1d060685a64581be01862bef0fb005.db",
+  "snapshot_sha256": "62010dec821d1a4ad2da8f3a0cdb69b298df9ed2822c31c50d2df3e79e7f062d",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_arms\\2022-2024-2026\\6b1d060685a64581be01862bef0fb005.source-changes.jsonl",
+  "status": "verified",
+  "unexplained_changes": 0,
+  "version": 1
+}
