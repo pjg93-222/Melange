@@ -1,0 +1,1425 @@
+{
+  "basis": {
+    "large_cents": 100000000,
+    "large_individual_cents": 10000000,
+    "text": "A receipt is listed as large at $1,000,000.00 or more, or at $100,000.00 or more when an individual sent it; both thresholds are a proposed default and await the owner's ratification."
+  },
+  "counts": {
+    "source_records": 86270
+  },
+  "generated_at": "2026-09-17T15:49:09.648406+00:00",
+  "outliers": {
+    "large": [
+      {
+        "amount": 250000.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4072820261539190224",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159875052946"
+      },
+      {
+        "amount": 250000.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4072820261539190225",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159875052946"
+      },
+      {
+        "amount": 144000.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4041520221470839071",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204149496107820"
+      },
+      {
+        "amount": 132900.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4062420261522612233",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921813"
+      },
+      {
+        "amount": 132900.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4062420261522612234",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921813"
+      }
+    ],
+    "large_amount": 909800.0,
+    "large_count": 5,
+    "non_giving": [
+      {
+        "amount": 190000.0,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "RETURN OF ERRONEOUS DEBIT MADE BY STRIPE ON 05/10/2023",
+        "record_id": "4092020231802645332",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202309209597131548"
+      },
+      {
+        "amount": 128262.88,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4122020221641867032",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212129557558463"
+      },
+      {
+        "amount": 123250.03,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4102820211376022901",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110209468085357"
+      },
+      {
+        "amount": 112568.63,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4040120221465073706",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203209494066786"
+      },
+      {
+        "amount": 40000.0,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "REFUND FOR ADMINISTRATIVE FEES",
+        "record_id": "4081020231765042887",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307319593094652"
+      },
+      {
+        "amount": 37123.81,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4030320221458815059",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202202189491823508"
+      },
+      {
+        "amount": 35038.36,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4122920211386905733",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112209474511448"
+      },
+      {
+        "amount": 20093.45,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4092220211371632313",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202109209466815035"
+      },
+      {
+        "amount": 15596.8,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "PROCESSING FEES REFUND; DISBURSEMENTS ISSUED IN 2020",
+        "record_id": "4112920221631504107",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210279543175419"
+      },
+      {
+        "amount": 7224.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4082520211343863689",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202108209466387167"
+      },
+      {
+        "amount": 1460.47,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "REIMBURSEMENT OF STRIP CREDIT CARD PROCESSING FEES",
+        "record_id": "4041220241895670896",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404119627534995"
+      },
+      {
+        "amount": 1380.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521539",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759177"
+      },
+      {
+        "amount": 1170.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521537",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759176"
+      },
+      {
+        "amount": 1000.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "ADVANCE OF OPERATING OFFSET- REFUND PENDING",
+        "record_id": "4020320221404361240",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485780549"
+      },
+      {
+        "amount": 956.78,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492476",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570983"
+      },
+      {
+        "amount": 762.17,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177730",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466946"
+      },
+      {
+        "amount": 516.7,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "REFUNDED CREDIT CARD PROCESSING FEES",
+        "record_id": "4111520241069133955",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159687668577"
+      },
+      {
+        "amount": 491.8,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEES",
+        "record_id": "4072220221543248026",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159521570620"
+      },
+      {
+        "amount": 478.13,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEES",
+        "record_id": "4080520211324767507",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465479804"
+      },
+      {
+        "amount": 450.0,
+        "company": "Cash App",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4072120221543083932",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518590883"
+      },
+      {
+        "amount": 397.29,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521535",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759176"
+      },
+      {
+        "amount": 375.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492472",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570982"
+      },
+      {
+        "amount": 368.5,
+        "company": "Cash App",
+        "cycle": 2024,
+        "description": "REPAYMENT OF OVER ESTIMENT OF PAYROLL",
+        "record_id": "4012620261303522251",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601149793975460"
+      },
+      {
+        "amount": 333.43,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4062520211311669529",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202106189449431954"
+      },
+      {
+        "amount": 319.32,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492483",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570986"
+      },
+      {
+        "amount": 315.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492474",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570983"
+      },
+      {
+        "amount": 300.42,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492480",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570985"
+      },
+      {
+        "amount": 249.2,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "OFFSET FOR CREDIT CARD PROCESSING FEES",
+        "record_id": "4061520221517050909",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202205149508124238"
+      },
+      {
+        "amount": 245.66,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "REFUNDED MERCHANT FEE",
+        "record_id": "4110120231808028648",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310309598913190"
+      },
+      {
+        "amount": 233.78,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-CREDIT CARD MERCHANT FEE",
+        "record_id": "4062120231750965718",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202306209582230332"
+      },
+      {
+        "amount": 198.45,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492486",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570987"
+      },
+      {
+        "amount": 180.96,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492507",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570994"
+      },
+      {
+        "amount": 180.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492475",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570983"
+      },
+      {
+        "amount": 174.36,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521538",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759177"
+      },
+      {
+        "amount": 156.84,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492491",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570988"
+      },
+      {
+        "amount": 150.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521543",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759178"
+      },
+      {
+        "amount": 139.65,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4062520211311669593",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202106189449432553"
+      },
+      {
+        "amount": 135.06,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492477",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570984"
+      },
+      {
+        "amount": 123.78,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492494",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570989"
+      },
+      {
+        "amount": 120.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177731",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466946"
+      },
+      {
+        "amount": 120.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492485",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570986"
+      },
+      {
+        "amount": 90.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492473",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570982"
+      },
+      {
+        "amount": 90.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492498",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570991"
+      },
+      {
+        "amount": 90.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492501",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570992"
+      },
+      {
+        "amount": 84.3,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492482",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570985"
+      },
+      {
+        "amount": 82.65,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4062520211311669610",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202106189449432098"
+      },
+      {
+        "amount": 75.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492484",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570986"
+      },
+      {
+        "amount": 75.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521541",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759178"
+      },
+      {
+        "amount": 61.12,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492488",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570987"
+      },
+      {
+        "amount": 60.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492479",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570984"
+      },
+      {
+        "amount": 60.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492499",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570991"
+      },
+      {
+        "amount": 60.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492503",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570992"
+      },
+      {
+        "amount": 48.1,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492481",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570985"
+      },
+      {
+        "amount": 45.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177732",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466946"
+      },
+      {
+        "amount": 45.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177735",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466947"
+      },
+      {
+        "amount": 45.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177737",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466948"
+      },
+      {
+        "amount": 45.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177738",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466948"
+      },
+      {
+        "amount": 45.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492490",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570988"
+      },
+      {
+        "amount": 45.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492504",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570993"
+      },
+      {
+        "amount": 35.34,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "CREDIT CARD FEE REFUND",
+        "record_id": "4102920211376406064",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110209468246663"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177733",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466947"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177734",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466947"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177739",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466949"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177741",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466949"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492478",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570984"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492489",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570988"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492493",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570989"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492495",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570990"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492496",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570990"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492508",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570994"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492509",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570994"
+      },
+      {
+        "amount": 30.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521546",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759179"
+      },
+      {
+        "amount": 29.82,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521540",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759177"
+      },
+      {
+        "amount": 19.78,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "REFUNDED MERCHANT FEE",
+        "record_id": "4110120231808028647",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310309598913190"
+      },
+      {
+        "amount": 15.24,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "CREDIT CARD FEE REFUND",
+        "record_id": "4102620211375490694",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110199468008435"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "CREDIT CARD FEE REFUND",
+        "record_id": "4071220221539931410",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207069517819004"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177736",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466948"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: FEE REVERSAL",
+        "record_id": "4081320211326177740",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466949"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492487",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570987"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492492",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570989"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492497",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570990"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492500",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570991"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492502",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570992"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492505",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570993"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "RECOUNT: REFUND: MERCHANT FEE",
+        "record_id": "4121120211384492506",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570993"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521542",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759178"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521545",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759179"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521547",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759180"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521548",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759180"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521549",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759180"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521550",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759181"
+      },
+      {
+        "amount": 15.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4122920211386905731",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112209474511448"
+      },
+      {
+        "amount": 14.0,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4082520211343863688",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202108209466387167"
+      },
+      {
+        "amount": 12.06,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "REFUND-PROCESSING FEE",
+        "record_id": "4122920211386905732",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112209474511448"
+      },
+      {
+        "amount": 8.34,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521536",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759176"
+      },
+      {
+        "amount": 4.47,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "VENDOR REFUND: MERCHANT FEE",
+        "record_id": "4121120211385521544",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759179"
+      },
+      {
+        "amount": 3.77,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "CREDIT CARD FEE REFUND",
+        "record_id": "4081720211328102083",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202108129466255278"
+      },
+      {
+        "amount": 2.01,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "OFFSET TO PREVIOUSLY REPORTED EXPENDITURE",
+        "record_id": "4080520221563271332",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518579385"
+      },
+      {
+        "amount": 0.98,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "CREDIT CARD FEE REFUND",
+        "record_id": "4102620211375490695",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110199468008436"
+      },
+      {
+        "amount": 0.1,
+        "company": "Stripe",
+        "cycle": 2022,
+        "description": "OFFSET- MERCHANT FEES",
+        "record_id": "4042820231744960626",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304149580522539"
+      }
+    ],
+    "non_giving_amount": 724547.79,
+    "non_giving_count": 100
+  },
+  "refunds": {
+    "linked": [],
+    "linked_amount": 0.0,
+    "linked_count": 0,
+    "unlinked": [
+      {
+        "amount": -5000.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED [SA11A1.39718]: CHARGEBACK",
+        "record_id": "4012320241816021631",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401239600219376"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021720261308802816",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602179834335312"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4050620261509605901",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605069866842555"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4050620261509605904",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605069866842556"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4051220261510057498",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862947599"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4051320261510218134",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862912815"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4052020261510801620",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857642474"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4062220261522087669",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606049870428907"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4062220261522087678",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606049870428910"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Stripe",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4120320251296701239",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159790877407"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4020620241821986434",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319608073155"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REATTRIBUTION FROM",
+        "record_id": "4020620241821988925",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319608073985"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "* CONTRIBUTION REATTRIBUTED TO SPECIAL PRIMARY 2024",
+        "record_id": "4030620241884043193",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403059622316172"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "* CONTRIBUTION REATTRIBUTED TO SPECIAL PRIMARY 2024",
+        "record_id": "4030620241884043585",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403059622316302"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4041920241897143697",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159633360670"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Plaid",
+        "cycle": 2024,
+        "description": "REDESIGNATE: CONTRIBUTION",
+        "record_id": "4042420251186466322",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504149755331338"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Stripe",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4062520241962322785",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406209652410619"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Cash App",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4102320242076642450",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410189698892241"
+      },
+      {
+        "amount": -3300.0,
+        "company": "SoFi",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4121120241075675926",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202411189719989450"
+      },
+      {
+        "amount": -3200.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4072620241979867125",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159660156556"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO OTHER",
+        "record_id": "4032920241888318650",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414243"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4051620221486584987",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202205059502581192"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458176",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860256"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; SEE REDESIGNATION; REDESIGNATION TO PRIMARY; DEBT RETIREMENT",
+        "record_id": "4111020221625857612",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532660238"
+      },
+      {
+        "amount": -2800.0,
+        "company": "Chime",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; SEE REDESIGNATION; REDESIGNATION TO PRIMARY",
+        "record_id": "4032620221464337173",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203259495910182"
+      },
+      {
+        "amount": -2300.0,
+        "company": "SoFi",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4051420251196683828",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504299758048202"
+      },
+      {
+        "amount": -2200.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO PRIMARY; DEBT RETIREMENT",
+        "record_id": "4111020221625857622",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532660241"
+      },
+      {
+        "amount": -2200.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO PRIMARY; DEBT RETIREMENT",
+        "record_id": "4111020221625857634",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532660245"
+      },
+      {
+        "amount": -1938.0,
+        "company": "Cash App",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4102320242076306183",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410189698780486"
+      },
+      {
+        "amount": -1905.08,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4110120231807938049",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598068696"
+      },
+      {
+        "amount": -1705.08,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4062220261522087681",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606049870428911"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4012320241816021629",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401239600219375"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4020520241819420696",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319607735783"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4020620241819942713",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601142550"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4050620241921741958",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627967471"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4050620241921742004",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627967486"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4071420231753422368",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307139582525384"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4072620241979867203",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159660156582"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4082620231800391175",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202308259596777005"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4111920241070332856",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685442460"
+      },
+      {
+        "amount": -1700.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; EARMARKED BY WINRED - CHARGED BACK",
+        "record_id": "4121020251297676234",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159790877904"
+      },
+      {
+        "amount": -1500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4062220261522087545",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606049870428866"
+      },
+      {
+        "amount": -1500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071620251208646625",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507149762810908"
+      },
+      {
+        "amount": -1500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071620251208646629",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507149762810910"
+      },
+      {
+        "amount": -1500.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071920261534862092",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607109874857280"
+      },
+      {
+        "amount": -1500.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4120220251296478458",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791358497"
+      },
+      {
+        "amount": -1500.0,
+        "company": "Kalshi",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4120220251296478520",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791358517"
+      },
+      {
+        "amount": -1000.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "[FRIENDS OF ANDY BARR COMMITTEE - C00633792]",
+        "record_id": "4021720261308794995",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601289794258223"
+      },
+      {
+        "amount": -1000.0,
+        "company": "Robinhood",
+        "cycle": 2026,
+        "description": "EARMARKED THROUGH WINRED",
+        "record_id": "4120220251296558329",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791111784"
+      },
+      {
+        "amount": -300.0,
+        "company": "Cash App",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4051420251196815776",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504299758092185"
+      },
+      {
+        "amount": -251.0,
+        "company": "Chime",
+        "cycle": 2022,
+        "description": "EARMARKED THROUGH WINRED [SA11AI.81424609]; CHARGEBACK",
+        "record_id": "4101820221588954703",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159536859668"
+      },
+      {
+        "amount": -250.0,
+        "company": "Cash App",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4102320242076861825",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410189698964700"
+      },
+      {
+        "amount": -225.9,
+        "company": "Chime",
+        "cycle": 2022,
+        "description": "JFC TRANSFER: TRUMP SAVE AMERICA JOINT FUNDRAISING COMMITTEE [SA12.82660633]; CHARGEBACK",
+        "record_id": "4080220231762038698",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307319585032665"
+      },
+      {
+        "amount": -100.0,
+        "company": "Robinhood",
+        "cycle": 2024,
+        "description": "REATTRIBUTION FROM",
+        "record_id": "4020620241821988924",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319608073985"
+      },
+      {
+        "amount": -100.0,
+        "company": "Chime",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4032620221464337176",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203259495910183"
+      },
+      {
+        "amount": -100.0,
+        "company": "Robinhood",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL; DEBT RETIREMENT",
+        "record_id": "4111020221625857615",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532660239"
+      }
+    ],
+    "unlinked_amount": -125375.06,
+    "unlinked_count": 56
+  },
+  "run_id": "20260911T010907-d7fdb039c080",
+  "schema_version": 1
+}

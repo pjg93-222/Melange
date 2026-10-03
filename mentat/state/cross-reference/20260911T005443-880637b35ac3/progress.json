@@ -1,0 +1,45 @@
+{
+  "error": "156 accepted source records are missing or financially changed. See source-comparison.json; resolve the source discrepancy before publishing accounting totals.",
+  "run_id": "20260911T005443-880637b35ac3",
+  "schema_version": 1,
+  "status": "failed",
+  "steps": [
+    {
+      "detail": "Pinning companies, cycles and source database",
+      "id": "define",
+      "label": "Define",
+      "status": "running"
+    },
+    {
+      "detail": "",
+      "id": "collect",
+      "label": "Collect",
+      "status": "pending"
+    },
+    {
+      "detail": "",
+      "id": "identify",
+      "label": "Identify",
+      "status": "pending"
+    },
+    {
+      "detail": "",
+      "id": "connect",
+      "label": "Connect",
+      "status": "pending"
+    },
+    {
+      "detail": "",
+      "id": "count",
+      "label": "Count",
+      "status": "pending"
+    },
+    {
+      "detail": "",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "pending"
+    }
+  ],
+  "updated_at": "2026-09-11T00:54:47.604678+00:00"
+}

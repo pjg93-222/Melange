@@ -1,0 +1,5391 @@
+{
+  "baseline": {
+    "basis": "accepted_report_receipts",
+    "sha256": "74658d0093eb05554c8dc3beb8e77fb1513848279bba39da2d5e7be8f6dbf496",
+    "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.db"
+  },
+  "changes": [
+    {
+      "after": {
+        "amount_cents": 1300,
+        "committee_id": "C00725820",
+        "contributor_name": "ANDERSON, JOAN",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4020620211121406426"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620211121406426"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00725820",
+        "contributor_name": "PANZARELLA, MICHAEL",
+        "cycle": 2022,
+        "date": "2020-12-22",
+        "sub_id": "4020620211121415665"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620211121415665"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00580100",
+        "contributor_name": "CHIMENTI, JEFF",
+        "cycle": 2022,
+        "date": "2020-11-05",
+        "sub_id": "4020620231723179987"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723179987"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00580100",
+        "contributor_name": "LANTELME, BRUCE",
+        "cycle": 2022,
+        "date": "2020-11-04",
+        "sub_id": "4020620231723193359"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723193359"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00580100",
+        "contributor_name": "SMIRNOVA, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-05",
+        "sub_id": "4020620231723204685"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723204685"
+    },
+    {
+      "after": {
+        "amount_cents": 225,
+        "committee_id": "C00580100",
+        "contributor_name": "SOFIAK RASCIA, DIANNE",
+        "cycle": 2022,
+        "date": "2020-11-05",
+        "sub_id": "4020620231723204997"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723204997"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00580100",
+        "contributor_name": "SPROUSE, RICHARD D",
+        "cycle": 2022,
+        "date": "2020-11-05",
+        "sub_id": "4020620231723205271"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723205271"
+    },
+    {
+      "after": {
+        "amount_cents": 150,
+        "committee_id": "C00580100",
+        "contributor_name": "STEPP, FRANK",
+        "cycle": 2022,
+        "date": "2020-11-05",
+        "sub_id": "4020620231723205543"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723205543"
+    },
+    {
+      "after": {
+        "amount_cents": 225,
+        "committee_id": "C00580100",
+        "contributor_name": "TSUKERMAN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-05",
+        "sub_id": "4020620231723207292"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723207292"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00580100",
+        "contributor_name": "WIRGES, KENT",
+        "cycle": 2022,
+        "date": "2020-11-05",
+        "sub_id": "4020620231723209553"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4020620231723209553"
+    },
+    {
+      "after": {
+        "amount_cents": 1,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-12-31",
+        "sub_id": "4020620241819644252"
+      },
+      "before": {
+        "amount_cents": 1,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-12-31",
+        "sub_id": "4020620241819644252"
+      },
+      "kind": "changed",
+      "source_id": "4020620241819644252"
+    },
+    {
+      "after": {
+        "amount_cents": 5,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-12-31",
+        "sub_id": "4020620241819644253"
+      },
+      "before": {
+        "amount_cents": 5,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-12-31",
+        "sub_id": "4020620241819644253"
+      },
+      "kind": "changed",
+      "source_id": "4020620241819644253"
+    },
+    {
+      "after": {
+        "amount_cents": 10,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-18",
+        "sub_id": "4020620241819711516"
+      },
+      "before": {
+        "amount_cents": 10,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-18",
+        "sub_id": "4020620241819711516"
+      },
+      "kind": "changed",
+      "source_id": "4020620241819711516"
+    },
+    {
+      "after": {
+        "amount_cents": 10,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-12-18",
+        "sub_id": "4020620241819711517"
+      },
+      "before": {
+        "amount_cents": 10,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-12-18",
+        "sub_id": "4020620241819711517"
+      },
+      "kind": "changed",
+      "source_id": "4020620241819711517"
+    },
+    {
+      "after": {
+        "amount_cents": 20,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-20",
+        "sub_id": "4020620241819752644"
+      },
+      "before": {
+        "amount_cents": 20,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-20",
+        "sub_id": "4020620241819752644"
+      },
+      "kind": "changed",
+      "source_id": "4020620241819752644"
+    },
+    {
+      "after": {
+        "amount_cents": 20,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2024,
+        "date": "2022-12-05",
+        "sub_id": "4020620241819752645"
+      },
+      "before": {
+        "amount_cents": 20,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2022,
+        "date": "2022-12-05",
+        "sub_id": "4020620241819752645"
+      },
+      "kind": "changed",
+      "source_id": "4020620241819752645"
+    },
+    {
+      "after": {
+        "amount_cents": 20,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2024,
+        "date": "2022-12-20",
+        "sub_id": "4020620241819752646"
+      },
+      "before": {
+        "amount_cents": 20,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2022,
+        "date": "2022-12-20",
+        "sub_id": "4020620241819752646"
+      },
+      "kind": "changed",
+      "source_id": "4020620241819752646"
+    },
+    {
+      "after": {
+        "amount_cents": 177,
+        "committee_id": "C00027466",
+        "contributor_name": "MILLER, MARK",
+        "cycle": 2026,
+        "date": "2024-10-28",
+        "sub_id": "4021020261305569239"
+      },
+      "before": {
+        "amount_cents": 177,
+        "committee_id": "C00027466",
+        "contributor_name": "MILLER, MARK",
+        "cycle": 2024,
+        "date": "2024-10-28",
+        "sub_id": "4021020261305569239"
+      },
+      "kind": "changed",
+      "source_id": "4021020261305569239"
+    },
+    {
+      "after": {
+        "amount_cents": 25000,
+        "committee_id": "C00010603",
+        "contributor_name": "BYRD, STEPHEN",
+        "cycle": 2026,
+        "date": "2024-11-17",
+        "sub_id": "4022420251177860016"
+      },
+      "before": {
+        "amount_cents": 25000,
+        "committee_id": "C00010603",
+        "contributor_name": "BYRD, STEPHEN",
+        "cycle": 2024,
+        "date": "2024-11-17",
+        "sub_id": "4022420251177860016"
+      },
+      "kind": "changed",
+      "source_id": "4022420251177860016"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00003418",
+        "contributor_name": "BASILE, DONALD",
+        "cycle": 2022,
+        "date": "2020-12-21",
+        "sub_id": "4030620211226394424"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226394424"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00003418",
+        "contributor_name": "BOSTICK, CODY",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226403381"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226403381"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00003418",
+        "contributor_name": "BOSTICK, CODY",
+        "cycle": 2022,
+        "date": "2020-12-12",
+        "sub_id": "4030620211226403382"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226403382"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "CHIMENTI, JEFF",
+        "cycle": 2022,
+        "date": "2020-12-21",
+        "sub_id": "4030620211226420110"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226420110"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226424629"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226424629"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2022,
+        "date": "2020-12-26",
+        "sub_id": "4030620211226424630"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226424630"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "EVANS, DAVID",
+        "cycle": 2022,
+        "date": "2020-12-15",
+        "sub_id": "4030620211226448056"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226448056"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "GALU, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226457970"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226457970"
+    },
+    {
+      "after": {
+        "amount_cents": 750,
+        "committee_id": "C00003418",
+        "contributor_name": "GALU, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-12",
+        "sub_id": "4030620211226457971"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226457971"
+    },
+    {
+      "after": {
+        "amount_cents": 750,
+        "committee_id": "C00003418",
+        "contributor_name": "GALU, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-20",
+        "sub_id": "4030620211226457972"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226457972"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00003418",
+        "contributor_name": "LANTELME, BRUCE DR.",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226507945"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226507945"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00003418",
+        "contributor_name": "LANTELME, BRUCE DR.",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226507946"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226507946"
+    },
+    {
+      "after": {
+        "amount_cents": 125,
+        "committee_id": "C00003418",
+        "contributor_name": "LANTELME, BRUCE DR.",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226507947"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226507947"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "LIVESAY, CHRISTOPHER S. MR.",
+        "cycle": 2022,
+        "date": "2020-12-14",
+        "sub_id": "4030620211226515452"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226515452"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "LIVESAY, CHRISTOPHER S. MR.",
+        "cycle": 2022,
+        "date": "2020-12-22",
+        "sub_id": "4030620211226515453"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226515453"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "LIVESAY, CHRISTOPHER S. MR.",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4030620211226515454"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226515454"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-17",
+        "sub_id": "4030620211226521842"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521842"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-18",
+        "sub_id": "4030620211226521843"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521843"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226521844"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521844"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226521845"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521845"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-13",
+        "sub_id": "4030620211226521846"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521846"
+    },
+    {
+      "after": {
+        "amount_cents": 750,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-27",
+        "sub_id": "4030620211226521847"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521847"
+    },
+    {
+      "after": {
+        "amount_cents": 625,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-29",
+        "sub_id": "4030620211226521848"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521848"
+    },
+    {
+      "after": {
+        "amount_cents": 625,
+        "committee_id": "C00003418",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4030620211226521849"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226521849"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00003418",
+        "contributor_name": "PARKER, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-19",
+        "sub_id": "4030620211226556059"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226556059"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00003418",
+        "contributor_name": "PREAP, SOFINA",
+        "cycle": 2022,
+        "date": "2020-12-12",
+        "sub_id": "4030620211226565309"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226565309"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00003418",
+        "contributor_name": "PREAP, SOFINA",
+        "cycle": 2022,
+        "date": "2020-12-27",
+        "sub_id": "4030620211226565310"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226565310"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00003418",
+        "contributor_name": "RIVKIND, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-27",
+        "sub_id": "4030620211226574365"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226574365"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "SASOUNESS, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4030620211226582232"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226582232"
+    },
+    {
+      "after": {
+        "amount_cents": 1125,
+        "committee_id": "C00003418",
+        "contributor_name": "SOFIAK RASCIA, DIANNE",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4030620211226597258"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226597258"
+    },
+    {
+      "after": {
+        "amount_cents": 1050,
+        "committee_id": "C00003418",
+        "contributor_name": "TOMASCH, DAVE",
+        "cycle": 2022,
+        "date": "2020-12-11",
+        "sub_id": "4030620211226611643"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226611643"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00003418",
+        "contributor_name": "TOMASCH, DAVE",
+        "cycle": 2022,
+        "date": "2020-12-14",
+        "sub_id": "4030620211226611644"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226611644"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00003418",
+        "contributor_name": "TOMASCH, DAVE",
+        "cycle": 2022,
+        "date": "2020-12-13",
+        "sub_id": "4030620211226611645"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226611645"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00003418",
+        "contributor_name": "WIRGES, KENT",
+        "cycle": 2022,
+        "date": "2020-12-17",
+        "sub_id": "4030620211226631876"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226631876"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00003418",
+        "contributor_name": "WIRGES, KENT",
+        "cycle": 2022,
+        "date": "2020-12-13",
+        "sub_id": "4030620211226631877"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226631877"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00003418",
+        "contributor_name": "WIRGES, KENT",
+        "cycle": 2022,
+        "date": "2020-12-25",
+        "sub_id": "4030620211226631878"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4030620211226631878"
+    },
+    {
+      "after": {
+        "amount_cents": 20158,
+        "committee_id": "C00010603",
+        "contributor_name": "SOFIE, JESSICA",
+        "cycle": 2022,
+        "date": "2020-11-09",
+        "sub_id": "4031920221461302180"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4031920221461302180"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00010603",
+        "contributor_name": "PARSONS, JED",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4031920221461417204"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4031920221461417204"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00010603",
+        "contributor_name": "PARSONS, JED",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4031920221462438133"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4031920221462438133"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00010603",
+        "contributor_name": "PARSONS, JED",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4031920221462438134"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4031920221462438134"
+    },
+    {
+      "after": {
+        "amount_cents": 20158,
+        "committee_id": "C00010603",
+        "contributor_name": "SOFIE, JESSICA",
+        "cycle": 2022,
+        "date": "2020-11-09",
+        "sub_id": "4031920221462666641"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4031920221462666641"
+    },
+    {
+      "after": {
+        "amount_cents": 20158,
+        "committee_id": "C00010603",
+        "contributor_name": "SOFIE, JESSICA",
+        "cycle": 2022,
+        "date": "2020-11-09",
+        "sub_id": "4031920221462666642"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4031920221462666642"
+    },
+    {
+      "after": {
+        "amount_cents": 10000,
+        "committee_id": "C00010603",
+        "contributor_name": "CHIMERA, JOHN",
+        "cycle": 2026,
+        "date": "2024-12-22",
+        "sub_id": "4032520251181339277"
+      },
+      "before": {
+        "amount_cents": 10000,
+        "committee_id": "C00010603",
+        "contributor_name": "CHIMERA, JOHN",
+        "cycle": 2024,
+        "date": "2024-12-22",
+        "sub_id": "4032520251181339277"
+      },
+      "kind": "changed",
+      "source_id": "4032520251181339277"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00909283",
+        "contributor_name": "AUSMAN, JAMES",
+        "cycle": 2026,
+        "date": "2023-05-06",
+        "sub_id": "4033020261434670924"
+      },
+      "before": {
+        "amount_cents": 100000,
+        "committee_id": "C00909283",
+        "contributor_name": "AUSMAN, JAMES",
+        "cycle": 2024,
+        "date": "2023-05-06",
+        "sub_id": "4033020261434670924"
+      },
+      "kind": "changed",
+      "source_id": "4033020261434670924"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00909283",
+        "contributor_name": "AUSMAN, JAMES",
+        "cycle": 2026,
+        "date": "2023-05-08",
+        "sub_id": "4033020261434670926"
+      },
+      "before": {
+        "amount_cents": 100000,
+        "committee_id": "C00909283",
+        "contributor_name": "AUSMAN, JAMES",
+        "cycle": 2024,
+        "date": "2023-05-08",
+        "sub_id": "4033020261434670926"
+      },
+      "kind": "changed",
+      "source_id": "4033020261434670926"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00909283",
+        "contributor_name": "TULLOSS, JUSTIN",
+        "cycle": 2026,
+        "date": "2023-05-26",
+        "sub_id": "4033020261434672166"
+      },
+      "before": {
+        "amount_cents": 100000,
+        "committee_id": "C00909283",
+        "contributor_name": "TULLOSS, JUSTIN",
+        "cycle": 2024,
+        "date": "2023-05-26",
+        "sub_id": "4033020261434672166"
+      },
+      "kind": "changed",
+      "source_id": "4033020261434672166"
+    },
+    {
+      "after": {
+        "amount_cents": 10000,
+        "committee_id": "C00341396",
+        "contributor_name": "FRYER, BRIAN",
+        "cycle": 2022,
+        "date": "2020-12-23",
+        "sub_id": "4041020211276943697"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4041020211276943697"
+    },
+    {
+      "after": {
+        "amount_cents": 4000,
+        "committee_id": "C00341396",
+        "contributor_name": "GOGIC, SOFIE",
+        "cycle": 2022,
+        "date": "2020-12-18",
+        "sub_id": "4041020211276944131"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4041020211276944131"
+    },
+    {
+      "after": {
+        "amount_cents": 2000,
+        "committee_id": "C00341396",
+        "contributor_name": "HULSE, LAURA",
+        "cycle": 2022,
+        "date": "2020-12-30",
+        "sub_id": "4041020211276945683"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4041020211276945683"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00341396",
+        "contributor_name": "SQUIRES, DAVID",
+        "cycle": 2022,
+        "date": "2020-12-19",
+        "sub_id": "4041020211276953069"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4041020211276953069"
+    },
+    {
+      "after": {
+        "amount_cents": 888,
+        "committee_id": "C00708289",
+        "contributor_name": "DAVENPORT, JOSEPH",
+        "cycle": 2024,
+        "date": "2021-08-01",
+        "sub_id": "4041820241896850053"
+      },
+      "before": {
+        "amount_cents": 888,
+        "committee_id": "C00708289",
+        "contributor_name": "DAVENPORT, JOSEPH",
+        "cycle": 2022,
+        "date": "2021-08-01",
+        "sub_id": "4041820241896850053"
+      },
+      "kind": "changed",
+      "source_id": "4041820241896850053"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "ALSBERG, KEITH",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4042120211278494679"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278494679"
+    },
+    {
+      "after": {
+        "amount_cents": 800,
+        "committee_id": "C00703975",
+        "contributor_name": "ALSBERG, KEITH",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4042120211278494680"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278494680"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "BECK-KOSIBA, LAUREN",
+        "cycle": 2022,
+        "date": "2020-10-27",
+        "sub_id": "4042120211278498273"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278498273"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "BECK-KOSIBA, LAUREN",
+        "cycle": 2022,
+        "date": "2020-10-28",
+        "sub_id": "4042120211278498274"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278498274"
+    },
+    {
+      "after": {
+        "amount_cents": 25000,
+        "committee_id": "C00703975",
+        "contributor_name": "CERKVENIK, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4042120211278505954"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278505954"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "CHIMENTI, GAYE",
+        "cycle": 2022,
+        "date": "2020-10-31",
+        "sub_id": "4042120211278506725"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278506725"
+    },
+    {
+      "after": {
+        "amount_cents": 50000,
+        "committee_id": "C00703975",
+        "contributor_name": "COMMITTEE TO ELECT DAVE ROGERS",
+        "cycle": 2022,
+        "date": "2020-10-28",
+        "sub_id": "4042120211278508305"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278508305"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00703975",
+        "contributor_name": "DILL, SOFIE",
+        "cycle": 2022,
+        "date": "2020-10-31",
+        "sub_id": "4042120211278512785"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278512785"
+    },
+    {
+      "after": {
+        "amount_cents": 50000,
+        "committee_id": "C00703975",
+        "contributor_name": "DRAYER, ZACHARY",
+        "cycle": 2022,
+        "date": "2020-10-25",
+        "sub_id": "4042120211278513872"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278513872"
+    },
+    {
+      "after": {
+        "amount_cents": 10674,
+        "committee_id": "C00703975",
+        "contributor_name": "GOLYSHEV, DMITRY",
+        "cycle": 2022,
+        "date": "2020-10-27",
+        "sub_id": "4042120211278522127"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278522127"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "GONCHAROVA, SOFIYA",
+        "cycle": 2022,
+        "date": "2020-10-25",
+        "sub_id": "4042120211278522176"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278522176"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "GONCHAROVA, SOFIYA",
+        "cycle": 2022,
+        "date": "2020-10-25",
+        "sub_id": "4042120211278522177"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278522177"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "GONCHAROVA, SOFIYA",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4042120211278522178"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278522178"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "GONCHAROVA, SOFIYA",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4042120211278522179"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278522179"
+    },
+    {
+      "after": {
+        "amount_cents": 50000,
+        "committee_id": "C00703975",
+        "contributor_name": "HENDERSON, PHILIP",
+        "cycle": 2022,
+        "date": "2020-10-26",
+        "sub_id": "4042120211278527117"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278527117"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "LINDEN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-10-28",
+        "sub_id": "4042120211278539802"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278539802"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "LINDEN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-10-28",
+        "sub_id": "4042120211278539803"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278539803"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "LINDEN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-10-28",
+        "sub_id": "4042120211278539804"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278539804"
+    },
+    {
+      "after": {
+        "amount_cents": 5878,
+        "committee_id": "C00703975",
+        "contributor_name": "LONDONO, JORGE",
+        "cycle": 2022,
+        "date": "2020-10-29",
+        "sub_id": "4042120211278540489"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278540489"
+    },
+    {
+      "after": {
+        "amount_cents": 1000,
+        "committee_id": "C00703975",
+        "contributor_name": "MATTESON, SYDNEY",
+        "cycle": 2022,
+        "date": "2020-10-28",
+        "sub_id": "4042120211278543717"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278543717"
+    },
+    {
+      "after": {
+        "amount_cents": 50000,
+        "committee_id": "C00703975",
+        "contributor_name": "MORA, DANIEL",
+        "cycle": 2022,
+        "date": "2020-10-25",
+        "sub_id": "4042120211278548356"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278548356"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "MULLEN, CONNOR",
+        "cycle": 2022,
+        "date": "2020-10-30",
+        "sub_id": "4042120211278549255"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278549255"
+    },
+    {
+      "after": {
+        "amount_cents": 800,
+        "committee_id": "C00703975",
+        "contributor_name": "ORLANDO, SID",
+        "cycle": 2022,
+        "date": "2020-10-27",
+        "sub_id": "4042120211278552520"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278552520"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "ORLANDO, SID",
+        "cycle": 2022,
+        "date": "2020-10-27",
+        "sub_id": "4042120211278552521"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278552521"
+    },
+    {
+      "after": {
+        "amount_cents": 10000,
+        "committee_id": "C00703975",
+        "contributor_name": "POWERS, ROBERT",
+        "cycle": 2022,
+        "date": "2020-10-25",
+        "sub_id": "4042120211278556398"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278556398"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00703975",
+        "contributor_name": "RHORER, ALEXIS R",
+        "cycle": 2022,
+        "date": "2020-10-29",
+        "sub_id": "4042120211278558905"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278558905"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00703975",
+        "contributor_name": "SOFIA, ZACHARY",
+        "cycle": 2022,
+        "date": "2020-10-30",
+        "sub_id": "4042120211278567797"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278567797"
+    },
+    {
+      "after": {
+        "amount_cents": 600,
+        "committee_id": "C00703975",
+        "contributor_name": "SOFIA, ZACHARY",
+        "cycle": 2022,
+        "date": "2020-10-26",
+        "sub_id": "4042120211278567798"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278567798"
+    },
+    {
+      "after": {
+        "amount_cents": 700,
+        "committee_id": "C00703975",
+        "contributor_name": "SOFIA, ZACHARY",
+        "cycle": 2022,
+        "date": "2020-10-27",
+        "sub_id": "4042120211278567799"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278567799"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "STEVENS, LINDSEY",
+        "cycle": 2022,
+        "date": "2020-10-25",
+        "sub_id": "4042120211278569295"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278569295"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00703975",
+        "contributor_name": "STEVENS, LINDSEY",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4042120211278569296"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278569296"
+    },
+    {
+      "after": {
+        "amount_cents": 5400,
+        "committee_id": "C00703975",
+        "contributor_name": "WARNER, SOFIA",
+        "cycle": 2022,
+        "date": "2020-10-28",
+        "sub_id": "4042120211278576274"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278576274"
+    },
+    {
+      "after": {
+        "amount_cents": 1500,
+        "committee_id": "C00703975",
+        "contributor_name": "WATLINGTON, MALCHUS",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4042120211278576487"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278576487"
+    },
+    {
+      "after": {
+        "amount_cents": 20000,
+        "committee_id": "C00703975",
+        "contributor_name": "WRIGHT, MATT",
+        "cycle": 2022,
+        "date": "2020-10-27",
+        "sub_id": "4042120211278579897"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278579897"
+    },
+    {
+      "after": {
+        "amount_cents": 25000,
+        "committee_id": "C00703975",
+        "contributor_name": "XU, ALINA",
+        "cycle": 2022,
+        "date": "2020-10-27",
+        "sub_id": "4042120211278580090"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4042120211278580090"
+    },
+    {
+      "after": {
+        "amount_cents": 4950,
+        "committee_id": "C00545749",
+        "contributor_name": "ACOSTA, SOFIA",
+        "cycle": 2026,
+        "date": "2024-09-18",
+        "sub_id": "4042320251186261847"
+      },
+      "before": {
+        "amount_cents": 4950,
+        "committee_id": "C00545749",
+        "contributor_name": "ACOSTA, SOFIA",
+        "cycle": 2024,
+        "date": "2024-09-18",
+        "sub_id": "4042320251186261847"
+      },
+      "kind": "changed",
+      "source_id": "4042320251186261847"
+    },
+    {
+      "after": {
+        "amount_cents": 20000,
+        "committee_id": "C00003418",
+        "contributor_name": "BERLIK, TAMARA",
+        "cycle": 2026,
+        "date": "2024-12-09",
+        "sub_id": "4061020251205017672"
+      },
+      "before": {
+        "amount_cents": 20000,
+        "committee_id": "C00003418",
+        "contributor_name": "BERLIK, TAMARA",
+        "cycle": 2024,
+        "date": "2024-12-09",
+        "sub_id": "4061020251205017672"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205017672"
+    },
+    {
+      "after": {
+        "amount_cents": 3760,
+        "committee_id": "C00003418",
+        "contributor_name": "BERLIK, TAMARA",
+        "cycle": 2026,
+        "date": "2024-12-17",
+        "sub_id": "4061020251205017673"
+      },
+      "before": {
+        "amount_cents": 3760,
+        "committee_id": "C00003418",
+        "contributor_name": "BERLIK, TAMARA",
+        "cycle": 2024,
+        "date": "2024-12-17",
+        "sub_id": "4061020251205017673"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205017673"
+    },
+    {
+      "after": {
+        "amount_cents": 208,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-11-05",
+        "sub_id": "4061020251205020643"
+      },
+      "before": {
+        "amount_cents": 208,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-11-05",
+        "sub_id": "4061020251205020643"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020643"
+    },
+    {
+      "after": {
+        "amount_cents": 421,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-11-07",
+        "sub_id": "4061020251205020644"
+      },
+      "before": {
+        "amount_cents": 421,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-11-07",
+        "sub_id": "4061020251205020644"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020644"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-11-14",
+        "sub_id": "4061020251205020645"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-11-14",
+        "sub_id": "4061020251205020645"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020645"
+    },
+    {
+      "after": {
+        "amount_cents": 417,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-11-14",
+        "sub_id": "4061020251205020646"
+      },
+      "before": {
+        "amount_cents": 417,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-11-14",
+        "sub_id": "4061020251205020646"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020646"
+    },
+    {
+      "after": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-11-14",
+        "sub_id": "4061020251205020647"
+      },
+      "before": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-11-14",
+        "sub_id": "4061020251205020647"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020647"
+    },
+    {
+      "after": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-11-26",
+        "sub_id": "4061020251205020648"
+      },
+      "before": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-11-26",
+        "sub_id": "4061020251205020648"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020648"
+    },
+    {
+      "after": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-11-26",
+        "sub_id": "4061020251205020649"
+      },
+      "before": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-11-26",
+        "sub_id": "4061020251205020649"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020649"
+    },
+    {
+      "after": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-12-26",
+        "sub_id": "4061020251205020650"
+      },
+      "before": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-12-26",
+        "sub_id": "4061020251205020650"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020650"
+    },
+    {
+      "after": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2026,
+        "date": "2024-12-26",
+        "sub_id": "4061020251205020651"
+      },
+      "before": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "BICKNELL, ELVIRA SOFIA",
+        "cycle": 2024,
+        "date": "2024-12-26",
+        "sub_id": "4061020251205020651"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205020651"
+    },
+    {
+      "after": {
+        "amount_cents": 20820,
+        "committee_id": "C00003418",
+        "contributor_name": "CHIMENTO, STACY",
+        "cycle": 2026,
+        "date": "2024-11-30",
+        "sub_id": "4061020251205058711"
+      },
+      "before": {
+        "amount_cents": 20820,
+        "committee_id": "C00003418",
+        "contributor_name": "CHIMENTO, STACY",
+        "cycle": 2024,
+        "date": "2024-11-30",
+        "sub_id": "4061020251205058711"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205058711"
+    },
+    {
+      "after": {
+        "amount_cents": 20820,
+        "committee_id": "C00003418",
+        "contributor_name": "CHIMENTO, STACY",
+        "cycle": 2026,
+        "date": "2024-12-31",
+        "sub_id": "4061020251205058712"
+      },
+      "before": {
+        "amount_cents": 20820,
+        "committee_id": "C00003418",
+        "contributor_name": "CHIMENTO, STACY",
+        "cycle": 2024,
+        "date": "2024-12-31",
+        "sub_id": "4061020251205058712"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205058712"
+    },
+    {
+      "after": {
+        "amount_cents": 146,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2026,
+        "date": "2024-11-11",
+        "sub_id": "4061020251205158544"
+      },
+      "before": {
+        "amount_cents": 146,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2024,
+        "date": "2024-11-11",
+        "sub_id": "4061020251205158544"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205158544"
+    },
+    {
+      "after": {
+        "amount_cents": 5620,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2026,
+        "date": "2024-11-11",
+        "sub_id": "4061020251205158545"
+      },
+      "before": {
+        "amount_cents": 5620,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2024,
+        "date": "2024-11-11",
+        "sub_id": "4061020251205158545"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205158545"
+    },
+    {
+      "after": {
+        "amount_cents": 937,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2026,
+        "date": "2024-11-09",
+        "sub_id": "4061020251205158546"
+      },
+      "before": {
+        "amount_cents": 937,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2024,
+        "date": "2024-11-09",
+        "sub_id": "4061020251205158546"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205158546"
+    },
+    {
+      "after": {
+        "amount_cents": 2915,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2026,
+        "date": "2024-11-16",
+        "sub_id": "4061020251205158547"
+      },
+      "before": {
+        "amount_cents": 2915,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2024,
+        "date": "2024-11-16",
+        "sub_id": "4061020251205158547"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205158547"
+    },
+    {
+      "after": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2026,
+        "date": "2024-11-15",
+        "sub_id": "4061020251205158548"
+      },
+      "before": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2024,
+        "date": "2024-11-15",
+        "sub_id": "4061020251205158548"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205158548"
+    },
+    {
+      "after": {
+        "amount_cents": 4164,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2026,
+        "date": "2024-11-26",
+        "sub_id": "4061020251205158549"
+      },
+      "before": {
+        "amount_cents": 4164,
+        "committee_id": "C00003418",
+        "contributor_name": "HEINTZ, KOURTNEY",
+        "cycle": 2024,
+        "date": "2024-11-26",
+        "sub_id": "4061020251205158549"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205158549"
+    },
+    {
+      "after": {
+        "amount_cents": 208,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-11-07",
+        "sub_id": "4061020251205417792"
+      },
+      "before": {
+        "amount_cents": 208,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-11-07",
+        "sub_id": "4061020251205417792"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417792"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-08",
+        "sub_id": "4061020251205417799"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-08",
+        "sub_id": "4061020251205417799"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417799"
+    },
+    {
+      "after": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-06",
+        "sub_id": "4061020251205417800"
+      },
+      "before": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-06",
+        "sub_id": "4061020251205417800"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417800"
+    },
+    {
+      "after": {
+        "amount_cents": 434,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-15",
+        "sub_id": "4061020251205417801"
+      },
+      "before": {
+        "amount_cents": 434,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-15",
+        "sub_id": "4061020251205417801"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417801"
+    },
+    {
+      "after": {
+        "amount_cents": 434,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-15",
+        "sub_id": "4061020251205417802"
+      },
+      "before": {
+        "amount_cents": 434,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-15",
+        "sub_id": "4061020251205417802"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417802"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-15",
+        "sub_id": "4061020251205417803"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-15",
+        "sub_id": "4061020251205417803"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417803"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-13",
+        "sub_id": "4061020251205417804"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-13",
+        "sub_id": "4061020251205417804"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417804"
+    },
+    {
+      "after": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-21",
+        "sub_id": "4061020251205417805"
+      },
+      "before": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-21",
+        "sub_id": "4061020251205417805"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417805"
+    },
+    {
+      "after": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-21",
+        "sub_id": "4061020251205417806"
+      },
+      "before": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-21",
+        "sub_id": "4061020251205417806"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417806"
+    },
+    {
+      "after": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-21",
+        "sub_id": "4061020251205417807"
+      },
+      "before": {
+        "amount_cents": 3914,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-21",
+        "sub_id": "4061020251205417807"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417807"
+    },
+    {
+      "after": {
+        "amount_cents": 2915,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-20",
+        "sub_id": "4061020251205417808"
+      },
+      "before": {
+        "amount_cents": 2915,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-20",
+        "sub_id": "4061020251205417808"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417808"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-25",
+        "sub_id": "4061020251205417809"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-25",
+        "sub_id": "4061020251205417809"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417809"
+    },
+    {
+      "after": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-26",
+        "sub_id": "4061020251205417810"
+      },
+      "before": {
+        "amount_cents": 1686,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-26",
+        "sub_id": "4061020251205417810"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417810"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-29",
+        "sub_id": "4061020251205417811"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-29",
+        "sub_id": "4061020251205417811"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417811"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-29",
+        "sub_id": "4061020251205417812"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-29",
+        "sub_id": "4061020251205417812"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417812"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-28",
+        "sub_id": "4061020251205417813"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-28",
+        "sub_id": "4061020251205417813"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417813"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-28",
+        "sub_id": "4061020251205417814"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-28",
+        "sub_id": "4061020251205417814"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417814"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-31",
+        "sub_id": "4061020251205417815"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-31",
+        "sub_id": "4061020251205417815"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417815"
+    },
+    {
+      "after": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2026,
+        "date": "2024-12-31",
+        "sub_id": "4061020251205417816"
+      },
+      "before": {
+        "amount_cents": 833,
+        "committee_id": "C00003418",
+        "contributor_name": "WILLIAMS, PATRICK",
+        "cycle": 2024,
+        "date": "2024-12-31",
+        "sub_id": "4061020251205417816"
+      },
+      "kind": "changed",
+      "source_id": "4061020251205417816"
+    },
+    {
+      "after": {
+        "amount_cents": 280000,
+        "committee_id": "C00718866",
+        "contributor_name": "BYRD, DANIEL",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4061120211307761661"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061120211307761661"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00718866",
+        "contributor_name": "ALI, SABRINA",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4061120211307762697"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061120211307762697"
+    },
+    {
+      "after": {
+        "amount_cents": 4000,
+        "committee_id": "C00718866",
+        "contributor_name": "PELLERIN, JASON",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4061120211307772131"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061120211307772131"
+    },
+    {
+      "after": {
+        "amount_cents": 50000,
+        "committee_id": "C00693515",
+        "contributor_name": "C LAMFALUSI, MICHAEL",
+        "cycle": 2022,
+        "date": "2020-12-18",
+        "sub_id": "4061620211308446626"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061620211308446626"
+    },
+    {
+      "after": {
+        "amount_cents": 6000,
+        "committee_id": "C00693515",
+        "contributor_name": "CANO, RAYMOND",
+        "cycle": 2022,
+        "date": "2020-12-23",
+        "sub_id": "4061620211308451071"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061620211308451071"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00693515",
+        "contributor_name": "GLUCK, SOFI",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4061620211308451885"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061620211308451885"
+    },
+    {
+      "after": {
+        "amount_cents": 10000,
+        "committee_id": "C00693515",
+        "contributor_name": "KYLE, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-30",
+        "sub_id": "4061620211308452724"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061620211308452724"
+    },
+    {
+      "after": {
+        "amount_cents": 10000,
+        "committee_id": "C00693515",
+        "contributor_name": "TOKUTOMI, MARK",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4061620211308454584"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061620211308454584"
+    },
+    {
+      "after": {
+        "amount_cents": 10000,
+        "committee_id": "C00693515",
+        "contributor_name": "WONG, OLIVER",
+        "cycle": 2022,
+        "date": "2020-12-26",
+        "sub_id": "4061620211308454976"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4061620211308454976"
+    },
+    {
+      "after": {
+        "amount_cents": 50000,
+        "committee_id": "C00703975",
+        "contributor_name": "DACCARETT-CHAR, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-02",
+        "sub_id": "4071720211320909122"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4071720211320909122"
+    },
+    {
+      "after": {
+        "amount_cents": 3435,
+        "committee_id": "C00703975",
+        "contributor_name": "MARTELL, NICOLAS",
+        "cycle": 2022,
+        "date": "2020-11-02",
+        "sub_id": "4071720211320909960"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4071720211320909960"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00703975",
+        "contributor_name": "WOODLOCK, KYLE",
+        "cycle": 2022,
+        "date": "2020-11-02",
+        "sub_id": "4071720211320910841"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4071720211320910841"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00577999",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-10",
+        "sub_id": "4072520231756950313"
+      },
+      "before": {
+        "amount_cents": 500,
+        "committee_id": "C00577999",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-10",
+        "sub_id": "4072520231756950313"
+      },
+      "kind": "changed",
+      "source_id": "4072520231756950313"
+    },
+    {
+      "after": {
+        "amount_cents": 3500,
+        "committee_id": "C00577999",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-10",
+        "sub_id": "4072520231756950367"
+      },
+      "before": {
+        "amount_cents": 3500,
+        "committee_id": "C00577999",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-10",
+        "sub_id": "4072520231756950367"
+      },
+      "kind": "changed",
+      "source_id": "4072520231756950367"
+    },
+    {
+      "after": {
+        "amount_cents": 2000,
+        "committee_id": "C00577999",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-28",
+        "sub_id": "4072520231756954389"
+      },
+      "before": {
+        "amount_cents": 2000,
+        "committee_id": "C00577999",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-28",
+        "sub_id": "4072520231756954389"
+      },
+      "kind": "changed",
+      "source_id": "4072520231756954389"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00736876",
+        "contributor_name": "CARLETON, PAUL",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4072620221551756941"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551756941"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00736876",
+        "contributor_name": "POTTER, WILLIAM",
+        "cycle": 2022,
+        "date": "2020-12-21",
+        "sub_id": "4072620221551763407"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551763407"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "POTTER, WILLIAM",
+        "cycle": 2022,
+        "date": "2020-12-21",
+        "sub_id": "4072620221551765778"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551765778"
+    },
+    {
+      "after": {
+        "amount_cents": 80000,
+        "committee_id": "C00736876",
+        "contributor_name": "VAN ESSEN, KYLE",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551767437"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551767437"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00736876",
+        "contributor_name": "LEE, STEVE",
+        "cycle": 2022,
+        "date": "2020-12-18",
+        "sub_id": "4072620221551769420"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551769420"
+    },
+    {
+      "after": {
+        "amount_cents": 10000,
+        "committee_id": "C00736876",
+        "contributor_name": "CHIMENTI, MARY",
+        "cycle": 2022,
+        "date": "2020-12-30",
+        "sub_id": "4072620221551774746"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551774746"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "POTTER, WILLIAM",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551776575"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551776575"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00736876",
+        "contributor_name": "CARLETON, PAUL",
+        "cycle": 2022,
+        "date": "2020-12-24",
+        "sub_id": "4072620221551798459"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551798459"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "LINDEN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-22",
+        "sub_id": "4072620221551811402"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551811402"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00736876",
+        "contributor_name": "LINDEN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-23",
+        "sub_id": "4072620221551818236"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551818236"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00736876",
+        "contributor_name": "LEE, STEVE",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551819339"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551819339"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00736876",
+        "contributor_name": "POTTER, WILLIAM",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551835305"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551835305"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00736876",
+        "contributor_name": "MELIN, MARTIN",
+        "cycle": 2022,
+        "date": "2020-12-30",
+        "sub_id": "4072620221551838003"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551838003"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "LEE, CHELSEA",
+        "cycle": 2022,
+        "date": "2020-12-22",
+        "sub_id": "4072620221551868525"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551868525"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "LEE, CHELSEA",
+        "cycle": 2022,
+        "date": "2020-12-29",
+        "sub_id": "4072620221551890470"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551890470"
+    },
+    {
+      "after": {
+        "amount_cents": 934,
+        "committee_id": "C00736876",
+        "contributor_name": "SOFIELD, RICHARD",
+        "cycle": 2022,
+        "date": "2020-12-18",
+        "sub_id": "4072620221551899118"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551899118"
+    },
+    {
+      "after": {
+        "amount_cents": 934,
+        "committee_id": "C00736876",
+        "contributor_name": "SOFIELD, RICHARD",
+        "cycle": 2022,
+        "date": "2020-12-21",
+        "sub_id": "4072620221551902188"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551902188"
+    },
+    {
+      "after": {
+        "amount_cents": 934,
+        "committee_id": "C00736876",
+        "contributor_name": "SOFIELD, RICHARD",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551903992"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551903992"
+    },
+    {
+      "after": {
+        "amount_cents": 5000,
+        "committee_id": "C00736876",
+        "contributor_name": "WHITE, JUSTIN",
+        "cycle": 2022,
+        "date": "2020-12-30",
+        "sub_id": "4072620221551913354"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551913354"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "SANDOVAL, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-29",
+        "sub_id": "4072620221551924674"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551924674"
+    },
+    {
+      "after": {
+        "amount_cents": 3334,
+        "committee_id": "C00736876",
+        "contributor_name": "LINDEN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-18",
+        "sub_id": "4072620221551928595"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551928595"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00736876",
+        "contributor_name": "KROEGER, RYAN",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551938162"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551938162"
+    },
+    {
+      "after": {
+        "amount_cents": 3000,
+        "committee_id": "C00736876",
+        "contributor_name": "KROEGER, RYAN",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551947144"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551947144"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "SANDOVAL, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-22",
+        "sub_id": "4072620221551959546"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551959546"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00736876",
+        "contributor_name": "PELLERIN, JASON",
+        "cycle": 2022,
+        "date": "2020-12-18",
+        "sub_id": "4072620221551969303"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551969303"
+    },
+    {
+      "after": {
+        "amount_cents": 50000,
+        "committee_id": "C00736876",
+        "contributor_name": "MARTIN, JEREMY",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4072620221551974001"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551974001"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00736876",
+        "contributor_name": "SYED, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4072620221551977419"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551977419"
+    },
+    {
+      "after": {
+        "amount_cents": 583,
+        "committee_id": "C00736876",
+        "contributor_name": "KROEGER, RYAN",
+        "cycle": 2022,
+        "date": "2020-12-21",
+        "sub_id": "4072620221551979819"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551979819"
+    },
+    {
+      "after": {
+        "amount_cents": 1000,
+        "committee_id": "C00736876",
+        "contributor_name": "LINDEN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-12-30",
+        "sub_id": "4072620221551980379"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4072620221551980379"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00729954",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2026,
+        "date": "2024-07-10",
+        "sub_id": "4072920251212306676"
+      },
+      "before": {
+        "amount_cents": 500,
+        "committee_id": "C00729954",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2024,
+        "date": "2024-07-10",
+        "sub_id": "4072920251212306676"
+      },
+      "kind": "changed",
+      "source_id": "4072920251212306676"
+    },
+    {
+      "after": {
+        "amount_cents": -95,
+        "committee_id": "C00729954",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2026,
+        "date": "2024-07-19",
+        "sub_id": "4072920251212306796"
+      },
+      "before": {
+        "amount_cents": -95,
+        "committee_id": "C00729954",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2024-07-19",
+        "sub_id": "4072920251212306796"
+      },
+      "kind": "changed",
+      "source_id": "4072920251212306796"
+    },
+    {
+      "after": {
+        "amount_cents": 100,
+        "committee_id": "C00729954",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2026,
+        "date": "2024-07-31",
+        "sub_id": "4072920251212307195"
+      },
+      "before": {
+        "amount_cents": 100,
+        "committee_id": "C00729954",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2024,
+        "date": "2024-07-31",
+        "sub_id": "4072920251212307195"
+      },
+      "kind": "changed",
+      "source_id": "4072920251212307195"
+    },
+    {
+      "after": {
+        "amount_cents": 95,
+        "committee_id": "C00729954",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2026,
+        "date": "2024-06-13",
+        "sub_id": "4072920251212311087"
+      },
+      "before": {
+        "amount_cents": 95,
+        "committee_id": "C00729954",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2024,
+        "date": "2024-06-13",
+        "sub_id": "4072920251212311087"
+      },
+      "kind": "changed",
+      "source_id": "4072920251212311087"
+    },
+    {
+      "after": {
+        "amount_cents": 95,
+        "committee_id": "C00729954",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2026,
+        "date": "2024-06-18",
+        "sub_id": "4072920251212311533"
+      },
+      "before": {
+        "amount_cents": 95,
+        "committee_id": "C00729954",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2024-06-18",
+        "sub_id": "4072920251212311533"
+      },
+      "kind": "changed",
+      "source_id": "4072920251212311533"
+    },
+    {
+      "after": {
+        "amount_cents": 17,
+        "committee_id": "C00808311",
+        "contributor_name": "MONCAYO, SOFIA",
+        "cycle": 2026,
+        "date": "2022-07-08",
+        "sub_id": "4073020251212670105"
+      },
+      "before": {
+        "amount_cents": 17,
+        "committee_id": "C00808311",
+        "contributor_name": "MONCAYO, SOFIA",
+        "cycle": 2022,
+        "date": "2022-07-08",
+        "sub_id": "4073020251212670105"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670105"
+    },
+    {
+      "after": {
+        "amount_cents": 117,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2026,
+        "date": "2022-06-29",
+        "sub_id": "4073020251212670749"
+      },
+      "before": {
+        "amount_cents": 117,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-06-29",
+        "sub_id": "4073020251212670749"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670749"
+    },
+    {
+      "after": {
+        "amount_cents": 417,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2026,
+        "date": "2022-07-09",
+        "sub_id": "4073020251212670750"
+      },
+      "before": {
+        "amount_cents": 417,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-07-09",
+        "sub_id": "4073020251212670750"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670750"
+    },
+    {
+      "after": {
+        "amount_cents": 117,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2026,
+        "date": "2022-07-29",
+        "sub_id": "4073020251212670751"
+      },
+      "before": {
+        "amount_cents": 117,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-07-29",
+        "sub_id": "4073020251212670751"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670751"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2026,
+        "date": "2022-08-17",
+        "sub_id": "4073020251212670752"
+      },
+      "before": {
+        "amount_cents": 250,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-08-17",
+        "sub_id": "4073020251212670752"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670752"
+    },
+    {
+      "after": {
+        "amount_cents": 67,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2026,
+        "date": "2022-08-17",
+        "sub_id": "4073020251212670753"
+      },
+      "before": {
+        "amount_cents": 67,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-08-17",
+        "sub_id": "4073020251212670753"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670753"
+    },
+    {
+      "after": {
+        "amount_cents": 333,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2026,
+        "date": "2022-09-10",
+        "sub_id": "4073020251212670754"
+      },
+      "before": {
+        "amount_cents": 333,
+        "committee_id": "C00808311",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-09-10",
+        "sub_id": "4073020251212670754"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670754"
+    },
+    {
+      "after": {
+        "amount_cents": 167,
+        "committee_id": "C00808311",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2026,
+        "date": "2022-06-28",
+        "sub_id": "4073020251212670992"
+      },
+      "before": {
+        "amount_cents": 167,
+        "committee_id": "C00808311",
+        "contributor_name": "NISNEVICH, SOFIA",
+        "cycle": 2022,
+        "date": "2022-06-28",
+        "sub_id": "4073020251212670992"
+      },
+      "kind": "changed",
+      "source_id": "4073020251212670992"
+    },
+    {
+      "after": {
+        "amount_cents": 150000,
+        "committee_id": "C00580100",
+        "contributor_name": "FRANKEL, SOFIA",
+        "cycle": 2024,
+        "date": "2020-11-01",
+        "sub_id": "4080420231763282470"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080420231763282470"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "BOSTICK, CODY",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4080720231763502552"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763502552"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "BOSTICK, CODY",
+        "cycle": 2022,
+        "date": "2020-12-12",
+        "sub_id": "4080720231763502553"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763502553"
+    },
+    {
+      "after": {
+        "amount_cents": 3375,
+        "committee_id": "C00762591",
+        "contributor_name": "EVANS, DAVID",
+        "cycle": 2022,
+        "date": "2020-12-15",
+        "sub_id": "4080720231763553967"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763553967"
+    },
+    {
+      "after": {
+        "amount_cents": 3750,
+        "committee_id": "C00762591",
+        "contributor_name": "LANTELME, BRUCE",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4080720231763621784"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763621784"
+    },
+    {
+      "after": {
+        "amount_cents": 3750,
+        "committee_id": "C00762591",
+        "contributor_name": "LANTELME, BRUCE",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4080720231763621785"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763621785"
+    },
+    {
+      "after": {
+        "amount_cents": 375,
+        "committee_id": "C00762591",
+        "contributor_name": "LANTELME, BRUCE",
+        "cycle": 2022,
+        "date": "2020-12-05",
+        "sub_id": "4080720231763621786"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763621786"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "WIRGES, KENT",
+        "cycle": 2022,
+        "date": "2020-12-13",
+        "sub_id": "4080720231763760295"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763760295"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "WIRGES, KENT",
+        "cycle": 2022,
+        "date": "2020-12-17",
+        "sub_id": "4080720231763760296"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763760296"
+    },
+    {
+      "after": {
+        "amount_cents": 3750,
+        "committee_id": "C00762591",
+        "contributor_name": "WIRGES, KENT",
+        "cycle": 2022,
+        "date": "2020-12-25",
+        "sub_id": "4080720231763760297"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763760297"
+    },
+    {
+      "after": {
+        "amount_cents": 22500,
+        "committee_id": "C00762591",
+        "contributor_name": "YU, MITCHELL",
+        "cycle": 2022,
+        "date": "2020-12-09",
+        "sub_id": "4080720231763766330"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4080720231763766330"
+    },
+    {
+      "after": {
+        "amount_cents": 333,
+        "committee_id": "C00729608",
+        "contributor_name": "SOFIN, EDWARD",
+        "cycle": 2022,
+        "date": "2020-12-24",
+        "sub_id": "4081020211325091197"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081020211325091197"
+    },
+    {
+      "after": {
+        "amount_cents": 25000,
+        "committee_id": "C00729608",
+        "contributor_name": "BISHOP, THERESA",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4081020211325112304"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081020211325112304"
+    },
+    {
+      "after": {
+        "amount_cents": 2500,
+        "committee_id": "C00729608",
+        "contributor_name": "SOFIN, EDWARD",
+        "cycle": 2022,
+        "date": "2020-12-28",
+        "sub_id": "4081020211325122262"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081020211325122262"
+    },
+    {
+      "after": {
+        "amount_cents": 923,
+        "committee_id": "C00729608",
+        "contributor_name": "SOFIN, EDWARD",
+        "cycle": 2022,
+        "date": "2020-12-30",
+        "sub_id": "4081020211325146689"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081020211325146689"
+    },
+    {
+      "after": {
+        "amount_cents": 100000,
+        "committee_id": "C00729608",
+        "contributor_name": "BLOCK, ALLAN",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4081020211325154648"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081020211325154648"
+    },
+    {
+      "after": {
+        "amount_cents": 140000,
+        "committee_id": "C00729608",
+        "contributor_name": "GALLAGHER, DANIEL",
+        "cycle": 2022,
+        "date": "2020-12-24",
+        "sub_id": "4081020211325236002"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081020211325236002"
+    },
+    {
+      "after": {
+        "amount_cents": 250000,
+        "committee_id": "C00729608",
+        "contributor_name": "BUCHHEIT, GERALD",
+        "cycle": 2022,
+        "date": "2020-12-31",
+        "sub_id": "4081020211325237573"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081020211325237573"
+    },
+    {
+      "after": {
+        "amount_cents": 30000,
+        "committee_id": "C00580100",
+        "contributor_name": "RIVKIND, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-08",
+        "sub_id": "4081220221564500421"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4081220221564500421"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00580100",
+        "contributor_name": "CHIMENO, EMILY",
+        "cycle": 2022,
+        "date": "2020-11-04",
+        "sub_id": "4102420221590808480"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4102420221590808480"
+    },
+    {
+      "after": {
+        "amount_cents": 225,
+        "committee_id": "C00580100",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2022,
+        "date": "2020-11-04",
+        "sub_id": "4102420221590809255"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4102420221590809255"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00580100",
+        "contributor_name": "PARKER, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-04",
+        "sub_id": "4102420221590830797"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4102420221590830797"
+    },
+    {
+      "after": {
+        "amount_cents": 500,
+        "committee_id": "C00580100",
+        "contributor_name": "SIMMONS, CHRIS",
+        "cycle": 2022,
+        "date": "2020-11-04",
+        "sub_id": "4102420221590836487"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4102420221590836487"
+    },
+    {
+      "after": {
+        "amount_cents": 225,
+        "committee_id": "C00580100",
+        "contributor_name": "UROSEVIC, FILOFTEIA",
+        "cycle": 2022,
+        "date": "2020-11-04",
+        "sub_id": "4102420221590840231"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4102420221590840231"
+    },
+    {
+      "after": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223172"
+      },
+      "before": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223172"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223172"
+    },
+    {
+      "after": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223173"
+      },
+      "before": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223173"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223173"
+    },
+    {
+      "after": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223174"
+      },
+      "before": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223174"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223174"
+    },
+    {
+      "after": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223175"
+      },
+      "before": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223175"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223175"
+    },
+    {
+      "after": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223176"
+      },
+      "before": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223176"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223176"
+    },
+    {
+      "after": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223177"
+      },
+      "before": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223177"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223177"
+    },
+    {
+      "after": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223178"
+      },
+      "before": {
+        "amount_cents": -900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223178"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223178"
+    },
+    {
+      "after": {
+        "amount_cents": -450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223179"
+      },
+      "before": {
+        "amount_cents": -450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223179"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223179"
+    },
+    {
+      "after": {
+        "amount_cents": -450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223180"
+      },
+      "before": {
+        "amount_cents": -450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223180"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223180"
+    },
+    {
+      "after": {
+        "amount_cents": -270,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223181"
+      },
+      "before": {
+        "amount_cents": -270,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223181"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223181"
+    },
+    {
+      "after": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223182"
+      },
+      "before": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223182"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223182"
+    },
+    {
+      "after": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223183"
+      },
+      "before": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223183"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223183"
+    },
+    {
+      "after": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223184"
+      },
+      "before": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223184"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223184"
+    },
+    {
+      "after": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223185"
+      },
+      "before": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223185"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223185"
+    },
+    {
+      "after": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223186"
+      },
+      "before": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223186"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223186"
+    },
+    {
+      "after": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223187"
+      },
+      "before": {
+        "amount_cents": -180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223187"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223187"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223188"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223188"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223188"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223189"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223189"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223189"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223190"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223190"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223190"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-23",
+        "sub_id": "4110120231808223191"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-23",
+        "sub_id": "4110120231808223191"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223191"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223192"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223192"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223192"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223193"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223193"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223193"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223194"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223194"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223194"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223195"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223195"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223195"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-23",
+        "sub_id": "4110120231808223196"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-23",
+        "sub_id": "4110120231808223196"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223196"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223197"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223197"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223197"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223198"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223198"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223198"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223199"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223199"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223199"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223200"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223200"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223200"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223201"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223201"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223201"
+    },
+    {
+      "after": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223202"
+      },
+      "before": {
+        "amount_cents": -90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-11-22",
+        "sub_id": "4110120231808223202"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223202"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223203"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223203"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223203"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223204"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223204"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223204"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223205"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223205"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223205"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-10-21",
+        "sub_id": "4110120231808223206"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-10-21",
+        "sub_id": "4110120231808223206"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223206"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223207"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223207"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223207"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223208"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223208"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223208"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223209"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223209"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223209"
+    },
+    {
+      "after": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223210"
+      },
+      "before": {
+        "amount_cents": 90,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223210"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223210"
+    },
+    {
+      "after": {
+        "amount_cents": 180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223211"
+      },
+      "before": {
+        "amount_cents": 180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223211"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223211"
+    },
+    {
+      "after": {
+        "amount_cents": 180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223212"
+      },
+      "before": {
+        "amount_cents": 180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223212"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223212"
+    },
+    {
+      "after": {
+        "amount_cents": 180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223213"
+      },
+      "before": {
+        "amount_cents": 180,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223213"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223213"
+    },
+    {
+      "after": {
+        "amount_cents": 270,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223214"
+      },
+      "before": {
+        "amount_cents": 270,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223214"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223214"
+    },
+    {
+      "after": {
+        "amount_cents": 450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223215"
+      },
+      "before": {
+        "amount_cents": 450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223215"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223215"
+    },
+    {
+      "after": {
+        "amount_cents": 450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223216"
+      },
+      "before": {
+        "amount_cents": 450,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223216"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223216"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-24",
+        "sub_id": "4110120231808223217"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-24",
+        "sub_id": "4110120231808223217"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223217"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-10-24",
+        "sub_id": "4110120231808223218"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-10-24",
+        "sub_id": "4110120231808223218"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223218"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223219"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-09-21",
+        "sub_id": "4110120231808223219"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223219"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223220"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223220"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223220"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223221"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-10-02",
+        "sub_id": "4110120231808223221"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223221"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2024,
+        "date": "2022-10-10",
+        "sub_id": "4110120231808223222"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENO, JOSEPH",
+        "cycle": 2022,
+        "date": "2022-10-10",
+        "sub_id": "4110120231808223222"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223222"
+    },
+    {
+      "after": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENTO, SAM",
+        "cycle": 2024,
+        "date": "2022-10-04",
+        "sub_id": "4110120231808223223"
+      },
+      "before": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENTO, SAM",
+        "cycle": 2022,
+        "date": "2022-10-04",
+        "sub_id": "4110120231808223223"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223223"
+    },
+    {
+      "after": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENTO, SAM",
+        "cycle": 2024,
+        "date": "2022-11-04",
+        "sub_id": "4110120231808223224"
+      },
+      "before": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "CHIMENTO, SAM",
+        "cycle": 2022,
+        "date": "2022-11-04",
+        "sub_id": "4110120231808223224"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808223224"
+    },
+    {
+      "after": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2024,
+        "date": "2022-11-15",
+        "sub_id": "4110120231808227197"
+      },
+      "before": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2022,
+        "date": "2022-11-15",
+        "sub_id": "4110120231808227197"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808227197"
+    },
+    {
+      "after": {
+        "amount_cents": 2700,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2024,
+        "date": "2022-11-03",
+        "sub_id": "4110120231808227198"
+      },
+      "before": {
+        "amount_cents": 2700,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2022,
+        "date": "2022-11-03",
+        "sub_id": "4110120231808227198"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808227198"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2024,
+        "date": "2022-10-27",
+        "sub_id": "4110120231808227199"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2022,
+        "date": "2022-10-27",
+        "sub_id": "4110120231808227199"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808227199"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2024,
+        "date": "2022-09-22",
+        "sub_id": "4110120231808227200"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "COMBS, DAVE",
+        "cycle": 2022,
+        "date": "2022-09-22",
+        "sub_id": "4110120231808227200"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808227200"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "DAVIDSON, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-05",
+        "sub_id": "4110120231808235675"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "DAVIDSON, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-05",
+        "sub_id": "4110120231808235675"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808235675"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "DAVIDSON, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-09",
+        "sub_id": "4110120231808235676"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "DAVIDSON, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-09",
+        "sub_id": "4110120231808235676"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808235676"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "DAVIDSON, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-22",
+        "sub_id": "4110120231808235677"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "DAVIDSON, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-22",
+        "sub_id": "4110120231808235677"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808235677"
+    },
+    {
+      "after": {
+        "amount_cents": 18000,
+        "committee_id": "C00762591",
+        "contributor_name": "GROVER, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-09",
+        "sub_id": "4110120231808274576"
+      },
+      "before": {
+        "amount_cents": 18000,
+        "committee_id": "C00762591",
+        "contributor_name": "GROVER, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-09",
+        "sub_id": "4110120231808274576"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808274576"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-18",
+        "sub_id": "4110120231808329865"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-18",
+        "sub_id": "4110120231808329865"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808329865"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-09-18",
+        "sub_id": "4110120231808329866"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-09-18",
+        "sub_id": "4110120231808329866"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808329866"
+    },
+    {
+      "after": {
+        "amount_cents": 1980,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-04",
+        "sub_id": "4110120231808329867"
+      },
+      "before": {
+        "amount_cents": 1980,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-04",
+        "sub_id": "4110120231808329867"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808329867"
+    },
+    {
+      "after": {
+        "amount_cents": 1980,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-05",
+        "sub_id": "4110120231808329868"
+      },
+      "before": {
+        "amount_cents": 1980,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-05",
+        "sub_id": "4110120231808329868"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808329868"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-04",
+        "sub_id": "4110120231808329869"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-04",
+        "sub_id": "4110120231808329869"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808329869"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-09-20",
+        "sub_id": "4110120231808329870"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-09-20",
+        "sub_id": "4110120231808329870"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808329870"
+    },
+    {
+      "after": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-10",
+        "sub_id": "4110120231808329871"
+      },
+      "before": {
+        "amount_cents": 4050,
+        "committee_id": "C00762591",
+        "contributor_name": "MALOLES, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-10",
+        "sub_id": "4110120231808329871"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808329871"
+    },
+    {
+      "after": {
+        "amount_cents": 9,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-09-18",
+        "sub_id": "4110120231808352601"
+      },
+      "before": {
+        "amount_cents": 9,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-09-18",
+        "sub_id": "4110120231808352601"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808352601"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-31",
+        "sub_id": "4110120231808352602"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-31",
+        "sub_id": "4110120231808352602"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808352602"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-21",
+        "sub_id": "4110120231808352603"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-21",
+        "sub_id": "4110120231808352603"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808352603"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-06",
+        "sub_id": "4110120231808352604"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-06",
+        "sub_id": "4110120231808352604"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808352604"
+    },
+    {
+      "after": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-12",
+        "sub_id": "4110120231808352605"
+      },
+      "before": {
+        "amount_cents": 2250,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-12",
+        "sub_id": "4110120231808352605"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808352605"
+    },
+    {
+      "after": {
+        "amount_cents": 3645,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-12",
+        "sub_id": "4110120231808352606"
+      },
+      "before": {
+        "amount_cents": 3645,
+        "committee_id": "C00762591",
+        "contributor_name": "NAVARRETE, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-12",
+        "sub_id": "4110120231808352606"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808352606"
+    },
+    {
+      "after": {
+        "amount_cents": 4500,
+        "committee_id": "C00762591",
+        "contributor_name": "RODRIGUEZ, ELEANOR",
+        "cycle": 2024,
+        "date": "2022-09-25",
+        "sub_id": "4110120231808384618"
+      },
+      "before": {
+        "amount_cents": 4500,
+        "committee_id": "C00762591",
+        "contributor_name": "RODRIGUEZ, ELEANOR",
+        "cycle": 2022,
+        "date": "2022-09-25",
+        "sub_id": "4110120231808384618"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808384618"
+    },
+    {
+      "after": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2024,
+        "date": "2022-09-20",
+        "sub_id": "4110120231808392064"
+      },
+      "before": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2022,
+        "date": "2022-09-20",
+        "sub_id": "4110120231808392064"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808392064"
+    },
+    {
+      "after": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-20",
+        "sub_id": "4110120231808392065"
+      },
+      "before": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-20",
+        "sub_id": "4110120231808392065"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808392065"
+    },
+    {
+      "after": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2024,
+        "date": "2022-11-05",
+        "sub_id": "4110120231808392066"
+      },
+      "before": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2022,
+        "date": "2022-11-05",
+        "sub_id": "4110120231808392066"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808392066"
+    },
+    {
+      "after": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2024,
+        "date": "2022-10-05",
+        "sub_id": "4110120231808392067"
+      },
+      "before": {
+        "amount_cents": 1800,
+        "committee_id": "C00762591",
+        "contributor_name": "SANTOS, SOFIA",
+        "cycle": 2022,
+        "date": "2022-10-05",
+        "sub_id": "4110120231808392067"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808392067"
+    },
+    {
+      "after": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "SIMMONS, CHRIS",
+        "cycle": 2024,
+        "date": "2022-11-03",
+        "sub_id": "4110120231808401751"
+      },
+      "before": {
+        "amount_cents": 900,
+        "committee_id": "C00762591",
+        "contributor_name": "SIMMONS, CHRIS",
+        "cycle": 2022,
+        "date": "2022-11-03",
+        "sub_id": "4110120231808401751"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808401751"
+    },
+    {
+      "after": {
+        "amount_cents": 4500,
+        "committee_id": "C00762591",
+        "contributor_name": "SIMMONS, CHRIS",
+        "cycle": 2024,
+        "date": "2022-11-03",
+        "sub_id": "4110120231808401752"
+      },
+      "before": {
+        "amount_cents": 4500,
+        "committee_id": "C00762591",
+        "contributor_name": "SIMMONS, CHRIS",
+        "cycle": 2022,
+        "date": "2022-11-03",
+        "sub_id": "4110120231808401752"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808401752"
+    },
+    {
+      "after": {
+        "amount_cents": 1350,
+        "committee_id": "C00762591",
+        "contributor_name": "SOFIAK RASCIA, DIANNE",
+        "cycle": 2024,
+        "date": "2022-11-15",
+        "sub_id": "4110120231808405953"
+      },
+      "before": {
+        "amount_cents": 1350,
+        "committee_id": "C00762591",
+        "contributor_name": "SOFIAK RASCIA, DIANNE",
+        "cycle": 2022,
+        "date": "2022-11-15",
+        "sub_id": "4110120231808405953"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808405953"
+    },
+    {
+      "after": {
+        "amount_cents": 9000,
+        "committee_id": "C00762591",
+        "contributor_name": "SOFIAK RASCIA, DIANNE",
+        "cycle": 2024,
+        "date": "2022-11-15",
+        "sub_id": "4110120231808405954"
+      },
+      "before": {
+        "amount_cents": 9000,
+        "committee_id": "C00762591",
+        "contributor_name": "SOFIAK RASCIA, DIANNE",
+        "cycle": 2022,
+        "date": "2022-11-15",
+        "sub_id": "4110120231808405954"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808405954"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "BOLE, SOFIA",
+        "cycle": 2024,
+        "date": "2021-04-03",
+        "sub_id": "4110120231808458008"
+      },
+      "before": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "BOLE, SOFIA",
+        "cycle": 2022,
+        "date": "2021-04-03",
+        "sub_id": "4110120231808458008"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808458008"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "BOLE, SOFIA",
+        "cycle": 2024,
+        "date": "2021-05-03",
+        "sub_id": "4110120231808458009"
+      },
+      "before": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "BOLE, SOFIA",
+        "cycle": 2022,
+        "date": "2021-05-03",
+        "sub_id": "4110120231808458009"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808458009"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "PARKER, SOFIA",
+        "cycle": 2024,
+        "date": "2021-05-19",
+        "sub_id": "4110120231808489631"
+      },
+      "before": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "PARKER, SOFIA",
+        "cycle": 2022,
+        "date": "2021-05-19",
+        "sub_id": "4110120231808489631"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808489631"
+    },
+    {
+      "after": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "PARKER, SOFIA",
+        "cycle": 2024,
+        "date": "2021-04-19",
+        "sub_id": "4110120231808489632"
+      },
+      "before": {
+        "amount_cents": 7500,
+        "committee_id": "C00762591",
+        "contributor_name": "PARKER, SOFIA",
+        "cycle": 2022,
+        "date": "2021-04-19",
+        "sub_id": "4110120231808489632"
+      },
+      "kind": "changed",
+      "source_id": "4110120231808489632"
+    },
+    {
+      "after": {
+        "amount_cents": 50,
+        "committee_id": "C00580100",
+        "contributor_name": "ARUTUNIAN, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-06",
+        "sub_id": "4121120211384498717"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384498717"
+    },
+    {
+      "after": {
+        "amount_cents": 9500,
+        "committee_id": "C00580100",
+        "contributor_name": "BOLE, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-03",
+        "sub_id": "4121120211384510383"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384510383"
+    },
+    {
+      "after": {
+        "amount_cents": 9500,
+        "committee_id": "C00580100",
+        "contributor_name": "CERNICICA, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4121120211384524322"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384524322"
+    },
+    {
+      "after": {
+        "amount_cents": 1900,
+        "committee_id": "C00580100",
+        "contributor_name": "CHIMENTI, JEFF",
+        "cycle": 2022,
+        "date": "2020-11-03",
+        "sub_id": "4121120211384526199"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384526199"
+    },
+    {
+      "after": {
+        "amount_cents": 450,
+        "committee_id": "C00580100",
+        "contributor_name": "HAY, SOFIE",
+        "cycle": 2022,
+        "date": "2020-11-06",
+        "sub_id": "4121120211384575420"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384575420"
+    },
+    {
+      "after": {
+        "amount_cents": 1250,
+        "committee_id": "C00580100",
+        "contributor_name": "HONER, ROBERT",
+        "cycle": 2022,
+        "date": "2020-11-06",
+        "sub_id": "4121120211384581716"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384581716"
+    },
+    {
+      "after": {
+        "amount_cents": 214,
+        "committee_id": "C00580100",
+        "contributor_name": "LIVESAY, CHRISTOPHER S",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4121120211384609455"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384609455"
+    },
+    {
+      "after": {
+        "amount_cents": 214,
+        "committee_id": "C00580100",
+        "contributor_name": "LIVESAY, CHRISTOPHER S",
+        "cycle": 2022,
+        "date": "2020-11-03",
+        "sub_id": "4121120211384609456"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384609456"
+    },
+    {
+      "after": {
+        "amount_cents": 475,
+        "committee_id": "C00580100",
+        "contributor_name": "MADDEN, DAVID S",
+        "cycle": 2022,
+        "date": "2020-11-02",
+        "sub_id": "4121120211384613762"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384613762"
+    },
+    {
+      "after": {
+        "amount_cents": 119,
+        "committee_id": "C00580100",
+        "contributor_name": "MEYTUS, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-02",
+        "sub_id": "4121120211384625851"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384625851"
+    },
+    {
+      "after": {
+        "amount_cents": 250,
+        "committee_id": "C00580100",
+        "contributor_name": "MOORE, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-06",
+        "sub_id": "4121120211384630268"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384630268"
+    },
+    {
+      "after": {
+        "amount_cents": 9500,
+        "committee_id": "C00580100",
+        "contributor_name": "PARKER, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4121120211384643985"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384643985"
+    },
+    {
+      "after": {
+        "amount_cents": 356,
+        "committee_id": "C00580100",
+        "contributor_name": "RAMOS, SOFIA",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4121120211384654852"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384654852"
+    },
+    {
+      "after": {
+        "amount_cents": 4750,
+        "committee_id": "C00580100",
+        "contributor_name": "SMITH, TERESA P",
+        "cycle": 2022,
+        "date": "2020-11-03",
+        "sub_id": "4121120211384678450"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384678450"
+    },
+    {
+      "after": {
+        "amount_cents": 33,
+        "committee_id": "C00580100",
+        "contributor_name": "SOFIN, EDWARD",
+        "cycle": 2022,
+        "date": "2020-11-02",
+        "sub_id": "4121120211384679242"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384679242"
+    },
+    {
+      "after": {
+        "amount_cents": 195,
+        "committee_id": "C00580100",
+        "contributor_name": "SOFIN, EDWARD",
+        "cycle": 2022,
+        "date": "2020-11-03",
+        "sub_id": "4121120211384679243"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384679243"
+    },
+    {
+      "after": {
+        "amount_cents": 4750,
+        "committee_id": "C00580100",
+        "contributor_name": "STRIPE, JOAN",
+        "cycle": 2022,
+        "date": "2020-11-01",
+        "sub_id": "4121120211384684763"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384684763"
+    },
+    {
+      "after": {
+        "amount_cents": 166,
+        "committee_id": "C00580100",
+        "contributor_name": "WILLIAMS, JEFFREY",
+        "cycle": 2022,
+        "date": "2020-11-02",
+        "sub_id": "4121120211384707479"
+      },
+      "before": null,
+      "kind": "added",
+      "source_id": "4121120211384707479"
+    }
+  ]
+}
