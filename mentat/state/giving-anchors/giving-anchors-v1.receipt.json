@@ -1,0 +1,177 @@
+{
+ "schema_version": 1,
+ "snapshot": "giving-anchors-v1.json",
+ "snapshot_sha256": "ba1fc273362b1f21a91547b7f4b9a522ef1309aeab11e887a9188517f2ddd0b5",
+ "built_at_utc": "2026-10-01T07:00:37Z",
+ "elapsed_seconds": 35.55,
+ "builder": {
+  "name": "build_giving_anchors",
+  "version": "1",
+  "code_sha256": "3c97e753529bdabdbe5c837d9811e162b40f9dbe079d1535d240f6a43191f6c3",
+  "python": "3.12.10"
+ },
+ "industries": {
+  "commercial_banks": {
+   "status": {
+    "general_giving": "ready",
+    "candidate_receipts": "ready",
+    "pac_to_candidates": "ready",
+    "lda": "ready"
+   },
+   "workbook_sha256": "842ba7a2312ffb03d969e8452c970b32f227fd09befcbf80f935a63c94e97bd3",
+   "index_token": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "coverage_end": "2026-06-30"
+  },
+  "credit_unions": {
+   "status": {
+    "general_giving": "ready",
+    "candidate_receipts": "ready",
+    "pac_to_candidates": "ready",
+    "lda": "ready"
+   },
+   "workbook_sha256": "a6591d397b2bda66ab7827b686e240985dc3b41fa6c53aa486e1def9c764c674",
+   "index_token": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "coverage_end": "2026-05-31"
+  },
+  "property_casualty": {
+   "status": {
+    "general_giving": "ready",
+    "candidate_receipts": "ready",
+    "pac_to_candidates": "unavailable",
+    "lda": "unavailable"
+   },
+   "workbook_sha256": "ffed8ec4783dfb84971c35e794182a3bb609d9a907cc8fd639dd24dc2c683683",
+   "index_token": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "coverage_end": "2026-06-30"
+  },
+  "community_banks": {
+   "status": {
+    "general_giving": "ready",
+    "candidate_receipts": "ready",
+    "pac_to_candidates": "unavailable",
+    "lda": "unavailable"
+   },
+   "workbook_sha256": "47983c9f31e822e8211ae45dea1c92c0ddd7973a37d3cac6c4ae029337d293a9",
+   "index_token": "4d12598b93e43b8570d444dabb61114824ab7006c204f18e741958a1e4bc7f90",
+   "coverage_end": "2026-06-30"
+  }
+ },
+ "unavailable": {},
+ "inputs": [
+  {
+   "role": "cpi",
+   "path": "C:\\Users\\pgoff\\Mentat\\sector_growth_study\\data\\00_controls.xlsx",
+   "sha256": "253aaadd6912862df817f51c9d97225735b5f8a764cac64deca40f224d1ab80e"
+  },
+  {
+   "role": "lda",
+   "path": "C:\\Users\\pgoff\\AppData\\Local\\Melange\\lda_rebuild\\derived\\sector_spend\\sector_spend.csv",
+   "sha256": "22d1ab59d1c9282ab34d58294ebc1379357d2a9c6cd85b305fb6c0fbe901a56c"
+  },
+  {
+   "role": "workbook:commercial_banks",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Banking Industry Spending Overview.xlsx",
+   "sha256": "842ba7a2312ffb03d969e8452c970b32f227fd09befcbf80f935a63c94e97bd3"
+  },
+  {
+   "role": "index:commercial_banks",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743.sqlite",
+   "sha256": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743"
+  },
+  {
+   "role": "source_db:commercial_banks",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\report-repairs\\banking-20260910\\data\\mentat.db",
+   "sha256": "4abdea581b99cec1674252ee098ab6afca57674bd8e90313e9f4156e88b2d991"
+  },
+  {
+   "role": "workbook:credit_unions",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Credit Union Industry Spending Overview.xlsx",
+   "sha256": "a6591d397b2bda66ab7827b686e240985dc3b41fa6c53aa486e1def9c764c674"
+  },
+  {
+   "role": "index:credit_unions",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7.sqlite",
+   "sha256": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7"
+  },
+  {
+   "role": "source_db:credit_unions",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\credit_union\\mentat.db",
+   "sha256": "43c0c109c057d5cbca55106a5a68a200df871f6bbfc97feef5499bf22e2055d9"
+  },
+  {
+   "role": "workbook:property_casualty",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Property & Casualty Insurance Industry Spending Overview.xlsx",
+   "sha256": "ffed8ec4783dfb84971c35e794182a3bb609d9a907cc8fd639dd24dc2c683683"
+  },
+  {
+   "role": "index:property_casualty",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667.sqlite",
+   "sha256": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667"
+  },
+  {
+   "role": "source_db:property_casualty",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\property_casualty_insurance\\mentat.db",
+   "sha256": "4defdf40e82a872d3e9de5da8aca1f01dbc4bb3699155f1c7e6e10ac3ea3e165"
+  },
+  {
+   "role": "workbook:community_banks",
+   "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Mentat Complete Files\\Community Banks Industry Spending Overview.xlsx",
+   "sha256": "47983c9f31e822e8211ae45dea1c92c0ddd7973a37d3cac6c4ae029337d293a9"
+  },
+  {
+   "role": "index:community_banks",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\contribution-analytics\\4d12598b93e43b8570d444dabb61114824ab7006c204f18e741958a1e4bc7f90.sqlite",
+   "sha256": "4d12598b93e43b8570d444dabb61114824ab7006c204f18e741958a1e4bc7f90"
+  },
+  {
+   "role": "source_db:community_banks",
+   "path": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\community_banks\\mentat.db",
+   "sha256": "923ab7866fab51dc4a4771b3b6e8f1fc14b5bb483c9f2eeecfb6795ddfda6ca2"
+  },
+  {
+   "role": "fec:pas2:2022",
+   "path": "pas222/itpas2.txt",
+   "sha256": "97d57e40bdfeb4b20041fb98a6d66f1ef65dbb78d789471feef0716bda27ecc2"
+  },
+  {
+   "role": "fec:cn:2022",
+   "path": "cn22/cn.txt",
+   "sha256": "09855928a0f015b44f717da04b08e71ac977049de4901672978ed52b6ed16e38"
+  },
+  {
+   "role": "fec:cm:2022",
+   "path": "cm22/cm.txt",
+   "sha256": "8d15fae150f2975a58542a39571ff716e3cf1094309e113da928a66e7968d6e2"
+  },
+  {
+   "role": "fec:pas2:2024",
+   "path": "pas224/itpas2.txt",
+   "sha256": "4b4b9a41274d9b29d8d3dd78426ce39f3a838b8f98b4cbde0672d08ddaaa41b8"
+  },
+  {
+   "role": "fec:cn:2024",
+   "path": "cn24/cn.txt",
+   "sha256": "a089c056ceb7153411cc8df3e0cd03dc608d0635f7ea8e83828eafdff1dd040f"
+  },
+  {
+   "role": "fec:cm:2024",
+   "path": "cm24/cm.txt",
+   "sha256": "7f7abd31beaece86617a315b4908b9f7dfe9e839dc1fd8124032c224cea16be3"
+  },
+  {
+   "role": "fec:pas2:2026",
+   "path": "pas226/itpas2.txt",
+   "sha256": "3b4c1c40362dad0ea57f67c618ce7260f3c03a493b9febcd0f89c8f3dc6ec4c0"
+  },
+  {
+   "role": "fec:cn:2026",
+   "path": "cn26/cn.txt",
+   "sha256": "fb6c06961bc0b5c15ec77ba6695b320cdd975f716df3e598a39688ed617c1740"
+  },
+  {
+   "role": "fec:cm:2026",
+   "path": "cm26/cm.txt",
+   "sha256": "fed8c68960b97d275ad90054ea643e6c8211a74e8e41d379b2e80024a51baf60"
+  }
+ ]
+}

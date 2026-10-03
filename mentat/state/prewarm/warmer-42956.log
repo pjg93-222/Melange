@@ -1,0 +1,4 @@
+2026-09-28 16:26:12 prewarm[43772] exit: parent_gone: Parent console pid 42956 is gone.
+2026-09-28 16:26:12 prewarm[43772] exit: parent_gone: Parent console pid 42956 is gone.
+{"status": "success", "summary": "Warmer exited: Parent console pid 42956 is gone.", "next_actions": ["exit cleanly; the console that launched this warmer is gone"], "artifacts": ["C:\\Users\\pgoff\\Mentat\\mentat\\state\\prewarm\\ledger.jsonl", "C:\\Users\\pgoff\\Mentat\\mentat\\state\\prewarm\\plan.json"], "metrics": {"executed": 0, "succeeded": 0, "failed": 0, "skipped_over_budget": 0, "quarantined_now": [], "run_id": "prewarm-20260928T202607Z-43772", "root_cause_hint": "parent_gone", "retry": "do not retry", "op_seconds": 5.197}}
+2026-09-28 16:26:12 prewarm[43772] exiting now after parent_gone: released 0 held lock(s); 1 non-daemon thread(s) stopped with it: MainThread

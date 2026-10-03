@@ -1,0 +1,2 @@
+2026-09-24 15:05:57 prewarm[53400] acquired the warmer lock after orphaned warmer pid 45696 exited
+2026-09-24 15:46:57 prewarm[53400] plan (start): 19 tasks, 19 pending; {"query_view": {"pending": 8}, "insights_default": {"pending": 8}, "insights_neighbor": {"pending": 3}}

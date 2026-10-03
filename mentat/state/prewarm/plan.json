@@ -1,0 +1,2999 @@
+{
+ "schema": 1,
+ "created_utc": "2026-10-01T20:36:02.836973Z",
+ "as_of": "2026-10-01",
+ "code_fp": "a2f3eb52e874d19d",
+ "hints_stamp": [
+  7559,
+  1790886944537437300
+ ],
+ "newest_hint": {
+  "dataset": "Banking",
+  "body": {
+   "dataset": "Banking",
+   "basis": "receipt",
+   "panels": [
+    "favorites",
+    "trends",
+    "changes"
+   ]
+  },
+  "key": "6f3562c40f44ae6023c0c98c9377a781f76cb664366a1f87fe684f40c5c953d9",
+  "seen_utc": "2026-10-01T20:35:44.526430+00:00"
+ },
+ "sources": {
+  "Banking": {
+   "available": true,
+   "verified": true,
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "message": null
+  },
+  "Community Banks": {
+   "available": true,
+   "verified": true,
+   "source_fp": "2703754563c97d124223177de43846d12db946e0874730b37727699451454060",
+   "index_present": false,
+   "message": null
+  },
+  "Credit Arms": {
+   "available": true,
+   "verified": true,
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "message": null
+  },
+  "Credit Union": {
+   "available": true,
+   "verified": true,
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "message": null
+  },
+  "Crypto": {
+   "available": true,
+   "verified": true,
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "message": null
+  },
+  "Fintech": {
+   "available": true,
+   "verified": true,
+   "source_fp": "75d7b0c7207c08bc20a8bb179dae1ae2d64b10df5a7628fb50fb911005bea975",
+   "index_present": false,
+   "message": null
+  },
+  "Property & Casualty Insurance": {
+   "available": true,
+   "verified": true,
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "message": null
+  },
+  "Rust FEC Verified 2023-2024": {
+   "available": true,
+   "verified": true,
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "index_present": true,
+   "message": null
+  },
+  "Telecom": {
+   "available": true,
+   "verified": true,
+   "source_fp": "3b1c094a806c26db1ef34544e96fc1fa13f5abc615f4cf9c981e00e44ce8cb66",
+   "index_present": false,
+   "message": null
+  }
+ },
+ "order": [
+  "Banking",
+  "Credit Union",
+  "Community Banks",
+  "Telecom",
+  "Crypto",
+  "Credit Arms",
+  "Fintech",
+  "Property & Casualty Insurance",
+  "Rust FEC Verified 2023-2024"
+ ],
+ "tasks": [
+  {
+   "id": "query_view:fintech:4ffe29764712",
+   "kind": "query_view",
+   "dataset": "Fintech",
+   "body": {
+    "dataset": "Fintech",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    6,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "75d7b0c7207c08bc20a8bb179dae1ae2d64b10df5a7628fb50fb911005bea975",
+   "index_present": false,
+   "state": "blocked",
+   "value": 5359.259747,
+   "tier": "hot",
+   "root_cause_hint": "index_missing"
+  },
+  {
+   "id": "query_view:telecom:0ecf618b41f3",
+   "kind": "query_view",
+   "dataset": "Telecom",
+   "body": {
+    "dataset": "Telecom",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    3,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "3b1c094a806c26db1ef34544e96fc1fa13f5abc615f4cf9c981e00e44ce8cb66",
+   "index_present": false,
+   "state": "blocked",
+   "value": 2872.709846,
+   "tier": "hot",
+   "root_cause_hint": "index_missing"
+  },
+  {
+   "id": "query_view:property_casualty_insurance:672328ed225b",
+   "kind": "query_view",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    7,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 1920.25079,
+   "tier": "hot"
+  },
+  {
+   "id": "query_view:credit_arms:f7fdae1dc14b",
+   "kind": "query_view",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    5,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 1552.374279,
+   "tier": "hot"
+  },
+  {
+   "id": "query_view:credit_union:1d5ce0a6e065",
+   "kind": "query_view",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    1,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 1387.913059,
+   "tier": "hot"
+  },
+  {
+   "id": "query_view:banking:8fbdddfc3c43",
+   "kind": "query_view",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    0,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 981.485787,
+   "tier": "hot"
+  },
+  {
+   "id": "query_view:crypto:34598f71e4c1",
+   "kind": "query_view",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    4,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 397.652145,
+   "tier": "hot"
+  },
+  {
+   "id": "query_view:community_banks:e95618cd1c18",
+   "kind": "query_view",
+   "dataset": "Community Banks",
+   "body": {
+    "dataset": "Community Banks",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    2,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "2703754563c97d124223177de43846d12db946e0874730b37727699451454060",
+   "index_present": false,
+   "state": "blocked",
+   "value": 76.096431,
+   "tier": "hot",
+   "root_cause_hint": "index_missing"
+  },
+  {
+   "id": "insights_default:banking:3c947dd5f71b",
+   "kind": "insights_default",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    0,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 21.792774,
+   "tier": "hot"
+  },
+  {
+   "id": "drawer_sidecars:banking:4952b78018c8",
+   "kind": "drawer_sidecars",
+   "dataset": "Banking",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Banking"
+   },
+   "rank": [
+    8,
+    0
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 3.134423,
+   "tier": "hot"
+  },
+  {
+   "id": "insights_neighbor:banking:84257975f9b7",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "original_observed",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    5,
+    0,
+    1
+   ],
+   "reason": "newest hint: other basis",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 2.174364,
+   "tier": "hot"
+  },
+  {
+   "id": "insights_default:credit_arms:d339e4c4b8b5",
+   "kind": "insights_default",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    5,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 2.084321,
+   "tier": "hot"
+  },
+  {
+   "id": "comparison_flows:banking:16a20c003aa6",
+   "kind": "comparison_flows",
+   "dataset": "Banking",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Banking"
+   },
+   "rank": [
+    7,
+    0
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 2.070605,
+   "tier": "hot"
+  },
+  {
+   "id": "insights_neighbor:banking:7b835378589a",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Bank of America NA"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    1
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 1.411671,
+   "tier": "hot"
+  },
+  {
+   "id": "graph_spark:banking:91ed6f47ba1d",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "Bank of America NA"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    0
+   ],
+   "reason": "Graph company Bank of America NA: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "hot",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:1a32ab0871a3",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "Capital One Bank NA"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    1
+   ],
+   "reason": "Graph company Capital One Bank NA: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "hot",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:39f0f4300035",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "Citibank"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    2
+   ],
+   "reason": "Graph company Citibank: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "hot",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:3db8951d40ba",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "Goldman Sachs Bank NA"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    3
+   ],
+   "reason": "Graph company Goldman Sachs Bank NA: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "hot",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:da9210d744b4",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "JP Morgan Chase Bank NA"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    4
+   ],
+   "reason": "Graph company JP Morgan Chase Bank NA: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "hot",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:e160d5aa8ea1",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "Morgan Stanley Bank"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    5
+   ],
+   "reason": "Graph company Morgan Stanley Bank: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "hot",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "query_view:rust_fec_verified_2023_2024:77170083ea49",
+   "kind": "query_view",
+   "dataset": "Rust FEC Verified 2023-2024",
+   "body": {
+    "dataset": "Rust FEC Verified 2023-2024",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2023-2024"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    1,
+    8,
+    0
+   ],
+   "reason": "Graph sparkline first-load query",
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.129992,
+   "tier": "background"
+  },
+  {
+   "id": "insights_default:credit_union:6b9f6b64918c",
+   "kind": "insights_default",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    1,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.388522,
+   "tier": "background"
+  },
+  {
+   "id": "insights_default:community_banks:f518154dcb85",
+   "kind": "insights_default",
+   "dataset": "Community Banks",
+   "body": {
+    "dataset": "Community Banks",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    2,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "2703754563c97d124223177de43846d12db946e0874730b37727699451454060",
+   "index_present": false,
+   "state": "blocked",
+   "value": 0.210801,
+   "tier": "background",
+   "root_cause_hint": "index_missing"
+  },
+  {
+   "id": "insights_default:telecom:9f0cf37bea21",
+   "kind": "insights_default",
+   "dataset": "Telecom",
+   "body": {
+    "dataset": "Telecom",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    3,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "3b1c094a806c26db1ef34544e96fc1fa13f5abc615f4cf9c981e00e44ce8cb66",
+   "index_present": false,
+   "state": "blocked",
+   "value": 0.175866,
+   "tier": "background",
+   "root_cause_hint": "index_missing"
+  },
+  {
+   "id": "insights_default:crypto:55de63e663bd",
+   "kind": "insights_default",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    4,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.502471,
+   "tier": "background"
+  },
+  {
+   "id": "insights_default:fintech:749a6d46d14f",
+   "kind": "insights_default",
+   "dataset": "Fintech",
+   "body": {
+    "dataset": "Fintech",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    6,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "75d7b0c7207c08bc20a8bb179dae1ae2d64b10df5a7628fb50fb911005bea975",
+   "index_present": false,
+   "state": "blocked",
+   "value": 0.130506,
+   "tier": "background",
+   "root_cause_hint": "index_missing"
+  },
+  {
+   "id": "insights_default:property_casualty_insurance:0dca0163ad41",
+   "kind": "insights_default",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    7,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.919884,
+   "tier": "background"
+  },
+  {
+   "id": "insights_default:rust_fec_verified_2023_2024:8a6287505e13",
+   "kind": "insights_default",
+   "dataset": "Rust FEC Verified 2023-2024",
+   "body": {
+    "dataset": "Rust FEC Verified 2023-2024",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    2,
+    8,
+    0
+   ],
+   "reason": "insights.js first-open default",
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.1418,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:76f14c82a747",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Capital One Bank NA"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    2
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.9133,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:c637fe07afe6",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Citibank"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    3
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.874231,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:5a5482b12be1",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Goldman Sachs Bank NA"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    4
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.733901,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:9c2b0237e2b1",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "JP Morgan Chase Bank NA"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    5
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.628807,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:1900aec05938",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Morgan Stanley Bank"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    6
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.919778,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:73d030529d6c",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "PNC Bank NA"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    7
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.792481,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:e846c83cbc9b",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Truist Bank"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    8
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.9258,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:18b52a6e9f79",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "US Bank NA"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    9
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.897052,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:a60e14477119",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Wells Fargo Bank NA"
+   },
+   "rank": [
+    3,
+    0,
+    0,
+    10
+   ],
+   "reason": "newest hint: other company",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 1.312869,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:4c3e52fa8feb",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Alliant Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    0
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.064255,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:7cdfec54d992",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "America First Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    1
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.062881,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:d54cecd1089c",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Boeing Employees Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    2
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.06381,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:c169dd43d0ed",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Golden 1 Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    3
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.063362,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:2e8e758b9357",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Mountain America Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    4
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.063332,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:1d2388495e55",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Navy Federal Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    5
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.07339,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:01143064d341",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Pentagon Federal Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    6
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.06381,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:0cbe19d4d67e",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "SchoolsFirst Federal Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    7
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.062881,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:52ed8dea968d",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "State Employees' Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    8
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.06378,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_union:e4a43aa88210",
+   "kind": "insights_company",
+   "dataset": "Credit Union",
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Suncoast Credit Union"
+   },
+   "rank": [
+    4,
+    1,
+    9
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.063332,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:c4977f39c04b",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "BINANCE US"
+   },
+   "rank": [
+    4,
+    4,
+    0
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.105553,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:79b021ea1c0e",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Bakkt"
+   },
+   "rank": [
+    4,
+    4,
+    1
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.10635,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:e8dd7ff4ef05",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Bitnomial"
+   },
+   "rank": [
+    4,
+    4,
+    2
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.104801,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:c1d6831f2fdf",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Coinbase"
+   },
+   "rank": [
+    4,
+    4,
+    3
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.104801,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:1a66896c07fb",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Coinlist"
+   },
+   "rank": [
+    4,
+    4,
+    4
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.104801,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:b3504f798d9b",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Foris Dax Inc"
+   },
+   "rank": [
+    4,
+    4,
+    5
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.105553,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:cf7eabc538fb",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Gemini"
+   },
+   "rank": [
+    4,
+    4,
+    6
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.104801,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:cd1f4fa70e7c",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Kraken"
+   },
+   "rank": [
+    4,
+    4,
+    7
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.10635,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:dc9d94b69fd6",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "MIAXdx"
+   },
+   "rank": [
+    4,
+    4,
+    8
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.107142,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:crypto:d4d59bf02039",
+   "kind": "insights_company",
+   "dataset": "Crypto",
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Tzero"
+   },
+   "rank": [
+    4,
+    4,
+    9
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.10635,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:717a98573f6e",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "American Honda Finance Corporation"
+   },
+   "rank": [
+    4,
+    5,
+    0
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.157202,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:e9d5aa67a9bb",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "CNH Industrial Capital LLC"
+   },
+   "rank": [
+    4,
+    5,
+    1
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.15833,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:c5c9767dd0ba",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Caterpillar Financial Services Corporation"
+   },
+   "rank": [
+    4,
+    5,
+    2
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.197156,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:4de315474a41",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Ford Motor Credit Company"
+   },
+   "rank": [
+    4,
+    5,
+    3
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.300647,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:c657e6230854",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "GM Financial"
+   },
+   "rank": [
+    4,
+    5,
+    4
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.380549,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:c21d3f19d12a",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Hyundai Capital America"
+   },
+   "rank": [
+    4,
+    5,
+    5
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.157126,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:b52bc5d275f3",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "John Deere Capital Corporation"
+   },
+   "rank": [
+    4,
+    5,
+    6
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.15833,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:869459023012",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "OneMain Holdings"
+   },
+   "rank": [
+    4,
+    5,
+    7
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.157202,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:25b87989dd97",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "PACCAR Financial Corp"
+   },
+   "rank": [
+    4,
+    5,
+    8
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.157202,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:credit_arms:e6b81e8fe0d3",
+   "kind": "insights_company",
+   "dataset": "Credit Arms",
+   "body": {
+    "dataset": "Credit Arms",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Toyota Motor Credit Corporation"
+   },
+   "rank": [
+    4,
+    5,
+    9
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.19812,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:1e4a8f979ef7",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Allstate"
+   },
+   "rank": [
+    4,
+    7,
+    0
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.098608,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:9bc29773aec2",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Berkshire Hathaway"
+   },
+   "rank": [
+    4,
+    7,
+    1
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.106277,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:a11319621a4d",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Chubb"
+   },
+   "rank": [
+    4,
+    7,
+    2
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.093225,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:3a8322bef190",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Farmers Insurance"
+   },
+   "rank": [
+    4,
+    7,
+    3
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.094213,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:b41276f356dd",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Liberty Mutual"
+   },
+   "rank": [
+    4,
+    7,
+    4
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.108848,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:a1c5e4429353",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Progressive Insurance"
+   },
+   "rank": [
+    4,
+    7,
+    5
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.091214,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:1406313e86c5",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "State Farm"
+   },
+   "rank": [
+    4,
+    7,
+    6
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.148431,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:eb645ae530aa",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "The Travelers Companies"
+   },
+   "rank": [
+    4,
+    7,
+    7
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.094213,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:59335c3eb2a6",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "USAA"
+   },
+   "rank": [
+    4,
+    7,
+    8
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.112157,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:property_casualty_insurance:91d2b516ba9f",
+   "kind": "insights_company",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "dataset": "Property & Casualty Insurance",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Zurich Insurance"
+   },
+   "rank": [
+    4,
+    7,
+    9
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.079762,
+   "tier": "background"
+  },
+  {
+   "id": "insights_company:rust_fec_verified_2023_2024:cdd11621f676",
+   "kind": "insights_company",
+   "dataset": "Rust FEC Verified 2023-2024",
+   "body": {
+    "dataset": "Rust FEC Verified 2023-2024",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ],
+    "company": "Ripple Labs"
+   },
+   "rank": [
+    4,
+    8,
+    0
+   ],
+   "reason": "every company: insights.js default with the company chosen",
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.035184,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:6ffbd615695a",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "original_supported",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    5,
+    0,
+    2
+   ],
+   "reason": "newest hint: other basis",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.814737,
+   "tier": "background"
+  },
+  {
+   "id": "insights_neighbor:banking:2d9ffc5492f5",
+   "kind": "insights_neighbor",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "pac_activity",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "rank": [
+    5,
+    0,
+    3
+   ],
+   "reason": "newest hint: other basis",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.832696,
+   "tier": "background"
+  },
+  {
+   "id": "graph_spark:banking:a4f20d325072",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "PNC Bank NA"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    6
+   ],
+   "reason": "Graph company PNC Bank NA: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "background",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:c1581b17a6c4",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "Truist Bank"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    7
+   ],
+   "reason": "Graph company Truist Bank: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "background",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:00047103a9e2",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "US Bank NA"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    8
+   ],
+   "reason": "Graph company US Bank NA: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "background",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "graph_spark:banking:04e190d84b2a",
+   "kind": "graph_spark",
+   "dataset": "Banking",
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "dimensions": [
+     "company",
+     "quarter"
+    ],
+    "measures": [
+     "amount"
+    ],
+    "filters": [
+     {
+      "field": "company",
+      "op": "eq",
+      "value": "Wells Fargo Bank NA"
+     },
+     {
+      "field": "cycle",
+      "op": "eq",
+      "value": "2025-2026"
+     }
+    ],
+    "aggregate_filters": [],
+    "sort": [
+     {
+      "field": "quarter",
+      "direction": "asc"
+     }
+    ],
+    "limit": 100000,
+    "offset": 0
+   },
+   "rank": [
+    6,
+    0,
+    9
+   ],
+   "reason": "Graph company Wells Fargo Bank NA: sparkline at the first-load cycle",
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "index_present": true,
+   "state": "over_budget",
+   "value": 1.403677,
+   "tier": "background",
+   "root_cause_hint": "cache_budget"
+  },
+  {
+   "id": "comparison_flows:credit_union:5393769d69c8",
+   "kind": "comparison_flows",
+   "dataset": "Credit Union",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Credit Union"
+   },
+   "rank": [
+    7,
+    1
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.213252,
+   "tier": "background"
+  },
+  {
+   "id": "comparison_flows:community_banks:9321c91a7af1",
+   "kind": "comparison_flows",
+   "dataset": "Community Banks",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Community Banks"
+   },
+   "rank": [
+    7,
+    2
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "2703754563c97d124223177de43846d12db946e0874730b37727699451454060",
+   "index_present": false,
+   "state": "warm",
+   "value": 0.152323,
+   "tier": "background"
+  },
+  {
+   "id": "comparison_flows:telecom:f7bd2f27fba3",
+   "kind": "comparison_flows",
+   "dataset": "Telecom",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Telecom"
+   },
+   "rank": [
+    7,
+    3
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "3b1c094a806c26db1ef34544e96fc1fa13f5abc615f4cf9c981e00e44ce8cb66",
+   "index_present": false,
+   "state": "warm",
+   "value": 0.17771,
+   "tier": "background"
+  },
+  {
+   "id": "comparison_flows:crypto:d4299df539b1",
+   "kind": "comparison_flows",
+   "dataset": "Crypto",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Crypto"
+   },
+   "rank": [
+    7,
+    4
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.348248,
+   "tier": "background"
+  },
+  {
+   "id": "comparison_flows:credit_arms:e9e0d0a03632",
+   "kind": "comparison_flows",
+   "dataset": "Credit Arms",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Credit Arms"
+   },
+   "rank": [
+    7,
+    5
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.527598,
+   "tier": "background"
+  },
+  {
+   "id": "comparison_flows:fintech:81163b8541ee",
+   "kind": "comparison_flows",
+   "dataset": "Fintech",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Fintech"
+   },
+   "rank": [
+    7,
+    6
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "75d7b0c7207c08bc20a8bb179dae1ae2d64b10df5a7628fb50fb911005bea975",
+   "index_present": false,
+   "state": "warm",
+   "value": 0.130506,
+   "tier": "background"
+  },
+  {
+   "id": "comparison_flows:property_casualty_insurance:cba45419803c",
+   "kind": "comparison_flows",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Property & Casualty Insurance"
+   },
+   "rank": [
+    7,
+    7
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.263799,
+   "tier": "background"
+  },
+  {
+   "id": "comparison_flows:rust_fec_verified_2023_2024:f637741c7631",
+   "kind": "comparison_flows",
+   "dataset": "Rust FEC Verified 2023-2024",
+   "body": {
+    "artifact": "comparison_flows",
+    "industry": "Rust FEC Verified 2023-2024"
+   },
+   "rank": [
+    7,
+    8
+   ],
+   "reason": "comparison-flows answer (cache receipt hook)",
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.116083,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:credit_union:108aeff2577b",
+   "kind": "drawer_sidecars",
+   "dataset": "Credit Union",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Credit Union"
+   },
+   "rank": [
+    8,
+    1
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.068313,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:community_banks:53e0094114ce",
+   "kind": "drawer_sidecars",
+   "dataset": "Community Banks",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Community Banks"
+   },
+   "rank": [
+    8,
+    2
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "2703754563c97d124223177de43846d12db946e0874730b37727699451454060",
+   "index_present": false,
+   "state": "warm",
+   "value": 0.108534,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:telecom:0571b3982c7d",
+   "kind": "drawer_sidecars",
+   "dataset": "Telecom",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Telecom"
+   },
+   "rank": [
+    8,
+    3
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "3b1c094a806c26db1ef34544e96fc1fa13f5abc615f4cf9c981e00e44ce8cb66",
+   "index_present": false,
+   "state": "warm",
+   "value": 0.076648,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:crypto:f5183057e91d",
+   "kind": "drawer_sidecars",
+   "dataset": "Crypto",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Crypto"
+   },
+   "rank": [
+    8,
+    4
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.088798,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:credit_arms:2438fa15d32e",
+   "kind": "drawer_sidecars",
+   "dataset": "Credit Arms",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Credit Arms"
+   },
+   "rank": [
+    8,
+    5
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.169659,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:fintech:0323b28301d8",
+   "kind": "drawer_sidecars",
+   "dataset": "Fintech",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Fintech"
+   },
+   "rank": [
+    8,
+    6
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "75d7b0c7207c08bc20a8bb179dae1ae2d64b10df5a7628fb50fb911005bea975",
+   "index_present": false,
+   "state": "warm",
+   "value": 0.040455,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:property_casualty_insurance:1557cdd4d832",
+   "kind": "drawer_sidecars",
+   "dataset": "Property & Casualty Insurance",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Property & Casualty Insurance"
+   },
+   "rank": [
+    8,
+    7
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "index_present": true,
+   "state": "warm",
+   "value": 0.090192,
+   "tier": "background"
+  },
+  {
+   "id": "drawer_sidecars:rust_fec_verified_2023_2024:88bcfd6f8571",
+   "kind": "drawer_sidecars",
+   "dataset": "Rust FEC Verified 2023-2024",
+   "body": {
+    "artifact": "drawer_sidecars",
+    "industry": "Rust FEC Verified 2023-2024"
+   },
+   "rank": [
+    8,
+    8
+   ],
+   "reason": "Graph drawer sidecars (drawer receipt hook)",
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "index_present": true,
+   "state": "quarantined",
+   "value": 0.099582,
+   "tier": "background"
+  }
+ ],
+ "skipped": [],
+ "released_quarantine": [],
+ "quarantine": {
+  "drawer_sidecars:rust_fec_verified_2023_2024:88bcfd6f8571": {
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "code_fp": "a2f3eb52e874d19d",
+   "since_utc": "2026-09-30T23:31:54.129923Z",
+   "failures": 3,
+   "root_cause_hint": "unexpected_exception:RuntimeError",
+   "last_error": "RuntimeError: Drawer sidecars incomplete: FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Mentat Complete Files\\\\Rust FEC Verified 2023-2024 Industry Spending Overview.xlsx'",
+   "kind": "drawer_sidecars",
+   "dataset": "Rust FEC Verified 2023-2024"
+  }
+ },
+ "pending_expansion": null,
+ "pending_companies": [
+  "Community Banks",
+  "Telecom",
+  "Fintech"
+ ],
+ "budget": {
+  "insights": {
+   "room_at_plan": 873,
+   "planned_writes": 0,
+   "over_budget": 0
+  },
+  "query": {
+   "room_at_plan": 0,
+   "planned_writes": 0,
+   "over_budget": 10
+  }
+ },
+ "ranking": "value",
+ "reprime": [],
+ "reason": "hints_changed",
+ "run_id": "prewarm-20261001T135442Z-40948"
+}

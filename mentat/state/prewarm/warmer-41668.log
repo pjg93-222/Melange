@@ -1,0 +1,5 @@
+2026-09-30 18:51:09 prewarm[68936] plan (start): 111 tasks, 91 pending; {"query_view": {"blocked": 3, "warm": 4, "pending": 2}, "insights_neighbor": {"pending": 14}, "insights_default": {"pending": 6, "blocked": 3}, "comparison_flows": {"pending": 9}, "graph_spark": {"over_budget": 10}, "insights_company": {"pending": 51}, "drawer_sidecars": {"pending": 9}}
+2026-09-30 18:53:25 prewarm[68936] promoted 1 warm responses a click has used
+2026-09-30 18:53:25 prewarm[68936] plan deferred: 1396 MB free physical memory
+2026-09-30 18:54:52 prewarm[68936] plan (hints_changed): 111 tasks, 91 pending; {"query_view": {"blocked": 3, "warm": 4, "pending": 2}, "insights_default": {"pending": 6, "blocked": 3}, "comparison_flows": {"pending": 9}, "insights_neighbor": {"pending": 14}, "insights_company": {"pending": 51}, "graph_spark": {"over_budget": 10}, "drawer_sidecars": {"pending": 9}}
+2026-09-30 18:54:55 prewarm[68936] pause: low_memory: 1530 MB free physical memory < 1536 MB

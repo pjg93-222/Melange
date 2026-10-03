@@ -1,0 +1,33 @@
+{
+ "pid": 40948,
+ "run_id": "prewarm-20261001T135442Z-40948",
+ "op": "run",
+ "updated_utc": "2026-10-01T20:36:02.883107Z",
+ "state": "idle",
+ "counts": {
+  "query_view": {
+   "blocked": 3,
+   "warm": 6
+  },
+  "insights_default": {
+   "warm": 6,
+   "blocked": 3
+  },
+  "drawer_sidecars": {
+   "warm": 8,
+   "quarantined": 1
+  },
+  "insights_neighbor": {
+   "warm": 13
+  },
+  "comparison_flows": {
+   "warm": 9
+  },
+  "graph_spark": {
+   "over_budget": 10
+  },
+  "insights_company": {
+   "warm": 41
+  }
+ }
+}

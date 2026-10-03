@@ -1,0 +1,17 @@
+2026-09-25 14:32:26 prewarm[48708] plan (start): 125 tasks, 115 pending; {"query_view": {"pending": 8}, "insights_default": {"pending": 8}, "comparison_flows": {"pending": 8}, "insights_company": {"pending": 70}, "drawer_sidecars": {"pending": 8}, "insights_neighbor": {"pending": 13}, "graph_spark": {"over_budget": 10}}
+2026-09-25 14:32:27 prewarm[48708] pause: low_memory: 1888 MB free physical memory < 2304 MB for comparison_flows
+2026-09-25 14:33:27 prewarm[48708] plan deferred: 1151 MB free physical memory
+2026-09-25 14:34:27 prewarm[48708] plan deferred: 1439 MB free physical memory
+2026-09-25 14:35:27 prewarm[48708] plan deferred: 1297 MB free physical memory
+2026-09-25 14:36:27 prewarm[48708] plan deferred: 1163 MB free physical memory
+2026-09-25 14:37:27 prewarm[48708] plan deferred: 1497 MB free physical memory
+2026-09-25 14:38:27 prewarm[48708] plan deferred: 1293 MB free physical memory
+2026-09-25 14:39:29 prewarm[48708] plan (hints_changed): 136 tasks, 122 pending; {"query_view": {"warm": 3, "pending": 5}, "insights_neighbor": {"pending": 14}, "insights_default": {"pending": 7, "warm": 1}, "comparison_flows": {"pending": 8}, "graph_spark": {"over_budget": 10}, "insights_company": {"pending": 80}, "drawer_sidecars": {"pending": 8}}
+2026-09-25 14:39:30 prewarm[48708] pause: low_memory: 1464 MB free physical memory < 1536 MB
+2026-09-25 14:40:30 prewarm[48708] pause: low_memory: 1758 MB free physical memory < 2304 MB for comparison_flows
+2026-09-25 15:02:10 prewarm[48708] pause: low_memory: 1465 MB free physical memory < 1536 MB
+2026-09-25 15:03:23 prewarm[48708] pause: low_memory: 1984 MB free physical memory < 2304 MB for comparison_flows
+2026-09-25 15:21:27 prewarm[48708] pause: low_memory: 2290 MB free physical memory < 2304 MB for comparison_flows
+2026-09-25 19:22:21 prewarm[48708] exit: parent_gone: Parent console pid 78912 is gone.
+{"status": "success", "summary": "Warmer exited: Parent console pid 78912 is gone.", "next_actions": ["exit cleanly; the console that launched this warmer is gone"], "artifacts": ["C:\\Users\\pgoff\\Mentat\\mentat\\state\\prewarm\\ledger.jsonl", "C:\\Users\\pgoff\\Mentat\\mentat\\state\\prewarm\\plan.json"], "metrics": {"executed": 126, "succeeded": 126, "failed": 0, "skipped_over_budget": 0, "quarantined_now": [], "run_id": "prewarm-20260925T183150Z-48708", "plan_counts": {"query_view": {"warm": 8}, "insights_neighbor": {"warm": 14}, "insights_default": {"warm": 8}, "comparison_flows": {"warm": 8}, "graph_spark": {"over_budget": 10}, "insights_company": {"warm": 80}, "drawer_sidecars": {"warm": 8}}, "root_cause_hint": "parent_gone", "retry": "do not retry", "op_seconds": 17430.874}}
+2026-09-25 19:22:21 prewarm[48708] exiting now after parent_gone: released 0 held lock(s); 3 non-daemon thread(s) stopped with it: MainThread, mentat-native_0, mentat-insights_0

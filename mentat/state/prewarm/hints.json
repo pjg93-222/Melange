@@ -1,0 +1,346 @@
+{
+ "version": 1,
+ "updated_utc": "2026-10-01T20:35:44.535439+00:00",
+ "requests": [
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "key": "6f3562c40f44ae6023c0c98c9377a781f76cb664366a1f87fe684f40c5c953d9",
+   "dataset": "Banking",
+   "seen_utc": "2026-10-01T20:35:44.526430+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation"
+    ]
+   },
+   "key": "664afbd103d1705e2e9bfab87a9a7138f84fbf2a2900f556a3d6c7b9f9897962",
+   "dataset": "Banking",
+   "seen_utc": "2026-10-01T14:50:01.798617+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation"
+    ]
+   },
+   "key": "20bd473268849cd9aeccf7aec43974a7bcbe443a96a8351cb6d172d05b2efe80",
+   "dataset": "Banking",
+   "seen_utc": "2026-09-30T22:54:51.514223+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "69f2ba34bbd0a6045dfcdbdb9fc863b5a42f2f357ef0ede82ea6847a9c9e9b6d",
+   "dataset": "Banking",
+   "seen_utc": "2026-09-30T00:31:31.506986+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "87755fb43f6219edbe2329ac8a2ba6441061e3cd5a4bfbb79e6485401c19a970",
+   "dataset": "Banking",
+   "seen_utc": "2026-09-28T23:13:06.666469+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "4bda76a080f703cea48f507723ba6572c0daa9fce403d15488a969bd66df114c",
+   "dataset": "Banking",
+   "seen_utc": "2026-09-27T21:26:22.092112+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "d746a0a71ec5fb53ea8ecd77348838978f78e0a1c3e37f6d351b89362bd758a1",
+   "dataset": "Credit Union",
+   "seen_utc": "2026-09-27T17:41:59.010041+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "becaf4fdfe44ee3081165703ae3d061ffcdfa022b7e5389e99baf1afb2fd93b4",
+   "dataset": "Banking",
+   "seen_utc": "2026-09-25T21:05:07.954137+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Community Banks",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "key": "2b84f33bf89d9355428504ab5cb20211e758af6aca84d4dbdf21589d15613c16",
+   "dataset": "Community Banks",
+   "seen_utc": "2026-09-24T21:14:28.513826+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Telecom",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "key": "26c50f385bfa01ab87931ddb669fcd5d41f9a255c44fa85a9a2e68cdf908d182",
+   "dataset": "Telecom",
+   "seen_utc": "2026-09-24T21:14:27.359319+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "key": "1f618c1f13b9acf6cc76d28f633ed4fb68050b3a97557ba70cef628287a69210",
+   "dataset": "Crypto",
+   "seen_utc": "2026-09-24T21:12:51.568780+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "key": "be85d0c0da60ed021e6916319c775e4f4fa1fc526d4aa5bd8e5d93ed5904d0dd",
+   "dataset": "Banking",
+   "seen_utc": "2026-09-24T21:12:49.722386+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ],
+    "baseline_cycle": "2021-2022",
+    "current_cycle": "2025-2026"
+   },
+   "key": "0da512e6e0455d1a229d553b5d92afc384f0e536d300eb63710666fc9da61646",
+   "dataset": "Credit Union",
+   "seen_utc": "2026-09-24T20:42:15.691302+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "05bf0af8b937a91534111715adc974044a378336d23b3bbf85cbc2a71834e769",
+   "dataset": "Credit Union",
+   "seen_utc": "2026-09-24T20:42:13.957227+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Crypto",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "key": "012d373ee6c4f90e053d617a5c730bc7842e1784da8074856088b86d41253d80",
+   "dataset": "Crypto",
+   "seen_utc": "2026-09-24T18:49:38.607415+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Credit Union",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "03dc4cb8be0dee5dd8ff28ced4b2bc7f30b7040a7f82c1466e95eea283a2639a",
+   "dataset": "Credit Union",
+   "seen_utc": "2026-09-24T18:37:19.690638+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Banking",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes",
+     "concentration",
+     "relationships",
+     "overlap",
+     "timing",
+     "profiles",
+     "spending",
+     "legislation",
+     "forecast"
+    ]
+   },
+   "key": "2afd20f7c031e70c6073b2b297fd5fb9bbc9947228c1b0d03836d9de5e320854",
+   "dataset": "Banking",
+   "seen_utc": "2026-09-24T18:32:22.901195+00:00"
+  },
+  {
+   "body": {
+    "dataset": "Community Banks",
+    "basis": "receipt",
+    "panels": [
+     "favorites",
+     "trends",
+     "changes"
+    ]
+   },
+   "key": "1bd811338467c8c64402a42f0ef6abbbeaae07ae4751194ea5eb7a4ae237dc80",
+   "dataset": "Community Banks",
+   "seen_utc": "2026-09-24T18:21:49.122779+00:00"
+  }
+ ]
+}
