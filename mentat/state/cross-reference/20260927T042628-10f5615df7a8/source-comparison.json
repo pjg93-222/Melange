@@ -1,0 +1,21 @@
+{
+  "baseline": {
+    "basis": "accepted_report_receipts",
+    "sha256": "236edefa658732d99ba83d1fe1590217fb6d1e405e9b03b64413e9c0aee51c81",
+    "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.db",
+    "sources": [
+      {
+        "cycles": [
+          2022,
+          2024,
+          2026
+        ],
+        "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026",
+        "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.db",
+        "snapshot_sha256": "236edefa658732d99ba83d1fe1590217fb6d1e405e9b03b64413e9c0aee51c81",
+        "token": "c69d420e7de34001e52d490cfcc2c5b6d00b04efeb672da6d17ce5ba0bc63777"
+      }
+    ]
+  },
+  "changes": []
+}

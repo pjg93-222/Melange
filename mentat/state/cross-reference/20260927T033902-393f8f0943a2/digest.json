@@ -1,0 +1,841 @@
+{
+  "basis": {
+    "classes": {
+      "individual": {
+        "listed_cents": 14600000,
+        "listed_count": 8,
+        "median_cents": 2107,
+        "percentile_cents": 500000,
+        "records": 4078,
+        "threshold_cents": 500000
+      },
+      "other": {
+        "listed_cents": 0,
+        "listed_count": 0,
+        "median_cents": 0,
+        "percentile_cents": 0,
+        "records": 7,
+        "threshold_cents": null
+      }
+    },
+    "median_multiple": 20,
+    "minimum_class_records": 20,
+    "percentile": 99.9,
+    "text": "A receipt is listed as large when it is in the top 0.1% of its own class and at least 20x that class's median counted receipt, which is $5,000.00 or more from an individual and no figure at all from any other contributor; the 0.1% cut and the 20x multiple are a proposed default and await the owner's ratification. This run counted fewer than 20 receipts sent by other contributors, too few to cut a distribution, so no such row is listed."
+  },
+  "counts": {
+    "source_records": 4649
+  },
+  "generated_at": "2026-09-27T03:39:29.314307+00:00",
+  "outliers": {
+    "large": [
+      {
+        "amount": 100000.0,
+        "company": "FirstBank Puerto Rico",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4082920242017068116",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408299675293330"
+      },
+      {
+        "amount": 10000.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4011720231703623083",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212159569370062"
+      },
+      {
+        "amount": 10000.0,
+        "company": "Dime Community Bank",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4081220221564132963",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208049525122211"
+      },
+      {
+        "amount": 6000.0,
+        "company": "First Hawaiian Bank",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4082820251268691102",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319767668413"
+      },
+      {
+        "amount": 5000.0,
+        "company": "Merchants Bank of Indiana",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4021320251172522986",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202502119753399146"
+      },
+      {
+        "amount": 5000.0,
+        "company": "First Financial Bancorp",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4041520251184234632",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159755351406"
+      },
+      {
+        "amount": 5000.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4112320221630656244",
+        "role": "transfer_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210279541719850"
+      },
+      {
+        "amount": 5000.0,
+        "company": "Merchants Bank of Indiana",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4112520241073445546",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410189698625894"
+      }
+    ],
+    "large_amount": 146000.0,
+    "large_count": 8,
+    "non_giving": [
+      {
+        "amount": 30032.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "NON CONFORMING CHECK REDEPOSIT",
+        "record_id": "4120820221633618951",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211049546709077"
+      },
+      {
+        "amount": 4754.64,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4031820261423997517",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603179853398609"
+      },
+      {
+        "amount": 4449.05,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4041520261435877469",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604149857157717"
+      },
+      {
+        "amount": 4391.26,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4031820261423997519",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603179853398609"
+      },
+      {
+        "amount": 4082.46,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "ACH FAILURE TO SETTLE - RETURN",
+        "record_id": "4110920221625161798",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532594473"
+      },
+      {
+        "amount": 3965.26,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4041520261435877471",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604149857157718"
+      },
+      {
+        "amount": 3910.69,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4041520261435877470",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604149857157717"
+      },
+      {
+        "amount": 3568.79,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4050720261509716067",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857738614"
+      },
+      {
+        "amount": 3342.51,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4050720261509716068",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857738614"
+      },
+      {
+        "amount": 3000.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "NON CONFORMING IMAGE CHECK RETURN",
+        "record_id": "4110920221625161797",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532594473"
+      },
+      {
+        "amount": 2227.34,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4050720261509716069",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857738614"
+      },
+      {
+        "amount": 2092.65,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4061220261521272018",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605219870209319"
+      },
+      {
+        "amount": 2000.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "NON CONFIRMING CHECK REDEPOSIT",
+        "record_id": "4120820221633618950",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211049546709077"
+      },
+      {
+        "amount": 1900.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "NON CONFORMING IMAGE CHECK REDEPOSIT",
+        "record_id": "4110920221625161800",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532594474"
+      },
+      {
+        "amount": 1500.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "NON CONFORMING IMAGE CHECK REDEPOSIT",
+        "record_id": "4110920221625161799",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532594473"
+      },
+      {
+        "amount": 1377.26,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4010920261300720855",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510309792071076"
+      },
+      {
+        "amount": 1161.42,
+        "company": "Merchants Bank of Indiana",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4071720241977353154",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407139653207836"
+      },
+      {
+        "amount": 716.88,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4051920261510737744",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862278914"
+      },
+      {
+        "amount": 715.05,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4051920261510737743",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862278913"
+      },
+      {
+        "amount": 711.47,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4012720261303725395",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601199794033003"
+      },
+      {
+        "amount": 707.91,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4011220261300862344",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202511059792573381"
+      },
+      {
+        "amount": 706.1,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4011220261300862343",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202511059792573381"
+      },
+      {
+        "amount": 702.56,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4010920261300720856",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510309792071076"
+      },
+      {
+        "amount": 695.65,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4042420251186608220",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159755550442"
+      },
+      {
+        "amount": 693.88,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4042420251186608219",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159755550441"
+      },
+      {
+        "amount": 690.4,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4051420251201219171",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505149761190825"
+      },
+      {
+        "amount": 690.28,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4012720261303725396",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601199794033004"
+      },
+      {
+        "amount": 686.94,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4102820242084938862",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410149685132190"
+      },
+      {
+        "amount": 686.82,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4012720261303725394",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601199794033003"
+      },
+      {
+        "amount": 685.19,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4102820242084938861",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410149685132190"
+      },
+      {
+        "amount": 681.64,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4011220261300862342",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202511059792573380"
+      },
+      {
+        "amount": 669.84,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4051420251201219172",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505149761190826"
+      },
+      {
+        "amount": 666.48,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4051420251201219170",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505149761190825"
+      },
+      {
+        "amount": 661.45,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4102820242084938860",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410149685132189"
+      },
+      {
+        "amount": 629.94,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4042420251186608221",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159755550442"
+      },
+      {
+        "amount": 626.24,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4051920261510737746",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862278914"
+      },
+      {
+        "amount": 532.57,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4080820242011337524",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159653767227"
+      },
+      {
+        "amount": 530.48,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4080820242011337522",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159653767226"
+      },
+      {
+        "amount": 528.44,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4042420241911267857",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404149627622884"
+      },
+      {
+        "amount": 527.38,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4042420241911267856",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404149627622883"
+      },
+      {
+        "amount": 525.32,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4050720251189036760",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759054521"
+      },
+      {
+        "amount": 523.26,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4101720231804774349",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310149597782684"
+      },
+      {
+        "amount": 522.22,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4101720231804774348",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310149597782684"
+      },
+      {
+        "amount": 514.39,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4080820242011337523",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159653767226"
+      },
+      {
+        "amount": 509.39,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4050720251189036761",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759054521"
+      },
+      {
+        "amount": 507.39,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4050720251189036759",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759054520"
+      },
+      {
+        "amount": 504.4,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4101720231804774347",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310149597782683"
+      },
+      {
+        "amount": 495.33,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4042420241911267858",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404149627622884"
+      },
+      {
+        "amount": 454.11,
+        "company": "OceanFirst Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4031820261423997518",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603179853398609"
+      },
+      {
+        "amount": 363.93,
+        "company": "Merchants Bank of Indiana",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4110520241050689000",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685332800"
+      },
+      {
+        "amount": 318.4,
+        "company": "Merchants Bank of Indiana",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4110520241050689001",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685332800"
+      },
+      {
+        "amount": 297.31,
+        "company": "Merchants Bank of Indiana",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4110520241050689002",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685332800"
+      },
+      {
+        "amount": 192.94,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4042620231744106744",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580624744"
+      },
+      {
+        "amount": 115.92,
+        "company": "Customers Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4051920261510737745",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862278914"
+      },
+      {
+        "amount": 66.52,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4073120231758381299",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159582981400"
+      },
+      {
+        "amount": 66.49,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4073120231758381297",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159582981399"
+      },
+      {
+        "amount": 66.37,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4110220221604179902",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210149532554867"
+      },
+      {
+        "amount": 66.35,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4110220221604179901",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210149532554866"
+      },
+      {
+        "amount": 66.32,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4080520221563317482",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159521411227"
+      },
+      {
+        "amount": 66.29,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4080520221563317480",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159521411226"
+      },
+      {
+        "amount": 66.26,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4081120221563955651",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208109525233815"
+      },
+      {
+        "amount": 66.24,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4081120221563955650",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208109525233815"
+      },
+      {
+        "amount": 66.21,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4022520221453365884",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202202099491613095"
+      },
+      {
+        "amount": 66.17,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4040920221465493974",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204079495972509"
+      },
+      {
+        "amount": 66.16,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4040920221465493973",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204079495972508"
+      },
+      {
+        "amount": 66.12,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4080720211324967127",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107159451349658"
+      },
+      {
+        "amount": 66.09,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4080720211324967128",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107159451349659"
+      },
+      {
+        "amount": 66.06,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4041520211277727877",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202104149443332810"
+      },
+      {
+        "amount": 66.04,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4041520211277727876",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202104149443332810"
+      },
+      {
+        "amount": 64.36,
+        "company": "Customers Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4073120231758381298",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159582981399"
+      },
+      {
+        "amount": 64.2,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4110220221604179900",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210149532554866"
+      },
+      {
+        "amount": 64.17,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4080520221563317481",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159521411226"
+      },
+      {
+        "amount": 64.09,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4022520221453365885",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202202099491613096"
+      },
+      {
+        "amount": 64.05,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4022520221453365883",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202202099491613095"
+      },
+      {
+        "amount": 64.01,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4040920221465493975",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204079495972509"
+      },
+      {
+        "amount": 63.97,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4080720211324967126",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107159451349658"
+      },
+      {
+        "amount": 59.86,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4081120221563955652",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208109525233816"
+      },
+      {
+        "amount": 59.68,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "INTEREST INCOME",
+        "record_id": "4041520211277727878",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202104149443332810"
+      }
+    ],
+    "non_giving_amount": 100305.31,
+    "non_giving_count": 78
+  },
+  "refunds": {
+    "linked": [],
+    "linked_amount": 0.0,
+    "linked_count": 0,
+    "unlinked": [
+      {
+        "amount": -950.0,
+        "company": "Apple Bank for Savings",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4032620241887657896",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403209627348335"
+      },
+      {
+        "amount": -100.0,
+        "company": "Customers Bank",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4062120231750854956",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202306189582175962"
+      }
+    ],
+    "unlinked_amount": -1050.0,
+    "unlinked_count": 2
+  },
+  "run_id": "20260927T033902-393f8f0943a2",
+  "schema_version": 1
+}
