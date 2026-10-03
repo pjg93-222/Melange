@@ -1,0 +1,32 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026",
+  "baseline_token": null,
+  "changed_decisions": 86270,
+  "counts": {
+    "added": 86270,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\tmp\\production-remaining-10lane-20260729T1235\\runs\\20260729T123437-15692\\industries\\fintech\\data\\mentat.db",
+  "database_sha256": "2a9bc0199a9065bde48c48e4a87b92e76fcb5557e15e146f59e557a40643231e",
+  "delta_cents": 980389131,
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026",
+  "dollar_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.dollar-changes.jsonl",
+  "industry": "Fintech",
+  "payload": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\fintech\\industry_data-2a9bc0199a9065bd.json",
+  "payload_sha256": "a4d2430f02fe9a2e2273bcffc9daf2826d849e9e142375d4e63fe4f4ceeb7fed",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.db",
+  "snapshot_sha256": "74658d0093eb05554c8dc3beb8e77fb1513848279bba39da2d5e7be8f6dbf496",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.source-changes.jsonl",
+  "status": "verified",
+  "unexplained_changes": 0,
+  "version": 1
+}

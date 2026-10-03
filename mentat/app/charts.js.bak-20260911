@@ -1,0 +1,365 @@
+/* The graph explorer makes same-origin reads only; SVG is generated locally. */
+(() => {
+  'use strict';
+  const el = id => document.getElementById('chart-' + id);
+  const esc = escapeHtml, math = globalThis.MentatCharts;
+  let data = null, suggestions = [], revision = 0, chart = null, chartConfig = null, redrawTimer, graphContext = null;
+  const palette = MentatTheme.palette;
+  const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits:3});
+  function numericAxis(low,high,integer=false) {
+    if(low===high){const padding=Math.abs(low)*.1||1;low-=padding;high+=padding;}
+    const rough=(high-low)/5,magnitude=10**Math.floor(Math.log10(rough)),fraction=rough/magnitude;
+    let step=(fraction<=1+1e-12?1:fraction<=2+1e-12?2:fraction<=5+1e-12?5:10)*magnitude;
+    if(integer)step=Math.max(1,step);
+    if(!Number.isFinite(step)||step<=0)throw new Error('The numeric range is too large or too small to display.');
+    const units=value=>{const scaled=value/step,nearest=Math.round(scaled);return Math.abs(scaled-nearest)<=Number.EPSILON*Math.max(1,Math.abs(scaled))*4?nearest:scaled;};
+    const start=Math.floor(units(low))*step,end=Math.ceil(units(high))*step;
+    const decimals=Math.max(0,Math.min(100,-Math.floor(Math.log10(step))));
+    const ticks=Array.from({length:Math.round((end-start)/step)+1},(_,i)=>Number((start+i*step).toFixed(decimals)));
+    return {min:Math.min(low,ticks[0]),max:Math.max(high,ticks.at(-1)),ticks};
+  }
+  const aggregateNames={sum:'Sum',mean:'Mean',median:'Median',min:'Minimum',max:'Maximum',count:'Row count'};
+  function columnLabel(index) {
+    const column=data?.columns[index];
+    if(!column)return 'All rows';
+    return column.unit && !column.name.toLowerCase().includes(String(column.unit).toLowerCase()) ? `${column.name} (${column.unit})` : column.name;
+  }
+  function measureLabel(config=chartConfig,result=chart) {
+    const individual=['box','scatter','histogram'].includes(result?.type);
+    const base=!individual&&config.aggregation==='count'?'Row count':columnLabel(config.y);
+    const measured=individual||config.aggregation==='count'?base:`${base} · ${aggregateNames[config.aggregation]}`;
+    return config.transform==='yoy'?`${base} · year-over-year change (%)`:config.transform==='change'?`${measured} · period change`:measured;
+  }
+  function error(message='') { el('error').textContent = message; el('error').hidden = !message; }
+  function clearChart() { chart = null; el('image').replaceChildren(); el('values').replaceChildren(); el('export').hidden = true; el('scope').textContent = ''; }
+  function reset() { clearTimeout(redrawTimer); data = null; clearChart(); error(); el('settings').disabled = true; el('columns').replaceChildren(); el('context').textContent = 'Loading your chart…'; }
+  function options(node, items) { node.replaceChildren(...items.map(([value,label]) => new Option(label, value))); }
+  function reportControls(enabled) {
+    for(const id of ['run','report','sheet','header','rescan']) el(id).disabled=!enabled;
+  }
+  function measureOptions() {
+    const measures=data.columns.filter(c=>c.type==='number'&&!/\b(year|cycle)\b/i.test(c.name));
+    options(el('y'),[...measures.map(c=>[c.index,c.name]),[-1,'Row count']]);
+    options(el('series'),[[-1,'None'],...data.columns.map(c=>[c.index,c.name])]);
+  }
+  function requestPath(sheet='', header=0) {
+    const params = new URLSearchParams({id:el('run').value, index:el('report').value});
+    if (sheet) params.set('sheet', sheet);
+    if (header) params.set('header', header);
+    return '/api/report-data?' + params;
+  }
+  async function loadRuns() {
+    const ticket=++revision;reset();reportControls(true);el('loading').textContent='Choosing a completed report…';
+    try {
+      const body = await api('/api/report-sources');
+      if(ticket!==revision)return;
+      options(el('run'), body.runs.map(r => [r.id, r.name]));
+      const preferred = body.runs.find(r => r.id === (document.getElementById('graph-run').value || selectedRun) && !['ready','needs review'].includes(r.state))
+        || body.runs.find(r => r.state === 'completed');
+      const candidates=[preferred,...body.runs.filter(r=>r.state==='completed')].filter((r,i,a)=>r&&a.findIndex(v=>v?.id===r.id)===i);
+      let catalog=null;
+      for(const candidate of candidates){
+        const available=await api('/api/reports?id='+encodeURIComponent(candidate.id));
+        if(ticket!==revision)return;
+        if(available.reports.length){el('run').value=candidate.id;catalog=available;break;}
+      }
+      await loadReports(catalog);
+    } catch (e) { if(ticket===revision)error(e.message); }
+  }
+  async function loadReports(preloaded=null) {
+    const ticket = ++revision; reset(); options(el('report'), []); options(el('sheet'), []);
+    el('loading').textContent = 'Reading reports…';
+    try {
+      if (!el('run').value) { el('loading').textContent = 'No collection runs available.'; return; }
+      const run = preloaded?.reports ? preloaded : await api('/api/reports?id=' + encodeURIComponent(el('run').value));
+      if (ticket !== revision) return;
+      options(el('report'), run.reports.map(r => [r.index, r.name]));
+      const scopedReport = graphContext?.reports?.map(source => run.reports.find(report => report.name === source.name)).find(Boolean);
+      if (scopedReport) el('report').value = scopedReport.index;
+      if (!run.reports.length) { el('loading').textContent = 'This run has no completed reports.'; return; }
+      await loadSheets();
+    } catch (e) { if (ticket === revision) { error(e.message); el('loading').textContent = 'Report list unavailable.'; } }
+  }
+  async function loadSheets() {
+    const ticket = ++revision; reset(); options(el('sheet'), []); el('loading').textContent = 'Reading worksheets…';
+    try {
+      const body = await api(requestPath());
+      if (ticket !== revision) return;
+      options(el('sheet'), body.sheets.map(s => [s,s]));
+      const preferred = ['Candidate Funding','Funding Cohorts','Allocation Estimates','Beneficiary Summary'].find(s => body.sheets.includes(s));
+      if (preferred) el('sheet').value = preferred;
+      await scan();
+    } catch (e) { if (ticket === revision) { error(e.message); el('loading').textContent = 'Worksheets unavailable.'; } }
+  }
+  async function scan(manual=false) {
+    const ticket = ++revision; reset(); el('loading').textContent = 'Scanning columns…';
+    try {
+      if (manual && !el('header').reportValidity()) throw new Error('Enter a header row from 1 to 100.');
+      const body = await api(requestPath(el('sheet').value, manual ? Number(el('header').value) : 0));
+      if (ticket !== revision) return;
+      data = body; el('header').value = data.header_row; el('settings').disabled = false;
+      el('filters').replaceChildren(); el('start').value = ''; el('end').value = ''; el('limit').value = '';
+      el('loading').textContent = `${fmt(data.row_count)} rows · ${data.columns.length} columns scanned`;
+      el('context').textContent = data.note;
+      options(el('x'), [[-1,'All rows'], ...data.columns.map(c => [c.index, `${c.name} · ${c.type}`])]);
+      measureOptions();
+      suggestions = math.recommend(data.columns);
+      options(el('suggestion'), suggestions.length ? suggestions.map((s,i) => [i,s.label]) : [['','Choose columns below']]);
+      el('columns').innerHTML = data.columns.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.type)}</td><td>${fmt(c.distinct)}</td><td>${fmt(c.missing)}</td></tr>`).join('');
+      prepareSubjects();
+      if (suggestions.length) applySuggestion();
+      quick(suggestions[0]?.type || 'bar');
+    } catch (e) { if (ticket === revision) { error(e.message); el('loading').textContent = 'Column scan unavailable.'; } }
+  }
+  function applySuggestion() {
+    const s = suggestions[Number(el('suggestion').value)]; if (!s) return;
+    el('type').value = s.type; el('x').value = s.x; el('y').value = s.y;
+    el('aggregation').value = s.aggregation; el('transform').value='none'; syncControls();
+  }
+  function prepareSubjects() {
+    const subject = data.columns.find(c => c.name === 'Subject');
+    options(el('subject'), subject ? [...new Set(data.rows.map(r => r[subject.index]))].map(s=>[s,s]) : []);
+  }
+  function quick(choice) {
+    if (!data) return;
+    try {
+      const next = math.quickConfig(data, configuration(), choice);
+      for (const key of ['type','x','y','series','aggregation','transform','period','horizon']) if(next[key]!=null) el(key).value=next[key];
+      syncControls(); create();
+    } catch(e) { clearChart();syncControls();error(e.message); }
+  }
+  function syncControls() {
+    const type = el('type').value;
+    el('aggregation').disabled = ['box','scatter','histogram'].includes(type);
+    el('x').disabled = type === 'histogram';
+    el('y').disabled = false;
+    el('series').disabled = !['grouped','groupedhorizontal','multiline'].includes(type);
+    el('period').disabled=el('transform').value==='none';
+    el('horizon').disabled=el('transform').value!=='forecast';
+    el('x-label').textContent = type === 'scatter' ? 'Horizontal axis (X)' : el('transform').value !== 'none' ? 'Date or election cycle' : 'Group by';
+    el('subject-label').hidden = el('transform').value === 'none' || !el('subject').options.length;
+    for (const button of document.querySelectorAll('#chart-quick button, #chart-time-quick button')) {
+      const choice = button.dataset.chart || button.dataset.transform;
+      button.setAttribute('aria-pressed', String(button.dataset.transform ? el('transform').value===choice : el('transform').value==='none' && type===choice));
+      try { if(data) math.quickConfig(data,{x:Number(el('x').value),y:Number(el('y').value),series:Number(el('series').value),aggregation:el('aggregation').value},choice); button.disabled=!data; button.title=''; }
+      catch(e) {button.disabled=true;button.title=e.message;}
+    }
+    const timeNotes={annual:'Over time groups observations into calendar years or two-year election cycles using the selected aggregation. Partial periods remain partial.',yoy:'Year over year shows percentage change from the previous calendar year. Missing years and nonpositive prior totals cannot supply a percentage.',change:'Period change subtracts the immediately preceding year or election cycle; missing periods remain unavailable.',forecast:'Forecast compares corresponding election phases in completed periods. It needs sufficient comparable history; projected values are not observed giving.'};
+    const chartNotes={scatter:'Scatter compares two numeric fields. Every valid selected row is plotted; dense plots combine SVG marks for speed without sampling.',histogram:'Histogram counts rows in numeric ranges of the selected measure.',box:'Box plot shows the median, middle half, whiskers and outliers of individual values in each group.',pie:'Pie shows each nonnegative group’s share of the total.',doughnut:'Doughnut shows each nonnegative group’s share of the total.',pareto:'Pareto orders nonnegative groups by value and adds cumulative percentage.',waterfall:'Waterfall shows each group’s change and the running total.',radar:'Radar compares at least three nonnegative groups on a shared scale.'};
+    el('quick-note').textContent=timeNotes[el('transform').value]||chartNotes[type]||'Choose a chart type to select compatible fields automatically. Change the measure, grouping or aggregation to refine it.';
+  }
+  function addFilter() {
+    if (!data) return;
+    const row = document.createElement('div'); row.className = 'chart-filter';
+    const column = document.createElement('select'); column.setAttribute('aria-label','Filter column');
+    options(column, data.columns.map(c => [c.index,c.name]));
+    const op = document.createElement('select'); op.setAttribute('aria-label','Filter operation');
+    options(op, [['equals','Equals'],['contains','Contains'],['gte','At least'],['lte','At most']]);
+    const value = document.createElement('input'); value.setAttribute('aria-label','Filter value'); value.placeholder = 'Value';
+    const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'secondary'; remove.textContent = 'Remove filter';
+    remove.onclick = () => { row.remove(); create(); };
+    row.append(column,op,value,remove); el('filters').append(row);
+  }
+  function configuration() {
+    if (!el('start').reportValidity() || !el('end').reportValidity() || !el('limit').reportValidity()) throw new Error('Enter valid worksheet row numbers.');
+    const subject=data?.columns.find(c=>c.name==='Subject');
+    const filters=[...el('filters').children].filter(row=>row.children[2].value!=='').map(row=>({column:Number(row.children[0].value),op:row.children[1].value,value:row.children[2].value}));
+    if(subject && el('transform').value!=='none')filters.push({column:subject.index,op:'equals',value:el('subject').value});
+    return {type:el('type').value, x:Number(el('x').value), y:Number(el('y').value), aggregation:el('aggregation').value,
+      transform:el('transform').value,period:el('period').value,horizon:Number(el('horizon').value),start:Number(el('start').value),end:Number(el('end').value),limit:Number(el('limit').value),series:Number(el('series').value),filters};
+  }
+  function create() {
+    clearTimeout(redrawTimer); error(); clearChart(); if (!data) return;
+    try {
+      chartConfig = configuration(); chart = math.build(data, chartConfig);
+      const measure = measureLabel();
+      el('title').textContent = `${measure} · ${chartConfig.transform==='none' ? el('type').selectedOptions[0].textContent : el('transform').selectedOptions[0].textContent}`;
+      el('context').textContent = `${el('report').selectedOptions[0].textContent} / ${data.sheet}`;
+      const filterText = chartConfig.filters.map(f => `${data.columns[f.column].name} ${f.op} ${f.value}`).join('; ');
+      const group = chart.type === 'histogram' ? 'Numeric bins' : data.columns[chartConfig.x]?.name || 'All rows';
+      el('scope').textContent = `${el('report').selectedOptions[0].textContent} / ${data.sheet} · ${chart.selected} of ${data.row_count} rows selected; ${chart.excluded} rows excluded for missing/non-numeric values. Group/X: ${group}. ${['box','scatter','histogram'].includes(chart.type) ? 'Individual worksheet values.' : 'Aggregation: ' + chartConfig.aggregation + '.'} Worksheet rows: ${chartConfig.start || 'first data row'}–${chartConfig.end || 'last data row'}. Row count limit: ${chartConfig.limit || 'all matching rows'} (after filters). Filters: ${filterText || 'none'}. SHA-256: ${data.sha256}.` +
+        (chart.type === 'box' ? ' Quartiles use linear interpolation; whiskers end at observations within 1.5×IQR; dots show outliers.' : '');
+      if(chart.note)el('scope').textContent+=' '+chart.note; if(['Comparison','Funding comparison'].includes(data.sheet))el('scope').textContent+=' '+data.note;
+      draw(chart, measure); renderValues(); el('export').hidden = false;
+    } catch (e) { clearChart(); error(e.message); }
+  }
+  function svgNode(tag, attrs={}, text) {
+    const node = document.createElementNS('http://www.w3.org/2000/svg',tag);
+    for (const [k,v] of Object.entries(attrs)) node.setAttribute(k,String(v));
+    if (text != null) node.textContent = text; return node;
+  }
+  function draw(result, measure) {
+    const grouping=columnLabel(chartConfig.x),xTitle=result.type==='histogram'?columnLabel(chartConfig.y):grouping;
+    if(result.series){
+      const svg=MentatGroupedSVG(result,el('title').textContent,el('scope').textContent),bounds=svg.getAttribute('viewBox').split(' ').map(Number);
+      // Wide comparisons scroll inside the preview instead of shrinking labels.
+      svg.style.minWidth=`${bounds[2]}px`;
+      svg.setAttribute('viewBox',`0 0 ${bounds[2]} ${bounds[3]+55}`);
+      svg.querySelector('rect').setAttribute('height',bounds[3]+55);
+      for(const [axis,text,y] of [['y',measure,65],['x',`${grouping} · Separate series: ${columnLabel(chartConfig.series)}`,bounds[3]+24]])svg.append(svgNode('text',{x:150,y,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':13,'data-axis-title':axis},text));
+      el('image').replaceChildren(svg);return;
+    }
+    const canvasHeight=result.type==='horizontal'?Math.max(620,result.groups.length*36+190):['pie','doughnut'].includes(result.type)?670:620;
+    const svg = svgNode('svg',{xmlns:'http://www.w3.org/2000/svg',viewBox:`0 0 960 ${canvasHeight}`,role:'img','aria-label':el('title').textContent});
+    const add = (tag,attrs,text) => { const n = svgNode(tag,attrs,text); svg.append(n); return n; };
+    add('title',{},el('title').textContent); add('desc',{},el('scope').textContent);
+    add('rect',{width:960,height:canvasHeight,fill:'#fff'});
+    const label = (x,y,text,attrs={}) => add('text',{x,y,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':12,...attrs},text);
+    const tooltip = (node,text) => node.append(svgNode('title',{},text));
+    const wrapped=(x,y,text,maxChars=32,maxLines=2,attrs={})=>{
+      const source=String(text),words=source.split(/\s+/),lines=[];let line='';
+      for(const word of words){if((line+' '+word).trim().length>maxChars&&line){lines.push(line);line='';}line+=(line?' ':'')+word;}
+      if(line)lines.push(line);
+      const shown=lines.slice(0,maxLines).map(part=>part.length>maxChars?part.slice(0,maxChars-1)+'…':part);
+      if(lines.length>maxLines)shown[maxLines-1]=shown[maxLines-1].slice(0,maxChars-1)+'…';
+      const node=label(x,y,'',attrs);shown.forEach((part,i)=>node.append(svgNode('tspan',{x,dy:i?'1.25em':0},part)));tooltip(node,source);return node;
+    };
+    const tick=n=>n!==0&&Math.abs(n)<.001?Number(n.toPrecision(3)).toExponential():Math.abs(n)>=1e6?Number(n).toLocaleString('en-US',{notation:'compact',maximumFractionDigits:2}):Number(n).toLocaleString('en-US',{maximumSignificantDigits:8});
+    wrapped(20,28,el('title').textContent,83,2,{'font-size':19,'font-weight':400,'font-family':MentatTheme.serif});
+    label(20,70,`${data.sheet} · ${fmt(result.selected-result.excluded)} ${result.points?'plotted':'source'} rows${result.points?.length>2000?' · all points, no sampling':''}`);
+    if (['pie','doughnut'].includes(result.type)) {
+      const total = result.groups.reduce((n,g) => n+g.value,0); let angle = -Math.PI/2;
+      result.groups.forEach((g,i) => {
+        const next = angle + 2*Math.PI*g.value/total, color = palette[i%palette.length], cx=285,cy=290,r=175;
+        if (g.value > 0) {
+          const node = g.value === total ? add('circle',{cx,cy,r,fill:color}) : add('path',{
+            d:`M ${cx} ${cy} L ${cx+r*Math.cos(angle)} ${cy+r*Math.sin(angle)} A ${r} ${r} 0 ${next-angle > Math.PI ? 1:0} 1 ${cx+r*Math.cos(next)} ${cy+r*Math.sin(next)} Z`,fill:color,stroke:'#fff','stroke-width':2});
+          tooltip(node,`${g.label}: ${fmt(g.value)} (${(100*g.value/total).toFixed(1)}%)`);
+        }
+        if (i < 16) { add('rect',{x:510,y:90+i*32,width:12,height:12,fill:color}); wrapped(533,100+i*32,`${g.label} · ${(100*g.value/total).toFixed(1)}%`,51,2); }
+        angle = next;
+      });
+      if(result.type==='doughnut')add('circle',{cx:285,cy:290,r:95,fill:'#fff'});
+      label(20,620,`${grouping} · share of ${measure}`);
+      if (result.groups.length > 16) label(510,640,'All slices shown. Full labels are in the table and CSV.');
+    } else if (result.type==='horizontal') {
+      const groups=result.groups,axis=numericAxis(Math.min(0,...groups.map(g=>g.value)),Math.max(0,...groups.map(g=>g.value)),chartConfig.aggregation==='count');
+      const scale=v=>280+(v-axis.min)/(axis.max-axis.min)*610;
+      const plotHeight=canvasHeight-190,step=plotHeight/groups.length;
+      wrapped(20,100,grouping,34,1,{'data-axis-title':'y'});
+      groups.forEach((g,i)=>{const yy=125+i*step,h=Math.min(24,step*.65);wrapped(270,yy+h/2+3,g.label,33,2,{'text-anchor':'end'});tooltip(add('rect',{x:Math.min(scale(0),scale(g.value)),y:yy,width:Math.max(1,Math.abs(scale(g.value)-scale(0))),height:h,fill:palette[i%palette.length]}),`${g.label}: ${fmt(g.value)}`);});
+      for(const value of axis.ticks)label(scale(value),canvasHeight-42,tick(value),{'text-anchor':'middle','data-axis-tick':'x'});
+      wrapped(585,canvasHeight-18,measure,70,1,{'text-anchor':'middle','data-axis-title':'x'});
+    } else if(result.type==='radar') {
+      const groups=result.groups;if(groups.length<3)throw new Error('Radar charts need at least three groups.');
+      if(groups.some(g=>g.value<0))throw new Error('Radar charts need nonnegative values.');
+      const max=Math.max(...groups.map(g=>g.value))||1,point=(i,r)=>[470+Math.cos(i*2*Math.PI/groups.length-Math.PI/2)*r,295+Math.sin(i*2*Math.PI/groups.length-Math.PI/2)*r];
+      for(let ring=1;ring<=4;ring++)add('polygon',{points:groups.map((g,i)=>point(i,ring*45).join(',')).join(' '),fill:'none',stroke:MentatTheme.grid});
+      groups.forEach((g,i)=>{if(i%Math.max(1,Math.ceil(groups.length/12)))return;const p=point(i,210);wrapped(p[0],p[1],g.label,24,2,{'text-anchor':'middle'});});
+      tooltip(add('polygon',{points:groups.map((g,i)=>point(i,g.value/max*180).join(',')).join(' '),fill:palette[0],'fill-opacity':.2,stroke:palette[0]}),groups.map(g=>`${g.label}: ${fmt(g.value)}`).join('; '));
+      wrapped(20,575,`${grouping} · ${measure} · radial scale 0–${tick(max)}`,100,2,{'data-axis-title':'y'});
+    } else {
+      const groups = result.groups || [], isBox = result.type === 'box', scatter = result.type === 'scatter';
+      let cumulative=0;const waterfall=result.type==='waterfall'?groups.map(g=>{const start=cumulative;cumulative+=g.value;return {start,end:cumulative};}):null;
+      const values = waterfall?waterfall.flatMap(g=>[g.start,g.end]):scatter ? result.points.map(p=>p.y) : isBox ? groups.flatMap(g=>[g.low,g.high,...g.outliers]) : groups.map(g=>g.value);
+      let min = Math.min(...values), max = Math.max(...values);
+      if (!isBox && !scatter) { min = Math.min(0,min); max = Math.max(0,max); }
+      const countAxis=result.type==='histogram'||(!isBox&&!scatter&&chartConfig.aggregation==='count'&&chartConfig.transform!=='yoy');
+      const axis=numericAxis(min,max,countAxis);min=axis.min;max=axis.max;
+      const y = v => 430 - (v-min)/(max-min)*335;
+      for (const value of axis.ticks) { add('line',{x1:100,x2:920,y1:y(value),y2:y(value),stroke:MentatTheme.grid}); label(90,y(value)+4,tick(value),{'text-anchor':'end','data-axis-tick':'y'}); }
+      wrapped(100,88,result.type === 'histogram' ? 'Row count' : result.type==='waterfall'?`${measure} · cumulative total`:measure,100,1,{'data-axis-title':'y'});
+      if (scatter) {
+        const xs=result.points.map(p=>p.x),xAxis=numericAxis(Math.min(...xs),Math.max(...xs));
+        const x=v=>100+(v-xAxis.min)/(xAxis.max-xAxis.min)*820;
+        svg.setAttribute('data-total-points',result.points.length);
+        if(result.points.length<=2000)result.points.forEach(p=>tooltip(add('circle',{cx:x(p.x),cy:y(p.y),r:4,fill:palette[0],'fill-opacity':.65}),`${columnLabel(chartConfig.x)}: ${fmt(p.x)}; ${measure}: ${fmt(p.y)}`));
+        else for(let start=0;start<result.points.length;start+=1000){
+          const points=result.points.slice(start,start+1000);
+          const path=points.map(p=>`M${x(p.x).toFixed(3)},${y(p.y).toFixed(3)}h.01`).join(' ');
+          add('path',{d:path,fill:'none',stroke:palette[0],'stroke-width':4,'stroke-linecap':'round','stroke-opacity':.6,'data-point-count':points.length});
+        }
+        for(const value of xAxis.ticks)label(x(value),453,tick(value),{'text-anchor':'middle','data-axis-tick':'x'});
+        wrapped(510,510,xTitle,85,2,{'text-anchor':'middle','data-axis-title':'x'});
+      } else {
+        const step=820/groups.length, x=i=>100+step*(i+.5), width=Math.min(60,step*.7);
+        if(result.type==='area')add('polygon',{points:`${x(0)},${y(0)} `+groups.map((g,i)=>`${x(i)},${y(g.value)}`).join(' ')+` ${x(groups.length-1)},${y(0)}`,fill:palette[0],'fill-opacity':.16});
+        if (['line','area'].includes(result.type)) add('polyline',{points:groups.filter(g=>!g.forecast).map((g,i)=>`${x(i)},${y(g.value)}`).join(' '),fill:'none',stroke:palette[0],'stroke-width':2});
+        const firstForecast=groups.findIndex(g=>g.forecast);if(firstForecast>0)add('polyline',{points:groups.slice(firstForecast-1).map((g,i)=>`${x(firstForecast-1+i)},${y(g.value)}`).join(' '),fill:'none',stroke:palette[0],'stroke-width':2,'stroke-dasharray':'7 5'});
+        if(result.type==='pareto'){let running=0;const total=groups.reduce((n,g)=>n+g.value,0);add('polyline',{points:groups.map((g,i)=>{running+=g.value;return `${x(i)},${430-running/total*335}`;}).join(' '),fill:'none',stroke:palette[1],'stroke-width':3});label(920,78,'Cumulative 0–100%',{'text-anchor':'end'});}
+        groups.forEach((g,i)=>{
+          const color=palette[i%palette.length];
+          if(isBox){
+            add('line',{x1:x(i),x2:x(i),y1:y(g.low),y2:y(g.high),stroke:color,'stroke-width':2});
+            for(const v of [g.low,g.high])add('line',{x1:x(i)-width/3,x2:x(i)+width/3,y1:y(v),y2:y(v),stroke:color,'stroke-width':2});
+            tooltip(add('rect',{x:x(i)-width/2,y:y(g.q3),width,height:Math.max(1,y(g.q1)-y(g.q3)),fill:color,'fill-opacity':.25,stroke:color}),`${g.label}: median ${fmt(g.median)}, Q1 ${fmt(g.q1)}, Q3 ${fmt(g.q3)}, n=${g.n}`);
+            add('line',{x1:x(i)-width/2,x2:x(i)+width/2,y1:y(g.median),y2:y(g.median),stroke:color,'stroke-width':3});
+            g.outliers.forEach(v=>tooltip(add('circle',{cx:x(i),cy:y(v),r:3,fill:color}),`${g.label}: ${fmt(v)} (outlier)`));
+          }else if(waterfall){const w=waterfall[i];tooltip(add('rect',{x:x(i)-width/2,y:Math.min(y(w.start),y(w.end)),width,height:Math.max(1,Math.abs(y(w.start)-y(w.end))),fill:g.value<0?palette[1]:palette[0]}),`${g.label}: ${fmt(g.value)}; running total ${fmt(w.end)}`);
+          }else if(['line','area'].includes(result.type)) tooltip(add('circle',{cx:x(i),cy:y(g.value),r:4,fill:g.forecast?'white':palette[0],stroke:palette[0]}),`${g.forecast?'Same-phase baseline ':g.partial?'Partial period ':''}${g.label}: ${fmt(g.value)}${g.forecast_basis_year?`; based on ${g.forecast_basis_year}`:''}`);
+          else tooltip(add('rect',{x:x(i)-width/2,y:Math.min(y(0),y(g.value)),width,height:Math.max(1,Math.abs(y(0)-y(g.value))),fill:color}),`${g.label}: ${fmt(g.value)}`);
+          if(i % Math.max(1,Math.ceil(groups.length/8)) === 0){
+            const displayLabel=result.type==='histogram'?g.label.split(' – ').map(value=>Number(value).toLocaleString('en-US',{maximumSignificantDigits:6})).join(' – '):g.label;
+            const node=wrapped(x(i),453,displayLabel,16,2,{'text-anchor':'middle','data-category-label':'true'});
+            if(result.type==='histogram')node.querySelector('title').textContent=g.label;
+          }
+        });
+        wrapped(510,515,xTitle,85,2,{'text-anchor':'middle','data-axis-title':'x'});
+        if(groups.length>8)label(100,574,`${groups.length} groups plotted; selected axis labels shown. Full labels and values are in the table and CSV.`);
+      }
+    }
+    el('image').replaceChildren(svg);
+  }
+  function tableRows() {
+    if(chart.series)return [[columnLabel(chartConfig.x),...chart.series.map(name=>`${name} · ${measureLabel()}`)],...chart.groups.map(g=>[g.label,...g.values.map(v=>v.value??'Unavailable')])];
+    if (chart.type === 'scatter') return [[columnLabel(chartConfig.x),columnLabel(chartConfig.y)], ...chart.points.map(p=>[p.x,p.y])];
+    if (chart.type === 'box') return [[columnLabel(chartConfig.x),'Count',`Q1 · ${measureLabel()}`,`Median · ${measureLabel()}`,`Q3 · ${measureLabel()}`,'Lower whisker','Upper whisker','Outliers'],...chart.groups.map(g=>[g.label,g.n,g.q1,g.median,g.q3,g.low,g.high,g.outliers.join('; ')])];
+    return [[chart.type==='histogram'?`${columnLabel(chartConfig.y)} · range`:columnLabel(chartConfig.x),chart.type==='histogram'?'Row count':measureLabel(),...(chart.temporal?['Status','Baseline period']:[])],...chart.groups.map(g=>[g.label,g.value,...(chart.temporal?[g.forecast?'Same-phase baseline':g.partial?'Partial observation':'Observed / derived',g.forecast_basis_year??'']:[])])];
+  }
+  function renderValues() {
+    const [head,...rows]=tableRows();
+    const shown=rows.slice(0,200);
+    el('values').innerHTML=`<p class="chart-note">${rows.length>shown.length?`Showing the first ${fmt(shown.length)} of ${fmt(rows.length)} rows. Export data CSV includes every plotted value.`:`All ${fmt(rows.length)} rows shown.`}</p>`+'<table><thead><tr>'+head.map(h=>`<th>${esc(h)}</th>`).join('')+'</tr></thead><tbody>'+shown.map(r=>'<tr>'+r.map(v=>`<td>${esc(typeof v==='number'?fmt(v):v)}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
+  }
+  function download(content,type,name) {
+    const url=URL.createObjectURL(new Blob([content],{type})), link=document.createElement('a');
+    link.href=url; link.download=name; link.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  for(const format of ['svg','png']) el('save-'+format).onclick=async()=>{
+    if(!chart)return;
+    try {await MentatExport.image(el('image').firstChild,format,el('title').textContent,el('scope').textContent);}
+    catch(e){error(e.message);}
+  };
+  el('save-csv').onclick=()=>{
+    if(!chart)return;
+    const quote=v=>'"'+String(typeof v==='string' && /^[=+\-@\t\r]/.test(v)?"'"+v:v).replaceAll('"','""')+'"';
+    const rows=[['Chart',el('title').textContent],['Scope',el('scope').textContent],...tableRows()];
+    download('\uFEFF'+rows.map(r=>r.map(quote).join(',')).join('\r\n'),'text/csv;charset=utf-8','mentat-chart.csv');
+  };
+  el('run').onchange=loadReports; el('report').onchange=loadSheets; el('sheet').onchange=()=>scan();
+  el('source-report').onclick=()=>loadRuns();
+  el('rescan').onclick=()=>scan(true); el('suggestion').onchange=()=>{applySuggestion();create();}; el('add-filter').onclick=addFilter; el('create').onclick=create;
+  document.querySelectorAll('#chart-quick button, #chart-time-quick button').forEach(button=>button.onclick=()=>quick(button.dataset.chart||button.dataset.transform));
+  el('settings').addEventListener('input',event=>{
+    if(event.target===el('type')){quick(el('type').value);return;}
+    if(event.target===el('transform')&&el('transform').value!=='none'){quick(el('transform').value);return;}
+    if(event.target===el('y'))el('aggregation').value=el('y').value==='-1'?'count':'sum';
+    syncControls();clearTimeout(redrawTimer);if(event.target.tagName==='SELECT')create();else{clearChart();redrawTimer=setTimeout(create,120);}
+  });
+  el('all-rows').onclick=()=>{el('start').value='';el('end').value='';el('limit').value='';create();};
+  el('header').addEventListener('input',()=>{clearChart();el('settings').disabled=true;el('loading').textContent='Rescan columns to apply the new header row.';});
+  window.addEventListener('mentat:chart-data',event=>{
+    ++revision;reset();reportControls(false);loaded=true;data=event.detail;
+    options(el('report'),[['comparison','Selected comparison subjects']]);options(el('sheet'),[['Comparison','Comparison']]);
+    options(el('run'),[['comparison','Selected subjects']]);
+    el('header').value=1;el('settings').disabled=false;el('filters').replaceChildren();el('start').value='';el('end').value='';el('limit').value='';
+    el('context').textContent=data.note;el('loading').textContent=`${data.row_count} subject-period observations`;
+    options(el('x'),[[-1,'All rows'],...data.columns.map(c=>[c.index,c.name])]);measureOptions();
+    el('x').value='0';el('y').value='2';el('type').value='bar';el('aggregation').value='sum';el('transform').value='none';
+    if(data.default_config)for(const [key,value] of Object.entries(data.default_config))el(key).value=value;
+    suggestions=[];options(el('suggestion'),[['','Comparison data']]);prepareSubjects();
+    if(data.default_config){syncControls();create();}else quick('bar');
+  });
+  let loaded=false;
+  window.addEventListener('mentat:graph',event=>{
+    const next=event.detail;
+    if(next?.run!==graphContext?.run || next?.industry!==graphContext?.industry)loaded=false;
+    graphContext=next;
+  });
+  function activate() {if(!document.getElementById('view-graph').hidden && document.getElementById('graph-builder').open && !loaded){loaded=true;loadRuns();}}
+  document.getElementById('graph-builder').addEventListener('mentat:open',activate);
+  document.getElementById('graph-advanced').addEventListener('toggle',activate);
+  document.querySelector('.workspace-tabs').addEventListener('click',activate);
+  document.querySelector('.workspace-tabs').addEventListener('keydown',activate);
+  window.addEventListener('hashchange',activate);window.addEventListener('mentat:view',activate);activate();
+})();

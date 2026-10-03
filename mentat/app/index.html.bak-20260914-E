@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MENTAT</title>
+<link rel="icon" type="image/svg+xml" href="/mentat-icon.svg">
+<link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/graph.css"><link rel="stylesheet" href="/comparison.css"><link rel="stylesheet" href="/acu-theme.css"><link rel="stylesheet" href="/cross-reference.css"><link rel="stylesheet" href="/workspace.css"><link rel="stylesheet" href="/chart-studio.css">
+<script src="/theme.js" defer></script><script src="/chart-export.js" defer></script><script src="/chart-math.js" defer></script><script src="/ui-state.js" defer></script><script src="/coverage-view.js" defer></script><script src="/app.js" defer></script><script src="/grouped-chart.js" defer></script><script src="/charts.js" defer></script><script src="/graph.js" defer></script><script src="/comparison.js" defer></script><script src="/funding-comparison.js" defer></script><script src="/chart-studio-core.js" defer></script><script src="/contribution-plot.js" defer></script><script src="/contribution-charts.js" defer></script><script src="/contribution-map.js" defer></script><script src="/chart-studio-contributions.js" defer></script><script src="/chart-studio.js" defer></script><script src="/chart-comparison.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#workspace-main">Skip to workspace</a>
+<header class="app-navigation"><a class="wordmark" href="#loading" aria-label="Mentat · Load a sector">MENTAT</a><span class="brand-caption">Giving, in perspective.</span><nav class="workspace-tabs" role="tablist" aria-label="Workspace">
+<span class="nav-group" role="presentation">Workspace</span>
+<button id="tab-loading" type="button" role="tab" aria-controls="view-loading" aria-selected="true">Loading</button>
+<button id="tab-collection" type="button" role="tab" aria-controls="view-collection" aria-selected="false" tabindex="-1">Collection</button>
+<span class="nav-group" role="presentation">Analysis</span>
+<button id="tab-graph" type="button" role="tab" aria-controls="view-graph" aria-selected="false" tabindex="-1">Graph</button>
+<button id="tab-chart-studio" type="button" role="tab" aria-controls="view-chart-studio" aria-selected="false" tabindex="-1">Chart Studio</button>
+<button id="tab-cross-reference" type="button" role="tab" aria-controls="view-cross-reference" aria-selected="false" tabindex="-1">Cross-reference</button>
+<span class="nav-group" role="presentation">Evidence</span>
+<button id="tab-evidence" type="button" role="tab" aria-controls="view-evidence" aria-selected="false" tabindex="-1">PAC evidence</button>
+</nav><span class="local-indicator">Local only</span><span id="connection" role="status">Connecting…</span></header>
+<main id="workspace-main" tabindex="-1">
+<section class="workspace" aria-label="Mentat workspace">
+<div class="workspace-heading"><div><h1 id="workspace-title">Load a sector</h1></div><div id="graph-actions" class="graph-actions" hidden><button id="compare-open" class="secondary" type="button" aria-expanded="false" aria-controls="compare-panel">Compare subjects</button><button id="graph-open-sources" class="secondary" type="button" aria-haspopup="dialog">Sources &amp; freshness</button><button id="graph-open-builder" class="secondary" type="button" aria-haspopup="dialog">Create chart</button></div><button id="split-view" class="secondary" type="button" aria-pressed="false" hidden>Split with PAC evidence</button><span id="stage" class="badge">Ready when you are</span></div>
+
+<div id="error" class="error" role="alert" hidden></div>
+<section id="view-loading" role="tabpanel" aria-labelledby="tab-loading">
+<p class="view-intro">Build a company roster, review the names, then start collection.</p>
+<div id="roster-panel" class="loading-grid"><div class="panel roster-editor">
+<div class="section-label">01 · BUILD YOUR ROSTER</div><h2>Sector & companies</h2>
+<form id="roster-form">
+<label class="field" for="sector">Sector</label><input id="sector" type="text" maxlength="31" placeholder="e.g. Credit unions, Community banks" required autocomplete="off">
+<p class="muted">Use each company’s canonical name once. Add other names below.</p>
+<div id="company-editor"></div>
+<div class="editor-actions"><button id="add-company" type="button" class="secondary">+ Add company</button><button id="review-roster" type="submit" class="primary">Review roster</button></div>
+<p id="draft-status" class="muted" role="status">Draft stays in this browser.</p>
+</form>
+<details class="file-import"><summary>Or upload a spreadsheet</summary>
+<label class="upload" for="file"><strong>Choose a roster</strong><span>CSV, TSV, or Excel · up to 5 MB</span><input id="file" type="file" accept=".csv,.tsv,.xlsx"></label>
+<a class="text-link" href="/template.csv" download="mentat-roster-template.csv">Download the upload template ↗</a>
+<p>Use <code>canonical_name</code>, <code>alias</code>, and <code>sector</code> columns. Repeat the canonical name for each alias. <code>industry</code> is also accepted. Optional: <code>exclusion</code>. Mentat’s existing roster workbooks work too.</p></details>
+</div><div class="panel launch-panel"><div class="section-label">02 · REVIEW & COLLECT</div><h2>Collection setup</h2>
+<p id="review-placeholder">Review your roster to see the exact names that will be searched. No data collection starts until you press Start collection.</p>
+<div id="upload-review" hidden><h3>Roster review</h3><div id="roster-counts"></div><div id="roster-list"></div>
+<fieldset><legend>Election cycles</legend><label><input type="checkbox" name="cycle" value="2022" checked> 2021–22</label><label><input type="checkbox" name="cycle" value="2024" checked> 2023–24</label><label><input type="checkbox" name="cycle" value="2026" checked> 2025–26</label></fieldset>
+<label class="field" for="api-key">FEC API key <span id="key-hint">Saved encrypted for your Windows account. Separate multiple keys with commas.</span></label><input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Enter your API key">
+<button id="save-keys" type="button" class="secondary">Save keys securely</button><button id="start" type="button" class="primary" disabled>Start collection</button></div>
+<p id="key-status" class="local-note"></p>
+<p class="local-note">Closing the browser does not stop collection. Follow checkpoints and incoming records in the Collection tab.</p></div></div>
+<section class="panel coverage-panel" aria-labelledby="loading-coverage-title"><div class="panel-heading"><h2 id="loading-coverage-title">Saved FEC coverage</h2><details class="inline-help"><summary>How coverage is assessed</summary><p>Coverage applies to the saved run’s roster and searches. Review changed company names and aliases before reusing it. An active cycle is flagged stale when its verified cutoff is more than 30 days behind today; a past cycle requires coverage through December 31.</p></details></div><div id="loading-coverage" role="status"><p>Unverifiable · Checking saved coverage evidence.</p></div></section>
+</section>
+<section id="view-collection" role="tabpanel" aria-labelledby="tab-collection" hidden>
+<div class="run-library"><div class="run-collections" role="group" aria-label="Collection folders"><button type="button" data-run-group="progress" aria-pressed="true">In progress <span id="run-count-progress">0</span></button><button type="button" data-run-group="history" aria-pressed="false">History <span id="run-count-history">0</span></button><button type="button" data-run-group="archived" aria-pressed="false">Archived <span id="run-count-archived">0</span></button></div><div class="run-toolbar"><label for="runs">Collection<select id="runs"><option value="">No collections yet</option></select></label><button id="archive-run" type="button" class="secondary" disabled>Archive run</button></div><p id="run-library-note" class="muted"></p><details class="working-folders"><summary>Working folders</summary><p><strong>Collection work &amp; checkpoints</strong><br><span id="collection-directory"></span></p><p><strong>Completed reports</strong><br><span id="completed-directory"></span></p><button id="view-completed-reports" type="button" class="secondary">View completed reports</button></details></div>
+<h2 id="run-title" class="run-heading">Your collection workspace</h2>
+<button id="resume-setup" type="button" class="secondary" hidden>Continue collection setup</button>
+<p id="run-readiness-note" class="muted" hidden></p>
+<div id="empty" class="empty"><div class="empty-mark">M</div><h3>Start with a list of names.</h3><p>Your companies, collection checkpoints, and incoming records will appear here. You can also inspect an existing run from the list.</p></div>
+<div id="monitor" hidden>
+<p id="freshness" class="muted"></p>
+
+<div class="quality-panel" role="status"><strong id="quality-title">Collection coverage unverified</strong><p id="quality-detail">Completed tasks do not establish complete downstream coverage.</p><div id="quality-checks"></div><button id="clear-quality" type="button" hidden>Clear reviewed notices</button><details><summary>Data scope and source age</summary><p>Search checks cover the requested names at collection time. Missing employer names and unlisted aliases can still leave gaps. Rebuilt reports show observed committee transfers through three hops, with unresolved paths and separate conditional estimates. These are not traced company dollars or lower bounds. Historical reports may predate transfer coverage.</p><p>Rebuilt reports classify ActBlue and WinRed as hybrid/Carey committees. Older exports may still use the former Super PAC reporting rule.</p><ul id="source-snapshots"></ul></details></div>
+<div id="run-controls"><div class="section-label">RUN CONTROLS</div><div class="editor-actions"><button id="stop" type="button" class="danger" disabled title="No collection is running">Stop collection</button><label class="field" for="worker-target">Workers</label><input id="worker-target" type="number" min="1" max="64" placeholder="e.g. 6" disabled title="No collection is running"><button id="apply-workers" type="button" class="secondary" disabled title="No collection is running">Apply</button></div></div>
+<div class="metrics"><div><span>Search tasks processed</span><strong id="completed">—</strong></div><div><span id="worker-metric-label">Active workers</span><strong id="workers">—</strong><small id="worker-detail"></small></div><div><span>Failed tasks</span><strong id="failed">—</strong></div><div><span>Estimated time left</span><strong id="eta">—</strong><small>Elapsed <span id="elapsed">—</span></small></div></div>
+<span id="stopping-banner" class="badge" hidden>Stopping - finishing in-flight lanes.</span>
+<div class="progress-track"><div id="progress"></div></div><p id="phase-description" class="muted"></p>
+<div id="industries" class="industry-list"></div>
+<section class="panel coverage-panel" aria-labelledby="collection-coverage-title"><div class="panel-heading"><h2 id="collection-coverage-title">FEC data-through by sector and cycle</h2><details class="inline-help"><summary>How coverage is assessed</summary><p>Dated evidence must cover every company’s employer and corporate searches. Task completion, retrieval time and file modification time do not establish a cutoff. Active cycles allow a 30-day lag; past cycles require coverage through December 31.</p></details></div><div id="collection-coverage" role="status"></div></section>
+<div id="worker-panel" class="panel"><div class="panel-heading"><h3>Collection workers</h3><label for="lanes">Inspect worker <select id="lanes"><option>No workers yet</option></select></label></div><div id="lane-summary" class="muted">Waiting for collection to start.</div><div class="table-scroll"><table><thead><tr><th>Company</th><th>Cycle</th><th>Search</th><th>Rows fetched</th><th>Source count</th><th>Checkpoint</th></tr></thead><tbody id="checkpoints"></tbody></table></div></div>
+<div id="records-panel" class="panel"><div class="panel-heading"><div><h3>Activity Log</h3><p class="muted">Latest 25 stored records from the selected worker. Provisional until reconciliation and coverage checks finish. Positions use reported titles until final report classification.</p></div><span class="badge subtle">RAW DATA</span></div><div class="table-scroll"><table><thead><tr><th>Person</th><th class="number">Amount</th><th>Position</th><th>Title</th><th>Recipient</th></tr></thead><tbody id="records"></tbody></table></div></div>
+<div class="bottom-grid"><div class="panel"><h3>Run events</h3><div id="events" class="events"></div></div><div class="panel"><h3>Completed reports</h3><div id="reports"><p class="muted">Reports appear after collection and validation succeed.</p></div></div></div>
+<section class="panel" aria-labelledby="report-freshness-title"><h3 id="report-freshness-title">Report freshness</h3><p>Retrieval records when a source was downloaded. Modification records a file change. Only an explicit verified data-through date describes coverage; unknown means the receipts do not establish it.</p><div id="report-freshness"></div></section>
+</div></section>
+<section id="view-cross-reference" role="tabpanel" aria-labelledby="tab-cross-reference" hidden>
+<p class="xref-intro">One coherent account of who supplied the money and where it went. Mentat cross-references FEC evidence automatically, preserves each decision, and brings unresolved cases forward for review.</p>
+<div class="xref-toolbar"><button id="xref-refresh" type="button" class="secondary">Refresh saved evidence</button><span id="xref-refresh-status" role="status">Read-only · Refreshes every 5 seconds while this tab is visible.</span></div>
+<div id="xref-results"><p class="muted">Loading the latest cross-reference evidence…</p></div>
+</section>
+<script src="/cross-reference.js" defer></script>
+<section id="view-graph" role="tabpanel" aria-labelledby="tab-graph" hidden>
+<section class="panel graph-controls" aria-label="Scope">
+<div class="scope-heading"><span class="section-label">SCOPE</span><div class="scope-actions"><details class="report-location"><summary>Report folder</summary><label for="graph-run">Source folder<select id="graph-run"></select></label></details><button id="graph-reset" type="button" class="graph-text-button">Reset</button></div></div>
+<div class="graph-filter-grid">
+<label for="graph-industry">Industry<select id="graph-industry"></select></label>
+<label for="graph-company">Company<select id="graph-company"><option value="">All companies</option></select></label>
+<label for="graph-tier">Employee level<select id="graph-tier"><option value="">All levels</option><option>Chief</option><option>Middle-Management</option><option>Employees</option></select></label>
+<label for="graph-cycle">Election cycle<select id="graph-cycle"><option value="">All cycles</option></select></label>
+<label for="graph-funding">Giving<select id="graph-funding"><option value="all">All giving</option><option value="personal">Personal</option><option value="corporate">Corporate</option></select></label>
+</div><div id="graph-chips" class="graph-chips"></div></section>
+<nav class="analysis-tabs" role="tablist" aria-label="Graph analysis">
+<button id="graph-tab-overview" role="tab" aria-controls="graph-analysis-panel" aria-selected="true" type="button">Overview</button>
+<button id="graph-tab-recipients" role="tab" aria-controls="graph-analysis-panel" aria-selected="false" tabindex="-1" type="button">Recipients</button>
+<button id="graph-tab-candidates" role="tab" aria-controls="graph-analysis-panel" aria-selected="false" tabindex="-1" type="button">Candidates</button>
+<button id="graph-tab-companies" role="tab" aria-controls="graph-analysis-panel" aria-selected="false" tabindex="-1" type="button">Companies</button>
+</nav>
+<div class="compare-tools graph-row-tools"><label for="graph-row-count">Rows per chart<input id="graph-row-count" type="number" min="1" step="1" value="10" placeholder="All rows"></label><button id="graph-all-rows" class="secondary" type="button">Show all rows</button><span id="graph-row-status" role="status"></span></div>
+<p id="graph-status" class="muted" role="status">Choose a report source.</p>
+<div id="graph-error" class="error" role="alert" hidden></div>
+<div id="graph-results" hidden><p id="graph-scope" class="chart-note" role="status"></p>
+<div class="graph-metrics"><div><span>Net giving in selected scope</span><strong id="graph-total">—</strong><small id="graph-basis-note"></small></div><div><span>Direct to candidates</span><strong id="graph-direct">—</strong><small id="graph-direct-share"></small></div><div><span>Recipient organizations</span><strong id="graph-recipient-count">—</strong><small id="graph-organization-share"></small></div></div>
+<div id="graph-analysis-panel" role="tabpanel" aria-labelledby="graph-tab-overview" tabindex="0">
+<div class="graph-panels" data-analysis="overview">
+<section id="graph-category-panel" class="panel"><div class="panel-heading"><h2>Giving by recipient type</h2></div><p class="muted">Net contributions · saved receipt categories</p><div id="graph-categories"></div><p class="chart-note">Organization receipts are not attributed to candidates.</p><button class="graph-text-button" data-analysis-tab="recipients" type="button">View recipients →</button></section>
+<section id="graph-organization-panel" class="panel" hidden><div class="panel-heading"><h2>Top organizations</h2><button class="graph-text-button" data-values="organizations" type="button">View all →</button></div><p class="muted">Select a recipient to narrow the scope.</p><div id="graph-organizations"></div></section>
+<section id="graph-candidate-panel" class="panel graph-candidate-panel"><div class="panel-heading"><h2>Top candidates</h2><button id="graph-view-candidates" class="graph-text-button" type="button">View all →</button></div>
+<div id="graph-candidate-controls" class="graph-candidate-controls" hidden><label for="graph-mode">Candidate view<select id="graph-mode"><option value="direct">Direct contributions</option><option value="activity">Downstream PAC activity</option><option value="estimates">Conditional industry estimates</option></select></label><label for="graph-direction" hidden>Direction<select id="graph-direction"><option value="Support">Support</option><option value="Oppose">Opposition</option><option value="Contribution / Other">Contributions / other activity</option><option value="Unknown">Unknown direction</option></select></label></div>
+<p id="graph-candidate-note" class="chart-note"></p><p id="graph-unresolved" class="chart-note"></p><div id="graph-candidates"></div>
+<p id="graph-candidate-separation" class="chart-note">Direct contributions only. Downstream PAC activity and conditional estimates are separate candidate views.</p>
+<details id="graph-candidate-detail" hidden><summary id="graph-candidate-detail-title">Candidate receipt groups</summary><div class="table-scroll"><table><thead><tr><th>Company</th><th>Level</th><th>Recipient / source committee</th><th>Cycle</th><th>Amount</th></tr></thead><tbody id="graph-candidate-rows"></tbody></table></div></details></section>
+<section class="panel" id="graph-company-panel" hidden><div class="panel-heading"><h2>Company comparison</h2><button class="graph-text-button" data-values="companies" type="button">View all →</button></div><p class="muted">Select a company to explore its giving.</p><div id="graph-companies"></div></section>
+<section class="panel" id="graph-level-panel" hidden><div class="panel-heading"><h2>Giving by employee level</h2></div><p class="chart-note">Personal giving in the selected scope. Corporate giving is separate.</p><div id="graph-levels"></div></section>
+</div></div>
+<div class="graph-details-tools"><details id="graph-method-details"><summary>Details &amp; methodology</summary><p id="graph-method" class="muted"></p><p class="muted">Chart images export the displayed preview. CSV includes every value in the selected breakdown.</p></details><div class="graph-export-tools"><label class="sr-only" for="graph-export-target">Chart to export</label><select id="graph-export-target"><option value="categories">Recipient types</option><option value="organizations">Organizations</option><option value="candidates">Candidates</option><option value="companies">Companies</option><option value="levels">Employee levels</option></select><button id="graph-full-table" class="graph-text-button" type="button">Full table</button><label class="sr-only" for="graph-export-format">Export format</label><select id="graph-export-format"><option value="png">PNG image</option><option value="svg">SVG image</option><option value="csv">CSV data</option></select><button id="graph-export" class="secondary" type="button">Export chart</button></div></div>
+</div>
+<section id="compare-panel" class="comparison-workspace" hidden aria-label="Compare subjects">
+<div class="panel-heading"><div><div class="section-label">COMPARE SUBJECTS</div><h2>Compare funding</h2><p>Choose sources and recipients to create a comparison.</p></div><span id="compare-count"></span></div>
+<div class="compare-tools"><label for="compare-run">Report folder<select id="compare-run"></select></label><label for="compare-industry">Industry<select id="compare-industry"></select></label></div>
+<section id="flow-panel" aria-label="Compare funding to recipients">
+<h3>Who funded whom?</h3><p>Click companies or PACs on the left and candidates or recipients on the right. Each source and activity stays separate.</p>
+<div class="compare-tools"><label>Show<select id="flow-mode"><option value="Candidate">Candidates</option><option value="Recipient">Recipient committees</option></select></label><label>Find receiver type<select id="flow-category"><option value="">All receiver types</option></select></label><label>Election cycle<select id="flow-cycle"></select></label></div>
+<div class="flow-pickers"><section><label>Find companies or PACs<input id="flow-source-search" type="search" placeholder="Search name or committee ID"></label><label>Source type<select id="flow-source-type"><option value="">All companies and committees</option></select></label><div id="flow-sources" class="flow-choices" aria-label="Funding sources"></div><div id="flow-source-picks" class="flow-picks"></div></section><section><label>Find candidates or recipients<input id="flow-target-search" type="search" placeholder="Search name or candidate ID"></label><button id="flow-select-matches" class="secondary" type="button">Select matching recipients</button><div id="flow-targets" class="flow-choices" aria-label="Funding recipients"></div><div id="flow-target-picks" class="flow-picks"></div></section></div>
+<div id="flow-channels" class="flow-picks" aria-label="Included activity"></div>
+<div class="compare-tools"><label>Chart<select id="flow-type"><option value="grouped">Side-by-side bars</option><option value="groupedhorizontal">Horizontal comparison</option><option value="multiline">Separate lines</option></select></label><label>Recipients per view<input id="flow-count" type="number" min="1" max="60" step="1" value="10"></label><button id="flow-prev" class="secondary" type="button">Previous</button><button id="flow-next" class="secondary" type="button">Next</button><button id="flow-chart" type="button">Open chart &amp; export</button><button id="flow-clear" class="secondary" type="button">Clear choices</button></div>
+<p id="flow-status" role="status"></p><div id="flow-preview" class="flow-preview"></div><div id="flow-table" class="table-scroll"></div><p id="flow-note" class="chart-note"></p>
+</section>
+<details><summary>Compare overall subject totals</summary><div class="compare-tools"><label for="compare-kind">Subject type<select id="compare-kind"><option value="">All subjects</option><option>Industry</option><option>Company</option><option>Person</option><option>Recipient</option><option>Candidate</option></select></label><label for="compare-search">Search subjects<input id="compare-search" type="search" placeholder="Name, company or candidate"></label></div><p id="compare-status" class="muted" role="status"></p><div class="compare-tools"><label for="compare-cycle">Compare cycle<select id="compare-cycle"></select></label><button id="compare-chart" type="button" class="secondary">Chart these subjects</button><button id="compare-export" type="button" class="secondary">Export comparison CSV</button><button id="compare-clear" type="button" class="secondary">Clear comparison</button></div>
+<div class="compare-layout"><div id="compare-results" class="compare-results" aria-label="Subject search results"></div><div><p id="compare-empty" class="compare-empty">Drop a subject below or click a search result to begin.</p><div id="compare-cards" class="compare-cards" aria-label="Selected comparison subjects"></div></div></div>
+<p class="chart-note">Columns are independent and may overlap. An industry includes its companies; PAC activity may be shared. No combined total is calculated. Missing data is unavailable, not zero. Person coverage follows the saved report.</p></details></section>
+<dialog id="graph-sources" class="sources-drawer" aria-labelledby="graph-sources-title"><div class="panel-heading"><h2 id="graph-sources-title">Sources &amp; freshness</h2><button id="graph-close-sources" class="graph-text-button" type="button" aria-label="Close sources">✕</button></div><p>Retrieval does not establish data currency.</p><p id="graph-source-label" class="muted"></p><div id="graph-freshness"></div><details><summary>Report fingerprints</summary><div id="graph-provenance"></div></details></dialog>
+<dialog id="graph-builder" aria-labelledby="graph-builder-title"><div class="panel-heading"><div><div class="section-label">LOCAL EXPLORER</div><h2 id="graph-builder-title">Create chart</h2></div><button id="graph-close-builder" class="secondary" type="button">Close</button></div>
+<p class="view-intro">Pick a statistic, then click a chart. Your chart updates as you choose.</p>
+<div class="chart-layout"><section class="chart-controls" aria-label="Graph creation menu">
+<details id="chart-dataset"><summary>Change data</summary>
+<button id="chart-source-report" class="secondary" type="button">Choose report worksheet</button>
+<label for="chart-run">Report folder<select id="chart-run"></select></label>
+<label for="chart-report">Report<select id="chart-report"></select></label>
+<label for="chart-sheet">Worksheet / subsection<select id="chart-sheet"></select></label>
+<div class="chart-row"><label for="chart-header">Header row<input id="chart-header" type="number" min="1" max="100" value="5"></label><button id="chart-rescan" class="secondary" type="button">Rescan columns</button></div>
+</details>
+<p id="chart-loading" class="muted" role="status">Choose a report to scan its columns.</p>
+<fieldset id="chart-settings" disabled><legend>Make it yours</legend>
+<label for="chart-y">Statistic<select id="chart-y"></select></label>
+<div class="chart-row"><label for="chart-start">First worksheet row<input id="chart-start" type="number" min="1" step="1" placeholder="First data row"></label><label for="chart-limit">Row count<input id="chart-limit" type="number" min="1" step="1" placeholder="All matching rows"></label></div><button id="chart-all-rows" class="secondary" type="button">Use all rows</button>
+<label for="chart-type">Chart type<select id="chart-type"><option value="grouped">Side-by-side bars</option><option value="groupedhorizontal">Horizontal comparison</option><option value="multiline">Separate lines</option><option value="bar">Bar chart</option><option value="box">Box plot</option><option value="pie">Pie chart</option><option value="line">Line chart</option><option value="scatter">Scatter plot</option><option value="histogram">Histogram</option><option value="horizontal">Horizontal bar</option><option value="area">Area chart</option><option value="doughnut">Doughnut chart</option><option value="waterfall">Waterfall</option><option value="pareto">Pareto</option><option value="radar">Radar</option></select></label>
+<label for="chart-series">Separate series<select id="chart-series"><option value="-1">None</option></select></label>
+<div id="chart-quick" class="chart-quick" aria-label="Choose a chart">
+<button type="button" data-chart="bar">▥<span>Bar</span></button><button type="button" data-chart="line">⌁<span>Line</span></button><button type="button" data-chart="pie">◕<span>Pie</span></button><button type="button" data-chart="scatter">⠿<span>Scatter</span></button><button type="button" data-chart="histogram">▟<span>Histogram</span></button><button type="button" data-chart="box">⊞<span>Box plot</span></button>
+</div>
+<label for="chart-x"><span id="chart-x-label">Compare by</span><select id="chart-x"></select></label>
+<div id="chart-time-quick" class="chart-time-quick" aria-label="Explore changes over time"><button type="button" data-transform="annual">Over time</button><button type="button" data-transform="yoy">Year over year</button><button type="button" data-transform="forecast">Forecast</button></div>
+<label id="chart-subject-label" for="chart-subject" hidden>Subject<select id="chart-subject"></select></label>
+<p id="chart-quick-note" class="chart-note"></p>
+<details id="graph-advanced"><summary>More options</summary>
+<label for="chart-suggestion">Suggested from columns<select id="chart-suggestion"></select></label>
+
+<label for="chart-aggregation">Aggregation<select id="chart-aggregation"><option value="sum">Sum</option><option value="mean">Mean</option><option value="count">Count rows</option><option value="median">Median</option><option value="min">Minimum</option><option value="max">Maximum</option></select></label>
+<label for="chart-transform">Time analysis<select id="chart-transform"><option value="none">None</option><option value="annual">Period totals</option><option value="yoy">Year-over-year %</option><option value="change">Period change</option><option value="forecast">Same-phase baseline</option></select></label><div class="chart-row"><label for="chart-period">Period<select id="chart-period"><option value="year">Calendar year</option><option value="cycle">Election cycle (2 years)</option></select></label><label for="chart-horizon">Forecast periods<input id="chart-horizon" type="number" min="1" max="10" value="2"></label></div><p class="chart-note">For time analysis, choose a date/year as X and a bar, line or area chart. Filter to one subject before comparing periods. Over time shows totals by year or election cycle. Year over year compares consecutive calendar years. Forecast repeats the latest completed value from the matching election phase; it needs four closed cycles or eight closed years. Current and partial periods stay visible but do not train the baseline.</p><details open><summary>Filter a subsection</summary><p class="muted">Filters combine with AND. Row numbers refer to the worksheet.</p><label for="chart-end">Last worksheet row (optional)<input id="chart-end" type="number" min="1" step="1"></label><div id="chart-filters"></div><button id="chart-add-filter" class="secondary" type="button">+ Add filter</button></details>
+<button id="chart-create" class="secondary" type="button">Update chart</button>
+</details>
+</fieldset></section>
+<section class="chart-preview" aria-label="Graph preview"><div class="panel-heading"><div><div class="section-label">LOCAL EXPLORER</div><h2 id="chart-title">Your data, in view</h2></div><span class="badge subtle">LOCAL ONLY</span></div><p id="chart-context">Choose a worksheet to begin.</p><div id="chart-error" class="error" role="alert" hidden></div><div id="chart-image" class="chart-image"></div><div id="chart-export" hidden><button id="chart-save-png" class="secondary" type="button">Export PNG</button><button id="chart-save-svg" class="secondary" type="button">Export SVG</button> <button id="chart-save-csv" class="secondary" type="button">Export data CSV</button></div><p id="chart-scope" class="muted"></p><details><summary>Scanned columns</summary><div class="table-scroll"><table><thead><tr><th>Column</th><th>Detected type</th><th>Distinct</th><th>Missing</th></tr></thead><tbody id="chart-columns"></tbody></table></div></details><details><summary>Chart values & statistics</summary><div id="chart-values" class="table-scroll"></div></details></section></div>
+</dialog></section>
+
+<section id="view-chart-studio" role="tabpanel" aria-labelledby="tab-chart-studio" hidden>
+<div class="studio">
+<div class="studio-header">
+<h2 class="studio-heading">Chart Studio</h2>
+<span class="studio-scope-block"><span id="studio-scope-chip" class="studio-scope-chip" role="status"></span><small id="studio-scope-note" class="studio-scope-note" hidden></small></span>
+<button id="studio-scope-change" class="studio-scope-change" type="button" title="Open the Data source panel and choose a report">Data source</button>
+<span class="studio-header-gap"></span>
+<button id="studio-overview-toggle" class="studio-overview-toggle" type="button" aria-pressed="false">Company overview</button>
+<div id="studio-view-mode" class="studio-segmented studio-options-restore" role="radiogroup" aria-label="Studio view">
+<button id="studio-view-builder" type="button" role="radio" aria-checked="true" title="Data panel, shelves and Inspector">Builder</button>
+<button id="studio-view-canvas" type="button" role="radio" aria-checked="false" tabindex="-1" title="The chart on its own">Canvas only</button>
+</div>
+<button id="studio-inspector-toggle" class="studio-inspector-toggle" type="button" aria-expanded="false" aria-controls="studio-inspector">Inspector<span id="studio-inspector-count" class="studio-inspector-badge" hidden></span></button>
+</div>
+<div class="studio-toolbar" role="toolbar" aria-label="Chart Studio toolbar">
+<button id="studio-undo" type="button" title="Undo the last change">&#8630; Undo</button>
+<button id="studio-redo" type="button" title="Redo the change just undone">&#8631; Redo</button>
+<button id="studio-swap" type="button" title="Exchange the Columns and Rows shelves">&#8644; Swap</button>
+<button id="studio-sort-asc" type="button" aria-pressed="false" title="Sort the grouping smallest first">&#8593; Sort ascending</button>
+<button id="studio-sort-desc" type="button" aria-pressed="false" title="Sort the grouping largest first">&#8595; Sort descending</button>
+<button id="studio-labels" type="button" aria-pressed="false" title="Write each mark's value beside it">Show mark labels</button>
+<select id="studio-fit" aria-label="Fit the view" title="How the drawing fills the view"><option value="standard">Fit: Standard</option><option value="width">Fit: Fit width</option><option value="entire">Fit: Entire view</option></select>
+<button id="studio-clear" type="button" title="Empty this sheet but keep the data source">Clear</button>
+<button id="studio-duplicate" type="button" title="Copy this sheet into a new one">Duplicate sheet</button>
+<details class="studio-menu" id="studio-download"><summary>Download</summary><div><button id="studio-download-png" type="button">Image (PNG)</button><button id="studio-download-svg" type="button">Image (SVG)</button><button id="studio-download-csv" type="button">Data (CSV)</button></div></details>
+<button id="studio-showme-toggle" type="button" aria-pressed="true" aria-controls="studio-showme">Show Me</button>
+<span class="studio-toolbar-gap"></span>
+<button id="studio-classic" class="studio-classic" type="button" aria-haspopup="dialog" title="Open the original Create chart dialog">Classic builder</button>
+</div>
+
+<div class="studio-grid" id="studio-grid">
+<aside class="studio-side" aria-label="Data">
+<div class="studio-pane" id="studio-pane-data">
+<h3 class="studio-panel-title">Data</h3>
+<details class="studio-source-disclosure" id="studio-source-details" open><summary id="studio-source-summary">Data source</summary>
+<div class="studio-source">
+<label for="studio-source-mode">Data source<select id="studio-source-mode"><option value="contributions">Verified contributions</option><option value="worksheet">Report worksheet</option></select></label>
+<div id="studio-contribution-source">
+<label for="studio-dataset">Report<select id="studio-dataset"></select></label>
+<p id="studio-dataset-message" class="studio-note" hidden></p>
+<label for="studio-basis">Accounting basis<select id="studio-basis"></select></label>
+<label for="studio-destination">State location view<select id="studio-destination"><option value="">Choose a state view</option><option value="recipient_state">Recipient committee address</option><option value="represented_state">Candidate represented state</option><option value="state">Contributor state</option></select></label>
+<p id="studio-basis-note" class="studio-note"></p>
+<button id="studio-refresh-data" class="studio-rescan" type="button">Refresh verified data</button>
+</div>
+<div id="studio-worksheet-source" hidden>
+<label for="studio-run">Report folder<select id="studio-run"></select></label>
+<label for="studio-report">Report<select id="studio-report"></select></label>
+<label for="studio-sheet">Worksheet<select id="studio-sheet"></select></label>
+<label for="studio-header">Header row<input id="studio-header" type="number" min="1" max="100" value="5"></label><button id="studio-rescan" class="studio-rescan" type="button">Rescan columns</button>
+</div>
+<p id="studio-loading" role="status">Reading verified contribution fields&#8230;</p>
+<div id="studio-progress" class="studio-progress" role="status" hidden><span id="studio-progress-message"></span><span id="studio-progress-elapsed"></span><button id="studio-progress-cancel" type="button">Cancel</button></div>
+</div>
+</details>
+<label for="studio-search">Search fields<input id="studio-search" type="search" placeholder="Filter this list" autocomplete="off"></label>
+<label id="studio-field-table-label" for="studio-field-table">Fields from<select id="studio-field-table"><option value="">All related tables</option></select></label>
+<h3>Dimensions</h3>
+<div id="studio-dimensions" class="studio-fields"></div>
+<h3>Measures</h3>
+<div id="studio-measures" class="studio-fields"></div>
+<p id="studio-hidden-note" class="studio-note" hidden></p>
+<div id="studio-hidden-block" hidden><div id="studio-hidden" class="studio-fields"></div></div>
+</div>
+</aside>
+
+<div class="studio-view">
+<div class="studio-shelves" id="studio-shelves">
+<div class="studio-shelf"><span class="studio-shelf-name" id="studio-columns-name">Columns</span><div id="studio-columns" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-columns-name"></div></div>
+<div class="studio-shelf"><span class="studio-shelf-name" id="studio-rows-name">Rows</span><div id="studio-rows" class="studio-drop" data-placeholder="Drop a field here" aria-labelledby="studio-rows-name"></div></div>
+<div class="studio-shelf"><span class="studio-shelf-name" id="studio-filters-name">Filters</span><div id="studio-filters" class="studio-drop" data-placeholder="Drop a field to filter" aria-labelledby="studio-filters-name"></div></div>
+</div>
+<div class="studio-canvas-wrap" id="studio-canvas-wrap">
+<h2 id="studio-title">Chart Studio</h2>
+<p id="studio-reconcile" class="studio-reconcile" role="status" hidden></p>
+<p id="studio-note" class="studio-note">Choose a verified report in the Data panel to begin.</p>
+<div id="studio-error" class="error" role="alert" hidden></div>
+<div id="studio-verified-summary" class="studio-verified-summary" hidden></div>
+<div id="studio-canvas" class="studio-canvas fit-standard"></div>
+<div id="studio-table" class="studio-table table-scroll" hidden></div>
+<div id="studio-result-controls" class="studio-result-controls" hidden><button id="studio-groups-prev" type="button">Previous groups</button><span id="studio-group-count"></span><button id="studio-groups-next" type="button">Next groups</button><button id="studio-inspect-all" type="button">View source records</button></div>
+<section id="studio-inspection" class="studio-inspection" hidden aria-label="Source records"><div class="studio-inline"><h3>Source records</h3><button id="studio-inspection-close" type="button">Close</button></div><p id="studio-record-count" class="studio-note" role="status"></p><div id="studio-records" class="table-scroll"></div><button id="studio-record-prev" type="button">Previous records</button><button id="studio-record-next" type="button">Next records</button></section>
+</div>
+</div>
+
+<aside class="studio-inspector" id="studio-inspector" aria-label="Inspector">
+<div class="studio-inspector-head"><h3 class="studio-panel-title">Inspector</h3><button id="studio-inspector-close" class="studio-inspector-close" type="button">Close</button></div>
+<div class="studio-inspector-tabs" role="tablist" aria-label="Inspector">
+<button id="studio-tab-marks" type="button" role="tab" aria-selected="true" aria-controls="studio-pane-marks">Marks</button>
+<button id="studio-tab-analytics" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="studio-pane-analytics">Analytics</button>
+<button id="studio-tab-filters" type="button" role="tab" aria-selected="false" tabindex="-1" aria-controls="studio-pane-filters">Filters</button>
+</div>
+<div class="studio-pane" id="studio-pane-marks" role="tabpanel" aria-labelledby="studio-tab-marks">
+<div class="studio-showme" id="studio-showme">
+<div class="studio-showme-head"><h3>Show Me</h3><button id="studio-showme-close" type="button">Hide</button></div>
+<div id="studio-showme-grid" class="studio-showme-grid"></div>
+<p id="studio-showme-foot" class="studio-showme-foot"></p>
+</div>
+<h3>Marks</h3>
+<label for="studio-mark">Mark type<select id="studio-mark"></select></label>
+<div class="studio-mark-props">
+<div class="studio-prop"><span>Colour</span><div id="studio-color" class="studio-drop" data-placeholder="Colour" aria-label="Colour property"></div></div>
+<div class="studio-prop"><span>Size</span><div id="studio-size" class="studio-drop" data-placeholder="Size" aria-label="Size property"></div></div>
+<div class="studio-prop"><span>Label</span><div id="studio-label" class="studio-drop" data-placeholder="Label" aria-label="Label property"></div></div>
+<div class="studio-prop"><span>Detail</span><div id="studio-detail" class="studio-drop" data-placeholder="Detail" aria-label="Detail property"></div></div>
+<div class="studio-prop"><span>Tooltip</span><div id="studio-tooltip" class="studio-drop" data-placeholder="Tooltip" aria-label="Tooltip property"></div></div>
+</div>
+<p id="studio-marks-note" class="studio-note">Colour separates series; Detail sets the grouping behind each mark. Select a mark to inspect its source records.</p>
+<div id="studio-map-settings" hidden><h3>Map layers</h3><label class="studio-check"><input id="studio-layer-states" type="checkbox" checked> State boundaries</label><label class="studio-check"><input id="studio-layer-districts" type="checkbox" checked> Congressional districts</label><label class="studio-check"><input id="studio-layer-zips" type="checkbox"> ZIP areas when zoomed</label><label for="studio-congress">Congress<select id="studio-congress"><option value="119">119th Congress</option><option value="120">120th Congress</option></select></label><p class="studio-note">Boundaries are visual overlays. ZIPs can cross district and state boundaries; overlays do not allocate money.</p></div>
+<h3>Pages</h3>
+<div id="studio-pages" class="studio-drop" data-placeholder="One dimension" aria-label="Pages shelf"></div>
+<div id="studio-pager" class="studio-pager" hidden><button id="studio-pager-prev" type="button" aria-label="Previous page member">&#9664;</button><button id="studio-pager-play" type="button" aria-pressed="false" aria-label="Play through the page members">&#9654;</button><button id="studio-pager-next" type="button" aria-label="Next page member">&#9654;|</button><span id="studio-pager-label"></span></div>
+<h3>Parameters</h3>
+<div class="studio-inline"><label for="studio-param-start">First worksheet row<input id="studio-param-start" type="number" min="1" step="1" placeholder="First"></label><label for="studio-param-end">Last worksheet row<input id="studio-param-end" type="number" min="1" step="1" placeholder="Last"></label></div>
+<div class="studio-inline"><label for="studio-param-limit">Row limit<input id="studio-param-limit" type="number" min="1" step="1" placeholder="All rows"></label><label for="studio-param-groups">Group limit<input id="studio-param-groups" type="number" min="1" max="1000" step="1" placeholder="40" title="40 per page (verified) &#183; fold after 40 (worksheet); Graph and classic fold at 60"></label></div>
+<label id="studio-bin-width-label" for="studio-bin-width" hidden>Histogram bin width (USD)<input id="studio-bin-width" type="number" min="0.01" step="0.01" value="100"></label>
+<label class="studio-check" for="studio-param-split"><input id="studio-param-split" type="checkbox"> Split "; "-separated cells on the grouping field</label>
+<label class="studio-check" for="studio-show-hidden"><input id="studio-show-hidden" type="checkbox"> Show identifier fields</label>
+</div>
+<div class="studio-pane" id="studio-pane-analytics" role="tabpanel" aria-labelledby="studio-tab-analytics" hidden>
+<h3>Summarize and model</h3>
+<div id="studio-analytics-list"></div>
+<h3>Transform parameters</h3>
+<label for="studio-param-period">Period<select id="studio-param-period"><option value="">From the field</option><option value="year">Calendar year</option><option value="cycle">Election cycle (2 years)</option></select></label>
+<label for="studio-param-horizon">Forecast periods<input id="studio-param-horizon" type="number" min="1" max="10" value="2"></label>
+<label id="studio-param-subject-label" for="studio-param-subject" hidden>Subject<select id="studio-param-subject" title="Time analysis adds up one subject at a time; other views read every row."></select></label>
+<p class="studio-note">Drag an object onto the view, or press it. Period totals, year-over-year, period change and the same-phase forecast need a date, year or election-cycle field on a shelf.</p>
+</div>
+<div class="studio-pane" id="studio-pane-filters" role="tabpanel" aria-labelledby="studio-tab-filters" hidden>
+<h3>Active filters</h3>
+<div id="studio-filter-rows" class="studio-filter-rows"></div>
+<label for="studio-filter-add">Add filter<select id="studio-filter-add"><option value="">Choose a field&#8230;</option></select></label>
+<p class="studio-note">Filters combine with AND. These rows and the Filters shelf are the same filters.</p>
+</div>
+</aside>
+</div>
+
+<div class="studio-overview" id="studio-overview" hidden aria-label="Company overview">
+<div class="studio-overview-head">
+<label for="studio-overview-company">Company<select id="studio-overview-company"></select></label>
+<p id="studio-overview-scope" class="studio-note" role="status"></p>
+</div>
+<div id="studio-overview-grid" class="studio-overview-grid"></div>
+</div>
+
+<div class="studio-datasource" id="studio-datasource" hidden></div>
+
+<div class="studio-sheets">
+<button id="studio-sheet-source" type="button" aria-selected="false">Data Source</button>
+<div id="studio-sheet-tabs" class="studio-sheet-tabs"></div>
+<button id="studio-new-sheet" type="button">+ New sheet</button>
+</div>
+<div class="studio-status" id="studio-status" role="status"></div>
+</div>
+</section>
+
+<section id="view-evidence" role="tabpanel" aria-labelledby="tab-evidence" hidden>
+<div class="evidence-source-bar"><label for="evidence-source">Evidence source<select id="evidence-source"><option value="csv">CSV file</option><option value="snapshot">Saved FEC snapshots</option></select></label></div>
+<div id="evidence-csv-workspace">
+<section class="panel csv-picker" aria-label="Choose PAC evidence"><div class="section-label">FROM YOUR SELECTED FILE</div><h2>PAC evidence</h2><p class="muted">Choose a CSV, then a PAC. Review the reported rows beside your graph.</p><label class="csv-file-label" for="evidence-csv-file">Choose CSV<input id="evidence-csv-file" type="file" accept=".csv,text/csv"></label><p id="evidence-csv-status" role="status">FEC or Mentat CSV with a committee ID column · up to 5 MB.</p><div class="evidence-toolbar"><label for="evidence-csv-committee">PAC<select id="evidence-csv-committee" disabled><option value="">Choose a CSV first</option></select></label><label for="evidence-csv-cycle">Election cycle<select id="evidence-csv-cycle" disabled><option value="">All cycles</option></select></label></div></section>
+<section id="evidence-csv-results" class="panel" aria-label="Selected CSV observations" hidden><h2 id="evidence-csv-title">Reported activity</h2><p id="evidence-csv-scope" class="muted"></p><div id="evidence-csv-totals" class="evidence-cards"></div><p class="muted">Sums reflect the selected CSV rows. Receipts, disbursements and independent spending stay separate; amended or duplicate filings may overlap.</p><details id="evidence-csv-details"><summary>File details &amp; interpretation</summary><p id="evidence-csv-provenance"></p><ul id="evidence-csv-warnings"></ul></details><h3>Source rows</h3><p id="evidence-csv-row-status" class="muted" role="status"></p><div class="table-scroll"><table><thead><tr><th>Row</th><th>Date / cycle</th><th>Amount</th><th>Counterparty / activity</th><th>Source</th></tr></thead><tbody id="evidence-csv-rows"></tbody></table></div><div class="csv-pagination"><button id="evidence-csv-prev" type="button" class="secondary">Previous rows</button><button id="evidence-csv-next" type="button" class="secondary">Next rows</button></div></section>
+</div><div id="evidence-saved" hidden>
+<section class="panel" aria-label="Evidence configuration">
+<div class="panel-heading"><h2>Saved FEC snapshots</h2><button id="evidence-refresh" class="secondary" type="button">Refresh snapshots</button></div>
+<div class="evidence-toolbar"><label for="evidence-mode">Evidence scope<select id="evidence-mode"><option value="saved">Choose saved evidence</option><option value="graph">Follow Graph selection</option></select></label><label for="evidence-snapshot">Saved snapshot<select id="evidence-snapshot"></select></label></div>
+<p class="muted">Choose a saved company, cycle and committee independently, or follow Graph. These controls filter saved evidence.</p>
+<details id="evidence-config"><summary>Configure a new snapshot</summary>
+<form id="evidence-form"><div class="evidence-toolbar">
+<label for="evidence-company-input">Company<input id="evidence-company-input" required maxlength="250"></label>
+<label for="evidence-cycles-input">Election years<input id="evidence-cycles-input" required placeholder="2024, 2026"></label>
+<label for="evidence-committees-input">FEC committee IDs<input id="evidence-committees-input" required placeholder="C00000001, C00000002"></label>
+</div><label for="evidence-aliases-input">Company aliases · one per line<textarea id="evidence-aliases-input" rows="3"></textarea></label>
+<p class="muted">Committee IDs define the network covered. Collecting makes new FEC requests and saves a separate snapshot; existing evidence is preserved.</p>
+<button id="evidence-use-config" type="button" class="secondary">Use selected snapshot settings</button> <button id="evidence-collect" type="submit">Collect new snapshot</button>
+</form></details><p id="evidence-job-status" role="status"></p>
+</section>
+<p id="evidence-empty" class="empty" hidden>No PAC evidence snapshot is available yet. Collection reports remain in the Collection tab.</p>
+<section id="evidence-panel" class="panel" hidden aria-label="PAC spending evidence">
+<div class="panel-heading"><div><div class="section-label">FOLLOW THE REPORTED MONEY</div><h2>Company → PAC → candidates</h2><p>Explore the recorded legs. Spending from a pooled PAC is committee activity; it cannot be assigned to a particular donor without further evidence.</p></div></div>
+<div class="evidence-toolbar"><label for="evidence-cycle">Election cycle<select id="evidence-cycle"></select></label><label for="evidence-committee">Spending committee<select id="evidence-committee"></select></label></div>
+<p id="evidence-scope" class="muted"></p><div id="evidence-funding" class="evidence-cards"></div>
+<div id="evidence-transfers"></div>
+<div class="allocation-panel"><h3>Conditional company cash estimate</h3><div id="allocation-status" role="status"></div><div id="allocation-results"></div><details><summary>Estimation method &amp; assumptions</summary><p>At each payment, assign the same fraction as the company's share of the PAC's available cash. Carry that fraction through PAC transfers; leave retained cash and operating expenses in their own categories.</p><p class="formula">Estimated company-funded spending = payment × company cash share before payment</p><p class="muted">Example only: a 25% cash share × $10 million of candidate spending gives a $2.5 million estimate. This is an accounting assumption, not proof of donor intent or influence.</p></details></div>
+<details><summary>Company receipt evidence and excluded conversions</summary><div class="table-scroll"><table><thead><tr><th>Reported name / role</th><th>Date</th><th>Amount</th><th>Filing explanation</th></tr></thead><tbody id="evidence-receipts"></tbody></table></div></details>
+<h3 class="evidence-subheading">Candidate activity as filed</h3><p class="muted">Amounts below belong to the selected committee. Support and opposition stay separate. Expand a name to compare the filing with the candidate register.</p>
+<div class="table-scroll"><table><thead><tr><th>Candidate / identity check</th><th>Direction</th><th class="number">Committee spending</th><th class="number">Estimated company funding</th><th>Activity dates</th><th>Evidence</th></tr></thead><tbody id="evidence-candidates"></tbody></table></div>
+<details><summary>What is needed for a donor allocation?</summary><p>Reconcile all receipts and disbursements, opening and retained cash, asset conversions and refunds. Enforce donation → transfer → expenditure dates, including transfers between cycles. Document any earmark before calling a dollar amount traced. Otherwise, show assumptions and uncertainty with the estimate.</p><p id="evidence-timing" class="muted"></p></details>
+</section>
+</div></section>
+</section>
+</main><script src="/evidence-csv.js" defer></script><footer>MENTAT <span>FEC collection · canonical names + aliases</span></footer>
+</body></html>

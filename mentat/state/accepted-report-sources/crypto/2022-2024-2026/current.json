@@ -1,0 +1,32 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026",
+  "baseline_token": null,
+  "changed_decisions": 14801,
+  "counts": {
+    "added": 14801,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\tmp\\production-all-20260728T204300\\runs\\20260728T204315-41296\\industries\\crypto\\data\\mentat.db",
+  "database_sha256": "371f51e69ba2b9e477ec3a198d2a8e1ec689cd06f48b1c85683704772810893d",
+  "delta_cents": 24994948317,
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026",
+  "dollar_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.dollar-changes.jsonl",
+  "industry": "Crypto",
+  "payload": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\crypto\\industry_data-371f51e69ba2b9e4.json",
+  "payload_sha256": "ff3b40ab72aba97cafe60e29b39903fcab86a43c3539085e099699a1c3744dc1",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.db",
+  "snapshot_sha256": "236edefa658732d99ba83d1fe1590217fb6d1e405e9b03b64413e9c0aee51c81",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.source-changes.jsonl",
+  "status": "verified",
+  "unexplained_changes": 0,
+  "version": 1
+}

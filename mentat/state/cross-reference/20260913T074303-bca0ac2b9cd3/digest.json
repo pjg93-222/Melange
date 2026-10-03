@@ -1,0 +1,3648 @@
+{
+  "basis": {
+    "large_cents": 100000000,
+    "large_individual_cents": 10000000,
+    "text": "A receipt is listed as large at $1,000,000.00 or more, or at $100,000.00 or more when an individual sent it; both thresholds are a proposed default and await the owner's ratification."
+  },
+  "counts": {
+    "source_records": 849399
+  },
+  "generated_at": "2026-09-17T15:48:31.490115+00:00",
+  "outliers": {
+    "large": [
+      {
+        "amount": 1058200.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4081420261580995959",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607319899298014"
+      },
+      {
+        "amount": 1000000.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4062520241962512520",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406209652356999"
+      },
+      {
+        "amount": 1000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "entity": "ORG",
+        "record_id": "4092420211371961952",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202109209466753293"
+      },
+      {
+        "amount": 814600.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4050720251189002564",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759047134"
+      },
+      {
+        "amount": 500000.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4031920251180342094",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503189754229323"
+      },
+      {
+        "amount": 225000.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4060420251204801342",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761822592"
+      },
+      {
+        "amount": 175000.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4110520241050881745",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159698191643"
+      },
+      {
+        "amount": 150000.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4062120241961875013",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406209649401518"
+      },
+      {
+        "amount": 135000.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4011320231697805320",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212089550098262"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4032320261425058865",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209853749452"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4032320261425058866",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209853749453"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4032320261425058867",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209853749453"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4051120261509988209",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605089866911381"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4051120261509988258",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605089866911398"
+      },
+      {
+        "amount": 132900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4073020261539816581",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607209894285483"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4092320251291898549",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509209790314000"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4092320251291898550",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509209790314000"
+      },
+      {
+        "amount": 132900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4092320251291898551",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509209790314001"
+      },
+      {
+        "amount": 123900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010620251126152367",
+        "role": "unverified_other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059739446891"
+      },
+      {
+        "amount": 123900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4052920241951140644",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405209646237323"
+      },
+      {
+        "amount": 123900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4052920241951140738",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405209646237355"
+      },
+      {
+        "amount": 123900.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4060420251204841257",
+        "role": "unverified_other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761835899"
+      },
+      {
+        "amount": 100000.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4061120241960471310",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406079648881795"
+      },
+      {
+        "amount": 100000.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4092120221576375905",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202209209528867892"
+      }
+    ],
+    "large_amount": 6949500.0,
+    "large_count": 24,
+    "non_giving": [
+      {
+        "amount": 10000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "LOAN",
+        "record_id": "4032320231737481845",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303219579570231"
+      },
+      {
+        "amount": 5000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "LOAN",
+        "record_id": "4010720251127211385",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412209739975623"
+      },
+      {
+        "amount": 5000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "LOAN",
+        "record_id": "4032320231737748867",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303219579628764"
+      },
+      {
+        "amount": 5000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "LOAN",
+        "record_id": "4032320231737748868",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303219579628764"
+      },
+      {
+        "amount": 5000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "LOAN",
+        "record_id": "4103120241015768730",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410319719899780"
+      },
+      {
+        "amount": 5000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "LOAN",
+        "record_id": "4103120241015768731",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410319719899780"
+      },
+      {
+        "amount": 3000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "LOAN",
+        "record_id": "4010720251127211386",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412209739975623"
+      },
+      {
+        "amount": 2000000.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "LOAN",
+        "record_id": "4010720251127211384",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412209739975623"
+      },
+      {
+        "amount": 837581.88,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "TRUIST BANK STOCK SOLD THROUGH BROKER.",
+        "record_id": "4040620261435149703",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604069856987773"
+      },
+      {
+        "amount": 608896.04,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4090820261595886408",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209903328715"
+      },
+      {
+        "amount": 606046.83,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4071420261533989526",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870958106"
+      },
+      {
+        "amount": 603210.96,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4060220261512109024",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604209866614096"
+      },
+      {
+        "amount": 587896.54,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4081220261580775417",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607209894265391"
+      },
+      {
+        "amount": 585145.6,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4061720261521529990",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605209870174576"
+      },
+      {
+        "amount": 576721.16,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4031620261423644173",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602209837825065"
+      },
+      {
+        "amount": 523692.12,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4032620261425539497",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209853750893"
+      },
+      {
+        "amount": 501033.11,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4022720261359887647",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601319808906875"
+      },
+      {
+        "amount": 481650.59,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4012020261302797809",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901870"
+      },
+      {
+        "amount": 476296.59,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4012020261302797810",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901871"
+      },
+      {
+        "amount": 430103.22,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4012020261302797808",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901870"
+      },
+      {
+        "amount": 429397.9,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4012020261302797811",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901871"
+      },
+      {
+        "amount": 389912.35,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4012020261302797807",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901870"
+      },
+      {
+        "amount": 387602.94,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4081920251218730903",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319789366236"
+      },
+      {
+        "amount": 376233.71,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4081920251218730904",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319789366236"
+      },
+      {
+        "amount": 311305.14,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4022220241826236334",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619445809"
+      },
+      {
+        "amount": 300743.57,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4022220241826236331",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619445808"
+      },
+      {
+        "amount": 280874.93,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4022220241826236347",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619445813"
+      },
+      {
+        "amount": 280501.45,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4022220241826236337",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619445810"
+      },
+      {
+        "amount": 272248.19,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4022220241826236340",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619445811"
+      },
+      {
+        "amount": 264648.73,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON-CONTRIBUTION ACCOUNT",
+        "record_id": "4100320231803800366",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310029597392331"
+      },
+      {
+        "amount": 255322.82,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4022220241826236345",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619445812"
+      },
+      {
+        "amount": 224587.7,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4022820241857731438",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202402209620000728"
+      },
+      {
+        "amount": 212928.35,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4110820241067914486",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202409209684604149"
+      },
+      {
+        "amount": 199741.44,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2026,
+        "description": "NON-CONTRIBUTION: INTEREST",
+        "record_id": "4081920251218730902",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319789366235"
+      },
+      {
+        "amount": 199501.33,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4082820242017001702",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408209666695803"
+      },
+      {
+        "amount": 195633.63,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4120520241074772777",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410319719883215"
+      },
+      {
+        "amount": 194266.87,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4082320242014873402",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408209674341914"
+      },
+      {
+        "amount": 186956.77,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4081320242011874817",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407209665370753"
+      },
+      {
+        "amount": 182845.91,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4090820261595887062",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209903309107"
+      },
+      {
+        "amount": 174723.06,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4062720241962952517",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406209652364625"
+      },
+      {
+        "amount": 171354.96,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4081420242012013244",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407199661426283"
+      },
+      {
+        "amount": 169598.66,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4062720241962978623",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652538467"
+      },
+      {
+        "amount": 168434.84,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4081220261580766424",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607209894307492"
+      },
+      {
+        "amount": 166421.58,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "ADJUSTMENT FOR PAST MUTUAL FUND INVESTMENT ACTIVITY",
+        "record_id": "4092320251292154529",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509239790383568"
+      },
+      {
+        "amount": 163759.04,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4032620241887746333",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403209627377845"
+      },
+      {
+        "amount": 162991.82,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4050920241922678103",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404209633607029"
+      },
+      {
+        "amount": 156626.59,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4062820241963043945",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652528663"
+      },
+      {
+        "amount": 155955.66,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4053020241951319390",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405209648569144"
+      },
+      {
+        "amount": 148223.09,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON-CONTRIBUTION ACCOUNT",
+        "record_id": "4100320231803800365",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310029597392330"
+      },
+      {
+        "amount": 140587.09,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4070120241963131390",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652521038"
+      },
+      {
+        "amount": 136920.38,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4121220241075936730",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410209709511424"
+      },
+      {
+        "amount": 127284.7,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4071820261534797002",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607139874899064"
+      },
+      {
+        "amount": 122226.18,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4103120241015213239",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410259719655677"
+      },
+      {
+        "amount": 110679.04,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4062720241962948409",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652512938"
+      },
+      {
+        "amount": 110386.71,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4063020261523235253",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870940704"
+      },
+      {
+        "amount": 107991.43,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4082720261585274337",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209899773303"
+      },
+      {
+        "amount": 107540.25,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4062720241962938878",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652508759"
+      },
+      {
+        "amount": 106437.15,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4070120261523405673",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606189870715478"
+      },
+      {
+        "amount": 104158.25,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4020620241820716850",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319607952842"
+      },
+      {
+        "amount": 98373.16,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4071020251208108367",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507109762745701"
+      },
+      {
+        "amount": 95679.47,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4081920261584103654",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607209894306566"
+      },
+      {
+        "amount": 95642.85,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4062220261521895107",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605209870140372"
+      },
+      {
+        "amount": 94928.05,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4062920261523093799",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606189870779119"
+      },
+      {
+        "amount": 93522.3,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4072720261538400816",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159875316949"
+      },
+      {
+        "amount": 88308.58,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4052920261511824859",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605209870108721"
+      },
+      {
+        "amount": 88228.61,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4121520231812603665",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312159599472635"
+      },
+      {
+        "amount": 87474.01,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4020920241824321350",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202402089619752236"
+      },
+      {
+        "amount": 87336.39,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2022,
+        "description": "FRAUDULENT FUNDS RECOVERED; SEE DISBURSEMENT TO WIRE FRAUD / CYBER THEFT IN THE AMOUNT OF $87336.39 ON 6/24/22",
+        "record_id": "4110920221616737434",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532616600"
+      },
+      {
+        "amount": 80184.19,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4031620261423662265",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602209837818651"
+      },
+      {
+        "amount": 76921.15,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4111920241070539477",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685653942"
+      },
+      {
+        "amount": 76774.38,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4111920241070539476",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685653942"
+      },
+      {
+        "amount": 75980.76,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4012320251133993318",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059720785424"
+      },
+      {
+        "amount": 75732.37,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4021320251172694895",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319748778922"
+      },
+      {
+        "amount": 75294.06,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4021320251172694893",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319748778922"
+      },
+      {
+        "amount": 75238.3,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "BANK INTEREST",
+        "record_id": "4110820241067800183",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410149685188995"
+      },
+      {
+        "amount": 75190.25,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4080120231759189343",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159582980530"
+      },
+      {
+        "amount": 75173.76,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4111920241070539473",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685653941"
+      },
+      {
+        "amount": 75164.19,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4050720261509769471",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604219866639648"
+      },
+      {
+        "amount": 74944.93,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4060220261512108705",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604209866615264"
+      },
+      {
+        "amount": 74388.96,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4021920261309490922",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602199834783831"
+      },
+      {
+        "amount": 74194.52,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4012320251134645899",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501089740101250"
+      },
+      {
+        "amount": 72596.3,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4082220221565727585",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208199525541216"
+      },
+      {
+        "amount": 71594.03,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4032620261425541768",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209853750796"
+      },
+      {
+        "amount": 71195.84,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4042020231743405423",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580598612"
+      },
+      {
+        "amount": 70908.6,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4111320241068313348",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685547480"
+      },
+      {
+        "amount": 70512.09,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4042920251187865470",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159756057221"
+      },
+      {
+        "amount": 70200.36,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4100820242069254287",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410089684814280"
+      },
+      {
+        "amount": 69518.58,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4072020231755162189",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307149582562824"
+      },
+      {
+        "amount": 69029.78,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4021020231724211488",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202302109578205883"
+      },
+      {
+        "amount": 67945.68,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4111320241068313350",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685547481"
+      },
+      {
+        "amount": 66948.57,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4072720261538400817",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159875316949"
+      },
+      {
+        "amount": 66771.8,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT EARNINGS",
+        "record_id": "4122120231813032194",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599662171"
+      },
+      {
+        "amount": 66393.56,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "NON-CONTRIBUTION ACCOUNT - INTEREST",
+        "record_id": "4082320242014919372",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408219675241962"
+      },
+      {
+        "amount": 66010.43,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CAPITAL GAINS",
+        "record_id": "4011920221388755605",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201189475011772"
+      },
+      {
+        "amount": 65684.84,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4111520241068933569",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685491137"
+      },
+      {
+        "amount": 65681.36,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4111420241068792086",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159686040503"
+      },
+      {
+        "amount": 65618.25,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4012420241816231496",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401249600236123"
+      },
+      {
+        "amount": 65507.23,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "NON-CONTRIBUTION ACCOUNT - INTEREST",
+        "record_id": "4091920242041052971",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202409189675524481"
+      },
+      {
+        "amount": 62813.35,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4051420241923239862",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159632872660"
+      },
+      {
+        "amount": 62555.98,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4072420241978842037",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159659778566"
+      },
+      {
+        "amount": 61802.76,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4071720251209090881",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507169763552836"
+      },
+      {
+        "amount": 61626.19,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4051420241923239857",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159632872659"
+      },
+      {
+        "amount": 61571.68,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4020520241819434754",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319600711242"
+      },
+      {
+        "amount": 60145.16,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4012620231720617725",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301269574977809"
+      },
+      {
+        "amount": 60062.3,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "NONCONTRIBUTION ACCOUNT - INTEREST",
+        "record_id": "4121220241075798644",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202411059719929737"
+      },
+      {
+        "amount": 60052.06,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4072420241978842031",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159659778564"
+      },
+      {
+        "amount": 60000.0,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4081120251215783734",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507159762920438"
+      },
+      {
+        "amount": 58861.61,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "NONCONTRIBUTION ACCOUNT - INTEREST",
+        "record_id": "4092720242042669987",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202409209684214281"
+      },
+      {
+        "amount": 58329.71,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4051420241923239861",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159632872660"
+      },
+      {
+        "amount": 58053.71,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4072220211321890630",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107159451101909"
+      },
+      {
+        "amount": 57584.03,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4072420241978842038",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159659778566"
+      },
+      {
+        "amount": 57478.6,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4012120251133114790",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059739339280"
+      },
+      {
+        "amount": 57109.7,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4042920251187865474",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159756057223"
+      },
+      {
+        "amount": 56269.09,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4121120231812208786",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312099599432706"
+      },
+      {
+        "amount": 56075.26,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "NET INVESTMENT EARNINGS",
+        "record_id": "4042520231744008823",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304149580544043"
+      },
+      {
+        "amount": 56068.15,
+        "company": "US Bank NA",
+        "cycle": 2024,
+        "description": "GAIN ON SALE OF STOCK",
+        "record_id": "4090720231801836014",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202309069596987851"
+      },
+      {
+        "amount": 56049.26,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4121620221637003103",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212089547424230"
+      },
+      {
+        "amount": 55780.41,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "BANK INTEREST",
+        "record_id": "4110820241067800185",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410149685188995"
+      },
+      {
+        "amount": 55579.2,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4072520231756865472",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307199583817357"
+      },
+      {
+        "amount": 54676.23,
+        "company": "US Bank NA",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4010520261299975204",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159790906321"
+      },
+      {
+        "amount": 54616.02,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4020120231721745543",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301319575228448"
+      },
+      {
+        "amount": 54506.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4121120231812208784",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312099599432706"
+      },
+      {
+        "amount": 52817.2,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4041120241889025693",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404119627524189"
+      },
+      {
+        "amount": 52497.85,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4073120251212832884",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507309764367735"
+      },
+      {
+        "amount": 52468.38,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4071720251209090882",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507169763552836"
+      },
+      {
+        "amount": 52418.7,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4040120261434885801",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209853734785"
+      },
+      {
+        "amount": 52210.48,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4121120231812208789",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312099599432707"
+      },
+      {
+        "amount": 51830.35,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4081420261580979146",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607229894417744"
+      },
+      {
+        "amount": 51814.96,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "NON-CONTRIBUTION ACCOUNT - INTEREST",
+        "record_id": "4112720241073902429",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410209709175715"
+      },
+      {
+        "amount": 51770.81,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4020420251142308756",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501309748700619"
+      },
+      {
+        "amount": 51319.54,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CHANGE IN MARKET VALUE",
+        "record_id": "4041020231738696749",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304109579735590"
+      },
+      {
+        "amount": 51246.15,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4120520241074772776",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410319719883214"
+      },
+      {
+        "amount": 50868.42,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "REIMBURSEMENT INTEREST",
+        "record_id": "4031620261423689648",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602209837815812"
+      },
+      {
+        "amount": 50361.06,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4103120241015213238",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410259719655676"
+      },
+      {
+        "amount": 50234.56,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4010720251127211397",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412209739975713"
+      },
+      {
+        "amount": 50203.67,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4082820242017001698",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408209666695802"
+      },
+      {
+        "amount": 50000.0,
+        "company": "Truist Bank",
+        "cycle": 2022,
+        "description": "EQUITY LINE OF CREDIT",
+        "record_id": "4062920221539143249",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202206239517756851"
+      },
+      {
+        "amount": 49193.74,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4061720241960930538",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406149649026668"
+      },
+      {
+        "amount": 49155.18,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "BANK INTEREST",
+        "record_id": "4110820241067800188",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410149685188996"
+      },
+      {
+        "amount": 48729.72,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4020520251143086388",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752322524"
+      },
+      {
+        "amount": 47979.28,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "BANK INTEREST",
+        "record_id": "4082920242017068200",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408299675293359"
+      },
+      {
+        "amount": 47929.35,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "RECOUNT INTEREST INCOME",
+        "record_id": "4120520241074772779",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410319719883215"
+      },
+      {
+        "amount": 47793.28,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4032020241885337845",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403209622524314"
+      },
+      {
+        "amount": 47745.33,
+        "company": "US Bank NA",
+        "cycle": 2024,
+        "description": "INTEREST EARNED",
+        "record_id": "4112020241071317590",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159685480550"
+      },
+      {
+        "amount": 47709.36,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INTEREST INCOME",
+        "record_id": "4022820241858101261",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202402089619735076"
+      },
+      {
+        "amount": 47503.52,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4021920261309490918",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602199834783829"
+      },
+      {
+        "amount": 47288.35,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4021920261309490920",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602199834783830"
+      },
+      {
+        "amount": 47137.07,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "RECOUNT INTEREST INCOME",
+        "record_id": "4082820242017001704",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408209666695805"
+      },
+      {
+        "amount": 47073.1,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4013020261304220237",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601279794213692"
+      },
+      {
+        "amount": 46608.53,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "BANK INTEREST",
+        "record_id": "4082920242017068199",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408299675293359"
+      },
+      {
+        "amount": 46315.87,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CAPITAL GAINS",
+        "record_id": "4012720261303830229",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601219794096382"
+      },
+      {
+        "amount": 45736.87,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4042920251187865465",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159756057220"
+      },
+      {
+        "amount": 45660.56,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4081520242013124229",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408069666087711"
+      },
+      {
+        "amount": 45307.43,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4071720251209090877",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507169763552835"
+      },
+      {
+        "amount": 45076.82,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4021920261309490917",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602199834783829"
+      },
+      {
+        "amount": 44668.44,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "BANK INTEREST",
+        "record_id": "4082920242017068201",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408299675293359"
+      },
+      {
+        "amount": 44471.84,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4021920261309490919",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602199834783830"
+      },
+      {
+        "amount": 44432.8,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4021120261305869429",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309795168848"
+      },
+      {
+        "amount": 44228.2,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4081420242012013243",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407199661426282"
+      },
+      {
+        "amount": 44105.77,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "CSGP STOCK SOLD THROUGH BROKER, PURCHASER UNKNOWN",
+        "record_id": "4051920251202995216",
+        "role": "asset_liquidation",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505199761340433"
+      },
+      {
+        "amount": 43896.94,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4080620251215515419",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507159763509076"
+      },
+      {
+        "amount": 43705.58,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4062720241962978622",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652538465"
+      },
+      {
+        "amount": 43692.87,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4020520251143086396",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752322527"
+      },
+      {
+        "amount": 43555.6,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4062420241961988911",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406209652357726"
+      },
+      {
+        "amount": 43282.96,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4111420241068792090",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159686040504"
+      },
+      {
+        "amount": 43273.86,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4082120261584464256",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608079899415712"
+      },
+      {
+        "amount": 43205.05,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4080120231759189345",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159582980530"
+      },
+      {
+        "amount": 43150.02,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4011420261301760410",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202512199793649969"
+      },
+      {
+        "amount": 43126.79,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4051420241923463397",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404199633497341"
+      },
+      {
+        "amount": 43122.57,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2026,
+        "description": "INVESTMENT ACCOUNT GAIN",
+        "record_id": "4080720261570538263",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159875746637"
+      },
+      {
+        "amount": 43116.6,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "RECOUNT INTEREST INCOME",
+        "record_id": "4081420242012013246",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407199661426283"
+      },
+      {
+        "amount": 43008.49,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4092620242041916368",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202409259684727388"
+      },
+      {
+        "amount": 42933.17,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME; NON CONTRIBUTION ACCOUNT",
+        "record_id": "4021920261309490921",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602199834783830"
+      },
+      {
+        "amount": 42886.95,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "RECOUNT INTEREST INCOME",
+        "record_id": "4062720241962978625",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652538467"
+      },
+      {
+        "amount": 42735.77,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4061120241960457948",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406059648852379"
+      },
+      {
+        "amount": 42691.39,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "INVESTMENT ACCOUNT INTEREST",
+        "record_id": "4061820241961569310",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406149649016418"
+      },
+      {
+        "amount": 42411.19,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4060120261511947304",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604179863156580"
+      },
+      {
+        "amount": 42159.4,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "RECOUNT INTEREST INCOME",
+        "record_id": "4103120241015213241",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410259719655677"
+      },
+      {
+        "amount": 42045.76,
+        "company": "US Bank NA",
+        "cycle": 2022,
+        "description": "GAIN ON SALE OF STOCK",
+        "record_id": "4080320211324367563",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107309452398493"
+      },
+      {
+        "amount": 41985.2,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4061020261521066219",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605199866996965"
+      },
+      {
+        "amount": 41753.03,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4092620242041916371",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202409259684727389"
+      },
+      {
+        "amount": 41550.11,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4020920221406076429",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485365722"
+      },
+      {
+        "amount": 41488.26,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4092620242041916374",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202409259684727390"
+      },
+      {
+        "amount": 41396.49,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4011420261301614340",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202511209792929452"
+      },
+      {
+        "amount": 40537.37,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INTEREST",
+        "record_id": "4121420251298577569",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202511179792617588"
+      },
+      {
+        "amount": 40051.25,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4013020261304220236",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601279794213692"
+      },
+      {
+        "amount": 39860.73,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "PAC INVESTMENT CHANGE IN VALUE",
+        "record_id": "4020920221406076427",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485365722"
+      },
+      {
+        "amount": 39852.43,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4061120241960457952",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406059648852380"
+      },
+      {
+        "amount": 39799.63,
+        "company": "Truist Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4051220261510099875",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857687522"
+      },
+      {
+        "amount": 39089.16,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4032020241885334946",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403199622521738"
+      },
+      {
+        "amount": 38615.72,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INTEREST INCOME",
+        "record_id": "4063020261523199891",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606179870702244"
+      },
+      {
+        "amount": 38577.03,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "HEADQUARTERS INTEREST INCOME",
+        "record_id": "4022420251178346804",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202502209753554795"
+      },
+      {
+        "amount": 38479.56,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT CHANGE IN VALUE",
+        "record_id": "4031220261421079521",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602129834314927"
+      },
+      {
+        "amount": 38383.3,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "RECOUNT INTEREST INCOME",
+        "record_id": "4062820241963043947",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406279652528664"
+      },
+      {
+        "amount": 37927.49,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4080420261549233264",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159880542163"
+      },
+      {
+        "amount": 37739.8,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4013120241818024864",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401309600645894"
+      },
+      {
+        "amount": 37506.15,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "INVESTMENT INCOME",
+        "record_id": "4022020261309750113",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309795275623"
+      },
+      {
+        "amount": 37496.31,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4081520242013147595",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408149666184630"
+      },
+      {
+        "amount": 37443.36,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4051320221484826004",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496297631"
+      },
+      {
+        "amount": 37299.92,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "DIVIDEND INCOME",
+        "record_id": "4080120231759189342",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159582980529"
+      }
+    ],
+    "non_giving_amount": 76500263.92,
+    "non_giving_count": 4778
+  },
+  "refunds": {
+    "linked": [],
+    "linked_amount": 0.0,
+    "linked_count": 0,
+    "unlinked": [
+      {
+        "amount": -183700.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4060420251204801343",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761822593"
+      },
+      {
+        "amount": -45000.0,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "OVER LIMIT TRANSFERRED TO HEADQUARTERS/BUILDING FUND ACCOUNT",
+        "record_id": "4081420242012012826",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407199661426142"
+      },
+      {
+        "amount": -45000.0,
+        "company": "Truist Bank",
+        "cycle": 2024,
+        "description": "OVER LIMIT TRANSFERRED TO LEGAL/RECOUNT FUND ACCOUNT",
+        "record_id": "4081420242012012827",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407199661426142"
+      },
+      {
+        "amount": -6600.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE; REATTRIBUTION / REDESIGNATION REQUESTED",
+        "record_id": "4021620241825260475",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235359"
+      },
+      {
+        "amount": -5800.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2022,
+        "description": "REATTRIBUTE TO SPOUSE",
+        "record_id": "4060320221494294902",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202205299514490697"
+      },
+      {
+        "amount": -5800.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960458090",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860227"
+      },
+      {
+        "amount": -5800.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960458214",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860269"
+      },
+      {
+        "amount": -5000.0,
+        "company": "US Bank NA",
+        "cycle": 2024,
+        "description": "INSUFFICIENT FUNDS",
+        "record_id": "4020220241819127811",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601048125"
+      },
+      {
+        "amount": -5000.0,
+        "company": "Capital One Bank NA",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4050320221474085162",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204199500052764"
+      },
+      {
+        "amount": -5000.0,
+        "company": "Capital One Bank NA",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4052220211296920647",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202105209447037212"
+      },
+      {
+        "amount": -5000.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "CHECK; CONTRIBUTION SHOULD HAVE BEEN CREDITED TO AN INDIVIDUAL.",
+        "record_id": "4060220261512146441",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604219866629326"
+      },
+      {
+        "amount": -5000.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805582248",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598374935"
+      },
+      {
+        "amount": -5000.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805582293",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598374950"
+      },
+      {
+        "amount": -5000.0,
+        "company": "PNC Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805582353",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598374970"
+      },
+      {
+        "amount": -4800.0,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "* REDESIGNATED TO GENERAL 2026",
+        "record_id": "4060320261520042209",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605059866806280"
+      },
+      {
+        "amount": -4180.72,
+        "company": "Capital One Bank NA",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED; CHARGEBACK",
+        "record_id": "4101820242074061688",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159688453486"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4010220261299898287",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791478070"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4010720261300312746",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791454869"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2026,
+        "description": "REDESIGNATION TO PRIMARY RUNOFF, IF ONE OCCURS, OR TO THE GENERAL",
+        "record_id": "4012320261303374926",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601079793919214"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "* REATTRIBUTED TO SPOUSE, ANTIONE BUSSON",
+        "record_id": "4030920261411591121",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601319825672592"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "* REDESIGNATION",
+        "record_id": "4031020261420636802",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601319808843697"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Bank of America NA",
+        "cycle": 2026,
+        "description": "* REDESIGNATED TO GENERAL 2026",
+        "record_id": "4031120261420724321",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601319825642808"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Capital One Bank NA",
+        "cycle": 2026,
+        "description": "* REDESIGNATION",
+        "record_id": "4043020261484962506",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159863083242"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4051120261510003973",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862323121"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO RUNOFF",
+        "record_id": "4051220261510108149",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857288140"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4052820261511748094",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605019866787038"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4062320261522317917",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606109870554529"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2026,
+        "description": "REATTRIBUTION FROM",
+        "record_id": "4071920261534869141",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159890802042"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2026,
+        "description": "* CONTRIBUTION REDESIGNATED TO GENERAL",
+        "record_id": "4072020261534963610",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159890741123"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL; REFUNDED $2900.00 ON 06/08/2025",
+        "record_id": "4072220251209904140",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507159763310475"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4080420261541214439",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159875997890"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4081120261570796978",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159875484817"
+      },
+      {
+        "amount": -3500.0,
+        "company": "Citibank",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4120320251296697698",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510149790790936"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4012320251134471025",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501239747727579"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4020120241818767895",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319607819412"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4020520241819422672",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319607703903"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "* REATTRIBUTED FROM 10/9/24 TO SPOUSE",
+        "record_id": "4021120251167052127",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319749053226"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259161",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234921"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259164",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234922"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259176",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234926"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259179",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234927"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK $270.71 ON 11/18/2023; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259183",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234928"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259186",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234929"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK $270.71 ON 11/18/2023; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259194",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234932"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259289",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234964"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259314",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234972"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259321",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601234974"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259480",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235027"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259757",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235120"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259798",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235133"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259841",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235148"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259845",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235149"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259862",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235155"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259887",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235163"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK $270.71 ON 11/18/2023; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825259924",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235175"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260006",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235203"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260018",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235207"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260021",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235208"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260027",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235210"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260049",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235217"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260055",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235219"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260097",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235233"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260146",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235249"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK $270.71 ON 11/18/2023; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260158",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235253"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260173",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235258"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260291",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235298"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260295",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235299"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL; REATTRIBUTION / REDESIGNATION REQUESTED",
+        "record_id": "4021620241825260476",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235359"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260513",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235372"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825260677",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235426"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE; REATTRIBUTION / REDESIGNATION REQUESTED",
+        "record_id": "4021620241825260912",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235505"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4021620241825261008",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319601235537"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4022120241825584774",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319618814012"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2028",
+        "record_id": "4022220241825994910",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619450466"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2028",
+        "record_id": "4022220241825995093",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619450527"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "RETURN TO JFC: TIM SCOTT VICTORY FUND; SEE SB18.978715",
+        "record_id": "4022220241826007932",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319619454807"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4022720241857398174",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202402229622213477"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4030820241884553686",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403079622346452"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4030820241884554123",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403079622346598"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4031520241885040916",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403129622396615"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4041820241896857512",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404129627603839"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4042020231743405092",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304149580486174"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4042520241911372655",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627794102"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4050220241921324276",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159633201656"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050620241921742227",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627967561"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4050620241921742229",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627967561"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050720241921804514",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627837671"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Capital One Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050820241922049771",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627959892"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050820241922064957",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627703221"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4050820241922165641",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627900242"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050820241922166490",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202404159627992443"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4051620241949493845",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405029636881641"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4052920241951259073",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405299648785399"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4062520241962354355",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406209652421143"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4070920241972634554",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407099652743845"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4070920241972634588",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407099652743857"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4070920241972634639",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407099652743874"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4070920241972639341",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407099652745441"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4070920241972639343",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407099652745442"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071820231753783094",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583527857"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071820231753783233",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583527903"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071820231753785201",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583528559"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071820231753785249",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583528575"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071820231753848865",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583094930"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4071820231753850690",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583095538"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4071920231754551616",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583596558"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED; CHARGEBACK",
+        "record_id": "4080820242011352243",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159660698596"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4081320251217565580",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202508069789392538"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4081520231788217418",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202308119596536269"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4100120242066952874",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202409209683586458"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4101820231805480909",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310139597737834"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805534327",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598358961"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4101820231805534329",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598358961"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805534332",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598358962"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805546617",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598363057"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Citibank",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805549376",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598363977"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805550366",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598364307"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805560614",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598367723"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805565538",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598369364"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4101820231805565540",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598369365"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4101820231805566104",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598369553"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO PRIMARY 2024",
+        "record_id": "4101820231805581920",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598374825"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4101820231805581966",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202310159598374840"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Bank of America NA",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4102320242076895277",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410189698975850"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4102320242077077776",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410189699036683"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4103120241015829880",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159686643037"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4121120241075675811",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202411189719989412"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4121320231812293027",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312079599395300"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "TRANSFER; TRANSFER FROM TEAM SFA",
+        "record_id": "4121320231812318171",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312079599403682"
+      },
+      {
+        "amount": -3300.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE; DEBT RETIREMENT",
+        "record_id": "4123020251299790849",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791162982"
+      },
+      {
+        "amount": -3000.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2024,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4041720231742700847",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304149580486417"
+      },
+      {
+        "amount": -3000.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4073020251212540264",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507159763384067"
+      },
+      {
+        "amount": -3000.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; DEBIT",
+        "record_id": "4120220211380417625",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202111249469513851"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4012520221389237514",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201109474927802"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4012520221389237619",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201109474927837"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4012520221389255441",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201109474933778"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4012820221403441566",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201249475112425"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4030120221453732327",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485713586"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Truist Bank",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4031420231734363927",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303139579006875"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4031420231734363953",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303139579006884"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "* SEE REDESIGNATION TO AUGUST 23RD PRIMARY",
+        "record_id": "4032220241885498092",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403219627379634"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4032420221464108388",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203249495894674"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO OTHER",
+        "record_id": "4032920241888318662",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414246"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO OTHER",
+        "record_id": "4032920241888318671",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414248"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO OTHER",
+        "record_id": "4032920241888318824",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414282"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REFUND TO BE ISSUED; REDESIGNATION TO OTHER",
+        "record_id": "4032920241888318893",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414297"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4032920241888320227",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414687"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4032920241888320250",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414694"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4032920241888320253",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414695"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4032920241888320264",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414699"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4032920241888320269",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414701"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4032920241888320273",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414702"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4032920241888320350",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414817"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4032920241888320374",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403269627414825"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4042720221472839618",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204219502248505"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "REDESIGNATION TO GENERAL",
+        "record_id": "4050420221474441970",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496784166"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050920221475192411",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496891685"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4050920221475960290",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496629446"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050920221475988563",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496629572"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050920221475991074",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496412896"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4050920221475992441",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496307698"
+      },
+      {
+        "amount": -2900.0,
+        "company": "PNC Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4051220221481097079",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496827878"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4051220231747182450",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202305119581437270"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4060120221494164999",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202205269514408636"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATE FROM P2022 TO G2022",
+        "record_id": "4060320221494294901",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202205299514490697"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "REDESIGNATE FROM P2022 TO G2022",
+        "record_id": "4060320221494295258",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202205299514490816"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458079",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860224"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458091",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860228"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960458104",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860232"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458115",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860236"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960458118",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860237"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458165",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860252"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458199",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860264"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458215",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860269"
+      },
+      {
+        "amount": -2900.0,
+        "company": "PNC Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960458248",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860280"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458344",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860312"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960458426",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860339"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458500",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860364"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960458598",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860397"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4061120241960458791",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860461"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; US CITIZEN; REATTRIBUTION TO SPOUSE",
+        "record_id": "4061120241960459817",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860803"
+      },
+      {
+        "amount": -2900.0,
+        "company": "JP Morgan Chase Bank NA",
+        "cycle": 2022,
+        "description": "* REDESIGNATED TO GENERAL 2022",
+        "record_id": "4071720211320911216",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107149451080266"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "EARMARKED THROUGH WINRED [SA11A1.7286]-CHARGEBACK",
+        "record_id": "4071720221540825798",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159521631178"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4072020221541763442",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207129518375126"
+      },
+      {
+        "amount": -2900.0,
+        "company": "PNC Bank NA",
+        "cycle": 2022,
+        "description": "GENERAL CONTRIBUTION REFUND; GENERAL CONTRIBUTION REFUND",
+        "record_id": "4072920221553487300",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518687352"
+      },
+      {
+        "amount": -2900.0,
+        "company": "PNC Bank NA",
+        "cycle": 2022,
+        "description": "GENERAL CONTRIBUTION REFUND; GENERAL CONTRIBUTION REFUND",
+        "record_id": "4072920221553487350",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518687368"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "REATTRIBUTE FROM MICHAEL LANDOLT TO ANN WISMER",
+        "record_id": "4080320221553991364",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208019525109619"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2022,
+        "description": "REATTRIBUTION FROM",
+        "record_id": "4081020211325012807",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107159451591113"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4102720211375864361",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467877732"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Citibank",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; REDESIGNATION TO GENERAL",
+        "record_id": "4110520211377246581",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467444069"
+      },
+      {
+        "amount": -2900.0,
+        "company": "US Bank NA",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4110620211377354212",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467591990"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "* REDESIGNATED TO GENERAL 2022",
+        "record_id": "4111020211378212331",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110229468346938"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Morgan Stanley Bank",
+        "cycle": 2022,
+        "description": "* REDESIGNATED TO GENERAL 2022",
+        "record_id": "4111020211378212489",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110229468346991"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REDESIGNATION FROM",
+        "record_id": "4120820221633658270",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211109546750794"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REATTRIBUTION FROM",
+        "record_id": "4120820221633658272",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211109546750794"
+      },
+      {
+        "amount": -2900.0,
+        "company": "Goldman Sachs Bank NA",
+        "cycle": 2022,
+        "description": "REATTRIBUTION FROM",
+        "record_id": "4120820221633658273",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211109546750795"
+      },
+      {
+        "amount": -2800.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "TRANSFER; TRANSFER FROM YOUNG VICTORY COMMITTEE 2",
+        "record_id": "4013120231721604887",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301309575191034"
+      },
+      {
+        "amount": -2800.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4042320211278857511",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202104159443592539"
+      },
+      {
+        "amount": -2800.0,
+        "company": "Bank of America NA",
+        "cycle": 2022,
+        "description": "EARMARKED THROUGH WINRED [SA11AI.4132]: CHARGEBACK",
+        "record_id": "4062420211311503647",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202106179449390647"
+      },
+      {
+        "amount": -2800.0,
+        "company": "Wells Fargo Bank NA",
+        "cycle": 2024,
+        "description": "REDESIGNATED CONTRIBUTION",
+        "record_id": "4080620242011069563",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159660024403"
+      }
+    ],
+    "unlinked_amount": -1127074.41,
+    "unlinked_count": 641
+  },
+  "run_id": "20260913T074303-bca0ac2b9cd3",
+  "schema_version": 1
+}

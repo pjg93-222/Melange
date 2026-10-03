@@ -1,0 +1,3 @@
+# The repository ignores *.json globally (generated data). In this folder the schemas, the shared example payloads and the
+# negative controls are the contract between lanes (brain DE-021): source of truth, tracked.
+!*.json

@@ -1,0 +1,3 @@
+2026-09-24 13:09:03 prewarm[37336] plan (start): 0 tasks, 0 pending; {}
+2026-09-24 13:09:48 prewarm[37336] exit: parent_gone: Parent console pid 59412 is gone.
+{"status": "success", "summary": "Warmer exited: Parent console pid 59412 is gone.", "next_actions": ["exit cleanly; the console that launched this warmer is gone"], "artifacts": ["C:\\Users\\pgoff\\Mentat\\mentat\\state\\prewarm\\ledger.jsonl", "C:\\Users\\pgoff\\Mentat\\mentat\\state\\prewarm\\plan.json"], "metrics": {"executed": 0, "succeeded": 0, "failed": 0, "quarantined_now": [], "run_id": "prewarm-20260924T170848Z-37336", "plan_counts": {}, "root_cause_hint": "parent_gone", "retry": "do not retry", "op_seconds": 60.27}}

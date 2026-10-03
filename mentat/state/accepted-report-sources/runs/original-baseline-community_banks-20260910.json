@@ -1,0 +1,32 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026",
+  "baseline_token": null,
+  "changed_decisions": 4649,
+  "counts": {
+    "added": 4649,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\tmp\\production-all-20260728T204300\\runs\\20260728T204315-41296\\industries\\community-banks\\data\\mentat.db",
+  "database_sha256": "42b733201efff95404e9cc89e237d0d1b1655775f1b3d9ebd0b14ae256b42edc",
+  "delta_cents": 86350598,
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026",
+  "dollar_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.dollar-changes.jsonl",
+  "industry": "Community Banks",
+  "payload": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\community_banks\\industry_data-42b733201efff954.json",
+  "payload_sha256": "32def575daa055e013a79d42118a0dc42fd6d12e80d573904a2ab48dffd922d6",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.db",
+  "snapshot_sha256": "7a01045cbb18482d892b1a022336c199aab047b2cbf9dc4139ab5fa792c7a29c",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.source-changes.jsonl",
+  "status": "verified",
+  "unexplained_changes": 0,
+  "version": 1
+}

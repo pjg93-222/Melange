@@ -1,0 +1,32 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\telecom\\2022-2024-2026",
+  "baseline_token": null,
+  "changed_decisions": 808066,
+  "counts": {
+    "added": 808066,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\tmp\\production-remaining-10lane-20260729T1235\\runs\\20260729T123437-15692\\industries\\telecom\\data\\mentat.db",
+  "database_sha256": "34ef41793b3ab4c970e2d913ea7b42d50766b6c8f1430b40adbd9b0f8bd06d15",
+  "delta_cents": 3769812109,
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\telecom\\2022-2024-2026",
+  "dollar_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\telecom\\2022-2024-2026\\778185604b1e45be8bb7c6b76611e59d.dollar-changes.jsonl",
+  "industry": "Telecom",
+  "payload": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\telecom\\industry_data-34ef41793b3ab4c9.json",
+  "payload_sha256": "f37e976021a265f30bfa191e66de344bb68f7cddcc08ec1023aa82a0265c9bd6",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\telecom\\2022-2024-2026\\778185604b1e45be8bb7c6b76611e59d.db",
+  "snapshot_sha256": "9cc81b88aac591799be2ff48cada19a21799f32e56bd42d8c4e80d5f70557056",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\telecom\\2022-2024-2026\\778185604b1e45be8bb7c6b76611e59d.source-changes.jsonl",
+  "status": "blocked",
+  "unexplained_changes": 505794,
+  "version": 1
+}

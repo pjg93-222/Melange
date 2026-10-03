@@ -1,0 +1,2522 @@
+[
+  {
+    "request_index": 0,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SEAWATER SYSTEMS"
+  },
+  {
+    "request_index": 1,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:STRIECINC"
+  },
+  {
+    "request_index": 2,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR TRANSPORTATION"
+  },
+  {
+    "request_index": 3,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ASPIRE LOYAL"
+  },
+  {
+    "request_index": 4,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BILLING"
+  },
+  {
+    "request_index": 5,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 6,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 7,
+    "status": "rejected",
+    "reason": "junk_employer:SELF"
+  },
+  {
+    "request_index": 8,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:GENERAL CONTRACTING"
+  },
+  {
+    "request_index": 9,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:GENERAL CONTRACTING"
+  },
+  {
+    "request_index": 10,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAKING EQUIPMENT"
+  },
+  {
+    "request_index": 11,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OBSERVATORY"
+  },
+  {
+    "request_index": 12,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 13,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 14,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INDISTRIES"
+  },
+  {
+    "request_index": 15,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INDUSTRIES"
+  },
+  {
+    "request_index": 16,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 17,
+    "status": "rejected",
+    "reason": "junk_employer:RETIRED"
+  },
+  {
+    "request_index": 18,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 19,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 20,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PROPERTIES"
+  },
+  {
+    "request_index": 21,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 22,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 23,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 24,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PROPERTIES"
+  },
+  {
+    "request_index": 25,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:14"
+  },
+  {
+    "request_index": 26,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MFG"
+  },
+  {
+    "request_index": 27,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRANSPORT L L C"
+  },
+  {
+    "request_index": 28,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:IND SUPPLY"
+  },
+  {
+    "request_index": 29,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 30,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 31,
+    "status": "rejected",
+    "reason": "junk_employer:SELF EMPLOYED"
+  },
+  {
+    "request_index": 32,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:JANITORIAL SERVICES"
+  },
+  {
+    "request_index": 33,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FISHING"
+  },
+  {
+    "request_index": 34,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 35,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMAND"
+  },
+  {
+    "request_index": 36,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 37,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DOGS"
+  },
+  {
+    "request_index": 38,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:COMMERCE"
+  },
+  {
+    "request_index": 39,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 40,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DIGITAL TWIN"
+  },
+  {
+    "request_index": 41,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:DT"
+  },
+  {
+    "request_index": 42,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SAW"
+  },
+  {
+    "request_index": 43,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:POOL SPA"
+  },
+  {
+    "request_index": 44,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MECHANICAL"
+  },
+  {
+    "request_index": 45,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 46,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INVESTORS"
+  },
+  {
+    "request_index": 47,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:14"
+  },
+  {
+    "request_index": 48,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:PROPERTIES"
+  },
+  {
+    "request_index": 49,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:MOTORTRANSPORT"
+  },
+  {
+    "request_index": 50,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PLUMBING"
+  },
+  {
+    "request_index": 51,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:WEB DEVELOPMENT"
+  },
+  {
+    "request_index": 52,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PLASTICS"
+  },
+  {
+    "request_index": 53,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PLUMBING"
+  },
+  {
+    "request_index": 54,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 55,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DOGS"
+  },
+  {
+    "request_index": 56,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 57,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:HITS"
+  },
+  {
+    "request_index": 58,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 59,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 60,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 61,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 62,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 63,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INVESTORS"
+  },
+  {
+    "request_index": 64,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:POWER SYSTEMS"
+  },
+  {
+    "request_index": 65,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRAVEL"
+  },
+  {
+    "request_index": 66,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LIGHTING"
+  },
+  {
+    "request_index": 67,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAY"
+  },
+  {
+    "request_index": 68,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 69,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 70,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR TRANS"
+  },
+  {
+    "request_index": 71,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 72,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SAW"
+  },
+  {
+    "request_index": 73,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 74,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:3"
+  },
+  {
+    "request_index": 75,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:XIII"
+  },
+  {
+    "request_index": 76,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:AUDIO VIDEO"
+  },
+  {
+    "request_index": 77,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 78,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 79,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FINANCIAL ADVISORS"
+  },
+  {
+    "request_index": 80,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 81,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 82,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:TATTOO"
+  },
+  {
+    "request_index": 83,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 84,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DATA"
+  },
+  {
+    "request_index": 85,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DATA"
+  },
+  {
+    "request_index": 86,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR TRANS"
+  },
+  {
+    "request_index": 87,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:BITCOINCRAIGCOM"
+  },
+  {
+    "request_index": 88,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 89,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:COMMUNICATION"
+  },
+  {
+    "request_index": 90,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:RISK PARTNER"
+  },
+  {
+    "request_index": 91,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ADVISORY"
+  },
+  {
+    "request_index": 92,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FOODS"
+  },
+  {
+    "request_index": 93,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 94,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OIL GAS"
+  },
+  {
+    "request_index": 95,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SOFT"
+  },
+  {
+    "request_index": 96,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DOGS"
+  },
+  {
+    "request_index": 97,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FORMS SYSTEMS"
+  },
+  {
+    "request_index": 98,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:WATER"
+  },
+  {
+    "request_index": 99,
+    "status": "rejected",
+    "reason": "blank_employer"
+  },
+  {
+    "request_index": 100,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:WATER"
+  },
+  {
+    "request_index": 101,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 102,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 103,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 104,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 105,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 106,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 107,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 108,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 109,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DENTAL LABORATORY"
+  },
+  {
+    "request_index": 110,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:IND"
+  },
+  {
+    "request_index": 111,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 112,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:GEL AT JONI WEYL"
+  },
+  {
+    "request_index": 113,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ENT"
+  },
+  {
+    "request_index": 114,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 115,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 116,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 117,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 118,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 119,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 120,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DIVERSIFIED SERVICE"
+  },
+  {
+    "request_index": 121,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 122,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 123,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 124,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OBSERVATORY"
+  },
+  {
+    "request_index": 125,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:COMPUTER GROUP"
+  },
+  {
+    "request_index": 126,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 127,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 128,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 129,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 130,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ENERGY SOLUTIONS"
+  },
+  {
+    "request_index": 131,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 132,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MUSIC"
+  },
+  {
+    "request_index": 133,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 134,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PROFESSIONAL SERVICES"
+  },
+  {
+    "request_index": 135,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 136,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 137,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 138,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MEDIA GROUP"
+  },
+  {
+    "request_index": 139,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAKERY EQUIPMENT"
+  },
+  {
+    "request_index": 140,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:BIO"
+  },
+  {
+    "request_index": 141,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FUTURES"
+  },
+  {
+    "request_index": 142,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 143,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:AMS"
+  },
+  {
+    "request_index": 144,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:G E L AT JONI WEYL"
+  },
+  {
+    "request_index": 145,
+    "status": "rejected",
+    "reason": "junk_employer:SELF"
+  },
+  {
+    "request_index": 146,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 147,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 148,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:EXECUTIVE COACHING"
+  },
+  {
+    "request_index": 149,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CHICAGO"
+  },
+  {
+    "request_index": 150,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:HAIR STUDIO"
+  },
+  {
+    "request_index": 151,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 152,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 153,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRANSPORTATION UNDERWRITERS"
+  },
+  {
+    "request_index": 154,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 155,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 156,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:UNLIMITED"
+  },
+  {
+    "request_index": 157,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FRAMING"
+  },
+  {
+    "request_index": 158,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FISH"
+  },
+  {
+    "request_index": 159,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DATA"
+  },
+  {
+    "request_index": 160,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 161,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 162,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 163,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DOGS"
+  },
+  {
+    "request_index": 164,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 165,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:14"
+  },
+  {
+    "request_index": 166,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 167,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 168,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 169,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:G E L"
+  },
+  {
+    "request_index": 170,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 171,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 172,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:3 GROUP"
+  },
+  {
+    "request_index": 173,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LSV"
+  },
+  {
+    "request_index": 174,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 175,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 176,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OUTDOOR ADV"
+  },
+  {
+    "request_index": 177,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 178,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 179,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ARENA"
+  },
+  {
+    "request_index": 180,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FRAMING"
+  },
+  {
+    "request_index": 181,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SALON AND DAY SPA"
+  },
+  {
+    "request_index": 182,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 183,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:E LABS"
+  },
+  {
+    "request_index": 184,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 185,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 186,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:IT"
+  },
+  {
+    "request_index": 187,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOUNTAIN"
+  },
+  {
+    "request_index": 188,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:YACHT CHARTERS"
+  },
+  {
+    "request_index": 189,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MTN MEDICAL"
+  },
+  {
+    "request_index": 190,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FOOD"
+  },
+  {
+    "request_index": 191,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DEVELOPMENT"
+  },
+  {
+    "request_index": 192,
+    "status": "rejected",
+    "reason": "junk_employer:RETIRED"
+  },
+  {
+    "request_index": 193,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:EROSION"
+  },
+  {
+    "request_index": 194,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SHIPPERS GROUP"
+  },
+  {
+    "request_index": 195,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:HITS"
+  },
+  {
+    "request_index": 196,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DOGS"
+  },
+  {
+    "request_index": 197,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 198,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROOFING CONTRACTING"
+  },
+  {
+    "request_index": 199,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 200,
+    "status": "rejected",
+    "reason": "junk_employer:SELF"
+  },
+  {
+    "request_index": 201,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 202,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 203,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 204,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 205,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TWIN CONSULTING"
+  },
+  {
+    "request_index": 206,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 207,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FRAMING"
+  },
+  {
+    "request_index": 208,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 209,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 210,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 211,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRAVREL"
+  },
+  {
+    "request_index": 212,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 213,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 214,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INDUSTRIES"
+  },
+  {
+    "request_index": 215,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 216,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 217,
+    "status": "rejected",
+    "reason": "junk_employer:SELF"
+  },
+  {
+    "request_index": 218,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 219,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SCIENTIFIC"
+  },
+  {
+    "request_index": 220,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 221,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAKING EQUIPMENT"
+  },
+  {
+    "request_index": 222,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 223,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 224,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 225,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FISHING"
+  },
+  {
+    "request_index": 226,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 227,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 228,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 229,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 230,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DIAGNOSTICS"
+  },
+  {
+    "request_index": 231,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:3"
+  },
+  {
+    "request_index": 232,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 233,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OBSERVATORY"
+  },
+  {
+    "request_index": 234,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 235,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 236,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 237,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BOND AND MAINTENANCE"
+  },
+  {
+    "request_index": 238,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 239,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:AUDIO VIDEOO"
+  },
+  {
+    "request_index": 240,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:3 GROUP"
+  },
+  {
+    "request_index": 241,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 242,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 243,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PLASTICS"
+  },
+  {
+    "request_index": 244,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OF CHICAGO"
+  },
+  {
+    "request_index": 245,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OBSERVATORY"
+  },
+  {
+    "request_index": 246,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FUND SERVICES"
+  },
+  {
+    "request_index": 247,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 248,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:RECOVERY CENTERS"
+  },
+  {
+    "request_index": 249,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 250,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MEDIA GROUP"
+  },
+  {
+    "request_index": 251,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 252,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 253,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:COLLECTIBLES"
+  },
+  {
+    "request_index": 254,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 255,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:IND"
+  },
+  {
+    "request_index": 256,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MANAGERS"
+  },
+  {
+    "request_index": 257,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SPACESHIP"
+  },
+  {
+    "request_index": 258,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DIVERSIFIED SERVICE"
+  },
+  {
+    "request_index": 259,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 260,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BUSINESS SOLUTIONS"
+  },
+  {
+    "request_index": 261,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 262,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TECHNOLIGIES"
+  },
+  {
+    "request_index": 263,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:RISING MUSIC"
+  },
+  {
+    "request_index": 264,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRAVEL"
+  },
+  {
+    "request_index": 265,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CANVAS"
+  },
+  {
+    "request_index": 266,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:HEALTH"
+  },
+  {
+    "request_index": 267,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRANSPORTATION"
+  },
+  {
+    "request_index": 268,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 269,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAKERY SOLUTIONS"
+  },
+  {
+    "request_index": 270,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 271,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 272,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DISPLAYS"
+  },
+  {
+    "request_index": 273,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:VIA MAGNIT GLOBAL"
+  },
+  {
+    "request_index": 274,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 275,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT COMMERCIAL REAL ESTATE"
+  },
+  {
+    "request_index": 276,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TOOL AND MFG"
+  },
+  {
+    "request_index": 277,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CAFE"
+  },
+  {
+    "request_index": 278,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:HAIR STUDIO"
+  },
+  {
+    "request_index": 279,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:3 GROUP"
+  },
+  {
+    "request_index": 280,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:WEALTH GROUP"
+  },
+  {
+    "request_index": 281,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ARENA"
+  },
+  {
+    "request_index": 282,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:WEB DEVELOPMENT"
+  },
+  {
+    "request_index": 283,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ADVISORY SERVICES"
+  },
+  {
+    "request_index": 284,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 285,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 286,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INVESTMENT HOLDINGS"
+  },
+  {
+    "request_index": 287,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DIGITAL ASSET EXCHANGE"
+  },
+  {
+    "request_index": 288,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:HEALTH"
+  },
+  {
+    "request_index": 289,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DESIGN GROUP"
+  },
+  {
+    "request_index": 290,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FUTURES"
+  },
+  {
+    "request_index": 291,
+    "status": "review",
+    "reason": "ambiguous_brand_home_state_manual_trade"
+  },
+  {
+    "request_index": 292,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 293,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PLUS"
+  },
+  {
+    "request_index": 294,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT DEVELOPMENT"
+  },
+  {
+    "request_index": 295,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ARENA PEACOCK THEATER"
+  },
+  {
+    "request_index": 296,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FINANCIAL"
+  },
+  {
+    "request_index": 297,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:IND SUPPLY"
+  },
+  {
+    "request_index": 298,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DOGS"
+  },
+  {
+    "request_index": 299,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 300,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:STRATEGIES"
+  },
+  {
+    "request_index": 301,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DISPLAYS"
+  },
+  {
+    "request_index": 302,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LAW"
+  },
+  {
+    "request_index": 303,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DOGS"
+  },
+  {
+    "request_index": 304,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INDUSTRIES"
+  },
+  {
+    "request_index": 305,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INSURANCE"
+  },
+  {
+    "request_index": 306,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MANAGER"
+  },
+  {
+    "request_index": 307,
+    "status": "rejected",
+    "reason": "junk_employer:INFORMATION REQUESTED"
+  },
+  {
+    "request_index": 308,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:AUDIO VIDEO"
+  },
+  {
+    "request_index": 309,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:FLEX"
+  },
+  {
+    "request_index": 310,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 311,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FOOD"
+  },
+  {
+    "request_index": 312,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:KRATOM"
+  },
+  {
+    "request_index": 313,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 314,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ENT"
+  },
+  {
+    "request_index": 315,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 316,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:REAL ESTATE"
+  },
+  {
+    "request_index": 317,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 318,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAY"
+  },
+  {
+    "request_index": 319,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 320,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 321,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 322,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 323,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INS AGENCY"
+  },
+  {
+    "request_index": 324,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PLASTICS"
+  },
+  {
+    "request_index": 325,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 326,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 327,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DIVERSIFIED SERVICES"
+  },
+  {
+    "request_index": 328,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 329,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR TRANS"
+  },
+  {
+    "request_index": 330,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 331,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INDUSTRIED"
+  },
+  {
+    "request_index": 332,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 333,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ENTERPRISES"
+  },
+  {
+    "request_index": 334,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 335,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INDUSTRIES"
+  },
+  {
+    "request_index": 336,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TWIN CONSULTING"
+  },
+  {
+    "request_index": 337,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ADVISORY SERVICES"
+  },
+  {
+    "request_index": 338,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 339,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 340,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 341,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 342,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 343,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR TRANS"
+  },
+  {
+    "request_index": 344,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:KINETICS"
+  },
+  {
+    "request_index": 345,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:UNLIMITED"
+  },
+  {
+    "request_index": 346,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 347,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 348,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SHIPPERS GROUP"
+  },
+  {
+    "request_index": 349,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 350,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:WATER"
+  },
+  {
+    "request_index": 351,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 352,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAKERY EQUIPMENT"
+  },
+  {
+    "request_index": 353,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 354,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 355,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PROPERTIES"
+  },
+  {
+    "request_index": 356,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAKERY EQUIPMENT"
+  },
+  {
+    "request_index": 357,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:RESOURCES"
+  },
+  {
+    "request_index": 358,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 359,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 360,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:HEALTHCARE"
+  },
+  {
+    "request_index": 361,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:KINETICS"
+  },
+  {
+    "request_index": 362,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:FINANCIAL ADVISORS"
+  },
+  {
+    "request_index": 363,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:UNLIMITED"
+  },
+  {
+    "request_index": 364,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:THERAPEUTICS"
+  },
+  {
+    "request_index": 365,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 366,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 367,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 368,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 369,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 370,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 371,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 372,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PROFESSIONAL SERVICES"
+  },
+  {
+    "request_index": 373,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MEDICAL TECHNOLOGIES"
+  },
+  {
+    "request_index": 374,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 375,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 376,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:GEL AT JONI WEYL"
+  },
+  {
+    "request_index": 377,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 378,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:JANITORIAL SERVICES"
+  },
+  {
+    "request_index": 379,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INNOVATIONS"
+  },
+  {
+    "request_index": 380,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 381,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:WEALTH GROUP"
+  },
+  {
+    "request_index": 382,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:GENERAL CONTRACTING"
+  },
+  {
+    "request_index": 383,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 384,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CREATIVE AGENCY"
+  },
+  {
+    "request_index": 385,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 386,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:EXPRESS"
+  },
+  {
+    "request_index": 387,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 388,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OBSERVATORY"
+  },
+  {
+    "request_index": 389,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 390,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:3"
+  },
+  {
+    "request_index": 391,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ATHLETIC WEAR"
+  },
+  {
+    "request_index": 392,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 393,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 394,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 395,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 396,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 397,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 398,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DESIGN GROUP"
+  },
+  {
+    "request_index": 399,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ADVANCED MARKETING SOLUTIONS"
+  },
+  {
+    "request_index": 400,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 401,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INVESTORS"
+  },
+  {
+    "request_index": 402,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:JANITORIAL SERVICES"
+  },
+  {
+    "request_index": 403,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 404,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR"
+  },
+  {
+    "request_index": 405,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRANSPORT"
+  },
+  {
+    "request_index": 406,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 407,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DATA"
+  },
+  {
+    "request_index": 408,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:AEG"
+  },
+  {
+    "request_index": 409,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MUSIC"
+  },
+  {
+    "request_index": 410,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ENERGY"
+  },
+  {
+    "request_index": 411,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 412,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 413,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 414,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SOUL"
+  },
+  {
+    "request_index": 415,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 416,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 417,
+    "status": "review",
+    "reason": "squashed_prefix_unverified_remainder:SBEAUTYSALON"
+  },
+  {
+    "request_index": 418,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CONSULTING SERVICES"
+  },
+  {
+    "request_index": 419,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 420,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 421,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 422,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 423,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OBSERVATORY"
+  },
+  {
+    "request_index": 424,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 425,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 426,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TECHNOLOGIES JAPAN"
+  },
+  {
+    "request_index": 427,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:DESIGN"
+  },
+  {
+    "request_index": 428,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT COMMERCIAL REAL ESTATE"
+  },
+  {
+    "request_index": 429,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 430,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 431,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAY"
+  },
+  {
+    "request_index": 432,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 433,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 434,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PROPERTY MANAGEMENT"
+  },
+  {
+    "request_index": 435,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:POOL AND SPA"
+  },
+  {
+    "request_index": 436,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTORTRANSPORT"
+  },
+  {
+    "request_index": 437,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CHIROPRACTIC"
+  },
+  {
+    "request_index": 438,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:RESOURCES"
+  },
+  {
+    "request_index": 439,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRANSPORTATION"
+  },
+  {
+    "request_index": 440,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LOGISTICS OF NORTH FLORIDA"
+  },
+  {
+    "request_index": 441,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:IND"
+  },
+  {
+    "request_index": 442,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CONSTRUCTION"
+  },
+  {
+    "request_index": 443,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CAP LIMITED GROUP"
+  },
+  {
+    "request_index": 444,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR"
+  },
+  {
+    "request_index": 445,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PLASTICS"
+  },
+  {
+    "request_index": 446,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 447,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 448,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CREATIVE"
+  },
+  {
+    "request_index": 449,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 450,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:OBSERVATORY"
+  },
+  {
+    "request_index": 451,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:EYE CARE"
+  },
+  {
+    "request_index": 452,
+    "status": "rejected",
+    "reason": "ambiguous_brand_non_home_state_manual_trade"
+  },
+  {
+    "request_index": 453,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 454,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:XIII"
+  },
+  {
+    "request_index": 455,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL SUPPORT"
+  },
+  {
+    "request_index": 456,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:MOTOR"
+  },
+  {
+    "request_index": 457,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 458,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:SIGN"
+  },
+  {
+    "request_index": 459,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL"
+  },
+  {
+    "request_index": 460,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ENTERPRISES"
+  },
+  {
+    "request_index": 461,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:HEALTH WELLNESS"
+  },
+  {
+    "request_index": 462,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 463,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:HAIR DESIGN STUDIO AND SPA"
+  },
+  {
+    "request_index": 464,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:POWER SYSTEMS"
+  },
+  {
+    "request_index": 465,
+    "status": "rejected",
+    "reason": "junk_employer:SELF EMPLOYED"
+  },
+  {
+    "request_index": 466,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:XIII"
+  },
+  {
+    "request_index": 467,
+    "status": "rejected",
+    "reason": "junk_employer:RETIRED"
+  },
+  {
+    "request_index": 468,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BOOKKEEPING SERVICES"
+  },
+  {
+    "request_index": 469,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 470,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 471,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 472,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TECHNICAL SERVICES"
+  },
+  {
+    "request_index": 473,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:INDUSTRIES"
+  },
+  {
+    "request_index": 474,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 475,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 476,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT"
+  },
+  {
+    "request_index": 477,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:LEGAL SUPPORT"
+  },
+  {
+    "request_index": 478,
+    "status": "rejected",
+    "reason": "junk_employer:RETIRED"
+  },
+  {
+    "request_index": 479,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:CONSULTING"
+  },
+  {
+    "request_index": 480,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 481,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:N"
+  },
+  {
+    "request_index": 482,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 483,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BAKERY EQUIPMENT"
+  },
+  {
+    "request_index": 484,
+    "status": "rejected",
+    "reason": "junk_employer:NOT EMPLOYED"
+  },
+  {
+    "request_index": 485,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRAVEL"
+  },
+  {
+    "request_index": 486,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 487,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BUILDS IT"
+  },
+  {
+    "request_index": 488,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:GYMNASTICS ACADEMY"
+  },
+  {
+    "request_index": 489,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 490,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 491,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BARBERS"
+  },
+  {
+    "request_index": 492,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:BOULDER"
+  },
+  {
+    "request_index": 493,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 494,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:COFFEE AND KITCHEN"
+  },
+  {
+    "request_index": 495,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:ROSEMONT COMMERCIAL REAL ESTATE"
+  },
+  {
+    "request_index": 496,
+    "status": "review",
+    "reason": "ambiguous_brand_outside_home_state"
+  },
+  {
+    "request_index": 497,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TRANSPORTATION"
+  },
+  {
+    "request_index": 498,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TEXAS"
+  },
+  {
+    "request_index": 499,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:AUDIO VISUAL"
+  },
+  {
+    "request_index": 500,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:TWIN CONSULTING"
+  },
+  {
+    "request_index": 501,
+    "status": "rejected",
+    "reason": "employer_prefix_not_verified"
+  },
+  {
+    "request_index": 502,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:IND SUPPLY"
+  },
+  {
+    "request_index": 503,
+    "status": "review",
+    "reason": "prefix_with_unverified_trailing_tokens:PROPERTIES"
+  }
+]

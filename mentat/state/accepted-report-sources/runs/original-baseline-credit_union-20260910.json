@@ -1,0 +1,32 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026",
+  "baseline_token": null,
+  "changed_decisions": 67169,
+  "counts": {
+    "added": 67169,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\tmp\\production-all-20260728T204300\\runs\\20260728T204315-41296\\industries\\credit-union\\data\\mentat.db",
+  "database_sha256": "9a7c88ff97fdac51f26fad0a8b1731e8da0b77d35925bc44e67ab0e78b1d2279",
+  "delta_cents": 142200565,
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026",
+  "dollar_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026\\4980809641704cbca8f4b921020d588e.dollar-changes.jsonl",
+  "industry": "Credit Union",
+  "payload": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\credit_union\\industry_data-9a7c88ff97fdac51.json",
+  "payload_sha256": "f512fb05ab5e902319a356cd277494e811237dc23b7154a6172d2fa84752dcef",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026\\4980809641704cbca8f4b921020d588e.db",
+  "snapshot_sha256": "1eb9ca9332cbb7ebb44cb77d8a281188e032162a192a5aae574e29c641d22a47",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026\\4980809641704cbca8f4b921020d588e.source-changes.jsonl",
+  "status": "verified",
+  "unexplained_changes": 0,
+  "version": 1
+}

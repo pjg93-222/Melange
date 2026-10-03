@@ -1,0 +1,21 @@
+{
+  "baseline": {
+    "basis": "accepted_report_receipts",
+    "sha256": "7a01045cbb18482d892b1a022336c199aab047b2cbf9dc4139ab5fa792c7a29c",
+    "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.db",
+    "sources": [
+      {
+        "cycles": [
+          2022,
+          2024,
+          2026
+        ],
+        "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026",
+        "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.db",
+        "snapshot_sha256": "7a01045cbb18482d892b1a022336c199aab047b2cbf9dc4139ab5fa792c7a29c",
+        "token": "5c1a77d76cc778f6a84c5c49d0aa80a687b70a5e840a722c429febfe7d86c41c"
+      }
+    ]
+  },
+  "changes": []
+}

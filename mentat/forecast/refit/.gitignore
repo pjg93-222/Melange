@@ -1,0 +1,4 @@
+# The repository ignores *.json and *.csv globally (generated data). In this folder they are source of truth:
+# registry/*.json (industry registry, frozen models, pinned raw-input manifest, Rlib manifest) and the parity fixtures.
+!*.json
+!*.csv

@@ -1,0 +1,8 @@
+# The repo root .gitignore ignores *.json for data artifacts. These are not
+# artifacts of a run: they are hand-written test cases shared by the Python and
+# R suites (arrival_gates_cases.json pins F12's earliest-arrival and carryover
+# rule for tests/test_arrival_gates.py and lane A's R port;
+# memo_redisclosure_cases.json pins F13's memo re-disclosure rule for
+# tests/test_memo_redisclosure.py and tests/test_memo_redisclosure.R). Without this
+# negation `git add mentat/tests/fixtures` adds nothing.
+!*.json

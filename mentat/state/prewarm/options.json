@@ -1,0 +1,281 @@
+{
+ "Banking": {
+  "receipt": {
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "companies": [
+    "Bank of America NA",
+    "Capital One Bank NA",
+    "Citibank",
+    "Goldman Sachs Bank NA",
+    "JP Morgan Chase Bank NA",
+    "Morgan Stanley Bank",
+    "PNC Bank NA",
+    "Truist Bank",
+    "US Bank NA",
+    "Wells Fargo Bank NA"
+   ]
+  },
+  "original_observed": {
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "companies": [
+    "Bank of America NA",
+    "Capital One Bank NA",
+    "Citibank",
+    "Goldman Sachs Bank NA",
+    "JP Morgan Chase Bank NA",
+    "Morgan Stanley Bank",
+    "PNC Bank NA",
+    "Truist Bank",
+    "US Bank NA",
+    "Wells Fargo Bank NA"
+   ]
+  },
+  "original_supported": {
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "companies": [
+    "Bank of America NA",
+    "Capital One Bank NA",
+    "Citibank",
+    "Goldman Sachs Bank NA",
+    "JP Morgan Chase Bank NA",
+    "Morgan Stanley Bank",
+    "PNC Bank NA",
+    "Truist Bank",
+    "US Bank NA",
+    "Wells Fargo Bank NA"
+   ]
+  },
+  "pac_activity": {
+   "source_fp": "719285b6881b7aa460672d2516767e6e7552340eb02fb16bc8115f7957e73743",
+   "companies": [
+    "Bank of America NA",
+    "Capital One Bank NA",
+    "Citibank",
+    "Goldman Sachs Bank NA",
+    "JP Morgan Chase Bank NA",
+    "Morgan Stanley Bank",
+    "PNC Bank NA",
+    "Truist Bank",
+    "US Bank NA",
+    "Wells Fargo Bank NA"
+   ]
+  }
+ },
+ "Community Banks": {
+  "receipt": {
+   "source_fp": "4d12598b93e43b8570d444dabb61114824ab7006c204f18e741958a1e4bc7f90",
+   "companies": [
+    "Apple Bank for Savings",
+    "ConnectOne Bank",
+    "Customers Bank",
+    "Dime Community Bank",
+    "First Financial Bancorp",
+    "First Hawaiian Bank",
+    "FirstBank Puerto Rico",
+    "Merchants Bank of Indiana",
+    "NexBank",
+    "OceanFirst Bank"
+   ]
+  },
+  "original_observed": {
+   "source_fp": "aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763",
+   "companies": [
+    "Apple Bank for Savings",
+    "ConnectOne Bank",
+    "Customers Bank",
+    "Dime Community Bank",
+    "First Financial Bancorp",
+    "First Hawaiian Bank",
+    "FirstBank Puerto Rico",
+    "Merchants Bank of Indiana",
+    "NexBank",
+    "OceanFirst Bank"
+   ]
+  },
+  "original_supported": {
+   "source_fp": "aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763",
+   "companies": [
+    "Apple Bank for Savings",
+    "ConnectOne Bank",
+    "Customers Bank",
+    "Dime Community Bank",
+    "First Financial Bancorp",
+    "First Hawaiian Bank",
+    "FirstBank Puerto Rico",
+    "Merchants Bank of Indiana",
+    "NexBank",
+    "OceanFirst Bank"
+   ]
+  },
+  "pac_activity": {
+   "source_fp": "aa280fbab4caf1c8bb97b9fbcdbb33e37ee21caf321fbc68af4c21d15a97b763",
+   "companies": [
+    "Apple Bank for Savings",
+    "ConnectOne Bank",
+    "Customers Bank",
+    "Dime Community Bank",
+    "First Financial Bancorp",
+    "First Hawaiian Bank",
+    "FirstBank Puerto Rico",
+    "Merchants Bank of Indiana",
+    "NexBank",
+    "OceanFirst Bank"
+   ]
+  }
+ },
+ "Credit Arms": {
+  "receipt": {
+   "source_fp": "276f2473dae60171e7c541f1d28f8304cdec8fb3957528214c2d5c31f4335cf5",
+   "companies": [
+    "American Honda Finance Corporation",
+    "CNH Industrial Capital LLC",
+    "Caterpillar Financial Services Corporation",
+    "Ford Motor Credit Company",
+    "GM Financial",
+    "Hyundai Capital America",
+    "John Deere Capital Corporation",
+    "OneMain Holdings",
+    "PACCAR Financial Corp",
+    "Toyota Motor Credit Corporation"
+   ]
+  }
+ },
+ "Crypto": {
+  "receipt": {
+   "source_fp": "a43f3913adb2c2902032f722f65bce65201a231f5cc7f39a6d5e61c66c91aa6f",
+   "companies": [
+    "BINANCE US",
+    "Bakkt",
+    "Bitnomial",
+    "Coinbase",
+    "Coinlist",
+    "Foris Dax Inc",
+    "Gemini",
+    "Kraken",
+    "MIAXdx",
+    "Tzero"
+   ]
+  }
+ },
+ "Credit Union": {
+  "receipt": {
+   "source_fp": "2573fdc05d25f8a91c3875dd47d3a2d8201f5a8cdbf3497b87b30ddf45d0f3d7",
+   "companies": [
+    "Alliant Credit Union",
+    "America First Credit Union",
+    "Boeing Employees Credit Union",
+    "Golden 1 Credit Union",
+    "Mountain America Credit Union",
+    "Navy Federal Credit Union",
+    "Pentagon Federal Credit Union",
+    "SchoolsFirst Federal Credit Union",
+    "State Employees' Credit Union",
+    "Suncoast Credit Union"
+   ]
+  },
+  "original_observed": {
+   "source_fp": "639738a4f13af62232b285a6d327d38dd32fe1253a1b20e4e7f9c4f6ae6f9490",
+   "companies": [
+    "Alliant Credit Union",
+    "America First Credit Union",
+    "Boeing Employees Credit Union",
+    "Golden 1 Credit Union",
+    "Mountain America Credit Union",
+    "Navy Federal Credit Union",
+    "Pentagon Federal Credit Union",
+    "SchoolsFirst Federal Credit Union",
+    "State Employees' Credit Union",
+    "Suncoast Credit Union"
+   ]
+  },
+  "original_supported": {
+   "source_fp": "639738a4f13af62232b285a6d327d38dd32fe1253a1b20e4e7f9c4f6ae6f9490",
+   "companies": [
+    "Alliant Credit Union",
+    "America First Credit Union",
+    "Boeing Employees Credit Union",
+    "Golden 1 Credit Union",
+    "Mountain America Credit Union",
+    "Navy Federal Credit Union",
+    "Pentagon Federal Credit Union",
+    "SchoolsFirst Federal Credit Union",
+    "State Employees' Credit Union",
+    "Suncoast Credit Union"
+   ]
+  },
+  "pac_activity": {
+   "source_fp": "639738a4f13af62232b285a6d327d38dd32fe1253a1b20e4e7f9c4f6ae6f9490",
+   "companies": [
+    "Alliant Credit Union",
+    "America First Credit Union",
+    "Boeing Employees Credit Union",
+    "Golden 1 Credit Union",
+    "Mountain America Credit Union",
+    "Navy Federal Credit Union",
+    "Pentagon Federal Credit Union",
+    "SchoolsFirst Federal Credit Union",
+    "State Employees' Credit Union",
+    "Suncoast Credit Union"
+   ]
+  }
+ },
+ "Fintech": {
+  "receipt": {
+   "source_fp": "2f9fa3df526b0f27a753943ed615240adf931be93f3223838752b517824ceb65",
+   "companies": [
+    "Cash App",
+    "Chime",
+    "Dave Inc.",
+    "Kalshi",
+    "Klarna",
+    "Plaid",
+    "Polymarket",
+    "Robinhood",
+    "SoFi",
+    "Stripe"
+   ]
+  }
+ },
+ "Telecom": {
+  "receipt": {
+   "source_fp": "6f7acaee8a6e8c5ac34e5d572094a078c85c68c46b1f990c022f3021d2dbc08c",
+   "companies": [
+    "AT&T",
+    "Altice USA",
+    "Charter Communications",
+    "Comcast",
+    "Cox Communications",
+    "EchoStar",
+    "Frontier Communications",
+    "Lumen Technologies",
+    "T-Mobile",
+    "Verizon"
+   ]
+  }
+ },
+ "Property & Casualty Insurance": {
+  "receipt": {
+   "source_fp": "5cd59a37059a7b097d9c707ea762e9ced6322b58417a8aef659a48d46f42b667",
+   "companies": [
+    "Allstate",
+    "Berkshire Hathaway",
+    "Chubb",
+    "Farmers Insurance",
+    "Liberty Mutual",
+    "Progressive Insurance",
+    "State Farm",
+    "The Travelers Companies",
+    "USAA",
+    "Zurich Insurance"
+   ]
+  }
+ },
+ "Rust FEC Verified 2023-2024": {
+  "receipt": {
+   "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+   "companies": [
+    "Ripple Labs"
+   ]
+  }
+ }
+}

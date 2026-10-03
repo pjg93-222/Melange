@@ -1,0 +1,45 @@
+{
+  "error": "Conflicting duplicate source ID: 4040220251182759511",
+  "run_id": "20260911T005512-cc5a4f70a10b",
+  "schema_version": 1,
+  "status": "failed",
+  "steps": [
+    {
+      "detail": "10 companies; 3 cycles; immutable source pinned",
+      "id": "define",
+      "label": "Define",
+      "status": "completed"
+    },
+    {
+      "detail": "833 exact source records cross-checked; historical query coverage remains unproven",
+      "id": "collect",
+      "label": "Collect",
+      "status": "review"
+    },
+    {
+      "detail": "Resolving donor identity, funding source and receipt meaning",
+      "id": "identify",
+      "label": "Identify",
+      "status": "running"
+    },
+    {
+      "detail": "Cross-referencing explicit filing, memo and intermediary relationships",
+      "id": "connect",
+      "label": "Connect",
+      "status": "running"
+    },
+    {
+      "detail": "",
+      "id": "count",
+      "label": "Count",
+      "status": "pending"
+    },
+    {
+      "detail": "",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "pending"
+    }
+  ],
+  "updated_at": "2026-09-11T00:55:51.194742+00:00"
+}

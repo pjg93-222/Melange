@@ -1,0 +1,1 @@
+{"url":"https://api.open.fec.gov/v1/schedules/schedule_a/4062220261522023969/?two_year_transaction_period=2026","retrieved_at":"2026-09-27T01:39:26.943894+00:00","sha256":"f4053a6888b6207ae431ee3f5278f5e020721afdd986dcee72ea7bd56c1d448f","response":{"api_version":"1.0","pagination":{"count":0,"is_count_exact":true,"last_indexes":null,"pages":0,"per_page":20},"results":[]}}

@@ -1,0 +1,8 @@
+{
+  "pluginId": "analyze-issue@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:08:39.752Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "92e8a5fc336aa4b631acaf23d2c97dd2520bbc9125d16af83a7057c14a64f909",
+    "commands\\analyze-issue.md": "a4da744964107baa1e813b8c862130b20e462ae01564abc188cbd72c80f8b771"
+  }
+}

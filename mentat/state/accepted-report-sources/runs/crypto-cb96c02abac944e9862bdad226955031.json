@@ -1,0 +1,42 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026",
+  "baseline_scopes": [
+    {
+      "cycles": [
+        2022,
+        2024,
+        2026
+      ],
+      "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026",
+      "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.db",
+      "snapshot_sha256": "236edefa658732d99ba83d1fe1590217fb6d1e405e9b03b64413e9c0aee51c81",
+      "token": "c69d420e7de34001e52d490cfcc2c5b6d00b04efeb672da6d17ce5ba0bc63777"
+    }
+  ],
+  "baseline_token": "c69d420e7de34001e52d490cfcc2c5b6d00b04efeb672da6d17ce5ba0bc63777",
+  "counts": {
+    "added": 0,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 14801
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\crypto\\mentat.db",
+  "database_sha256": "0c2dc2e228f5343af960a2cb4898f3a47921d7b33080fa60be161b78fc497dcb",
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026",
+  "industry": "Crypto",
+  "previous": {
+    "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\b7237c63d68740d4bb0775c12092f103.baseline.db",
+    "snapshot_sha256": "dd2131a5277d50074e38b1ebc717e7361201aa693836ef408a006e2918f06de9"
+  },
+  "previous_token": "c69d420e7de34001e52d490cfcc2c5b6d00b04efeb672da6d17ce5ba0bc63777",
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\12baec06341340df8b04027268bb30b5.db",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\12baec06341340df8b04027268bb30b5.source-changes.jsonl",
+  "state_root": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources",
+  "status": "source_verified",
+  "version": 1
+}

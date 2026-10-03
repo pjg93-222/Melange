@@ -1,0 +1,160 @@
+const assert = require('node:assert/strict');
+const view = require('../app/cross-reference.js');
+
+const fixture = {available:true,status:'completed',run_id:'20260910-safe',report:{
+  generated_at:'2026-09-10T12:00:00Z',scope:{industries:['Banking'],companies:['A Bank'],cycles:[2024],source_count:1},
+  summary:{input_records:5,automatic_decisions:2,unresolved_records:1,unresolved_amount:40,
+    observed_original_giving:100,employee_giving:100,pac_outgoing:60,baseline_amount:160,amount_change:-60,verified_unique:false},
+  steps:[{id:'collect',status:'completed'},{id:'connect',status:'review',detail:'Missing counterpart'}],
+  unresolved_reasons:[{reason:'Reference missing',records:1,amount:40}],
+  review_queue:[{company:'A Bank',reason:'Reference missing',cycle:2024,amount:40,record_id:'123'}],
+  changes:[{company:'A Bank',reason:'Linked outgoing stage',cycle:2024,before:160,after:100,delta:-60,record_id:'456'}],
+  limitations:['Collection coverage remains unverified.'],
+}};
+const rendered = view.html(fixture);
+assert.match(rendered,/Observed original giving/);
+assert.match(rendered,/\$100\.00/);
+assert.match(rendered,/PAC outgoing activity/);
+assert.match(rendered,/Recipient-reported activity in these records; incomplete/);
+assert.match(rendered,/Previous receipt total/);
+assert.match(rendered,/\$60\.00/);
+assert.match(rendered,/Do not add it to original giving/);
+assert.match(rendered,/Provisional totals/);
+assert.match(rendered,/not yet verified unique dollars/);
+assert.match(rendered,/not an accuracy percentage/);
+assert.doesNotMatch(rendered,/99\.9|200%|100%/);
+assert.match(rendered,/Needs evidence/);
+assert.match(rendered,/Missing counterpart/);
+assert.match(rendered,/Corporate treasury giving · supported ownership<\/dt><dd>Unavailable/);
+assert.match(rendered,/Generation time describes this computation/);
+assert.match(rendered,/not an estimated error amount/);
+assert.match(rendered,/Automatically resolved/);
+assert.match(rendered,/Records needing review/);
+assert.doesNotMatch(rendered,/Source-verified receipts|Classified from stored evidence|Collection coverage follow-up/);
+const coverage = structuredClone(fixture);
+Object.assign(coverage.report.summary, {source_verified_records:3,classified_from_stored_records:1,
+  coverage_records:4,coverage_amount:140,coverage_only_records:3});
+coverage.report.coverage_reasons = [{reason:'latest_filing_completeness_unproven',records:4,amount:140,
+  action:'Check the complete filing once.'}];
+const coverageHtml = view.html(coverage);
+assert.match(coverageHtml,/Source-verified receipts<\/span><strong>3<\/strong>/);
+assert.match(coverageHtml,/Classified from stored evidence<\/span><strong>1<\/strong>/);
+assert.match(coverageHtml,/Records needing review<\/span><strong>1<\/strong>/);
+assert.match(coverageHtml,/Collection coverage follow-up/);
+assert.match(coverageHtml,/4 records are affected by collection coverage checks \(\$140\.00 associated amount\)/);
+assert.match(coverageHtml,/3 of those records have no remaining transaction question/);
+assert.match(coverageHtml,/Check the complete filing once/);
+assert.match(coverageHtml,/Complete filing collection and unique-dollar totals are separate conclusions/);
+assert.equal((coverageHtml.match(/Check the complete filing once/g) || []).length,1);
+assert.match(coverageHtml,/Provisional totals/);
+const noReview = structuredClone(coverage);
+Object.assign(noReview.report.summary,{unresolved_records:0,unresolved_amount:0});
+noReview.report.review_queue = [];
+noReview.report.unresolved_reasons = [];
+assert.match(view.html(noReview),/Records needing review<\/span><strong>0<\/strong>/);
+assert.match(view.html(noReview),/No records are queued in this summary/);
+assert.match(view.html(noReview),/Collection coverage follow-up/);
+for (const step of ['Define','Collect','Identify','Connect','Count','Verify & report']) assert.ok(rendered.includes(step));
+assert.equal((rendered.match(/class="xref-step xref-step-/g) || []).length,6);
+assert.match(view.html({status:'empty'}),/No run has been saved yet/);
+assert.match(view.html({available:true,status:'running',run_id:'active',progress:{steps:[{id:'collect',status:'running'}]}}),/In progress/);
+assert.doesNotMatch(view.html({status:'error',message:'Mismatch'}),/\$100/);
+assert.match(view.html({status:'error',message:'Mismatch'}),/No totals are shown/);
+const injected = structuredClone(fixture), bad = '<img src=x onerror="alert(1)">';
+injected.run_id = bad;
+injected.report.scope.companies = [bad];
+injected.report.steps[1].detail = bad;
+injected.report.review_queue[0].reason = bad;
+injected.report.changes[0].company = bad;
+injected.report.changes[0].source_description = '<script>alert(1)</script> RETURN OF ERRONEOUS DEBIT';
+injected.report.limitations = [bad];
+injected.report.coverage_reasons = [{reason:bad,records:1,amount:40,action:bad}];
+assert.doesNotMatch(view.html(injected),/<img|<script|onerror="/);
+assert.match(view.html(injected),/&lt;img/);
+assert.match(view.html(injected),/&lt;script&gt;alert\(1\)&lt;\/script&gt; RETURN OF ERRONEOUS DEBIT/);
+assert.equal(view.money(null),'Unavailable');
+assert.equal(view.money('60'),'Unavailable');
+assert.equal(view.money(Infinity),'Unavailable');
+assert.equal(view.money(0),'$0.00');
+const failed = {available:true,status:'failed',run_id:'bad',notices:[],progress:{message:'Failure'}};
+assert.equal(view.html(failed),view.html(failed)); // Rendering does not mutate saved notices.
+const many = structuredClone(fixture);
+many.report.changes = Array.from({length:40}, (_, i) => ({record_id:'RECORD'+i}));
+assert.match(view.html(many),/RECORD19/);
+assert.doesNotMatch(view.html(many),/RECORD20/);
+many.report.coverage_reasons = Array.from({length:60}, (_, i) => ({reason:'COVERAGE'+i}));
+assert.match(view.html(many),/COVERAGE49/);
+assert.doesNotMatch(view.html(many),/COVERAGE50/);
+const explained = structuredClone(fixture);
+explained.report.review_queue[0].reason = 'latest_filing_completeness_unproven';
+explained.report.review_queue[0].action = 'Retrieve the full amended filing.';
+assert.match(view.html(explained),/Complete latest filing has not been established/);
+assert.match(view.html(explained),/Retrieve the full amended filing/);
+explained.report.partisan_breakdowns = [{view:'original_giving',democratic:80,republican:20,other_unknown:100,
+  denominator_dr:100,democratic_percent:80,republican_percent:20,classified_gross_percent:50,basis:'Explicit fixture classification.'}];
+assert.match(view.html(explained),/Democratic share of D\/R/);
+assert.match(view.html(explained),/80%/);
+assert.match(view.html(explained),/50%/);
+assert.match(view.html(explained),/absolute receipt dollars/);
+explained.report.partisan_breakdowns[0].democratic_percent = 200;
+assert.doesNotMatch(view.html(explained),/200%/);
+explained.report.review_queue[0].source_url = 'https://docquery.fec.gov/pdf/123/filing.pdf';
+assert.match(view.html(explained),/href="https:\/\/docquery.fec.gov\/pdf\/123\/filing.pdf"/);
+assert.match(view.html(explained),/rel="noopener noreferrer"/);
+for (const url of ['javascript:alert(1)','https://evil.test/file','https://www.fec.gov/file?api_key=secret']) {
+  explained.report.review_queue[0].source_url = url;
+  assert.doesNotMatch(view.html(explained),/href=/);
+}
+console.log('Cross-reference view checks passed.');
+
+// Opt-in browser integration verifies tab activation, rendering and refresh.
+if (process.env.MENTAT_CROSS_REFERENCE_BROWSER === '1') (async () => {
+  const {spawn} = require('node:child_process'), {once} = require('node:events'), path = require('node:path'), os = require('node:os');
+  const modules = process.env.MENTAT_NODE_MODULES || path.join(os.homedir(), '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
+  const {chromium} = require(require.resolve('playwright', {paths:[modules]}));
+  const server = spawn(process.env.MENTAT_PYTHON || 'python', [path.join(__dirname,'console_browser_fixture.py')], {stdio:['pipe','pipe','pipe'],windowsHide:true});
+  let browser;
+  const stderr = []; server.stderr.on('data', chunk => stderr.push(chunk.toString()));
+  try {
+    const origin = await new Promise((resolve,reject) => {
+      let output = '';
+      server.stdout.on('data', chunk => { output += chunk; if (output.includes('\n')) resolve(output.trim().split('\n')[0]); });
+      server.on('exit', code => reject(new Error(`Fixture exited ${code}: ${stderr.join('')}`)));
+      server.on('error', reject);
+    });
+    browser = await chromium.launch({headless:true, channel:process.env.MENTAT_BROWSER_CHANNEL || 'chrome'});
+    const page = await browser.newPage({viewport:{width:1440,height:1100}});
+    const errors = []; page.on('pageerror', error => errors.push(error.message));
+    let data = coverage, calls = 0;
+    await page.route('**/api/cross-reference', route => { calls++; return route.fulfill({json:data}); });
+    await page.goto(origin + '/#cross-reference');
+    await page.getByText('Observed original giving',{exact:true}).waitFor();
+    assert.equal(await page.locator('#tab-cross-reference').getAttribute('aria-selected'),'true');
+    assert.equal(await page.locator('#view-collection').isVisible(),false);
+    assert.equal(await page.locator('#view-graph').isVisible(),false);
+    assert.equal(await page.locator('.xref-step').count(),6);
+    assert.match(await page.locator('#xref-results').innerText(),/not yet verified unique dollars/);
+    assert.equal(await page.getByRole('heading',{name:'Collection coverage follow-up'}).count(),1);
+    assert.equal(await page.getByText('Source-verified receipts',{exact:true}).count(),1);
+    assert.equal(await page.getByText('Check the complete filing once.',{exact:true}).count(),1);
+    if (process.env.MENTAT_CROSS_REFERENCE_SCREENSHOT) await page.screenshot({path:process.env.MENTAT_CROSS_REFERENCE_SCREENSHOT,fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+    assert.equal(await page.locator('#view-cross-reference').evaluate(element => element.scrollWidth <= element.clientWidth),true);
+    const tabIds = await page.locator('.workspace-tabs [role=tab]').evaluateAll(tabs => tabs.map(tab => tab.id));
+    const previousTab = tabIds[(tabIds.indexOf('tab-cross-reference') + tabIds.length - 1) % tabIds.length];
+    await page.locator('#' + previousTab).click();
+    await page.locator('#' + previousTab).focus();
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await page.locator('#tab-cross-reference').getAttribute('aria-selected'),'true');
+    data = {status:'error',message:'Saved report fingerprint mismatch.'};
+    await page.locator('#xref-refresh').click();
+    await page.getByRole('heading',{name:'Saved evidence unavailable'}).waitFor();
+    assert.equal(await page.getByText('Observed original giving',{exact:true}).count(),0);
+    assert.ok(calls >= 2);
+    assert.deepEqual(errors,[]);
+    console.log('Cross-reference browser checks passed.');
+  } finally {
+    if (browser) await browser.close();
+    const exited = once(server,'exit'); server.stdin.end('\n'); await exited;
+  }
+})().catch(error => { console.error(error); process.exitCode = 1; });

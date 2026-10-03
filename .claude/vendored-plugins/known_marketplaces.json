@@ -1,0 +1,74 @@
+{
+  "taste-skill": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/leonxlnx/taste-skill.git"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\taste-skill",
+    "lastUpdated": "2026-08-24T04:36:41.712Z"
+  },
+  "awesome-claude-code-plugins": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/ccplugins/awesome-claude-code-plugins.git"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\awesome-claude-code-plugins",
+    "lastUpdated": "2026-08-25T17:07:53.725Z"
+  },
+  "local-desktop-app-uploads": {
+    "source": {
+      "source": "directory",
+      "path": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\local-desktop-app-uploads"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\local-desktop-app-uploads",
+    "lastUpdated": "2026-08-31T19:58:18.619Z"
+  },
+  "ecc": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/affaan-m/ECC.git"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\ecc",
+    "lastUpdated": "2026-08-31T19:59:19.537Z"
+  },
+  "ui-ux-pro-max-skill": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\ui-ux-pro-max-skill",
+    "lastUpdated": "2026-08-31T20:01:46.393Z"
+  },
+  "caveman": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/JuliusBrussee/caveman.git"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\caveman",
+    "lastUpdated": "2026-08-31T20:02:19.379Z"
+  },
+  "brightdata-plugins": {
+    "source": {
+      "source": "git",
+      "url": "https://github.com/brightdata/skills.git"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\brightdata-plugins",
+    "lastUpdated": "2026-09-30T15:34:23.387Z"
+  },
+  "runpod": {
+    "source": {
+      "source": "github",
+      "repo": "runpod/runpod-plugins-official"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\runpod",
+    "lastUpdated": "2026-09-30T16:14:28.739Z"
+  },
+  "claude-plugins-official": {
+    "source": {
+      "source": "github",
+      "repo": "anthropics/claude-plugins-official"
+    },
+    "installLocation": "C:\\Users\\pgoff\\.claude\\plugins\\marketplaces\\claude-plugins-official",
+    "lastUpdated": "2026-10-01T22:03:05.092Z"
+  }
+}

@@ -1,0 +1,111 @@
+﻿record_id,company,cycle,reason,before,after,delta,source_url
+4092020231802645332,Stripe,2024,non_giving_receipt_role:other_receipt,190000.0,0.0,-190000.0,https://docquery.fec.gov/cgi-bin/fecimg/?202309209597131548
+4122020221641867032,Stripe,2022,non_giving_receipt_role:other_receipt,128262.88,0.0,-128262.88,https://docquery.fec.gov/cgi-bin/fecimg/?202212129557558463
+4102820211376022901,Stripe,2022,non_giving_receipt_role:other_receipt,123250.03,0.0,-123250.03,https://docquery.fec.gov/cgi-bin/fecimg/?202110209468085357
+4040120221465073706,Stripe,2022,non_giving_receipt_role:other_receipt,112568.63,0.0,-112568.63,https://docquery.fec.gov/cgi-bin/fecimg/?202203209494066786
+4081020231765042887,Stripe,2024,non_giving_receipt_role:other_receipt,40000.0,0.0,-40000.0,https://docquery.fec.gov/cgi-bin/fecimg/?202307319593094652
+4030320221458815059,Stripe,2022,non_giving_receipt_role:other_receipt,37123.81,0.0,-37123.81,https://docquery.fec.gov/cgi-bin/fecimg/?202202189491823508
+4122920211386905733,Stripe,2022,non_giving_receipt_role:other_receipt,35038.36,0.0,-35038.36,https://docquery.fec.gov/cgi-bin/fecimg/?202112209474511448
+4092220211371632313,Stripe,2022,non_giving_receipt_role:other_receipt,20093.45,0.0,-20093.45,https://docquery.fec.gov/cgi-bin/fecimg/?202109209466815035
+4112920221631504107,Stripe,2022,non_giving_receipt_role:other_receipt,15596.8,0.0,-15596.8,https://docquery.fec.gov/cgi-bin/fecimg/?202210279543175419
+4082520211343863689,Stripe,2022,non_giving_receipt_role:other_receipt,7224.0,0.0,-7224.0,https://docquery.fec.gov/cgi-bin/fecimg/?202108209466387167
+4070920241972639614,SoFi,2024,individual_with_accepted_employer_match; recognized_contribution_receipt; same_original_gift_at_conduit_and_destination,6600.0,0.0,-6600.0,https://docquery.fec.gov/cgi-bin/fecimg/?202407099652745532
+4121120241075675925,SoFi,2024,individual_with_accepted_employer_match; recognized_contribution_receipt,0.0,6600.0,6600.0,https://docquery.fec.gov/cgi-bin/fecimg/?202411189719989450
+4120820221633640538,Kalshi,2022,individual_with_accepted_employer_match; recognized_contribution_receipt,0.0,5800.0,5800.0,https://docquery.fec.gov/cgi-bin/fecimg/?202211239546876491
+4030620241884043586,Stripe,2024,individual_with_accepted_employer_match; recognized_contribution_receipt,0.0,3300.0,3300.0,https://docquery.fec.gov/cgi-bin/fecimg/?202403059622316303
+4042420251186466321,Plaid,2024,individual_with_accepted_employer_match; recognized_contribution_receipt,0.0,3300.0,3300.0,https://docquery.fec.gov/cgi-bin/fecimg/?202504149755331338
+4061120241960458177,Robinhood,2022,explicit_same_filing_memo_reference; individual_with_accepted_employer_match; recognized_contribution_receipt,2900.0,0.0,-2900.0,https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860256
+4051420251196683825,SoFi,2024,individual_with_accepted_employer_match; recognized_contribution_receipt,0.0,2300.0,2300.0,https://docquery.fec.gov/cgi-bin/fecimg/?202504299758048201
+4041220241895670896,Stripe,2024,non_giving_receipt_role:other_receipt,1460.47,0.0,-1460.47,https://docquery.fec.gov/cgi-bin/fecimg/?202404119627534995
+4121120211385521539,Stripe,2022,non_giving_receipt_role:other_receipt,1380.0,0.0,-1380.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759177
+4121120211385521537,Stripe,2022,non_giving_receipt_role:other_receipt,1170.0,0.0,-1170.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759176
+4020320221404361240,Robinhood,2022,non_giving_receipt_role:other_receipt,1000.0,0.0,-1000.0,https://docquery.fec.gov/cgi-bin/fecimg/?202201319485780549
+4061220231749190761,SoFi,2024,individual_with_accepted_employer_match; recognized_contribution_receipt; superseded_in_observed_filing_family,1000.0,0.0,-1000.0,https://docquery.fec.gov/cgi-bin/fecimg/?202306079581772473
+4121120211384492476,Stripe,2022,non_giving_receipt_role:other_receipt,956.78,0.0,-956.78,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570983
+4081320211326177730,Stripe,2022,non_giving_receipt_role:other_receipt,762.17,0.0,-762.17,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466946
+4111520241069133955,Stripe,2024,non_giving_receipt_role:other_receipt,516.7,0.0,-516.7,https://docquery.fec.gov/cgi-bin/fecimg/?202410159687668577
+4061220231749180188,Chime,2024,individual_with_accepted_employer_match; recognized_contribution_receipt; superseded_in_observed_filing_family,500.0,0.0,-500.0,https://docquery.fec.gov/cgi-bin/fecimg/?202306079581761901
+4072220221543248026,Stripe,2022,non_giving_receipt_role:other_receipt,491.8,0.0,-491.8,https://docquery.fec.gov/cgi-bin/fecimg/?202207159521570620
+4080520211324767507,Stripe,2022,non_giving_receipt_role:other_receipt,478.13,0.0,-478.13,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465479804
+4072120221543083932,Cash App,2022,non_giving_receipt_role:other_receipt,450.0,0.0,-450.0,https://docquery.fec.gov/cgi-bin/fecimg/?202207159518590883
+4121120211385521535,Stripe,2022,non_giving_receipt_role:other_receipt,397.29,0.0,-397.29,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759176
+4121120211384492472,Stripe,2022,non_giving_receipt_role:other_receipt,375.0,0.0,-375.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570982
+4012620261303522251,Cash App,2024,non_giving_receipt_role:other_receipt,368.5,0.0,-368.5,https://docquery.fec.gov/cgi-bin/fecimg/?202601149793975460
+4062520211311669529,Stripe,2022,non_giving_receipt_role:other_receipt,333.43,0.0,-333.43,https://docquery.fec.gov/cgi-bin/fecimg/?202106189449431954
+4121120211384492483,Stripe,2022,non_giving_receipt_role:other_receipt,319.32,0.0,-319.32,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570986
+4121120211384492474,Stripe,2022,non_giving_receipt_role:other_receipt,315.0,0.0,-315.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570983
+4121120211384492480,Stripe,2022,non_giving_receipt_role:other_receipt,300.42,0.0,-300.42,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570985
+4061520221517050909,Stripe,2022,non_giving_receipt_role:other_receipt,249.2,0.0,-249.2,https://docquery.fec.gov/cgi-bin/fecimg/?202205149508124238
+4110120231808028648,Stripe,2024,non_giving_receipt_role:other_receipt,245.66,0.0,-245.66,https://docquery.fec.gov/cgi-bin/fecimg/?202310309598913190
+4062120231750965718,Stripe,2022,non_giving_receipt_role:other_receipt,233.78,0.0,-233.78,https://docquery.fec.gov/cgi-bin/fecimg/?202306209582230332
+4121120211384492486,Stripe,2022,non_giving_receipt_role:other_receipt,198.45,0.0,-198.45,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570987
+4121120211384492507,Stripe,2022,non_giving_receipt_role:other_receipt,180.96,0.0,-180.96,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570994
+4121120211384492475,Stripe,2022,non_giving_receipt_role:other_receipt,180.0,0.0,-180.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570983
+4121120211385521538,Stripe,2022,non_giving_receipt_role:other_receipt,174.36,0.0,-174.36,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759177
+4121120211384492491,Stripe,2022,non_giving_receipt_role:other_receipt,156.84,0.0,-156.84,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570988
+4121120211385521543,Stripe,2022,non_giving_receipt_role:other_receipt,150.0,0.0,-150.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759178
+4062520211311669593,Stripe,2022,non_giving_receipt_role:other_receipt,139.65,0.0,-139.65,https://docquery.fec.gov/cgi-bin/fecimg/?202106189449432553
+4121120211384492477,Stripe,2022,non_giving_receipt_role:other_receipt,135.06,0.0,-135.06,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570984
+4121120211384492494,Stripe,2022,non_giving_receipt_role:other_receipt,123.78,0.0,-123.78,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570989
+4081320211326177731,Stripe,2022,non_giving_receipt_role:other_receipt,120.0,0.0,-120.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466946
+4121120211384492485,Stripe,2022,non_giving_receipt_role:other_receipt,120.0,0.0,-120.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570986
+4051420251198814915,Cash App,2024,individual_with_accepted_employer_match; provisional_receipt_role:transfer_receipt,0.0,100.0,100.0,https://docquery.fec.gov/cgi-bin/fecimg/?202504299758735898
+4121120211384492473,Stripe,2022,non_giving_receipt_role:other_receipt,90.0,0.0,-90.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570982
+4121120211384492498,Stripe,2022,non_giving_receipt_role:other_receipt,90.0,0.0,-90.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570991
+4121120211384492501,Stripe,2022,non_giving_receipt_role:other_receipt,90.0,0.0,-90.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570992
+4121120211384492482,Stripe,2022,non_giving_receipt_role:other_receipt,84.3,0.0,-84.3,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570985
+4062520211311669610,Stripe,2022,non_giving_receipt_role:other_receipt,82.65,0.0,-82.65,https://docquery.fec.gov/cgi-bin/fecimg/?202106189449432098
+4121120211384492484,Stripe,2022,non_giving_receipt_role:other_receipt,75.0,0.0,-75.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570986
+4121120211385521541,Stripe,2022,non_giving_receipt_role:other_receipt,75.0,0.0,-75.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759178
+4121120211384492488,Stripe,2022,non_giving_receipt_role:other_receipt,61.12,0.0,-61.12,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570987
+4121120211384492479,Stripe,2022,non_giving_receipt_role:other_receipt,60.0,0.0,-60.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570984
+4121120211384492499,Stripe,2022,non_giving_receipt_role:other_receipt,60.0,0.0,-60.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570991
+4121120211384492503,Stripe,2022,non_giving_receipt_role:other_receipt,60.0,0.0,-60.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570992
+4121120211384492481,Stripe,2022,non_giving_receipt_role:other_receipt,48.1,0.0,-48.1,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570985
+4081320211326177732,Stripe,2022,non_giving_receipt_role:other_receipt,45.0,0.0,-45.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466946
+4081320211326177735,Stripe,2022,non_giving_receipt_role:other_receipt,45.0,0.0,-45.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466947
+4081320211326177737,Stripe,2022,non_giving_receipt_role:other_receipt,45.0,0.0,-45.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466948
+4081320211326177738,Stripe,2022,non_giving_receipt_role:other_receipt,45.0,0.0,-45.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466948
+4121120211384492490,Stripe,2022,non_giving_receipt_role:other_receipt,45.0,0.0,-45.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570988
+4121120211384492504,Stripe,2022,non_giving_receipt_role:other_receipt,45.0,0.0,-45.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570993
+4102920211376406064,Stripe,2022,non_giving_receipt_role:other_receipt,35.34,0.0,-35.34,https://docquery.fec.gov/cgi-bin/fecimg/?202110209468246663
+4081320211326177733,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466947
+4081320211326177734,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466947
+4081320211326177739,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466949
+4081320211326177741,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466949
+4121120211384492478,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570984
+4121120211384492489,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570988
+4121120211384492493,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570989
+4121120211384492495,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570990
+4121120211384492496,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570990
+4121120211384492508,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570994
+4121120211384492509,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570994
+4121120211385521546,Stripe,2022,non_giving_receipt_role:other_receipt,30.0,0.0,-30.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759179
+4121120211385521540,Stripe,2022,non_giving_receipt_role:other_receipt,29.82,0.0,-29.82,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759177
+4110120231808028647,Stripe,2024,non_giving_receipt_role:other_receipt,19.78,0.0,-19.78,https://docquery.fec.gov/cgi-bin/fecimg/?202310309598913190
+4102620211375490694,Stripe,2022,non_giving_receipt_role:other_receipt,15.24,0.0,-15.24,https://docquery.fec.gov/cgi-bin/fecimg/?202110199468008435
+4071220221539931410,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202207069517819004
+4081320211326177736,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466948
+4081320211326177740,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202107319465466949
+4121120211384492487,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570987
+4121120211384492492,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570989
+4121120211384492497,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570990
+4121120211384492500,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570991
+4121120211384492502,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570992
+4121120211384492505,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570993
+4121120211384492506,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469570993
+4121120211385521542,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759178
+4121120211385521545,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759179
+4121120211385521547,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759180
+4121120211385521548,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759180
+4121120211385521549,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759180
+4121120211385521550,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759181
+4122920211386905731,Stripe,2022,non_giving_receipt_role:other_receipt,15.0,0.0,-15.0,https://docquery.fec.gov/cgi-bin/fecimg/?202112209474511448
+4082520211343863688,Stripe,2022,non_giving_receipt_role:other_receipt,14.0,0.0,-14.0,https://docquery.fec.gov/cgi-bin/fecimg/?202108209466387167
+4122920211386905732,Stripe,2022,non_giving_receipt_role:other_receipt,12.06,0.0,-12.06,https://docquery.fec.gov/cgi-bin/fecimg/?202112209474511448
+4121120211385521536,Stripe,2022,non_giving_receipt_role:other_receipt,8.34,0.0,-8.34,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759176
+4121120211385521544,Stripe,2022,non_giving_receipt_role:other_receipt,4.47,0.0,-4.47,https://docquery.fec.gov/cgi-bin/fecimg/?202112029469759179
+4081720211328102083,Stripe,2022,non_giving_receipt_role:other_receipt,3.77,0.0,-3.77,https://docquery.fec.gov/cgi-bin/fecimg/?202108129466255278
+4080520221563271332,Stripe,2022,non_giving_receipt_role:other_receipt,2.01,0.0,-2.01,https://docquery.fec.gov/cgi-bin/fecimg/?202207159518579385
+4102620211375490695,Stripe,2022,non_giving_receipt_role:other_receipt,0.98,0.0,-0.98,https://docquery.fec.gov/cgi-bin/fecimg/?202110199468008436
+4042820231744960626,Stripe,2022,non_giving_receipt_role:other_receipt,0.1,0.0,-0.1,https://docquery.fec.gov/cgi-bin/fecimg/?202304149580522539

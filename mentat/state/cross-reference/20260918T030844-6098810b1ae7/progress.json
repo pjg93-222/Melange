@@ -1,0 +1,44 @@
+{
+  "run_id": "20260918T030844-6098810b1ae7",
+  "schema_version": 1,
+  "status": "completed",
+  "steps": [
+    {
+      "detail": "10 companies; 3 cycles; immutable source pinned",
+      "id": "define",
+      "label": "Define",
+      "status": "completed"
+    },
+    {
+      "detail": "32649 exact source records cross-checked; historical query coverage remains unproven",
+      "id": "collect",
+      "label": "Collect",
+      "status": "review"
+    },
+    {
+      "detail": "Attribution and transaction decisions recorded with evidence",
+      "id": "identify",
+      "label": "Identify",
+      "status": "review"
+    },
+    {
+      "detail": "386 evidence-backed links; filing coverage checks tracked separately from receipt review",
+      "id": "connect",
+      "label": "Connect",
+      "status": "review"
+    },
+    {
+      "detail": "Observed accounting views computed; unique-dollar certification remains separate",
+      "id": "count",
+      "label": "Count",
+      "status": "completed"
+    },
+    {
+      "detail": "Source unchanged; decisions reconciled; receipt review and collection coverage reported separately",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "review"
+    }
+  ],
+  "updated_at": "2026-09-18T03:19:38.125595+00:00"
+}

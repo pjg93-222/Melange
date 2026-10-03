@@ -1,0 +1,1204 @@
+{
+  "run_id": "pod-publish-20260930",
+  "mode": "refit",
+  "pipeline": "giving-forecast-refit",
+  "version": "refit-0.1.0-phase1",
+  "started_utc": "2026-09-30T21:38:10Z",
+  "finished_utc": "2026-09-30T21:39:02Z",
+  "inputs": [
+    {
+      "role": "os_totals:commercial_banks",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_baseline/direct_sources/F03_2024_totals.json",
+      "sha256": "a8ec8aad6e202ca6540204d87bc343cd72125aa3b6b42a3a820d8cb78c5b0103",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2012:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2012_candidates_H.json",
+      "sha256": "fdb8d241b4435873c4406e27671095f2e8dd6747b55c15ca2a714201f8e8495e",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2012:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2012_candidates_S.json",
+      "sha256": "45cd41e2e7daf5a1b7ece5bfc8a21b340cb804314d676a5e8384f018077c7c42",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:commercial_banks:2012",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2012_presidential.json",
+      "sha256": "6f831fed530fdf0edd905f76b4d96d05ce78a775752dfccdbcb80ad38b18f8b0",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2014:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2014_candidates_H.json",
+      "sha256": "6e6a38a128ee01934f292a3ce3eeebbeaca2b3b87518888a4025772fd0d1c709",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2014:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2014_candidates_S.json",
+      "sha256": "a947e3da513150c7a1402e5cf84cc4bd863636f19291142667f8e5e0127b3028",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:commercial_banks:2014",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2014_presidential.json",
+      "sha256": "1faaa81f9d28d113b9545e7c26bdec7b45e272de6d7d2d3d46d3efe9b4562039",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2016:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2016_candidates_H.json",
+      "sha256": "3e5ed3cb5c5c87331acc3d5cc7b35174b999fec9a6b413d2436ea8e626790e79",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2016:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2016_candidates_S.json",
+      "sha256": "4bd6a70347aaa038805c9229fb31f30141a530e11b0a3520cd74f8b035cd4fc7",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:commercial_banks:2016",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2016_presidential.json",
+      "sha256": "b73352ffbbd354aa28900a908813663bdc448acd2d45fc1a03ef23cf72e990e0",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2018:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2018_candidates_H.json",
+      "sha256": "83304de4152e0cfdb1a446571359cf19ce65a874493426199689f2056cb219a6",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2018:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2018_candidates_S.json",
+      "sha256": "a555c98278eedad0cfe0309d307ab431f87f53579f64cb80fa886a85674513c5",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:commercial_banks:2018",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2018_presidential.json",
+      "sha256": "932c8a50706e1a04895fdf09e919e08c59f2c964fb5c9dc59847bab70c6b1b5d",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2020:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2020_candidates_H.json",
+      "sha256": "e4f4d49c6328dbe0e10bdb6e04e448e1c69ad06cbf9d0c530aca592448b8ee4d",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2020:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2020_candidates_S.json",
+      "sha256": "bf92f02ff50aefea47ba2e8a4e0f437a3b911d5a228d4fa228a375c1d177e686",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:commercial_banks:2020",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2020_presidential.json",
+      "sha256": "3bfca939538043906755d4a71ded88ca79ad3689754db315cae92d0ef4783952",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2022:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2022_candidates_H.json",
+      "sha256": "950e03aefd475a8081875037f13263d09951e2bd2b4f59ff7e0710872aba9003",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2022:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2022_candidates_S.json",
+      "sha256": "7429c14d3ae89096a1c4a278a2094ac72aa2b0a279778e65e35edca9daa6f5ee",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:commercial_banks:2022",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2022_presidential.json",
+      "sha256": "5e9d5ef1c127aa9ba4d2b2792105aa6ac1364d22e9bab67cd5b52e67fb9fc084",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2024:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2024_candidates_H.json",
+      "sha256": "01c9338f73f36452d7d21df327b1413accd1675612fe4b2cf6c126c57286312a",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:commercial_banks:2024:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2024_candidates_S.json",
+      "sha256": "c06014e6c8acf402f5c9219103626568e89a5ae62ec097d8952bf12e2bdb4330",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:commercial_banks:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F03_2024_presidential.json",
+      "sha256": "8ba77012a8d8cb74a477d7a2e9b340f5e57fa2ab36fb8e791066cbc388e3f736",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_totals:credit_unions",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_baseline/direct_sources/F05_2024_totals.json",
+      "sha256": "bddd9f2c40afc21c70928062ee6225ac714cd80a4a4221ac87c6c6908d09dbb1",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2012:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2012_candidates_H.json",
+      "sha256": "479ef2323167c9edc74179a46646a4753fef9d687012fa6e6c1465f58bcc2f91",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2012:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2012_candidates_S.json",
+      "sha256": "1521843f2f525985ab0b329f73bab57c6d5b2f03aaf66cc16710cacd32330d61",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:credit_unions:2012",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2012_presidential.json",
+      "sha256": "ddefdf9600575844c714b45288640b0db99f5733e14b6ab59ec11caf7b845141",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2014:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2014_candidates_H.json",
+      "sha256": "120fd32c62a7862f15aee8eadb01d9a4664131bc0df94324b41358948d325962",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2014:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2014_candidates_S.json",
+      "sha256": "c6d4809c6c4e361b003e04500eeca58eb862749502a466c5f57280987ee43248",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:credit_unions:2014",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2014_presidential.json",
+      "sha256": "7f382aa5d4b7ef700ac11a085903b111c17853ff8801df2560f69bc930aa8710",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2016:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2016_candidates_H.json",
+      "sha256": "bacd6cf6f8c8adbce91da5f96246e9d00459cd240583544352beeff4b1fd9036",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2016:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2016_candidates_S.json",
+      "sha256": "287e26e36ca100d88315c010374e7989dd90c209cae756537b9f2d6028ffe81f",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:credit_unions:2016",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2016_presidential.json",
+      "sha256": "6e5d75e484d9fad84a583df8930866ce3b290427a8b26b202c1607b7587488d9",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2018:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2018_candidates_H.json",
+      "sha256": "05f11d83a589d272829933298c1c81a914188227b7ab08998ca2480e2b8706bd",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2018:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2018_candidates_S.json",
+      "sha256": "aeac56f597141954b7befcd517592b84f59f072e0e9f27edf25883f93ddba133",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:credit_unions:2018",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2018_presidential.json",
+      "sha256": "1672a746b4a4af5019e864aa8963715649aa247f9d78a40b9b2d138d8efb48a1",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2020:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2020_candidates_H.json",
+      "sha256": "8e8e3f6f2175ea50a7b5471675ae440a14f46ed2860a1995ee96509f6926e85f",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2020:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2020_candidates_S.json",
+      "sha256": "c3ec8b25336f422bb70dbe88eb19e4e727c59288600673ffe2bc2fd5688b01f4",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:credit_unions:2020",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2020_presidential.json",
+      "sha256": "9802ad6829573ef27767b448f16c4291f16b142995d786897166ed910d99680c",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2022:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2022_candidates_H.json",
+      "sha256": "d10c454e14897fa69bcb8eff35006c72c849999d92802794f6957c834e430ebd",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2022:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2022_candidates_S.json",
+      "sha256": "ded39725312cea90a08fb6685f9364c6de8bcd8a83b610f7c13cc929d5ecc299",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:credit_unions:2022",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2022_presidential.json",
+      "sha256": "8a373e7f850ac616d12667c9c297757f1eb677b9182d86e442d450ca27dac000",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2024:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2024_candidates_H.json",
+      "sha256": "2461f0e83c547a389897ddfe6db3f24d73b8d9206b230f745410eb57d2d4f3b2",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:credit_unions:2024:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2024_candidates_S.json",
+      "sha256": "dce79d20c258c383c7f524f7aef0b70b2e18359e21768df010ec970316682f58",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:credit_unions:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/F05_2024_presidential.json",
+      "sha256": "f804faeb2c97ae3d61a161ba01a2410bd86d5b74cbeacda593b0082b33dbe608",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_totals:auto_light_duty_manufacturing",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_baseline/direct_sources/T2100_2024_totals.json",
+      "sha256": "5d8ec0e629b728806513f1e82caae8ca98245627cf85d65d8d0aa97ea90782a8",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2012:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2012_candidates_H.json",
+      "sha256": "26b7455cea7a332494299ece9aa3f6804d06783c3e5ec063e3aaff5c4581a3d1",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2012:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2012_candidates_S.json",
+      "sha256": "d08a25ab14a2cf541ffff92fdd7b68cc7108399b82199084b444f644222715cf",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:auto_light_duty_manufacturing:2012",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2012_presidential.json",
+      "sha256": "14a980a826a0812a44a461cb84ab762ab6f1d9c26b15532646ea4c150eab20ef",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2014:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2014_candidates_H.json",
+      "sha256": "b8166b12c4e3b6e02564a0b9ef467be2ab40d779700579fd4aee2ed76ae6a6ff",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2014:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2014_candidates_S.json",
+      "sha256": "60e9b3f521ac7be7adf47e98f253ab0e76e456018780e2649bf49d0707fd8523",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:auto_light_duty_manufacturing:2014",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2014_presidential.json",
+      "sha256": "86569a3f6f45c652e6c1659e039361cd6f82972ad6be4149185fd194762100bd",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2016:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2016_candidates_H.json",
+      "sha256": "4c0718b9e0c352c3b31c74f5c59407c58d66b0de25607ae957458b5da1347858",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2016:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2016_candidates_S.json",
+      "sha256": "5a558264522c82536d23374226075301e82fdccc8506d91417e042c18fb6167f",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:auto_light_duty_manufacturing:2016",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2016_presidential.json",
+      "sha256": "574630a971c24c1deca1c4d7b5627bf4d3276d146fdba5ccb06c13b5a588fb60",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2018:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2018_candidates_H.json",
+      "sha256": "dd7dba29c06f3debf86623e748e2c59bd96caf9b3a7df608b83cb3aa7ca52d6c",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2018:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2018_candidates_S.json",
+      "sha256": "16c3244fc3255d73200010aebd26960f4dffc734f3c48d774aa5a3316677751c",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:auto_light_duty_manufacturing:2018",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2018_presidential.json",
+      "sha256": "2abb80526360f45b92b6d40858229f3e6f66c35cee5b1775bd1c1b112832400b",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2020:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2020_candidates_H.json",
+      "sha256": "f134d59f9ab8a2fc7af2237fc86594794680146bf1b9a4a7ad13b520c1938d53",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2020:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2020_candidates_S.json",
+      "sha256": "234b58485c4ac128b7fa6155b237381367b931f694fb3449dfcc1776eaf06f27",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:auto_light_duty_manufacturing:2020",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2020_presidential.json",
+      "sha256": "8049c4d8f174eecfac2d6c143e7fd7bd59709da3aefc59ed26c8f6ad0f1e4a19",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2022:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2022_candidates_H.json",
+      "sha256": "1355adbc621079157b5a7dcaafa5b413f58f2f0e227a4fae21fdf09ee0d63053",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2022:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2022_candidates_S.json",
+      "sha256": "f4c467a10611ad26f2106ee5d8663c00b142b457edec21b6fb1f03eb555cc876",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:auto_light_duty_manufacturing:2022",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2022_presidential.json",
+      "sha256": "25495d9e134ee9c38e58e161b25e9d0e598b7bcaa354d54d472d42cd011498a8",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2024:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2024_candidates_H.json",
+      "sha256": "fb9114c78a82f26e8ad48abc43600297484a10d8a048f639587451dc3ae3f8a7",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:auto_light_duty_manufacturing:2024:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2024_candidates_S.json",
+      "sha256": "584de3ca05c7fd6604369124cb80778afcadd5cf898ccb9ab4443c18cc41040a",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:auto_light_duty_manufacturing:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/direct_sources/T2100_2024_presidential.json",
+      "sha256": "c5970ae9b9000a002ce88b104d07db3f1be853cbdf2af0c9e5340c21624da4c7",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "fec_cn:2012",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/fec_sources/cn12.zip",
+      "sha256": "53a07683cbc0bf9c47c825502ed8212626313c54c63a27bc40048dc3e38ddf21",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "fec_cn:2016",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/fec_sources/cn16.zip",
+      "sha256": "7dd5b2df23b83ca408d9abd11f02486209c3bf638b3cf601ac13b0e5d19f51da",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "fec_cn:2020",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/fec_sources/cn20.zip",
+      "sha256": "f0229bb4e6b8030b074972ffb27fa163b195729b31f1276005ecca31a0728a39",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "fec_cn:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/fec_sources/cn24.zip",
+      "sha256": "d3a99d3e79661da59dff23d34cf053412c8210a95aaf8912545aeb807b027b48",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "ibis_actual",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSD/07_actual_industry_growth.xlsx",
+      "sha256": "996b89e079671a84cdb330f786670f2ded7b5bf3f1e0c81b74ef5c0c36a7a0a1",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "ibis_predicted",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSD/06_predicted_industry_growth.xlsx",
+      "sha256": "6ee67a899b018a32340730da8181a2f1a626e8ea520d28c03af07eb76605a71c",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "lobbyview_sector_year",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSD/01_lobbying_expenditures.xlsx",
+      "sha256": "908a23fdb286db16ff370fb5ef8b0924561fea6102bd4129bff8f8966589ea89",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "cpi",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSD/00_controls.xlsx",
+      "sha256": "253aaadd6912862df817f51c9d97225735b5f8a764cac64deca40f224d1ab80e",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "current_control",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSD/03_actual_seat_gain.xlsx",
+      "sha256": "d7181b61556be66a6dd7f8e6de94bc72aecb5227614de5cbcb80a6d0e54b792a",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "election_workbook",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSD/02_election_forecasting.xlsx",
+      "sha256": "79d051037c2383aa228a698ce7a5b85ae9c5a4cedc0d604812734550e4162ecb",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "iem_zip",
+      "path": "/workspace/forecast-audit-5603f2/inputs/House_Senate_Control_Forecasts_CSV.zip",
+      "sha256": "852d894f3ef2d7fe0aa45e319013bf9a0f2388596759f66c71e06925663f67d2",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:kalshi:house:2026",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_kalshi_house_2026.csv",
+      "sha256": "4f73e7af62f8554cc5e6b924c109991495d83811d4e2035a222ffec98a9912e3",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:kalshi:senate:2026",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_kalshi_senate_2026.csv",
+      "sha256": "6633296cae7345917f8f54456a62634366368b44ebd411117a17d7d818d28c2b",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:polymarket:house:2026",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_polymarket_house_2026.csv",
+      "sha256": "7a7f0fa40a32df8749e6c01bdcc2b6ee59d009e7fead268f3fb0921905e8c37e",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:polymarket:senate:2026",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_polymarket_senate_2026.csv",
+      "sha256": "c8f9a475abf92242610e23e094377f7b295f6ccb337c156f0c1c92bd10c9dd4b",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:kalshi:house:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_kalshi_house_2024.csv",
+      "sha256": "00ac00747894527793a99e76cc6fe3d620341c6aeb94f8aaa75bb7950624d301",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:kalshi:senate:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_kalshi_senate_2024.csv",
+      "sha256": "08a629918c588790ca4494a885723806dd78c2d30d55999eeb1d3ab59a14fd2b",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:polymarket:house:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_polymarket_house_2024.csv",
+      "sha256": "426cc3a9811038f527587a83b394fb7bb4ba34a09d66c0af92a0088a8445b3dd",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "market_daily:polymarket:senate:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/SGSA/expected_control/daily_polymarket_senate_2024.csv",
+      "sha256": "87a1efadb91162c46d421c3d2c68dac814cf3840d1200e211c1d5e9e828e3f65",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "parity_ref:selected_models.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/CHE/outputs/stepwise/selected_models.csv",
+      "sha256": "b1e43bf584813bdfc9ea232b41437f97a226d61474facd3b33bb43d163639ea6",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:analysis_case_panels.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/CHE/work/stepwise/analysis_case_panels.csv",
+      "sha256": "f010d3bfc0e328eee12a1f28dccccf1e06bf4d2585742c591cd5fc02189221b2",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:regression_panel.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_tests/regression_panel.csv",
+      "sha256": "cd16608dad9cb94c101586d59079d890ec820615bdaaf3353f21f81936e82d4c",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:pac_selected_design.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_forward/pac_selected_design.csv",
+      "sha256": "49b170d1f2a766f5d3c06663183c122fc38bfc6a0d02100be58eeb56c8e70a95",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:year_effects__all71.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/r2_lobbying_audit/designs/year_effects__all71.csv",
+      "sha256": "1e7c5c10ecaf08f24269c6fd20e0d5c8f8b195829860d575422da2311ff24cc7",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:money_panel.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_partisanship/money_panel.csv",
+      "sha256": "62c2dc13cb2ca00707abe4a58763986ba3f8eaf002b78cc8607d1a67fff52558",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:industry_forecast_slopes.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/CHE/outputs/stepwise/industry_forecast_slopes.csv",
+      "sha256": "2717a101059cdd033b0e030b063b5e83b0461c5b2932c72a9037a274b3deb737",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:nested_validation_metrics.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/CHE/outputs/stepwise/nested_validation_metrics.csv",
+      "sha256": "a9145d9ad19f849236e87456e901d27ebda6b8a5ad30d2bfff3c16a0355a13a8",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:interpretable_effects.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/CHE/outputs/stepwise/interpretable_effects.csv",
+      "sha256": "51f3ae146cdf401a26f86d65d3e95b72f8895c410cde1e8b7a2ea2432e8a2fa5",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:analyze.py",
+      "path": "/workspace/forecast-audit-5603f2/inputs/CHE/work/stepwise/analyze.py",
+      "sha256": "c6b6a133d68c763921dabbd034eae56894e04cc36b116136657fa45ae0ff55c1",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:level_sample.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/lobbying_followup/level_sample.csv",
+      "sha256": "1e7125f00af25a50854cfdf1db3d91cf910478464cf8f8ad56acdfe414cf6c77",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "parity_ref:lobbying_comparison_sample.csv",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/forecast_followup/lobbying_comparison_sample.csv",
+      "sha256": "196cf41c640675c10f3b78aafff05e871d7700818c9c53d7d0f54be052967338",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "v1_bundle",
+      "path": "/workspace/forecast-audit-5603f2/inputs/BUNDLE_V1/giving-models-v1.json",
+      "sha256": "75c382af66d344abb583e66a21b4da7d431144da6e20b5e09c34d72cc797fd3b",
+      "status": "ok",
+      "purpose": "parity_ref"
+    },
+    {
+      "role": "os_totals:property_casualty",
+      "path": "/workspace/forecast-audit-5603f2/inputs/LOO/outputs/opensecrets_baseline/direct_sources/F09_2024_totals.json",
+      "sha256": "115b4a7a3ba2c20595720e3128e5ad2218a11a3df7b487664f2f56d8a07aab0d",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2012:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2012_candidates_H.json",
+      "sha256": "d26bb14b73a0eeafdff33f89d26498ae39f460b6e08a4ca0301afb91220df7fb",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2012:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2012_candidates_S.json",
+      "sha256": "0d707c9bde6b9a8fc434683dc27d1cb15c1f79b57753b2685b81e88b8fddcf47",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:property_casualty:2012",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2012_presidential.json",
+      "sha256": "d9ff841befcd5f8b5ce4ff0d6df9d0d96b433ad022c45a1c9ad47dd0fa717551",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2014:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2014_candidates_H.json",
+      "sha256": "62787ef6a4d9792fab5fc50efdf651bbb799703b7bbc5fcf07bc10b519f4a145",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2014:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2014_candidates_S.json",
+      "sha256": "7b55afc193e6a10671bc4c6caf14033b7c3aeb5321b590d84bf468cc112c08da",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:property_casualty:2014",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2014_presidential.json",
+      "sha256": "50636bf5a2f74350b1d47cf9d9b8d757ebff70a7b2ad84ffe6eabae4f1d61da8",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2016:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2016_candidates_H.json",
+      "sha256": "734585941cf93cc4c62d9f06d746d686751ba0edaca836bfb554d0a8dfedead2",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2016:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2016_candidates_S.json",
+      "sha256": "f45e7d94036c08f9156000bad7e1a0f9f257c08de5be6ede38e37c471ea5f5df",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:property_casualty:2016",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2016_presidential.json",
+      "sha256": "2e66632172bccd2a71aa14956f169f5d924f2ae7b8b9b9d292d77ae4b2d9e389",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2018:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2018_candidates_H.json",
+      "sha256": "7ea88db8a2d164904cffb2cc3135ca447cbef8bd10f56e0c74ff2644afa53453",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2018:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2018_candidates_S.json",
+      "sha256": "47dfd8af46de61ec89390583378f77a0c31eb64acc959e4307863609af3c01bc",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:property_casualty:2018",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2018_presidential.json",
+      "sha256": "d75a385c0e941a06ff72f23435ab82d18db1655b85e79a9e36bb5ab84f80806a",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2020:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2020_candidates_H.json",
+      "sha256": "ab8faf5e20d23f05a82461b1ea44e7cfee9ad488f4a89d549288bbf92c4347f8",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2020:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2020_candidates_S.json",
+      "sha256": "9ac2e1d9e9efc39d79ff6c2aa4d48b527067336b9fef4cd7d42af99997ccf887",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:property_casualty:2020",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2020_presidential.json",
+      "sha256": "5438a5d8ee8311d1252283d69e99014e511c93eeef9e969a35edb424a4e8512d",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2022:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2022_candidates_H.json",
+      "sha256": "26ed4f6543e3946a3975e9f00703b052bf31a2a5660ca6d6e1a7360f94f6d51b",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2022:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2022_candidates_S.json",
+      "sha256": "d14cf1901460da2d0dcc2e47354e9fe811a9aeaab59f17ad1dfb1e3c22c22780",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:property_casualty:2022",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2022_presidential.json",
+      "sha256": "921ac0c780056ea524eb9a59545b9d88d74c9f8872a037e15f26cdef348a72d2",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2024:H",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2024_candidates_H.json",
+      "sha256": "a48660a818d533f56ac3eb9e800dc21f73eac329443f2b8ec5a45e2c2d0e4c67",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_recipients:property_casualty:2024:S",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2024_candidates_S.json",
+      "sha256": "9aae117121ebda621bbcd059df98e4f28472df077174f94a856e1b6f1613156d",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "os_presidential:property_casualty:2024",
+      "path": "/workspace/forecast-audit-5603f2/inputs/INGEST/local-f09-proposals-20260930/outputs/os/F09_2024_presidential.json",
+      "sha256": "c366da1133dcf3ca17cdb10c6a19f0e6e3f1932bad528b67f367d4aee6e345a0",
+      "status": "ok",
+      "purpose": "raw"
+    },
+    {
+      "role": "ibis_actual_current:property_casualty",
+      "path": "/workspace/forecast-audit-5603f2/inputs/RFDATA/ibis_pc_2024_11_current_year.csv",
+      "sha256": "f5d733048236a0dd95fe42c1ed676b9345f7cf0b5aa54f6d416cb4d785a24c11",
+      "status": "ok",
+      "purpose": "raw"
+    }
+  ],
+  "code": [
+    {
+      "file": "rf_agent.R",
+      "sha256": "dc76e7caefd92defab95fa44fb31c9ed82fec50667e6f3762dd6d2641d92108f"
+    },
+    {
+      "file": "rf_backtest.R",
+      "sha256": "5a932f27f4ab4351c17434006790881826795176a84b5701830dc21088bdedfb"
+    },
+    {
+      "file": "rf_bundle.R",
+      "sha256": "4c5cf09b525cec0be6c29e3c85943a5a0c096e866dd567e9816e8312ef79ea77"
+    },
+    {
+      "file": "rf_bundle2.R",
+      "sha256": "047d3f8b0efb85710012fa9d5f16bbd2daf23308dac3b71b520807fe3a6ff92c"
+    },
+    {
+      "file": "rf_config.R",
+      "sha256": "1fc9e66cfbd89805308b22cf04ebf30752cff4a2c1080ac9ab0777f89ee01ae6"
+    },
+    {
+      "file": "rf_fit.R",
+      "sha256": "a218b37ae470571437dcf0e3472c166cc34977ba1e5366b973fe14666e9912bb"
+    },
+    {
+      "file": "rf_gates.R",
+      "sha256": "b069f28c8d5ac45766c0add0356385c6aead86381e109fd8d546f527531e068c"
+    },
+    {
+      "file": "rf_glassbox.R",
+      "sha256": "92d94296f280c89e3d153b4147d24136313c6aee2e867cb7dfa6dccd114d72f8"
+    },
+    {
+      "file": "rf_growth.R",
+      "sha256": "4b9a3c752ac315dcc4acf717894342e00a789b5ce274bcb25a2126acba88fc83"
+    },
+    {
+      "file": "rf_inputs.R",
+      "sha256": "403765af4b75cf863c86e41a76bcc324ffaa4f3d466332d82731a426e355a38c"
+    },
+    {
+      "file": "rf_intervals.R",
+      "sha256": "a2d5585603fb683e4d17b042d85b88fbbde09981f96926e37bbc83e7330150cd"
+    },
+    {
+      "file": "rf_io.R",
+      "sha256": "dbad5bcfc467bfbd7c548ab88e9cd7f3fad236b6746fc022d008717c8c2aaa93"
+    },
+    {
+      "file": "rf_lobbying.R",
+      "sha256": "dd0818d36baec0d74907bbdafc97e72e4d5f027d102ab706374684abe2771462"
+    },
+    {
+      "file": "rf_opensecrets.R",
+      "sha256": "c20c630bd40564ecc15974bf63ef0e0b3bb5c1691956bf580cd2b99c49b4a3b0"
+    },
+    {
+      "file": "rf_packages.R",
+      "sha256": "fecc99e7f4f1772b3a3cf3a13e98ce41e32fe3a4f3f5fac1f967e35991701ed3"
+    },
+    {
+      "file": "rf_panels.R",
+      "sha256": "90892aa8d2f48083d00bf5bb6bd3982e37e873014fc71b95b512c17d290b3d04"
+    },
+    {
+      "file": "rf_parallel.R",
+      "sha256": "8863ea7ad60b48c68b0d775e5b5cbc28d647d62495dc71be5bc464c5315f829f"
+    },
+    {
+      "file": "rf_parity.R",
+      "sha256": "fd23b09b7d6c3f1038ee6d8731b3e6513656069e708fc0c19ab0125211cdfc66"
+    },
+    {
+      "file": "rf_political.R",
+      "sha256": "4ef5462b0bdb1153bd04f1b87abfc8a7e503e48e65480000b076f23cea01b7c2"
+    },
+    {
+      "file": "rf_pool.R",
+      "sha256": "d0855cf9828843d15c91aa9a4fbd55a3a94b140b836d359c5955e4661becf1b3"
+    },
+    {
+      "file": "rf_publish.R",
+      "sha256": "f6bbf22fbc334fb4183d566fd23d9514d6b42d0bdc89006ed925597727ea4877"
+    },
+    {
+      "file": "rf_registry.R",
+      "sha256": "03ac22482e3dc25b53ba4387226f758c362400eed736627860c03277da0b7997"
+    },
+    {
+      "file": "rf_report.R",
+      "sha256": "e910d5ebac36d635c8b3763e4955e56e966e8c5f067b94d987a84e495ef8423d"
+    },
+    {
+      "file": "rf_rng.R",
+      "sha256": "c9bcf7312016ec6e09319a647a9dbbc2624f39cb039a4b22a806c815dfef727e"
+    },
+    {
+      "file": "rf_robust.R",
+      "sha256": "200c13b5a365cd7a6defde34aee4a603d0ded577deda640cc7d313dd7f8ce07d"
+    },
+    {
+      "file": "rf_run.R",
+      "sha256": "71a1dd479b9a6a2f678f3e4ef65e1325772bbeba38a00e82987220bbff56a080"
+    },
+    {
+      "file": "rf_schema.R",
+      "sha256": "0a764a856691eb30eed04e8da6094e38fb7b74c276436456db830e8d7e169793"
+    },
+    {
+      "file": "rf_select.R",
+      "sha256": "46c9cacb97aed4b234d309c7f1807e81ca89fe54465c1c8dd02959c32d083eb5"
+    },
+    {
+      "file": "rf_stepwise.R",
+      "sha256": "b025d847d9c30e4295f781454c6abdb2e72b55af361f3a3e27d3486e49caaefb"
+    },
+    {
+      "file": "rf_v2model.R",
+      "sha256": "cfa3338d23cfcf91538c5770c4b8e6335ccb8962621ba9d42b241b2b67b5f7f1"
+    }
+  ],
+  "code_sha256": "a1fade8038fd7f190b1b9d3082fd072373444fc3f5a87822b0cd10b4ba56bdcf",
+  "R_version": "R version 4.6.0 (2026-04-24)",
+  "platform": {
+    "R_version": "R version 4.6.0 (2026-04-24)",
+    "platform": "x86_64-pc-linux-gnu",
+    "os": "Ubuntu 24.04.3 LTS",
+    "blas": "/usr/lib/x86_64-linux-gnu/atlas/libblas.so.3.10.3",
+    "lapack": "/usr/lib/x86_64-linux-gnu/atlas/liblapack.so.3.10.3",
+    "cores": 32,
+    "node": "d3e3e3ac8c64",
+    "note": "numerical results agree across platforms to ~1e-13; compare bundles with rf_bundle_diff(), never byte equality"
+  },
+  "packages": [
+    {
+      "package": "jsonlite",
+      "version": "2.0.0",
+      "lib": "/workspace/forecast-audit-5603f2/Rlib"
+    },
+    {
+      "package": "readxl",
+      "version": "1.5.0",
+      "lib": "/workspace/forecast-audit-5603f2/Rlib"
+    },
+    {
+      "package": "sandwich",
+      "version": "3.1-3",
+      "lib": "/workspace/forecast-audit-5603f2/Rlib"
+    },
+    {
+      "package": "clubSandwich",
+      "version": "0.7.0",
+      "lib": "/workspace/forecast-audit-5603f2/Rlib"
+    }
+  ],
+  "gates": [
+    {
+      "gate": "G0 environment",
+      "status": "PASS",
+      "detail": "R version 4.6.0 (2026-04-24); jsonlite 2.0.0, readxl 1.5.0, sandwich 3.1-3, clubSandwich 0.7.0; rf_rng.R hash pinned"
+    },
+    {
+      "gate": "G1 inputs",
+      "status": "PASS",
+      "detail": "121 inputs present, hashes pinned, vault copies byte-equal"
+    },
+    {
+      "gate": "G2 parity",
+      "status": "PASS",
+      "detail": "1407 expectations, 0 failed, 0 errors"
+    },
+    {
+      "gate": "G3 panel validity",
+      "status": "PASS",
+      "detail": "34 checks, 0 failures"
+    },
+    {
+      "gate": "G4 sample adequacy",
+      "status": "WARN",
+      "detail": "withheld: auto_light_duty_manufacturing/lobbying"
+    },
+    {
+      "gate": "G5 stability",
+      "status": "PASS",
+      "detail": "14 sign checks hold"
+    },
+    {
+      "gate": "G6 non-degradation",
+      "status": "WARN",
+      "detail": "7 cells no worse than the published calculator (v1 calculator recomputed on the same folds of the frozen v1 sample (pooled slope, same-phase anchor, calc path)); waived by the owner: control_House / commercial_banks (Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".); control_House / credit_unions (Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".); control_House / auto_light_duty_manufacturing (Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".)"
+    },
+    {
+      "gate": "G7 bundle",
+      "status": "PASS",
+      "detail": "schema-valid, all numbers finite, every calculator industry has a capability or a reason per model"
+    },
+    {
+      "gate": "G8 consumer smoke",
+      "status": "PASS",
+      "detail": "exit status 0:   \"report\": \"/workspace/forecast-audit-5603f2/verification/publication-gate/aggregate-smoke.json\" | }"
+    },
+    {
+      "gate": "G9 vs naive",
+      "status": "WARN",
+      "detail": "does not beat last-period naive: lobby_log (4.050 vs naive 3.936)"
+    }
+  ],
+  "parity": {
+    "suite": {
+      "files": 10,
+      "tests": 75,
+      "expectations": 1407,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "warnings": 0
+    }
+  },
+  "bundle_path": "/workspace/forecast-audit-5603f2/out/runs/pod-publish-20260930/bundle/giving-models-v2.json",
+  "bundle_sha256": "7aa3711cd8043c8e8e7fc3be653c8b3d89b8324f4f200c8f53c1eb5a0089cac1",
+  "decision": "PUBLISH",
+  "published_to": {
+    "dir": "/workspace/forecast-audit-5603f2/repo/mentat/app/data",
+    "file": "versions/7aa3711cd8043c8e8e7fc3be653c8b3d89b8324f4f200c8f53c1eb5a0089cac1/giving-models-v2.json",
+    "sha256": "7aa3711cd8043c8e8e7fc3be653c8b3d89b8324f4f200c8f53c1eb5a0089cac1",
+    "model_version": "refit-20260930-377f7324-00a83f464ffe"
+  },
+  "rule_selection": {
+    "pac": {
+      "reported_rule": "R1",
+      "reason": "R1 has the lowest MAE in every design among the rules that beat pooled"
+    },
+    "control_House": {
+      "reported_rule": "R0",
+      "reason": "no rule beats the pooled slope R0 by 5% in both designs: the pooled slope is used"
+    },
+    "control_Senate": {
+      "reported_rule": "R0",
+      "reason": "no rule beats the pooled slope R0 by 5% in both designs: the pooled slope is used"
+    },
+    "lobby": {
+      "reported_rule": "R0",
+      "reason": "no rule beats the pooled slope R0 by 5% in the rolling design: the pooled slope is used"
+    }
+  },
+  "anchor_selection": {
+    "control_House": {
+      "auto_light_duty_manufacturing": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo +13.1%, chrono -7.7%; positive = same_phase better)"
+      },
+      "commercial_banks": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo +55.4%, chrono +4.4%; positive = same_phase better)"
+      },
+      "credit_unions": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo -15.3%, chrono +20.8%; positive = same_phase better)"
+      },
+      "property_casualty": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo -43.4%, chrono -2.3%; positive = same_phase better)"
+      }
+    },
+    "control_Senate": {
+      "auto_light_duty_manufacturing": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo -29.6%, chrono +12.5%; positive = same_phase better)"
+      },
+      "commercial_banks": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo -20.1%, chrono -2.1%; positive = same_phase better)"
+      },
+      "credit_unions": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo -10.7%, chrono -9.4%; positive = same_phase better)"
+      },
+      "property_casualty": {
+        "anchor": "previous_cycle",
+        "slope_rule": "R0",
+        "reason": "previous_cycle kept: same_phase does not beat it by 5% in every design (loeo -140.1%, chrono -20.5%; positive = same_phase better)"
+      }
+    }
+  },
+  "waivers": [
+    {
+      "gate": "G6",
+      "cell": "lobby / commercial_banks",
+      "term": "lobby",
+      "industry": "commercial_banks",
+      "reason": "owner ruling: keep log refit",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": false,
+      "applied": true,
+      "new_MAE": 6.64414878944751,
+      "published_MAE": 6.3549470844694
+    },
+    {
+      "gate": "G6",
+      "cell": "control_House / commercial_banks",
+      "term": "control_House",
+      "industry": "commercial_banks",
+      "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": true,
+      "applied": true,
+      "new_MAE": 1.54982061704938,
+      "published_MAE": 1.05346532256982
+    },
+    {
+      "gate": "G6",
+      "cell": "control_House / credit_unions",
+      "term": "control_House",
+      "industry": "credit_unions",
+      "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": true,
+      "applied": true,
+      "new_MAE": 1.83627749233309,
+      "published_MAE": 1.52193157891346
+    },
+    {
+      "gate": "G6",
+      "cell": "control_House / auto_light_duty_manufacturing",
+      "term": "control_House",
+      "industry": "auto_light_duty_manufacturing",
+      "reason": "Owner explicitly authorized the three House-share LOEO degradations measured by pod-final-20260930: \"Waive these three cells and publish\".",
+      "owner": "Paul Goff",
+      "date": "2026-09-30",
+      "show_warning": true,
+      "applied": true,
+      "new_MAE": 1.76552202686047,
+      "published_MAE": 1.33826878020482
+    }
+  ],
+  "waiting_for_data": []
+}

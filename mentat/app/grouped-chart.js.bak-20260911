@@ -1,0 +1,52 @@
+/* A shared SVG view: nulls remain gaps and refunds retain their sign. */
+globalThis.MentatGroupedSVG = (result,title,note='') => {
+  const ns='http://www.w3.org/2000/svg', horizontal=result.type==='groupedhorizontal', colors=MentatTheme.palette;
+  const count=result.groups.length, series=result.series.length;
+  const plotHeight=horizontal?Math.max(280,count*(24*series+28)):340;
+  const plotWidth=horizontal?800:Math.max(800,count*Math.max(70,series*16));
+  const width=plotWidth+220, height=plotHeight+180+series*24;
+  const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('role','img');svg.setAttribute('aria-label',title);
+  const add=(tag,attrs={},text)=>{const n=document.createElementNS(ns,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!=null)n.textContent=text;svg.append(n);return n;};
+  const label=(x,y,text,attrs={})=>add('text',{x,y,fill:MentatTheme.ink,'font-family':MentatTheme.sans,'font-size':12,...attrs},text);
+  const tip=(node,text)=>{const n=document.createElementNS(ns,'title');n.textContent=text;node.append(n);};
+  const wrapped=(x,y,text,characters,attrs={})=>{
+    const words=String(text).split(/\s+/),lines=[];let line='';
+    for(const word of words){if(line&&(line+' '+word).length>characters){lines.push(line);line='';}line+=(line?' ':'')+word;}
+    if(line)lines.push(line);
+    const shown=lines.slice(0,2).map(value=>value.length>characters?value.slice(0,characters-1)+'…':value);
+    if(lines.length>2)shown[1]=shown[1].slice(0,characters-1)+'…';
+    const node=label(x,y,'',attrs);
+    shown.forEach((value,index)=>{const span=document.createElementNS(ns,'tspan');span.setAttribute('x',x);span.setAttribute('dy',index?'1.25em':0);span.textContent=value;node.append(span);});
+    tip(node,text);return node;
+  };
+  add('title',{},title);add('desc',{},note);add('rect',{width,height,fill:'#fff'});wrapped(20,28,title,Math.floor((width-40)/10),{'font-size':18});
+  const values=result.groups.flatMap(g=>g.values.map(v=>v.value).filter(v=>v!==null));
+  const low=Math.min(0,...values),high=Math.max(0,...values),range=high-low||1;
+  const scale=v=>horizontal?200+(v-low)/range*plotWidth:70+plotHeight-(v-low)/range*plotHeight;
+  for(let i=0;i<=5;i++){
+    const value=low+range*i/5,p=scale(value),text=value.toLocaleString('en-US',{maximumFractionDigits:2});
+    add('line',horizontal?{x1:p,x2:p,y1:60,y2:70+plotHeight,stroke:MentatTheme.grid}:{x1:150,x2:150+plotWidth,y1:p,y2:p,stroke:MentatTheme.grid});
+    if(horizontal)label(p,90+plotHeight,text,{'text-anchor':'middle'});else label(140,p+4,text,{'text-anchor':'end'});
+  }
+  const step=horizontal?plotHeight/count:plotWidth/count;
+  result.groups.forEach((g,i)=>{
+    if(horizontal)wrapped(190,80+i*step,g.label,26,{'text-anchor':'end','data-group-label':'true'});
+    else wrapped(150+step*(i+.5),90+plotHeight,g.label,24,{'text-anchor':'end','data-group-label':'true',transform:`rotate(-30 ${150+step*(i+.5)} ${90+plotHeight})`});
+    g.values.forEach((v,j)=>{
+      if(v.value===null)return;
+      const color=colors[j%colors.length],text=`${g.label} · ${v.series}: ${v.value.toLocaleString('en-US',{maximumFractionDigits:3})}`;
+      if(result.type==='multiline'){
+        const x=150+step*(i+.5),y=scale(v.value),previous=result.groups[i-1]?.values[j];
+        if(previous?.value!=null)add('line',{x1:x-step,x2:x,y1:scale(previous.value),y2:y,stroke:color,'stroke-width':2,'stroke-dasharray':j>=colors.length?'5 3':'none'});
+        tip(add('circle',{cx:x,cy:y,r:4,fill:color}),text);
+      }else if(horizontal){
+        tip(add('rect',{x:Math.min(scale(0),scale(v.value)),y:85+i*step+j*24,width:Math.max(.5,Math.abs(scale(v.value)-scale(0))),height:18,fill:color}),text);
+      }else{
+        const w=step*.8/series;
+        tip(add('rect',{x:150+i*step+step*.1+j*w,y:Math.min(scale(0),scale(v.value)),width:Math.max(1,w-2),height:Math.max(.5,Math.abs(scale(v.value)-scale(0))),fill:color}),text);
+      }
+    });
+  });
+  result.series.forEach((name,i)=>{add('rect',{x:20,y:plotHeight+160+i*24,width:12,height:12,fill:colors[i%colors.length]});label(42,plotHeight+171+i*24,name);});
+  return svg;
+};

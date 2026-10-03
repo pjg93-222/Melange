@@ -1,0 +1,5 @@
+# The repository ignores *.json and *.csv globally (generated data). In this folder the registry and the
+# synthetic test fixtures are source of truth. Licensed content (IBISWorld PDFs, OpenSecrets pages) never goes here:
+# it lives in the inbox, the vault and the runtime folder, all outside git.
+!*.json
+!*.csv

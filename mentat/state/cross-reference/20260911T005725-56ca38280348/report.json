@@ -1,0 +1,528 @@
+{
+  "changes": [
+    {
+      "after": 0.0,
+      "before": 190000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": -190000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4092020231802645332"
+    },
+    {
+      "after": 0.0,
+      "before": 128262.88,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -128262.88,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4122020221641867032"
+    },
+    {
+      "after": 0.0,
+      "before": 123250.03,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -123250.03,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4102820211376022901"
+    },
+    {
+      "after": 0.0,
+      "before": 112568.63,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -112568.63,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4040120221465073706"
+    },
+    {
+      "after": 0.0,
+      "before": 40000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": -40000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4081020231765042887"
+    },
+    {
+      "after": 0.0,
+      "before": 37123.81,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -37123.81,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4030320221458815059"
+    },
+    {
+      "after": 0.0,
+      "before": 35038.36,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -35038.36,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4122920211386905733"
+    },
+    {
+      "after": 0.0,
+      "before": 20093.45,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -20093.45,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4092220211371632313"
+    },
+    {
+      "after": 0.0,
+      "before": 15596.8,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -15596.8,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4112920221631504107"
+    },
+    {
+      "after": 0.0,
+      "before": 7224.0,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -7224.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4082520211343863689"
+    },
+    {
+      "after": 0.0,
+      "before": 6600.0,
+      "company": "SoFi",
+      "cycle": 2024,
+      "delta": -6600.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt; same_original_gift_at_conduit_and_destination",
+      "record_id": "4070920241972639614"
+    },
+    {
+      "after": 6600.0,
+      "before": 0.0,
+      "company": "SoFi",
+      "cycle": 2024,
+      "delta": 6600.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4121120241075675925"
+    },
+    {
+      "after": 5800.0,
+      "before": 0.0,
+      "company": "Kalshi",
+      "cycle": 2022,
+      "delta": 5800.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4120820221633640538"
+    },
+    {
+      "after": 3300.0,
+      "before": 0.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": 3300.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4030620241884043586"
+    },
+    {
+      "after": 3300.0,
+      "before": 0.0,
+      "company": "Plaid",
+      "cycle": 2024,
+      "delta": 3300.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4042420251186466321"
+    },
+    {
+      "after": 0.0,
+      "before": 2900.0,
+      "company": "Robinhood",
+      "cycle": 2022,
+      "delta": -2900.0,
+      "reason": "explicit_same_filing_memo_reference; individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4061120241960458177"
+    },
+    {
+      "after": 2300.0,
+      "before": 0.0,
+      "company": "SoFi",
+      "cycle": 2024,
+      "delta": 2300.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4051420251196683825"
+    },
+    {
+      "after": 0.0,
+      "before": 1460.47,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": -1460.47,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4041220241895670896"
+    },
+    {
+      "after": 0.0,
+      "before": 1380.0,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -1380.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4121120211385521539"
+    },
+    {
+      "after": 0.0,
+      "before": 1170.0,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -1170.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4121120211385521537"
+    }
+  ],
+  "checks": {
+    "collection_completeness_established": false,
+    "duplicate_exclusions_have_retained_representation": true,
+    "identical_input_duplicates_coalesced": 0,
+    "integer_cent_reconciliation": true,
+    "original_and_pac_buckets_disjoint": true,
+    "overall_unique_dollars_established": false,
+    "relationship_graph_acyclic": true,
+    "unique_source_ids": true
+  },
+  "elapsed_seconds": 28.12,
+  "generated_at": "2026-09-11T00:57:53.499703+00:00",
+  "imports": [],
+  "ledger_sha256": "4a3a27b0d14f069b1dcb8d9178bc9ea67c8dbdd158b0875b394358705d09513f",
+  "limitations": [
+    "Observed original giving remains provisional until filing and route completeness is established.",
+    "PAC outgoing amounts here are recipient-reported activity, not a complete Schedule B spending census.",
+    "Unresolved exposure can include overlapping representations and is not an error bound.",
+    "99.9% is an independent audit target, not the percentage of automatically processed records."
+  ],
+  "link_count": 4,
+  "recovery": {
+    "failures": [],
+    "recovered": 0,
+    "requested": 0
+  },
+  "review_queue": [
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 250000.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4072820261539190224"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 250000.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4072820261539190225"
+    },
+    {
+      "action": "Retrieve the filing header and enumerate its amendment family.",
+      "amount": 144000.0,
+      "company": "Stripe",
+      "cycle": 2022,
+      "reason": "filing_relationship_evidence_missing",
+      "record_id": "4041520221470839071"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 132900.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4061120251205747992"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 132900.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612233"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 132900.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612234"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 132900.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved",
+      "record_id": "4061120251205747992"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 132900.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4061120251205747992"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 75000.0,
+      "company": "Chime",
+      "cycle": 2024,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4082020242014279666"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 75000.0,
+      "company": "Chime",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4082020242014279666"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 72800.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4061120251205747991"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 72800.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612225"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 72800.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612226"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 72800.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved",
+      "record_id": "4061120251205747991"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 72800.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4061120251205747991"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 55700.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4042220261482670708"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 50000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4010820251127543798"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 50000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4011020251127841356"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 50000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4020620251150116436"
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 50000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "latest_filing_completeness_unproven",
+      "record_id": "4051020251189925451"
+    }
+  ],
+  "run_id": "20260911T005725-56ca38280348",
+  "schema_version": 1,
+  "scope": {
+    "accounting_basis": "original giving once; PAC outgoing activity separately",
+    "baseline": {
+      "basis": "accepted_report_receipts",
+      "sha256": "74658d0093eb05554c8dc3beb8e77fb1513848279bba39da2d5e7be8f6dbf496",
+      "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.db"
+    },
+    "collection_coverage": {
+      "complete": false,
+      "invalid_units": [],
+      "missing_queries": [],
+      "reason": "Legacy query evidence is missing."
+    },
+    "companies": [
+      "Cash App",
+      "Chime",
+      "Dave Inc.",
+      "Kalshi",
+      "Klarna",
+      "Plaid",
+      "Polymarket",
+      "Robinhood",
+      "SoFi",
+      "Stripe"
+    ],
+    "cutoff": "source snapshot; later filings and unlisted aliases may add evidence",
+    "cycle_basis": "calendar receipt date; original source query period preserved separately",
+    "cycles": [
+      2022,
+      2024,
+      2026
+    ],
+    "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\fintech\\mentat.db",
+    "database_sha256": "d55ce04ced908141888e4c271e66c43b4bc7a75dab41246b13ae7b69a265f90a",
+    "distinct_source_ids": 86270,
+    "industries": [
+      "Fintech"
+    ],
+    "rule_fingerprints": {
+      "inputs\\fec_receipt_rules.json": "4ee2f6984bdebb2a6eb9264937b764bcf90236fc98b5677b60b36e1731f1d930",
+      "tools\\cross_reference_engine.py": "14ae5d2b406bd048187ca3a11f1786743f56660a722d06c6b9f9253bc8a7d0ee",
+      "tools\\cross_reference_store.py": "8faf64fb05cf88adf53a1abc12fab616ce5f1c918792e8af0f4451c31f3a855b",
+      "tools\\pac_evidence.py": "501b0e54e0a80b5da62556e55972d01819ff484536a9f75db0b6ced0b165e09c",
+      "tools\\run_cross_reference.py": "3e52a54322243d71e99b850e601c5a593f4f7a6843c1bac7c7bfda17e38653ad"
+    },
+    "source_change_counts": {},
+    "source_count": 1,
+    "source_observations": 86662,
+    "supplied_evidence": {}
+  },
+  "status": "completed",
+  "steps": [
+    {
+      "detail": "10 companies; 3 cycles; immutable source pinned",
+      "id": "define",
+      "label": "Define",
+      "status": "completed"
+    },
+    {
+      "detail": "833 exact source records cross-checked; historical query coverage remains unproven",
+      "id": "collect",
+      "label": "Collect",
+      "status": "review"
+    },
+    {
+      "detail": "Attribution and transaction decisions recorded with evidence",
+      "id": "identify",
+      "label": "Identify",
+      "status": "review"
+    },
+    {
+      "detail": "4 evidence-backed links; unresolved relationships queued",
+      "id": "connect",
+      "label": "Connect",
+      "status": "review"
+    },
+    {
+      "detail": "Observed accounting views computed; unique-dollar certification remains separate",
+      "id": "count",
+      "label": "Count",
+      "status": "completed"
+    },
+    {
+      "detail": "Source unchanged; decision ledger reconciled; independent accuracy certification not yet established",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "review"
+    }
+  ],
+  "summary": {
+    "amount_change": -713597.79,
+    "automatic_decisions": 61423,
+    "baseline_amount": 9803891.31,
+    "corporate_giving": 0.0,
+    "employee_giving": 8506671.08,
+    "input_records": 86270,
+    "linked_refund_adjustments": 0.0,
+    "observed_original_giving": 9090293.52,
+    "pac_outgoing": 0.0,
+    "supported_original_giving": 0.0,
+    "unresolved_amount": 9341043.64,
+    "unresolved_negative": -125375.06,
+    "unresolved_positive": 9215668.58,
+    "unresolved_records": 24847,
+    "unverified_funding": 583622.44,
+    "verified_unique": false
+  },
+  "unresolved_reasons": [
+    {
+      "amount": 6945196.45,
+      "reason": "latest_filing_completeness_unproven",
+      "records": 20340
+    },
+    {
+      "amount": 1890257.81,
+      "reason": "memo_parent_not_established",
+      "records": 1656
+    },
+    {
+      "amount": 1095668.07,
+      "reason": "original_source_of_transfer_unresolved",
+      "records": 979
+    },
+    {
+      "amount": 583072.44,
+      "reason": "treasury_ownership_unresolved",
+      "records": 711
+    },
+    {
+      "amount": 505039.38,
+      "reason": "filing_relationship_evidence_missing",
+      "records": 2808
+    },
+    {
+      "amount": 270318.61,
+      "reason": "receipt_role_unresolved",
+      "records": 97
+    },
+    {
+      "amount": 140000.0,
+      "reason": "reciprocal_earmark_not_established",
+      "records": 6
+    },
+    {
+      "amount": 125375.06,
+      "reason": "signed_adjustment_not_linked_refund",
+      "records": 56
+    },
+    {
+      "amount": 550.0,
+      "reason": "source_or_attribution_conflict",
+      "records": 43
+    }
+  ]
+}

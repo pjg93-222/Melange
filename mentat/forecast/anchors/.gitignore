@@ -1,0 +1,3 @@
+# The repository ignores *.json globally (generated data). The anchor builder's registry is source of truth, tracked.
+# The anchor snapshot itself is runtime state (brain D-048): it lives in mentat/state/giving-anchors, never here.
+!*.json

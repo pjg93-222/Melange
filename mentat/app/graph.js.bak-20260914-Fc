@@ -1,0 +1,261 @@
+/* Guided Graph section: read-only, same-origin report queries and local SVG. */
+(() => {
+  'use strict';
+  const get = name => document.getElementById('graph-' + name);
+  const dollars = n => Number(n).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2});
+  const titleFor = {categories:'Recipient types',organizations:'Top organizations',candidates:'Top candidates',companies:'Company comparison',levels:'Giving by employee level'};
+  let analysis = 'overview';
+  let loaded = false, revision = 0, view = null, category = '', recipient = '', controller = null, unavailable = [];
+  function options(node, values, selected='') {
+    node.replaceChildren(...values.map(([id,label]) => new Option(label,id)));
+    if ([...node.options].some(o=>o.value===selected)) node.value=selected;
+  }
+  function error(text='') {get('error').textContent=text;get('error').hidden=!text;}
+  function clear() {view=null;window.dispatchEvent(new CustomEvent('mentat:graph',{detail:null}));get('results').hidden=true;get('candidate-detail').hidden=true;get('freshness').replaceChildren();get('provenance').replaceChildren();error();}
+  function syncControls() {
+    get('tier').disabled=get('funding').value==='corporate';
+    if(get('tier').disabled)get('tier').value='';
+    get('direction').parentElement.hidden=get('mode').value==='direct';
+  }
+  function filters() {
+    return new URLSearchParams({id:get('run').value,industry:get('industry').value,company:get('company').value,
+      tier:get('tier').value,cycle:get('cycle').value,funding:get('funding').value,mode:get('mode').value,
+      direction:get('direction').value,category,recipient});
+  }
+  async function loadRuns() {
+    try {
+      const body=await api('/api/report-sources');
+      let chosen=body.runs.find(r=>r.id===selectedRun && !['ready','needs review'].includes(r.state))
+        ||body.runs.find(r=>r.state==='completed')||body.runs[0];
+      let catalog=null;
+      const candidates=[chosen,...body.runs.filter(r=>!['ready','needs review'].includes(r.state))].filter((r,i,a)=>r&&a.findIndex(v=>v?.id===r.id)===i);
+      for(const candidate of candidates){
+        const available=await api('/api/graph-catalog?id='+encodeURIComponent(candidate.id));
+        if(available.industries.length){chosen=candidate;catalog=available;break;}
+      }
+      options(get('run'),body.runs.map(r=>[r.id,`${r.name} · ${r.state}`]),chosen?.id);
+      await loadCatalog(catalog);
+    } catch(e){error(e.message);get('status').textContent='Report sources unavailable.';}
+  }
+  async function loadCatalog(preloaded=null) {
+    const ticket=++revision;controller?.abort();clear();get('status').textContent='Reading saved report sources…';
+    options(get('industry'),[]);options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);
+    category='';recipient='';get('tier').value='';get('funding').value='all';get('mode').value='direct';syncControls();
+    if(!get('run').value){get('status').textContent='No saved runs available.';return;}
+    try {
+      const body=preloaded?.industries ? preloaded : await api('/api/graph-catalog?id='+encodeURIComponent(get('run').value));
+      if(ticket!==revision)return;
+      options(get('industry'),body.industries.map(i=>[i.name,i.name]));
+      unavailable=body.unavailable_reports||[];
+      if(unavailable.length)get('source-label').textContent='Unavailable saved reports: '+unavailable.join(', ');
+      if(!body.industries.length){get('status').textContent=body.message||'No finalized report data in this run. Choose another saved run, or check Collection for its status.';return;}
+      await refresh(true);
+    } catch(e){if(ticket===revision){error(e.message);get('status').textContent='Report sources unavailable.';}}
+  }
+  async function refresh(initial=false) {
+    const ticket=++revision;controller?.abort();controller=new AbortController();clear();syncControls();
+    if(!get('industry').value)return;
+    get('status').textContent='Reading saved giving data…';
+    try {
+      const response=await fetch('/api/graph?'+filters()+(initial?'&latest=1':''),{signal:controller.signal});
+      const body=await response.json();if(!response.ok)throw new Error(body.error||'Graph unavailable.');
+      if(ticket!==revision)return;
+      view=body;render();window.dispatchEvent(new CustomEvent('mentat:graph',{detail:{...body,run:get('run').value,industry:get('industry').value}}));
+    } catch(e){if(ticket===revision&&e.name!=='AbortError'){error(e.message);get('status').textContent='Graph unavailable for this selection.';}}
+  }
+  function chip(text,clearFilter) {
+    const button=document.createElement('button');button.type='button';button.className='secondary';button.textContent=text+' ×';
+    button.onclick=()=>{clearFilter();refresh();};get('chips').append(button);
+  }
+  function render() {
+    const opts=view.options;
+    options(get('company'),[['','All companies'],...opts.companies.map(c=>[c,c])],view.filters.company);
+    options(get('cycle'),[['','All cycles'],...opts.cycles.map(c=>[c,`${Number(c)-1}–${c}`])],view.filters.cycle);
+    options(get('tier'),[['','All levels'],...['Chief','Middle-Management','Employees',...(opts.unknown_tiers?['Unknown']:[])].map(t=>[t,t])],view.filters.tier);
+    syncControls();get('chips').replaceChildren();
+    if(category)chip(category,()=>{category='';recipient='';});
+    if(recipient)chip(opts.recipients.find(r=>r.id===recipient)?.label||recipient,()=>{recipient='';});
+    const scope=[get('industry').value,view.filters.company||'All companies',view.filters.tier||'All levels',get('funding').selectedOptions[0].textContent,get('cycle').selectedOptions[0].textContent,category,recipient].filter(Boolean).join(' · ');
+    get('scope').textContent=scope;
+    get('source-label').textContent=get('run').selectedOptions[0].textContent+(unavailable.length?' · Unavailable saved reports: '+unavailable.join(', '):'');
+    get('status').textContent=`${view.totals.receipt_groups.toLocaleString()} included receipt groups · local data`;
+    get('total').textContent=dollars(view.totals.giving);get('direct').textContent=dollars(view.totals.direct);
+    get('recipient-count').textContent=dollars(view.totals.organizations);
+    for(const [id,value] of [['direct-share',view.totals.direct],['organization-share',view.totals.organizations]]) get(id).textContent=view.totals.giving>0&&value>=0&&value<=view.totals.giving ? (100*value/view.totals.giving).toFixed(1)+'% of net giving' : 'Share unavailable for signed totals';
+    get('candidate-note').textContent=view.candidate_note;
+    get('unresolved').hidden=view.filters.mode!=='direct'||view.totals.unresolved_candidate_links===0;
+    get('unresolved').textContent=`${dollars(view.totals.unresolved_candidate_links)} in candidate-category receipts has no unique authorized candidate link and is excluded from these rankings.`;
+    get('method').textContent=view.note;
+    get('provenance').replaceChildren(...view.reports.map(r=>{const p=document.createElement('p');p.className='muted';p.textContent=`${r.name} · SHA-256 ${r.sha256}`;return p;}));
+    draw('categories',view.categories,id=>{category=id;recipient='';refresh();},true);
+    draw('organizations',view.organizations,id=>{recipient=id;refresh();});
+    if(view.candidate_available)draw('candidates',view.candidates,showCandidate);
+    else{get('candidates').replaceChildren();const p=document.createElement('p');p.className='graph-empty';p.textContent='This candidate view is unavailable for the selected scope.';get('candidates').append(p);}
+    draw('companies',view.companies,id=>{get('company').value=id;category='';recipient='';refresh();});
+    draw('levels',view.levels,id=>{get('tier').value=id;get('funding').value='personal';refresh();});
+    renderFreshness();applyAnalysis();syncExport();
+    get('results').hidden=false;
+  }
+  function svgNode(tag,attributes={},text) {
+    const node=document.createElementNS('http://www.w3.org/2000/svg',tag);
+    Object.entries(attributes).forEach(([k,v])=>node.setAttribute(k,String(v)));
+    if(text!==undefined)node.textContent=text;
+    return node;
+  }
+  function draw(name,rows,onClick,shares=false) {
+    const container=get(name);container.replaceChildren();
+    if(!rows.length){const p=document.createElement('p');p.className='graph-empty';p.textContent='No nonzero amounts recorded for this selection.';container.append(p);return;}
+    const count=Number(get('row-count').value);
+    const shown=count>0?rows.slice(0,count):rows,total=rows.reduce((sum,r)=>sum+r.amount,0);
+    const percentages=shares&&total>0&&rows.every(r=>r.amount>=0);
+    const compact=name==='candidates', width=compact?430:720, height=shown.length*(compact?62:52)+35;
+    const svg=svgNode('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':titleFor[name],class:'graph-bars'});
+    svg.append(svgNode('title',{},titleFor[name]),svgNode('desc',{},`${get('scope').textContent}. ${shown.length} of ${rows.length} groups. Values in USD.`));
+    const positive=Math.max(0,...shown.map(r=>r.amount)),negative=Math.min(0,...shown.map(r=>r.amount));
+    const scale=330/(positive-negative||1),zero=205-negative*scale;
+    const colors=MentatTheme.palette;
+    shown.forEach((row,i)=>{
+      const y=i*(compact?62:52)+26,label=row.label+(row.party?` · ${row.party}`:'');
+      const text=label.length>(compact?33:24)?label.slice(0,compact?30:21)+'…':label;
+      const group=svgNode('g',{role:'button',tabindex:0,'aria-label':`${label}: ${dollars(row.amount)}`,class:'graph-bar-button'});
+      group.append(svgNode('title',{},`${label}: ${dollars(row.amount)}`));
+      group.append(svgNode('rect',{x:0,y:y-24,width,height:compact?60:48,fill:'transparent','pointer-events':'all'}));
+      group.append(svgNode('text',{x:compact?4:190,y,fill:MentatTheme.ink,'text-anchor':compact?'start':'end','font-family':MentatTheme.sans,'font-size':compact?16:17},text));
+      if(compact) {
+        group.append(svgNode('line',{x1:4,x2:width-4,y1:y+31,y2:y+31,stroke:MentatTheme.grid}));
+        group.append(svgNode('text',{x:4,y:y+21,fill:MentatTheme.muted,'font-family':MentatTheme.sans,'font-size':12},row.id));
+      } else group.append(svgNode('rect',{x:Math.min(zero,zero+row.amount*scale),y:y-18,width:Math.max(1,Math.abs(row.amount*scale)),height:27,rx:2,fill:row.amount<0?MentatTheme.negative:colors[Math.min(i,colors.length-1)],class:'graph-mark'}));
+      group.append(svgNode('text',{x:width-8,y:compact?y+21:y,fill:MentatTheme.ink,'text-anchor':'end','font-family':MentatTheme.sans,'font-size':compact?16:17},dollars(row.amount)));
+      const select=()=>onClick(row.id);group.addEventListener('click',select);group.addEventListener('keydown',event=>{if(['Enter',' '].includes(event.key)){event.preventDefault();select();}});
+      svg.append(group);
+    });container.append(svg);
+    {const preview=document.createElement('p');preview.className='muted';preview.textContent=`Showing ${shown.length} of ${rows.length}`;container.append(preview);}
+    const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=`All ${rows.length} values`;
+    let valuesBuilt=false;
+    details.addEventListener('toggle',()=>{
+      if(!details.open||valuesBuilt)return;
+      const scroll=document.createElement('div');scroll.className='table-scroll';
+      const table=document.createElement('table'),head=document.createElement('thead'),body=document.createElement('tbody');
+      head.innerHTML='<tr><th>Name</th><th>Net amount</th></tr>';
+      rows.forEach(row=>{const tr=document.createElement('tr'),label=document.createElement('td'),value=document.createElement('td'),button=document.createElement('button');button.type='button';button.className='graph-text-button';button.textContent=row.label;button.onclick=()=>onClick(row.id);label.append(button);value.textContent=dollars(row.amount);tr.append(label,value);body.append(tr);});
+      table.append(head,body);scroll.append(table);details.append(scroll);valuesBuilt=true;
+    });
+    details.append(summary);container.append(details);
+    if(shares&&!percentages){const p=document.createElement('p');p.className='muted';p.textContent='Signed net amounts shown; percentage shares are withheld when a category is negative.';container.append(p);}
+  }
+  get('row-count').oninput=()=>{if(!get('row-count').checkValidity()){get('row-status').textContent='Enter a positive whole number.';return;}get('row-status').textContent='';if(view)render();};
+  get('all-rows').onclick=()=>{get('row-count').value='';get('row-status').textContent='Showing every matching row.';if(view)render();};
+  function showCandidate(id) {
+    const row=view.candidates.find(c=>c.id===id);if(!row)return;
+    get('candidate-detail-title').textContent=`${row.label} · ${id} · ${view.filters.mode==='direct'?'Included receipt groups':'Source committee activity'}`;
+    const rows=view.candidate_details.filter(r=>r.candidate_id===id);
+    get('candidate-rows').replaceChildren(...rows.map(row=>{const tr=document.createElement('tr');for(const value of [row.company||'—',row.tier||'—',row.recipient,row.cycle,dollars(row.amount)]){const td=document.createElement('td');td.textContent=value;tr.append(td);}return tr;}));
+    get('candidate-detail').hidden=false;get('candidate-detail').open=true;
+    get('candidate-detail').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  function exportChart(name) {
+    if(!view)return;
+    const safe=value=>'"'+String(typeof value==='string'&&/^[=+\-@\t\r]/.test(value)?"'"+value:value).replaceAll('"','""')+'"';
+    const rows=[['Graph',titleFor[name]],['Scope',get('scope').textContent],['Candidate view',get('mode').selectedOptions[0].textContent],['Direction',view.filters.mode==='direct'?'Direct':view.filters.direction],
+      ['Note',name==='candidates'?view.candidate_note:view.note],...view.reports.map(r=>['Report SHA-256',r.name+' '+r.sha256]),['Name','USD','Identifier'],...view[name].map(r=>[r.label,r.amount,r.id])];
+    const url=URL.createObjectURL(new Blob(['\uFEFF'+rows.map(r=>r.map(safe).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
+    const link=document.createElement('a');link.href=url;link.download='mentat-'+name+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  get('run').onchange=loadCatalog;
+  get('industry').onchange=()=>{category='';recipient='';options(get('company'),[['','All companies']]);options(get('cycle'),[['','All cycles']]);refresh(true);};
+  for(const name of ['company','tier','cycle','funding'])get(name).onchange=()=>{category='';recipient='';if(name==='tier'&&get('tier').value)get('funding').value='personal';syncControls();refresh();};
+  for(const name of ['mode','direction'])get(name).onchange=()=>{syncControls();refresh();};
+  get('reset').onclick=()=>{category='';recipient='';get('company').value='';get('tier').value='';get('cycle').value=view?.options.cycles.at(-1)||'';get('funding').value='all';get('mode').value='direct';get('direction').value='Support';selectAnalysis('overview');refresh();};
+  function applyAnalysis() {
+    const names=['overview','recipients','candidates','companies'];
+    names.forEach(name=>{const tab=get('tab-'+name);tab.setAttribute('aria-selected',String(name===analysis));tab.tabIndex=name===analysis?0:-1;});
+    get('analysis-panel').setAttribute('aria-labelledby','graph-tab-'+analysis);
+    document.querySelector('.graph-panels').dataset.analysis=analysis;
+    get('category-panel').hidden=!['overview','recipients'].includes(analysis);
+    get('organization-panel').hidden=analysis!=='recipients';
+    get('candidate-panel').hidden=!['overview','candidates'].includes(analysis);
+    get('candidate-controls').hidden=analysis!=='candidates';
+    get('candidate-separation').hidden=analysis!=='overview';
+    get('company-panel').hidden=analysis!=='companies';
+    get('level-panel').hidden=analysis!=='companies';
+  }
+  function selectAnalysis(name,focus=false) {
+    analysis=name;applyAnalysis();
+    get('export-target').value={overview:'categories',recipients:'organizations',candidates:'candidates',companies:'companies'}[name];syncExport();
+    if(name==='overview'&&get('mode').value!=='direct'){get('mode').value='direct';refresh();}
+    if(focus)get('tab-'+name).focus();
+  }
+  document.querySelector('.analysis-tabs').addEventListener('click',e=>{const tab=e.target.closest('[role=tab]');if(tab)selectAnalysis(tab.id.replace('graph-tab-',''));});
+  document.querySelector('.analysis-tabs').addEventListener('keydown',e=>{
+    const names=['overview','recipients','candidates','companies'],index=names.indexOf(analysis);
+    const next={ArrowRight:(index+1)%4,ArrowLeft:(index+3)%4,Home:0,End:3}[e.key];
+    if(next!==undefined){e.preventDefault();selectAnalysis(names[next],true);}
+  });
+  function showValues(name) {
+    selectAnalysis({categories:'recipients',organizations:'recipients',candidates:'candidates',companies:'companies',levels:'companies'}[name]);
+    get('export-target').value=name;syncExport();
+    const details=get(name).querySelector('details');if(details){details.open=true;details.scrollIntoView({block:'nearest'});details.querySelector('summary').focus();}
+  }
+  document.querySelectorAll('[data-analysis-tab]').forEach(b=>b.onclick=()=>selectAnalysis(b.dataset.analysisTab,true));
+  document.querySelectorAll('[data-values]').forEach(b=>b.onclick=()=>showValues(b.dataset.values));
+  get('view-candidates').onclick=()=>showValues('candidates');
+  get('full-table').onclick=()=>showValues(get('export-target').value);
+  function syncExport() {
+    const name=get('export-target').value;
+    get('export').disabled=!view||(name==='candidates'&&!view.candidate_available)||!view[name]?.length;
+    get('full-table').disabled=get('export').disabled;
+  }
+  get('export-target').onchange=syncExport;
+  get('export').onclick=async()=>{
+    if(!view)return;
+    const name=get('export-target').value,format=get('export-format').value;
+    if(name==='candidates'&&!view.candidate_available)return;
+    if(format==='csv'){exportChart(name);return;}
+    const note=name==='candidates'?view.candidate_note:view.note;
+    const context=`${get('scope').textContent}. ${name==='candidates'?get('mode').selectedOptions[0].textContent+'. '+(view.filters.mode==='direct'?'':view.filters.direction+'. '):''}${note} Preview: ${get(name).querySelectorAll('svg .graph-bar-button').length} of ${view[name].length} groups. `+view.reports.map(r=>`${r.name} SHA-256 ${r.sha256}`).join('; ');
+    try {await MentatExport.image(get(name).querySelector('svg'),format,titleFor[name],context,'mentat-'+name);}
+    catch(e){error(e.message);}
+  };
+  function renderFreshness() {
+    const host=get('freshness');host.replaceChildren();
+    const field=(node,label,value)=>{
+      const row=document.createElement('div');row.className='source-field';
+      const key=document.createElement('span'),val=document.createElement('span');key.textContent=label;val.textContent=value||'Unknown';
+      if(!value)val.className='freshness-unknown';row.append(key,val);node.append(row);
+    };
+    view.reports.forEach(report=>{
+      const fresh=report.freshness||{},section=document.createElement('section');section.className='source-receipt';
+      const h=document.createElement('h3');h.textContent=report.name;section.append(h);
+      field(section,'Report file modified',fresh.report_modified_at);
+      const status=document.createElement('p');status.className='chart-note';status.textContent='Overall report freshness unknown. Source dates do not establish complete search coverage.';section.append(status);
+      for(const source of fresh.sources||[]) {
+        const group=document.createElement('section');group.className='source-receipt';
+        const name=document.createElement('h3');name.textContent=[source.source,source.cycle].filter(Boolean).join(' · ');group.append(name);
+        field(group,'Retrieved',source.retrieved_at);field(group,'File modified',source.file_modified_at);field(group,'Verified data through',source.verified_data_through);
+        const badge=document.createElement('p');badge.className=source.verified_data_through?'freshness-verified':'freshness-unknown';badge.textContent=source.verified_data_through?'Verified date in receipt':'Freshness unknown';group.append(badge);
+        const details=document.createElement('details'),summary=document.createElement('summary'),receipt=document.createElement('p');summary.textContent='Source receipt';receipt.className='chart-note';receipt.textContent=[source.receipt,source.local_receipt,source.sha256,source.note,source.verification_evidence].filter(Boolean).join(' · ')||'Receipt unavailable';details.append(summary,receipt);
+        field(details,'Last checked',source.checked_at);field(details,'Server last modified',source.server_last_modified);group.append(details);section.append(group);
+      }
+      if(!fresh.sources?.length)field(section,'Source freshness',null);
+      for(const issue of fresh.issues||[]){const p=document.createElement('p');p.className='freshness-unknown';p.textContent=issue;section.append(p);}
+      host.append(section);
+    });
+  }
+  for(const name of ['sources','builder']) {
+    get('open-'+name).onclick=()=>{get(name).showModal();if(name==='builder')get(name).dispatchEvent(new Event('mentat:open'));};
+    get('close-'+name).onclick=()=>get(name).close();
+  }
+  let reportSignature='';
+  window.addEventListener('mentat:run',event=>{
+    const run=event.detail;if(!loaded||get('run').value!=='published-reports')return;
+    const signature=JSON.stringify(run.reports.map(r=>[r.index,r.quality?.sha256]));
+    if(reportSignature&&signature!==reportSignature)loadCatalog();
+    reportSignature=signature;
+  });
+  applyAnalysis();
+  function activate(){if((currentView==='graph'||(currentView==='evidence'&&splitView))&&!loaded){loaded=true;loadRuns();}}
+  window.addEventListener('mentat:view',activate);
+  document.querySelector('.workspace-tabs').addEventListener('click',activate);
+  document.querySelector('.workspace-tabs').addEventListener('keydown',activate);
+  window.addEventListener('hashchange',activate);activate();
+})();

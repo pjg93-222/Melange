@@ -1,0 +1,12 @@
+{
+ "drawer_sidecars:rust_fec_verified_2023_2024:88bcfd6f8571": {
+  "source_fp": "029cbeb9b16d217106d524135c0c1701872323e8dd5056d1b1e59b6ba1f0b48e",
+  "code_fp": "a2f3eb52e874d19d",
+  "since_utc": "2026-09-30T23:31:54.129923Z",
+  "failures": 3,
+  "root_cause_hint": "unexpected_exception:RuntimeError",
+  "last_error": "RuntimeError: Drawer sidecars incomplete: FileNotFoundError: [WinError 2] The system cannot find the file specified: 'C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Mentat Complete Files\\\\Rust FEC Verified 2023-2024 Industry Spending Overview.xlsx'",
+  "kind": "drawer_sidecars",
+  "dataset": "Rust FEC Verified 2023-2024"
+ }
+}

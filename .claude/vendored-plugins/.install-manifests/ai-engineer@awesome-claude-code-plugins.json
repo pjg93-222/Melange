@@ -1,0 +1,8 @@
+{
+  "pluginId": "ai-engineer@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:08:18.297Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "e4950bcdeb31721a89e5a3a2bca9dbf5879b198a036b6db9f13e79bdf9509b6a",
+    "agents\\ai-engineer.md": "66b559f2915de91a418fb683c77e0aceff9a6b8cf1b75f81ff5c268e43302cc9"
+  }
+}

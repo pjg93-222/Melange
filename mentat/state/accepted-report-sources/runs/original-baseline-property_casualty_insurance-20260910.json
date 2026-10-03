@@ -1,0 +1,32 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\property_casualty_insurance\\2022-2024-2026",
+  "baseline_token": null,
+  "changed_decisions": 360207,
+  "counts": {
+    "added": 360207,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\tmp\\production-all-20260728T204300\\runs\\20260728T204315-41296\\industries\\property-casualty-insurance\\data\\mentat.db",
+  "database_sha256": "712a1080ba38c2bcc94443c487dab0cfdc96a5c88ec0d68e9e0e8b4b59abe44e",
+  "delta_cents": 1668736559,
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\property_casualty_insurance\\2022-2024-2026",
+  "dollar_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\property_casualty_insurance\\2022-2024-2026\\6319a49a75ee4adaafc1dae1a6fd01ba.dollar-changes.jsonl",
+  "industry": "Property & Casualty Insurance",
+  "payload": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\industry-report\\property_casualty_insurance\\industry_data-712a1080ba38c2bc.json",
+  "payload_sha256": "dbc27b4168d0a07df8a9b4246682da4f1bc1a5eddebc04342ef9a922e3e2066a",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\property_casualty_insurance\\2022-2024-2026\\6319a49a75ee4adaafc1dae1a6fd01ba.db",
+  "snapshot_sha256": "35998d6912052d743988fb3e86c243196db130169d38ae3031c82f7b95f9c2fd",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\property_casualty_insurance\\2022-2024-2026\\6319a49a75ee4adaafc1dae1a6fd01ba.source-changes.jsonl",
+  "status": "verified",
+  "unexplained_changes": 0,
+  "version": 1
+}

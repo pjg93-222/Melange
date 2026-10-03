@@ -1,0 +1,8 @@
+{
+  "pluginId": "brand-guardian@awesome-claude-code-plugins",
+  "createdAt": "2026-08-25T17:08:52.590Z",
+  "files": {
+    ".claude-plugin\\plugin.json": "96c8bd65f8dc4ad6ee4b4b3666f7dc36206355b85f673ad95cca0d8697125c00",
+    "agents\\brand-guardian.md": "e22a93d236149c3b75342f19390bf977a96349b2afe0d18aad9dde31f8f80d2f"
+  }
+}

@@ -1,0 +1,785 @@
+{
+  "attribution_recheck": {
+    "artifacts": {
+      "attribution-inputs.json": "112f7d5635d88e9a6b86527fb9fa0f0622de975c6a9b53f040fa7c1277c542bd",
+      "attribution-results.json": "7237e1de7a428482f7f625ae794e8755c7f1b8173f52f1337f2070c91ed0e331"
+    },
+    "conflicting_match_inputs": 0,
+    "eligible_records": 155944,
+    "resolved_records": 128516,
+    "status": "completed",
+    "unique_inputs": 14966
+  },
+  "changes": [
+    {
+      "after": 0.0,
+      "before": 10000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2022,
+      "delta": -10000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4032320231737481845",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303219579570231"
+    },
+    {
+      "after": 0.0,
+      "before": 5000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2024,
+      "delta": -5000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4010720251127211385",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412209739975623"
+    },
+    {
+      "after": 0.0,
+      "before": 5000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2022,
+      "delta": -5000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4032320231737748867",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303219579628764"
+    },
+    {
+      "after": 0.0,
+      "before": 5000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2022,
+      "delta": -5000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4032320231737748868",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303219579628764"
+    },
+    {
+      "after": 0.0,
+      "before": 5000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2024,
+      "delta": -5000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4103120241015768730",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410319719899780"
+    },
+    {
+      "after": 0.0,
+      "before": 5000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2024,
+      "delta": -5000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4103120241015768731",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410319719899780"
+    },
+    {
+      "after": 0.0,
+      "before": 3000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2024,
+      "delta": -3000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4010720251127211386",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412209739975623"
+    },
+    {
+      "after": 0.0,
+      "before": 2000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2024,
+      "delta": -2000000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4010720251127211384",
+      "source_description": "LOAN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412209739975623"
+    },
+    {
+      "after": 0.0,
+      "before": 837581.88,
+      "company": "Truist Bank",
+      "cycle": 2026,
+      "delta": -837581.88,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4040620261435149703",
+      "source_description": "TRUIST BANK STOCK SOLD THROUGH BROKER.",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604069856987773"
+    },
+    {
+      "after": 0.0,
+      "before": 608896.04,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -608896.04,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4090820261595886408",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209903328715"
+    },
+    {
+      "after": 0.0,
+      "before": 606046.83,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -606046.83,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4071420261533989526",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870958106"
+    },
+    {
+      "after": 0.0,
+      "before": 603210.96,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -603210.96,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4060220261512109024",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604209866614096"
+    },
+    {
+      "after": 0.0,
+      "before": 587896.54,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -587896.54,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4081220261580775417",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607209894265391"
+    },
+    {
+      "after": 0.0,
+      "before": 585145.6,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -585145.6,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4061720261521529990",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605209870174576"
+    },
+    {
+      "after": 0.0,
+      "before": 576721.16,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -576721.16,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4031620261423644173",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602209837825065"
+    },
+    {
+      "after": 0.0,
+      "before": 523692.12,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -523692.12,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4032620261425539497",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209853750893"
+    },
+    {
+      "after": 0.0,
+      "before": 501033.11,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -501033.11,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4022720261359887647",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601319808906875"
+    },
+    {
+      "after": 0.0,
+      "before": 481650.59,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -481650.59,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4012020261302797809",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901870"
+    },
+    {
+      "after": 0.0,
+      "before": 476296.59,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -476296.59,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4012020261302797810",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901871"
+    },
+    {
+      "after": 0.0,
+      "before": 430103.22,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "delta": -430103.22,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4012020261302797808",
+      "source_description": "NON-CONTRIBUTION: INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901870"
+    }
+  ],
+  "checks": {
+    "collection_completeness_established": false,
+    "duplicate_exclusions_have_retained_representation": true,
+    "identical_input_duplicates_coalesced": 0,
+    "integer_cent_reconciliation": true,
+    "original_and_pac_buckets_disjoint": true,
+    "overall_unique_dollars_established": false,
+    "relationship_graph_acyclic": true,
+    "unique_source_ids": true
+  },
+  "coverage_reasons": [
+    {
+      "action": "Retrieve the filing header and enumerate its amendment family.",
+      "amount": 51689898.08,
+      "reason": "filing_relationship_evidence_missing",
+      "records": 292818
+    },
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 41770685.96,
+      "reason": "latest_filing_completeness_unproven",
+      "records": 426991
+    }
+  ],
+  "coverage_task_count": 15562,
+  "elapsed_seconds": 650.41,
+  "excluded_reasons": [
+    {
+      "amount": 100365440.78,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "records": 45895
+    },
+    {
+      "amount": 32538668.49,
+      "reason": "attribution_contradicted_by_text",
+      "records": 29816
+    },
+    {
+      "amount": 23795428.94,
+      "reason": "non_giving_resolved_without_company_attribution",
+      "records": 40973
+    },
+    {
+      "amount": 7258142.81,
+      "reason": "company_attribution_not_accepted",
+      "records": 33827
+    },
+    {
+      "amount": 2204936.88,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "records": 6
+    },
+    {
+      "amount": 180071.38,
+      "reason": "recognized_contribution_receipt",
+      "records": 385
+    },
+    {
+      "amount": 172771.38,
+      "reason": "individual_with_accepted_employer_match",
+      "records": 381
+    },
+    {
+      "amount": 141923.55,
+      "reason": "explicit_same_filing_memo_reference",
+      "records": 65
+    },
+    {
+      "amount": 35396.0,
+      "reason": "superseded_in_observed_filing_family",
+      "records": 30
+    },
+    {
+      "amount": 35151.83,
+      "reason": "same_original_gift_at_conduit_and_destination",
+      "records": 291
+    },
+    {
+      "amount": 14500.0,
+      "reason": "connected_pac_affiliation",
+      "records": 5
+    },
+    {
+      "amount": 8086.83,
+      "reason": "automatic_exact_alias_recheck",
+      "records": 50
+    },
+    {
+      "amount": 5000.0,
+      "reason": "separate_observed_pac_activity",
+      "records": 2
+    },
+    {
+      "amount": 2300.0,
+      "reason": "company_named_unverified",
+      "records": 2
+    },
+    {
+      "amount": 600.0,
+      "reason": "role_marker_with_company_named",
+      "records": 1
+    }
+  ],
+  "generated_at": "2026-09-18T03:19:31.431481+00:00",
+  "header_recovery": {
+    "failures": [],
+    "recovered": 0,
+    "requested": 0
+  },
+  "imports": [],
+  "ledger_sha256": "f54a3490dadea665ceb6092001a81fc0163f50a9048156e5afbc0ca44ea92a59",
+  "limitations": [
+    "Receipt classification can be resolved from its evidence while full filing and route coverage remains open.",
+    "Observed original giving is not a certification of complete unique dollars.",
+    "PAC outgoing amounts here are recipient-reported activity, not a complete Schedule B spending census.",
+    "Unresolved exposure can include overlapping representations and is not an error bound.",
+    "Automatically processed records do not establish the accuracy or completeness of the resulting totals."
+  ],
+  "link_count": 386,
+  "partisan_breakdowns": [
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": 0.0,
+      "democratic": 0.0,
+      "democratic_percent": null,
+      "denominator_dr": 0.0,
+      "other_unknown": 77054485.76,
+      "republican": 0.0,
+      "republican_percent": null,
+      "view": "original_giving"
+    },
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": 0.0,
+      "democratic": 0.0,
+      "democratic_percent": null,
+      "denominator_dr": 0.0,
+      "other_unknown": 22774438.0,
+      "republican": 0.0,
+      "republican_percent": null,
+      "view": "pac_activity"
+    }
+  ],
+  "recovery": {
+    "failures": [],
+    "recovered": 0,
+    "requested": 0
+  },
+  "review_queue": [
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 1000000.0,
+      "company": "Bank of America NA",
+      "cycle": 2022,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4092420211371961952",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202109209466753293"
+    },
+    {
+      "action": "Identify whether this is a refund, reversal, redesignation or other correction and obtain its explicit counterpart.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": -183700.0,
+      "company": "Citibank",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; signed_adjustment_not_linked_refund",
+      "record_id": "4060420251204801343",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761822593"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 132900.0,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4051120261509988209",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605089866911381"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 132900.0,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4051120261509988258",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605089866911398"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 123900.0,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; receipt_role_unresolved",
+      "record_id": "4010620251126152367",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059739446891"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 123900.0,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established",
+      "record_id": "4052920241951140644",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405209646237323"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 123900.0,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established",
+      "record_id": "4052920241951140738",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405209646237355"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 123900.0,
+      "company": "Citibank",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; receipt_role_unresolved",
+      "record_id": "4060420251204841257",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761835899"
+    },
+    {
+      "action": "Resolve the employer/company identity and record an accepted or rejected attribution decision.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 100000.0,
+      "company": "Goldman Sachs Bank NA",
+      "cycle": 2026,
+      "reason": "company_named_unverified; memo_parent_not_established",
+      "record_id": "4082520261584906755",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202608209899750272"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 90600.0,
+      "company": "Goldman Sachs Bank NA",
+      "cycle": 2022,
+      "reason": "memo_parent_not_established",
+      "record_id": "4032120231736787731",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303209579434141"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Resolve the employer/company identity and record an accepted or rejected attribution decision.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 80803.31,
+      "company": "PNC Bank NA",
+      "cycle": 2022,
+      "reason": "company_named_unverified; receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4081620221564872039",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208169525400708"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Resolve the employer/company identity and record an accepted or rejected attribution decision.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 75000.0,
+      "company": "Goldman Sachs Bank NA",
+      "cycle": 2024,
+      "reason": "company_named_unverified; memo_parent_not_established; treasury_ownership_unresolved",
+      "record_id": "4060320251204404271",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506039761730483"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 65200.0,
+      "company": "JP Morgan Chase Bank NA",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established",
+      "record_id": "4052920241951140599",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405209646237308"
+    },
+    {
+      "action": "Retrieve the missing filing relationships for the observed same-donor transaction versions before deciding whether either supersedes the other.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 63500.0,
+      "company": "Wells Fargo Bank NA",
+      "cycle": 2022,
+      "reason": "observed_filing_versions_unresolved; receipt_role_unresolved",
+      "record_id": "4031920221461955261",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203149493887451"
+    },
+    {
+      "action": "Retrieve the missing filing relationships for the observed same-donor transaction versions before deciding whether either supersedes the other.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 63500.0,
+      "company": "Wells Fargo Bank NA",
+      "cycle": 2022,
+      "reason": "observed_filing_versions_unresolved; receipt_role_unresolved",
+      "record_id": "4031920221463239403",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203149493887451"
+    },
+    {
+      "action": "Retrieve the missing filing relationships for the observed same-donor transaction versions before deciding whether either supersedes the other.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 63500.0,
+      "company": "Wells Fargo Bank NA",
+      "cycle": 2022,
+      "reason": "observed_filing_versions_unresolved; receipt_role_unresolved",
+      "record_id": "4031920221463239404",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203149493887451"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 63500.0,
+      "company": "Wells Fargo Bank NA",
+      "cycle": 2022,
+      "reason": "receipt_role_unresolved",
+      "record_id": "4092320221576718185",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202209209528664696"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Resolve the employer/company identity and record an accepted or rejected attribution decision.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 61000.0,
+      "company": "Wells Fargo Bank NA",
+      "cycle": 2024,
+      "reason": "company_named_unverified; receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4080320231762750818",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307319584191038"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 59800.0,
+      "company": "Citibank",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; receipt_role_unresolved",
+      "record_id": "4060420251204841256",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761835898"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Resolve the employer/company identity and record an accepted or rejected attribution decision.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 56464.46,
+      "company": "PNC Bank NA",
+      "cycle": 2024,
+      "reason": "company_named_unverified; receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4120620231812026408",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312069599382051"
+    }
+  ],
+  "run_id": "20260918T030844-6098810b1ae7",
+  "schema_version": 1,
+  "scope": {
+    "accounting_basis": "original giving once; PAC outgoing activity separately",
+    "attribution_recheck": {
+      "artifacts": {
+        "attribution-inputs.json": "112f7d5635d88e9a6b86527fb9fa0f0622de975c6a9b53f040fa7c1277c542bd",
+        "attribution-results.json": "7237e1de7a428482f7f625ae794e8755c7f1b8173f52f1337f2070c91ed0e331"
+      },
+      "conflicting_match_inputs": 0,
+      "eligible_records": 155944,
+      "resolved_records": 128516,
+      "status": "completed",
+      "unique_inputs": 14966
+    },
+    "attribution_text_test": {
+      "committees_with_connected_organization": 20082,
+      "companies_with_names": 10
+    },
+    "baseline": null,
+    "collection_coverage": {
+      "complete": false,
+      "invalid_units": [],
+      "missing_queries": [],
+      "reason": "Legacy query evidence is missing."
+    },
+    "committee_master": {
+      "inputs\\fec_committee_master\\cm22\\cm.txt": "a452a78c461c3b04c03b9417b9da58a8e6ffbcfe67a04ab4a6d0cf4471f2dfb3",
+      "inputs\\fec_committee_master\\cm24\\cm.txt": "6620d7b67f05f939173abcc2c59b4877c7080ad2350958e08b192da2fdaae200",
+      "inputs\\fec_committee_master\\cm26\\cm.txt": "e96dedf6d6d78f68b4113e8300f55dfc7503e353b08b2b1817822d7ee42e4002"
+    },
+    "companies": [
+      "Bank of America NA",
+      "Capital One Bank NA",
+      "Citibank",
+      "Goldman Sachs Bank NA",
+      "JP Morgan Chase Bank NA",
+      "Morgan Stanley Bank",
+      "PNC Bank NA",
+      "Truist Bank",
+      "US Bank NA",
+      "Wells Fargo Bank NA"
+    ],
+    "cutoff": "source snapshot; later filings and unlisted aliases may add evidence",
+    "cycle_basis": "calendar receipt date; original source query period preserved separately",
+    "cycles": [
+      2022,
+      2024,
+      2026
+    ],
+    "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\report-repairs\\banking-20260910\\data\\mentat.db",
+    "database_sha256": "4abdea581b99cec1674252ee098ab6afca57674bd8e90313e9f4156e88b2d991",
+    "distinct_source_ids": 849399,
+    "industries": [
+      "Banking"
+    ],
+    "rule_fingerprints": {
+      "R\\collect.R": "d44c1db447725dff847138537b7211fe81c333701307b12c3b019a845bf8c113",
+      "R\\fec_page.R": "a7c5572f0eb733cffc1b2a2dcc0a87fc7e715b7039301c56e92b6aecc23f702e",
+      "R\\ingest.R": "798193f5356cadf49e9b339a5a36cb783e6a6c40917025e575718ac78636dc9d",
+      "R\\paths.R": "8b917fd820fc95797fc132996f26ef29f48201fa103a6c53b06ab72822990585",
+      "R\\schema.R": "0e91cbf2c3f2034b6dc329b416d1aca1f359743b81c10e6938ddc1e4214e8f7d",
+      "inputs\\company_home_states.csv": "de222437b333346158692081941cb82345506fb2c20d5112a8056e5de81639c9",
+      "inputs\\company_match_overrides.csv": "49cd87e5abf859c0728c6ef0fdd7279e9ec2130623097b91c3725e36f9597f4c",
+      "inputs\\fec_receipt_rules.json": "e1cbca218b835ef06f3ad0cd55a1fd1a40263b86fd3410788f2d486d6a73850d",
+      "inputs\\verified_employer_aliases.csv": "d92da3434414ae11c851d9c294e565f978fd2e6e8dd7fdd03f892c9561d01df1",
+      "tools\\cross_reference_engine.py": "00bb9d3e3c2c73aa4abf26608aa405f248044d7e3903852c0d3ac1c40b82cc99",
+      "tools\\cross_reference_store.py": "d687f488e481314f594f0a288a8a4a0281f6884ba6639817389d7b104b03c09f",
+      "tools\\fec_filing_headers.py": "30766fc320fdb7d7d7ee13e78eaffc59114393c7571a381efa6a5325f9a35cd8",
+      "tools\\pac_evidence.py": "6176e6183e0a910cae4ac2d668a6784c9966ac58dedaed391833d0f7aaaec4a9",
+      "tools\\recheck_attribution.R": "6a2b32d05102efb5249f3edceb1e71a0f21cc714506b2fdfa617308350bd103b",
+      "tools\\recheck_attribution.py": "daaa3fc795868b43309f3cfdf4b78a6a502c95398fb0e8e160383ef8dc332204",
+      "tools\\report_source_guard.py": "a6f1eb3f1ce08b6af208d55e688f1cd0ee957d061c3ccd879d67827bd38972c6",
+      "tools\\run_cross_reference.py": "46a529dfa60d9e0c4505475e9a5b2d1da5c64d8344066dff1689404b80f083e2",
+      "tools\\validate_industry_coverage.py": "1f6abed7fe8a107b2e7f3cab2df7dfd0d419931a1599f2746471acff2edd271f"
+    },
+    "source_change_counts": {},
+    "source_count": 1,
+    "source_observations": 849431,
+    "supplied_evidence": {
+      "affiliations": {
+        "path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\verified_company_affiliations.json",
+        "sha256": "3c9968f5cd7369416274d50c23ef1fdf513287ba4bc598dc264514b027ff8b1a"
+      }
+    }
+  },
+  "status": "completed",
+  "steps": [
+    {
+      "detail": "10 companies; 3 cycles; immutable source pinned",
+      "id": "define",
+      "label": "Define",
+      "status": "completed"
+    },
+    {
+      "detail": "32649 exact source records cross-checked; historical query coverage remains unproven",
+      "id": "collect",
+      "label": "Collect",
+      "status": "review"
+    },
+    {
+      "detail": "Attribution and transaction decisions recorded with evidence",
+      "id": "identify",
+      "label": "Identify",
+      "status": "review"
+    },
+    {
+      "detail": "386 evidence-backed links; filing coverage checks tracked separately from receipt review",
+      "id": "connect",
+      "label": "Connect",
+      "status": "review"
+    },
+    {
+      "detail": "Observed accounting views computed; unique-dollar certification remains separate",
+      "id": "count",
+      "label": "Count",
+      "status": "completed"
+    },
+    {
+      "detail": "Source unchanged; decisions reconciled; receipt review and collection coverage reported separately",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "review"
+    }
+  ],
+  "summary": {
+    "amount_change": -56461741.51,
+    "automatic_decisions": 803243,
+    "baseline_amount": 133516227.27,
+    "classified_from_stored_records": 789391,
+    "corporate_giving": 0.0,
+    "coverage_amount": 93460584.04,
+    "coverage_only_records": 693314,
+    "coverage_records": 719809,
+    "employee_giving": 71246149.34,
+    "input_records": 849399,
+    "linked_refund_adjustments": 0.0,
+    "observed_original_giving": 77054485.76,
+    "pac_outgoing": 22774438.0,
+    "source_verified_records": 13852,
+    "supported_original_giving": 0.0,
+    "unresolved_amount": 16990616.89,
+    "unresolved_negative": -1216462.96,
+    "unresolved_positive": 15774153.93,
+    "unresolved_records": 46156,
+    "unverified_funding": 5808336.42,
+    "verified_unique": false
+  },
+  "unresolved_reasons": [
+    {
+      "amount": 8799053.99,
+      "reason": "memo_parent_not_established",
+      "records": 19648
+    },
+    {
+      "amount": 5937349.79,
+      "reason": "original_source_of_transfer_unresolved",
+      "records": 18814
+    },
+    {
+      "amount": 5140809.45,
+      "reason": "company_named_unverified",
+      "records": 6247
+    },
+    {
+      "amount": 4281699.33,
+      "reason": "treasury_ownership_unresolved",
+      "records": 1328
+    },
+    {
+      "amount": 3864785.48,
+      "reason": "receipt_role_unresolved",
+      "records": 1546
+    },
+    {
+      "amount": 1700421.02,
+      "reason": "funding_identity_unresolved",
+      "records": 486
+    },
+    {
+      "amount": 1216462.96,
+      "reason": "signed_adjustment_not_linked_refund",
+      "records": 660
+    },
+    {
+      "amount": 533939.04,
+      "reason": "observed_filing_versions_unresolved",
+      "records": 1169
+    },
+    {
+      "amount": 384885.15,
+      "reason": "earmark_counterpart_not_unique",
+      "records": 16032
+    },
+    {
+      "amount": 337295.18,
+      "reason": "reciprocal_earmark_not_established",
+      "records": 2188
+    },
+    {
+      "amount": 17674.0,
+      "reason": "ambiguous_amendment_order",
+      "records": 24
+    },
+    {
+      "amount": 2211.65,
+      "reason": "source_or_attribution_conflict",
+      "records": 13
+    },
+    {
+      "amount": 737.06,
+      "reason": "earmark_destination_ambiguous",
+      "records": 89
+    },
+    {
+      "amount": 653.82,
+      "reason": "company_attribution_unverified",
+      "records": 17
+    }
+  ]
+}

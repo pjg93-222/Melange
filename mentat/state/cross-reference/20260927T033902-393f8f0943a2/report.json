@@ -1,0 +1,744 @@
+{
+  "attribution_recheck": {
+    "artifacts": {
+      "attribution-inputs.json": "c1a14b1041926aebefd7b254c9d0db39f234cf7a78b77fe88d43e62b67eb81b2",
+      "attribution-results.json": "27c1472d23a71f5256401ba17b8192e0982cfaa6977f0b8d8eec90d0cf99cef3"
+    },
+    "conflicting_match_inputs": 0,
+    "eligible_records": 398,
+    "resolved_records": 15,
+    "status": "completed",
+    "unique_inputs": 82
+  },
+  "changes": [
+    {
+      "after": 0.0,
+      "before": 30032.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "delta": -30032.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4120820221633618951",
+      "source_description": "NON CONFORMING CHECK REDEPOSIT",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211049546709077"
+    },
+    {
+      "after": 10000.0,
+      "before": 0.0,
+      "company": "Dime Community Bank",
+      "cycle": 2022,
+      "delta": 10000.0,
+      "reason": "company_named_unverified; recognized_contribution_receipt",
+      "record_id": "4081220221564132963",
+      "source_description": "CONTRIBUTION",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208049525122211"
+    },
+    {
+      "after": 0.0,
+      "before": 10000.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "delta": -10000.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt; same_original_gift_at_conduit_and_destination",
+      "record_id": "4112320221630704000",
+      "source_description": "CONTRIBUTION; EARMARKED FROM WINRED",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210279541724073"
+    },
+    {
+      "after": 5000.0,
+      "before": 0.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2022,
+      "delta": 5000.0,
+      "reason": "company_named_unverified; provisional_receipt_role:unverified_receipt_role",
+      "record_id": "4080520221563292667",
+      "source_description": "",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518692970"
+    },
+    {
+      "after": 5000.0,
+      "before": 0.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2026,
+      "delta": 5000.0,
+      "reason": "company_named_unverified; provisional_receipt_role:unverified_receipt_role",
+      "record_id": "4123120251299828014",
+      "source_description": "",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791039005"
+    },
+    {
+      "after": 0.0,
+      "before": 4754.64,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -4754.64,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4031820261423997517",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603179853398609"
+    },
+    {
+      "after": 0.0,
+      "before": 4449.05,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -4449.05,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4041520261435877469",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604149857157717"
+    },
+    {
+      "after": 0.0,
+      "before": 4391.26,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -4391.26,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4031820261423997519",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603179853398609"
+    },
+    {
+      "after": 0.0,
+      "before": 4082.46,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "delta": -4082.46,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4110920221625161798",
+      "source_description": "ACH FAILURE TO SETTLE - RETURN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532594473"
+    },
+    {
+      "after": 0.0,
+      "before": 3965.26,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -3965.26,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4041520261435877471",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604149857157718"
+    },
+    {
+      "after": 0.0,
+      "before": 3910.69,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -3910.69,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4041520261435877470",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604149857157717"
+    },
+    {
+      "after": 0.0,
+      "before": 3568.79,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -3568.79,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4050720261509716067",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857738614"
+    },
+    {
+      "after": 0.0,
+      "before": 3342.51,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -3342.51,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4050720261509716068",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857738614"
+    },
+    {
+      "after": 0.0,
+      "before": 3300.0,
+      "company": "ConnectOne Bank",
+      "cycle": 2024,
+      "delta": -3300.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt; same_original_gift_at_conduit_and_destination",
+      "record_id": "4053020241951576867",
+      "source_description": "CONTRIBUTION; EARMARKED FROM WINRED",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202405039645467070"
+    },
+    {
+      "after": 0.0,
+      "before": 3000.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "delta": -3000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4110920221625161797",
+      "source_description": "NON CONFORMING IMAGE CHECK RETURN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532594473"
+    },
+    {
+      "after": 0.0,
+      "before": 2900.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "delta": -2900.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt; same_original_gift_at_conduit_and_destination",
+      "record_id": "4080220221553762906",
+      "source_description": "EARMARKED THROUGH WINRED ON 2022-03-08",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207279525067302"
+    },
+    {
+      "after": 0.0,
+      "before": 2227.34,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -2227.34,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4050720261509716069",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857738614"
+    },
+    {
+      "after": 0.0,
+      "before": 2092.65,
+      "company": "OceanFirst Bank",
+      "cycle": 2026,
+      "delta": -2092.65,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4061220261521272018",
+      "source_description": "INTEREST",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605219870209319"
+    },
+    {
+      "after": 0.0,
+      "before": 2000.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "delta": -2000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4120820221633618950",
+      "source_description": "NON CONFIRMING CHECK REDEPOSIT",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211049546709077"
+    },
+    {
+      "after": 0.0,
+      "before": 1900.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "delta": -1900.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4110920221625161800",
+      "source_description": "NON CONFORMING IMAGE CHECK REDEPOSIT",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159532594474"
+    }
+  ],
+  "checks": {
+    "collection_completeness_established": false,
+    "duplicate_exclusions_have_retained_representation": true,
+    "identical_input_duplicates_coalesced": 0,
+    "integer_cent_reconciliation": true,
+    "original_and_pac_buckets_disjoint": true,
+    "overall_unique_dollars_established": false,
+    "relationship_graph_acyclic": true,
+    "unique_source_ids": true
+  },
+  "coverage_reasons": [
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 622891.22,
+      "reason": "latest_filing_completeness_unproven",
+      "records": 3341
+    },
+    {
+      "action": "Retrieve the filing header and enumerate its amendment family.",
+      "amount": 65947.33,
+      "reason": "filing_relationship_evidence_missing",
+      "records": 631
+    }
+  ],
+  "coverage_task_count": 512,
+  "elapsed_seconds": 27.26,
+  "excluded_reasons": [
+    {
+      "amount": 861621.62,
+      "reason": "attribution_contradicted_by_text",
+      "records": 466
+    },
+    {
+      "amount": 100305.31,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "records": 78
+    },
+    {
+      "amount": 28532.04,
+      "reason": "individual_with_accepted_employer_match",
+      "records": 18
+    },
+    {
+      "amount": 28532.04,
+      "reason": "recognized_contribution_receipt",
+      "records": 18
+    },
+    {
+      "amount": 28532.04,
+      "reason": "same_original_gift_at_conduit_and_destination",
+      "records": 18
+    }
+  ],
+  "generated_at": "2026-09-27T03:39:29.314307+00:00",
+  "header_recovery": {
+    "cached": 0,
+    "failures": [],
+    "recovered": 0,
+    "requested": 0,
+    "selected": 0
+  },
+  "imports": [],
+  "ledger_sha256": "df5177290b95a157dcace7371eb91c8ac2cd848ad91ef228a41ddb8f196e0880",
+  "limitations": [
+    "Receipt classification can be resolved from its evidence while full filing and route coverage remains open.",
+    "Observed original giving is not a certification of complete unique dollars.",
+    "PAC outgoing amounts here are recipient-reported activity, not a complete Schedule B spending census.",
+    "Unresolved exposure can include overlapping representations and is not an error bound.",
+    "Automatically processed records do not establish the accuracy or completeness of the resulting totals."
+  ],
+  "link_count": 18,
+  "partisan_breakdowns": [
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": 33.19856307099376,
+      "democratic": 133469.43,
+      "democratic_percent": 52.34733315731188,
+      "denominator_dr": 254968.92,
+      "other_unknown": 517268.57,
+      "republican": 121499.49,
+      "republican_percent": 47.65266684268812,
+      "view": "original_giving"
+    },
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": null,
+      "democratic": 0.0,
+      "democratic_percent": null,
+      "denominator_dr": 0.0,
+      "other_unknown": 0.0,
+      "republican": 0.0,
+      "republican_percent": null,
+      "view": "pac_activity"
+    }
+  ],
+  "recovery": {
+    "deferred_reason": null,
+    "failures": [
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4062220261521882604"
+      }
+    ],
+    "recovered": 99,
+    "requested": 100,
+    "selected": 100,
+    "still_partial": 0
+  },
+  "review_queue": [
+    {
+      "action": "Resolve the employer/company identity and record an accepted or rejected attribution decision.",
+      "amount": 10000.0,
+      "company": "Dime Community Bank",
+      "cycle": 2022,
+      "reason": "company_named_unverified",
+      "record_id": "4081220221564132963",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202208049525122211"
+    },
+    {
+      "action": "Fetch the designated recipient receipt and validate the reciprocal earmark.",
+      "amount": 6000.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2026,
+      "reason": "earmark_counterpart_not_unique",
+      "record_id": "4082820251268691102",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319767668413"
+    },
+    {
+      "action": "Recover the FEC contributor entity type and contributor ID.; Resolve the employer/company identity and record an accepted or rejected attribution decision.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 5000.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2022,
+      "reason": "company_named_unverified; funding_identity_unresolved; receipt_role_unresolved",
+      "record_id": "4080520221563292667",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518692970"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 5000.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4112320221630656244",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210279541719850"
+    },
+    {
+      "action": "Recover the FEC contributor entity type and contributor ID.; Resolve the employer/company identity and record an accepted or rejected attribution decision.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 5000.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2026,
+      "reason": "company_named_unverified; funding_identity_unresolved; receipt_role_unresolved",
+      "record_id": "4123120251299828014",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791039005"
+    },
+    {
+      "action": "Fetch the designated recipient receipt and validate the reciprocal earmark.",
+      "amount": 3500.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2026,
+      "reason": "earmark_counterpart_not_unique",
+      "record_id": "4030920261414337963",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602209835479328"
+    },
+    {
+      "action": "Retrieve both receipts and verify the stated conduit, donor, ZIP, date and amount.",
+      "amount": 3500.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2026,
+      "reason": "reciprocal_earmark_not_established",
+      "record_id": "4032620261426684408",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603209854146234"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 3500.0,
+      "company": "Merchants Bank of Indiana",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4032620261433491201",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202603269856860980"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 3500.0,
+      "company": "First Financial Bancorp",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4042420251186597486",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504159755352626"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 3500.0,
+      "company": "Merchants Bank of Indiana",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4050420261499234079",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857285903"
+    },
+    {
+      "action": "Retrieve both receipts and verify the stated conduit, donor, ZIP, date and amount.",
+      "amount": 3500.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2026,
+      "reason": "reciprocal_earmark_not_established",
+      "record_id": "4051820261510623694",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857300595"
+    },
+    {
+      "action": "Retrieve both receipts and verify the stated conduit, donor, ZIP, date and amount.",
+      "amount": 3500.0,
+      "company": "Merchants Bank of Indiana",
+      "cycle": 2026,
+      "reason": "reciprocal_earmark_not_established",
+      "record_id": "4062320261522329963",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606119870651386"
+    },
+    {
+      "action": "Retrieve both receipts and verify the stated conduit, donor, ZIP, date and amount.",
+      "amount": 3500.0,
+      "company": "Merchants Bank of Indiana",
+      "cycle": 2026,
+      "reason": "reciprocal_earmark_not_established",
+      "record_id": "4070720261531234962",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209872631616"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 3300.0,
+      "company": "First Financial Bancorp",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4022720261359723066",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601319795293017"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 3300.0,
+      "company": "Merchants Bank of Indiana",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4072220261536735265",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159890556265"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 3300.0,
+      "company": "First Financial Bancorp",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4080620242010998198",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407159653263864"
+    },
+    {
+      "action": "Fetch the designated recipient receipt and validate the reciprocal earmark.",
+      "amount": 3000.0,
+      "company": "First Hawaiian Bank",
+      "cycle": 2024,
+      "reason": "earmark_counterpart_not_unique",
+      "record_id": "4041120241891016434",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202403209625262402"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 2900.0,
+      "company": "First Financial Bancorp",
+      "cycle": 2022,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4022820221453623616",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485785021"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 2800.0,
+      "company": "Customers Bank",
+      "cycle": 2022,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4062120231750942688",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202306209582215872"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 2800.0,
+      "company": "Merchants Bank of Indiana",
+      "cycle": 2022,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4121820211386151925",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112169469872163"
+    }
+  ],
+  "run_id": "20260927T033902-393f8f0943a2",
+  "schema_version": 1,
+  "scope": {
+    "accounting_basis": "original giving once; PAC outgoing activity separately",
+    "attribution_recheck": {
+      "artifacts": {
+        "attribution-inputs.json": "c1a14b1041926aebefd7b254c9d0db39f234cf7a78b77fe88d43e62b67eb81b2",
+        "attribution-results.json": "27c1472d23a71f5256401ba17b8192e0982cfaa6977f0b8d8eec90d0cf99cef3"
+      },
+      "conflicting_match_inputs": 0,
+      "eligible_records": 398,
+      "resolved_records": 15,
+      "status": "completed",
+      "unique_inputs": 82
+    },
+    "attribution_text_test": {
+      "committees_with_connected_organization": 20082,
+      "companies_with_names": 19
+    },
+    "baseline": {
+      "basis": "accepted_report_receipts",
+      "sha256": "7a01045cbb18482d892b1a022336c199aab047b2cbf9dc4139ab5fa792c7a29c",
+      "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.db",
+      "sources": [
+        {
+          "cycles": [
+            2022,
+            2024,
+            2026
+          ],
+          "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026",
+          "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.db",
+          "snapshot_sha256": "7a01045cbb18482d892b1a022336c199aab047b2cbf9dc4139ab5fa792c7a29c",
+          "token": "5c1a77d76cc778f6a84c5c49d0aa80a687b70a5e840a722c429febfe7d86c41c"
+        }
+      ]
+    },
+    "collection_coverage": {
+      "complete": false,
+      "invalid_units": [],
+      "missing_queries": [],
+      "reason": "Legacy query evidence is missing."
+    },
+    "committee_master": {
+      "inputs\\fec_committee_master\\cm22\\cm.txt": "a452a78c461c3b04c03b9417b9da58a8e6ffbcfe67a04ab4a6d0cf4471f2dfb3",
+      "inputs\\fec_committee_master\\cm24\\cm.txt": "6620d7b67f05f939173abcc2c59b4877c7080ad2350958e08b192da2fdaae200",
+      "inputs\\fec_committee_master\\cm26\\cm.txt": "e96dedf6d6d78f68b4113e8300f55dfc7503e353b08b2b1817822d7ee42e4002"
+    },
+    "companies": [
+      "Apple Bank for Savings",
+      "ConnectOne Bank",
+      "Customers Bank",
+      "Dime Community Bank",
+      "First Financial Bancorp",
+      "First Hawaiian Bank",
+      "FirstBank Puerto Rico",
+      "Merchants Bank of Indiana",
+      "NexBank",
+      "OceanFirst Bank"
+    ],
+    "cutoff": "source snapshot; later filings and unlisted aliases may add evidence",
+    "cycle_basis": "calendar receipt date; original source query period preserved separately",
+    "cycles": [
+      2022,
+      2024,
+      2026
+    ],
+    "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\community_banks\\mentat.db",
+    "database_sha256": "923ab7866fab51dc4a4771b3b6e8f1fc14b5bb483c9f2eeecfb6795ddfda6ca2",
+    "distinct_source_ids": 4649,
+    "industries": [
+      "Community Banks"
+    ],
+    "rule_fingerprints": {
+      "R\\collect.R": "b77ceffc69d3da45789770044ac7b23d915f1a814ba86f6c2c227296144f381a",
+      "R\\fec_page.R": "ffab349b11b158dd80eddc4e8958e36761eb9d86cdf07cd0e28ed3033c79ae07",
+      "R\\ingest.R": "798193f5356cadf49e9b339a5a36cb783e6a6c40917025e575718ac78636dc9d",
+      "R\\paths.R": "8b917fd820fc95797fc132996f26ef29f48201fa103a6c53b06ab72822990585",
+      "R\\schema.R": "563759a14f81251e821c5d89ddd3af7e7ce6a00429c5a535c79fd1ab6334cd44",
+      "config\\attribution-policy.json": "a33308d15268fdf4b7bb8d98f34115d89153dec40c07d63d4be1098059c71e1c",
+      "inputs\\company_home_states.csv": "de222437b333346158692081941cb82345506fb2c20d5112a8056e5de81639c9",
+      "inputs\\company_match_overrides.csv": "49cd87e5abf859c0728c6ef0fdd7279e9ec2130623097b91c3725e36f9597f4c",
+      "inputs\\fec_receipt_rules.json": "0114ee8492e401da16c6505c2ea8a0bc89ab3445cfc94768ac48617c4ee91a9a",
+      "inputs\\verified_employer_aliases.csv": "d92da3434414ae11c851d9c294e565f978fd2e6e8dd7fdd03f892c9561d01df1",
+      "tools\\attribution_policy.py": "b1ad33a0c868ffc8de00c2f811af45ca2d206fa1b407e494227616d1da7dae60",
+      "tools\\cross_reference_engine.py": "5b52f41ae99ddb68d5f84ebad164cf7c6547d1707ea51e637ab222840b2c8d55",
+      "tools\\cross_reference_store.py": "d687f488e481314f594f0a288a8a4a0281f6884ba6639817389d7b104b03c09f",
+      "tools\\fec_filing_headers.py": "30766fc320fdb7d7d7ee13e78eaffc59114393c7571a381efa6a5325f9a35cd8",
+      "tools\\pac_evidence.py": "c246da2a312733123edae2d66e0e89d0da2adca77d5f71937c7b7e3215e9065c",
+      "tools\\recheck_attribution.R": "6a2b32d05102efb5249f3edceb1e71a0f21cc714506b2fdfa617308350bd103b",
+      "tools\\recheck_attribution.py": "0d99a2454bf33d3503a0093677212d87afaacc917e8aaa356dc45cb14a523c40",
+      "tools\\report_source_guard.py": "c20eee34ff1e177b2f9ec1a2a0e621dbbe758bc0d6ec193fd8d2ca9db5908ac5",
+      "tools\\run_cross_reference.py": "7f0c5fd59a088e2b40baa4224d67d50fb2142c36cbbb0458f7a7e003fbc2ce32",
+      "tools\\validate_industry_coverage.py": "1f6abed7fe8a107b2e7f3cab2df7dfd0d419931a1599f2746471acff2edd271f"
+    },
+    "source_change_counts": {},
+    "source_count": 1,
+    "source_observations": 4649,
+    "supplied_evidence": {
+      "affiliations": {
+        "path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\verified_company_affiliations.json",
+        "sha256": "f1fd22a9a7c462c2661b9d87c6abbbe15cffccc9ba3cadc9de1eaa74f69d5880"
+      }
+    }
+  },
+  "status": "completed",
+  "steps": [
+    {
+      "detail": "10 companies; 3 cycles; immutable source pinned",
+      "id": "define",
+      "label": "Define",
+      "status": "completed"
+    },
+    {
+      "detail": "378 exact source records cross-checked; historical query coverage remains unproven",
+      "id": "collect",
+      "label": "Collect",
+      "status": "review"
+    },
+    {
+      "detail": "Attribution and transaction decisions recorded with evidence",
+      "id": "identify",
+      "label": "Identify",
+      "status": "review"
+    },
+    {
+      "detail": "18 evidence-backed links; filing coverage checks tracked separately from receipt review",
+      "id": "connect",
+      "label": "Connect",
+      "status": "review"
+    },
+    {
+      "detail": "Observed accounting views computed; unique-dollar certification remains separate",
+      "id": "count",
+      "label": "Count",
+      "status": "completed"
+    },
+    {
+      "detail": "Source unchanged; decisions reconciled; receipt review and collection coverage reported separately",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "review"
+    }
+  ],
+  "summary": {
+    "amount_change": -91268.49,
+    "automatic_decisions": 4234,
+    "baseline_amount": 863505.98,
+    "classified_from_stored_records": 4001,
+    "corporate_giving": 0.0,
+    "coverage_amount": 688838.55,
+    "coverage_only_records": 3672,
+    "coverage_records": 3972,
+    "employee_giving": 761137.49,
+    "input_records": 4649,
+    "linked_refund_adjustments": 0.0,
+    "observed_original_giving": 772237.49,
+    "pac_outgoing": 0.0,
+    "source_verified_records": 233,
+    "supported_original_giving": 0.0,
+    "unresolved_amount": 263681.57,
+    "unresolved_negative": -1050.0,
+    "unresolved_positive": 262631.57,
+    "unresolved_records": 415,
+    "unverified_funding": 11100.0,
+    "verified_unique": false
+  },
+  "unresolved_reasons": [
+    {
+      "amount": 112000.0,
+      "reason": "reciprocal_earmark_not_established",
+      "records": 84
+    },
+    {
+      "amount": 85498.94,
+      "reason": "memo_parent_not_established",
+      "records": 115
+    },
+    {
+      "amount": 81398.94,
+      "reason": "original_source_of_transfer_unresolved",
+      "records": 110
+    },
+    {
+      "amount": 29361.85,
+      "reason": "company_named_unverified",
+      "records": 167
+    },
+    {
+      "amount": 28041.02,
+      "reason": "earmark_counterpart_not_unique",
+      "records": 16
+    },
+    {
+      "amount": 20330.86,
+      "reason": "receipt_role_unresolved",
+      "records": 31
+    },
+    {
+      "amount": 10000.0,
+      "reason": "funding_identity_unresolved",
+      "records": 2
+    },
+    {
+      "amount": 7768.51,
+      "reason": "company_attribution_unverified",
+      "records": 35
+    },
+    {
+      "amount": 1100.0,
+      "reason": "treasury_ownership_unresolved",
+      "records": 5
+    },
+    {
+      "amount": 1050.0,
+      "reason": "signed_adjustment_not_linked_refund",
+      "records": 2
+    }
+  ]
+}
