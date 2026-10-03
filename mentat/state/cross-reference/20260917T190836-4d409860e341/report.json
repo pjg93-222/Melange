@@ -1,0 +1,747 @@
+{
+  "attribution_recheck": {
+    "artifacts": {
+      "attribution-inputs.json": "dba5f8e8fa55fe69c6bb8d89b4437e823fa07965263e5800b4519ad09d0cf6fe",
+      "attribution-results.json": "8cf0ae47e7d6fc09367654d9f08c78d5c141f80f11ce4f5b91cae4ea912c0d23"
+    },
+    "conflicting_match_inputs": 0,
+    "eligible_records": 9543,
+    "resolved_records": 0,
+    "status": "completed",
+    "unique_inputs": 889
+  },
+  "changes": [
+    {
+      "after": 0.0,
+      "before": 190000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": -190000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4092020231802645332",
+      "source_description": "RETURN OF ERRONEOUS DEBIT MADE BY STRIPE ON 05/10/2023",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202309209597131548"
+    },
+    {
+      "after": 0.0,
+      "before": 128262.88,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -128262.88,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4122020221641867032",
+      "source_description": "REFUND-PROCESSING FEE",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212129557558463"
+    },
+    {
+      "after": 0.0,
+      "before": 123250.03,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -123250.03,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4102820211376022901",
+      "source_description": "REFUND-PROCESSING FEE",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110209468085357"
+    },
+    {
+      "after": 0.0,
+      "before": 112568.63,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -112568.63,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4040120221465073706",
+      "source_description": "REFUND-PROCESSING FEE",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202203209494066786"
+    },
+    {
+      "after": 0.0,
+      "before": 40000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": -40000.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4081020231765042887",
+      "source_description": "REFUND FOR ADMINISTRATIVE FEES",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307319593094652"
+    },
+    {
+      "after": 0.0,
+      "before": 37123.81,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -37123.81,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4030320221458815059",
+      "source_description": "REFUND-PROCESSING FEE",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202202189491823508"
+    },
+    {
+      "after": 0.0,
+      "before": 35038.36,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -35038.36,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4122920211386905733",
+      "source_description": "REFUND-PROCESSING FEE",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112209474511448"
+    },
+    {
+      "after": 25000.0,
+      "before": 0.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": 25000.0,
+      "reason": "company_named_unverified; recognized_contribution_receipt",
+      "record_id": "4051020251192529389",
+      "source_description": "",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759718298"
+    },
+    {
+      "after": 25000.0,
+      "before": 0.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": 25000.0,
+      "reason": "company_named_unverified; recognized_contribution_receipt",
+      "record_id": "4051020251192734409",
+      "source_description": "",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759786638"
+    },
+    {
+      "after": 25000.0,
+      "before": 0.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": 25000.0,
+      "reason": "company_named_unverified; provisional_receipt_role:transfer_receipt",
+      "record_id": "4060420251204830001",
+      "source_description": "* HARRIS VICTORY FUND",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761832145"
+    },
+    {
+      "after": 0.0,
+      "before": 20093.45,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -20093.45,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4092220211371632313",
+      "source_description": "REFUND-PROCESSING FEE",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202109209466815035"
+    },
+    {
+      "after": 16300.0,
+      "before": 0.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "delta": 16300.0,
+      "reason": "company_named_unverified; provisional_receipt_role:transfer_receipt",
+      "record_id": "4060420251204699386",
+      "source_description": "* HARRIS VICTORY FUND",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761858330"
+    },
+    {
+      "after": 0.0,
+      "before": 15596.8,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -15596.8,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4112920221631504107",
+      "source_description": "PROCESSING FEES REFUND; DISBURSEMENTS ISSUED IN 2020",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210279543175419"
+    },
+    {
+      "after": 10000.0,
+      "before": 0.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "delta": 10000.0,
+      "reason": "company_named_unverified; provisional_receipt_role:unverified_receipt_role",
+      "record_id": "4021120261305828555",
+      "source_description": "",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601299794422037"
+    },
+    {
+      "after": 10000.0,
+      "before": 0.0,
+      "company": "Stripe",
+      "cycle": 2026,
+      "delta": 10000.0,
+      "reason": "company_named_unverified; recognized_contribution_receipt",
+      "record_id": "4120320251296697317",
+      "source_description": "",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202510159791199654"
+    },
+    {
+      "after": 10000.0,
+      "before": 0.0,
+      "company": "Stripe",
+      "cycle": 2026,
+      "delta": 10000.0,
+      "reason": "company_named_unverified; provisional_receipt_role:unverified_receipt_role",
+      "record_id": "4121820251299409978",
+      "source_description": "",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202511209792820441"
+    },
+    {
+      "after": 0.0,
+      "before": 7224.0,
+      "company": "Stripe",
+      "cycle": 2022,
+      "delta": -7224.0,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "record_id": "4082520211343863689",
+      "source_description": "REFUND-PROCESSING FEE",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202108209466387167"
+    },
+    {
+      "after": 0.0,
+      "before": 6600.0,
+      "company": "SoFi",
+      "cycle": 2024,
+      "delta": -6600.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt; same_original_gift_at_conduit_and_destination",
+      "record_id": "4070920241972639614",
+      "source_description": "CONTRIBUTION; EARMARKED FROM WINRED; REATTRIBUTION / REDESIGNATION REQUESTED",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407099652745532"
+    },
+    {
+      "after": 6600.0,
+      "before": 0.0,
+      "company": "SoFi",
+      "cycle": 2024,
+      "delta": 6600.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4121120241075675925",
+      "source_description": "CONTRIBUTION; SEE REDESIGNATION",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202411189719989450"
+    },
+    {
+      "after": 5800.0,
+      "before": 0.0,
+      "company": "Kalshi",
+      "cycle": 2022,
+      "delta": 5800.0,
+      "reason": "individual_with_accepted_employer_match; recognized_contribution_receipt",
+      "record_id": "4120820221633640538",
+      "source_description": "CONTRIBUTION; REFUNDED $2900.00 ON 10/10/2022; REFUNDED $2900 ON 10/10/2022",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202211239546876491"
+    }
+  ],
+  "checks": {
+    "collection_completeness_established": false,
+    "duplicate_exclusions_have_retained_representation": true,
+    "identical_input_duplicates_coalesced": 0,
+    "integer_cent_reconciliation": true,
+    "original_and_pac_buckets_disjoint": true,
+    "overall_unique_dollars_established": false,
+    "relationship_graph_acyclic": true,
+    "unique_source_ids": true
+  },
+  "coverage_reasons": [
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 7739468.65,
+      "reason": "latest_filing_completeness_unproven",
+      "records": 21287
+    },
+    {
+      "action": "Retrieve the filing header and enumerate its amendment family.",
+      "amount": 1498609.6,
+      "reason": "filing_relationship_evidence_missing",
+      "records": 3349
+    }
+  ],
+  "coverage_task_count": 2111,
+  "elapsed_seconds": 368.94,
+  "excluded_reasons": [
+    {
+      "amount": 6562667.89,
+      "reason": "attribution_contradicted_by_text",
+      "records": 8695
+    },
+    {
+      "amount": 2985544.14,
+      "reason": "company_attribution_not_accepted",
+      "records": 51060
+    },
+    {
+      "amount": 730347.79,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "records": 102
+    },
+    {
+      "amount": 11000.0,
+      "reason": "individual_with_accepted_employer_match",
+      "records": 4
+    },
+    {
+      "amount": 11000.0,
+      "reason": "recognized_contribution_receipt",
+      "records": 4
+    },
+    {
+      "amount": 6600.0,
+      "reason": "same_original_gift_at_conduit_and_destination",
+      "records": 1
+    },
+    {
+      "amount": 2900.0,
+      "reason": "explicit_same_filing_memo_reference",
+      "records": 1
+    },
+    {
+      "amount": 2900.0,
+      "reason": "non_giving_resolved_without_company_attribution",
+      "records": 1
+    },
+    {
+      "amount": 1500.0,
+      "reason": "superseded_in_observed_filing_family",
+      "records": 2
+    }
+  ],
+  "generated_at": "2026-09-17T19:14:45.218879+00:00",
+  "header_recovery": {
+    "failures": [],
+    "recovered": 0,
+    "requested": 0
+  },
+  "imports": [],
+  "ledger_sha256": "f3789e260cf2f27b65b376b3191f040e74d129746eb990eefdb7ce4eb358aecb",
+  "limitations": [
+    "Receipt classification can be resolved from its evidence while full filing and route coverage remains open.",
+    "Observed original giving is not a certification of complete unique dollars.",
+    "PAC outgoing amounts here are recipient-reported activity, not a complete Schedule B spending census.",
+    "Unresolved exposure can include overlapping representations and is not an error bound.",
+    "Automatically processed records do not establish the accuracy or completeness of the resulting totals."
+  ],
+  "link_count": 4,
+  "partisan_breakdowns": [
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": 34.08063806772103,
+      "democratic": 1844918.29,
+      "democratic_percent": 51.05922712827308,
+      "denominator_dr": 3613290.67,
+      "other_unknown": 7437053.38,
+      "republican": 1768372.38,
+      "republican_percent": 48.94077287172692,
+      "view": "original_giving"
+    },
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": null,
+      "democratic": 0.0,
+      "democratic_percent": null,
+      "denominator_dr": 0.0,
+      "other_unknown": 0.0,
+      "republican": 0.0,
+      "republican_percent": null,
+      "view": "pac_activity"
+    }
+  ],
+  "recovery": {
+    "failures": [],
+    "recovered": 0,
+    "requested": 0
+  },
+  "review_queue": [
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 132900.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4061120251205747992",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506109762124444"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 132900.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612233",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921813"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 132900.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612234",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921813"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 75000.0,
+      "company": "Chime",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4082020242014279666",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202408159666200629"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 72800.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4061120251205747991",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506109762124443"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 72800.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612225",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921810"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 72800.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established",
+      "record_id": "4062420261522612226",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921811"
+    },
+    {
+      "action": "Retrieve both receipts and verify the stated conduit, donor, ZIP, date and amount.",
+      "amount": 50000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "reciprocal_earmark_not_established",
+      "record_id": "4020620251150116436",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501179741502145"
+    },
+    {
+      "action": "Retrieve both receipts and verify the stated conduit, donor, ZIP, date and amount.",
+      "amount": 50000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "reciprocal_earmark_not_established",
+      "record_id": "4051020251190997471",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759207992"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 50000.0,
+      "company": "Polymarket",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4051320251196541034",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760714379"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 50000.0,
+      "company": "Polymarket",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established",
+      "record_id": "4051320251196541035",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760714379"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 50000.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4060320251204404546",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506039761730575"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 44300.0,
+      "company": "Robinhood",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4061120251205744909",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506109762123415"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 44300.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4062420261522611990",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921732"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 44300.0,
+      "company": "Kalshi",
+      "cycle": 2026,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4062420261522611992",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870921733"
+    },
+    {
+      "action": "Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 41700.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established",
+      "record_id": "4010620251127036774",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731602169"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 41300.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4010620251126143074",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059739443792"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 41300.0,
+      "company": "Stripe",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4010620251127024432",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731597946"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 41300.0,
+      "company": "Polymarket",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved; treasury_ownership_unresolved",
+      "record_id": "4020520251143224873",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752439338"
+    },
+    {
+      "action": "Retrieve the receipt and referenced original donor/transaction evidence.; Retrieve the referenced same-filing parent and validate donor, date, sign and amount coverage.",
+      "amount": 41300.0,
+      "company": "Polymarket",
+      "cycle": 2024,
+      "reason": "memo_parent_not_established; original_source_of_transfer_unresolved",
+      "record_id": "4020520251143224874",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752439338"
+    }
+  ],
+  "run_id": "20260917T190836-4d409860e341",
+  "schema_version": 1,
+  "scope": {
+    "accounting_basis": "original giving once; PAC outgoing activity separately",
+    "attribution_recheck": {
+      "artifacts": {
+        "attribution-inputs.json": "dba5f8e8fa55fe69c6bb8d89b4437e823fa07965263e5800b4519ad09d0cf6fe",
+        "attribution-results.json": "8cf0ae47e7d6fc09367654d9f08c78d5c141f80f11ce4f5b91cae4ea912c0d23"
+      },
+      "conflicting_match_inputs": 0,
+      "eligible_records": 9543,
+      "resolved_records": 0,
+      "status": "completed",
+      "unique_inputs": 889
+    },
+    "attribution_text_test": {
+      "committees_with_connected_organization": 20082,
+      "companies_with_names": 19
+    },
+    "baseline": {
+      "basis": "accepted_report_receipts",
+      "sha256": "74658d0093eb05554c8dc3beb8e77fb1513848279bba39da2d5e7be8f6dbf496",
+      "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.db",
+      "sources": [
+        {
+          "cycles": [
+            2022,
+            2024,
+            2026
+          ],
+          "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026",
+          "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.db",
+          "snapshot_sha256": "74658d0093eb05554c8dc3beb8e77fb1513848279bba39da2d5e7be8f6dbf496",
+          "token": "f7b0cd0975119e32a9b9ce79995a31cdfb670f315ca8e7f4c2bf1a2ba732de05"
+        }
+      ]
+    },
+    "collection_coverage": {
+      "complete": false,
+      "invalid_units": [],
+      "missing_queries": [],
+      "reason": "Legacy query evidence is missing."
+    },
+    "committee_master": {
+      "inputs\\fec_committee_master\\cm22\\cm.txt": "a452a78c461c3b04c03b9417b9da58a8e6ffbcfe67a04ab4a6d0cf4471f2dfb3",
+      "inputs\\fec_committee_master\\cm24\\cm.txt": "6620d7b67f05f939173abcc2c59b4877c7080ad2350958e08b192da2fdaae200",
+      "inputs\\fec_committee_master\\cm26\\cm.txt": "e96dedf6d6d78f68b4113e8300f55dfc7503e353b08b2b1817822d7ee42e4002"
+    },
+    "companies": [
+      "Cash App",
+      "Chime",
+      "Dave Inc.",
+      "Kalshi",
+      "Klarna",
+      "Plaid",
+      "Polymarket",
+      "Robinhood",
+      "SoFi",
+      "Stripe"
+    ],
+    "cutoff": "source snapshot; later filings and unlisted aliases may add evidence",
+    "cycle_basis": "calendar receipt date; original source query period preserved separately",
+    "cycles": [
+      2022,
+      2024,
+      2026
+    ],
+    "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\fintech\\mentat.db",
+    "database_sha256": "d55ce04ced908141888e4c271e66c43b4bc7a75dab41246b13ae7b69a265f90a",
+    "distinct_source_ids": 86270,
+    "industries": [
+      "Fintech"
+    ],
+    "rule_fingerprints": {
+      "R\\collect.R": "d44c1db447725dff847138537b7211fe81c333701307b12c3b019a845bf8c113",
+      "R\\fec_page.R": "a7c5572f0eb733cffc1b2a2dcc0a87fc7e715b7039301c56e92b6aecc23f702e",
+      "R\\ingest.R": "798193f5356cadf49e9b339a5a36cb783e6a6c40917025e575718ac78636dc9d",
+      "R\\paths.R": "8b917fd820fc95797fc132996f26ef29f48201fa103a6c53b06ab72822990585",
+      "R\\schema.R": "0e91cbf2c3f2034b6dc329b416d1aca1f359743b81c10e6938ddc1e4214e8f7d",
+      "inputs\\company_home_states.csv": "de222437b333346158692081941cb82345506fb2c20d5112a8056e5de81639c9",
+      "inputs\\company_match_overrides.csv": "49cd87e5abf859c0728c6ef0fdd7279e9ec2130623097b91c3725e36f9597f4c",
+      "inputs\\fec_receipt_rules.json": "e1cbca218b835ef06f3ad0cd55a1fd1a40263b86fd3410788f2d486d6a73850d",
+      "inputs\\verified_employer_aliases.csv": "d92da3434414ae11c851d9c294e565f978fd2e6e8dd7fdd03f892c9561d01df1",
+      "tools\\cross_reference_engine.py": "00bb9d3e3c2c73aa4abf26608aa405f248044d7e3903852c0d3ac1c40b82cc99",
+      "tools\\cross_reference_store.py": "d687f488e481314f594f0a288a8a4a0281f6884ba6639817389d7b104b03c09f",
+      "tools\\fec_filing_headers.py": "30766fc320fdb7d7d7ee13e78eaffc59114393c7571a381efa6a5325f9a35cd8",
+      "tools\\pac_evidence.py": "6176e6183e0a910cae4ac2d668a6784c9966ac58dedaed391833d0f7aaaec4a9",
+      "tools\\recheck_attribution.R": "6a2b32d05102efb5249f3edceb1e71a0f21cc714506b2fdfa617308350bd103b",
+      "tools\\recheck_attribution.py": "daaa3fc795868b43309f3cfdf4b78a6a502c95398fb0e8e160383ef8dc332204",
+      "tools\\report_source_guard.py": "a6f1eb3f1ce08b6af208d55e688f1cd0ee957d061c3ccd879d67827bd38972c6",
+      "tools\\run_cross_reference.py": "46a529dfa60d9e0c4505475e9a5b2d1da5c64d8344066dff1689404b80f083e2",
+      "tools\\validate_industry_coverage.py": "1f6abed7fe8a107b2e7f3cab2df7dfd0d419931a1599f2746471acff2edd271f"
+    },
+    "source_change_counts": {},
+    "source_count": 1,
+    "source_observations": 86662,
+    "supplied_evidence": {
+      "affiliations": {
+        "path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\verified_company_affiliations.json",
+        "sha256": "3c9968f5cd7369416274d50c23ef1fdf513287ba4bc598dc264514b027ff8b1a"
+      }
+    }
+  },
+  "status": "completed",
+  "steps": [
+    {
+      "detail": "10 companies; 3 cycles; immutable source pinned",
+      "id": "define",
+      "label": "Define",
+      "status": "completed"
+    },
+    {
+      "detail": "842 exact source records cross-checked; historical query coverage remains unproven",
+      "id": "collect",
+      "label": "Collect",
+      "status": "review"
+    },
+    {
+      "detail": "Attribution and transaction decisions recorded with evidence",
+      "id": "identify",
+      "label": "Identify",
+      "status": "review"
+    },
+    {
+      "detail": "4 evidence-backed links; filing coverage checks tracked separately from receipt review",
+      "id": "connect",
+      "label": "Connect",
+      "status": "review"
+    },
+    {
+      "detail": "Observed accounting views computed; unique-dollar certification remains separate",
+      "id": "count",
+      "label": "Count",
+      "status": "completed"
+    },
+    {
+      "detail": "Source unchanged; decisions reconciled; receipt review and collection coverage reported separately",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "review"
+    }
+  ],
+  "summary": {
+    "amount_change": 1246452.74,
+    "automatic_decisions": 82792,
+    "baseline_amount": 9803891.31,
+    "classified_from_stored_records": 82675,
+    "corporate_giving": 0.0,
+    "coverage_amount": 9238078.25,
+    "coverage_only_records": 22931,
+    "coverage_records": 24636,
+    "employee_giving": 8746811.15,
+    "input_records": 86270,
+    "linked_refund_adjustments": 0.0,
+    "observed_original_giving": 11050344.05,
+    "pac_outgoing": 0.0,
+    "source_verified_records": 117,
+    "supported_original_giving": 0.0,
+    "unresolved_amount": 4535566.55,
+    "unresolved_negative": -140125.06,
+    "unresolved_positive": 4395441.49,
+    "unresolved_records": 3478,
+    "unverified_funding": 2303532.9,
+    "verified_unique": false
+  },
+  "unresolved_reasons": [
+    {
+      "amount": 2092515.92,
+      "reason": "memo_parent_not_established",
+      "records": 1773
+    },
+    {
+      "amount": 1993000.53,
+      "reason": "company_named_unverified",
+      "records": 1606
+    },
+    {
+      "amount": 1851948.05,
+      "reason": "receipt_role_unresolved",
+      "records": 760
+    },
+    {
+      "amount": 1727304.0,
+      "reason": "funding_identity_unresolved",
+      "records": 685
+    },
+    {
+      "amount": 1183043.58,
+      "reason": "original_source_of_transfer_unresolved",
+      "records": 1045
+    },
+    {
+      "amount": 594128.9,
+      "reason": "treasury_ownership_unresolved",
+      "records": 732
+    },
+    {
+      "amount": 140125.06,
+      "reason": "signed_adjustment_not_linked_refund",
+      "records": 61
+    },
+    {
+      "amount": 140000.0,
+      "reason": "reciprocal_earmark_not_established",
+      "records": 6
+    },
+    {
+      "amount": 2385.0,
+      "reason": "observed_filing_versions_unresolved",
+      "records": 51
+    }
+  ]
+}

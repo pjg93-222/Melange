@@ -1,0 +1,21 @@
+{
+  "baseline": {
+    "basis": "accepted_report_receipts",
+    "sha256": "74658d0093eb05554c8dc3beb8e77fb1513848279bba39da2d5e7be8f6dbf496",
+    "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.db",
+    "sources": [
+      {
+        "cycles": [
+          2022,
+          2024,
+          2026
+        ],
+        "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026",
+        "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\fintech\\2022-2024-2026\\95cd900aa78044b193320c9cb05f8e70.db",
+        "snapshot_sha256": "74658d0093eb05554c8dc3beb8e77fb1513848279bba39da2d5e7be8f6dbf496",
+        "token": "f7b0cd0975119e32a9b9ce79995a31cdfb670f315ca8e7f4c2bf1a2ba732de05"
+      }
+    ]
+  },
+  "changes": []
+}

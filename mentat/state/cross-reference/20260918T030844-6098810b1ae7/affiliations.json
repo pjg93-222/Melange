@@ -1,0 +1,238 @@
+{
+  "schema_version": 2,
+  "records": [
+    {
+      "company": "Bank of America NA",
+      "entity_id": "C00364778",
+      "entity_name": "BANK OF AMERICA CORPORATION FEDERAL PAC",
+      "aliases": [
+        "BANK OF AMERICA CORPORATION STATE AND FEDERAL PAC",
+        "BANK OF AMERICA CORP. FEDERAL PAC",
+        "BANK OF AMERICA PAC",
+        "BANK OF AMERICA FEDERAL PAC",
+        "BANK OF AMERICA CORP FEDERAL PAC",
+        "BANK OF AMERICA CORPORATION PAC",
+        "BANK OF AMERICA CORPORATION FEDERAL POLITICAL ACTION COMMITTEE",
+        "BANK OF AMERICA CORPORATION STATE & FEDERAL PAC"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00364778/",
+      "evidence_id": "fec-committee-C00364778"
+    },
+    {
+      "company": "Capital One Bank NA",
+      "entity_id": "C00326595",
+      "entity_name": "CAPITAL ONE FINANCIAL CORP. ASSOC. POLITICAL FUND",
+      "aliases": [
+        "CAPITAL ONE FINANCIAL CORPORATION ASSOCIATES POLITICAL FUND",
+        "CAPITAL ONE ASSOCIATES POLITICAL FUND",
+        "CAPITAL ONE ASSOC. POLITICAL FUND",
+        "CAPITAL ONE FINANCIAL CORP ASSOCIATES POLITICAL FUND",
+        "CAPITAL ONE FINANCIAL CORP. ASSOCIATES POLITICAL FUND",
+        "CAPITAL ONE FINANCIAL CORPORATION PAC",
+        "CAPITAL ONE FINANCIAL CORPORATION ASSOCIATION POLITICAL ACTION COMMITTEE",
+        "CAPITAL ONE FINANCIAL CORP. ASSOC. PAC",
+        "CAPITAL ONE FINANCIAL CORPORATION ASSOCIATES PAC",
+        "CAPITAL ONE FINANCIAL CORP ASSOC PAC",
+        "CAPITAL ONE FINANCIAL CORP. PAC"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00326595/",
+      "evidence_id": "fec-committee-C00326595"
+    },
+    {
+      "company": "Citibank",
+      "entity_id": "C00008474",
+      "entity_name": "CITIGROUP INC. POLITICAL ACTION COMMITTEE - FEDERAL (CITIGROUP PAC-FEDERAL)",
+      "aliases": [
+        "CITIGROUP INC. PAC - FEDERAL (CITIGROUP PAC-FEDERAL)",
+        "CITIGROUP INC. PAC - FEDERAL (CITI PAC - FEDERAL)",
+        "CITIGROUP INC. PAC",
+        "CITIGROUP INC. PAC - FEDERAL",
+        "CITIGROUP INC. POLITICAL ACTION COMMITTEE - FEDERAL (CITIGRO",
+        "CITIGROUP INC. POLITICAL ACTION COMMITTEE - FEDERAL",
+        "CITIGROUP INC PAC",
+        "CITIGROUP PAC",
+        "CITIGROUP INC. POLITICAL ACTION COMMITTEE",
+        "CITIGROUP, INC. PAC",
+        "CITIGROUP INC. FEDERAL POLITICAL ACTION COMMITTEE",
+        "CITIGROUP INC. PAC FEDERAL",
+        "CITIGROUP INC., PAC",
+        "CITIGROUP, INC. POLITICAL ACTION COMMITTEE - FEDERAL",
+        "CITIGROUP INC PAC FEDERAL",
+        "CITIGROUP INC. PAC- FEDERAL"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00008474/",
+      "evidence_id": "fec-committee-C00008474"
+    },
+    {
+      "company": "Goldman Sachs Bank NA",
+      "entity_id": "C00350744",
+      "entity_name": "THE GOLDMAN SACHS GROUP, INC. POLITICAL ACTION COMMITTEE",
+      "aliases": [
+        "THE GOLDMAN SACHS GROUP, INC. PAC",
+        "THE GOLDMAN SACHS GROUP INC. PAC",
+        "GOLDMAN SACHS GROUP INC. PAC",
+        "GOLDMAN SACHS GROUP, INC. PAC",
+        "THE GOLDMAN SACHS GROUP INC PAC",
+        "GOLDMAN SACHS GROUP PAC",
+        "THE GOLDMAN SACHS GROUP, INC PAC",
+        "GOLDMAN SACHS GROUP, INC. POLITICAL ACTION COMMITTEE",
+        "THE GOLDMAN SACHS GROUP PAC",
+        "GOLDMAN SACHS PAC",
+        "THE GOLDMAN SACHS GROUP, INC.-PAC",
+        "GOLDMAN SACHS GROUP INC PAC",
+        "GOLDMAN SACHS GROUP INC. POLITICAL ACTION COMMITTEE"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00350744/",
+      "evidence_id": "fec-committee-C00350744"
+    },
+    {
+      "company": "JP Morgan Chase Bank NA",
+      "entity_id": "C00128512",
+      "entity_name": "JPMORGAN CHASE & CO. PAC",
+      "aliases": ["JP MORGAN CHASE & CO. PAC", "JP MORGAN CHASE & CO PAC"],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00128512/",
+      "evidence_id": "fec-committee-C00128512"
+    },
+    {
+      "company": "JP Morgan Chase Bank NA",
+      "entity_id": "C00104299",
+      "entity_name": "JPMORGAN CHASE & CO. FEDERAL POLITICAL ACTION COMMITTEE",
+      "aliases": [
+        "J.P. MORGAN CHASE & CO. FEDERAL POLITICAL ACTION COMMITTEE",
+        "J.P. MORGAN CHASE & CO. STATE AND FEDERAL POLITICAL ACTION COMMITTEE",
+        "JP MORGAN CHASE & CO. FEDERAL PAC",
+        "JP MORGAN CHASE & CO FEDERAL PAC",
+        "JP MORGAN CHASE & CO. FEDERAL POLITICAL ACTION COMMITTEE"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00104299/",
+      "evidence_id": "fec-committee-C00104299"
+    },
+    {
+      "company": "Morgan Stanley Bank",
+      "entity_id": "C00337626",
+      "entity_name": "MORGAN STANLEY POLITICAL ACTION COMMITTEE",
+      "aliases": ["MORGAN STANLEY PAC"],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00337626/",
+      "evidence_id": "fec-committee-C00337626"
+    },
+    {
+      "company": "PNC Bank NA",
+      "entity_id": "C00035519",
+      "entity_name": "BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC. (PNC PAC)",
+      "aliases": [
+        "PNC PAC",
+        "PNC PAC - FEDERAL",
+        "PNC FINANCIAL SERVICES PAC",
+        "BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC.",
+        "BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FIN",
+        "BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC. (P",
+        "BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROU",
+        "BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC. ( PNC PAC)"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00035519/",
+      "evidence_id": "fec-committee-C00035519"
+    },
+    {
+      "company": "PNC Bank NA",
+      "entity_id": "C00186064",
+      "entity_name": "FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC. (PNC PAC)",
+      "aliases": [
+        "FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC. (...",
+        "FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC. (PNC",
+        "FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP",
+        "FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP,",
+        "FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP (PNC PAC)",
+        "FEDERAL BIPARTISAN VOLUNTARY PUBLIC AFFAIRS COMMITTEE OF THE PNC FINANCIAL SERVICES GROUP, INC."
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00186064/",
+      "evidence_id": "fec-committee-C00186064"
+    },
+    {
+      "company": "Truist Bank",
+      "entity_id": "C00386524",
+      "entity_name": "TRUIST FINANCIAL CORPORATION FEDERAL PAC",
+      "aliases": [
+        "TRUIST FINANCIAL CORPORATION FEDERAL PAC (FORMERLY SUNTRUST BANKS, INC. POLITICAL ACTION COMMITTEE)",
+        "TRUIST FINANCIAL CORPORATION FEDERAL PAC (FORMERLY SUNTRUST BANKS INC. POLITICAL ACTION COMMITTEE)",
+        "TRUIST FINANCIAL CORPORATION FEDERAL PAC (FORMERLY SUNTRUST BANKS INC. PAC)",
+        "TRUIST FINANCIAL CORPORATION FEDERAL PAC (FORMERLY SUNTRUST BANKS INC. POLITICAL ACTION CO",
+        "TRUIST FINANCIAL CORPORATION FEDERAL PAC (FORMERLY SUNTRUST",
+        "TRUIST FINANCIAL CORPORATION FEDERAL PAC (FORMERLY SUNTRUST BANKS, INC. PAC)",
+        "TRUIST FINANCIAL CORPORATION FEDERAL PAC (FORMERLY SUNTRUST BANKS, INC. POLITICAL ACTION C",
+        "TRUIST FINANCIAL CORPORATION POLITICAL ACTION COMMITTEE (FOR",
+        "TRUIST FINANCIAL CORPORATION FEDERAL, STATE & LOCAL POLITICAL ACTION COMMITTEE (FORMERLY SUNTRUST BANKS, INC. MAIN STREET BANKERS PAC)",
+        "TRUIST FINANCIAL CORPORATION PAC",
+        "TRUIST FINANCIAL CORP FEDERAL PAC",
+        "TRUIST FINANCIAL PAC"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00386524/",
+      "evidence_id": "fec-committee-C00386524"
+    },
+    {
+      "company": "US Bank NA",
+      "entity_id": "C00488882",
+      "entity_name": "U.S. BANCORP FEDERAL POLITICAL ACTION COMMITTEE",
+      "aliases": [
+        "U.S. BANCORP POLITICAL PARTICIPATION PROGRAM",
+        "U.S. BANCORP FEDERAL PAC",
+        "US BANK POLITICAL ACTION COMMITTEE",
+        "U.S. BANCORP FEDERAL ACTION COMMITTEE"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00488882/",
+      "evidence_id": "fec-committee-C00488882"
+    },
+    {
+      "company": "Wells Fargo Bank NA",
+      "entity_id": "C00034595",
+      "entity_name": "WELLS FARGO AND COMPANY EMPLOYEE PAC (AKA WELLS FARGO EMPLOYEE PAC)",
+      "aliases": [
+        "WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND II",
+        "WELLS FARGO AND COMPANY EMPLOYEE PAC",
+        "WELLS FARGO AND COMPANY EMPLOYEE PAC (AKA WELLS FARGO EMPLOY",
+        "WELLS FARGO & CO EMPLOYEE PAC",
+        "WELLS FARGO & CO. EMPLOYEE PAC",
+        "WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FU",
+        "WELLS FARGO & COMPANY EMPLOYEE PAC",
+        "WELLS FARGO EMPLOYEE PAC",
+        "WELLS FARGO & CO EMPLOYEES PAC",
+        "WELLS FARGO & COMPANY EMPLOYEE POLITICAL ACTION COMMITTEE",
+        "WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND I",
+        "WELLS FARGO & CO. EMPLOYEES GOOD GOVERNMENT FEDERAL FUND II",
+        "WELLS FARGO & COMPANY EMPLOYEES GOOD GOVERNMENT FEDERAL FUND II",
+        "WELLS FARGO & CO. EMPLOYEES GOOD GOVERNMENT",
+        "WELLS FARGO AND COMPANY EMPLOYEES GOOD GOVERNMENT",
+        "WELLS FARGO & CO. EMPLOYEES GOOD GOVERNMENT PAC",
+        "WELLS FARGO PAC",
+        "WELLS FARGO CO. EMPLOYEES GOOD GOVERNMENT PAC",
+        "WELLS FARGO AND CO EMPLOYEE PAC (AKA WELLS FARGO EMPLOYEE PAC)",
+        "WELLS FARGO & CO EMPLOYEES GOOD GOVT FEDERAL FUND"
+      ],
+      "relationship": "connected_pac",
+      "valid_from": "2021-01-01",
+      "source_url": "https://www.fec.gov/data/committee/C00034595/",
+      "evidence_id": "fec-committee-C00034595"
+    }
+  ]
+}
