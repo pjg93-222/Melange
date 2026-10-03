@@ -1,0 +1,2843 @@
+{
+  "basis": {
+    "classes": {
+      "individual": {
+        "listed_cents": 385990000,
+        "listed_count": 95,
+        "median_cents": 1000,
+        "percentile_cents": 1000000,
+        "records": 56773,
+        "threshold_cents": 1000000
+      },
+      "other": {
+        "listed_cents": 0,
+        "listed_count": 0,
+        "median_cents": 76753,
+        "percentile_cents": 900000,
+        "records": 153,
+        "threshold_cents": 1535060
+      }
+    },
+    "median_multiple": 20,
+    "minimum_class_records": 20,
+    "percentile": 99.9,
+    "text": "A receipt is listed as large when it is in the top 0.1% of its own class and at least 20x that class's median counted receipt, which is $10,000.00 or more from an individual and $15,350.60 or more from any other contributor; the 0.1% cut and the 20x multiple are a proposed default and await the owner's ratification."
+  },
+  "counts": {
+    "source_records": 67169
+  },
+  "generated_at": "2026-09-21T05:54:52.681550+00:00",
+  "outliers": {
+    "large": [
+      {
+        "amount": 884700.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051020251190671466",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759104324"
+      },
+      {
+        "amount": 500000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4072920221553430990",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207209522511828"
+      },
+      {
+        "amount": 458700.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4011320251129928434",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412049720455407"
+      },
+      {
+        "amount": 245000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4090220221567959157",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202209019528329579"
+      },
+      {
+        "amount": 123900.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010620251126150399",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059739446235"
+      },
+      {
+        "amount": 123900.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010620251126150499",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059739446269"
+      },
+      {
+        "amount": 100000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4020620251143653176",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752377706"
+      },
+      {
+        "amount": 92300.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010620251126152512",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059739446940"
+      },
+      {
+        "amount": 50000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051320251194367718",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505139761176657"
+      },
+      {
+        "amount": 50000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051320251194367724",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505139761176659"
+      },
+      {
+        "amount": 50000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051320251194367726",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505139761176659"
+      },
+      {
+        "amount": 50000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4121620241076895739",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731446921"
+      },
+      {
+        "amount": 47100.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051320251194367716",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505139761176656"
+      },
+      {
+        "amount": 44600.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051020251191702061",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505079759442522"
+      },
+      {
+        "amount": 41300.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4060420251204704882",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761860162"
+      },
+      {
+        "amount": 41300.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4060420251204704883",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506049761860162"
+      },
+      {
+        "amount": 41300.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4102920241011134529",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410209699299984"
+      },
+      {
+        "amount": 41300.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4121620241076631375",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731359128"
+      },
+      {
+        "amount": 36500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4030620231733306046",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303049578840645"
+      },
+      {
+        "amount": 26800.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051320251194367720",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505139761176657"
+      },
+      {
+        "amount": 25000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4043020261484938416",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862512405"
+      },
+      {
+        "amount": 23200.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051320251194367722",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505139761176658"
+      },
+      {
+        "amount": 13500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4030620231733691963",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303049578968957"
+      },
+      {
+        "amount": 12900.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4010420231659889055",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212089553445465"
+      },
+      {
+        "amount": 12900.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4010420231659889097",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212089553445479"
+      },
+      {
+        "amount": 12900.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4121620221637568990",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212089557181380"
+      },
+      {
+        "amount": 12900.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4121620221637569635",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212089557181595"
+      },
+      {
+        "amount": 12000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4022520261359021163",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309795126747"
+      },
+      {
+        "amount": 12000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4022520261359021164",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309795126747"
+      },
+      {
+        "amount": 12000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4062920261523109124",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606119870618404"
+      },
+      {
+        "amount": 12000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4071520261534229258",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607089874807223"
+      },
+      {
+        "amount": 12000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4071520261534229260",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607089874807224"
+      },
+      {
+        "amount": 11600.0,
+        "company": "Pentagon Federal Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4011020231668878091",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212159558213463"
+      },
+      {
+        "amount": 11600.0,
+        "company": "Pentagon Federal Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4012520221389227812",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201109474924568"
+      },
+      {
+        "amount": 11600.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4012820251137505778",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501229747689996"
+      },
+      {
+        "amount": 11600.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4021120251171815451",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319750062218"
+      },
+      {
+        "amount": 11500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4042820261483867883",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159863119486"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010220251125427389",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731658897"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010220251125498859",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731303997"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010220251125579844",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731563127"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010220251125583991",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731643658"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010220251125642037",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412069739733485"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4010720251127421422",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412229739983229"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4012720251135326269",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501169740193519"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4012920251138288882",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501239747728025"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4012920251138295815",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501289748012929"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4013020251138935584",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501309748315567"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4020620251143462327",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752736636"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4021120251171917393",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501309748663711"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4021220251172344828",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319748966937"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4021320251172752948",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202502019753232381"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4022520251178473711",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202502209753719685"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4022520251178478937",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202502209753710937"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4022820251179270688",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202502209753517096"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4030620231733691911",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202303049578968935"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4031020251179752856",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503069754074663"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4031020251179808871",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503109754082390"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4031120251179891787",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503119754118655"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4031420251180055983",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503139754161169"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4031820251180299956",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503189754222077"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4032420251181217783",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503249754476544"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4033120251181763803",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503309754825993"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4040120251182219264",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202503319754832482"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4040220251183141308",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504029755024180"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4040920251183540719",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504099755193374"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4041120251183654670",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504119755215394"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4042320251186166975",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504169756094127"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4042820251187228782",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504209756336626"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4042820251187232835",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504239756385816"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4042820261483767280",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604109857092496"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4042920251187920616",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504299757604295"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4043020251188039520",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504309758901307"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "entity": "IND",
+        "record_id": "4050420231746845895",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202305029581392518"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4050520251188619391",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505039758924304"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4050520261502859374",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604209864046198"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4050620251188949717",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505059759032863"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4050620251188958525",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505069759037264"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4051220251193589018",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505129760926733"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4061820261521601823",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605159866974998"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4062320251206848350",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202506209762510732"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4062920261523024554",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606199870840922"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4070120251207386414",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507019762559670"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4071620241973647966",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407119653103464"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4071720251209039451",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507159763520380"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4071720251209039673",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507159763520457"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "entity": "IND",
+        "record_id": "4071720261534612603",
+        "role": "contribution",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607109874853522"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4111220241068034772",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410159688229999"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4112520241073393359",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202410249710441568"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4120920241075304897",
+        "role": "transfer_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202411129719969249"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4121720241077104217",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731167901"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4122320241124599485",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412049720457935"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4122620241124817159",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731351854"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4123020241124967511",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412089739741877"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4123120241125043883",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731475004"
+      },
+      {
+        "amount": 10000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "entity": "IND",
+        "record_id": "4123120241125228090",
+        "role": "unverified_receipt_role",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731741508"
+      }
+    ],
+    "large_amount": 3859900.0,
+    "large_count": 95,
+    "non_giving": [
+      {
+        "amount": 17518.21,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302163",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332441"
+      },
+      {
+        "amount": 7971.61,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138076",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610263"
+      },
+      {
+        "amount": 7950.99,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138072",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610262"
+      },
+      {
+        "amount": 7949.09,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138081",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610265"
+      },
+      {
+        "amount": 7928.52,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138082",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610265"
+      },
+      {
+        "amount": 7910.57,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588518",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161967"
+      },
+      {
+        "amount": 7888.21,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588520",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161968"
+      },
+      {
+        "amount": 7734.15,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138077",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610264"
+      },
+      {
+        "amount": 7674.92,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588511",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161965"
+      },
+      {
+        "amount": 7653.23,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588513",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161965"
+      },
+      {
+        "amount": 7614.32,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588514",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161966"
+      },
+      {
+        "amount": 5425.45,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302164",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332441"
+      },
+      {
+        "amount": 4235.25,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302165",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332442"
+      },
+      {
+        "amount": 4216.18,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302167",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332442"
+      },
+      {
+        "amount": 3853.73,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138078",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610264"
+      },
+      {
+        "amount": 3252.15,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302162",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332441"
+      },
+      {
+        "amount": 3050.99,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138073",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610262"
+      },
+      {
+        "amount": 2799.8,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543617",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920059"
+      },
+      {
+        "amount": 2797.21,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020320231722440328",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301319575670105"
+      },
+      {
+        "amount": 2792.11,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4041820231742948397",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580917163"
+      },
+      {
+        "amount": 2704.51,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020320231722440327",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301319575670105"
+      },
+      {
+        "amount": 2531.08,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543612",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920058"
+      },
+      {
+        "amount": 2363.63,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588516",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161966"
+      },
+      {
+        "amount": 2292.78,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588521",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161968"
+      },
+      {
+        "amount": 2054.81,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450943",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193036"
+      },
+      {
+        "amount": 2053.76,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450944",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193037"
+      },
+      {
+        "amount": 2051.7,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901088",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734223"
+      },
+      {
+        "amount": 2049.65,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077951",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354700"
+      },
+      {
+        "amount": 2047.66,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077963",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354704"
+      },
+      {
+        "amount": 2046.62,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934128",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554493"
+      },
+      {
+        "amount": 2044.56,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934123",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554492"
+      },
+      {
+        "amount": 2042.52,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199367",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501456"
+      },
+      {
+        "amount": 2041.47,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199366",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501455"
+      },
+      {
+        "amount": 2039.43,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242534",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472113"
+      },
+      {
+        "amount": 2027.26,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042520231744022856",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580926510"
+      },
+      {
+        "amount": 2025.91,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543618",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920060"
+      },
+      {
+        "amount": 1989.52,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450945",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193037"
+      },
+      {
+        "amount": 1986.51,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901095",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734225"
+      },
+      {
+        "amount": 1979.6,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934138",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554497"
+      },
+      {
+        "amount": 1977.62,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199361",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501454"
+      },
+      {
+        "amount": 1974.63,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242536",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472114"
+      },
+      {
+        "amount": 1850.4,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077958",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354702"
+      },
+      {
+        "amount": 1549.61,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543616",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920059"
+      },
+      {
+        "amount": 1548.82,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020320231722440324",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301319575670104"
+      },
+      {
+        "amount": 1547.02,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302166",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332442"
+      },
+      {
+        "amount": 1498.11,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020320231722440326",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301319575670104"
+      },
+      {
+        "amount": 1473.79,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302171",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332444"
+      },
+      {
+        "amount": 1400.33,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543611",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920057"
+      },
+      {
+        "amount": 1393.25,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4041820231742948399",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580917163"
+      },
+      {
+        "amount": 1393.25,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4041820231742948400",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580917164"
+      },
+      {
+        "amount": 1392.27,
+        "company": "Mountain America Credit Union",
+        "cycle": 2026,
+        "description": "DUPLICATE TRANSACTION SENT IN ERROR, RETURN INITIATED 06/05/2025",
+        "record_id": "4011320261301413154",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202511209793272683"
+      },
+      {
+        "amount": 1392.24,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138074",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610263"
+      },
+      {
+        "amount": 1390.36,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138087",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610267"
+      },
+      {
+        "amount": 1386.67,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588515",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161966"
+      },
+      {
+        "amount": 1379.44,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543614",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920058"
+      },
+      {
+        "amount": 1377.58,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020320231722440329",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301319575670105"
+      },
+      {
+        "amount": 1373.93,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4041820231742948402",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580917164"
+      },
+      {
+        "amount": 1356.8,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543609",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920057"
+      },
+      {
+        "amount": 1350.1,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450934",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193033"
+      },
+      {
+        "amount": 1343.73,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588524",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161969"
+      },
+      {
+        "amount": 1340.16,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588517",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161967"
+      },
+      {
+        "amount": 1331.37,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020320231722440325",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301319575670104"
+      },
+      {
+        "amount": 1308.27,
+        "company": "Mountain America Credit Union",
+        "cycle": 2026,
+        "description": "DUPLICATE TRANSACTION SENT IN ERROR, RETURNED ON 3/13/25",
+        "record_id": "4042420251186468572",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202504189756197095"
+      },
+      {
+        "amount": 1247.55,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543610",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920057"
+      },
+      {
+        "amount": 1200.24,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450939",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193035"
+      },
+      {
+        "amount": 1199.53,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450940",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193035"
+      },
+      {
+        "amount": 1198.13,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901096",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734226"
+      },
+      {
+        "amount": 1196.73,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077957",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354702"
+      },
+      {
+        "amount": 1195.37,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077959",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354703"
+      },
+      {
+        "amount": 1194.66,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934141",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554498"
+      },
+      {
+        "amount": 1193.27,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934140",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554497"
+      },
+      {
+        "amount": 1191.87,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199362",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501454"
+      },
+      {
+        "amount": 1191.16,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199360",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501453"
+      },
+      {
+        "amount": 1189.77,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242549",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472118"
+      },
+      {
+        "amount": 1162.21,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450942",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193036"
+      },
+      {
+        "amount": 1160.16,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901093",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734225"
+      },
+      {
+        "amount": 1158.8,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072020221542548618",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518724239"
+      },
+      {
+        "amount": 1155.45,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934135",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554496"
+      },
+      {
+        "amount": 1154.1,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199380",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501460"
+      },
+      {
+        "amount": 1152.07,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242533",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472113"
+      },
+      {
+        "amount": 1151.24,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450935",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193034"
+      },
+      {
+        "amount": 1150.8,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450936",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193034"
+      },
+      {
+        "amount": 1150.75,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543615",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920059"
+      },
+      {
+        "amount": 1149.93,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901094",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734225"
+      },
+      {
+        "amount": 1148.23,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077956",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354702"
+      },
+      {
+        "amount": 1147.79,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934136",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554496"
+      },
+      {
+        "amount": 1146.93,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934134",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554495"
+      },
+      {
+        "amount": 1124.68,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072020221542548620",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518724239"
+      },
+      {
+        "amount": 1117.96,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242543",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472116"
+      },
+      {
+        "amount": 1113.25,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901091",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734224"
+      },
+      {
+        "amount": 1112.42,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072020221542548616",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518724238"
+      },
+      {
+        "amount": 1110.35,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934131",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554494"
+      },
+      {
+        "amount": 1080.3,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077955",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354701"
+      },
+      {
+        "amount": 1053.14,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138079",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610264"
+      },
+      {
+        "amount": 1037.49,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077952",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354700"
+      },
+      {
+        "amount": 1025.91,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042120231743543613",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580920058"
+      },
+      {
+        "amount": 953.03,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138084",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610266"
+      },
+      {
+        "amount": 859.84,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072020221542548621",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518724240"
+      },
+      {
+        "amount": 857.1,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199378",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501459"
+      },
+      {
+        "amount": 856.37,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199375",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501458"
+      },
+      {
+        "amount": 854.94,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242544",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472117"
+      },
+      {
+        "amount": 853.51,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022320221424245060",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485488143"
+      },
+      {
+        "amount": 852.14,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022320221424245069",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485488146"
+      },
+      {
+        "amount": 828.05,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242547",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472118"
+      },
+      {
+        "amount": 826.67,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242552",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472119"
+      },
+      {
+        "amount": 770.29,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022320221424245065",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485488145"
+      },
+      {
+        "amount": 719.31,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138080",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610265"
+      },
+      {
+        "amount": 652.15,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242537",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472114"
+      },
+      {
+        "amount": 650.7,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588522",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161968"
+      },
+      {
+        "amount": 619.87,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450937",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193034"
+      },
+      {
+        "amount": 604.83,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302168",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332443"
+      },
+      {
+        "amount": 603.32,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302172",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332444"
+      },
+      {
+        "amount": 593.12,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077954",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354701"
+      },
+      {
+        "amount": 557.21,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450938",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193035"
+      },
+      {
+        "amount": 555.94,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077964",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354704"
+      },
+      {
+        "amount": 517.54,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450948",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193038"
+      },
+      {
+        "amount": 517.27,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450933",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193033"
+      },
+      {
+        "amount": 516.75,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901092",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734224"
+      },
+      {
+        "amount": 516.24,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077950",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354700"
+      },
+      {
+        "amount": 515.74,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077953",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354701"
+      },
+      {
+        "amount": 515.47,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934132",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554495"
+      },
+      {
+        "amount": 514.96,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934125",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554492"
+      },
+      {
+        "amount": 503.83,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4112920221631575152",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210279541892705"
+      },
+      {
+        "amount": 500.33,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901089",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734223"
+      },
+      {
+        "amount": 499.83,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072020221542548619",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518724239"
+      },
+      {
+        "amount": 498.59,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934143",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554498"
+      },
+      {
+        "amount": 466.05,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077967",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354705"
+      },
+      {
+        "amount": 465.71,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4041820231742948403",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580917165"
+      },
+      {
+        "amount": 442.66,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199377",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501459"
+      },
+      {
+        "amount": 432.61,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302160",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332440"
+      },
+      {
+        "amount": 400.36,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042520231744022857",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580926510"
+      },
+      {
+        "amount": 384.5,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450946",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193037"
+      },
+      {
+        "amount": 384.36,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450947",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193038"
+      },
+      {
+        "amount": 384.07,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901090",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734224"
+      },
+      {
+        "amount": 383.78,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077960",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354703"
+      },
+      {
+        "amount": 383.5,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077968",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354706"
+      },
+      {
+        "amount": 383.35,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934127",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554493"
+      },
+      {
+        "amount": 382.78,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199373",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501458"
+      },
+      {
+        "amount": 382.63,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199371",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501457"
+      },
+      {
+        "amount": 382.34,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242538",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472115"
+      },
+      {
+        "amount": 372.24,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450932",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193033"
+      },
+      {
+        "amount": 371.82,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072520221543901087",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518734223"
+      },
+      {
+        "amount": 370.85,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934126",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554493"
+      },
+      {
+        "amount": 370.57,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199368",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501456"
+      },
+      {
+        "amount": 370.15,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242541",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472116"
+      },
+      {
+        "amount": 369.88,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199376",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501459"
+      },
+      {
+        "amount": 357.08,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4042520231744022855",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580926510"
+      },
+      {
+        "amount": 346.51,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4042120221471077961",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202204159496354703"
+      },
+      {
+        "amount": 309.95,
+        "company": "Mountain America Credit Union",
+        "cycle": 2026,
+        "description": "VOTER FILE PURCHASE AT FAIR MARKET VALUE",
+        "record_id": "4082020251219018174",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202508209789638207"
+      },
+      {
+        "amount": 294.51,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138075",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610263"
+      },
+      {
+        "amount": 267.22,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4101720221588450941",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159533193036"
+      },
+      {
+        "amount": 232.47,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199372",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501457"
+      },
+      {
+        "amount": 222.44,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934129",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554494"
+      },
+      {
+        "amount": 210.56,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072020221542548617",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518724238"
+      },
+      {
+        "amount": 209.61,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4110520211377242548",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202110159467472118"
+      },
+      {
+        "amount": 161.35,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4112920221631575153",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210279541892705"
+      },
+      {
+        "amount": 160.98,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4072020221542548615",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202207159518724238"
+      },
+      {
+        "amount": 160.62,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4020120221403934133",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485554495"
+      },
+      {
+        "amount": 119.19,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138085",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610266"
+      },
+      {
+        "amount": 22.09,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4041820231742948401",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202304159580917164"
+      },
+      {
+        "amount": 4.11,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2022,
+        "description": "INTEREST",
+        "record_id": "4022420221453199358",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202201319485501453"
+      },
+      {
+        "amount": 0.11,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189127351",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760356481"
+      },
+      {
+        "amount": 0.11,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189127360",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760356531"
+      },
+      {
+        "amount": 0.1,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189127350",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760356481"
+      },
+      {
+        "amount": 0.1,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189127352",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760356481"
+      },
+      {
+        "amount": 0.1,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050920251189511019",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760356272"
+      },
+      {
+        "amount": 0.07,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050920251189511024",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760356273"
+      },
+      {
+        "amount": 0.06,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189127359",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760356531"
+      },
+      {
+        "amount": 0.06,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302169",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332443"
+      },
+      {
+        "amount": 0.06,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050920251189741842",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760346016"
+      },
+      {
+        "amount": 0.05,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302159",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332440"
+      },
+      {
+        "amount": 0.05,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4050820251189302161",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505089760332440"
+      },
+      {
+        "amount": 0.04,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138071",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610262"
+      },
+      {
+        "amount": 0.04,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138086",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610267"
+      },
+      {
+        "amount": 0.03,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4122120231813138083",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202312209599610266"
+      },
+      {
+        "amount": 0.01,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588512",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161965"
+      },
+      {
+        "amount": 0.01,
+        "company": "SchoolsFirst Federal Credit Union",
+        "cycle": 2024,
+        "description": "INTEREST",
+        "record_id": "4072220231756588523",
+        "role": "other_receipt",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307159583161969"
+      }
+    ],
+    "non_giving_amount": 272530.5,
+    "non_giving_count": 177
+  },
+  "refunds": {
+    "linked": [],
+    "linked_amount": 0.0,
+    "linked_count": 0,
+    "unlinked": [
+      {
+        "amount": -5000.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; 2026 AGGREGATE; CHARGED BACK",
+        "record_id": "4061820261521601845",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202605159866975006"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4050420261499005850",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159863071575"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "* REATTRIBUTED FROM PRIMARY 2026 TO GENERAL 2026",
+        "record_id": "4050620261509607157",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159862859403"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4062420261522619551",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606119870626158"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4062420261522619554",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606119870626159"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4062420261522619557",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606119870626160"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4062420261522619560",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606119870626161"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4071520261534174890",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607099874851185"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4071520261534174893",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607099874851186"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4090320251290262997",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509029789835253"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4090320251290263000",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509029789835254"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4090320251290263003",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509029789835255"
+      },
+      {
+        "amount": -3500.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "",
+        "record_id": "4090320251290263006",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202509029789835256"
+      },
+      {
+        "amount": -2900.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4061120241960460247",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860946"
+      },
+      {
+        "amount": -2100.0,
+        "company": "Pentagon Federal Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4061120241960458736",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406069648860443"
+      },
+      {
+        "amount": -600.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4070320211319710587",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202107019450941095"
+      },
+      {
+        "amount": -520.51,
+        "company": "Alliant Credit Union",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4020320251140560716",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752817581"
+      },
+      {
+        "amount": -520.51,
+        "company": "Alliant Credit Union",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4020320251140561403",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752817810"
+      },
+      {
+        "amount": -520.51,
+        "company": "Alliant Credit Union",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4020320251140561404",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752817810"
+      },
+      {
+        "amount": -520.51,
+        "company": "Alliant Credit Union",
+        "cycle": 2024,
+        "description": "",
+        "record_id": "4020320251140561405",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752817810"
+      },
+      {
+        "amount": -250.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4121120211384671162",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469630545"
+      },
+      {
+        "amount": -250.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4121120211384671163",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469630546"
+      },
+      {
+        "amount": -250.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4121120211384671164",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469630546"
+      },
+      {
+        "amount": -250.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4121120211384671165",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469630546"
+      },
+      {
+        "amount": -250.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4121120211384671166",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469630547"
+      },
+      {
+        "amount": -250.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "",
+        "record_id": "4121120211384671167",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202112029469630547"
+      },
+      {
+        "amount": -104.1,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED; CHARGEBACK",
+        "record_id": "4020320251140562886",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752818304"
+      },
+      {
+        "amount": -104.1,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED; CHARGEBACK",
+        "record_id": "4020320251140563067",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752818364"
+      },
+      {
+        "amount": -104.1,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED; CHARGEBACK",
+        "record_id": "4020320251140705205",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752865744"
+      },
+      {
+        "amount": -104.1,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED; CHARGEBACK",
+        "record_id": "4020320251140842985",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752911670"
+      },
+      {
+        "amount": -95.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4062420261522530353",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870932055"
+      },
+      {
+        "amount": -75.0,
+        "company": "Pentagon Federal Credit Union",
+        "cycle": 2022,
+        "description": "EARMARKED THROUGH WINRED [SA11AI.80935249]; CHARGEBACK",
+        "record_id": "4101820221588763556",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202210159536795953"
+      },
+      {
+        "amount": -67.5,
+        "company": "Pentagon Federal Credit Union",
+        "cycle": 2022,
+        "description": "JFC TRANSFER: TRUMP SAVE AMERICA JOINT FUNDRAISING COMMITTEE [SA12.82660633]; CHARGEBACK",
+        "record_id": "4080220231761946632",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202307319585001976"
+      },
+      {
+        "amount": -47.5,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4062420261522530354",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870932055"
+      },
+      {
+        "amount": -47.5,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4062420261522530355",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870932055"
+      },
+      {
+        "amount": -45.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "CONTRIBUTION; 2022 AGGREGATE; CHARGED BACK",
+        "record_id": "4011820231708499214",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202301059574291564"
+      },
+      {
+        "amount": -45.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2022,
+        "description": "EARMARKED THROUGH WINRED [SA11AI.82395966]; CHARGEBACK",
+        "record_id": "4121620221637548537",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202212089550575675"
+      },
+      {
+        "amount": -35.0,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "CONTRIBUTION; CHARGED BACK",
+        "record_id": "4062420261522530356",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202606209870932056"
+      },
+      {
+        "amount": -27.07,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "EARMARKED THROUGH WINRED",
+        "record_id": "4072220261537117141",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159885133753"
+      },
+      {
+        "amount": -20.82,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "EARMARKED THROUGH WINRED",
+        "record_id": "4072220261537146553",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159885143557"
+      },
+      {
+        "amount": -0.55,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "EARMARKED THROUGH WINRED",
+        "record_id": "4072220261537117144",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159885133754"
+      },
+      {
+        "amount": -0.26,
+        "company": "State Employees' Credit Union",
+        "cycle": 2024,
+        "description": "EARMARKED THROUGH WINRED; CHARGEBACK",
+        "record_id": "4020320251140850956",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752742225"
+      },
+      {
+        "amount": -0.05,
+        "company": "State Employees' Credit Union",
+        "cycle": 2026,
+        "description": "EARMARKED THROUGH WINRED",
+        "record_id": "4072220261537117145",
+        "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202607159885133755"
+      }
+    ],
+    "unlinked_amount": -57104.69,
+    "unlinked_count": 43
+  },
+  "run_id": "20260921T055153-885792788fa7",
+  "schema_version": 1
+}

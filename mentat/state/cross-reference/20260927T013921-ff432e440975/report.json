@@ -1,0 +1,818 @@
+{
+  "attribution_recheck": {
+    "artifacts": {
+      "attribution-inputs.json": "f3d84845bd2584e5d5ada0e9ca686fc1014f081f9cf8477ae837843ebabb2772",
+      "attribution-results.json": "84f2268fa9f9ae8fe2e917de1dc78b7d5f384417c36fff3efe17fef0ab6a87ce"
+    },
+    "conflicting_match_inputs": 0,
+    "eligible_records": 2963,
+    "resolved_records": 0,
+    "status": "completed",
+    "unique_inputs": 504
+  },
+  "changes": [
+    {
+      "after": 0.0,
+      "before": 25000000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "delta": -25000000.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4081220242011729504",
+      "source_description": "25,000,000 USDC SOLD VIA COINBASE - PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202407209661447526"
+    },
+    {
+      "after": 0.0,
+      "before": 15500000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "delta": -15500000.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4021420241824800142",
+      "source_description": "15,500,000 USDC SOLD VIA COINBASE -  PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319618984589"
+    },
+    {
+      "after": 0.0,
+      "before": 15500000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "delta": -15500000.0,
+      "reason": "memo_redisclosure_of_counted_parent; provisional_receipt_role:unverified_disclosure_memo",
+      "record_id": "4021420241824800143",
+      "source_description": "15,500,000 USDC. CONTRIBUTION DISCLOSEDON ON LINE 11(A)",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319618984590"
+    },
+    {
+      "after": 0.0,
+      "before": 4400000.0,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "delta": -4400000.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4081520251218411850",
+      "source_description": "40.0  BITCOINS (BTC) SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319779651213"
+    },
+    {
+      "after": 0.0,
+      "before": 3801738.87,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "delta": -3801738.87,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4081520251218411848",
+      "source_description": "36.20703691 BITCOINS (BTC) SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319779651213"
+    },
+    {
+      "after": 0.0,
+      "before": 1500000.0,
+      "company": "Gemini",
+      "cycle": 2026,
+      "delta": -1500000.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4081920251218730888",
+      "source_description": "NON-CONTRIBUTION: 1,500,000 USDC COINS LIQUIDATED VIA GEMINI TRUST - PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319789366231"
+    },
+    {
+      "after": 0.0,
+      "before": 1499985.0,
+      "company": "Gemini",
+      "cycle": 2026,
+      "delta": -1499985.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4012020261302797782",
+      "source_description": "NON-CONTRIBUTION: 1,500,000 USDC COINS LIQUIDATED VIA GEMINI TRUST - PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901861"
+    },
+    {
+      "after": 0.0,
+      "before": 1003908.64,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -1003908.64,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4010420251125925160",
+      "source_description": "15.47 BITCOIN SOLD VIA GEMINI PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731347387"
+    },
+    {
+      "after": 0.0,
+      "before": 1003908.64,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -1003908.64,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4010420251125925162",
+      "source_description": "15.47 BITCOIN SOLD VIA GEMINI PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731347388"
+    },
+    {
+      "after": 0.0,
+      "before": 1000000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "delta": -1000000.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4052320251204077614",
+      "source_description": "NON-CONTRIBUTION ACCOUNT; 1.754,815.29 XRP SOLD VIA COINBASE EXCHANGE - PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505229761679334"
+    },
+    {
+      "after": 0.0,
+      "before": 999699.11,
+      "company": "Gemini",
+      "cycle": 2026,
+      "delta": -999699.11,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4081920251218730885",
+      "source_description": "NON-CONTRIBUTION: 9.84715056 BITCOIN LIQUIDATED VIA GEMINI TRUST -  PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319789366230"
+    },
+    {
+      "after": 0.0,
+      "before": 956832.53,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "delta": -956832.53,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4121820251299065689",
+      "source_description": "NON-CONTRIBUTION ACCOUNT - XRP CRYPTOCURRENCY SOLD THROUGH BROKER, PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202512179793527031"
+    },
+    {
+      "after": 0.0,
+      "before": 847757.76,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -847757.76,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4051220251193611107",
+      "source_description": "344.0578 ETHER SOLD VIA GEMINI PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505129760934341"
+    },
+    {
+      "after": 0.0,
+      "before": 845074.16,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -845074.16,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4010420251125925158",
+      "source_description": "12.79245939 BITCOIN SOLD VIA GEMINI PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731347387"
+    },
+    {
+      "after": 0.0,
+      "before": 843880.1,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -843880.1,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4021120251167138860",
+      "source_description": "242.707 ETHER SOLD VIA GEMINI, PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752737139"
+    },
+    {
+      "after": 0.0,
+      "before": 825789.06,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -825789.06,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4010420251125925156",
+      "source_description": "12.5 BITCOIN SOLD VIA GEMINI PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731347386"
+    },
+    {
+      "after": 0.0,
+      "before": 519161.38,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -519161.38,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4010420251125925154",
+      "source_description": "8 BITCOIN SOLD VIA GEMINI PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731347385"
+    },
+    {
+      "after": 0.0,
+      "before": 501203.0,
+      "company": "Gemini",
+      "cycle": 2024,
+      "delta": -501203.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4010420251125925152",
+      "source_description": "7.78746088 BITCOIN SOLD VIA GEMINI PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202412059731347385"
+    },
+    {
+      "after": 0.0,
+      "before": 401343.06,
+      "company": "Gemini",
+      "cycle": 2026,
+      "delta": -401343.06,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4081920251218730887",
+      "source_description": "NON-CONTRIBUTION: 12,768,029.987 GALA COINS LIQUIDATED VIA GEMINI TRUST -  PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319789366230"
+    },
+    {
+      "after": 0.0,
+      "before": 250000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "delta": -250000.0,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "record_id": "4051220251193611131",
+      "source_description": "520243.201275 RIPPLE SOLD VIA COINBASE EXCHANGE, PURCHASER UNKNOWN",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202505129760934349"
+    }
+  ],
+  "checks": {
+    "collection_completeness_established": false,
+    "duplicate_exclusions_have_retained_representation": true,
+    "identical_input_duplicates_coalesced": 0,
+    "integer_cent_reconciliation": true,
+    "original_and_pac_buckets_disjoint": true,
+    "overall_unique_dollars_established": false,
+    "relationship_graph_acyclic": true,
+    "unique_source_ids": true
+  },
+  "coverage_reasons": [
+    {
+      "action": "Establish the complete latest filing inventory, including records removed by amendment.",
+      "amount": 169617047.57,
+      "reason": "latest_filing_completeness_unproven",
+      "records": 7497
+    },
+    {
+      "action": "Retrieve the filing header and enumerate its amendment family.",
+      "amount": 556660.95,
+      "reason": "filing_relationship_evidence_missing",
+      "records": 880
+    }
+  ],
+  "coverage_task_count": 1282,
+  "elapsed_seconds": 47.55,
+  "excluded_reasons": [
+    {
+      "amount": 132541695.0,
+      "reason": "memo_redisclosure_of_counted_parent",
+      "records": 13
+    },
+    {
+      "amount": 132541695.0,
+      "reason": "provisional_receipt_role:unverified_disclosure_memo",
+      "records": 13
+    },
+    {
+      "amount": 64124792.65,
+      "reason": "non_giving_receipt_role:asset_liquidation",
+      "records": 244
+    },
+    {
+      "amount": 880417.53,
+      "reason": "company_attribution_not_accepted",
+      "records": 5209
+    },
+    {
+      "amount": 119600.0,
+      "reason": "individual_with_accepted_employer_match",
+      "records": 18
+    },
+    {
+      "amount": 77900.0,
+      "reason": "recognized_contribution_receipt",
+      "records": 11
+    },
+    {
+      "amount": 68200.0,
+      "reason": "same_original_gift_at_conduit_and_destination",
+      "records": 7
+    },
+    {
+      "amount": 47572.05,
+      "reason": "preexisting_source_exclusion:exclusion_pattern:SEATTLE KRAKEN",
+      "records": 67
+    },
+    {
+      "amount": 36522.77,
+      "reason": "non_giving_receipt_role:other_receipt",
+      "records": 5
+    },
+    {
+      "amount": 8700.0,
+      "reason": "explicit_same_filing_memo_reference",
+      "records": 3
+    },
+    {
+      "amount": 5102.7,
+      "reason": "attribution_contradicted_by_text",
+      "records": 43
+    },
+    {
+      "amount": 1000.0,
+      "reason": "superseded_in_observed_filing_family",
+      "records": 1
+    }
+  ],
+  "generated_at": "2026-09-27T01:40:09.178870+00:00",
+  "header_recovery": {
+    "cached": 0,
+    "failures": [],
+    "recovered": 0,
+    "requested": 0,
+    "selected": 0
+  },
+  "imports": [],
+  "ledger_sha256": "4db0bfa3800d48d2e7d95cce18f8ec5d90c8fa58ceceba7f1bcb8e7345665b54",
+  "limitations": [
+    "Receipt classification can be resolved from its evidence while full filing and route coverage remains open.",
+    "Observed original giving is not a certification of complete unique dollars.",
+    "PAC outgoing amounts here are recipient-reported activity, not a complete Schedule B spending census.",
+    "Unresolved exposure can include overlapping representations and is not an error bound.",
+    "Automatically processed records do not establish the accuracy or completeness of the resulting totals."
+  ],
+  "link_count": 24,
+  "partisan_breakdowns": [
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": 3.1347992230052606,
+      "democratic": 2058951.84,
+      "democratic_percent": 40.77325783156014,
+      "denominator_dr": 5049760.43,
+      "other_unknown": 166209498.96,
+      "republican": 2990808.59,
+      "republican_percent": 59.22674216843986,
+      "view": "original_giving"
+    },
+    {
+      "basis": "Accepted recipient party classification; D/(D+R) of signed receipts. Other/unknown stays separate; gross coverage uses absolute amounts. This does not assign untraced intermediary money to its final recipients.",
+      "classified_gross_percent": 100.0,
+      "democratic": 1000.0,
+      "democratic_percent": 100.0,
+      "denominator_dr": 1000.0,
+      "other_unknown": 0.0,
+      "republican": 0.0,
+      "republican_percent": 0.0,
+      "view": "pac_activity"
+    }
+  ],
+  "recovery": {
+    "deferred_reason": null,
+    "failures": [
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4030420261386079642"
+      },
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4030420261386079658"
+      },
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4030420261386079659"
+      },
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4030420261386079660"
+      },
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4030420261386079661"
+      },
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4052920261511810657"
+      },
+      {
+        "reason": "Exact source ID unavailable",
+        "source_id": "4062220261522023969"
+      }
+    ],
+    "recovered": 93,
+    "requested": 100,
+    "selected": 100,
+    "still_partial": 0
+  },
+  "review_queue": [
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 24999995.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4062620241962823148",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202406209652010582"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 23000000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4020420251141540904",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752374587"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 15500000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4021420241824800115",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319618984580"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 15000000.0,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4081520251218411830",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319779651206"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 10000000.0,
+      "company": "Foris Dax Inc",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4012020261302797780",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901861"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 10000000.0,
+      "company": "Foris Dax Inc",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4012020261302797781",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601029793901861"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 10000000.0,
+      "company": "Foris Dax Inc",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4081920251218730884",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319789366229"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 8092475.0,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4030420261386079642",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309795196946"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 6000000.0,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4030420261386079658",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309795196952"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 5175000.0,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4030420261386079660",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309795196953"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 5000000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4021420241824800114",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319618984579"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.; Retrieve the receipt and referenced original donor/transaction evidence.",
+      "amount": 5000000.0,
+      "company": "Foris Dax Inc",
+      "cycle": 2026,
+      "reason": "receipt_role_unresolved; treasury_ownership_unresolved",
+      "record_id": "4031620261423644172",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202602209837825065"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 5000000.0,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4081520251218411831",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319779651206"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 5000000.0,
+      "company": "Coinbase",
+      "cycle": 2026,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4081520251218411832",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202507319779651206"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 1500000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4020620241822088011",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401299600583814"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 1500000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4021620241825215175",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202401319618989447"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 1026000.0,
+      "company": "Foris Dax Inc",
+      "cycle": 2026,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4042820261483770329",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202604159857676508"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 1000000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4020420251141540744",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319752375836"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 1000000.0,
+      "company": "Coinbase",
+      "cycle": 2024,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4020420251141540915",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202501319748804085"
+    },
+    {
+      "action": "Establish the dated company/entity relationship with a source and evidence ID.",
+      "amount": 1000000.0,
+      "company": "Foris Dax Inc",
+      "cycle": 2026,
+      "reason": "treasury_ownership_unresolved",
+      "record_id": "4022720261359729116",
+      "source_url": "https://docquery.fec.gov/cgi-bin/fecimg/?202601309794842570"
+    }
+  ],
+  "run_id": "20260927T013921-ff432e440975",
+  "schema_version": 1,
+  "scope": {
+    "accounting_basis": "original giving once; PAC outgoing activity separately",
+    "attribution_recheck": {
+      "artifacts": {
+        "attribution-inputs.json": "f3d84845bd2584e5d5ada0e9ca686fc1014f081f9cf8477ae837843ebabb2772",
+        "attribution-results.json": "84f2268fa9f9ae8fe2e917de1dc78b7d5f384417c36fff3efe17fef0ab6a87ce"
+      },
+      "conflicting_match_inputs": 0,
+      "eligible_records": 2963,
+      "resolved_records": 0,
+      "status": "completed",
+      "unique_inputs": 504
+    },
+    "attribution_text_test": {
+      "committees_with_connected_organization": 20082,
+      "companies_with_names": 19
+    },
+    "baseline": {
+      "basis": "accepted_report_receipts",
+      "sha256": "236edefa658732d99ba83d1fe1590217fb6d1e405e9b03b64413e9c0aee51c81",
+      "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.db",
+      "sources": [
+        {
+          "cycles": [
+            2022,
+            2024,
+            2026
+          ],
+          "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026",
+          "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\crypto\\2022-2024-2026\\ffdf89d274e347439d7fb74c8b6a32e7.db",
+          "snapshot_sha256": "236edefa658732d99ba83d1fe1590217fb6d1e405e9b03b64413e9c0aee51c81",
+          "token": "c69d420e7de34001e52d490cfcc2c5b6d00b04efeb672da6d17ce5ba0bc63777"
+        }
+      ]
+    },
+    "collection_coverage": {
+      "complete": false,
+      "invalid_units": [],
+      "missing_queries": [],
+      "reason": "Legacy query evidence is missing."
+    },
+    "committee_master": {
+      "inputs\\fec_committee_master\\cm22\\cm.txt": "a452a78c461c3b04c03b9417b9da58a8e6ffbcfe67a04ab4a6d0cf4471f2dfb3",
+      "inputs\\fec_committee_master\\cm24\\cm.txt": "6620d7b67f05f939173abcc2c59b4877c7080ad2350958e08b192da2fdaae200",
+      "inputs\\fec_committee_master\\cm26\\cm.txt": "e96dedf6d6d78f68b4113e8300f55dfc7503e353b08b2b1817822d7ee42e4002"
+    },
+    "companies": [
+      "BINANCE US",
+      "Bakkt",
+      "Bitnomial",
+      "Coinbase",
+      "Coinlist",
+      "Foris Dax Inc",
+      "Gemini",
+      "Kraken",
+      "MIAXdx",
+      "Tzero"
+    ],
+    "cutoff": "source snapshot; later filings and unlisted aliases may add evidence",
+    "cycle_basis": "calendar receipt date; original source query period preserved separately",
+    "cycles": [
+      2022,
+      2024,
+      2026
+    ],
+    "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\crypto\\mentat.db",
+    "database_sha256": "0c2dc2e228f5343af960a2cb4898f3a47921d7b33080fa60be161b78fc497dcb",
+    "distinct_source_ids": 14801,
+    "industries": [
+      "Crypto"
+    ],
+    "rule_fingerprints": {
+      "R\\collect.R": "b77ceffc69d3da45789770044ac7b23d915f1a814ba86f6c2c227296144f381a",
+      "R\\fec_page.R": "ffab349b11b158dd80eddc4e8958e36761eb9d86cdf07cd0e28ed3033c79ae07",
+      "R\\ingest.R": "798193f5356cadf49e9b339a5a36cb783e6a6c40917025e575718ac78636dc9d",
+      "R\\paths.R": "8b917fd820fc95797fc132996f26ef29f48201fa103a6c53b06ab72822990585",
+      "R\\schema.R": "563759a14f81251e821c5d89ddd3af7e7ce6a00429c5a535c79fd1ab6334cd44",
+      "config\\attribution-policy.json": "a33308d15268fdf4b7bb8d98f34115d89153dec40c07d63d4be1098059c71e1c",
+      "inputs\\company_home_states.csv": "de222437b333346158692081941cb82345506fb2c20d5112a8056e5de81639c9",
+      "inputs\\company_match_overrides.csv": "49cd87e5abf859c0728c6ef0fdd7279e9ec2130623097b91c3725e36f9597f4c",
+      "inputs\\fec_receipt_rules.json": "0114ee8492e401da16c6505c2ea8a0bc89ab3445cfc94768ac48617c4ee91a9a",
+      "inputs\\verified_employer_aliases.csv": "d92da3434414ae11c851d9c294e565f978fd2e6e8dd7fdd03f892c9561d01df1",
+      "tools\\attribution_policy.py": "b1ad33a0c868ffc8de00c2f811af45ca2d206fa1b407e494227616d1da7dae60",
+      "tools\\cross_reference_engine.py": "5b52f41ae99ddb68d5f84ebad164cf7c6547d1707ea51e637ab222840b2c8d55",
+      "tools\\cross_reference_store.py": "d687f488e481314f594f0a288a8a4a0281f6884ba6639817389d7b104b03c09f",
+      "tools\\fec_filing_headers.py": "30766fc320fdb7d7d7ee13e78eaffc59114393c7571a381efa6a5325f9a35cd8",
+      "tools\\pac_evidence.py": "c246da2a312733123edae2d66e0e89d0da2adca77d5f71937c7b7e3215e9065c",
+      "tools\\recheck_attribution.R": "6a2b32d05102efb5249f3edceb1e71a0f21cc714506b2fdfa617308350bd103b",
+      "tools\\recheck_attribution.py": "0d99a2454bf33d3503a0093677212d87afaacc917e8aaa356dc45cb14a523c40",
+      "tools\\report_source_guard.py": "c20eee34ff1e177b2f9ec1a2a0e621dbbe758bc0d6ec193fd8d2ca9db5908ac5",
+      "tools\\run_cross_reference.py": "7f0c5fd59a088e2b40baa4224d67d50fb2142c36cbbb0458f7a7e003fbc2ce32",
+      "tools\\validate_industry_coverage.py": "1f6abed7fe8a107b2e7f3cab2df7dfd0d419931a1599f2746471acff2edd271f"
+    },
+    "source_change_counts": {},
+    "source_count": 1,
+    "source_observations": 14806,
+    "supplied_evidence": {
+      "affiliations": {
+        "path": "C:\\Users\\pgoff\\Mentat\\mentat\\inputs\\verified_company_affiliations.json",
+        "sha256": "f1fd22a9a7c462c2661b9d87c6abbbe15cffccc9ba3cadc9de1eaa74f69d5880"
+      }
+    }
+  },
+  "status": "completed",
+  "steps": [
+    {
+      "detail": "10 companies; 3 cycles; immutable source pinned",
+      "id": "define",
+      "label": "Define",
+      "status": "completed"
+    },
+    {
+      "detail": "431 exact source records cross-checked; historical query coverage remains unproven",
+      "id": "collect",
+      "label": "Collect",
+      "status": "review"
+    },
+    {
+      "detail": "Attribution and transaction decisions recorded with evidence",
+      "id": "identify",
+      "label": "Identify",
+      "status": "review"
+    },
+    {
+      "detail": "24 evidence-backed links; filing coverage checks tracked separately from receipt review",
+      "id": "connect",
+      "label": "Connect",
+      "status": "review"
+    },
+    {
+      "detail": "Observed accounting views computed; unique-dollar certification remains separate",
+      "id": "count",
+      "label": "Count",
+      "status": "completed"
+    },
+    {
+      "detail": "Source unchanged; decisions reconciled; receipt review and collection coverage reported separately",
+      "id": "verify",
+      "label": "Verify and report",
+      "status": "review"
+    }
+  ],
+  "summary": {
+    "amount_change": -78690223.78,
+    "automatic_decisions": 10728,
+    "baseline_amount": 249949483.17,
+    "classified_from_stored_records": 10408,
+    "corporate_giving": 0.0,
+    "coverage_amount": 170173708.52,
+    "coverage_only_records": 5136,
+    "coverage_records": 8377,
+    "employee_giving": 9018332.69,
+    "input_records": 14801,
+    "linked_refund_adjustments": 0.0,
+    "observed_original_giving": 171259259.39,
+    "pac_outgoing": 1000.0,
+    "source_verified_records": 320,
+    "supported_original_giving": 0.0,
+    "unresolved_amount": 164166950.47,
+    "unresolved_negative": -174572.86,
+    "unresolved_positive": 163992377.61,
+    "unresolved_records": 4073,
+    "unverified_funding": 162240926.7,
+    "verified_unique": false
+  },
+  "unresolved_reasons": [
+    {
+      "amount": 161762723.04,
+      "reason": "treasury_ownership_unresolved",
+      "records": 86
+    },
+    {
+      "amount": 55700851.23,
+      "reason": "receipt_role_unresolved",
+      "records": 1026
+    },
+    {
+      "amount": 1435659.59,
+      "reason": "memo_parent_not_established",
+      "records": 829
+    },
+    {
+      "amount": 954302.86,
+      "reason": "company_named_unverified",
+      "records": 2202
+    },
+    {
+      "amount": 947207.85,
+      "reason": "original_source_of_transfer_unresolved",
+      "records": 608
+    },
+    {
+      "amount": 478166.66,
+      "reason": "funding_identity_unresolved",
+      "records": 247
+    },
+    {
+      "amount": 271855.42,
+      "reason": "ambiguous_amendment_order",
+      "records": 192
+    },
+    {
+      "amount": 263600.0,
+      "reason": "reciprocal_earmark_not_established",
+      "records": 22
+    },
+    {
+      "amount": 174572.86,
+      "reason": "signed_adjustment_not_linked_refund",
+      "records": 90
+    },
+    {
+      "amount": 42115.05,
+      "reason": "company_attribution_unverified",
+      "records": 975
+    },
+    {
+      "amount": 20000.0,
+      "reason": "earmark_counterpart_not_unique",
+      "records": 2
+    },
+    {
+      "amount": 1000.0,
+      "reason": "company_pac_affiliation_unresolved",
+      "records": 1
+    },
+    {
+      "amount": 37.0,
+      "reason": "source_or_attribution_conflict",
+      "records": 3
+    }
+  ]
+}
