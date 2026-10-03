@@ -1,0 +1,42 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026",
+  "baseline_scopes": [
+    {
+      "cycles": [
+        2022,
+        2024,
+        2026
+      ],
+      "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026",
+      "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026\\4980809641704cbca8f4b921020d588e.db",
+      "snapshot_sha256": "1eb9ca9332cbb7ebb44cb77d8a281188e032162a192a5aae574e29c641d22a47",
+      "token": "61c04ef939a18bd6e68243d311946b7d2a90813b1811e4dd0957872ec42388d9"
+    }
+  ],
+  "baseline_token": "61c04ef939a18bd6e68243d311946b7d2a90813b1811e4dd0957872ec42388d9",
+  "counts": {
+    "added": 0,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 67169
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\credit_union\\mentat.db",
+  "database_sha256": "43c0c109c057d5cbca55106a5a68a200df871f6bbfc97feef5499bf22e2055d9",
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026",
+  "industry": "Credit Union",
+  "previous": {
+    "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026\\08c5e4fcf92e4902a3c2b96eed1940bf.baseline.db",
+    "snapshot_sha256": "17477a36e961723bc3a39f8a409048037989f96086064ec7f524938e6c3cb6e0"
+  },
+  "previous_token": "61c04ef939a18bd6e68243d311946b7d2a90813b1811e4dd0957872ec42388d9",
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026\\3d1e6e0d151f429dbc1416ba684c16f6.db",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\credit_union\\2022-2024-2026\\3d1e6e0d151f429dbc1416ba684c16f6.source-changes.jsonl",
+  "state_root": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources",
+  "status": "source_verified",
+  "version": 1
+}

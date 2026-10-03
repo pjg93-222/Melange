@@ -1,0 +1,25 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\banking\\2022-2024-2026",
+  "baseline_token": null,
+  "counts": {
+    "added": 849399,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 0
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\report-repairs\\banking-20260910\\data\\mentat.db",
+  "database_sha256": "4abdea581b99cec1674252ee098ab6afca57674bd8e90313e9f4156e88b2d991",
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\banking\\2022-2024-2026",
+  "industry": "Banking",
+  "previous": null,
+  "previous_token": null,
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\banking\\2022-2024-2026\\1ee5154933cd4b21828f4b9d37d16ef9.db",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\banking\\2022-2024-2026\\1ee5154933cd4b21828f4b9d37d16ef9.source-changes.jsonl",
+  "status": "source_verified",
+  "version": 1
+}

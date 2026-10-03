@@ -1,0 +1,42 @@
+{
+  "baseline_directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026",
+  "baseline_scopes": [
+    {
+      "cycles": [
+        2022,
+        2024,
+        2026
+      ],
+      "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026",
+      "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\7069fdecd428490dbdefa1eddb73c3c8.db",
+      "snapshot_sha256": "7a01045cbb18482d892b1a022336c199aab047b2cbf9dc4139ab5fa792c7a29c",
+      "token": "5c1a77d76cc778f6a84c5c49d0aa80a687b70a5e840a722c429febfe7d86c41c"
+    }
+  ],
+  "baseline_token": "5c1a77d76cc778f6a84c5c49d0aa80a687b70a5e840a722c429febfe7d86c41c",
+  "counts": {
+    "added": 0,
+    "changed": 0,
+    "missing": 0,
+    "unchanged": 4649
+  },
+  "cycles": [
+    2022,
+    2024,
+    2026
+  ],
+  "database": "C:\\Users\\pgoff\\Mentat\\mentat\\.cache\\receipt-metadata-repair-20260910\\community_banks\\mentat.db",
+  "database_sha256": "923ab7866fab51dc4a4771b3b6e8f1fc14b5bb483c9f2eeecfb6795ddfda6ca2",
+  "directory": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026",
+  "industry": "Community Banks",
+  "previous": {
+    "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\c5dddb7d630049728cddca9136f88c99.baseline.db",
+    "snapshot_sha256": "8949caa0d3eaf17188d3b038203a9d111d7fb96fcd0821c3117c8a596ae00459"
+  },
+  "previous_token": "5c1a77d76cc778f6a84c5c49d0aa80a687b70a5e840a722c429febfe7d86c41c",
+  "snapshot": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\dae7b247059648eeb632e1eaee09b9a3.db",
+  "source_ledger": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources\\community_banks\\2022-2024-2026\\dae7b247059648eeb632e1eaee09b9a3.source-changes.jsonl",
+  "state_root": "C:\\Users\\pgoff\\Mentat\\mentat\\state\\accepted-report-sources",
+  "status": "source_verified",
+  "version": 1
+}
