@@ -23,6 +23,7 @@ import ast
 import json
 import math
 import os
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -60,15 +61,27 @@ class NoHeavyImports(unittest.TestCase):
         self.assertEqual(imported - allowed, set())
 
     def test_running_everything_loads_no_geo_library(self):
-        geo_lookup.hex_id(40.75, -73.98, 25)
-        geo_lookup.hex_center('h25:0:0')
-        geo_lookup.albers_5070_inverse(0.0, 0.0)
-        geo_lookup.locate(latitude=40.75, longitude=-73.98)
-        geo_lookup.locate(zip='10028')
-        geo_lookup.locate(city='Charlotte', state='NC')
-        geo_lookup.locate(state='AK')
-        geo_lookup.assignment('0' * 64)
-        loaded = sorted(name for name in HEAVY if name in sys.modules)
+        # A fresh interpreter: an earlier geo test in this pytest process may already
+        # have imported geopandas/shapely/pyproj, and sys.modules is shared.
+        code = (
+            'import json, sys\n'
+            'sys.path.insert(0, sys.argv[1])\n'
+            'import geo_lookup\n'
+            'geo_lookup.hex_id(40.75, -73.98, 25)\n'
+            "geo_lookup.hex_center('h25:0:0')\n"
+            'geo_lookup.albers_5070_inverse(0.0, 0.0)\n'
+            'geo_lookup.locate(latitude=40.75, longitude=-73.98)\n'
+            "geo_lookup.locate(zip='10028')\n"
+            "geo_lookup.locate(city='Charlotte', state='NC')\n"
+            "geo_lookup.locate(state='AK')\n"
+            "geo_lookup.assignment('0' * 64)\n"
+            'print(json.dumps(sorted(n for n in json.loads(sys.argv[2]) if n in sys.modules)))\n'
+        )
+        done = subprocess.run(
+            [sys.executable, '-c', code, str(MENTAT / 'app'), json.dumps(HEAVY)],
+            cwd=MENTAT, capture_output=True, text=True, timeout=120)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        loaded = json.loads(done.stdout.strip().splitlines()[-1])
         self.assertEqual(loaded, [], f'{sys.executable} loaded {loaded}')
 
 
