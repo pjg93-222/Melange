@@ -1,0 +1,9 @@
+# python -m fec.surfaces.test_staffer_closeness_bidirectional --ties  (the verifier's tie-heavy graphs, 20,000 per mode, both modes), run from the root of each tree.
+
+## clean export of the v4 tip
+decimal: 20000 graphs: same route 19478, equal-cost swap 29, same steps, lower exact cost 78, fewer steps 90, unreachable 325, MORE steps 0, WORSE exact cost 0; violations 0
+log: 20000 graphs: same route 19338, equal-cost swap 355, same steps, lower exact cost 0, fewer steps 13, unreachable 294, MORE steps 0, WORSE exact cost 0; violations 0
+
+## the applied tree
+decimal: 20000 graphs: same route 19478, equal-cost swap 29, same steps, lower exact cost 78, fewer steps 90, unreachable 325, MORE steps 0, WORSE exact cost 0; violations 0
+log: 20000 graphs: same route 19338, equal-cost swap 355, same steps, lower exact cost 0, fewer steps 13, unreachable 294, MORE steps 0, WORSE exact cost 0; violations 0

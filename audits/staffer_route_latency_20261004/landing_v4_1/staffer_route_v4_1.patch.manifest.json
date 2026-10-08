@@ -1,0 +1,257 @@
+{
+ "fec/surfaces/staffer_closeness_routes.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 5,
+   "n_crcrlf": 0,
+   "n_crlf": 1045,
+   "n_lone_cr": 0,
+   "size": 60933
+  },
+  "after_sha256": "2e21a33b910b0b75e5836eb7c1024f364aba983e0d5bc2b9a7be1a91864c81b3",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 5,
+   "n_crcrlf": 0,
+   "n_crlf": 968,
+   "n_lone_cr": 0,
+   "size": 56426
+  },
+  "before_sha256": "76c0347eb942e2457a2dbb8e9e028b83c6655194c0d1bff21d2c80d3ef97b933"
+ },
+ "fec/surfaces/staffer_distinct_routes.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 158,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 8175
+  },
+  "after_sha256": "4f9d8487f70be9190eecd5eeeab9eee6b73cfa9c6076132d2c45dfffeef7ec59",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 157,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 8063
+  },
+  "before_sha256": "8fab7ea38bc8eb5b917ff1d2a78c5faffa6127550f3ec6967618455a6fd634c4"
+ },
+ "fec/surfaces/staffer_live/README.md": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 120,
+   "n_lone_cr": 0,
+   "size": 35540
+  },
+  "after_sha256": "fcd33af85994ab06b0a53f48894b555a65a9fe39141fe11e9bb8582e2847040b",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 120,
+   "n_lone_cr": 0,
+   "size": 34095
+  },
+  "before_sha256": "07a757393a05c5b06d581b0a9887b7b6280d749abc5c3af8bd1d18de7cb39ead"
+ },
+ "fec/surfaces/staffer_live/staffer-route.js": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 301,
+   "n_lone_cr": 0,
+   "size": 41182
+  },
+  "after_sha256": "6499975ff5ebc33d6ad799bf02c8b0c7b8f7ad894171858a1f8577150c4bddc3",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 300,
+   "n_lone_cr": 0,
+   "size": 40785
+  },
+  "before_sha256": "d5e5ad28823caef1af96685eedabf41a27bf90390963445b1a29c4c15daaa514"
+ },
+ "fec/surfaces/staffer_live_service.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 2161,
+   "n_lone_cr": 0,
+   "size": 142626
+  },
+  "after_sha256": "6731a381575c99b1ce921eca8975e5ceeec9a4c9227916dd1c4c15236ca1f2d4",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_CRLF",
+   "n_bare_lf": 0,
+   "n_crcrlf": 0,
+   "n_crlf": 2142,
+   "n_lone_cr": 0,
+   "size": 140654
+  },
+  "before_sha256": "a512c5c7dcfe5726caa27552f28b27b90e254c118bb591124da00a29d87e3e78"
+ },
+ "fec/surfaces/staffer_routing.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 1,
+   "n_crcrlf": 0,
+   "n_crlf": 706,
+   "n_lone_cr": 0,
+   "size": 45797
+  },
+  "after_sha256": "d4c717f4f8fed3a199137515553c1abaadfadb12adf520d2ac7bb10781c0c8a0",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "MIXED",
+   "n_bare_lf": 1,
+   "n_crcrlf": 0,
+   "n_crlf": 691,
+   "n_lone_cr": 0,
+   "size": 44816
+  },
+  "before_sha256": "c9b0896a00814b1d392564aa0801a497f83b2d5581539e64676a8ff6ee2a2d24"
+ },
+ "fec/tests/surfaces/test_staffer_left_out_staff.cjs": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 386,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 32724
+  },
+  "after_sha256": "d2cafc128dcbaf947bbb3c17ea25367ef19c2b6742b9c60478b4098d8d0eddac",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 320,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 26381
+  },
+  "before_sha256": "c34f37e52e63a28131867cf3ee4e730e75dffd639d50cb60d06affe3cf7feace"
+ },
+ "fec/tests/surfaces/test_staffer_office_covered_staff.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 802,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 53061
+  },
+  "after_sha256": "abe3979d841d0d4859843ad754f9cb7187fd506f7ccc499c0557a24d3bc8dbfa",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 678,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 44324
+  },
+  "before_sha256": "72323acb4fdb574f661b49c4f1a7935bdc3e6e13982440acc333d75bfedab110"
+ },
+ "fec/tests/surfaces/test_staffer_prewarm.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 776,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 39000
+  },
+  "after_sha256": "f8199d50f26edf2224f375a40e4339cbcce199a9ac79828b43cf8bbf04db2b6b",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 685,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 33345
+  },
+  "before_sha256": "bf8319795c04bfa102e09a94c985a9774ad6579c8ff16b15588aa2ea36cfbf16"
+ },
+ "fec/tests/surfaces/test_staffer_request_work_index.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 416,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 20096
+  },
+  "after_sha256": "6fb10e4b9399c87a9f0adbcdc25ddf2e0355bfbb004c422ad0b8c6f7457e1a6e",
+  "before_eol": null,
+  "before_sha256": null
+ },
+ "fec/tests/surfaces/test_staffer_unreachable_hint.py": {
+  "after_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 649,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 37891
+  },
+  "after_sha256": "85e07cc4f2965e53068c1e640ece4bde5a6abc1364fc63cabafc61fffbc1237c",
+  "before_eol": {
+   "bom": "none",
+   "ends_with_eol": true,
+   "klass": "PURE_LF",
+   "n_bare_lf": 558,
+   "n_crcrlf": 0,
+   "n_crlf": 0,
+   "n_lone_cr": 0,
+   "size": 31989
+  },
+  "before_sha256": "15dbe2ef735960c65fb5c584797c31416ea747c98e33eab8cf93c2d1811eb66b"
+ }
+}

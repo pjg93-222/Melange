@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HF2995D35560545F3A9A0E1ACA6BD9067" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2154 IH: Digital Taxonomy Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-04-09</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2154</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190409">April 9, 2019</action-date><action-desc><sponsor name-id="S001200">Mr. Soto</sponsor> (for himself and <cosponsor name-id="D000626">Mr. Davidson of Ohio</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To authorize additional appropriations to the Federal Trade Commission to prevent unfair or
+			 deceptive acts or practices relating to digital tokens and transactions
+			 relating to digital tokens, and to require a report to Congress on the
+			 Commission’s actions related to digital tokens.</official-title></form>
+	<legis-body id="H95D395591B1C4C02A5D52C7758B05E94" style="OLC">
+ <section id="H274BB4DA02EF43578D502C20667C57BC" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Digital Taxonomy Act of 2019</short-title></quote>.</text> </section><section id="HBD7D83C9D01B442D9BDE478DFBDFD1C1"><enum>2.</enum><header>Authorization of appropriations to prevent unfair or deceptive acts or practices relating to digital tokens</header><text display-inline="no-display-inline">There is authorized to be appropriated to the Federal Trade Commission $25,000,000 for each of fiscal years 2020 through 2024 to prevent unfair or deceptive acts or practices in transactions relating to digital tokens pursuant to section 5 of the Federal Trade Commission Act (<external-xref legal-doc="usc" parsable-cite="usc/15/45">15 U.S.C. 45</external-xref>).</text>
+ </section><section id="H0AA792D3DDAA479EA9F5C92A92B21EB2"><enum>3.</enum><header>Definition of digital tokens</header><text display-inline="no-display-inline">As used in this Act—</text> <paragraph id="H1226EFC4496A4A4FA1CB92FD35A561C9"><enum>(1)</enum><text>the term <term>digital token</term> means a digital unit—</text>
+ <subparagraph id="H40818AD67CF34D2499B4ED55A06F9E44"><enum>(A)</enum><text>that is programmed with rules that govern its creation, supply, ownership, use, and transfer, where such rules are designed to resist modification or tampering by any single person or persons under common control;</text>
+ </subparagraph><subparagraph id="H5F211DFBDA1F43A1ADA1D38166E3E78F"><enum>(B)</enum><text>that has a transaction history that—</text> <clause id="H332F458664F549419D949AB8D55B59EC"><enum>(i)</enum><text>is recorded in a distributed, digital ledger or digital data structure in which consensus is achieved through a mathematically verifiable process; and</text>
+ </clause><clause id="HF3E9D90685734FACA3BE57F2851741BC"><enum>(ii)</enum><text>after consensus is reached, is designed to resist modification or tampering by any single person or persons under common control;</text>
+ </clause></subparagraph><subparagraph id="H9DBBA483185F495286D0AF2C908D0A13"><enum>(C)</enum><text>that is capable of being transferred between persons in a decentralized fashion without an intermediate custodian; and</text>
+ </subparagraph><subparagraph id="H3D6B67CC3EF64B9BA86E19F8A14EC438"><enum>(D)</enum><text>that is not a representation of a financial interest in a company or partnership, including an ownership or debt interest or revenue share; and</text>
+ </subparagraph></paragraph><paragraph id="H5963EDE5FD864DE6BC255CB1809F7213"><enum>(2)</enum><text>the term <term>digital unit</term>—</text> <subparagraph id="H4850F98151814356849B8B0AAC14ADF8"><enum>(A)</enum><text display-inline="yes-display-inline">means a representation of economic, proprietary, or access rights that is stored in a computer-readable format; and</text>
+ </subparagraph><subparagraph id="H3C566D3C176C46798A40DE9F0F89CC88"><enum>(B)</enum><text>does not include a store of value.</text> </subparagraph></paragraph></section><section id="HCD5FDD515B774925821DFD56D9C9A4C7"><enum>4.</enum><header>Report to Congress</header><text display-inline="no-display-inline">Beginning one year after the date of enactment of this Act and each year thereafter, the Federal Trade Commission shall transmit a report to the Committee on Energy and Commerce of the House of Representatives and the Committee on Commerce, Science, and Transportation of the Senate of—</text>
+ <paragraph id="H060937F4AAB44A3FA5150F31EC96225F"><enum>(1)</enum><text display-inline="yes-display-inline">any actions taken by the Commission relating to unfair or deceptive acts or practices in transactions relating to digital tokens;</text>
+ </paragraph><paragraph id="HF0C152E616BE4901959DE7D3C62ED2DA"><enum>(2)</enum><text display-inline="yes-display-inline">the Commission’s plan to prevent unfair or deceptive acts or practices relating to digital tokens; and</text>
+ </paragraph><paragraph id="H1616F0CFCC714C3EA75A640136BC3AAC"><enum>(3)</enum><text display-inline="yes-display-inline">any recommendations by the Commission for legislation that would to improve the ability of the Commission and other relevant Federal agencies—</text>
+ <subparagraph id="HEE16404E32E643358E2C24345FD5973E"><enum>(A)</enum><text>to further protect consumers from unfair or deceptive acts or practices in the digital token marketplace; and</text>
+ </subparagraph><subparagraph id="H441B1B8F48B145B587CB3DB4F20F6A8B"><enum>(B)</enum><text>to promote the competitiveness of the United States and promote innovation of businesses in the global digital token sector.</text>
+ </subparagraph></paragraph></section><section id="H3C099BBD69054E0A8AF96C6E491D1902"><enum>5.</enum><header>Preservation of authority</header><text display-inline="no-display-inline">Nothing in this Act shall supersede the authority of the Commodity Futures Trading Commission nor prevent the treatment of digital tokens as commodities subject to the Commodity Exchange Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1a">7 U.S.C. 1a</external-xref> et seq.).</text>
+		</section></legis-body></bill>
+
+

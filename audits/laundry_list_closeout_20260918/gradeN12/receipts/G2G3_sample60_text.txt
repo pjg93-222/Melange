@@ -1,0 +1,579 @@
+================================================================================================================
+SAMPLE 01 [stratum E] rowid=102837 member=Thom Tillis date=2018-01-24 show=ben-shapiro-conservatives-being-censored-in-name-of-safety
+  original nwords=144  kept nwords=23  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  No, I haven't. I sit on the Judiciary Committee along with Senator Coons and I have not seen any evidence to suggest that.
+  --- REMOVED seg 1/3  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=27 ---
+      tag='SEN. JOE MANCHIN, D-W.VA'
+      RAW SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17, 2017: I do not at all believe that Mr. Mueller has been compromised for his investigation. I think he's beyond reproach. 
+  --- REMOVED seg 2/3  class=E_colonless_honorific own=False speaker='John Cornyn' disp=reattributed nwords=18 ---
+      tag='SEN. JOHN CORNYN, R-TEXAS'
+      RAW SEN. JOHN CORNYN, R-TEXAS, "THIS WEEK"/ABC, DEC. 17, 2017 : I have a lot of admiration and respect for Director Mueller. 
+  --- REMOVED seg 3/3  class=E_colonless_honorific own=False speaker='Chris Van Hollen' disp=reattributed nwords=66 ---
+      tag='SEN. CHRIS VAN HOLLEN, D-MD.'
+      RAW SEN. CHRIS VAN HOLLEN, D-MD., "THIS WEEK"/ABC, DEC. 17, 2017: You've got somebody who, by all accounts, is an independent person, somebody who's got lots of integrity. UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017: He enjoys very broad support in the Senate both among Republicans and Democrats because of his long service as the FBI director, because of his record of respectable leadership as a senior federal prosecutor. (END VIDEO CLIPS)
+
+================================================================================================================
+SAMPLE 02 [stratum E] rowid=218527 member=Rand Paul date=2021-03-19 show=acd
+  original nwords=17  kept nwords=11  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  ... vaccines and you are wearing two masks, isn't that theater?
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=4 ---
+      tag='DR. ANTHONY FAUCI'
+      RAW DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================================
+SAMPLE 03 [stratum E] rowid=110238 member=Rick Scott date=2021-03-21 show=meet-the-press
+  original nwords=21  kept nwords=12  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  This is a crisis that is man-made by one man: Joe Biden.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=6 ---
+      tag='REP. KEVIN MCCARTHY'
+      RAW REP. KEVIN MCCARTHY It’s more than just a crisis.
+
+================================================================================================================
+SAMPLE 04 [stratum E] rowid=217583 member=Christopher Coons date=2021-02-16 show=cnr
+  original nwords=61  kept nwords=31  classes=['A_anchored_caps', 'E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  We can proceed with a Democrat only bill. President Biden is uniting the American people. He is moving forward on relief that has the support of 3/4 of the American people.
+  --- REMOVED seg 1/2  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=22 ---
+      tag='COLLINS (voice-over)'
+      RAW COLLINS (voice-over): Biden's top health officials are also pushing for the passage of his stimulus bill, arguing that schools need more resources to reopen. 
+  --- REMOVED seg 2/2  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=4 ---
+      tag='DR. ANTHONY FAUCI'
+      RAW DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================================
+SAMPLE 05 [stratum E] rowid=223251 member=Pete Aguilar date=2021-11-18 show=cnr
+  original nwords=138  kept nwords=19  classes=['A_anchored_caps', 'C_unanchored_paren', 'E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  You've had over 200 interviews with witnesses. We've looked at over 25,000 documents. We continue to make significant progress.
+  --- REMOVED seg 1/3  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=67 ---
+      tag='NOBLES (voice-over)'
+      RAW NOBLES (voice-over): They contend they are making progress, despite resistance from those loyal to former President Donald Trump. The committee is holding off on referring former Chief of Staff Mark Meadows for criminal contempt of Congress. Instead, writing him a letter with a list of what they want to know from him, including answers to questions about a personal cell phone and messages they say Meadows may have destroyed. 
+  --- REMOVED seg 2/3  class=E_colonless_honorific own=False speaker='Bennie Thompson' disp=reattributed nwords=31 ---
+      tag='REP. BENNIE THOMPSON (D-MS)'
+      RAW REP. BENNIE THOMPSON (D-MS) (voice-over): We have information that that phone may or may not be in his possession. The number is not active anymore that he used, so we just want to know. [03:55:02] 
+  --- REMOVED seg 3/3  class=C_unanchored_paren own=False speaker=None disp=ledger_only_unresolved nwords=13 ---
+      tag='NOBLES (voice-over)'
+      RAW NOBLES (voice-over): While Meadows remains defiant, the committee continues to insist that he must appear.
+
+================================================================================================================
+SAMPLE 06 [stratum E] rowid=307106 member=Rand Paul date=2026-07-30 show=cnr
+  original nwords=32  kept nwords=12  classes=['B_stop_name_paren', 'E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  You are not recognized, sir. Security, please remove him from the room.
+  --- REMOVED seg 1/2  class=B_stop_name_paren own=False speaker=None disp=ledger_only_unresolved nwords=11 ---
+      tag='FOX (voice-over)'
+      RAW FOX (voice-over): Fauci invoked his Fifth Amendment Right against self-incrimination over 100 times. 
+  --- REMOVED seg 2/2  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=5 ---
+      tag='DR. ANTHONY FAUCI'
+      RAW DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================================
+SAMPLE 07 [stratum E] rowid=212286 member=Rand Paul date=2020-05-13 show=nday
+  original nwords=26  kept nwords=20  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  I don't think you're the end all. I don't think you're the one person that gets to make the decision.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=4 ---
+      tag='DR. ANTHONY FAUCI'
+      RAW DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================================
+SAMPLE 08 [stratum E] rowid=80238 member=Jon Husted date=2025-09-17 show=ip
+  original nwords=53  kept nwords=41  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  Yeah, and thank you, Mr. Chairman. And the -- and the irony of this is, is when I talk with you, you say that. And when I talk with Secretary Kennedy, he says this, we got to get this figured out.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker='Bill Cassidy' disp=reattributed nwords=10 ---
+      tag='SEN. BILL CASSIDY'
+      RAW SEN. BILL CASSIDY, (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &
+
+================================================================================================================
+SAMPLE 09 [stratum E] rowid=82055 member=Raphael Warnock date=2024-04-28 show=this-week
+  original nwords=58  kept nwords=55  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  I think that Georgia voters, black voters included, are going to show up for Joe Biden the same way they showed up for me. Not to vote is to vote. It is to push Donald Trump a little bit closer to the White House. And that is a dangerous proposition. DONALD TRUMP (R), FORMER U.S.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=1 ---
+      tag='PRESIDENT AND'
+      RAW PRESIDENT AND 2024
+
+================================================================================================================
+SAMPLE 10 [stratum E] rowid=231698 member=Steny Hoyer date=2022-10-14 show=cnr
+  original nwords=48  kept nwords=41  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  You have -- you also have troops -- this is Steny Hoyer, troops at Fort McNair, Andrews Air Force Base, other military bases. We need active duty, National Guard, all the people who are sworn to protect and defend the Constitution.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker='Nancy Pelosi' disp=ledger_only_short_turn nwords=4 ---
+      tag='REP. NANCY PELOSI (D-CA)'
+      RAW REP. NANCY PELOSI (D-CA), SPEAKER OF THE
+
+================================================================================================================
+SAMPLE 11 [stratum E] rowid=91491 member=Thom Tillis date=2026-06-02 show=ctmo
+  original nwords=44  kept nwords=28  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  This is beyond the pale. This is not good for my colleagues. There's no one positive thing that could be spun out of this between now and November.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker='Susan Collins' disp=reattributed nwords=13 ---
+      tag='SEN. SUSAN COLLINS (R-ME)'
+      RAW SEN. SUSAN COLLINS (R-ME); I do not support the weaponization fund as it has been described.
+
+================================================================================================================
+SAMPLE 12 [stratum E] rowid=275908 member=Mitch McConnell date=2022-06-08 show=msnow
+  original nwords=64  kept nwords=31  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  The United States Senate will not be intimidated. We will not be kept out of this chamber by thugs, mobs, or threats. We will not bow to the lawlessness or intimidation.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=30 ---
+      tag='REP. KEVIN MCCARTHY (R-CA)'
+      RAW REP. KEVIN MCCARTHY (R-CA); The violence, destruction and chaos we saw earlier was unacceptable, undemocratic, and unAmerican. It was the saddest day I`ve ever had as serving as a member of this institution.
+
+================================================================================================================
+SAMPLE 13 [stratum E] rowid=69954 member=Jake Auchincloss date=2024-08-08 show=cnap
+  original nwords=39  kept nwords=32  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  If I were Donald Trump with five deferments from Vietnam as a favor to my father, I would be very cautious about opening the door to attacks on those who served honorably.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=0 ---
+      tag='KAMALA HARRIS, VICE PRESIDENT OF THE STATES'
+      RAW KAMALA HARRIS, VICE PRESIDENT OF THE STATES
+
+================================================================================================================
+SAMPLE 14 [stratum E] rowid=213957 member=Rand Paul date=2020-09-24 show=cnr
+  original nwords=24  kept nwords=19  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  They're no longer having the pandemic because they have enough immunity in New York City to actually stop it.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=3 ---
+      tag='DR. ANTHONY FAUCI'
+      RAW DR. ANTHONY FAUCI, NATIONAL INSTITUTE
+
+================================================================================================================
+SAMPLE 15 [stratum E] rowid=70117 member=Charles Schumer date=2024-08-20 show=se
+  original nwords=41  kept nwords=31  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  So, let's elect Kamala Harris, Tim Walz, and a Democratic majority in the Senate and keep the torch of freedom burning bright for generations to come. On to victory in November.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=0 ---
+      tag='[21:25:00] (CHEERING) KAMALA HARRIS (D), VICE PRESIDENT OF THE UNITED'
+      RAW [21:25:00] (CHEERING) KAMALA HARRIS (D), VICE PRESIDENT OF THE UNITED
+
+================================================================================================================
+SAMPLE 16 [stratum E] rowid=219771 member=Lindsey Graham date=2021-05-26 show=cg
+  original nwords=32  kept nwords=26  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  At what point in time would it become more likely it came from the lab if we don't find an intermediate animal host? How much longer?
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=4 ---
+      tag='DR. ANTHONY FAUCI'
+      RAW DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+
+================================================================================================================
+SAMPLE 17 [stratum E] rowid=66735 member=Michael McCaul date=2024-04-05 show=cnr
+  original nwords=160  kept nwords=19  classes=['A_anchored_caps', 'E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  The Biden administration's failure to plan for their withdrawal threaten the safety and security of us personnel in country.
+  --- REMOVED seg 1/2  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=132 ---
+      tag='ATWOOD (voice-over)'
+      RAW ATWOOD (voice-over): The interviews are part of an ongoing investigation led by the committee's Republican chairman, Mike McCaul, into the chaotic evacuation that resulted in the deaths of 13 U.S. servicemembers in a terrorist attack outside of the Kabul airport. One official testifying, quote, we had to create from scratch tactical operations that would get our priority people into the airport. He added, we were roughly as effective as we could be under the circumstances. Another saying he was never briefed on an established evacuation plan because, quote, were already in the midst of executing an evacuation that substantially exceeded the scope and scale of what had been contemplated. The top U.S. military generals suggested that the damage could have been mitigated if the State Department had called for an earlier non-combatant evacuation. GEN. 
+  --- REMOVED seg 2/2  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=0 ---
+      tag='MARK MILLEY, FORMER UNITED STATES CHAIRMAN OF'
+      RAW MARK MILLEY, FORMER UNITED STATES CHAIRMAN OF
+
+================================================================================================================
+SAMPLE 18 [stratum E] rowid=71147 member=Mitch McConnell date=2024-10-29 show=ctmo
+  original nwords=19  kept nwords=16  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  The mob was fed lies. They were provoked by the president. DONALD TRUMP (R), FORMER U.S.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker=None disp=ledger_only_unresolved nwords=1 ---
+      tag='PRESIDENT AND'
+      RAW PRESIDENT AND 2024
+
+================================================================================================================
+SAMPLE 19 [stratum E] rowid=267967 member=Maxine Waters date=2019-04-30 show=msnow
+  original nwords=19  kept nwords=15  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  He`s prepared to fight us tooth and nail and we`re prepared to fight him back.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker='Adam Schiff' disp=ledger_only_short_turn nwords=1 ---
+      tag='REP. ADAM SCHIFF (D-CA)'
+      RAW REP. ADAM SCHIFF (D-CA);
+
+================================================================================================================
+SAMPLE 20 [stratum E] rowid=198822 member=Alexandria Ocasio-Cortez date=2019-07-15 show=sitroom
+  original nwords=458  kept nwords=451  classes=['E_colonless_honorific']
+  --- KEPT TEXT (what the member keeps) ---
+  [first 500] Good afternoon, everyone. I'll try to keep things as brief, I guess, as I can. Who knows, when I get on a roll, right. When I was a little girl, my father took me to the Reflecting Pool here. We were on a road trip from New York to Florida to visit family. And I've told this story before. But it was my first time ever visiting Washington, D.C., and it was my only time visiting Washington, D.C., for years, if not decades. And he rested me on the side of the Reflecting Pool and had my toes dip in 
+  [last  900] ... public education system on to the leadership of Betsy DeVos and to a cash cow to enrich himself and his friends. I am not surprised when he corrupts via the Secretary of Transportation. I am not surprised at what he's doing, but I also know that we're focused on making it better. Because we don't leave the things that we love. And when we love this country, what that means is that we propose the solutions to fix it. We love all people in this country, and that's why we believe health care is a human right. We -- we love all children in this country. And because we do, that's why we fight for education for all children through college. And so we'll stay focused on our agenda, and we won't get caught slipping. Because all of this is a distraction. It's a distraction from what's most important and from our core values as American citizens. And with that, I'll hand it over to Rashida Tlaib.
+  --- REMOVED seg 1/1  class=E_colonless_honorific own=False speaker='Rashida Tlaib' disp=ledger_only_short_turn nwords=4 ---
+      tag='REP. RASHIDA TLAIB (D-MI)'
+      RAW REP. RASHIDA TLAIB (D-MI), MAJORITY MEMBER, HOUSE
+
+================================================================================================================
+SAMPLE 21 [stratum D] rowid=258736 member=Elise Stefanik date=2023-07-26 show=pbs-newshour
+  original nwords=346  kept nwords=126  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  With each passing day, House Republicans' investigations uncover more and more evidence showing that Joe Biden not only knew about, but was involved in his family's illegal influence peddling scheme. Laura Barrón-López: Again, those accusations are unsubstantiated. But Republican attacks on the president and his son will almost certainly ramp up in the aftermath of today's hearing, which left Hunter Biden's legal future unresolved. To help us understand it all, I'm joined by Glenn Thrush of The New York Times. He's in Wilmington, Delaware, where he was inside the courtroom. Glenn, thanks so much for joining. Today was expected to be smooth sailing for Hunter Biden on this guilty plea deal, but that all broke down. What happened? You were in the courtroom. Can you explain?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=214 ---
+      tag='Glenn Thrush, The New York Times'
+      RAW[:700] Glenn Thrush, The New York Times: It was pretty extraordinary. When you cover a plea deal, it tends to be the signing of some papers. The judge tends to go through a whole list of questions that are sort of written out in advance. But the tenor of this hearing was totally different from the start. The judge in the case seemed utterly skeptical, nearly hostile towards this agreement, and she attacked two provisions in particular. The first was a provision that was the gun agreement on the diversion program. And the second, and more importantly, was this blanket immunity that the government had granted to Hunter Biden relating to any issues, not -- that appeared to relate to any issues, not ju
+      RAW[-400:] ...t for foreign countries and in the throes of a really desperate drug and alcohol addiction. Laura Barrón-López: And so Hunter Biden ended up pleading not guilty to those two misdemeanor tax charges that you mentioned. But he could still end up working out a deal with the Justice Department, right? So can you walk us through where all those charges stand, including that potential felony gun charge?
+
+================================================================================================================
+SAMPLE 22 [stratum D] rowid=116271 member=Ilhan Omar date=2024-05-23 show=pbs-newshour
+  original nwords=53  kept nwords=19  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  Why did you not immediately send the police that were standing by, your campus police, law enforcement, to intervene?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=30 ---
+      tag='Gene Block, UCLA Chancellor'
+      RAW Gene Block, UCLA Chancellor: We tried. We notified -- as soon as we saw the violence, we notified all of our mutual aid partners. We tried to get police there as quickly as possible.
+
+================================================================================================================
+SAMPLE 23 [stratum D] rowid=254901 member=Lindsey Graham date=2019-07-18 show=pbs-newshour
+  original nwords=59  kept nwords=30  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  The point is, they're all American citizens, entitled to their voice. And when they do provocative things, they're going to be met with provocation. So this is a two-way street.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker='John Kennedy' disp=reattributed nwords=25 ---
+      tag='Sen. John Kennedy, La.'
+      RAW Sen. John Kennedy, La.: I'm just ready to move on. I mean, this is -- I don't hate anybody. I think this is America. You're entitled to your opinion.
+
+================================================================================================================
+SAMPLE 24 [stratum D] rowid=258820 member=Charles Schumer date=2023-09-21 show=pbs-newshour
+  original nwords=378  kept nwords=301  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  [first 500] Providing aid is not just a matter of Ukrainian security. It's a matter of American security, because a victorious Putin is an emboldened Putin, making the world less safe for democracy. Laura Barrón-López: Among the key things Zelenskyy asked for during his Capitol Hill visit, more air defense and long-range rockets, called ATACMS, which President Biden has been reluctant to provide. Just before Zelenskyy arrived at the White House to meet with Biden, National Security Adviser Jake Sullivan sai
+  [last  900] ...istance to Ukraine, including more artillery, more ammunition, more anti-tank weapons. And, next week, the first U.S. Abrams tanks will be delivered to Ukraine. Laura Barrón-López: American aid now and in the future is critical to Ukraine's survival. Early today, missiles rained over cities across Ukraine. It was Russia's largest aerial bombardment in more than a month. Some of the attacks targeted Ukraine's electrical grid for the first time in six months. Ukraine's military says they shot down most of the missiles. Still, falling debris ignited fires in residential areas in Kyiv and destroyed homes and businesses farther south in Cherkasy. And in Southern Ukraine, projectiles destroyed a residential block in Kherson, killing five and wounding more. Raising the stakes further, the Polish prime minister on television last night said Poland would stop sending military supplies to Ukraine.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=70 ---
+      tag='Mateusz Morawiecki, Polish Prime Minister (through interpreter)'
+      RAW Mateusz Morawiecki, Polish Prime Minister (through interpreter): We are no longer transferring weapons to Ukraine because we're now arming ourselves with the most modern weapons. Laura Barrón-López: And just last week, Poland, Hungary and Slovakia announced a ban on Ukrainian grain imports, saying the move was to protect their farmers. Back in the U.S., as Republican infighting over more aid to Ukraine continues, President Biden seeks to project strong support for a fellow democracy under brutal attack.
+
+================================================================================================================
+SAMPLE 25 [stratum D] rowid=305584 member=John Thune date=2026-07-13 show=pbs-newshour
+  original nwords=57  kept nwords=25  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  He was confident that the United States could be a force for good. And he gave everything he had to ensuring that we would be.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=27 ---
+      tag='Benjamin Netanyahu, Israeli Prime Minister'
+      RAW Benjamin Netanyahu, Israeli Prime Minister: Israel has lost one of the great champions of the American-Israeli alliance. And, frankly, I have lost a beloved friend who I have had for many decades.
+
+================================================================================================================
+SAMPLE 26 [stratum D] rowid=176057 member=Jim Jordan date=2026-01-22 show=pbs-newshour
+  original nwords=11  kept nwords=4  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  So help you God?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=2 ---
+      tag='Jack Smith, Former Special Counsel'
+      RAW Jack Smith, Former Special Counsel: I do.
+
+================================================================================================================
+SAMPLE 27 [stratum D] rowid=175673 member=Angus King date=2026-01-19 show=pbs-newshour
+  original nwords=45  kept nwords=20  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  Congress has abdicated its power largely. I'd say it's the seventh inning. We're behind 4-3. But the game isn't over.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=20 ---
+      tag='Sarah Binder, George Washington University'
+      RAW Sarah Binder, George Washington University: The big, long picture here over the 20th century into these years of Trump is a loss of congressional power.
+
+================================================================================================================
+SAMPLE 28 [stratum D] rowid=255829 member=Bernard Sanders date=2020-03-16 show=pbs-newshour
+  original nwords=31  kept nwords=16  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  He is undermining the doctors and the scientists who are trying to help the American people.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=10 ---
+      tag='Former Vice President Joseph Biden'
+      RAW Former Vice President Joseph Biden: Donald Trump, he's exacerbated every single one of these problems.
+
+================================================================================================================
+SAMPLE 29 [stratum D] rowid=258130 member=Charles Schumer date=2022-11-28 show=pbs-newshour
+  original nwords=813  kept nwords=281  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  [first 500] For a former president to sit down and have dinner with a high-profile antisemite is disgusting and dangerous. To give an antisemite even the smallest platform, much less an audience over dinner, is pure evil. Even assuming the former president didn't realize Mr. Fuentes was coming to Mar-a-Lago, for him to refuse to condemn Fuentes and his bigoted words after the dinner is appalling, and it is dangerous. Laura Barrón-López: We asked every Republican senator and every member of Republican House 
+  [last  900] ...h Nick Fuentes." The vast majority of them did not respond to us. For more on what this means for the Republican Party. I'm joined by Mary McCord. She is the director of the Institute for Constitutional Advocacy and Protection and a former Justice Department official. And Stuart Stevens, he is a former Republican consultant now at The Lincoln Project and a new pro-democracy media platform, Resolute Square. Thank you both for joining us our today. Stu, I want to start with you. As Republican senators were returning to Washington this evening, they were asked by reporters about the dinner, and a number of them said that it was -- quote -- "inappropriate, that it was wrong, that there's no place for white supremacy in the Republican Party." Separately, former Vice President Mike Pence said that Trump should apologize for the meeting. What's your assessment of the Republican response so far?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=527 ---
+      tag='Stuart Stevens, The Lincoln Project'
+      RAW[:700] Stuart Stevens, The Lincoln Project: Well, look, I think this has to be taken in context of what has happened to the Republican Party, which, in my view, is a complete moral collapse, unlike any we have really seen in America with a major political party. This happened in Florida. The governor of Florida, Ron DeSantis, as far as I know, has yet to assert that Joe Biden won a legal and fair election. We talk about election deniers, but we focus on those who are out there campaigning on it. But the vast majority of elected Republican officials are yet to say that Donald Trump lost a free and fair election, which is -- they're -- that is -- how extreme can that be? That means that we don't live
+      RAW[-400:] ...Barrón-López: And Fuentes, as you noted, Mary, isn't new on the scene. Representatives Marjorie Taylor Greene of Georgia and Paul Gosar of Arizona spoke at Fuentes' white nationalist conference earlier this year. And yet there was no vast Republican condemnation of it across the party. Stu, what roots do you see of this? Why do you think that these figures are accepted within the Republican Party?
+
+================================================================================================================
+SAMPLE 30 [stratum D] rowid=144501 member=Raphael Warnock date=2025-01-16 show=pbs-newshour
+  original nwords=48  kept nwords=24  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  Do you agree that ending the tax cuts for those making more than $400,000 would help close the deficit and reduce our national debt?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=18 ---
+      tag='Scott Bessent, U.S. Treasury Secretary Nominee'
+      RAW Scott Bessent, U.S. Treasury Secretary Nominee: Senator Warnock, I do not. I believe that you would capture an inordinate amount of small business people.
+
+================================================================================================================
+SAMPLE 31 [stratum D] rowid=256068 member=John Cornyn date=2020-06-16 show=pbs-newshour
+  original nwords=27  kept nwords=9  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  Well, do you believe basically all Americans are racist?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=13 ---
+      tag='Fmr. Attorney General Vanita Gupta'
+      RAW Fmr. Attorney General Vanita Gupta: I think we all have implicit bias and racial bias, yes, I do.
+
+================================================================================================================
+SAMPLE 32 [stratum D] rowid=258150 member=Nancy Pelosi date=2022-12-06 show=pbs-newshour
+  original nwords=35  kept nwords=17  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  January 6 was a day of horror and heartbreak. It is also a moment of extraordinary heroism.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=12 ---
+      tag='Tom Manger, U.S. Capitol Police Chief'
+      RAW Tom Manger, U.S. Capitol Police Chief: I cannot thank our officers enough for their courage, for the resolve.
+
+================================================================================================================
+SAMPLE 33 [stratum D] rowid=137948 member=Michael Lawler date=2024-10-22 show=pbs-newshour
+  original nwords=50  kept nwords=20  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  I think I do. I will be voting for him. But the choice is between Donald Trump and Kamala Harris.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=26 ---
+      tag='Tom Stein, Democratic Voter'
+      RAW Tom Stein, Democratic Voter: When it comes down to it, he's got to support Trump or he won't have his job. And I think that's -- I feel it's dangerous.
+
+================================================================================================================
+SAMPLE 34 [stratum D] rowid=108613 member=Kevin Kiley date=2024-05-08 show=pbs-newshour
+  original nwords=37  kept nwords=4  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  Has anyone been terminated?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=26 ---
+      tag='Enikia Ford Morthel, Berkeley Unified School District'
+      RAW Enikia Ford Morthel, Berkeley Unified School District: In general, I can tell you that can't speak about personal matters, but I can tell you that we do follow up and we take action.
+
+================================================================================================================
+SAMPLE 35 [stratum D] rowid=257343 member=Ilhan Omar date=2021-10-29 show=pbs-newshour
+  original nwords=297  kept nwords=114  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  We're voting yes because there is a vision we can collectively create as a city on what public safety should look like for us. Fred de Sam Lazaro: The plan would amend the Minneapolis charter, removing the police department and the city's requirement to fund a minimum number of officers. There would instead be a Department of Public Safety that takes a -- quote -- "comprehensive public health approach," including police officers, if necessary. The department would report not just to the mayor, but also the City Council. And it would likely include social workers, housing experts, and mental health specialists. Minneapolis resident Mercedes Stevenson welcomes the amendment. She's a survivor of domestic violence.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=179 ---
+      tag='Mercedes Stevenson, Minneapolis Resident'
+      RAW Mercedes Stevenson, Minneapolis Resident: It's about expanding public safety. We as a community need more trained individuals to help with mental health and emotional health crises. I myself suffer from PTSD, and I know that my trauma response wouldn't be the same as anybody else's response. And so having someone trained and knows my language, and that would be comforting to me. Fred de Sam Lazaro: But the amendment is far from universally supported. Teto Wilson lives and owns a barbershop in the majority-Black North Minneapolis. Teto Wilson Owner, Wilson's Image Barbers & Stylists: People feel frustrated, and they don't feel safe. They feel like, if crime happens, and we don't have the proper amount of police to deal with it, what are we going to do? I don't feel like there's enough about it that has been explained for me to feel comfortable voting for a Department of Public Safety. Fred de Sam Lazaro: The North Side has borne the brunt of the city's sharp increase in shootings and homicides this year. Memorials to children killed by gun violence dot the neighborhood.
+
+================================================================================================================
+SAMPLE 36 [stratum D] rowid=155292 member=Josh Hawley date=2025-05-20 show=pbs-newshour
+  original nwords=49  kept nwords=13  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  We need it as quickly as possible. Will you help us expedite that?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=30 ---
+      tag='Kristi Noem, U.S. Homeland Security Secretary'
+      RAW Kristi Noem, U.S. Homeland Security Secretary: Absolutely. I have spoken with your governor and did that day that this devastation happened. And so we have promised and pledged to get that expedited as soon as possible.
+
+================================================================================================================
+SAMPLE 37 [stratum D] rowid=258713 member=Jeanne Shaheen date=2023-07-11 show=pbs-newshour
+  original nwords=209  kept nwords=92  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  We can see something move forward when we see the ratification. Laura Barrón-López: All the while, the war in Ukraine goes on. Overnight, Russian forces attacks Kyiv and Odessa in drone strikes, where Ukrainian forces struck down 26 of the 28 drones. But one month into the Ukrainian counteroffensive, efforts to regain territory from Russia move slower than expected, and artillery is running low. Back in Vilnius, Ukraine welcomed a commitment by 11 allied countries to provide fighter jet training, and France announced it would send long-range missiles to the Ukrainian forces.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=111 ---
+      tag='Emmanuel Macron, French President (through translator)'
+      RAW Emmanuel Macron, French President (through translator): We have decided to deliver new deep-strike missiles to Ukraine. They will therefore be deployed in accordance with the commitments we have made with them. Laura Barrón-López: Ukraine has an ally in the summit's host city, where thousands of blue and yellow flags line the streets, an unmistakable signal of support for President Zelenskyy, who will meet with President Biden and NATO leaders tomorrow once again to press his case. Many at the summit are watching that meeting closely tomorrow between President Biden and President Zelenskyy, especially as President Biden has refused to back off his position that the conflict must be over before Ukraine can gain full membership to NATO.
+
+================================================================================================================
+SAMPLE 38 [stratum D] rowid=151413 member=Steven Horsford date=2025-04-09 show=pbs-newshour
+  original nwords=27  kept nwords=17  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  If it was a plan, if it was always a plan, how is this not market manipulation?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=5 ---
+      tag='Jamieson Greer, U.S. Trade Representative'
+      RAW Jamieson Greer, U.S. Trade Representative: It's not market manipulation, sir.
+
+================================================================================================================
+SAMPLE 39 [stratum D] rowid=257660 member=Ted Cruz date=2022-03-22 show=pbs-newshour
+  original nwords=43  kept nwords=14  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  Is Critical Race Theory taught in schools? Is it taught in kindergarten through 12?
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=22 ---
+      tag='Judge Ketanji Brown Jackson, Supreme Court Nominee'
+      RAW Judge Ketanji Brown Jackson, Supreme Court Nominee: Senator, I don't know. I don't think so. I believe it is an academic theory that is at the law school level.
+
+================================================================================================================
+SAMPLE 40 [stratum D] rowid=185172 member=Jack Reed date=2026-05-19 show=pbs-newshour
+  original nwords=18  kept nwords=5  classes=['D_mixed_case_label']
+  --- KEPT TEXT (what the member keeps) ---
+  And you're the president's consigliere.
+  --- REMOVED seg 1/1  class=D_mixed_case_label own=False speaker=None disp=ledger_only_unresolved nwords=7 ---
+      tag='Todd Blanche, Acting U.S. Attorney General'
+      RAW Todd Blanche, Acting U.S. Attorney General: Your perspective is completely wrong, Senator, respectfully.
+
+================================================================================================================
+SAMPLE 41 [stratum O] rowid=225986 member=Daniel Webster date=2022-05-29 show=cnr
+  original nwords=75  kept nwords=23  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  Their rates of gun violence declined quite substantially, both with respect to homicides and with suicides. And it virtually eliminated fatal mass shootings.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=50 ---
+      tag='TODD (voice-over)'
+      RAW TODD (voice-over): Since Australia's gun control laws went into effect in 1996, mass shootings have gone from almost once a year to almost never, with only one since that time. And John Howard later pointed out, his government was able to get that done, even though he's a political conservative. JOHN HOWARD,
+
+================================================================================================================
+SAMPLE 42 [stratum O] rowid=216673 member=Amy Klobuchar date=2021-01-30 show=cnr
+  original nwords=95  kept nwords=67  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  Some of the ads has been discussed contained misinformation, telling voters that they could vote online, which, of course, wasn't true. And in fact, here is one of them, targeted, of course, telling people that they could just text Hillary to that number and that is how they vote. I just want people to understand what this is. Efforts like this are actually criminal. They are illegal.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=26 ---
+      tag="O'SULLIVAN (voice-over)"
+      RAW O'SULLIVAN (voice-over): A similar tweet targeted Hispanic voters. Ben Nimmo is the head of investigations at Graphika, a company that analyzes the spread of disinformation on social media.
+
+================================================================================================================
+SAMPLE 43 [stratum O] rowid=67279 member=Maria Cantwell date=2024-04-25 show=cnr
+  original nwords=38  kept nwords=25  classes=['B_unknown_surname_paren']
+  --- KEPT TEXT (what the member keeps) ---
+  Congress is acting to prevent foreign adversaries from conducting espionage, surveillance, maligned operations, harming vulnerable Americans, our servicemen and women, and our U.S. government personnel.
+  --- REMOVED seg 1/1  class=B_unknown_surname_paren own=False speaker=None disp=ledger_only_unresolved nwords=11 ---
+      tag='YOSHIDA (voice-over)'
+      RAW YOSHIDA (voice-over): Some experts say this bill does not prioritize the right issues.
+
+================================================================================================================
+SAMPLE 44 [stratum O] rowid=238633 member=Michael Turner date=2023-02-06 show=ctmo
+  original nwords=154  kept nwords=92  classes=['B_unknown_surname_paren']
+  --- KEPT TEXT (what the member keeps) ---
+  The key is -- is the payload attached to it, which you've reported is the size of three buses. And that's -- that's obviously huge. And it was being commanded and controlled by mainland China and delivering indicted information back to mainland China. Again, if you look at the path and you put X's where all of our sensitive missile defense and nuclear facilities are, I believe that they were trying to gain information on how to defeat the command and control of our nuclear weapons systems and our missile defense systems.
+  --- REMOVED seg 1/1  class=B_unknown_surname_paren own=False speaker=None disp=ledger_only_unresolved nwords=60 ---
+      tag='SUAREZ (voice-over)'
+      RAW SUAREZ (voice-over): The Pentagon says at least four other Chinese surveillance balloons have been spotted in recent years. They also said they had briefed Congress on previous balloons that flew near Texas and Florida. Officials say this balloon was unique from the others in the path it took and the length of time it spent loitering over sensitive missile sites in Montana.
+
+================================================================================================================
+SAMPLE 45 [stratum O] rowid=274164 member=Suzan DelBene date=2021-09-22 show=msnow
+  original nwords=371  kept nwords=283  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  [first 500] Well, it was a great meeting. Thanks, Lawrence. It`s great to be here. It was a great meeting because we need to bring folks together. We need to talk about what that Build Back Better, the final bill is going to be because it is important that we land the plane and pass important legislation that is going to help families, communities, and deliver on the promise of building back better. That is the goal. So, we talked in the meeting about what the goals are, what it would take to bring folks to
+  [last  900] ...ts. And I think the president did an excellent job of hearing people`s priorities, their concerns, as he works with everyone across the Democratic Caucus to get things done. This is a group effort. We sink or swim together. And I think the only acceptable answer is to pass a strong infrastructure bill, pass a strong Build Back Better Act, so that we are delivering for families, for workers, for communities across the country. So, that was our discussion. He obviously had a separate discussion after ours. And now I think it is about what is our collective conversation to come up with that final piece of legislation. I am a chair of the new Democrat coalition, 40 percent of the House, moderate members, our goal is to get things done and no one is going to feel the benefit of this policy if we don`t pass it in the House and Senate and get it to the president`s desk. That has to be the goal.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=87 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: OK. So, you were in the first meeting after the leadership meeting which was the moderate group. We all understand what the bipartisan infrastructure bill is because it`s already passed the Senate. And you`re all in favor of that. And so, the real discussion in that room had to be about what is now the shape of the $3.5 trillion reconciliation package. Was there an agreement in that room about that reconciliation package and what was your position on that in the discussion with the president today?
+
+================================================================================================================
+SAMPLE 46 [stratum O] rowid=239479 member=Richard Blumenthal date=2023-02-14 show=cg
+  original nwords=67  kept nwords=31  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  There is a lot of information presented to us this morning that could be -- he told the American people without any harm to sources or methods or our national security.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=34 ---
+      tag='LIEBERMANN (voice-over)'
+      RAW LIEBERMANN (voice-over): The spate of shoot downs revealing new complications, like what happens if a fighter jet misses its target. Top U.S. general confirming the first missile, an AIM-9X Sidewinder missed the object over Lake Huron.
+
+================================================================================================================
+SAMPLE 47 [stratum O] rowid=269045 member=Mitch McConnell date=2019-07-29 show=msnow
+  original nwords=53  kept nwords=7  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  First there`s something I need to address.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=45 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: Nah, it wasn`t the Trump weekend of public racist rants. That didn`t bother the Majority Leader of the United States Senate one bit. He didn`t care about that, hasn`t said a word about that. Here is what Mitch McConnell felt he had to urgently address.
+
+================================================================================================================
+SAMPLE 48 [stratum O] rowid=262684 member=Jon Ossoff date=2017-04-13 show=msnow
+  original nwords=111  kept nwords=6  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  Thank you for having me, Lawrence.
+  --- REMOVED seg 1/3  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=7 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: Coming up, Donald Trump versus Donald Trump. 
+  --- REMOVED seg 2/3  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=84 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: And now for the good news, the wicked good news, the last word has a new viewer, Ruth Ann Kramer arrived at 12:41 this afternoon. Her mother Joanne Denyeau is one of our producers. Ruth Ann joins big brother Joey who made his Last Word debut in August of 2015. Ruth Ann is the seventh baby born to the Last Word staff since this program was launched only six and a half years ago. More than one baby per year, get some sleep, Joanne. 
+  --- REMOVED seg 3/3  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=11 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: And now for tonight`s episode of Donald Trump versus Donald Trump.
+
+================================================================================================================
+SAMPLE 49 [stratum O] rowid=214224 member=Nancy Pelosi date=2020-10-11 show=ndaysun
+  original nwords=76  kept nwords=25  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  If all that chaos takes us to a time that could be past the date when the electoral college must meet, we will be ready.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=48 ---
+      tag='BROWN (on camera)'
+      RAW BROWN (on camera): The clampdown on disinformation around the election, Twitter is now announcing several changes it's making including blocking any Twitter user including the candidates themselves, from declaring victory before state officials have announced so or before two national news outlets have made their public projections. Pamela Brown, CNN, Washington.
+
+================================================================================================================
+SAMPLE 50 [stratum O] rowid=89184 member=Adam Schiff date=2026-03-20 show=cnc
+  original nwords=76  kept nwords=19  classes=['B_unknown_surname_paren']
+  --- KEPT TEXT (what the member keeps) ---
+  What I am doing is protecting this country and combating the weaponization of intelligence by the likes of you.
+  --- REMOVED seg 1/1  class=B_unknown_surname_paren own=False speaker=None disp=ledger_only_unresolved nwords=55 ---
+      tag='CAMPBELL (voice-over)'
+      RAW CAMPBELL (voice-over): But the history of the Bureau has been marked by frequent clashes with the White House. That intense conflict is the topic of a new CNN original series documentary exploring the fragile and high-risk relationship between FBI directors' past and the presidents they served. As the FBI's quest for independence was pushed to the brink.
+
+================================================================================================================
+SAMPLE 51 [stratum O] rowid=78939 member=Tim Scott date=2025-07-19 show=cnr
+  original nwords=47  kept nwords=27  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  It sends the wrong message to spend public money on luxury upgrades that feel more like they belong in the palace of Versailles than a public institution.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=18 ---
+      tag='TODD (voice-over)'
+      RAW TODD (voice-over): But Powell and the Fed say those features were either not in the plans or were scaled back.
+
+================================================================================================================
+SAMPLE 52 [stratum O] rowid=273323 member=Mitch McConnell date=2021-05-11 show=msnow
+  original nwords=53  kept nwords=28  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  We all learned early in life, if you can write the rules, you can win the game. If you can write the rules, you can win the game.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=24 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: Chuck Schumer pleaded with Republican members of the Rules Committee, including Mitch McConnell, to do something they never do: consider the eyes of history.
+
+================================================================================================================
+SAMPLE 53 [stratum O] rowid=83061 member=Maxine Dexter date=2025-10-07 show=acd
+  original nwords=102  kept nwords=8  classes=['B_unknown_surname_paren', 'C_unanchored_paren']
+  --- KEPT TEXT (what the member keeps) ---
+  I need people to not take the bait.
+  --- REMOVED seg 1/2  class=B_unknown_surname_paren own=False speaker=None disp=ledger_only_unresolved nwords=71 ---
+      tag='PROKUPECZ (voice-over)'
+      RAW PROKUPECZ (voice-over): That's why Maxine Dexter wants all these protesters to leave the ICE facility. The Democratic congresswoman from Portland supports their message, but fears they're playing into President Trump's hands. The question is, are we being strategic? Are we being effective? And I would argue that being down there, taking a risk, that you become a player in this reality TV vision that Donald Trump has of Portland is a mistake. [20:40:11] 
+  --- REMOVED seg 2/2  class=C_unanchored_paren own=False speaker=None disp=ledger_only_unresolved nwords=19 ---
+      tag='PROKUPECZ (voice-over)'
+      RAW PROKUPECZ (voice-over): It seems unlikely she'll get her wish. Protester Justin Allen doesn't think any of these people are going away.
+
+================================================================================================================
+SAMPLE 54 [stratum O] rowid=213722 member=Jeff Merkley date=2020-09-15 show=ebo
+  original nwords=74  kept nwords=17  classes=['B_unknown_surname_paren']
+  --- KEPT TEXT (what the member keeps) ---
+  These fires in Oregon, they're apocalyptic going through a couple of towns that had been absolutely incinerated.
+  --- REMOVED seg 1/1  class=B_unknown_surname_paren own=False speaker=None disp=ledger_only_unresolved nwords=54 ---
+      tag='SAVIDGE (voice over)'
+      RAW SAVIDGE (voice over): Oregon's Governor says the state is stretched to its limits. Last week, it had 3,000 firefighters. This week, nearly double that number and still more are needed. And in an ominous sign for the first time in its history, Oregon is preparing to use its mobile morgue, with a team of 75 forensics specialists.
+
+================================================================================================================
+SAMPLE 55 [stratum O] rowid=205935 member=Madeleine Dean date=2019-11-27 show=bbn
+  original nwords=119  kept nwords=29  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  --shows a consciousness of guilt. Then the President tries to backpedal and say no quid pro quo. And then ultimately because he's been caught has to release that aide.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=87 ---
+      tag='MARQUARDT (voice over)'
+      RAW MARQUARDT (voice over): As the aide was held up over the summer, two officials in the Office of Management and Budget resigned. Testimony just released showed they expressed concerns about the hold. Though, an administration official disputes that was the reason they left. Right before the President finally released the money he insisted to a point man on Ukraine, Ambassador Gordon Sondland on a call that there was no quid pro quo. But Trump did tell Sondland that he wanted the Ukrainian President to Zelensky to do the right thing.
+
+================================================================================================================
+SAMPLE 56 [stratum O] rowid=71608 member=Richard Blumenthal date=2024-11-15 show=cnr
+  original nwords=31  kept nwords=17  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  Matt Gaetz has chosen to resign from the House, but he can't choose to conceal that information.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=12 ---
+      tag='FOREMAN (voice-over)'
+      RAW FOREMAN (voice-over): But, he can choose, as he has in the past, to fight.
+
+================================================================================================================
+SAMPLE 57 [stratum O] rowid=242734 member=Tim Scott date=2023-05-23 show=cnr
+  original nwords=53  kept nwords=39  classes=['B_unknown_surname_paren']
+  --- KEPT TEXT (what the member keeps) ---
+  We live in the land where it is absolutely possible for a kid raised in poverty in a single parent household in a small apartment to one day serve in the people's house and maybe even, the White House.
+  --- REMOVED seg 1/1  class=B_unknown_surname_paren own=False speaker=None disp=ledger_only_unresolved nwords=12 ---
+      tag='MCKEND (voice-over)'
+      RAW MCKEND (voice-over): The only black Republican in the Senate, Scott emphasizing his personal story.
+
+================================================================================================================
+SAMPLE 58 [stratum O] rowid=213548 member=Tim Scott date=2020-08-25 show=fmjc
+  original nwords=49  kept nwords=24  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  This election is about your future. And it is critical to paint a full picture of the records of Donald Trump and Joe Biden.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=22 ---
+      tag='ZELENY (voice over)'
+      RAW ZELENY (voice over): The only black Republican U.S. senator described how he thinks the Democrats could permanently transform what it means to be an American.
+
+================================================================================================================
+SAMPLE 59 [stratum O] rowid=206147 member=Jim Jordan date=2019-12-03 show=fmjc
+  original nwords=72  kept nwords=52  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  The President has, for the longest time, talked about his concern about foreign aid, his concern about corruption in Ukraine, his concern about other European countries not doing enough to help us. So he had those valid concerns. A new guy gets elected. He said, let's see if this guy is legit.
+  --- REMOVED seg 1/1  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=17 ---
+      tag='MALVEAUX (voice over)'
+      RAW MALVEAUX (voice over): But the G.O.P. report completely ignores significant and incriminating testimony against President Trump. Democrats dismissing their rebuttal.
+
+================================================================================================================
+SAMPLE 60 [stratum O] rowid=268184 member=John Garamendi date=2019-05-15 show=msnow
+  original nwords=224  kept nwords=55  classes=['A_anchored_caps']
+  --- KEPT TEXT (what the member keeps) ---
+  Yes, there are problems in Iraq. Yes, there are concerns in Iraq. Do we need an aircraft carrier to deal with those? Do we need B-52 bombers? Or do we have the drumbeat of war here? Are we headed for a Gulf of Tonkin situation? I believe we may very well be in that situation.
+  --- REMOVED seg 1/2  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=148 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: The Gulf of Tonkin resolution was passed by Congress in 1964 to authorize President Lyndon Johnson`s use of force in Vietnam. After a U.S. Navy confrontation with North Vietnamese forces in the Gulf of Tonkin, the details of that naval encounter in the Gulf of Tonkin were later showed to have been wildly exaggerated and falsely portrayed by the Johnson administration in order to justify what became an out-of-control American war in Vietnam in which the United States lost 58,000 troops and in the end, the United States lost the war. Next, we`ll be joined by a former national security official who saw the George W. Bush administration`s march to war in the Middle East. Richard Clarke is a former counterterrorism adviser who became one of the strongest opponents of the Iraq war. He`ll join us to discuss President Trump, John Bolton, and what happens next with Iran. 
+  --- REMOVED seg 2/2  class=A_anchored_caps own=False speaker=None disp=ledger_only_unresolved nwords=19 ---
+      tag='O`DONNELL'
+      RAW O`DONNELL: Here is that British major general speaking from Baghdad on video at the Pentagon disagreeing with President Trump yesterday.
+

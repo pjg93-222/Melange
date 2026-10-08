@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H02163627138C48F1ABCA720B3AF1735D" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7725 IH: Stop Child Care Fraud Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-02-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7725</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260226">February 26, 2026</action-date><action-desc><sponsor name-id="R000619">Mr. Rulli</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Workforce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Child Care and Development Block Grant Act of 1990 to require States disclose agency regulatory participation under such Act.</official-title></form><legis-body id="H9F07F04958AD4F41914BA5E2CE277572" style="OLC"> 
+<section id="HB6AA90579DAE48A684DF416C571DAF8B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stop Child Care Fraud Act</short-title></quote>.</text></section> <section id="H7160EF553FD44182A60FEF4145F89660" section-type="subsequent-section"><enum>2.</enum><header>Program integrity and accountability</header><text display-inline="no-display-inline">Section 658E(c)(2) of the Child Care and Development Block Grant Act of 1990 (<external-xref legal-doc="usc" parsable-cite="usc/42/9858c">42 U.S.C. 9858c(c)(2)</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" id="HE27AE8B80E414B8EB0E19F1BEC93AD09" display-inline="no-display-inline"> 
+<subparagraph id="HE61E5E98BA454892A533A26E948DB68B"><enum>(W)</enum><header>program integrity and accountability</header><text display-inline="yes-display-inline">The plan shall include a description of—</text> <clause id="H182D8DB0C3D54F9F9D3F47DB3E8B9752"><enum>(i)</enum><text>the State's internal controls to ensure program integrity and accountability,</text></clause> 
+<clause id="HFC00673A1FE349FEB7B9BDEEBCBAE0CD"><enum>(ii)</enum><text>the processes in place—</text> <subclause id="H645BBF0B910E4E88AB192F95CDA9C15F"><enum>(I)</enum><text>to investigate and recover fraudulent payments, and</text></subclause> 
+<subclause id="HC0A120ABCC9B400295CFE08F5C4F743F"><enum>(II)</enum><text>to impose sanctions on clients or providers in response to fraud, and</text></subclause></clause> <clause id="H7DA999727D044A8DABE063FE4A8B3815"><enum>(iii)</enum><text>the procedures in place to document and verify eligibility.</text></clause><continuation-text continuation-text-level="subparagraph">Such description shall include how the State utilizes data within and across other State and local agencies that have oversight of child care providers that serve children who receive assistance under this subchapter.</continuation-text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+</legis-body></bill>
+

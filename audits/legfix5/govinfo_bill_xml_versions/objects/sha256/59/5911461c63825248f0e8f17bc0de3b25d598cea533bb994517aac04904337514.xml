@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" dms-id="H81B3DD75B87C4C1791D1A2E43D0BA61A" public-private="public" key="H" bill-type="olc"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 7422 RH: Geothermal Cost-Recovery Authority Act of 2024</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-09-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IB</distribution-code> 
+<calendar display="yes">Union Calendar No. 566</calendar> 
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 7422</legis-num> 
+<associated-doc role="report" display="yes">[Report No. 118–670]</associated-doc> 
+<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<action display="yes"> 
+<action-date date="20240220">February 20, 2024</action-date> 
+<action-desc><sponsor name-id="O000172">Ms. Ocasio-Cortez</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HII00" added-display-style="italic" deleted-display-style="strikethrough">Committee on Natural Resources</committee-name></action-desc> 
+</action> 
+<action> 
+<action-date date="20240912">September 12, 2024</action-date> 
+<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc> 
+<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction> 
+<action-instruction>For text of introduced bill, see copy of bill as introduced on February 20, 2024</action-instruction> 
+</action> 
+<action display="yes"> 
+<action-desc display="yes"><pagebreak/></action-desc> 
+</action> 
+<legis-type>A BILL</legis-type> 
+<official-title display="yes">To amend the Geothermal Steam Act of 1970 to provide cost-recovery authority for the Department of the Interior.<pagebreak/></official-title> 
+</form> 
+<legis-body display-enacting-clause="yes-display-enacting-clause" changed="added" style="OLC" committee-id="HII00" reported-display-style="italic" id="HF3030B0F09C94505B6130CEBCDC64753"> 
+<section id="H4671434BA0264C4AA758A102DE37906A" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Geothermal Cost-Recovery Authority Act of 2024</short-title></quote>.</text></section> <section id="HC18A1C9C8DD14742BF36F365B5E76AA5"><enum>2.</enum><header>Cost recovery from geothermal leasing and permitting</header><text display-inline="no-display-inline">Section 6 of the Geothermal Steam Act of 1970 (<external-xref legal-doc="usc" parsable-cite="usc/30/1005">30 U.S.C. 1005</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" id="H04E1946CB8A14E95B4C90C00C3178934" display-inline="no-display-inline"> 
+<subsection id="H8B1B36EFF5F1407AA67E174728BB94EF"><enum>(j)</enum><header>Cost recovery</header> 
+<paragraph id="HDF8C90C4FA21450AB51C15E5929D16E1"><enum>(1)</enum><header>In general</header><text>During the period that begins on the date of enactment of this subsection and ends September 30, 2031, the Secretary may require a holder of a geothermal lease to reimburse the United States for all reasonable administrative and other costs incurred by the United States from—</text> <subparagraph id="H19C4C01618FA4DD6A32788884F51BEA5"><enum>(A)</enum><text display-inline="yes-display-inline">processing the application for the geothermal lease, including any application for an operations plan, geothermal drilling permit, utilization plan, site license, facility construction permit, commercial use permit, and any other approval associated with a geothermal lease; and</text></subparagraph> 
+<subparagraph id="H0B35DB4C20F447DFAE402567A32555A1"><enum>(B)</enum><text display-inline="yes-display-inline">monitoring—</text> <clause id="HFC016179AD8C4E3AB9FFEDADBB2E1AB4"><enum>(i)</enum><text>geophysical exploration operations;</text></clause> 
+<clause id="HA2C2A860198D4F12AB4F67D79F0B9637"><enum>(ii)</enum><text display-inline="yes-display-inline">the drilling, plugging, and abandonment of wells; and</text></clause> <clause id="H11A1EA385DD34DBF970AF0B83EB3BB61"><enum>(iii)</enum><text display-inline="yes-display-inline">the construction, operation, termination, and reclamation of any well site or facility for the utilization of geothermal resources pursuant to the geothermal lease.</text></clause></subparagraph></paragraph> 
+<paragraph id="HEAD6FA5EDB28448BB5A3C034BAC4FCEE" commented="no"><enum>(2)</enum><header>Considerations</header><text display-inline="yes-display-inline">In determining whether to require reimbursement under paragraph (1), the Secretary shall consider whether there is in existence a contributed funds agreement between the United States and the holder of a geothermal lease.</text></paragraph> <paragraph id="H3C09BDD7C2EF472D969114668353A32E" commented="no"><enum>(3)</enum><header>Adjustments</header><text>The Secretary may reduce the amount to be reimbursed under paragraph (1) if the Secretary determines—</text> 
+<subparagraph id="H32AD18C50F774C358A2694DAEA0543CF" commented="no"><enum>(A)</enum><text>that full reimbursement would impose an economic hardship on the holder of the geothermal lease; or</text></subparagraph> <subparagraph id="H0BD9664C8C754F55AF94812F43F6A150" commented="no"><enum>(B)</enum><text>that a less than full reimbursement is necessary to promote the greatest use of geothermal resources.</text></subparagraph></paragraph> 
+<paragraph id="HBD6114D484CD487BBD2F1DF28080B056" commented="no"><enum>(4)</enum><header>Use</header><text>The amounts reimbursed under this subsection shall be available to the Secretary of the Interior for expenditure for—</text> <subparagraph id="HEFB7F485BA2940AE849C4F9E2D5A05D3" commented="no"><enum>(A)</enum><text display-inline="yes-display-inline">processing the application for the geothermal lease, including any application for an operations plan, geothermal drilling permit, utilization plan, site license, facility construction permit, commercial use permit, and any other approval associated with a geothermal lease; and</text></subparagraph> 
+<subparagraph id="H475B58ADD2E247BB87D04A9720AB5EC6" commented="no"><enum>(B)</enum><text>monitoring—</text> <clause id="H26A309E9D00843B0A965E15BA9E47768" commented="no"><enum>(i)</enum><text>geophysical exploration operations;</text></clause> 
+<clause id="HF0597C7EC9544B9DBE9EE0E81D590D59" commented="no"><enum>(ii)</enum><text>the drilling, plugging, and abandonment of wells; and</text></clause> <clause id="HEC0D1AB30B1C4141B1946444BB20F2D7" commented="no"><enum>(iii)</enum><text>the construction, operation, termination, and reclamation of any well site or facility for the utilization of geothermal resources pursuant to the geothermal lease.</text></clause></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+<section id="H85ED55D4659A4FCEA40D9D0428FEE80D" commented="no"><enum>3.</enum><header>Report</header> 
+<subsection id="H78CB93C253DB4E448CEE994930E43905"><enum>(a)</enum><header>Report</header><text display-inline="yes-display-inline">Not later than 5 years after the date of enactment of this Act, the Secretary of the Interior shall submit to the Committee on Natural Resources of the House of Representatives and the Committee on Energy and Natural Resources of the Senate, and make publicly available on the website of the Department of the Interior, a report that includes—</text> <paragraph id="HEB2387669D244C50BFFBF4F73B94725F"><enum>(1)</enum><text>an assessment of how the amendments made by section 2 of this Act affected the Bureau of Land Management’s geothermal program, including the accomplishments of each field office relating to the coordination and processing of geothermal permits and any other approval associated with a geothermal lease;</text></paragraph> 
+<paragraph id="HFA8388BDE6C84363860AF0F5DB770BFD"><enum>(2)</enum><text>any recommendations for reauthorization of section 6(j) of the Geothermal Steam Act of 1970, as added by this Act; and</text></paragraph> <paragraph id="H6321E1BF438D40EAB0726C7EA72FF02A"><enum>(3)</enum><text>any other recommendations for updates to such section and the Bureau of Land Management’s geothermal program.</text></paragraph></subsection> 
+<subsection id="HB34D474A08054CA68BB13B9C913CF3CA"><enum>(b)</enum><header>Considerations</header><text display-inline="yes-display-inline">In developing the report required in subsection (a), the Secretary of the Interior shall solicit facts or information from the geothermal industry and other stakeholders.</text></subsection></section> </legis-body> <endorsement display="yes"> <action-date date="20240912">September 12, 2024</action-date> <action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc></endorsement> </bill> 
+

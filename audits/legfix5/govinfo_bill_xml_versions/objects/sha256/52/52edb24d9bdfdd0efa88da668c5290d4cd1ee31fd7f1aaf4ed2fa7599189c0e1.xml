@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H7A5D87F94A394780819F976CBD192C3F" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5720 IH: To amend the Fair Credit Reporting Act to prohibit the creation and sale of trigger leads, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-01-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 5720</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200130">January 30, 2020</action-date><action-desc><sponsor name-id="C001049">Mr. Clay</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Fair Credit Reporting Act to prohibit the creation and sale of trigger leads, and for
+			 other purposes.</official-title></form>
+	<legis-body id="HA325947ECC7B46B295C892F73E12F3EE" style="OLC">
+ <section id="H59B05B367D4C4DC787F0E098F8CE1727" section-type="section-one"><enum>1.</enum><header>Trigger lead prohibition</header><text display-inline="no-display-inline">Section 604(c) of the Fair Credit Reporting Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1681b">15 U.S.C. 1681b(c)</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block display-inline="no-display-inline" id="H554A4BF80D70466FB81BFC7433659C50" style="OLC">
+ <paragraph id="HCF86201311AC4EE5B53DED42AA9ACDFB"><enum>(4)</enum><header>Prohibition on trigger leads for residential mortgage loans</header><text display-inline="yes-display-inline">Notwithstanding paragraph (1), no consumer reporting agency may furnish a consumer report in connection with a credit transaction that is not initiated by a consumer, if the report is being procured based in whole or in part on the presence of an inquiry made in connection with a residential mortgage loan (as defined under section 103 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1602">15 U.S.C. 1602</external-xref>)).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

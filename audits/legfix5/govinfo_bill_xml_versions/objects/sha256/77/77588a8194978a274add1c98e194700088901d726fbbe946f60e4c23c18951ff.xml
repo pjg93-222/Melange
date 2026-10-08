@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 ??>
+<?I50 PUBLIC LAW 117–205—OCT. 17, 2022?>
+
+
+<?I97 136 STAT. ?>
+<?I98 136 STAT. ?>
+<?I99 136 STAT. ?>
+<?I50 PUBLIC LAW 117–205—OCT. 17, 2022?>
+<?I51 PUBLIC LAW 117–205—OCT. 17, 2022?>
+<?I52 PUBLIC LAW 117–205—OCT. 17, 2022?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 117–205: To amend title 38, United States Code, to improve and expand the Solid Start program of the Department of Veterans Affairs, and for other purposes.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>205</docNumber>
+<citableAs>Public Law 117–205</citableAs><citableAs>136 Stat. 2232</citableAs>
+<approvedDate>2022-10-17</approvedDate>
+<dc:date>2022-10-17</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>117</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><page display="no">?2231</page><note role="coverPage"><centerRunningHead>PUBLIC LAW 117–205—OCT. 17, 2022</centerRunningHead>
+<coverTitle>SOLID START ACT OF 2022</coverTitle>
+</note>
+<page identifier="/us/stat/136/2232">136 STAT. 2232</page>
+<dc:type>Public Law</dc:type><docNumber>117–205</docNumber>
+<congress value="117">117th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To amend title 38, United States Code, to improve and expand the Solid Start program of the Department of Veterans Affairs, and for other purposes.<sidenote><p class="centered fontsize8" id="xc8b77cd1-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076"><approvedDate date="2022-10-17">Oct. 17, 2022</approvedDate></p><p class="centered fontsize8" id="xc8b77cd2-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076">[<ref href="/us/bill/117/s/1198">S. 1198</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b77cd3-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Solid Start Act</p><p class="leftAlign firstIndent0 fontsize8" id="xc8b77cd4-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">of 2022.</p></sidenote>
+<section id="d118740e100" identifier="/us/pl/117/205/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b77cd5-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t38/s101">38 USC 101 note</ref>.</p></sidenote><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Solid Start Act of 2022</shortTitle>”.</content></section>
+<section id="d118740e115" identifier="/us/pl/117/205/s2" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>SOLID START PROGRAM OF THE DEPARTMENT OF VETERANS AFFAIRS.</heading><subsection class="firstIndent0 fontsize10" id="yc8b81916-e819-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/205/s2/a" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">(a) </num><heading class="fontsize10"><inline class="smallCaps">In General</inline>.—</heading><content><ref href="/us/usc/t38/ch63">Chapter 63 of title 38, United States Code</ref>, <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="add">adding</amendingAction> at the end the following new subchapter:<quotedContent><subchapter id="yc8b86737-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658174"><num class="fontsize10 smallCaps" value="II">“SUBCHAPTER II—</num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e48-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t38/s6320">38 USC 6320</ref> prec.</p></sidenote><heading class="fontsize10 smallCaps">OTHER OUTREACH PROGRAMS AND ACTIVITIES</heading><section class="centered fontsize12" id="yc8b88e49-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658164"><num class="fontsize12" value="6320">“§ 6320.</num><heading class="fontsize12"><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e4a-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t38/s6320">38 USC 6320</ref>.</p></sidenote> Solid Start program</heading><subsection class="firstIndent0 fontsize10" id="yc8b88e4b-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">“(a) </num><heading class="fontsize10"><inline class="smallCaps">In General</inline>.—</heading><chapeau>The Secretary shall carry out a program, to be known as the ‘Solid Start program’, under which the Secretary shall—</chapeau><paragraph class="fontsize10" id="yc8b88e4c-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">“(1) </num><content>build the capacity of the Department to efficiently and effectively respond to the queries and needs of veterans who have recently separated from the Armed Forces; and</content></paragraph>
+<paragraph class="fontsize10" id="yc8b88e4d-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">“(2) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e4e-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Coordination.</p></sidenote><chapeau>systemically integrate and coordinate efforts to assist veterans, including efforts—</chapeau><subparagraph class="fontsize10" id="yc8b88e4f-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">“(A) </num><content>to proactively reach out to newly separated veterans to inform them of their eligibility for programs of and benefits provided by the Department; and</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e50-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">“(B) </num><content>to connect veterans in crisis to resources that address their immediate needs.</content></subparagraph>
+</paragraph>
+</subsection>
+<subsection class="firstIndent0 fontsize10" id="yc8b88e51-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">“(b) </num><heading class="fontsize10"><inline class="smallCaps">Activities of the Solid Start Program</inline>.—</heading><paragraph class="inline" id="yc8b88e52-e819-11f0-bc57-ad3ac4b1618c"><num value="1">(1) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e53-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Coordination.</p></sidenote><chapeau>The Secretary, in coordination with the Secretary of Defense, shall carry out the Solid Start program of the Department by—</chapeau><subparagraph class="fontsize10" id="yc8b88e54-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">“(A) </num><content>collecting up-to-date contact information during transition classes or separation counseling for all members of the Armed Forces who are separating from the Armed Forces, while explaining the existence and purpose of the Solid Start program;</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e55-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">“(B) </num><content>calling each veteran, regardless of separation type or characterization of service, three times within the first year after separation of the veteran from the Armed Forces;</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e56-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="C">“(C) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e57-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Web posting.</p></sidenote><content>providing information about the Solid Start program on the website of the Department and in materials of the Department, especially transition booklets and other resources;<page identifier="/us/stat/136/2233">136 STAT. 2233</page></content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e58-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="D">“(D) </num><content>ensuring calls are truly tailored to the needs of each veteran’s unique situation by conducting quality assurance tests;</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e59-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="E">“(E) </num><content>prioritizing outreach to veterans who have accessed mental health resources prior to separation from the Armed Forces;</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e5a-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="F">“(F) </num><content>providing women veterans with information that is tailored to their specific health care and benefit needs;</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e5b-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="G">“(G) </num><content>as feasible, providing information on access to State and local resources, including Vet Centers and veterans service organizations; and</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e5c-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="H">“(H) </num><content><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e5d-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Analysis.</p><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e5e-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Data.</p><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e5f-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Assessment.</p></sidenote>gathering and analyzing data assessing the effectiveness of the Solid Start program.</content></subparagraph>
+</paragraph>
+<paragraph class="indentUp0 firstIndent0 fontsize10" id="yc8b88e60-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">“(2) </num><chapeau>The Secretary, in coordination with the Secretary of Defense, may carry out the Solid Start program by—</chapeau><subparagraph class="fontsize10" id="yc8b88e61-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">“(A) </num><content>encouraging members of the Armed Forces who are transitioning to civilian life to authorize alternate points of contact who can be reached should the member be unavailable during the first year following the separation of the member from the Armed Forces; and</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e62-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">“(B) </num><content>following up missed phone calls with tailored mailings to ensure the veteran still receives similar information.</content></subparagraph>
+</paragraph>
+<paragraph class="indentUp0 firstIndent0 fontsize10" id="yc8b88e63-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="3">“(3) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e64-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Definitions.</p></sidenote><chapeau>In this subsection:</chapeau><subparagraph class="fontsize10" id="yc8b88e65-e819-11f0-bc57-ad3ac4b1618c" role="definitions" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">“(A) </num><content>The term ‘<term>Vet Center</term>’ has the meaning given that term in section 1712A(h) of this title.</content></subparagraph>
+<subparagraph class="fontsize10" id="yc8b88e66-e819-11f0-bc57-ad3ac4b1618c" role="definitions" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">“(B) </num><content>The term ‘<term>veterans service organization</term>’ means an organization recognized by the Secretary for the representation of veterans under section 5902 of this title.”</content></subparagraph>
+</paragraph>
+</subsection>
+</section>
+</subchapter>
+</quotedContent>.</content></subsection>
+<subsection class="firstIndent0 fontsize10" id="yc8b88e67-e819-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/205/s2/b" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">(b) </num><heading class="fontsize10"><inline class="smallCaps">Conforming Amendments</inline>.—</heading><chapeau>Chapter 63 of such title, as amended by subsection (a), is further amended—</chapeau><paragraph class="fontsize10" id="yc8b88e68-e819-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/205/s2/b/1" role="instruction" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><content>by <amendingAction type="insert">inserting</amendingAction> before section 6301 the following:<quotedContent><subchapter id="yc8b88e69-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658174"><num class="fontsize10 bold" value="I">“Subchapter I—</num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e6a-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t38/s6301">38 USC 6301</ref> prec.</p></sidenote><heading class="fontsize10 smallCaps">Outreach Services Program”</heading></subchapter>
+</quotedContent><b>;</b></content></paragraph>
+<continuation class="indentUp1 firstIndent1 fontsize10" id="xc8b88e6b-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122">and</continuation><paragraph class="fontsize10" id="yc8b88e6c-e819-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/205/s2/b/2" role="instruction" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>in sections 6301, 6303, 6304, 6305, 6306, and 6307, by <amendingAction type="delete">striking</amendingAction> “<quotedText>this chapter</quotedText>” each place it appears and <amendingAction type="insert">inserting</amendingAction> “<quotedText>this subchapter</quotedText>”.</content></paragraph>
+</subsection>
+<subsection class="firstIndent0 fontsize10" id="yc8b88e6d-e819-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/205/s2/c" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="c">(c) </num><heading class="fontsize10"><inline class="smallCaps">Clerical Amendments</inline>.—</heading><chapeau>The table of sections at the beginning of chapter 63 of such title<sidenote><p class="leftAlign firstIndent0 fontsize8" id="xc8b88e6e-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t38/s6301">38 USC 6301</ref> prec.</p></sidenote> <amendingAction type="amend">is amended</amendingAction>—</chapeau><paragraph class="fontsize10" id="yc8b88e6f-e819-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/205/s2/c/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><content>by <amendingAction type="insert">inserting</amendingAction> before the item relating to section 6301 the following new item:<quotedContent><toc>
+<referenceItem role="subchapter" style="-uslm-lc:I658274">
+<designator><inline class="smallCaps"> “subchapter i—</inline></designator>
+<label><inline class="smallCaps">outreach services program”;</inline><?GPOvSpace 04?></label>
+</referenceItem></toc>
+</quotedContent></content></paragraph>
+<continuation class="indentUp1 firstIndent1 fontsize10" id="xc8b88e70-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122">and</continuation><page identifier="/us/stat/136/2234">136 STAT. 2234</page>
+<paragraph class="fontsize10" id="yc8b88e71-e819-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/205/s2/c/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>by <amendingAction type="add">adding</amendingAction> at the end the following new items:<quotedContent><toc>
+<referenceItem role="subchapter" style="-uslm-lc:I658274">
+<designator><inline class="smallCaps"> “subchapter ii—</inline></designator>
+<label><inline class="smallCaps">other outreach programs and activities</inline></label>
+</referenceItem><referenceItem role="section" style="-uslm-lc:I658242">
+<designator>“6320. </designator>
+<label>Solid Start program.”.<?GPOvSpace 04?></label>
+</referenceItem></toc>
+</quotedContent></content></paragraph>
+</subsection>
+</section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2022-10-17">October 17, 2022</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/117/s/1198">S. 1198</ref>:</heading>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 168 (2022):</heading>
+<p class="indentUp4 firstIndent-1" id="xc8b88e72-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Sept. 8, considered and passed Senate.</p><p class="indentUp4 firstIndent-1" id="xc8b88e73-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Sept. 19, Senate vitiated passage; reconsidered and passed Senate.</p><p class="indentUp4 firstIndent-1" id="xc8b88e74-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Sept. 28, considered in House.</p><p class="indentUp4 firstIndent-1" id="xc8b88e75-e819-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Sept. 29, prior proceeding vacated; considered and passed House.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

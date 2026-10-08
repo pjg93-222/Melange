@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-BAI21110-4S9-FY-F7S">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S217 IS: Patient Matching Improvement Act of 2021</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-02-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>117th CONGRESS</congress><session>1st Session</session>
+<legis-num>S. 217</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20210203">February 3, 2021</action-date>
+<action-desc><sponsor name-id="S388">Ms. Hassan</sponsor> (for herself and <cosponsor name-id="S373">Mr. Cassidy</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To permit the use of certain United States Postal Service formatting tools by health care organizations to improve the provision of patient matching services.</official-title>
+</form>
+<legis-body id="H673B596462DB4A9692E49AB3F918EC61">
+<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Patient Matching Improvement Act of 2021</short-title></quote>.</text></section> <section id="id1b342e93a42a4efbb8e6ef5c1a2a3a1a"><enum>2.</enum><header>Use of United States Postal Service formatting tools</header> <subsection id="id24afc9e4f5534045b5d94b2f513a1690"><enum>(a)</enum><header>United States Postal Service formatting tools</header> <paragraph id="id28710013ad324152b2fa12e23f9012b0"><enum>(1)</enum><header>In general</header><text>Not later than 90 days after the date of enactment of this Act, the Secretary of Health and Human Services, acting through the National Coordinator for Health Information Technology, shall—</text>
+<subparagraph id="id4C79B60416E04319B3D793E1FD5B514C"><enum>(A)</enum><text>collaborate with the United States Postmaster General in order to make its electronic address formatting tools available, as appropriate and consistent with the terms and conditions of such tools, to health care organizations (including hospitals, physician offices, electronic health record vendors, State and local health departments, registries, laboratories, and other organizations as determined necessary by the Secretary) for use in health information technology systems; </text></subparagraph> <subparagraph id="id07ECEF7CC7CD4412AA7A0221DB1F4ECD"><enum>(B)</enum><text>ensure that the electronic address formatting tools that are made available to health care organizations are able to transform single address records and multiple, simultaneous address records into the United States Postal Service preferred address format; and</text></subparagraph>
+<subparagraph id="id571C8E2895D54D4F94E576EB100FFD36" commented="no"><enum>(C)</enum><text>collaborate with the United States Postmaster General to prevent any limitations on the number of records formatted using the address formatting tools or health care organizations that could use the electronic address formatting tools.</text></subparagraph></paragraph> <paragraph id="idb60d2632f3324c8cb8e3b382aa93a73d"><enum>(2)</enum><header>COVID–19 laboratory testing</header><text>Not later than 90 days after the date of enactment of this Act, the Secretary of Health and Human Services shall collaborate with the United States Postmaster General in order to make its electronic address formatting tools available, as appropriate and consistent with the terms and conditions of such tools, to laboratories engaged in COVID–19 testing to improve, as appropriate, data collection consistent with State and local laws. </text></paragraph>
+<paragraph id="id89cbbb40d7314d34b41ef5a5aa3dac94"><enum>(3)</enum><header>Certification</header><text>Not later than 1 year after the date of enactment of this Act, the Secretary of Health and Human Services shall promulgate an interim final rule to require the standardization of addresses in the United States Postal Service format or subsequent health care specific standard as the standard for addresses when communicated through application programming interfaces. The Secretary shall update any applicable standard and certification requirements pursuant to sections 3004 and 3001(c)(5) of the Public Health Service Act.</text></paragraph></subsection> <subsection id="id479E8CEB2FB04FEE88D6FAD0BB085EFD"><enum>(b)</enum><header>Report</header><text>Not later than 120 days after the date of enactment of this Act, the Secretary of Health and Human Services, in consultation with the United States Postmaster General, shall submit to the Committee on Health, Education, Labor, and Pensions and the Committee on Homeland Security and Governmental Affairs of the Senate, and the Committee on Energy and Commerce and the Committee on Oversight and Reform of the House of Representatives, a report that identifies any barriers, as applicable, to making the tools described in subsection (a) available for purposes of such section if the Postmaster General determines that such tools may not be made available at such time. </text></subsection></section>
+</legis-body>
+</bill> 
+
+

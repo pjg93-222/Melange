@@ -1427,6 +1427,35 @@ class _ChainStoreCase(unittest.TestCase):
     SURVIVORS = ['electoral_history.json', 'affective_n.json', 'congestion.json']
 
 
+class TestLegislationReceiptSentinel(_ChainStoreCase):
+    def test_bank_receipt_rewrite_keeps_stable_sentinels_and_inventory(self):
+        # Reproduce the live fallback: three archived votes exceed the hash cap;
+        # the small, timestamped receipt would otherwise be the only hashable row.
+        old = time.time() - 3600
+        for i in range(3):
+            self._write_over_cap(self.tmp, 'archive/votes_%d.csv' % i,
+                                 self.BSM.SENTINEL_HASH_MAX_BYTES + i + 1, old)
+        receipt = 'bank_anchor_reconciliation.json'
+        full = self._write(self.tmp, receipt, 100, time.time() - 10)
+        store = dict(next(s for s in self.BSM.REGISTRY if s['id'] == 'repo.data_legislation'))
+        store.update(path=self.tmp, git_dir_store=False)
+        measured, candidates = self.measure(self.tmp)
+        store['measured'] = measured
+        before = self.BSM.pick_sentinels(store, candidates)
+        self.assertEqual({s['rel'] for s in before},
+                         {'archive/votes_%d.csv' % i for i in range(3)})
+        self.assertEqual(measured['file_count'], 4)
+        control = dict(store, sentinel_excludes=[])
+        self.assertIn(receipt, {s['rel'] for s in self.BSM.pick_sentinels(control, candidates)})
+        with open(full, 'wb') as handle:
+            handle.write(b'updated timestamp and reconciliation')
+        after_measure, candidates = self.measure(self.tmp)
+        store['measured'] = after_measure
+        self.assertEqual(before, self.BSM.pick_sentinels(store, candidates))
+        self.assertEqual(after_measure['file_count'], 4)
+        self.assertNotEqual(measured['bytes'], after_measure['bytes'])
+
+
 class TestC9ChainOutputsAreNotSentinels(_ChainStoreCase):
 
     def test_a_declared_chain_output_is_not_selected(self):

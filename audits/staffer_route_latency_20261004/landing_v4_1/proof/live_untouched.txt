@@ -1,0 +1,31 @@
+# LIVE (C:\Users\pgoff\OneDrive\Desktop\Melange Systems) fingerprinted read-only by scripts\live_fingerprint.py: git HEAD, the sha256 of the full 'git status --porcelain=v1 -uall' text, and the sha256 of
+# 'relative path|size|mtime_ns' over every file under fec/surfaces, fec/tests/surfaces and fec/tools (__pycache__ excluded). Taken on 2026-10-04 at the start of the work (04:49) and at its end (06:09), after the cut and
+# every proof (the cut, the main proof, the script and chain proofs and the dry runs against LIVE all ran in between; the suites, the evidence and the mutation checks ran on exports and scratch trees).
+
+## start (04:49:10)
+HEAD 3366a7840f90a204d496070da11354245d18f741
+status lines 59816 sha256 a0f80bef4462208c
+files fingerprinted 896 sha256 744d3ac98f22be42
+
+## end (06:09:59)
+HEAD 3366a7840f90a204d496070da11354245d18f741
+status lines 60796 sha256 2791d4ec2b7208b6
+files fingerprinted 896 sha256 744d3ac98f22be42
+
+## what that says
+- The 896 files under the three directories (path, size, mtime to the nanosecond) are identical at the start and at the end, and `diff` of the two full lists is empty: nothing in those trees was written, touched or re-saved
+  by the cut, the proofs, the suite runs, the evidence runs or the dry runs. That includes the 26 files landing_v4 touched and the 10 files this patch will edit. LIVE's HEAD did not move between the two readings.
+- HEAD at both readings is 3366a7840, "Land the people-network latency work (landing_v2, landing_v3_ids, landing_v4)", which another lane committed at 04:25 on 2026-10-04, before the first fingerprint (the task brief said that commit was in progress). It is one commit on 3248a6a02
+  (the base landing_v4 was cut against) and changes 173 files: exactly the 45 files of the three landings under fec/ (committed as LF blobs; their working files were not touched) and 128 files of an audit packet under
+  audits/staffer_route_latency_20261004/. It changes no other file under fec/. The cut and every script here gate on the working files' hashes, not on HEAD.
+- The 980 more `git status` lines at the end than at the start are untracked output of other lanes elsewhere in LIVE (the largest groups by top-level path: data/legislation 22,540 lines, audits/self_update_20260908 9,322,
+  outputs/cosponsor_refinement_20260905 4,983). The status under fec/surfaces, fec/tests/surfaces, fec/tools and fec/staffer_network lists only other lanes' UI work: three modified files under fec/surfaces/approved/clean/,
+  two modified and two untracked test files (test_clean_workspace_loading.py, test_make_staffer_network_html.py, test_original_workspace.py, test_staffer_harness_contract.py) and the untracked fec/surfaces/staffer_live/approved/
+  tree. None of them is a file of this patch (the 10 files it edits are clean in LIVE's git, since 3366a7840 committed them), and every one of them is inside the fingerprint above, whose size and mtime did not change.
+  This work wrote nothing in LIVE.
+- LIVE's fec/tools/__pycache__/live_patch.cpython-312.pyc is still the one of 2026-09-19 13:14:56 (every script here ran with PYTHONDONTWRITEBYTECODE=1), and `find fec/surfaces fec/tests/surfaces fec/tools
+  fec/staffer_network -type f -newermt "2026-10-04 04:00:00"` lists nothing.
+
+## the sidecar on 127.0.0.1:8841 (not touched: no script of this work connects to it, and the tests that start servers listen on ephemeral ports)
+listener on 8841: PID 36412, python.exe, started 2026-10-04 03:17:41 (before the first reading), the same process and the same listener at the start (netstat, 04:49) and at the end (process table, 06:09); read from the
+TCP listener table and the process table only. Its working set was 1,888 MB at 06:09.

@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" bill-type="olc" dms-id="H7A89B60907254D48B25D7EE1EB2088DB" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3154 RH: Homeownership for DREAMers Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IB</distribution-code>
+		<calendar display="yes">Union Calendar No. 155</calendar>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 3154</legis-num>
+		<associated-doc display="yes" role="report">[Report No. 116–197]</associated-doc>
+		<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190606">June 6, 2019</action-date>
+			<action-desc><sponsor name-id="V000130">Mr. Vargas</sponsor> (for himself, <cosponsor name-id="T000481">Ms. Tlaib</cosponsor>, <cosponsor name-id="G000587">Ms. Garcia of Texas</cosponsor>, <cosponsor name-id="M000087">Mrs. Carolyn B. Maloney of New York</cosponsor>, <cosponsor name-id="G000581">Mr. Gonzalez of Texas</cosponsor>, <cosponsor name-id="E000297">Mr. Espaillat</cosponsor>, <cosponsor name-id="N000179">Mrs. Napolitano</cosponsor>, <cosponsor name-id="C001112">Mr. Carbajal</cosponsor>, <cosponsor name-id="C001110">Mr. Correa</cosponsor>, <cosponsor name-id="P000617">Ms. Pressley</cosponsor>, <cosponsor name-id="F000454">Mr. Foster</cosponsor>, <cosponsor name-id="L000551">Ms. Lee of California</cosponsor>, <cosponsor name-id="H001047">Mr. Himes</cosponsor>, <cosponsor name-id="G000551">Mr. Grijalva</cosponsor>, <cosponsor name-id="M001207">Ms. Mucarsel-Powell</cosponsor>, <cosponsor name-id="O000172">Ms. Ocasio-Cortez</cosponsor>, <cosponsor name-id="G000586">Mr. García of Illinois</cosponsor>, <cosponsor name-id="S001200">Mr. Soto</cosponsor>, <cosponsor name-id="E000299">Ms. Escobar</cosponsor>, <cosponsor name-id="C001123">Mr. Cisneros</cosponsor>, <cosponsor name-id="R000486">Ms. Roybal-Allard</cosponsor>, <cosponsor name-id="G000585">Mr. Gomez</cosponsor>, <cosponsor name-id="C001091">Mr. Castro of Texas</cosponsor>, and <cosponsor name-id="H001064">Mr. Heck</cosponsor>) introduced the following bill; which was referred to the <committee-name added-display-style="italic" committee-id="HBA00" deleted-display-style="strikethrough">Committee on Financial Services</committee-name></action-desc>
+		</action>
+		<action><action-date>September 6, 2019</action-date><action-desc>Additional sponsors: <cosponsor name-id="B001285">Ms. Brownley of California</cosponsor>, <cosponsor name-id="C001097">Mr. Cárdenas</cosponsor>, <cosponsor name-id="P000608">Mr. Peters</cosponsor>, and	<cosponsor name-id="M001137">Mr. Meeks</cosponsor></action-desc></action><action>
+			<action-date>September 6, 2019</action-date>
+			<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the
+			 Union, and ordered to be printed</action-desc>
+			<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+			<action-instruction>For text of introduced bill, see copy of bill as introduced on June 6, 2019</action-instruction>
+		</action>
+		<action display="yes">
+			<action-desc display="yes"><pagebreak></pagebreak></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To clarify that eligibility of certain mortgages with Federal credit enhancement may not be
+			 conditioned on the status of a mortgagor as a DACA recipient if all other
+			 eligibility criteria are satisfied, and for other purposes.<pagebreak></pagebreak></official-title>
+	</form>
+	<legis-body changed="added" committee-id="HBA00" display-enacting-clause="yes-display-enacting-clause" id="HBC79D1DAF7334B8B9405085B81B65B60" reported-display-style="italic" style="OLC">
+ <section id="H69942212D1294602A5D99440F58CC44C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Homeownership for DREAMers Act</short-title></quote>.</text> </section><section id="H64D1C9B70BAB4FB8B6B4EEADC28DD8AB"><enum>2.</enum><header>DACA recipient eligibility</header> <subsection id="HAC1D96290AF44EC2B531CE58A672DB81"><enum>(a)</enum><header>FHA</header><text display-inline="yes-display-inline">Section 203 of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709</external-xref>) is amended by inserting after subsection (h) the following:</text>
+				<quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="HD6CE96AF55084AD3B5CD1EE250B7BC2D" reported-display-style="italic" style="OLC">
+					<subsection id="HA8E8DB8C2CFA4410AE4DAAE0C45A763C"><enum>(i)</enum><header>DACA recipient eligibility</header>
+ <paragraph id="HC1497B9629E6476CA1F2D8CD50EFC56F"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary may not—</text> <subparagraph id="H1EA789FEE0674C93AB1E09752DD8561D"><enum>(A)</enum><text>prescribe terms that limit the eligibility of a single family mortgage for insurance under this title because of the status of the mortgagor as a DACA recipient; or</text>
+ </subparagraph><subparagraph id="H699202AE60AD48CB95B9E156EA1FAD6D"><enum>(B)</enum><text display-inline="yes-display-inline">issue any limited denial of participation in the program for such insurance because of the status of the mortgagor as a DACA recipient.</text>
+ </subparagraph></paragraph><paragraph id="H1D5AD4D8A1D84057BBBFF501C11DCEF3"><enum>(2)</enum><header>DACA recipient defined</header><text display-inline="yes-display-inline">For the purposes of this subsection, the term <quote>DACA recipient</quote> means an alien who, at any time before, on, or after the date of the enactment of this subsection, is or was in deferred action status pursuant to the Deferred Action for Childhood Arrivals (‘DACA’) Program announced by the Secretary of Homeland Security on June 15, 2012.</text>
+						</paragraph><paragraph id="H6EDECF8C9DDA4DD686B6FF67F0F12824"><enum>(3)</enum><header>Exemption</header>
+ <subparagraph id="HEF271053B17D4EEE92E01CCCCA77A12E"><enum>(A)</enum><header>Denial for failure to satisfy valid eligibility requirements</header><text display-inline="yes-display-inline">Nothing in this title prohibits the denial of insurance based on failure to satisfy valid eligibility requirements.</text>
+ </subparagraph><subparagraph id="H0129CDCA7E93431BBFE03989A2523A04"><enum>(B)</enum><header>Invalid eligibility requirements</header><text>Valid eligibility requirements do not include criteria that were adopted with the purpose of denying eligibility for insurance because of race, color, religion, sex, familial status, national origin, disability, or the status of a mortgagor as a DACA recipient.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H58C3C061F12F47009BA385C3C481D7B4"><enum>(b)</enum><header>Rural Housing Service</header><text display-inline="yes-display-inline">Section 501 of the Housing Act of 1949 (<external-xref legal-doc="usc" parsable-cite="usc/42/1472">42 U.S.C. 1472</external-xref>) is amended by adding at the end the following:</text>
+				<quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="HBA15D97FA4454CC6B587A9A6341FDE46" reported-display-style="italic" style="OLC">
+					<subsection id="H71F345A3B5E34D77AF77181F98B3F576"><enum>(k)</enum><header>DACA recipient eligibility</header>
+ <paragraph id="H6837B6315EC94E699A2F6783131A2115"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary may not prescribe terms that limit eligibility for a single family mortgage made, insured, or guaranteed under this title because of the status of the mortgagor as a DACA recipient.</text>
+ </paragraph><paragraph id="H9BE8BFD90C9C4DC18CAD433439A3B097"><enum>(2)</enum><header>DACA recipient defined</header><text>For the purposes of this paragraph, the term <quote>DACA recipient</quote> means an alien who, at any time before, on, or after the date of the enactment of this paragraph, is or was in deferred action status pursuant to the Deferred Action for Childhood Arrivals (‘DACA’) Program announced by the Secretary of Homeland Security on June 15, 2012.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H36B186A8EFCD40CD86399BC0E2F55C50"><enum>(c)</enum><header>Fannie Mae</header><text>Section 302(b) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1717">12 U.S.C. 1717(b)</external-xref>) is amended by adding at the end the following:</text>
+				<quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="H38E78FD4B0554F459F761E6D7246E197" reported-display-style="italic" style="OLC">
+					<paragraph id="H995D51C9C6B749CD9CCD891B89F66812"><enum>(8)</enum><header>DACA recipient eligibility</header>
+ <subparagraph id="H84831DCF45A942BB8C91BCB7BCADD241"><enum>(A)</enum><header>In general</header><text>The corporation may not condition purchase of a single-family residence mortgage by the corporation under this subsection on the status of the borrower as a DACA recipient.</text>
+ </subparagraph><subparagraph id="H7CB66232A2064FEEB5EEECF2E04E4588"><enum>(B)</enum><header>DACA recipient defined</header><text display-inline="yes-display-inline">For the purposes of this paragraph, the term <quote>DACA recipient</quote> means an alien who, at any time before, on, or after the date of the enactment of this paragraph, is or was in deferred action status pursuant to the Deferred Action for Childhood Arrivals (‘DACA’) Program announced by the Secretary of Homeland Security on June 15, 2012.</text></subparagraph></paragraph><after-quoted-block>. </after-quoted-block></quoted-block>
+ </subsection><subsection id="HC698B636413C4BD4A3560492EDA41098"><enum>(d)</enum><header>Freddie Mac</header><text>Section 305(a) of the Federal Home Loan Mortgage Corporation Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1454">12 U.S.C. 1454</external-xref>) is amended by adding at the end the following:</text>
+				<quoted-block changed="added" committee-id="HBA00" display-inline="no-display-inline" id="H547F340A1DC142399C599A505AA08B65" reported-display-style="italic" style="OLC">
+					<paragraph id="HC8C712D84A7E494195D3098214BB6A84"><enum>(6)</enum><header>DACA recipient eligibility</header>
+ <subparagraph id="H74F5B583F6CC4F51A743E6DBAB6E6178"><enum>(A)</enum><header>In general</header><text>The Corporation may not condition purchase of a single-family residence mortgage by the corporation under this subsection on the status of the borrower as a DACA recipient.</text>
+ </subparagraph><subparagraph id="H2DF8141603234E43979BBEE678D01BA4"><enum>(B)</enum><header>DACA recipient defined</header><text display-inline="yes-display-inline">For the purposes of this subsection, the term <quote>DACA recipient</quote> means an alien who, at any time before, on, or after the date of the enactment of this subsection, is or was in deferred action status pursuant to the Deferred Action for Childhood Arrivals (‘DACA’) Program announced by the Secretary of Homeland Security on June 15, 2012.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section></legis-body>
+	<endorsement display="yes">
+		<action-date>September 6, 2019</action-date>
+		<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the
+			 Union, and ordered to be printed</action-desc></endorsement>
+</bill>
+
+

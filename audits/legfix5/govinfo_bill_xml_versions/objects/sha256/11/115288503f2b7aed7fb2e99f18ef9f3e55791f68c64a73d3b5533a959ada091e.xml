@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution public-private="public" resolution-stage="Introduced-in-Senate" resolution-type="senate-resolution" star-print="no-star-print">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 SRES 274 IS: Expressing solidarity with Falun Gong practitioners who have lost lives, freedoms, and other rights for adhering to their beliefs and practices, and condemning the practice of non-consenting organ harvesting, and for other purposes.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">III</distribution-code>
+		<congress display="yes">116th CONGRESS</congress>
+		<session display="yes">1st Session</session>
+		<legis-num>S. RES. 274</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action display="yes">
+			<action-date date="20190711">July 11, 2019</action-date>
+			<action-desc><sponsor name-id="S306">Mr. Menendez</sponsor> (for himself, <cosponsor name-id="S347">Mr. Moran</cosponsor>, <cosponsor name-id="S057">Mr. Leahy</cosponsor>, <cosponsor name-id="S384">Mr. Tillis</cosponsor>, <cosponsor name-id="S337">Mr. Coons</cosponsor>, <cosponsor name-id="S307">Mr. Brown</cosponsor>, <cosponsor name-id="S354">Ms. Baldwin</cosponsor>, <cosponsor name-id="S369">Mr. Markey</cosponsor>, <cosponsor name-id="S309">Mr. Casey</cosponsor>, <cosponsor name-id="S350">Mr. Rubio</cosponsor>, <cosponsor name-id="S355">Mr. Cruz</cosponsor>, <cosponsor name-id="S363">Mr. King</cosponsor>, <cosponsor name-id="S343">Mr. Boozman</cosponsor>, <cosponsor name-id="S259">Mr. Reed</cosponsor>, <cosponsor name-id="S374">Mr. Cotton</cosponsor>, and <cosponsor name-id="S373">Mr. Cassidy</cosponsor>) submitted the following resolution; which was referred to the <committee-name added-display-style="italic" committee-id="SSFR00" deleted-display-style="strikethrough">Committee on Foreign Relations</committee-name></action-desc>
+		</action>
+		<legis-type>RESOLUTION</legis-type>
+		<official-title display="yes">Expressing solidarity with Falun Gong practitioners who have lost lives, freedoms, and other rights
+			 for adhering to their beliefs and practices,  and condemning the practice
+			 of
+			 non-consenting organ harvesting, and for other purposes.</official-title>
+	</form>
+	<preamble>
+ <whereas><text>Whereas Falun Gong (also known as Falun Dafa) is a Chinese spiritual discipline founded by Li Hongzhi in 1992 that consists of spiritual and moral teachings, meditation, and exercise, and is based upon the universal principles of truthfulness, compassion, and forbearance;</text>
+ </whereas><whereas><text>Whereas, during the mid-1990s, Falun Gong acquired a large and diverse following, with as many as 70,000,000 practitioners at its peak;</text>
+ </whereas><whereas><text>Whereas, on April 25, 1999, an estimated 10,000 to 30,000 Falun Gong practitioners gathered in Beijing to protest growing restrictions by the Government of the People’s Republic of China on the activities of Falun Gong practitioners, and the Government of the People’s Republic of China responded with an intensive, comprehensive, and unforgiving campaign against the movement that began on July 20, 1999, with the banning of Falun Gong;</text>
+ </whereas><whereas><text>Whereas the Constitution of the People’s Republic of China guarantees basic rights, including the freedoms of speech, association, demonstration, and religion;</text>
+ </whereas><whereas><text>Whereas, in 1993, the Government of the People’s Republic of China praised Li Hongzhi for his contributions in <quote>safeguarding social order and security</quote> and <quote>promoting rectitude in society</quote>;</text>
+ </whereas><whereas><text>Whereas, in many detention facilities and labor camps, Falun Gong prisoners of conscience have at times comprised the majority of the population, and have been said to receive the longest sentences and the worst treatment, including torture;</text>
+ </whereas><whereas><text>Whereas, according to overseas Falun Gong and human rights organizations, since 1999, from several hundred to a few thousand Falun Gong adherents have died in custody from torture, abuse, and neglect;</text>
+ </whereas><whereas><text>Whereas a review of the Government of the People’s Republic of China by the United Nations Human Rights Council’s Working Group on the Universal Periodic Review in November 2018, recommended that China <quote>[e]nd prosecution and persecution on the basis of religion or belief, including for Muslims, Christians, Tibetan Buddhists and Falun Gong</quote>;</text>
+ </whereas><whereas><text>Whereas the United Nations Committee Against Torture and the Special Rapporteur on Torture have expressed concern over the allegations of organ harvesting from Falun Gong prisoners, and have called on the Government of the People’s Republic of China to increase accountability and transparency in the organ transplant system and punish those responsible for abuses;</text>
+ </whereas><whereas><text>Whereas the killing of religious or political prisoners for any purpose, including for the purpose of selling their organs for transplant, is an egregious and intolerable violation of the fundamental right to life;</text>
+ </whereas><whereas><text>Whereas voluntary and informed consent is the precondition for ethical organ donation, and international medical organizations state that prisoners, deprived of their freedom, are not in the position to give free consent and that the practice of sourcing organs from prisoners is a violation of ethical guidelines in medicine;</text>
+ </whereas><whereas><text>Whereas the Government of the People’s Republic of China and the Communist Party of China continue to deny reports that many organs are taken without the consent of prisoners, yet at the same time prevent independent verification of the organ transplant system in China;</text>
+ </whereas><whereas><text>Whereas the organ transplantation system in China does not comply with the World Health Organization’s requirement of transparency and traceability in organ procurement pathways;</text>
+ </whereas><whereas><text>Whereas the Department of State Country Report on Human Rights for China for 2018 reported that <quote>[s]ome activists and organizations continue to accuse the government of involuntarily harvesting organs from prisoners of conscience, especially members of Falun Gong</quote>;</text>
+ </whereas><whereas><text>Whereas Huang Jiefu, director of the China Organ Donation Committee, announced in December 2014 that China would end the practice of organ harvesting from executed prisoners by January 1, 2015, but did not directly address organ harvesting from prisoners of conscience;</text>
+ </whereas><whereas><text>Whereas Freedom House reported in 2015 that Falun Gong practitioners comprise the largest portion of prisoners of conscience in China, and face an elevated risk of dying or being killed in custody;</text>
+ </whereas><whereas><text>Whereas the Department of State Country Report on Human Rights for China for 2016 reported that <quote>some international medical professionals and human rights researchers questioned the voluntary nature of the [transplantation] system, the accuracy of official statistics, and official claims about the source of organs</quote>;</text>
+ </whereas><whereas><text>Whereas a 2017 report by Freedom House concluded that there was <quote>credible evidence suggesting that beginning in the early 2000s, Falun Gong detainees were killed for their organs on a large scale</quote>;</text>
+ </whereas><whereas><text>Whereas the Congressional-Executive Commission on China (CECC) stated in 2018 that <quote>[i]nternational organizations continued to express concern over reports that organs of detained prisoners have been used in numerous organ transplant operations in China, including those of Falun Gong practitioners</quote> and also noted that medical professionals and international advocacy organizations <quote>disputed Chinese health officials’ claims that organ procurement systems have been reformed in compliance with international standards, citing ethical concerns about organ sourcing raised by short wait times for organ transplants and discrepancies in data on organ transplants</quote>;</text>
+ </whereas><whereas><text>Whereas the Independent Tribunal Into Forced Organ Harvesting From Prisoners of Conscience in China, chaired by Sir Geoffrey Nice QC, issued a short form conclusion of its final judgment in June 2019 finding that <quote>forced organ harvesting has been committed for years throughout China on a significant scale and that Falun Gong practitioners have been one—and probably the main—source of organ supply</quote>; and</text>
+ </whereas><whereas><text>Whereas the Tribunal also concluded that it had seen no evidence that the organ transplantation industry in China had been dismantled, and absent a satisfactory explanation as to the source of organs, that forced organ harvesting continues in China today: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body>
+ <section display-inline="yes-display-inline" id="S1" section-type="undesignated-section"><enum></enum><text>That the Senate—</text> <paragraph id="ide912fe66d8ff436c89334afd11b0c827"><enum>(1)</enum><text>expresses solidarity with Falun Gong practitioners and their families for the lives, freedoms, and rights they lost for adhering to their beliefs and practices;</text>
+ </paragraph><paragraph id="id7cba4fc12e8a4ea88638d4045ead2161"><enum>(2)</enum><text>emphasizes to the Government of the People’s Republic of China that freedom of religion includes the right of Falun Gong practitioners to freely practice Falun Gong in China;</text>
+ </paragraph><paragraph id="id22a5f1cb248b4ae2a62b6806b42814de"><enum>(3)</enum><text>calls upon the Communist Party of China to immediately cease and desist from its campaign to persecute Falun Gong practitioners and promptly release all Falun Gong practitioners who have been confined, detained, or imprisoned for pursuing their right to hold and exercise their spiritual beliefs;</text>
+ </paragraph><paragraph id="ide32f965e39b546e4bf36796927cdd7a1"><enum>(4)</enum><text>condemns the practice of non-consenting organ harvesting in the People’s Republic of China;</text> </paragraph><paragraph id="ida36456efd1684ce3836d1ec93dc79ee8"><enum>(5)</enum><text>calls on the Government of the People’s Republic of China and the Communist Party of China to immediately end the practice of organ harvesting from all prisoners of conscience;</text>
+ </paragraph><paragraph id="id3071f1550dae47f2996bf0707c6585d7"><enum>(6)</enum><text>calls on the Government of the People’s Republic of China to allow an independent and transparent investigation into organ transplant abuses in China;</text>
+ </paragraph><paragraph id="id4c10004b8d214328a24127290cb5c586"><enum>(7)</enum><text>urges the President to consider the applicability of existing authorities, including the Global Magnitsky Human Rights Accountability Act (<external-xref legal-doc="usc" parsable-cite="usc/22/2656">22 U.S.C. 2656</external-xref> note), to impose targeted sanctions on those individuals responsible for the persecution of Falun Gong, including those engaging in a pattern of non-consensual organ harvesting; and</text>
+ </paragraph><paragraph id="iddd167c0867ad4d6cab03d04b45c39f29"><enum>(8)</enum><text>urges the President to ensure that the United States Government highlights and condemns human rights abuses perpetrated, ordered, or directed by government officials in China both publicly and in private engagements with all relevant government officials in China.</text>
+			</paragraph></section></resolution-body>
+</resolution>
+
+

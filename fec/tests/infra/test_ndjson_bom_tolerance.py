@@ -18,8 +18,7 @@ below, and the test class that keeps that exemption justified.
 
 Run with::
 
-    python fec/tests/run_focused_tests.py \
-        fec/tests/infra/test_ndjson_bom_tolerance.py
+    python -m pytest fec/tests/infra/test_ndjson_bom_tolerance.py -q
 
 Set ``XCUT_FEC_ROOT`` to point the imports at a different ``fec`` directory;
 that is how the pre-fix failure was demonstrated.

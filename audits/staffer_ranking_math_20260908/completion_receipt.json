@@ -1,0 +1,244 @@
+{
+  "status": "COMPLETE_LIVE_V8_VERIFIED",
+  "completed_at": "2026-09-08T06:24:08.855993+00:00",
+  "git_parent": "1b3f97603b40e6e461e64a054147b7530b8469e4",
+  "generation": "staffer_social_network_20260908_v8_math_primary",
+  "spine": "hill_personnel_spine_20260908_v8_primary",
+  "graph_math_unchanged_since_verified_build": true,
+  "canonical_promotions": 0,
+  "verification_receipts": [
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_network_receipt.json",
+      "bytes": 72109,
+      "sha256": "9c5384786f9b260edeca643297ab575c59324969077627ca6680788499d54723"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\staffer_social_network_20260908_v8_math_verification\\staffer_social_network_verification_receipt.json",
+      "bytes": 40273,
+      "sha256": "66574aa1e3e520b367c40ef81b82dfbe32d5675c9a001c9e6617e1730fe43034"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\hill_personnel_spine_20260908_v8_verification\\hill_personnel_spine_verification_receipt.json",
+      "bytes": 6457,
+      "sha256": "edffbd89632fa51a5a4ae842ed02fa4dd1d2ab47955c2d020ae66de03f6a1913"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\spine_identity_adjudication_20260908\\identity_release_receipt.json",
+      "bytes": 3881,
+      "sha256": "1b651e174847c9e3e9f2aa2f7335d948e3dc954420d1f78a16223a6933849a9b"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\spine_identity_adjudication_20260908\\source_link_remap_receipt.json",
+      "bytes": 3509,
+      "sha256": "4439aeca806203b0f0e985a90bdeb79eaa6229038c6b4417c7c583142e7b5fec"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\payroll_identity_20260908_v8_verification_final\\payroll_identity_migration_receipt.json",
+      "bytes": 5184,
+      "sha256": "e6851422d5c7c741aa68c388393d4cad282c8d9be349d580c3dbccadffea3234"
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_live_runtime\\repin_20260908T060735Z.json",
+      "bytes": 1841,
+      "sha256": "64d9e6ac8f8e87285c54e06a503032477aaff147d5c657839b5f6445d0a4541b"
+    }
+  ],
+  "consumer_validation": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\v8_consumer_validation.json",
+    "bytes": 1460,
+    "sha256": "b7458cae19248797836b3a91c5f296fa2df17d91ec569f52761a9e1c69ed48fa"
+  },
+  "live_validation": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\live_cutover_validation.json",
+    "bytes": 9939,
+    "sha256": "b2c7ee82fb9f3d6c1f263ef11b014f956c32a708efc438bcce3fc3ff7b597bb2"
+  },
+  "audit_classification": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\audit_failure_classification.json",
+    "bytes": 12058,
+    "sha256": "0197115361ea367a3770a5d2503482c5069c6f7119a4f7f5f9f881e8e5e1bb64"
+  },
+  "working_source_and_staged_hashes": [
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\build_staffer_social_network.py",
+      "bytes": 175961,
+      "sha256": "a8f72c08bd46578eb71d2e3a2f33ca4324952d0a5a9fcada0d5ce9a2c1b1749d",
+      "repository_path": "audits/staffer_network/build_staffer_social_network.py",
+      "staged_sha256": "74a1082ba37160e379548dea009cff2c7eec26f7e2fb7c53f33a7eb1c452d387",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\verify_staffer_social_network.py",
+      "bytes": 106845,
+      "sha256": "8067c390ec536835ce4edaf3a0ac2fe4effcb33523b880a914f50e77c7f377bc",
+      "repository_path": "audits/staffer_network/verify_staffer_social_network.py",
+      "staged_sha256": "8067c390ec536835ce4edaf3a0ac2fe4effcb33523b880a914f50e77c7f377bc",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\run_pipeline.py",
+      "bytes": 34246,
+      "sha256": "93df19e28570163d7003b690cc964645dcf171b89efe9cbf5d73f7ae79b1398d",
+      "repository_path": "fec/run_pipeline.py",
+      "staged_sha256": "f6673f6786d01593093ca682161965ecf00592127d282b2fe0c16e5322c47082",
+      "working_differs_from_staged": true
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\staffer_network\\ranking_math.py",
+      "bytes": 4124,
+      "sha256": "a5f8af6728e907948de728918e88bb241cd797e29cc3176546926ed51083c0e9",
+      "repository_path": "fec/staffer_network/ranking_math.py",
+      "staged_sha256": "9588869cab752a5e2f005c611c8a4bb72538863b3b56a098c8b7976591e044d6",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\build_staffer_network_section.py",
+      "bytes": 109617,
+      "sha256": "6f84061cb2da0811e84b3f8b913e94d6f5d1722a2e175db22ea582f5c4e1fcba",
+      "repository_path": "fec/surfaces/build_staffer_network_section.py",
+      "staged_sha256": "22838cbae82dbe01c329fe2cd3048bf793e9b40aaf443e393436deca2ce18b2a",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\repin_staffer_live.py",
+      "bytes": 32883,
+      "sha256": "2573d813be2fc4b5e35d1beb88c252eef1cfb6e5c0f71909fd9a4aaf8ce38120",
+      "repository_path": "fec/surfaces/repin_staffer_live.py",
+      "staged_sha256": "2573d813be2fc4b5e35d1beb88c252eef1cfb6e5c0f71909fd9a4aaf8ce38120",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\staffer_graph_snapshot.py",
+      "bytes": 26944,
+      "sha256": "46e69b5b5d44736313dc7269299dfca570e75fd42f2420823a47ab855b1bf08d",
+      "repository_path": "fec/surfaces/staffer_graph_snapshot.py",
+      "staged_sha256": "9abc51b765cee6839195a32ff8ec0c33accacc8f9ddbf222f16e4fdea05da577",
+      "working_differs_from_staged": true
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\staffer_outreach_ranking.py",
+      "bytes": 4688,
+      "sha256": "a1e17b236b5e203fa4d21040737937216daa714b3e6eede1a8264ee1f1138628",
+      "repository_path": "fec/surfaces/staffer_outreach_ranking.py",
+      "staged_sha256": "5cefe9e5e97e3b43a62533a5fd90356546d63ab2bfd3d800edbd1767a8437a91",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\staffer_payroll_identity.json",
+      "bytes": 239,
+      "sha256": "29d991205622db08b1ba7b9e8517ec54525793552460bd25bd95db349750f02c",
+      "repository_path": "fec/surfaces/staffer_payroll_identity.json",
+      "staged_sha256": "8eb9ab9d2bc54ba6583d501ddc9372e002fdb374b12967756156baa429c1d677",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\staffer_person_inventory.py",
+      "bytes": 18435,
+      "sha256": "979d49208d0d708cec2316ed9501c8ede74ad401fad7e601831617c68abe74eb",
+      "repository_path": "fec/surfaces/staffer_person_inventory.py",
+      "staged_sha256": "979d49208d0d708cec2316ed9501c8ede74ad401fad7e601831617c68abe74eb",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\staffer_routing_evidence.py",
+      "bytes": 13656,
+      "sha256": "339ae210ed0098aee8a3d0dd9b71fa790b1bd83ea9739746eab706c4f0414dc0",
+      "repository_path": "fec/surfaces/staffer_routing_evidence.py",
+      "staged_sha256": "339ae210ed0098aee8a3d0dd9b71fa790b1bd83ea9739746eab706c4f0414dc0",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\start_staffer_live.ps1",
+      "bytes": 2313,
+      "sha256": "803af8fc9e8de8531498bdc702b2e99f93aeb61d1ba16d4eea10259e18d3dd2e",
+      "repository_path": "fec/surfaces/start_staffer_live.ps1",
+      "staged_sha256": "803af8fc9e8de8531498bdc702b2e99f93aeb61d1ba16d4eea10259e18d3dd2e",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\surfaces\\templates\\make_staffer_network_html_00.tpl",
+      "bytes": 36010,
+      "sha256": "db667b4d94a5985b465ba7aec211fb700935fe257c453620623d930848fd91be",
+      "repository_path": "fec/surfaces/templates/make_staffer_network_html_00.tpl",
+      "staged_sha256": "db667b4d94a5985b465ba7aec211fb700935fe257c453620623d930848fd91be",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\staffer_network\\test_ranking_math.py",
+      "bytes": 6698,
+      "sha256": "51639e15b19e7cacfac5f003fe3df7e6d3a4a96448ab6259eec1811f62bfb556",
+      "repository_path": "fec/tests/staffer_network/test_ranking_math.py",
+      "staged_sha256": "895612b984272d3fc201d378b0ff8230aad70a0b485354d81ddae5843cdd6289",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\staffer_network\\test_staffer_social_persons_only.py",
+      "bytes": 61119,
+      "sha256": "f03351562144c25e14ee6b67b3b0c734590e3660e6d52a6ef35c20180b03e925",
+      "repository_path": "fec/tests/staffer_network/test_staffer_social_persons_only.py",
+      "staged_sha256": "bc2681b0531d8ccce762263683a23cd17700cb642345508ed22fb7e753cc9d87",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\surfaces\\test_staffer_network_section.py",
+      "bytes": 88815,
+      "sha256": "335e0a9b0b148ff06d33b58c571a482c05236bc4bf39bd3a63964552f19f5ebf",
+      "repository_path": "fec/tests/surfaces/test_staffer_network_section.py",
+      "staged_sha256": "335e0a9b0b148ff06d33b58c571a482c05236bc4bf39bd3a63964552f19f5ebf",
+      "working_differs_from_staged": false
+    },
+    {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\fec\\tests\\surfaces\\test_staffer_person_inventory.py",
+      "bytes": 7856,
+      "sha256": "b6957cd66e207f07f4be9a4e8a5b7cd5984fa4458c046371bf7967d339be9e6e",
+      "repository_path": "fec/tests/surfaces/test_staffer_person_inventory.py",
+      "staged_sha256": "b6957cd66e207f07f4be9a4e8a5b7cd5984fa4458c046371bf7967d339be9e6e",
+      "working_differs_from_staged": false
+    }
+  ],
+  "exact_rollout_patch": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\live_rollout.patch",
+    "bytes": 12036,
+    "sha256": "ba8f2e0fa885b2677b114deba98902549621d3fda7f0bb878ac1197c724db89a"
+  },
+  "tests": {
+    "math_interval_pytest": 17,
+    "graph_fixture_checks": 140,
+    "surface_fixture_checks": 213,
+    "renderer_checks": 219,
+    "rendered_tie_cases": 4,
+    "inventory_routing_selector_pytest": 11,
+    "cutover_integration_pytest": 120,
+    "launcher_powershell_syntax": "PASS"
+  },
+  "broad_dashboard_audit": {
+    "passed": 554,
+    "failed": 15,
+    "log": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\full_dashboard_audit.log",
+      "bytes": 43920,
+      "sha256": "3aa4195096b85f6236460745cc70a20473b5bbf1a9a5d080e04881037fc74c47"
+    },
+    "scope": "Classified separately; does not invalidate the verified authorized live Redesign target."
+  },
+  "publication": {
+    "authorized_live_target": "Moneyball_Redesign.html",
+    "launch_fallback": "Moneyball_Redesign.html",
+    "authorization_owner_task": "01a07f52-a2a0-73f2-8a34-70046bdb7289",
+    "http_validation": "live_cutover_validation.json",
+    "canonical_filename": "Moneyball.html",
+    "canonical_filename_limitation": "Carbonite file lock; old file retained, live route serves rebuilt authorized target."
+  },
+  "commit_scope": "17 source/test/selector paths plus task reports and compact receipts. Existing dashboard pipeline restructuring is preserved unstaged; the exact current Groups pin changes are recorded in live_rollout.patch.",
+  "packaging_checks": [
+    "Markdown update initially aborted before writing due to Windows cp1252; explicit UTF-8 succeeded.",
+    "Raw main/worktree helper equality assertion rejected only CRLF/LF differences. Actual current main builder and helper SHA256 match the verified primary receipt exactly.",
+    "git add initially found an abandoned zero-byte index.lock. No Git process or open handle existed and the lock was older than two minutes; preserved it under the task audit directory and retried."
+  ],
+  "limitations": [
+    "Five office names remain explicitly unresolved.",
+    "Shared-role damping is exploratory, not calibrated probability or an aggregate strength cap.",
+    "Historical report-period and title_last assumptions remain.",
+    "Global audit is 554/15, not a blanket PASS."
+  ]
+}

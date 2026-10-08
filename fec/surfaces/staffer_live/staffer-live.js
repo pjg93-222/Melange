@@ -102,7 +102,14 @@
   }
 
   function select(id,center=false){id=id?canonicalId(id):null;if(id&&!isPerson(state.nodes.get(id)))return;state.selected=id;if(id){const address=new URL(location.href);address.searchParams.set('person',id);history.replaceState(null,'',address.pathname+address.search);}if(id&&!state.visible.some(n=>n.id===id))rebuild();if(window.StafferExplorer)window.StafferExplorer.selectPerson(id);else if(id)focusNeighborhood(id);else state.focusedZoom=null;draw();detail();results();window.dispatchEvent(new CustomEvent('staffer-select',{detail:{id,node:state.nodes.get(id)}}));if(id&&window.matchMedia?.('(max-width:720px)').matches)$('person-panel').scrollIntoView({block:'start',behavior:'smooth'});}
-  function matchesQuery(n){const q=state.query.toLowerCase().trim();if(!q)return false;let searchable=state.searchIndex.get(n.id);if(!searchable){searchable=[label(n),n.id,n.source_summary||'',...(n.member_ids||[]),...(n.committee_ids||[]),...(n.policy_ids||[])].join(' ').toLowerCase();state.searchIndex.set(n.id,searchable);}return (String(state.snapshot?.search?.query||'').toLowerCase()===q&&n.is_search_match===true)||q.split(/\s+/).every(token=>searchable.includes(token));}
+  // An identifier is searched whole, never by its pieces (D-083). The words of a query are looked for only in what a person reads, the name, the
+  // source summary and the committee names in the committee ids. A committee id is container:office:<chamber>:<committee name>: the name is searched
+  // like any other name and the prefix before it never is. The node id, the bare uuid of a politico:<uuid> id and the member, committee and policy ids
+  // match only when the whole query is that identifier (trimmed, in any case). The server's own search flag is honoured as before.
+  const COMMITTEE_ID=/^container:office:(?:house|senate):(.+)$/i;
+  function matchesQuery(n){const q=state.query.toLowerCase().trim();if(!q)return false;let searchable=state.searchIndex.get(n.id);if(!searchable){searchable={words:[n.label||n.name||'',n.source_summary||''].concat(committeeNames(n)).join(' ').toLowerCase(),ids:wholeIds(n)};state.searchIndex.set(n.id,searchable);}return (String(state.snapshot?.search?.query||'').toLowerCase()===q&&n.is_search_match===true)||searchable.ids.includes(q)||q.split(/\s+/).every(token=>searchable.words.includes(token));}
+  function committeeNames(n){const names=[];for(const value of [].concat(n.committee_ids||[])){const m=COMMITTEE_ID.exec(String(value));if(m)names.push(m[1]);}return names;}
+  function wholeIds(n){const id=String(n.id).toLowerCase(),ids=[id];if(id.startsWith('politico:')&&id.length>9)ids.push(id.slice(9));for(const key of ['member_ids','committee_ids','policy_ids'])for(const value of [].concat(n[key]||[]))if(value!==null&&value!==undefined)ids.push(String(value).toLowerCase());return ids;}
   function results(){
     if(window.StafferExplorer)return;
     const out=$('results');out.replaceChildren();const q=state.query.toLowerCase();

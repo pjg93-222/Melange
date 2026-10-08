@@ -1,0 +1,30 @@
+LIVE_ARTIFACT: C:\Users\pgoff\AppData\Local\Melange\lda_rebuild\derived\champions_v2\boards.json
+INITIAL_SHA256: C160D1A66344EA24ABBFEC5F6911171BAF9ED7045F9B75BD48DC47EF406CA2D6
+FINAL_SHA256:   C160D1A66344EA24ABBFEC5F6911171BAF9ED7045F9B75BD48DC47EF406CA2D6
+UNCHANGED: true (re-verified by analyze_crown_law.py ISO check after all builds/tests)
+
+MODIFIED SOURCE FILES (Codex executor lane, xhigh):
+fec\lobbying\champions_v2.py
+fec\surfaces\make_lobby_network_html.py
+fec\audit\audit_full.py
+fec\tests\lobbying\test_lda_rebuild.py
+
+RUNTIME EXECUTION (coordinator lane, visible PowerShell; Codex sandbox denied python exec):
+- pre-edit baseline reconstructed via git stash of the four files (stash popped after)
+- builds ran with MONEYBALL_ROOT=<live tree> for READ-ONLY input resolution; the
+  producer's only write is its explicit --out, forced into this evidence dir both times
+- test harness ran with the same read-only env; run_tests.py is the documented
+  read-only-safe harness
+
+EVIDENCE FILES:
+analyze_crown_law.py, diff_receipt.json, DIFF_SUMMARY.md,
+baseline_boards.json, rule_boards.json, baseline_build_log.txt, rule_build_log.txt,
+tests_pre.txt, tests_post.txt, lda_pre_direct.txt, lda_post_direct.txt,
+byte_equivalence.txt, check_negative_control.txt, isolation.txt
+
+WORKTREE SCAFFOLDING (untracked, NOT committed):
+fec\entity_identity.json copied from the live tree (generated identity table the
+lobbying tests resolve relative to the code dir; absent in a bare worktree). Left
+in place for future worktree test runs.
+
+WRITES OUTSIDE WORKTREE: none (live tree and LOCALAPPDATA read-only throughout)

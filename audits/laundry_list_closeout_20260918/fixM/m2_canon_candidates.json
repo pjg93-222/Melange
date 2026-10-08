@@ -1,0 +1,277 @@
+{
+ "C1 dup-slug '-0' only": {
+  "tone_known": 4,
+  "tone_additional": 1,
+  "tone_additional_detail": [
+   {
+    "key": [
+     "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+     "V000130"
+    ],
+    "rows": [
+     {
+      "member": "Juan Vargas",
+      "date": "9/30/2022",
+      "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+      "url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+      "stance": "support",
+      "press_value": "0.03084"
+     },
+     {
+      "member": "Juan Vargas",
+      "date": "1/30/2023",
+      "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+      "url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0",
+      "stance": "support",
+      "press_value": "0.03886"
+     }
+    ]
+   }
+  ],
+  "fulltext_collisions": 5,
+  "fulltext_body_collisions": 5,
+  "fulltext_body_collision_detail": [
+   {
+    "key": "https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+    "urls": [
+     "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+     "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223"
+    ],
+    "n_distinct_bodies": 2
+   }
+  ],
+  "stack_collisions": 5,
+  "stack_label_collisions": 0,
+  "stack_label_collision_detail": [],
+  "api_hits_legacy": 627,
+  "api_hits_candidate": 623
+ },
+ "C2 last-segment slug >=2 hyphens": {
+  "tone_known": 7,
+  "tone_additional": 0,
+  "tone_additional_detail": [],
+  "fulltext_collisions": 5,
+  "fulltext_body_collisions": 1,
+  "fulltext_body_collision_detail": [
+   {
+    "key": "https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers",
+    "urls": [
+     "https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/",
+     "https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/"
+    ],
+    "n_distinct_bodies": 2
+   }
+  ],
+  "stack_collisions": 7,
+  "stack_label_collisions": 0,
+  "stack_label_collision_detail": [],
+  "api_hits_legacy": 627,
+  "api_hits_candidate": 93
+ },
+ "C3 dup-slug + last-segment >=2 hyphens": {
+  "tone_known": 11,
+  "tone_additional": 1,
+  "tone_additional_detail": [
+   {
+    "key": [
+     "https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act",
+     "V000130"
+    ],
+    "rows": [
+     {
+      "member": "Juan Vargas",
+      "date": "9/30/2022",
+      "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+      "url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+      "stance": "support",
+      "press_value": "0.03084"
+     },
+     {
+      "member": "Juan Vargas",
+      "date": "1/30/2023",
+      "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+      "url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0",
+      "stance": "support",
+      "press_value": "0.03886"
+     }
+    ]
+   }
+  ],
+  "fulltext_collisions": 10,
+  "fulltext_body_collisions": 6,
+  "fulltext_body_collision_detail": [
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act",
+    "urls": [
+     "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+     "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers",
+    "urls": [
+     "https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/",
+     "https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223"
+    ],
+    "n_distinct_bodies": 2
+   }
+  ],
+  "stack_collisions": 12,
+  "stack_label_collisions": 0,
+  "stack_label_collision_detail": [],
+  "api_hits_legacy": 627,
+  "api_hits_candidate": 93
+ },
+ "C4 dup-slug + last-segment >=3 hyphens": {
+  "tone_known": 10,
+  "tone_additional": 1,
+  "tone_additional_detail": [
+   {
+    "key": [
+     "https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act",
+     "V000130"
+    ],
+    "rows": [
+     {
+      "member": "Juan Vargas",
+      "date": "9/30/2022",
+      "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+      "url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+      "stance": "support",
+      "press_value": "0.03084"
+     },
+     {
+      "member": "Juan Vargas",
+      "date": "1/30/2023",
+      "title": "House Passes Rep. Vargas’ Credit Union Board Modernization Act",
+      "url": "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0",
+      "stance": "support",
+      "press_value": "0.03886"
+     }
+    ]
+   }
+  ],
+  "fulltext_collisions": 10,
+  "fulltext_body_collisions": 6,
+  "fulltext_body_collision_detail": [
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act",
+    "urls": [
+     "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act",
+     "https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers",
+    "urls": [
+     "https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/",
+     "https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/"
+    ],
+    "n_distinct_bodies": 2
+   },
+   {
+    "key": "https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+    "urls": [
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223",
+     "https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223"
+    ],
+    "n_distinct_bodies": 2
+   }
+  ],
+  "stack_collisions": 11,
+  "stack_label_collisions": 0,
+  "stack_label_collision_detail": [],
+  "api_hits_legacy": 627,
+  "api_hits_candidate": 101
+ }
+}

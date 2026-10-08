@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HAAAAC625FC0543CF9B018F24ABE95AA0" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6127 IH: Risk-Based Credit Examination Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-03-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 6127</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200305">March 5, 2020</action-date><action-desc><sponsor name-id="W000812">Mrs. Wagner</sponsor> (for herself and <cosponsor name-id="F000454">Mr. Foster</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Securities Exchange Act of 1934 with respect to risk-based examinations of Nationally Recognized Statistical Rating Organizations.</official-title></form><legis-body id="HAC9120A1C9B54B0DB4509678E6CA933E" style="OLC"><section id="H8956324FAB9D4E9CAAF87273B2CDFDFA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Risk-Based Credit Examination Act</short-title></quote>.</text></section><section id="H14036F2FF11441D3B411C87C9406D644"><enum>2.</enum><header>Risk-Based Examinations of Nationally Recognized Statistical Rating Organizations</header><text display-inline="no-display-inline">Section 15E(p)(3)(B) of the Securities Exchange Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/15/78o-7">15 U.S.C. 78o–7(p)(3)(B)</external-xref>) is amended in the matter preceding clause (i), by inserting <quote>, as appropriate, </quote> after <quote>Each examination under subparagraph (A) shall include</quote>.</text></section></legis-body></bill> 
+

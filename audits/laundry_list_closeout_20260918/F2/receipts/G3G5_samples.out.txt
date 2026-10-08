@@ -1,0 +1,545 @@
+﻿re-used lane B code: is_list() from 05b, boundaries() from 04b, clopper_pearson() from 05b
+refs loaded: 53011   artifact edges: 8017
+P3b hits: 749 (expect 749)
+P2-A unflagged INTERVIEW population : 11158
+P3b unflagged CREC population       : 28153
+row texts fetched for G5a: 40
+
+====================================================================================================
+G3  P3b HITS: 40 of 749 roster/signature-list mentions (seed 20260918) -- ARTEFACT / GENUINE / UNCLEAR
+====================================================================================================
+
+[01] Jill Tokuda            -> Austin Scott           [CREC] sid=145264 pkg=CREC-2023-03-30 date=2023-03-30 form=BARE lit='austin scott'
+     scored=True shipped=False tone=formality | Name appears in roll call list only
+     WINDOW: ogers (KY) Ross Rouzer Ruiz Ruppersberger Rutherford Ryan Sablan Salazar Salinas Sanchez Sarbanes Scanlon Schakowsky Schiff Schneider Scholten Schrier Scott (VA) Scott, Austin Scott, David Sessions Sewell Sherman Sherrill Simpson Slotkin Smith (MO) Smith (NJ) Smith (WA) Sorensen Soto Spanberger Stanton Stauber Steel Stefanik Steil Stevens Stewart Strickland Swalwell S
+
+[02] Thom Tillis            -> John Barrasso          [CREC] sid=122859 pkg=CREC-2022-02-09 date=2022-02-09 form=BARE lit='john barrasso'
+     scored=True shipped=False tone=formality | Mere name listing, no evaluative or substantive content.
+     WINDOW: Tillis, Angus S. King, Jr., Christopher A. Coons, Roy Blunt, Shelley Moore Capito, Patrick J. Leahy, Kyrsten Sinema, Jon Tester, Ron Johnson, Amy Klobuchar, Jon Ossoff, John Barrasso, Patty Murray, Sheldon Whitehouse, Rick Scott. Mark R. Warner, Kirsten E. Gillibrand, Rob Portman, Mike Rounds, James Lankford, Joni Ernst, Cynthia M. Lummis, Mike Crapo, Bill Hagerty, Ri
+
+[03] Andrea Salinas         -> Raul Ruiz              [PRES] sid= pkg= date=2026-08-03 form=TYPED lit=''
+     scored=False shipped=False tone=- 
+     WINDOW: Rep. Salinas Presses Trump Administration for Updates on Gaza Ceasefire and Peace Plan Tonko, Donald S. Beyer Jr., Bill Foster, John Garamendi, Judy Chu, Madeleine Dean, Jan Schakowsky, Raul Ruiz, M.D., Chellie Pingree, Jimmy Panetta, Lizzie Fletcher, Lori Trahan, Yvette D. Clarke, Brittany Pettersen, Sean Casten, Mark Takano, Bonnie Watson Coleman, Teresa Leger Fern<U+00E1>ndez, Veronica Escobar, Seth Magaziner, Joe Courtney, Danny K.
+
+[04] Lauren Underwood       -> Austin Scott           [CREC] sid=25269 pkg=CREC-2019-06-13 date=2019-06-13 form=BARE lit='austin scott'
+     scored=False shipped=False tone=- 
+     WINDOW: s (KY) Rose (NY) Rouda Rouzer Roybal-Allard Ruiz Ruppersberger Rush Ryan Sanchez Sarbanes Scalise Scanlon Schakowsky Schiff Schneider Schrader Schrier Scott (VA) Scott, Austin Scott, David Serrano Sewell (AL) Shalala Sherman Sherrill Shimkus Simpson Sires Slotkin Smith (MO) Smith (WA) Smucker Soto Spanberger Spano Speier Stanton Stauber Stefanik Steil Stevens Stivers
+
+[05] Lori Trahan            -> Kelly Morrison         [PRES] sid= pkg= date=2026-06-25 form=TYPED lit=''
+     scored=False shipped=False tone=- 
+     WINDOW: Trahan Leads 125 Lawmakers Calling on Trump Administration to Reverse Harmful Rule Changes to Health Research Grant Process Luis Correa, John Garamendi, Angie Craig, Kweisi Mfume, Julia Brownley, Zoe Lofgren, Seth Magaziner, Debbie Dingell, Sarah McBride, Sean Casten, Grace Meng, Raja Krishnamoorthi, Ayanna Pressley, Wesley Bell, Jasmine Crockett, Melanie Stansbury, Sam T. Liccardo, Kelly Morrison, Jes<U+00FA>s G. "Chuy" Garc<U+00ED>a, Maggie Goodlander, Salud Carbajal, Chrissy Houlahan, Troy A.
+
+[06] Derrick Van Orden      -> Austin Scott           [CREC] sid=154842 pkg=CREC-2023-11-02 date=2023-11-02 form=BARE lit='austin scott'
+     scored=True shipped=False tone=formality | Mere roll call vote listing, no evaluative content
+     WINDOW: rter Pressley Quigley Ramirez Raskin Ross Ruiz Ruppersberger Ryan Sablan Salazar Salinas Sanchez Sarbanes Schakowsky Schiff Schneider Scholten Schrier Scott (VA) Scott, Austin Scott, David Sewell Sherman Sherrill Slotkin Smith (WA) Smucker Sorensen Soto Spanberger Stansbury Stanton Stevens Strickland Swalwell Sykes Takano Thanedar Thompson (CA) Thompson (MS) Titus Tla
+
+[07] Glenn Grothman         -> Vicente Gonzalez       [CREC] sid=152825 pkg=CREC-2023-09-27 date=2023-09-27 form=BARE lit='vicente gonzalez'
+     scored=True shipped=False tone=formality | Roll call vote list, no evaluative content
+     WINDOW: ee Foxx Frankel, Lois Frost Gallagher Gallego Garamendi Garbarino Garcia (IL) Garcia (TX) Garcia, Robert Gimenez Golden (ME) Goldman (NY) Gomez Gonzales, Tony Gonzalez, Vicente Gonzalez-Colon Gottheimer Granger Graves (MO) Green, Al (TX) Griffith Grijalva Grothman Guthrie Harder (CA) Harris Hayes Higgins (NY) Hill Himes Hinson Horsford Houlahan Hoyer Hoyle (OR) Hudson
+
+[08] Andrea Salinas         -> Emily Randall          [PRES] sid= pkg= date=2026-08-03 form=TYPED lit=''
+     scored=False shipped=False tone=- 
+     WINDOW: Rep. Salinas Presses Trump Administration for Updates on Gaza Ceasefire and Peace Plan Lynch, James P. McGovern, Betty McCollum, Emily Randall, Steve Cohen, Chris Deluzio, Mike Quigley, Gwen S. Moore, Jill Tokuda, Lateefah Simon, Nydia M.
+
+[09] Derrick Van Orden      -> Vicente Gonzalez       [CREC] sid=150072 pkg=CREC-2023-07-13 date=2023-07-13 form=BARE lit='vicente gonzalez'
+     scored=False shipped=False tone=- 
+     WINDOW: scobar Eshoo Espaillat Fitzpatrick Fletcher Foster Foushee Frankel, Lois Frost Garamendi Garcia (IL) Garcia (TX) Garcia, Robert Golden (ME) Goldman (NY) Gomez Gonzalez, Vicente Gonzalez-Colon Gottheimer Green, Al (TX) Grijalva Harder (CA) Hayes Higgins (NY) Himes Horsford Houlahan Hoyer Hoyle (OR) Huffman Ivey Jackson (IL) Jackson (NC) Jackson Lee Jacobs James Jayapal
+
+[10] Kweisi Mfume           -> Donald Norcross        [PRES] sid= pkg= date=2026-08-31 form=TYPED lit=''
+     scored=True shipped=False tone=formality | Just listing co-signers of a letter
+     WINDOW: Reps. Mfume, Bell, Strickland Lead 70+ Congresspeople in Efforts to Stop Navy from Renaming Ship Honoring War Hero to instead Honor Donald Trump The letter was signed by: Reps. Gabe Amo, Yassamin Ansari, Joyce Beatty, Julia Brownley, Nikki Budzinski, Salud Carbajal, André Carson, Troy Carter, Ed Case, Joaquin Castro, Gilbert Cisneros, Emanuel Cleaver, Steve Cohen, Herb Conaway, Joe Courtney, Jason Crow, Diana DeGette, Christopher Deluzio, Mark DeSaulnier, Debbie Dingell, Sarah Elfreth, Dwight Evans, Shomari Figures, John Garamendi, Daniel Goldman, Maggie Goodlander, Josh Gottheimer, Steven Horsford, Chrissy Houlahan, Glenn Ivey, Sara Jacobs, Jonathan Jackson, William Keating, Timothy Kennedy, Ro Khanna, Greg Landsman, Stephen Lynch, April McClain Delaney, Jennifer McClellan, Christian Menefee, Dave Min, Gwen Moore, Seth Moulton, Jerrold Nadler, Donald Norcross, Eleanor Norton, Frank Pall
+
+[11] Thom Tillis            -> Rick Scott             [CREC] sid=122859 pkg=CREC-2022-02-09 date=2022-02-09 form=BARE lit='rick scott'
+     scored=True shipped=True tone=formality | Name appears in ceremonial list, no evaluative content
+     WINDOW:  Roy Blunt, Shelley Moore Capito, Patrick J. Leahy, Kyrsten Sinema, Jon Tester, Ron Johnson, Amy Klobuchar, Jon Ossoff, John Barrasso, Patty Murray, Sheldon Whitehouse, Rick Scott. Mark R. Warner, Kirsten E. Gillibrand, Rob Portman, Mike Rounds, James Lankford, Joni Ernst, Cynthia M. Lummis, Mike Crapo, Bill Hagerty, Richard Burr, Dan Sullivan, Debbie Stabenow, Roger 
+
+[12] Chellie Pingree        -> Vicente Gonzalez       [CREC] sid=152973 pkg=CREC-2023-09-27 date=2023-09-27 form=BARE lit='vicente gonzalez'
+     scored=True shipped=False tone=formality | Roll call name list, no evaluative content
+     WINDOW: Lois Franklin, C. Scott Frost Gallagher Gallego Garamendi Garbarino Garcia (IL) Garcia (TX) Garcia, Mike Garcia, Robert Gimenez Golden (ME) Goldman (NY) Gomez Gonzalez, Vicente Gonzalez-Colon Gottheimer Granger Graves (LA) Graves (MO) Green, Al (TX) Grijalva Guest Guthrie Harder (CA) Hayes Higgins (NY) Hill Himes Hinson Horsford Houchin Houlahan Hoyer Hoyle (OR) Hudso
+
+[13] John Barrasso          -> Todd Young             [CREC] sid=109256 pkg=CREC-2021-09-23 date=2021-09-23 form=BARE lit='todd young'
+     scored=True shipped=False tone=formality | Ceremonial list of names, no evaluative content.
+     WINDOW: an M. Collins, Bill Hagerty, Mike Braun, Mike Crapo, M. Michael Rounds, Jerry Moran, Bill Cassidy, M.D., Tim Scott, John Cornyn, Dan Sullivan, Mitt Romney, Deb Fischer, Todd Young, Rob Portman, United States Senators.
+
+[14] John Thune             -> Chuck Grassley         [CREC] sid=306692 pkg=CREC-2026-07-27 date=2026-07-27 form=BARE lit='chuck grassley'
+     scored=False shipped=True tone=- 
+     WINDOW: e Executive Calendar. John Thune, John Barrasso, Alan Armstrong, David McCormick, Kevin Cramer, John R. Curtis, Tim Sheehy, James E. Risch, John Boozman, Pete Ricketts, Chuck Grassley, Cynthia M. Lummis, James Lankford, Jim Banks, Bernie Moreno, Cindy Hyde-Smith, Tim Scott of South Carolina. 
+
+[15] Andy Biggs             -> Elijah Crane           [PRES] sid= pkg= date=2026-07-24 form=TYPED lit=''
+     scored=False shipped=False tone=- 
+     WINDOW: Biggs, Titus Lead Bipartisan Letter Urging Emergency Funding for Colorado River Basin Joining Biggs and Titus on the letter were U.S. Representatives Melanie Stansbury, Elijah Crane, Gabe Vasquez, Greg Stanton, J. Luis Correa, Yassamin Ansari, Jim Costa, Adelita Grijalva, Abraham Hamadeh, and Paul Gosar.
+
+[16] Chellie Pingree        -> Vicente Gonzalez       [CREC] sid=152973 pkg=CREC-2023-09-27 date=2023-09-27 form=BARE lit='vicente gonzalez'
+     scored=False shipped=False tone=- 
+     WINDOW: etcher Flood Foster Foushee Frankel, Lois Frost Gallego Garamendi Garbarino Garcia (IL) Garcia (TX) Garcia, Mike Garcia, Robert Golden (ME) Goldman (NY) Gomez Gonzalez, Vicente Gonzalez-Colon Gottheimer Green, Al (TX) Grijalva Harder (CA) Hayes Higgins (NY) Himes Hinson Horsford Houlahan Hoyer Hoyle (OR) Huffman Ivey Jackson (IL) Jackson (NC) Jackson Lee Jacobs James 
+
+[17] Mike Lee               -> Tommy Tuberville       [CREC] sid=111706 pkg=CREC-2021-10-07 date=2021-10-07 form=BARE lit='tommy tuberville'
+     scored=False shipped=True tone=- 
+     WINDOW: ohn Thune, Chuck Grassley, John Boozman, Ben Sasse, Tom Cotton, Roger F. Wicker, Roger Marshall, Bill Cassidy, Mike Rounds, Ron Johnson, Josh Hawley, Cynthia M. Lummis, Tommy Tuberville, Rick Scott, Thom Tillis, Rand Paul, James Lankford, Mike Braun, Marco Rubio, Roy Blunt, Richard Burr, Tim Scott, James E. Risch, Bill Hagerty, Joni Ernst, Dan Sullivan, Shelley Moore 
+
+[18] John Barrasso          -> John Kennedy           [CREC] sid=109256 pkg=CREC-2021-09-23 date=2021-09-23 form=BARE lit='john kennedy'
+     scored=True shipped=True tone=formality | Name appears in ceremonial list of cosponsors
+     WINDOW: o, John Hoeven, Tom Cotton, Shelley Moore Capito, John Boozman, Cindy Hyde- Smith, John Thune, Roger F. Wicker, James Lankford, Lindsey Graham, Josh Hawley, Rick Scott, John Kennedy, Ben Sasse, Thom Tillis, Roger Marshall, M.D., Charles E. Grassley, Susan M. Collins, Bill Hagerty, Mike Braun, Mike Crapo, M. Michael Rounds, Jerry Moran, Bill Cassidy, M.D., Tim Scott, J
+
+[19] Thom Tillis            -> John Thune             [CREC] sid=123062 pkg=CREC-2022-02-10 date=2022-02-10 form=BARE lit='john thune'
+     scored=True shipped=False tone=formality | Name appears in list with no evaluative content
+     WINDOW: Menendez. Cindy Hyde-Smith, Mike Braun, Jeanne Shaheen, Deb Fischer, John Kennedy, Marco Rubio, Mitt Romney, Joe Manchin, III, Sherrod Brown, Bill Cassidy, John Cornyn, John Thune, Mark Kelly, Cory A. Booker, Richard Blumenthal, Brian Schatz. Patrick J. Toomey, Lindsey Graham, Steve Daines, John Hoeven, Gary C. Peters, Jeff Merkley, Rand Paul, Bernard Sanders, James M
+
+[20] Thom Tillis            -> John Thune             [CREC] sid=122859 pkg=CREC-2022-02-09 date=2022-02-09 form=BARE lit='john thune'
+     scored=True shipped=False tone=formality | Mere name listing without evaluative or substantive content.
+     WINDOW: Smith, Cynthia Hyde- Smith, Mike Braun, Jeanne Shaheen, Deb Fischer, John Kennedy, Marco Rubio. Mitt Romney, Joe Manchin, III, Sherrod Brown, Bill Cassidy, John Cornyn, John Thune, Mark Kelly, Cory A. Booker, Kevin Cramer.
+
+[21] Lauren Underwood       -> Austin Scott           [CREC] sid=25267 pkg=CREC-2019-06-13 date=2019-06-13 form=BARE lit='austin scott'
+     scored=False shipped=False tone=- 
+     WINDOW:  (NY) Rouda Rouzer Roybal-Allard Ruiz Ruppersberger Rush Rutherford Ryan Sanchez Sarbanes Scalise Scanlon Schakowsky Schiff Schneider Schrader Schrier Scott (VA) Scott, Austin Scott, David Sensenbrenner Serrano Sewell (AL) Shalala Sherman Sherrill Shimkus Simpson Sires Slotkin Smith (MO) Smith (NE) Smith (WA) Smucker Soto Spanberger Spano Speier Stanton Stauber Stefan
+
+[22] Sara Jacobs            -> Austin Scott           [CREC] sid=150585 pkg=CREC-2023-07-19 date=2023-07-19 form=BARE lit='austin scott'
+     scored=True shipped=False tone=formality | Name appears only in roll call list.
+     WINDOW: Pfluger Phillips Porter Radewagen Reschenthaler Rodgers (WA) Rogers (AL) Rogers (KY) Rose Rosendale Rouzer Roy Ruiz Rutherford Salazar Sanchez Scalise Schweikert Scott, Austin Scott, David Self Sessions Simpson Smith (MO) Smith (NE) Smucker Spartz Stauber Steel Stefanik Steil Steube Stewart Strong Tenney Tiffany Turner Valadao Van Drew Vargas Vasquez Veasey Wagner Wal
+
+[23] Thom Tillis            -> Alex Padilla           [CREC] sid=122859 pkg=CREC-2022-02-09 date=2022-02-09 form=BARE lit='alex padilla'
+     scored=True shipped=False tone=formality | Name appears in ceremonial list, no evaluative content
+     WINDOW: chard Blumenthal, Brian Schatz, Patrick J. Toomey, Lindsey Graham, Steve Daines, John Hoeven, Gary C. Peters, Jeff Merkley. Rand Paul, Bernard Sanders, James M. Inhofe, Alex Padilla, Christopher Murphy, Tina Smith, Cynthia Hyde- Smith, Mike Braun, Jeanne Shaheen, Deb Fischer, John Kennedy, Marco Rubio. Mitt Romney, Joe Manchin, III, Sherrod Brown, Bill Cassidy, John C
+
+[24] Kweisi Mfume           -> Ed Case                [PRES] sid= pkg= date=2026-08-31 form=TYPED lit=''
+     scored=True shipped=True tone=neutral-substantive | Just lists Case as co-signer of letter
+     WINDOW: Reps. Mfume, Bell, Strickland Lead 70+ Congresspeople in Efforts to Stop Navy from Renaming Ship Honoring War Hero to instead Honor Donald Trump The letter was signed by: Reps. Gabe Amo, Yassamin Ansari, Joyce Beatty, Julia Brownley, Nikki Budzinski, Salud Carbajal, André Carson, Troy Carter, Ed Case, Joaquin Castro, Gilbert Cisneros, Emanuel Cleaver, Steve Cohen, Herb Conaway, Joe Courtney, Jason Crow, Diana DeGette, Christopher Deluzio, Mark DeSaulnier, Debbie Dingell, Sarah Elfreth, Dwight Evans, Shomari Figures, John Garamendi, Daniel Goldman, Maggie Goodlander, Josh Gottheimer, Steven Horsford, Chrissy Houlahan, Glenn Ivey, Sara Jacobs, Jonathan Jackson, William Keating, Timothy Kennedy, Ro Khanna, Greg Landsman, Stephen Lynch, April McClain Delaney, Jennifer McClellan, Christian Menefee, Dave Min, Gwen Moore, Seth Moulton, Jerrold Nadler, Donald Norcross, Eleanor Norton, Frank Pall
+
+[25] Lori Trahan            -> Shri Thanedar          [PRES] sid= pkg= date=2026-06-25 form=TYPED lit=''
+     scored=False shipped=False tone=- 
+     WINDOW: Trahan Leads 125 Lawmakers Calling on Trump Administration to Reverse Harmful Rule Changes to Health Research Grant Process Wilson, Chellie Pingree, Gabe Amo, Mark Takano, Derek T. Tran, Shri Thanedar, J. Luis Correa, John Garamendi, Angie Craig, Kweisi Mfume, Julia Brownley, Zoe Lofgren, Seth Magaziner, Debbie Dingell, Sarah McBride, Sean Casten, Grace Meng, Raja Krishnamoorthi, Ayanna Pressley, Wesley Bell, Jasmine Crockett, Melanie Stansbury, Sam T.
+
+[26] Charles Schumer        -> Christopher Murphy     [CREC] sid=143449 pkg=CREC-2023-03-02 date=2023-03-02 form=BARE lit='christopher murphy'
+     scored=False shipped=True tone=- 
+     WINDOW: od Hassan, Ben Ray Lujan, Raphael G. Warnock, Tammy Duckworth, Jack Reed, Sheldon Whitehouse, John W. Hickenlooper, Catherine Cortez Masto, Tammy Baldwin, Brian Schatz, Christopher Murphy, Tina Smith, Debbie Stabenow. 
+
+[27] Charles Schumer        -> Patty Murray           [CREC] sid=124932 pkg=CREC-2022-03-14 date=2022-03-14 form=BARE lit='patty murray'
+     scored=False shipped=True tone=- 
+     WINDOW: rn District of Georgia. Charles E. Schumer, Brian Schatz, Jack Reed, Angus S. King, Jr., Elizabeth Warren, Chris Van Hollen, Raphael G. Warnock, Jacky Rosen, Tim Kaine, Patty Murray, Margaret Wood Hassan, Tammy Duckworth, Alex Padilla, Tammy Baldwin, Mazie K. Hirono, Christopher A. Coons, Patrick J. Leahy. 
+
+[28] Lori Trahan            -> Sarah McBride          [PRES] sid= pkg= date=2026-06-25 form=TYPED lit=''
+     scored=False shipped=False tone=- 
+     WINDOW: Trahan Leads 125 Lawmakers Calling on Trump Administration to Reverse Harmful Rule Changes to Health Research Grant Process Tran, Shri Thanedar, J. Luis Correa, John Garamendi, Angie Craig, Kweisi Mfume, Julia Brownley, Zoe Lofgren, Seth Magaziner, Debbie Dingell, Sarah McBride, Sean Casten, Grace Meng, Raja Krishnamoorthi, Ayanna Pressley, Wesley Bell, Jasmine Crockett, Melanie Stansbury, Sam T. Liccardo, Kelly Morrison, Jes<U+00FA>s G.
+
+[29] Aaron Bean             -> Austin Scott           [CREC] sid=166922 pkg=CREC-2024-06-13 date=2024-06-13 form=BARE lit='austin scott'
+     scored=True shipped=False tone=formality | Name appears only in roll call vote list.
+     WINDOW: ett Quigley Rodgers (WA) Rogers (AL) Rogers (KY) Rose Ross Rouzer Roy Ruppersberger Rutherford Ryan Salazar Sanchez Scalise Schneider Scholten Schrier Schweikert Scott, Austin Scott, David Self Sessions Sewell Sherman Sherrill Simpson Slotkin Smith (MO) Smith (NE) Smith (WA) Smucker Soto Spanberger Spartz Stansbury Stanton Steel Stefanik Steil Stevens Strickland Stron
+
+[30] Kweisi Mfume           -> Dave Min               [PRES] sid= pkg= date=2026-08-31 form=TYPED lit=''
+     scored=True shipped=False tone=formality | Just listed as co-signer, no evaluative content
+     WINDOW: Reps. Mfume, Bell, Strickland Lead 70+ Congresspeople in Efforts to Stop Navy from Renaming Ship Honoring War Hero to instead Honor Donald Trump The letter was signed by: Reps. Gabe Amo, Yassamin Ansari, Joyce Beatty, Julia Brownley, Nikki Budzinski, Salud Carbajal, André Carson, Troy Carter, Ed Case, Joaquin Castro, Gilbert Cisneros, Emanuel Cleaver, Steve Cohen, Herb Conaway, Joe Courtney, Jason Crow, Diana DeGette, Christopher Deluzio, Mark DeSaulnier, Debbie Dingell, Sarah Elfreth, Dwight Evans, Shomari Figures, John Garamendi, Daniel Goldman, Maggie Goodlander, Josh Gottheimer, Steven Horsford, Chrissy Houlahan, Glenn Ivey, Sara Jacobs, Jonathan Jackson, William Keating, Timothy Kennedy, Ro Khanna, Greg Landsman, Stephen Lynch, April McClain Delaney, Jennifer McClellan, Christian Menefee, Dave Min, Gwen Moore, Seth Moulton, Jerrold Nadler, Donald Norcross, Eleanor Norton, Frank Pall
+
+[31] Charles Schumer        -> Brian Schatz           [CREC] sid=143446 pkg=CREC-2023-03-02 date=2023-03-02 form=BARE lit='brian schatz'
+     scored=False shipped=True tone=- 
+     WINDOW: Richard J. Durbin, Catherine Cortez Masto, Sheldon Whitehouse, Sherrod Brown, Margaret Wood Hassan, Raphael G. Warnock, Gary C. Peters, Jack Reed, Christopher A. Coons, Brian Schatz, Tina Smith, Ben Ray Lujan, Elizabeth Warren, Martin Heinrich, Christopher Murphy, Tammy Baldwin, Alex Padilla. 
+
+[32] Jeff Merkley           -> Seth Moulton           [PRES] sid= pkg= date=2026-08-25 form=TYPED lit=''
+     scored=False shipped=False tone=- 
+     WINDOW: Wyden, Merkley, Bonamici, Hoyle, Dexter, Colleagues Oppose Rescission of Key Energy Leasing and Public Lands Protections Senators Luj<U+00E1>n, Angus King, I-Maine, Whitehouse, Hickenlooper, Heinrich, Markey, and Booker, as well as U.S. Representatives Ansari, Brownley, Carbajal, Sean Casten, D-IlI., Cohen, Jasmine Crockett, D-Texas, DeGette, Dingell, Grijalva, Jacobs, Krishnamoorthi, Magaziner, McCollum, Min, Seth Moulton, D-Mass., Neguse, Pallone, Scott Peters, D-Calif., Randall, Scanlon, Simon, and Vargas. The text of the letter opposing the rescission of the 2024 Onshore Leasing Rule is here.
+
+[33] Thom Tillis            -> Jeff Merkley           [CREC] sid=123062 pkg=CREC-2022-02-10 date=2022-02-10 form=BARE lit='jeff merkley'
+     scored=True shipped=False tone=formality | Ceremonial name list with no evaluative content.
+     WINDOW: dy, John Cornyn, John Thune, Mark Kelly, Cory A. Booker, Richard Blumenthal, Brian Schatz. Patrick J. Toomey, Lindsey Graham, Steve Daines, John Hoeven, Gary C. Peters, Jeff Merkley, Rand Paul, Bernard Sanders, James M. Inhofe, Alex Padilla, Christopher Murphy, Tina Smith, Kevin Cramer, Marsha Blackburn, Thomas R. Carper, Ron Wyden, Dianne Feinstein. 
+
+[34] Kweisi Mfume           -> Steven Horsford        [PRES] sid= pkg= date=2026-08-31 form=TYPED lit=''
+     scored=True shipped=False tone=formality | Just listing co-signers of a letter.
+     WINDOW: Reps. Mfume, Bell, Strickland Lead 70+ Congresspeople in Efforts to Stop Navy from Renaming Ship Honoring War Hero to instead Honor Donald Trump The letter was signed by: Reps. Gabe Amo, Yassamin Ansari, Joyce Beatty, Julia Brownley, Nikki Budzinski, Salud Carbajal, André Carson, Troy Carter, Ed Case, Joaquin Castro, Gilbert Cisneros, Emanuel Cleaver, Steve Cohen, Herb Conaway, Joe Courtney, Jason Crow, Diana DeGette, Christopher Deluzio, Mark DeSaulnier, Debbie Dingell, Sarah Elfreth, Dwight Evans, Shomari Figures, John Garamendi, Daniel Goldman, Maggie Goodlander, Josh Gottheimer, Steven Horsford, Chrissy Houlahan, Glenn Ivey, Sara Jacobs, Jonathan Jackson, William Keating, Timothy Kennedy, Ro Khanna, Greg Landsman, Stephen Lynch, April McClain Delaney, Jennifer McClellan, Christian Menefee, Dave Min, Gwen Moore, Seth Moulton, Jerrold Nadler, Donald Norcross, Eleanor Norton, Frank Pall
+
+[35] John Thune             -> Tim Sheehy             [CREC] sid=306692 pkg=CREC-2026-07-27 date=2026-07-27 form=BARE lit='tim sheehy'
+     scored=False shipped=False tone=- 
+     WINDOW: eration in Executive Session of certain nominations on the Executive Calendar. John Thune, John Barrasso, Alan Armstrong, David McCormick, Kevin Cramer, John R. Curtis, Tim Sheehy, James E. Risch, John Boozman, Pete Ricketts, Chuck Grassley, Cynthia M. Lummis, James Lankford, Jim Banks, Bernie Moreno, Cindy Hyde-Smith, Tim Scott of South Carolina. 
+
+[36] Paul Tonko             -> Austin Scott           [CREC] sid=166691 pkg=CREC-2024-06-12 date=2024-06-12 form=BARE lit='austin scott'
+     scored=True shipped=False tone=formality | Roll call name list, no evaluative content
+     WINDOW: se Ross Rouzer Ruiz Ruppersberger Ryan Sablan Salazar Salinas Sanchez Sarbanes Scalise Scanlon Schakowsky Schiff Schneider Scholten Schrier Schweikert Scott (VA) Scott, Austin Scott, David Self Sewell Sherman Sherrill Simpson Slotkin Smith (NE) Smith (NJ) Smith (WA) Sorensen Soto Spanberger Stansbury Stanton Steel Steil Stevens Strickland Strong Suozzi Swalwell Sykes 
+
+[37] Tom Emmer              -> Austin Scott           [CREC] sid=167627 pkg=CREC-2024-06-27 date=2024-06-27 form=BARE lit='austin scott'
+     scored=True shipped=False tone=formality | Roll call vote list, no evaluative content
+     WINDOW: Y) Rose Ross Rouzer Ruiz Rulli Ruppersberger Ryan Sablan Salazar Salinas Sanchez Sarbanes Scalise Scanlon Schakowsky Schiff Schneider Scholten Schrier Scott (VA) Scott, Austin Scott, David Sewell Sherman Sherrill Simpson Slotkin Smith (MO) Smith (NJ) Smith (WA) Smucker Soto Spanberger Stansbury Stanton Steel Stefanik Steil Stevens Strickland Strong Suozzi Swalwell Syk
+
+[38] Josh Harder            -> Austin Scott           [CREC] sid=27070 pkg=CREC-2019-07-12 date=2019-07-12 form=BARE lit='austin scott'
+     scored=True shipped=False tone=formality | Roll call vote list, no evaluative content
+     WINDOW: enthaler Rice (NY) Riggleman Roby Rodgers (WA) Rogers (AL) Rogers (KY) Rooney (FL) Rose (NY) Rose, John W. Rouda Rouzer Roy Rutherford Scalise Scanlon Schweikert Scott, Austin Scott, David Sensenbrenner Sewell (AL) Sherrill Shimkus Simpson Slotkin Smith (MO) Smith (NE) Smith (NJ) Smucker Spanberger Spano Stauber Stefanik Steil Steube Stevens Stewart Stivers Taylor Tho
+
+[39] Thom Tillis            -> Joni Ernst             [CREC] sid=123062 pkg=CREC-2022-02-10 date=2022-02-10 form=BARE lit='joni ernst'
+     scored=True shipped=False tone=formality | Ceremonial name list with no evaluative content.
+     WINDOW: Amy Klobuchar, Jon Ossoff, John Barrasso, Patty Murray, Sheldon Whitehouse, Rick Scott. Mark R. Warner, Kirsten E. Gillibrand, Rob Portman, Mike Rounds, James Lankford, Joni Ernst, Cynthia M. Lummis, Mike Crapo, Bill Hagerty, Richard Burr, Dan Sullivan, Debbie Stabenow, Roger Marshall, Jerry Moran, James E. Risch, Tommy Tuberville, Tim Kaine. Lisa Murkowski, John W. H
+
+[40] Mike Lee               -> Tim Scott              [CREC] sid=111706 pkg=CREC-2021-10-07 date=2021-10-07 form=BARE lit='tim scott'
+     scored=True shipped=False tone=formality | Ceremonial name list with no evaluative content
+     WINDOW: ds, Ron Johnson, Josh Hawley, Cynthia M. Lummis, Tommy Tuberville, Rick Scott, Thom Tillis, Rand Paul, James Lankford, Mike Braun, Marco Rubio, Roy Blunt, Richard Burr, Tim Scott, James E. Risch, Bill Hagerty, Joni Ernst, Dan Sullivan, Shelley Moore Capito, Kevin Cramer, John Hoeven, Jerry Moran, Todd Young, Rob Portman.
+
+wrote G3_p3b_sample40_UNGRADED.json
+
+====================================================================================================
+G5a  P2-A RECALL PROBE: 40 of 11158 UNFLAGGED INTERVIEW mentions (seed 20260918) -- TRUE-BLEED / GENUINE / UNCLEAR
+====================================================================================================
+
+[01] Richard Durbin         -> Mitch McConnell        sid=214007 pkg=https://transcripts.cnn.com/sh date=2020-09-26 rowlen=1297 lit='mitch mcconnell' @off 431
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:666]: Good question. And usually that's what the Senate Judiciary Committee sits down to try to decide and we should. It is a lifetime appointment to the highest court in the land. We got a problem this time. It appears that Senator Mitch McConnell, the Republican leader of the Senate, and the president are determined to get this done in record time and to break the rules in doing it. Remember four years ago Antonin Scalia's vacancy {{Mitch McConnell}} piously pronounced that we couldn't fill that vacancy with President Obama. He was a lame duck. He only had a year left in his term. So we had to wait until the next election, for the next president to decide. Well, McC
+
+[02] Lisa Murkowski         -> Joni Ernst             sid=104782 pkg=https://www.nbcnews.com/meet-t date=2024-12-15 rowlen=451 lit='joni ernst' @off 269
+     scored=True shipped=True tone=positive | Praises Ernst as principled leader and defends her
+     detector markers in row: NONE
+     ROW[0:451]: Everybody toe the line. Everybody line up. We got you here, and if you want to survive, you better be good. Don't get on Santa's naughty list here, because we will primary you. I mean, we are seeing that play out in real time right now with the nominees. And my friend {{Joni Ernst}}, who is probably one of the more conservative principled Republican leaders in the, in the Senate right now, is being hung out to dry for not being good enough. [END TAPE]
+
+[03] Chris Van Hollen       -> Bernard Sanders        sid=278519 pkg=https://www.cfr.org/event/conv date=2019-05-21 rowlen=2522 lit='bernie sanders' @off 771
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[271:1005]: ats would say we’re the free and fair trade party. And there’s obviously a—sort of a mix—there was quite a mix of views among Democrats over various issues. Obviously President Clinton was president during NAFTA and President Obama worked on TPP, and, you know, you had a lot of Republicans more supportive than Democrats, in many cases, on TPP and where it was going. So now you, of course, have this situation where Trump, you know, ran against TPP. Secretary Clinton ended up running against TPP. {{Bernie Sanders}} was against TPP and trade. So I’m just sort of, again, setting the stage for where we are now. I think when it comes to the renegotiated NAFTA agreement, you know, the House is going to take a close look at it. One big 
+
+[04] Richard Durbin         -> Lindsey Graham         sid=81324 pkg=https://abcnews.go.com/Politic date=2019-01-13 rowlen=390 lit='lindsey graham' @off 218
+     scored=False shipped=True tone=positive | Credits Graham as sole exception who held hearings
+     detector markers in row: NONE
+     ROW[0:390]: The senate is controlled by Republicans. We found in the last two years, they were unwilling to hold investigative hearings. The only exception, I might add, was a crime subcommittee in Judiciary, which was chaired by {{Lindsey Graham}}. Lindsey has now ascended into the position of chairman of the Senate Judiciary Committee. It's within his power to hold these investigations, and he should.
+
+[05] Jamie Raskin           -> Nancy Pelosi           sid=276064 pkg=https://www.ms.now/transcript/ date=2022-06-30 rowlen=1552 lit='speaker pelosi said' @off 740
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[240:979]: ers of staff and equal subpoena power. And Bennie Thompson, who`s now of course, the chair of our select committee, he agreed to that as the emissary from the speaker. The emissary from McCarthy, John Katko from New York, he agreed to it. They took it back. We were about to sign the deal. And then as we understand it, Donald Trump vetoed it, the fourth branch of government, or at least somebody vetoed it, because suddenly, McCarthy turned on his own proposal, blew the whole thing up. That`s why {{Speaker Pelosi said}}, look, we`re not waiting around any longer. This is a matter of national importance and urgency. I`m going to create a select committee within the House of Representatives since the Republicans now both in the House, no
+
+[06] Mike Johnson           -> Ilhan Omar             sid=240496 pkg=https://www.foxnews.com/transc date=2019-03-07 rowlen=256 lit='representative omar' @off 54
+     scored=True shipped=True tone=negative | Implies doubt about Omar's character and discourse
+     detector markers in row: NONE
+     ROW[0:256]: I don't know how Nancy Pelosi could know the heart of {{Representative Omar}}. I don't think they have known one another long. And God only knows our hearts at the end of the day. But I will say this. We need to raise the level of public discourse around here.
+
+[07] Amy Klobuchar          -> Charles Schumer        sid=222152 pkg=https://transcripts.cnn.com/sh date=2021-10-01 rowlen=1338 lit='chuck schumer' @off 265
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:498]: There's a lot going on here. And over the weeks, I've had my moments, I'll be honest, where you get mad, you want to get things you want to get done. But in the end, just as the President has said today and he knows how to put together deals as do Nancy Pelosi and {{Chuck Schumer}}, it will get done and it does take time. Remember, democracy doing really big things, like this piece of legislation to put people first whether it is about childcare or housing, or finally saying, you know what, those 
+
+[08] Tim Scott              -> Lindsey Graham         sid=305500 pkg=https://www.cbsnews.com/news/f date=2026-07-12 rowlen=377 lit='lindsey graham' @off 288
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:377]: If you want to know who he was, he was a person who believed that, when you left this country, you should be safe no matter where you go and no matter what it cost. And that's why, as a guy who became the Budget chair, Margaret, one of the funniest stories, I remember sitting there with {{Lindsey Graham}}. And he said: "I am now the budget chair, and I know nothing about money."
+
+[09] Hakeem Jeffries        -> Steny Hoyer            sid=216800 pkg=https://transcripts.cnn.com/sh date=2021-02-03 rowlen=443 lit='steny hoyer' @off 339
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:443]: Kevin McCarthy should handle this problem because Marjorie Taylor Greene is totally out of control. It seems to me that the best thing that could happen at this moment is for Kevin McCarthy to make clear that she should not be on the Education and Labor Committees. [14:35:01] If he doesn't make that decision, I think, as the speaker and {{Steny Hoyer}} indicated, we'll be prepared to move forward. But let's cross that bridge when we get to it.
+
+[10] Steven Horsford        -> Bennie Thompson        sid=319638 pkg=https://www.c-span.org/program date=2023-01-05 rowlen=1321 lit='chairman bennie thompson' @off 869
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[369:1113]: WITH TO ADDRESS THINGS LIKE REDUCING THE COST OF PRESCRIPTION AFFORDABILITY AND DEMOCRATS WERE ABLE TO CAP THE COSTS FOR IT IN US -- FOR INSULIN THAT IS ONLY FOR SENIORS ON MEDICARE AND WHAT ABOUT A CHILD WHO IS 10 YEARS OLD WHO HAS DIABETES AND HIS FAMILY CANNOT AFFORD THE INSULIN? I AGREE WITH YOUR PREMISE AROUND ACCOUNTABILITY OF THOSE WERE INVOLVED IN THE JANUARY 6 ATTACK. WE ARE COMING UP ON THE ANNIVERSARY OF THAT. THERE ARE ANY PEOPLE WHO HAVE NOT BEEN HELD ACCOUNTABLE. I WANT TO COMMEND {{CHAIRMAN BENNIE THOMPSON}} WHO LED THE SELECT COMMITTEE TO LOOK INTO THE EVENT OF JANUARY 6 ALONG WITH REPUBLICAN MEMBER LIZ CHENEY AND I COMMEND HER FOR WORKING WITH CHAIRMAN THOMPSON TO GET THE FACTS TO THE AMERICAN PEOPLE AND THE REPORT THAT T
+
+[11] Richard Durbin         -> Jamie Raskin           sid=106027 pkg=https://www.nbcnews.com/meet-t date=2021-02-14 rowlen=537 lit='jamie raskin' @off 408
+     scored=True shipped=True tone=positive | Approvingly cites Raskin's point to bolster his argument.
+     detector markers in row: NONE
+     ROW[0:537]: I tell you what, I think that argument that we can't impeach someone who's out of office really begs the question -- the House managers made the point early on -- so that means that there's some period in the presidency when Congress cannot respond quickly enough that a president can get away with anything. I don't believe the framers were that careless in writing those sections. And history tells us, as {{Jamie Raskin}} just noted, that we have impeached those who have left office. You can't resign your way out of your responsibility.
+
+[12] Alexandria Ocasio-Cort -> Paul Gosar             sid=223239 pkg=https://transcripts.cnn.com/sh date=2021-11-17 rowlen=589 lit='representative gosar' @off 311
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:551]: It is sad. It is a sad day in which a member who leads a political party in the United States of America cannot bring themselves to say that issuing a depiction of murdering a member of Congress is wrong. What is so hard? What is so hard about saying that this is wrong? This is not about me. This is not about {{Representative Gosar}}, but this is about what we are willing to accept. It's pretty cut and dry. Do you find -- does anyone in this chamber find this behavior acceptable? Would you allow depictions of violence against women, against colleagu
+
+[13] James Lankford         -> Christopher Coons      sid=95191 pkg=https://www.cbsnews.com/news/f date=2025-09-14 rowlen=2379 lit='chris coons' @off 927
+     scored=True shipped=True tone=positive | Calls Coons a very close friend despite differences
+     detector markers in row: NONE
+     ROW[427:1158]: y wife and I often talk about the fact that I have this title of senator for a season. Someone else had it before me. Someone else will have it after me. But while I have it, I'm a steward of that task and that responsibility. And so, when we're talking about protecting judges and protecting individual, it's not just their personal safety, it is really declaring to the nation that we believe that these tasks are hard, that they should be intense debate, that we have very difference perspective. {{Chris Coons}} and I are very close friends, but have very different ideas on some things, but we have the ability to represent our individual states and set of ideas and to be able to talk those two things out and to be able to bring
+
+[14] Adam Schiff            -> Raja Krishnamoorthi    sid=268273 pkg=https://www.ms.now/transcript/ date=2019-05-22 rowlen=1191 lit='congressman raja krishnamoorthi' @off 327
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[0:578]: Another day, another very important ruling. Different judge, same opinion. The Trump legal arguments are without merit. Raise no serious legal questions, and speed is of the essence. So another I think resounding victory in the district court that bodes well. O`DONNELL: Joining us now a member of Chairman Schiff`s committee, {{Congressman Raja Krishnamoorthi}}, a Democrat from Illinois. He`s a member of the House Intelligence Committee which issued the subpoena for the Trump financial records from Deutsche Bank and Capital One. That subpoena was ordered, enforced today. He`s 
+
+[15] Mitch McConnell        -> Nancy Pelosi           sid=273975 pkg=https://www.ms.now/transcript/ date=2021-08-10 rowlen=299 lit='nancy pelosi' @off 175
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:299]: If I`m still the majority leader of the Senate, think of me as the Grim Reaper. None of that stuff is going to pass, none of it. For the first time in my memory, I agree with {{Nancy Pelosi}}. I am indeed the Grim Reaper when it comes to the socialist agenda that they`ve been ginning up over the House.
+
+[16] Mazie Hirono           -> Christopher Murphy     sid=226135 pkg=https://transcripts.cnn.com/sh date=2022-06-07 rowlen=225 lit='chris murphy' @off 24
+     scored=True shipped=True tone=positive | Expresses faith in Murphy's commitment and leadership
+     detector markers in row: NONE
+     ROW[0:225]: I have so much faith in {{Chris Murphy}} and his commitment to providing us with an option for some kind of commonsense gun safety legislation. So, as he remains optimistic, I remain optimistic. But the sense of urgency is there.
+
+[17] Alexandria Ocasio-Cort -> Bernard Sanders        sid=98662 pkg=https://www.npr.org/transcript date=2025-02-28 rowlen=82 lit='senator sanders' @off 66
+     scored=True shipped=True tone=positive | Proudly cites co-authorship alliance with Sanders.
+     detector markers in row: NONE
+     ROW[0:82]: Well, the credit card interest rate cap is my bill from 2019 with {{Senator Sanders}}.
+
+[18] Robert Garcia          -> James Comer            sid=91394 pkg=https://transcripts.cnn.com/sh date=2026-05-29 rowlen=748 lit='chairman comer is' @off 180
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:417]: Very clear that we continue to be incredibly disappointed of the decision to not have this interview videotaped and then released to the American public. The second thing we asked {{Chairman Comer is}} to ensure that this interview is under oath, and we understand the Attorney General is going to be there answering questions from Congress. But it should have been under oath, and it should be videotaped. We obviously h
+
+[19] Richard Blumenthal     -> Lindsey Graham         sid=186773 pkg=https://www.foxnews.com/transc date=2013-01-13 rowlen=788 lit='senator graham and' @off 739
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[239:788]: fighting force, can be tremendously effective. I think what we need to do, Chris, is define the mission. And that will, in turn, determine the size of the footprint. For example in Afghanistan, counterterrorism, fighting Special Operations as well as training will require some footprint on the ground. The question is, how many? And I think Kelly Ayotte is absolutely right to be focused on these issues. By the way, we have worked together on a very bipartisan way. She and Senator John McCain and {{Senator Graham and}} myself, Senator Casey on Iran.
+
+[20] Mitch McConnell        -> Nancy Pelosi           sid=138106 pkg=https://www.foxnews.com/transc date=2017-07-30 rowlen=722 lit='leader nancy pelosi' @off 243
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:482]: It’s time for our friends on the other friends on the other side to tell us what they have in mind. WALLACE (voice-over): We’ll discuss the possibility for bipartisan compromise and what the other side is willing to give with House Democratic {{Leader Nancy Pelosi}}. And with dysfunction in the nation’s capital, the worse it’s been in years, we’ll get a view from outside the beltway, when we talk with Republican Governor John Kasich of Ohio. Conway, Pelosi and Kasich, only on "Fox 
+
+[21] Byron Donalds          -> Charles Schumer        sid=80595 pkg=https://www.nbcnews.com/meet-t date=2026-04-15 rowlen=643 lit='chuck schumer' @off 291
+     scored=True shipped=True tone=negative | Blames Schumer for ignoring and blocking legislation.
+     detector markers in row: NONE
+     ROW[0:524]: In the House we passed H.R.2. It is the most robust border security package ever to pass a chamber of Congress. And I stress, Kristen, H.R.2 has passed the House. The Senate deal did not pass the Senate. Chuck Schumer in the Senate won’t even take it up for debate. He ignores it. That’s on {{Chuck Schumer}}. But at the core of this entire question, the number one job is to secure the country. Joe Biden doesn’t even need legislation to secure the country. He could do that right now. He can undo all of his executive orders t
+
+[22] Hakeem Jeffries        -> Nancy Pelosi           sid=218842 pkg=https://transcripts.cnn.com/sh date=2021-04-07 rowlen=964 lit='speaker pelosi and' @off 774
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[274:964]: Floyd. As far as I'm concerned, George Floyd was killed in cold blood in what was really a modern day lynching, something that should never happen on the streets of America or for that matter, anywhere in the world. And it's certainly important for us to see accountability as it relates to the death of George Floyd. More importantly, I think it will be important for Congress to act in a decisive fashion. The House has passed the George Floyd Justice in Policing Act through great leadership from {{Speaker Pelosi and}} Congresswoman Karen Bass. And we're working with the Senate to see if we can get this legislation through that body into the President's desk so it can be signed into law.
+
+[23] Amy Klobuchar          -> Mitch McConnell        sid=114499 pkg=https://www.nbcnews.com/meet-t date=2018-09-02 rowlen=192 lit='mitch mcconnell' @off 19
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:192]: Well, we know what {{Mitch McConnell}} did. But that was because he had the power. So to me, the first answer is that we need a check and balance on this White House. And we need to win elections.
+
+[24] Earl Carter            -> James Lankford         sid=321094 pkg=https://www.c-span.org/program date=2024-02-16 rowlen=877 lit='senator lankford' @off 663
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[163:877]: HAT WE NEED TO SECURE THE BORDER. IF YOU LOOK AT THE SENATE BILL, TELL ME HOW MANY LAWS THAT AFTER SO MANY PEOPLE VIOLATE THIS LAW IT IS THAT ILLEGAL? WE HAVE TO ARREST 5000 PEOPLE AND AFTER THAT POINT YOU WILL GET ARRESTED? THE BORDER NEEDS TO BE SECURED AND IT CAN BE SECURED. THE PRESIDENT HAS THE TOOLS TO SECURE THE BORDER. HE CAN STOP CATCH AND RELEASE AND BUILD THE WALL. WHEN I WAS IN TUCSON, ARIZONA WE SAW THE WALL. THE WALL OF THE DONALD TRUMP CONTINUED IN JOB BE BIDEN STOP. I APPRECIATE {{SENATOR LANKFORD}}. WE SHOULD BE LOOKING FOR SOLUTION, RIGHT NOW. WE HAVE TO COMPROMISE BUT I TELL YOU THAT HR TO IS AS CLOSE TO A PERFECT BILL WHEN IT RELATES TO THE BORDER AND WE NEED THIS SENATE TO TAKE UP HR TWO.
+
+[25] James Clyburn          -> Lindsey Graham         sid=275399 pkg=https://www.ms.now/transcript/ date=2022-03-24 rowlen=1373 lit='lindsey graham' @off 1191
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[691:1373]: hree in this instance. I`m very proud of that. Now, when I saw some of the questioning coming from the Senate. I was very disappointed because Ketanji Brown Jackson has been imminently qualified person fit for the court. There were others that were well-qualified. So, this has nothing to do with qualifications, and I had hoped that the hearing would be a little different than it turned out to be. And I`m very disappointed that it devolved to the point that it did. O`DONNELL: What do you make of {{Lindsey Graham}} in this confirmation hearing, for the nominee chosen by the president? One of his angles of attack is, you are not the judge from my state, who I would have supported.
+
+[26] Hakeem Jeffries        -> Jerrold Nadler         sid=208556 pkg=https://transcripts.cnn.com/sh date=2020-01-15 rowlen=1190 lit='chairman nadler' @off 435
+     scored=True shipped=True tone=positive | Credits Nadler's 'great leadership' in accountability effort
+     detector markers in row: NONE
+     ROW[0:670]: Well, the evidence is overwhelming that Donald Trump corruptly abused his power by pressuring a foreign government to target an American citizen for political and personal gain by withholding $391 million in military aid to Ukraine without justification. There is a mountain of evidence in that regard. In America, no one is above the law. That is why the House proceeded with great leadership from Speaker Pelosi, Chairman Schiff and {{Chairman Nadler}}, to hold this president accountable. The Constitution required it. Our democracy required it. Given the evidence that has been built to date, the American people deserve a fair trial. Our democracy deserves a fair trial
+
+[27] Christopher Coons      -> Lindsey Graham         sid=191426 pkg=https://transcripts.cnn.com/sh date=2019-02-18 rowlen=1332 lit='chairman graham has' @off 828
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[328:1067]: public and then making sure we've got a balanced a group of witnesses testifying in front of the committee. I want to give Senator Graham credit for being a co-sponsor with me of legislation, two Congresses now in a row, to protect the Mueller probe. He has consistently pushed back on the president's characterization of the Mueller probe as a witch hunt and has called for the full release of the final Mueller report, something I've been fighting for. But when it comes to the McCabe allegations, {{Chairman Graham has}} been pushing back very hard. His suggestion that this amounts to an administrative attempted coup I reject it but I think we ought to have hearings into this. I think we ought to air it because frankly, sunshine is the 
+
+[28] Daniel Goldman         -> Cynthia Lummis         sid=275895 pkg=https://www.ms.now/transcript/ date=2022-06-07 rowlen=1568 lit='senator cynthia lummis' @off 924
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[424:1166]: s of the house of representatives than any other state at 53. But it only has two senators, which is the same number the tiny population of Wyoming has, making Wyoming the most overrepresented state in the United States senate. [22:49:59] O`DONNELL: Wyoming`s two Republican senators representing 580,000 people cancel out California`s two Democratic senators representing 40 million people. Our next guest, Representative Katie Porter, won more votes than in her congressional district then Wyoming {{Senator Cynthia Lummis}} won in the entire state of California. Joining us now is Democratic Congresswoman Katie Porter of California, a member of the House Oversight Committee and the deputy chair of the House Progressive Caucus. Representativ
+
+[29] Tim Scott              -> Lindsey Graham         sid=305499 pkg=https://www.cbsnews.com/news/f date=2026-07-12 rowlen=694 lit='lindsey graham' @off 177
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:411]: Well, you know, one of the things I think we should do, obviously, that South Carolina Prayer Breakfast is coming up for me later this month. I'm going to rename it in honor of {{Lindsey Graham}}, and we'll now have the Lindsey Graham Prayer Breakfast going on for as long as I'm in public service, number one. Number two, as Senate leadership comes together, I talked to John Thune about 3:00 – about 4:30 this mor
+
+[30] Amy Klobuchar          -> Josh Hawley            sid=256650 pkg=https://www.pbs.org/newshour/s date=2021-01-05 rowlen=492 lit='josh hawley' @off 25
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:256]: It's the same. It's just {{Josh Hawley}} dressed up in a different package led by Ted Cruz. And it basically would require people to vote against the will of the people of the states. Not only that. If they think it's so screwed up, which they know it's not, t
+
+[31] Debbie Dingell         -> Nancy Pelosi           sid=207134 pkg=https://transcripts.cnn.com/sh date=2019-12-18 rowlen=244 lit='nancy pelosi' @off 33
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:244]: The one thing I've learned about {{Nancy Pelosi}} since I've been here is, she does listen and she understand the importance of building consensus. [06:40:06] She did not move forward on impeachment without knowing that that's where her caucus was.
+
+[32] Adam Schiff            -> Nancy Pelosi           sid=269442 pkg=https://www.ms.now/transcript/ date=2019-09-26 rowlen=856 lit='speaker nancy pelosi' @off 692
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[192:856]: resented with a record of a call between the president of the United States and the president of Ukraine in which the president, our president, sacrificed our national security and our Constitution for his personal, political benefit. O`DONNELL: And not one Republican member of the House Intelligence Committee today said Donald Trump did not betray his oath of office. Not one of them. They did not say Chairman Schiff is wrong. President Trump did not betray his oath of office. They did not say, {{Speaker Nancy Pelosi}} was wrong on Tuesday when she announced an official impeachment investigation because as she put it, the president betrayed his oath of office.
+
+[33] Charles Schumer        -> Mitch McConnell        sid=188285 pkg=https://transcripts.cnn.com/sh date=2019-01-03 rowlen=231 lit='mitch mcconnell' @off 104
+     scored=False shipped=True tone=- 
+     detector markers in row: 221[NOCOLON]'SEN. MITCH'
+     ROW[0:231]: We would urge them respectfully to reconsider and support these bills which are bipartisan one of which {{Mitch McConnell}} proposed, open up the government as we continue to debate what is the best way to secure our border. SEN. MITCH
+
+[34] Andy Biggs             -> Mike Johnson           sid=321262 pkg=https://www.c-span.org/program date=2024-03-11 rowlen=415 lit='mike johnson' @off 88
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[0:320]: I DON'T THINK THAT'S GONNA HAPPEN. I APPRECIATE THE SENTIMENT THERE. I AM TRYING TO GET {{MIKE JOHNSON}} TO BRING THE 12 BUDGET BILLS TO THE FLOOR. I THINK THAT'S WHAT HE'S TRYING TO FOCUS ON, BEING ABLE TO RALLY THE TROOPS HERE AND GET THAT STUFF DONE. I DON'T THINK HE WILL BE THE RUNNING MATE AND I DON'T WANT TO DEPRESS 
+
+[35] John Thune             -> Mitch McConnell        sid=267940 pkg=https://www.ms.now/transcript/ date=2019-04-24 rowlen=4317 lit='mitch mcconnell' @off 1346
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[846:1581]:  being over Mitch McConnell`s shoulder in the photo-ops. We`re going to insert a final commercial break right here so that will give us enough time to show you more from John Thune on what he thinks about a president`s betrayal of trust. And it will leave you wondering not just about Donald Trump`s betrayal of trust, but what has clearly become John Thune`s own personal betrayal of trust. O`DONNELL: John Thune is the “over the shoulder” guy. There he is in his standard spot over the shoulder of {{Mitch McConnell}}. John Thune is much more noticeable than most “over the shoulder” guys because he`s so much taller than the other shoulders that are usually around him. The shoulder John Thune permanently attached to is Mitch McConnell
+
+[36] John Barrasso          -> Charles Schumer        sid=255974 pkg=https://www.pbs.org/newshour/s date=2020-04-30 rowlen=1236 lit='chuck schumer' @off 729
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[229:962]: ll businesses, over $800 million. The program is working. And it's going to need to continue to work to help get these people back to work and make sure these businesses are there. The early goals were to just get the money out as quickly as we could to try to keep people on the payroll. This was such an overprescribed program that what we saw is, it ran out of money and sat empty for about 10 days, while the Democrats played politics and tried to get political leverage under Speaker Pelosi and {{Chuck Schumer}}. That should have never been allowed to happen. We now have this funded again. It is working for small businesses. And any business that signed an affidavit that said, we need the money and it's coronavirus-impacted, th
+
+[37] Mike Kelly             -> Jim Jordan             sid=258905 pkg=https://www.pbs.org/newshour/s date=2023-10-17 rowlen=261 lit='jim jordan' @off 119
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[0:261]: No, I can't, because we already had elected somebody to be our speaker-designate. And it's not -- it's nothing against {{Jim Jordan}}. I have nothing against Jim Jordan. I just don't like when people break the rules because it's not -- it's not something they like.
+
+[38] Mike Johnson           -> Charles Schumer        sid=83199 pkg=https://transcripts.cnn.com/sh date=2025-10-08 rowlen=935 lit='chuck schumer' @off 409
+     scored=False shipped=True tone=- 
+     detector markers in row: NONE
+     ROW[0:642]: There's one sad and inescapable fact that no one can forget here. This shutdown is nothing more than political cover for Chuck Schumer and the Democrats. They are worried about the Marxist flanks in the Democrat Party. [11:15:05] The Marxists are about to elect a mayor in New York City. That's Chuck Schumer's state. And he's terrified that he's going to get a challenge from his far left. I have noted that {{Chuck Schumer}} is a very far left politician, but he's not far enough left for the communists, and they're coming for him. And so he has to put up his dukes and show a fight. So they picked a fight on something that's not even related
+
+[39] Adam Schiff            -> Jerrold Nadler         sid=269311 pkg=https://www.ms.now/transcript/ date=2019-09-13 rowlen=59 lit='chairman nadler has' @off 8
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[0:59]: I think {{Chairman Nadler has}} described the proceedings well.
+
+[40] Jamie Raskin           -> Shelley Capito         sid=106021 pkg=https://www.nbcnews.com/meet-t date=2021-02-14 rowlen=1216 lit='senator capito from' @off 654
+     scored=False shipped=False tone=- 
+     detector markers in row: NONE
+     ROW[154:893]: It was absolutely overwhelming and meticulous and comprehensive. I don't think anybody can watch that without coming away saying, “Donald Trump incited that violent insurrection.” He named the date of the rally, he named the time of the rally. It was timed with the counting the electoral college votes. He said, "Stop the steal." And then he basically, you know, fired the cannon of the rally-goers that he had gathered right at the Capitol. So, look, when you listen to what McConnell said or what {{Senator Capito from}} West Virginia's saying, they're saying, "Look, the facts were there." They're not disputing that. They're just saying, "We don't think that we can prosecute a former president." They would have found some way -- you can
+
+wrote G5a_p2_unflagged40_UNGRADED.json
+
+====================================================================================================
+G5b  P3b RECALL PROBE: 40 of 28153 UNFLAGGED CREC mentions (seed 20260918) -- ARTEFACT / GENUINE / UNCLEAR
+====================================================================================================
+
+[01] Richard Durbin         -> Charles Schumer        sid=46863 pkg=CREC-2020-08-05 date=2020-08-05 form=TITLE lit='senator schumer and'
+     scored=False shipped=True tone=-   surname_tokens=2/66 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: gotiations he has engaged in. It is nothing short of amazing that the Republican leader of the U.S. Senate comes to the floor of the Senate every morning and criticizes Senator Schumer and Speaker Pelosi, who are sitting in a room day after day after day, trying to hammer out an agreement to help America in this time of need, while there are two empty chairs at that t
+
+[02] Adrian Smith           -> Neal Dunn              sid=22654 pkg=CREC-2019-04-09 date=2019-04-09 form=TITLE lit='congressman dunn for'
+     scored=False shipped=False tone=-   surname_tokens=1/31 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: Madam Speaker, I thank Congressman Dunn for yielding. I appreciate his taking the initiative to bring folks together to discuss, unfortunately, the need to address the disasters across America. Madam Speaker, representing on
+
+[03] Kim Schrier            -> Gus Bilirakis          sid=150200 pkg=CREC-2023-07-17 date=2023-07-17 form=TITLE lit='representative bilirakis'
+     scored=True shipped=True tone=positive   surname_tokens=3/46 distinct=3  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: Mr. Speaker, I yield myself such time as I may consume. I first thank Chair Rogers, Ranking Member Pallone, Representative Bilirakis, and, of course, Representative Pence, who sponsored this bill together with me, for their leadership and hard work on this bipartisan bill. I am a proud sponsor. The Animal Dr
+
+[04] Mike Lee               -> Ruben Gallego          sid=7354 pkg=CREC-2025-12-02 date=2025-12-02 form=TITLE lit='senator gallego'
+     scored=True shipped=True tone=neutral-substantive   surname_tokens=5/59 distinct=4  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: nam veterans the land they earned and have long been owed. At the request of Senator Padilla and the ranking member, Senator Sullivan paired his bill with the bill from Senator Gallego, keeping it bipartisan. However, to the surprise of Senator Sullivan and the Native Vietnam veterans who were relying on the legislation, this, too, drew the aforementioned objection, m
+
+[05] Bradley Schneider      -> Brian Fitzpatrick      sid=148070 pkg=CREC-2023-05-30 date=2023-05-30 form=BARE lit='brian fitzpatrick'
+     scored=True shipped=False tone=formality   surname_tokens=5/53 distinct=5  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: ry of Jewish Americans. I rise today in support of H. Res. 382, honoring Jewish American Heritage Month. I thank my colleagues--my dear friend Debbie Wasserman Schultz, Brian Fitzpatrick, Leader Hakeem Jeffries, David Kustoff, Jerry Nadler, and so many others--who join in making this resolution possible. Back before we had even gained our independence from England, Je
+
+[06] Tom Cotton             -> Christopher Coons      sid=109266 pkg=CREC-2021-09-23 date=2021-09-23 form=TITLE lit='senator coons to'
+     scored=False shipped=True tone=-   surname_tokens=2/62 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: will be back to help you soon.'' It was radio silence from America while the Taliban continued to demand the return of those troops. Thankfully, I was able to work with Senator Coons to get the message to the administration. After much confusion and delay, the State Department official finally returned the Ambassador's call. I want to thank Senator Coons for his assis
+
+[07] Richard Durbin         -> Mitch McConnell        sid=56642 pkg=CREC-2020-12-30 date=2020-12-30 form=TITLE lit="senator mcconnell's alternative"
+     scored=False shipped=True tone=-   surname_tokens=0/63 distinct=0  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: s to call for this measure which many have been decrying on the floor here as a class struggle or whatever their argument might be. There is no other measure, including Senator McConnell's alternative, which has any ghost of a chance to help the families in this country with this $2,000 benefit. The only thing that will do it--the only one thing that will do it--is th
+
+[08] John Barrasso          -> Deb Fischer            sid=182325 pkg=CREC-2025-05-21 date=2025-05-21 form=TITLE lit='senator deb fischer'
+     scored=True shipped=True tone=positive   surname_tokens=4/60 distinct=4  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: o the Senate to stop these EV mandates from taking hold on our Nation. I want to thank my colleagues who led the effort: Chairman Shelley Moore Capito of West Virginia, Senator Deb Fischer of Nebraska, and Senator Markwayne Mullin of Oklahoma. Together, we are going to reject this far-left cheerleading for more regulations, and we are going the protect consumers. We a
+
+[09] Cory Booker            -> Brian Schatz           sid=179324 pkg=CREC-2025-03-31 date=2025-03-31 form=BARE lit='brian schatz'
+     scored=True shipped=True tone=positive   surname_tokens=3/61 distinct=3  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: adopted me, helped me. Dick Durbin, you were amazing in those early months. And this is the next time I meet John Lewis for a moment that changed my life. Chris Murphy, Brian Schatz, remember this moment. It was during the 2017 healthcare debate, when I didn't know how we were going to stop that bill from passing and taking away healthcare from 20 million Americans. B
+
+[10] Patty Murray           -> John Hoeven            sid=151653 pkg=CREC-2023-09-12 date=2023-09-12 form=TITLE lit='senator hoeven for'
+     scored=False shipped=False tone=-   surname_tokens=2/62 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: , we ship apples, cherries, wheat, potatoes, pulse crops, and so many other commodities across the country and across the world. So I want to thank Senator Heinrich and Senator Hoeven for their very hard work to help put together a bipartisan bill that delivers on those crucial issues. This bill will make sure the FDA has the resources it needs to keep grocery stores 
+
+[11] Debbie Wasserman Schul -> Frank Pallone          sid=48522 pkg=CREC-2020-09-29 date=2020-09-29 form=TITLE lit='chairman pallone and'
+     scored=False shipped=False tone=-   surname_tokens=2/55 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: I rise today to support my bill, the Breast Cancer Education and Awareness Requires Learning Young Act Reauthorization, or the EARLY Act. I do want to start by thanking Chairman Pallone and Ranking Member Walden, as well as my Republican co-lead, Congresswoman Susan Brooks. I deeply appreciate their advocacy and assistance shepherding this bill through the Energy and 
+
+[12] Richard Durbin         -> Charles Schumer        sid=157617 pkg=CREC-2023-12-06 date=2023-12-06 form=TITLE lit="congressman chuck schumer's"
+     scored=False shipped=True tone=-   surname_tokens=0/56 distinct=0  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: to her memory and inspired her response. In 1994, an assault weapons ban was passed and considered a major step forward. Senator Feinstein's work in the Senate and then Congressman Chuck Schumer's work in the House made it a reality. Congress failed to reauthorize this critical legislation--a big mistake. Today, we can honor Senator Feinstein's legacy with the lives w
+
+[13] Sean Casten            -> John Rose              sid=22912 pkg=CREC-2019-04-30 date=2019-04-30 form=TITLE lit='representative rose for'
+     scored=False shipped=False tone=-   surname_tokens=2/40 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: Madam Speaker, I rise today in support of H. Res. 328. I thank Representative Rose for working on this resolution with me in a bipartisan manner, as well as Chair Waters and her staff for their commitment to seniors and financial literacy. H. Res. 328 supports the
+
+[14] Christopher Murphy     -> Richard Blumenthal     sid=57967 pkg=CREC-2021-02-03 date=2021-02-03 form=TITLE lit='senator blumenthal and'
+     scored=False shipped=True tone=-   surname_tokens=2/73 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW:  comes at the right time because we are not going to be able to do this by ourselves. We have to meet the moment. We can't go small right now. The problems are too big. Senator Blumenthal and I have spent lots of time at food banks in Connecticut. We have never, ever seen the desperate need that exists today in our State. Shame on us if we don't use the power that has
+
+[15] Maria Cantwell         -> Alex Padilla           sid=183623 pkg=CREC-2025-06-12 date=2025-06-12 form=BARE lit='alex padilla'
+     scored=True shipped=True tone=positive   surname_tokens=1/70 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW:  rep. It is not like he got elected by people. Our Governor was not afraid to let this voice be heard. But somehow, ICE and Homeland Security are afraid of the voice of Alex Padilla. They are afraid of Alex Padilla's presence in a room. Now, how can that be in the United States of America that a Senator elected by the people of his State, who simply wants to go to a p
+
+[16] Danny Davis            -> Darin LaHood           sid=170088 pkg=CREC-2024-09-17 date=2024-09-17 form=TITLE lit='chairman lahood for'
+     scored=False shipped=False tone=-   surname_tokens=2/40 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: Mr. Speaker, in closing, I thank Chairman Smith and Chairman LaHood for their partnership on this important bill that would improve and invest in child welfare services under title IV- B and ensure that State and Tribal support agencies can continue the
+
+[17] French Hill            -> Mike Flood             sid=16314 pkg=CREC-2026-05-19 date=2026-05-19 form=TITLE lit='chairman flood on'
+     scored=False shipped=True tone=-   surname_tokens=3/62 distinct=3  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: concerns with some of the provisions that were contained in the Senate- passed version of the housing bill. For Ranking Member Waters and me, Ranking Member Cleaver and Chairman Flood on the Subcommittee on Housing and Insurance, this has been years of work in the making and months of intensive work in this 119th Congress to find a path that improves accessibility to 
+
+[18] Susie Lee              -> Lindsey Graham         sid=137661 pkg=CREC-2022-09-29 date=2022-09-29 form=BARE lit='lindsey graham'
+     scored=True shipped=True tone=negative   surname_tokens=1/58 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: n would be banned in every State. The most extreme restrictions would be held in place, and women's healthcare decisions would be taken away from you and handed over to Lindsey Graham and his Republican colleagues. The vast majority of Americans support Roe, but the Supreme Court has stripped away our freedoms and overturned 50 years of constitutional precedent. Since
+
+[19] Christopher Murphy     -> Tim Kaine              sid=144464 pkg=CREC-2023-03-23 date=2023-03-23 form=TITLE lit='senator kaine'
+     scored=True shipped=True tone=positive   surname_tokens=2/56 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: given to us in article I, which is to be codeterminants of American foreign policy alongside the executive branch. Notwithstanding the good work of Senator Menendez and Senator Kaine, we have, over the course of the last several decades, completely outsourced that responsibility to set the national security policy to an executive branch and a national security apparat
+
+[20] Lucy McBath            -> Elise Stefanik         sid=59920 pkg=CREC-2021-03-16 date=2021-03-16 form=TITLE lit='congressman stefanik and'
+     scored=False shipped=False tone=-   surname_tokens=1/65 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: ted with our youth, to identify such abuse. That is why we must continue to invest in child abuse and prevention services, such as the national child abuse hotline that Congressman Stefanik and I have included in Stronger CAPTA. {time} 1600 We do not yet know the full extent to which the COVID-19 pandemic will impact our children, but we need to make sure that we are 
+
+[21] John Cornyn            -> Nancy Pelosi           sid=18689 pkg=CREC-2019-01-09 date=2019-01-09 form=TITLE lit='speaker pelosi has'
+     scored=False shipped=True tone=-   surname_tokens=3/66 distinct=3  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: t but then were left to die by the smugglers. Their graves are marked only with identities like ``skull case'' or ``unknown female.'' Border security is not immoral, as Speaker Pelosi has shamefully claimed, but refusing to act in the face of evil is immoral. It is clear that there is a crisis, as it is clear that it is our responsibility to restore safety and securit
+
+[22] Chuck Grassley         -> James Lankford         sid=14387 pkg=CREC-2026-04-15 date=2026-04-15 form=TITLE lit='senator lankford has'
+     scored=False shipped=True tone=-   surname_tokens=1/58 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: ct that we had a 43-day, all-government shutdown last year, and this year we have already, for the Department of Homeland Security, had a 45- or 46-day shutdown so far. Senator Lankford has the best idea that that will never happen again in our government--any shutdown. Congress' failure to fund the government shouldn't be penalizing the hard-working men and women of 
+
+[23] Suzanne Bonamici       -> Mark Takano            sid=35413 pkg=CREC-2019-11-19 date=2019-11-19 form=TITLE lit='representative takano'
+     scored=True shipped=True tone=positive   surname_tokens=1/58 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: d food insecurity are prevalent for too many students across this country. This bill includes language I authored, along with my Education and Labor Committee colleague Representative Takano, to address the issue of food insecurity by making sure that students who are eligible for SNAP are aware of their eligibility and have the support they need to secure those benef
+
+[24] Mitch McConnell        -> Rand Paul              sid=28608 pkg=CREC-2019-07-29 date=2019-07-29 form=BARE lit='rand paul'
+     scored=True shipped=True tone=negative   surname_tokens=3/58 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: imea from Ukraine. (Louisville-based Spectrum News posted video of the presser.) Without mentioning it directly, McConnell displayed his differences with Trump and Sen. Rand Paul, the junior senator from Kentucky and an outlier in the Senate when it comes to Moscow. Paul, who visited Russia this month, said the politics in America around the issues are poisoning the c
+
+[25] Nancy Mace             -> Cory Mills             sid=5565 pkg=CREC-2025-11-19 date=2025-11-19 form=TITLE lit='representative cory mills'
+     scored=False shipped=True tone=-   surname_tokens=3/53 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: presentative Cory Mills affects the dignity and integrity of the proceedings of the House and brings discredit upon the House: Now, therefore, be it resolved, that: (1) Representative Cory Mills be censured; (2) Representative Cory Mills forthwith present himself in the well of the House of Representatives for the pronouncement of censure; (3) Representative Cory Mill
+
+[26] Frank Pallone          -> Robert Latta           sid=53192 pkg=CREC-2020-11-17 date=2020-11-17 form=TITLE lit='representative latta for'
+     scored=False shipped=True tone=-   surname_tokens=1/56 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: rant that either meets the criteria for temporary or permanent suspension or revocation or has a history of prior suspension or revocations. Again, I thank my colleague Representative Latta for leading this legislation and Ranking Member Walden and his staff for working with me on this legislation. Madam Speaker, I urge my colleagues to support the bill, and I reserve
+
+[27] Herbert Conaway        -> Josh Gottheimer        sid=304733 pkg=CREC-2026-07-15 date=2026-07-15 form=TITLE lit='representative gottheimer'
+     scored=False shipped=False tone=-   surname_tokens=1/58 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: airs community-based outpatient clinic in Newton, New Jersey, after Anthony ``Tony'' Gallopo. I am pleased to have co-led this effort with my colleague from New Jersey, Representative Gottheimer, and pleased to speak in support of this bill today. Mr. Gallopo was a keystone in the northern New Jersey community. Born in 1961, he grew up in Bergen County, New Jersey, an
+
+[28] Steven Horsford        -> Hakeem Jeffries        sid=27124 pkg=CREC-2019-07-15 date=2019-07-15 form=BARE lit='hakeem jeffries'
+     scored=True shipped=True tone=positive   surname_tokens=1/63 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: an of the Congressional Black Caucus, the chairman of the Education and Labor Committee, it is because of their leadership, the chairman of the House Democratic Caucus, Hakeem Jeffries, and others, that this is part of the For the People Agenda. This is why we are laser-focused. And we are laser-focused on a lot of priorities. We want to give workers a raise. We also
+
+[29] Mitch McConnell        -> James Lankford         sid=158524 pkg=CREC-2024-01-08 date=2024-01-08 form=TITLE lit='senator lankford for'
+     scored=False shipped=True tone=-   surname_tokens=1/59 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: literally for years, is to restore meaningful border enforcement and fix the broken policies that the cartels are exploiting to devastating effect. And I am grateful to Senator Lankford for continuing to insist on such commonsense steps at the negotiating table. The stakes here are quite high. We have an opportunity to make the most comprehensive headway on border sec
+
+[30] Roger Wicker           -> Lindsey Graham         sid=306713 pkg=CREC-2026-07-28 date=2026-07-28 form=BARE lit='lindsey graham'
+     scored=False shipped=False tone=-   surname_tokens=1/58 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: Mr. President, and now let me join with my colleagues from New Hampshire and Alabama in urging a strong ``yes'' vote on the motion to proceed to Lindsey Graham's sanctions bill. A number of us gathered today, as we have already heard, at the National Cathedral for Senator Lindsey Graham's funeral. And in a few moments, we will vote to advance a
+
+[31] Mitch McConnell        -> Nancy Pelosi           sid=147280 pkg=CREC-2023-05-16 date=2023-05-16 form=TITLE lit='speaker pelosi'
+     scored=True shipped=True tone=neutral-substantive   surname_tokens=1/58 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: President and Democratic Speaker avoided crisis 4 years ago. I remember telling President Trump he needed to do something he was not anxious to do, which was to talk to Speaker Pelosi, because the American people had given us divided government. That is how a Democratic President and a Republican Speaker will avoid this crisis as well. Speaker McCarthy is right. The S
+
+[32] Richard Durbin         -> Mitch McConnell        sid=45570 pkg=CREC-2020-06-30 date=2020-06-30 form=TITLE lit='senator mcconnell was'
+     scored=False shipped=True tone=-   surname_tokens=3/64 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: employment program will expire. Speaker Nancy Pelosi passed a bill 4 weeks ago called the Heroes Act--a $3 trillion bill--and it has languished here in the Senate. When Senator McConnell was asked if he would call up this bill, he said that he didn't feel there was any urgent need to do so. I hope that Senator McConnell now feels a sense of urgency. He came to the flo
+
+[33] Chuck Grassley         -> Lindsey Graham         sid=37279 pkg=CREC-2019-12-19 date=2019-12-19 form=TITLE lit='chairman graham for'
+     scored=False shipped=True tone=-   surname_tokens=2/51 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW:  want to thank Senator Lankford for his leadership and tireless work these past several months on behalf of American victims of terrorism. Finally, I also want to thank Chairman Graham for making this bill a priority in the Judiciary Committee. I now urge all of my colleagues' support for this important and bipartisan measure.
+
+[34] Kevin Kiley            -> Virginia Foxx          sid=148024 pkg=CREC-2023-05-25 date=2023-05-25 form=TITLE lit='chairwoman virginia foxx'
+     scored=True shipped=True tone=positive   surname_tokens=1/58 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: iled to properly manage the H-2A program for bringing in temporary agricultural workers on a legal basis. Just this morning, House Education and the Workforce Committee Chairwoman Virginia Foxx and I sent an oversight letter to Acting Secretary Su regarding serious delays in the processing of H-2A applications. In the letter we write: ``It has come to the attention of
+
+[35] Russ Fulcher           -> Bruce Westerman        sid=151617 pkg=CREC-2023-09-12 date=2023-09-12 form=TITLE lit='chairman westerman'
+     scored=True shipped=True tone=positive   surname_tokens=2/58 distinct=2  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: ed with counties and Tribes. That is a win-win situation. Tribes and counties are local, and as such, they are on the front lines of the land management battle. I thank Chairman Westerman, my co-lead, Representative Marie Gluesenkamp Perez, and all of my other colleagues on the Natural Resources Committee and the Agriculture Committee for their support of this legisla
+
+[36] Mark Warner            -> Tim Kaine              sid=173610 pkg=CREC-2024-12-17 date=2024-12-17 form=TITLE lit="senator kaine's request"
+     scored=False shipped=True tone=-   surname_tokens=0/42 distinct=0  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: Mr. President, I rise today in support of Senator Kaine's request for unanimous consent for the Senate to pass the Saving the Civil Service Act. It is a critical bill that I hope all my colleagues would agree needs to be enshrined into law. On
+
+[37] Mike Lee               -> Richard Durbin         sid=127781 pkg=CREC-2022-04-06 date=2022-04-06 form=TITLE lit='chairman durbin and'
+     scored=False shipped=True tone=-   surname_tokens=3/66 distinct=3  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: s that neither the public nor this body would approve of it. In that case, we are left to infer what her judicial philosophy is from her record, which is precisely what Chairman Durbin and Judge Jackson suggested that we do. Except, as I have already pointed out, they don't want us to have the whole record, and they are unreasonably denying our access to the whole rec
+
+[38] Lindsey Graham         -> Richard Durbin         sid=161388 pkg=CREC-2024-03-06 date=2024-03-06 form=TITLE lit='senator durbin has'
+     scored=False shipped=True tone=-   surname_tokens=1/74 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: ake it down, knowing that it is up there, you ought to be able to sue them. My God, if we can't do that, what good are we? There are millions of these photos out there. Senator Durbin has been terrific to empower consumers with some hope they don't have to live this over and over and over again. Is it too much to ask the company, once notified, to take this stuff down
+
+[39] Rand Paul              -> Cory Booker            sid=43958 pkg=CREC-2020-06-04 date=2020-06-04 form=TITLE lit="senator booker's office"
+     scored=False shipped=True tone=-   surname_tokens=0/64 distinct=0  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: t be hamstrung into something that could give someone 10 years in prison for a minor crime. This is a very minor attempt. Everything we left in here we have worked with Senator Booker's office to make sure it is inclusive. They came back and said: What about attempted? We said: Let's change the language. So we have in there ``attempt to cause serious bodily harm.'' So
+
+[40] Richard Durbin         -> Christopher Coons      sid=139070 pkg=CREC-2022-12-07 date=2022-12-07 form=TITLE lit='senator chris coons'
+     scored=True shipped=True tone=formality   surname_tokens=1/59 distinct=1  (thresholds: >=10 distinct, >=0.35)
+     WINDOW: t, it has been nearly 10 months--10 months since that cold, dark morning when I was in the departure lounge at the main airport in Vilnius, Lithuania, with my colleague Senator Chris Coons. We watched on television as Russia attempted to seize another sovereign country in the heart of Europe. I will never forget those early scenes of Putin's horror unleashed on Ukrain
+
+wrote G5b_p3b_unflagged40_UNGRADED.json
+DONE G3G5

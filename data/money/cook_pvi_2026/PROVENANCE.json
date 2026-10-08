@@ -1,0 +1,28 @@
+{
+  "schema": "melange-cook-pvi-ingest-v1",
+  "ingested_utc": "2026-10-05",
+  "purpose": "Inputs to fec/engine/build_competitiveness.py (COMPET_MULT competitiveness multiplier c, Paul ruling 2026-10-05). Byte copies, not edited.",
+  "files": {
+    "cook_pvi_2026_districts.csv": {
+      "role": "House: Cook PVI 2026, 435 districts (pvi_2025 and pvi_2026 signed points, incumbent text, boundary_currency_status UNVERIFIED-HERE in the vendor package; VERIFIED by Paul 2026-10-06)",
+      "ingested_from": "C:\\Users\\pgoff\\.codex\\worktrees\\c7bb\\Melange Systems\\outputs\\cook_pvi_research_20261005\\cook_pvi_2026_districts.csv",
+      "source_url": "https://www.cookpolitical.com/cook-pvi/2026-partisan-voting-index/district-map-and-list",
+      "source_vintage": "article dated 2026-07-29; embed last modified 2026-07-22; retrieved 2026-10-05",
+      "upstream_sha256_recorded_in_source_manifest": "3bf2786d391323b48f4d87e9b5c5e82802bbf7749a1c83e7c6da600fa353cb71"
+    },
+    "source_manifest.json": {"role": "the research package's own manifest (raw asset hashes, plan hashes, scope notes)", "ingested_from": "same package directory"},
+    "README.md": {"role": "the research package's data dictionary and limits (EVEN = 0, rounded labels, boundaries unverified, Missouri map developments post-date the vintage)", "ingested_from": "same package directory"},
+    "cook_pvi_states_supplied_20261005.csv": {
+      "role": "Senate: Cook state PVI table, 50 states + DC, applied to ALL senators regardless of 2026 class",
+      "provenance": "supplied by Paul, 2026-10-05, Cook state PVI table",
+      "note": "not independently re-derived or verified by the build"
+    }
+  },
+  "sha256": {
+    "cook_pvi_2026_districts.csv": "3bf2786d391323b48f4d87e9b5c5e82802bbf7749a1c83e7c6da600fa353cb71",
+    "cook_pvi_states_supplied_20261005.csv": "16f853792dab972fc121c73a95bf79589dda36b1b6475f433dc822176079d816",
+    "source_manifest.json": "c33fef489ff7a20f01698dd9b095e4ca7bff980601bbeb9c1529510eaf4cb64a",
+    "README.md": "a8f5f6424047fa77aafc6027ea72713d0da2e1a08940d1dd2ec493552aa5c4db"
+  },
+  "limits": "Signed fields encode rounded display labels. House boundaries were VERIFIED by Paul on 2026-10-06 (the package's UNVERIFIED-HERE column is superseded); mid-decade redistricting (AL CA FL LA MO NC OH TN TX UT) is flagged, never altered. The constants that consume these inputs are Paul's judgment, uncalibrated; the reciprocity they encode is not validated."
+}

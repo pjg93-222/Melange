@@ -1,0 +1,269 @@
+======================================================================================================
+N5 / D3  THE 258 ARCHIVE-ONLY KEYS, FROM THE DESK SIDE   (reproduced: 258)
+======================================================================================================
+  by role: {'original-cosponsor': 50, 'cosponsor': 196, 'sponsor': 12}   by Congress: {'117': 5, '118': 11, '119': 242}
+  frame source of the 258: {('sentinel-verified',): 208, ('selected-archive', 'sentinel-verified'): 50}
+  256   D3-2 came from the Sentinel ledger (collector lane), never appended to the sheets
+  2     D3-1 sheets carry the triple under a DIFFERENT role: ['cosponsor']
+  ALREADY DISPLAYED on the desk today anyway (via manual csv / primacy sidecars / collector merge): 234 / 258
+  displayed role vs archive role: {('original-cosponsor', 'original'): 50, ('cosponsor', 'cosponsor'): 175, ('sponsor', 'sponsor'): 9}
+  live BILLSTATUS join date present: 246 ; latest=2026-09-10 ; joined after 2026-08-25=29
+  top bills: [('H.R.1181', 129), ('H.R.987', 35), ('H.R.2094', 19), ('H.R.9514', 16), ('H.R.9490', 4), ('S.978', 3), ('H.R.9668', 3), ('S.3623', 3), ('H.R.4936', 3), ('S.3940', 3)]
+  examples (up to 12):
+     Aaron Bean             H.R.1181      C119  arc_role=original-cosponsor  wb_roles=[]                     shown=True  src=sentinel-verified    live=2025-02-11
+     Abraham Hamadeh        H.R.1181      C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=sentinel-verified    live=2025-05-15
+     Adam Smith             H.R.2094      C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=selected-archive,sen live=2026-06-24
+     Addison McDowell       H.R.1181      C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=sentinel-verified    live=2025-02-18
+     Adelita Grijalva       H.R.2094      C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=selected-archive,sen live=2026-06-24
+     Adrian Smith           H.R.1181      C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=sentinel-verified    live=2025-03-04
+     Adriano Espaillat      H.R.2094      C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=selected-archive,sen live=2026-06-24
+     Al Green               H.R.9490      C119  arc_role=original-cosponsor  wb_roles=[]                     shown=True  src=sentinel-verified    live=2026-06-25
+     Alan Armstrong         S.978         C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=selected-archive,sen live=2026-08-07
+     Ami Bera               H.R.2094      C119  arc_role=cosponsor           wb_roles=[]                     shown=False src=sentinel-verified    live=2026-08-31
+     Andrew Clyde           H.R.1181      C119  arc_role=cosponsor           wb_roles=[]                     shown=True  src=sentinel-verified    live=2025-02-18
+     Andrew Clyde           H.R.9514      C119  arc_role=original-cosponsor  wb_roles=[]                     shown=True  src=sentinel-verified    live=2026-06-29
+  per-class examples:
+   -- D3-2 came from the Sentinel ledger (collector lane), never appended to the sheets
+        Aaron Bean             H.R.1181      C119  arc_role=original-cosponsor  shown=True  routing={'selected': 1}
+        Abraham Hamadeh        H.R.1181      C119  arc_role=cosponsor           shown=True  routing={'selected': 1}
+        Adam Smith             H.R.2094      C119  arc_role=cosponsor           shown=True  routing={'selected': 1, 'duplicate-same-role': 1}
+        Addison McDowell       H.R.1181      C119  arc_role=cosponsor           shown=True  routing={'selected': 1}
+        Adelita Grijalva       H.R.2094      C119  arc_role=cosponsor           shown=True  routing={'selected': 1, 'duplicate-same-role': 1}
+        Adrian Smith           H.R.1181      C119  arc_role=cosponsor           shown=True  routing={'selected': 1}
+   -- D3-1 sheets carry the triple under a DIFFERENT role: ['cosponsor']
+        Josh Hawley            S.381         C119  arc_role=original-cosponsor  shown=True  routing={'selected': 1, 'duplicate-same-role': 1}
+        Peter Welch            S.3549        C118  arc_role=original-cosponsor  shown=True  routing={'official-membership-withdrawn-or-role-superseded
+
+======================================================================================================
+N5 / D4  IF THE DESK READ THE ROUTING AUDIT'S SELECTED ROWS INSTEAD
+======================================================================================================
+  desk TODAY (shipped bundle)          : 6130 rows across 523 members
+  routing-audit SELECTED, collapsed    : 5777 rows across 523 members  (8123 selected rows before the (bill,congress) collapse)
+  ROWS LOST  (desk shows, routing-selected does not) = 377
+  ROWS GAINED(routing-selected has, desk does not)   = 24
+  NET = -353
+  lost by role displayed today: {'cosponsor': 118, 'sponsor': 142, 'original': 117}
+  lost by Congress: {'116': 12, '117': 59, '118': 49, '119': 257}
+  gained by routing role: {'cosponsor': 21, 'sponsor': 3}
+  gained by Congress: {'118': 2, '119': 22}
+
+  members whose desk bill list would CHANGE AT ALL = 194 / 533 (36.4%)
+  members who would END UP WITH ZERO bills but have >=1 today = 1
+  TOP 20 members by |net change| (today -> after):
+     member                      today  after    lost  gained     net
+     Elizabeth Warren               42     20      22       0     -22
+     Jack Reed                      34     17      17       0     -17
+     Brian Schatz                   25     15      10       0     -10
+     Raphael Warnock                25     16       9       0      -9
+     Amy Klobuchar                  29     21       8       0      -8
+     Jeff Merkley                   32     24       8       0      -8
+     Tommy Tuberville               22     14       8       0      -8
+     Adam Schiff                    19     12       7       0      -7
+     Chris Van Hollen               25     18       7       0      -7
+     Mark Warner                    22     15       7       0      -7
+     Josh Hawley                    13      7       6       0      -6
+     Mike Rounds                    23     17       6       0      -6
+     Angus King                     19     14       5       0      -5
+     Catherine Cortez Masto         29     24       5       0      -5
+     Cynthia Lummis                 35     30       5       0      -5
+     Kevin Cramer                   40     35       5       0      -5
+     Richard Durbin                 25     20       5       0      -5
+     Tina Smith                     25     20       5       0      -5
+     John Hoeven                    13      9       4       0      -4
+     Lisa Blunt Rochester           15     11       4       0      -4
+  TOP 20 members by LOST count:
+     Elizabeth Warren           today=42    lost=22    gained=0   
+     Jack Reed                  today=34    lost=17    gained=0   
+     Brian Schatz               today=25    lost=10    gained=0   
+     Raphael Warnock            today=25    lost=9     gained=0   
+     Amy Klobuchar              today=29    lost=8     gained=0   
+     Jeff Merkley               today=32    lost=8     gained=0   
+     Tommy Tuberville           today=22    lost=8     gained=0   
+     Adam Schiff                today=19    lost=7     gained=0   
+     Chris Van Hollen           today=25    lost=7     gained=0   
+     Mark Warner                today=22    lost=7     gained=0   
+     Josh Hawley                today=13    lost=6     gained=0   
+     Mike Rounds                today=23    lost=6     gained=0   
+     Angus King                 today=19    lost=5     gained=0   
+     Catherine Cortez Masto     today=29    lost=5     gained=0   
+     Cynthia Lummis             today=35    lost=5     gained=0   
+     Kevin Cramer               today=40    lost=5     gained=0   
+     Richard Durbin             today=25    lost=5     gained=0   
+     Tina Smith                 today=25    lost=5     gained=0   
+     John Hoeven                today=13    lost=4     gained=0   
+     Lisa Blunt Rochester       today=15    lost=4     gained=0   
+
+  CLASS OF EVERY LOST ROW (same taxonomy as D2):
+     a  routing holds the triple, non-selected only             n=46
+     e  found nowhere else                                      n=331
+     disposition strings carried by class-(a) losses:
+        'neutral-registry'                                     triples=33
+        'official-membership-withdrawn-or-role-superseded'     triples=23
+        'neutral-override'                                     triples=12
+        'neutral-official-evidence'                            triples=1
+     DESK SOURCE that supplied each lost row (why the routing frame never saw it):
+        bank_anchor                                                            n=139
+        primacy_act                                                            n=117
+        registry_anchor                                                        n=73
+        workbook_role_sheets                                                   n=46
+        collector_roster,sentinel_history                                      n=1
+        collector_roster,sentinel_admissions,sentinel_history                  n=1
+     class (c)/(d)/(e) losses in total = 331 ; class (a) = 46
+     CROSS-TAB  class x desk source:
+        class a  x  collector_roster,sentinel_admissions,sentinel_history      n=1
+        class a  x  collector_roster,sentinel_history                          n=1
+        class a  x  workbook_role_sheets                                       n=44
+        class e  x  bank_anchor                                                n=139
+        class e  x  primacy_act                                                n=117
+        class e  x  registry_anchor                                            n=73
+        class e  x  workbook_role_sheets                                       n=2
+     class-(a) losses split by WHAT the routing audit says (exclusive buckets):
+        withdrawn/role-superseded + a neutral disposition              n=23
+        neutral-* ONLY (real membership the producer scores 0)         n=23
+     ALL 46 class-(a) losses, verbatim:
+        Alexandria Ocasio-Cortez H.R.1030      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Amy Klobuchar            S.349         C117  role_today=sponsor     disp=['neutral-registry']
+        André Carson             H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Angie Craig              H.R.1215      C117  role_today=cosponsor   disp=['neutral-registry']
+        Ayanna Pressley          H.R.1030      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Bill Huizenga            H.R.5914      C117  role_today=cosponsor   disp=['neutral-registry']
+        Bonnie Watson Coleman    H.R.1030      C117  role_today=cosponsor   disp=['neutral-override']
+        Brian Fitzpatrick        H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Brian Fitzpatrick        H.R.5914      C117  role_today=cosponsor   disp=['neutral-registry']
+        Chris Van Hollen         S.3529        C117  role_today=sponsor     disp=['neutral-registry']
+        Cynthia Lummis           S.3529        C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Deb Fischer              S.3529        C117  role_today=cosponsor   disp=['neutral-registry']
+        Don Bacon                H.R.1215      C117  role_today=cosponsor   disp=['neutral-registry']
+        Dwight Evans             H.R.4895      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Ed Case                  H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Eleanor Norton           H.R.1030      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Eleanor Norton           H.R.1215      C117  role_today=cosponsor   disp=['neutral-registry']
+        Eleanor Norton           H.R.4895      C117  role_today=cosponsor   disp=['neutral-override']
+        Ilhan Omar               H.R.1030      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Ilhan Omar               H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Ilhan Omar               H.R.4895      C117  role_today=sponsor     disp=['neutral-override']
+        Jahana Hayes             H.R.1215      C117  role_today=cosponsor   disp=['neutral-registry']
+        Jesús García             H.R.1030      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Josh Gottheimer          H.R.5914      C117  role_today=sponsor     disp=['neutral-registry']
+        Lisa Blunt Rochester     H.R.1215      C117  role_today=sponsor     disp=['neutral-registry']
+        Margaret Hassan          S.349         C117  role_today=cosponsor   disp=['neutral-registry']
+        Nikema Williams          H.R.1215      C117  role_today=cosponsor   disp=['neutral-registry']
+        Nikema Williams          H.R.1711      C117  role_today=cosponsor   disp=['neutral-registry']
+        Peter Welch              H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Peter Welch              H.R.982       C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Pramila Jayapal          H.R.1030      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Pramila Jayapal          H.R.4895      C117  role_today=original    disp=['neutral-override', 'official-membership-withdrawn-or-role-superseded']
+        Raphael Warnock          S.3529        C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Rashida Tlaib            H.R.1030      C117  role_today=sponsor     disp=['neutral-override']
+        Richard Blumenthal       S.3529        C117  role_today=cosponsor   disp=['neutral-registry']
+        Robin Kelly              H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Susan Collins            S.349         C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Susan Collins            S.3529        C117  role_today=cosponsor   disp=['neutral-registry']
+        Sylvia Garcia            H.R.5914      C117  role_today=cosponsor   disp=['neutral-registry']
+        Thomas Suozzi            H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Tim Scott                S.3529        C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Tim Walberg              H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Vern Buchanan            H.R.1215      C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Vern Buchanan            H.R.982       C117  role_today=original    disp=['neutral-registry', 'official-membership-withdrawn-or-role-superseded']
+        Warren Davidson          H.R.1215      C117  role_today=cosponsor   disp=['neutral-registry']
+        Warren Davidson          H.R.9900      C119  role_today=sponsor     disp=['neutral-official-evidence']
+     ALL non-(a) losses that are NOT from a primacy/anchor sidecar:
+        Tim Scott                S.3382        C117  role_today=sponsor     src=['workbook_role_sheets']
+        Tim Scott                S.3992        C118  role_today=sponsor     src=['workbook_role_sheets']
+     lost rows whose bill number is an AMENDMENT (H.Amdt./S.Amdt.): 117 of 377
+     examples of NON-(a) losses (up to 20):
+        Adam Schiff              S.3940        C119  role=cosponsor   e  found nowhere else                      src=registry_anchor
+        Adam Schiff              S.AMDT.2231   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Adam Schiff              S.AMDT.2232   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Adam Schiff              S.AMDT.2233   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Adam Schiff              S.AMDT.2234   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Adam Schiff              S.AMDT.2260   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Adam Schiff              S.AMDT.2261   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Addison McDowell         H.R.2032      C119  role=original    e  found nowhere else                      src=bank_anchor
+        Alma Adams               H.AMDT.249    C116  role=sponsor     e  found nowhere else                      src=primacy_act
+        Amy Klobuchar            S.1880        C119  role=original    e  found nowhere else                      src=registry_anchor
+        Amy Klobuchar            S.3940        C119  role=original    e  found nowhere else                      src=registry_anchor
+        Amy Klobuchar            S.AMDT.218    C118  role=sponsor     e  found nowhere else                      src=primacy_act
+        Amy Klobuchar            S.AMDT.3270   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Amy Klobuchar            S.AMDT.3751   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Amy Klobuchar            S.AMDT.3916   C119  role=sponsor     e  found nowhere else                      src=primacy_act
+        Amy Klobuchar            S.AMDT.6275   C117  role=sponsor     e  found nowhere else                      src=primacy_act
+        Andrea Salinas           H.R.1822      C119  role=cosponsor   e  found nowhere else                      src=bank_anchor
+        Andy Barr                H.R.1822      C119  role=cosponsor   e  found nowhere else                      src=bank_anchor
+        Andy Kim                 S.3734        C119  role=original    e  found nowhere else                      src=bank_anchor
+        Andy Kim                 S.3940        C119  role=original    e  found nowhere else                      src=registry_anchor
+     examples of class-(a) losses (up to 15):
+        Alexandria Ocasio-Cortez H.R.1030      C117  role=original    disp={'neutral-override': 1, 'official-membership-withdra src=workbook_role_sheets
+        Amy Klobuchar            S.349         C117  role=sponsor     disp={'neutral-registry': 1}                              src=workbook_role_sheets
+        André Carson             H.R.1215      C117  role=original    disp={'neutral-registry': 1, 'official-membership-withdra src=workbook_role_sheets
+        Angie Craig              H.R.1215      C117  role=cosponsor   disp={'neutral-registry': 1}                              src=workbook_role_sheets
+        Ayanna Pressley          H.R.1030      C117  role=original    disp={'neutral-override': 1, 'official-membership-withdra src=workbook_role_sheets
+        Bill Huizenga            H.R.5914      C117  role=cosponsor   disp={'neutral-registry': 1}                              src=workbook_role_sheets
+        Bonnie Watson Coleman    H.R.1030      C117  role=cosponsor   disp={'neutral-override': 1}                              src=workbook_role_sheets
+        Brian Fitzpatrick        H.R.1215      C117  role=original    disp={'neutral-registry': 1, 'official-membership-withdra src=workbook_role_sheets
+        Brian Fitzpatrick        H.R.5914      C117  role=cosponsor   disp={'neutral-registry': 1}                              src=workbook_role_sheets
+        Chris Van Hollen         S.3529        C117  role=sponsor     disp={'neutral-registry': 1}                              src=workbook_role_sheets
+        Cynthia Lummis           S.3529        C117  role=original    disp={'neutral-registry': 1, 'official-membership-withdra src=workbook_role_sheets
+        Deb Fischer              S.3529        C117  role=cosponsor   disp={'neutral-registry': 1}                              src=workbook_role_sheets
+        Don Bacon                H.R.1215      C117  role=cosponsor   disp={'neutral-registry': 1}                              src=workbook_role_sheets
+        Dwight Evans             H.R.4895      C117  role=original    disp={'neutral-override': 1, 'official-membership-withdra src=workbook_role_sheets
+        Ed Case                  H.R.1215      C117  role=original    disp={'neutral-registry': 1, 'official-membership-withdra src=workbook_role_sheets
+
+  WHY EACH GAINED ROW IS ABSENT FROM THE DESK TODAY:
+     in_workbook_sheets=False | frame_src=sentinel-verified | desk_sidecar=sentinel_history       n=21
+     in_workbook_sheets=False | frame_src=sentinel-verified | desk_sidecar=collector_roster,sentinel_history n=3
+     examples (up to 20):
+        Ami Bera                 H.R.2094      C119  routing_role=cosponsor          cats=['Mortgage & Housing']
+        Andy Barr                H.R.4936      C119  routing_role=cosponsor          cats=['Fraud Prevention']
+        Anna Luna                H.R.4686      C118  routing_role=sponsor            cats=['Mortgage & Housing']
+        Anna Luna                H.R.6410      C118  routing_role=sponsor            cats=['Data Privacy & Cyber']
+        Anna Luna                H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Charles Fleischmann      H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Derrick Van Orden        H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Gus Bilirakis            H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Guy Reschenthaler        H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        John Joyce               H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Josh Brecheen            H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Mary Miller              H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Matt Van Epps            H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Max Miller               H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Michael Cloud            H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Michael Guest            H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Mike Kelly               H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Nathaniel Moran          H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Pete Stauber             H.R.987       C119  routing_role=cosponsor          cats=['Member Business Lending']
+        Riley Moore              H.R.1181      C119  routing_role=sponsor            cats=['Data Privacy & Cyber']
+
+======================================================================================================
+N5 / D5  FIELD COVERAGE: WHAT THE DESK RENDERS vs WHAT THE ROUTING AUDIT CARRIES
+======================================================================================================
+  desk row fields consumed by the page (make_member_desk_00.tpl:1778-1789 legBody,
+  :2058-2078 billCard): role, bill, congress, title, areas, sponsor, ncos, summary, url, action
+  routing-audit row fields present at all: ['bill', 'category_mechanism', 'congress', 'contribution', 'decay_weight', 'direction_mechanism', 'disposition', 'effective_category', 'effective_role', 'member', 'member_source', 'override_reason', 'reason', 'selected_role', 'sign', 'source_role', 'source_row', 'source_section', 'title', 'tracker_status']
+  over the 8123 SELECTED rows:
+     desk bill                         <- routing bill                   non-empty on 8123/8123 (100.0%)
+     desk congress                     <- routing congress               non-empty on 8123/8123 (100.0%)
+     desk title                        <- routing title                  non-empty on 8123/8123 (100.0%)
+     desk areas                        <- routing effective_category     non-empty on 8123/8123 (100.0%)
+     desk role                         <- routing effective_role         non-empty on 8123/8123 (100.0%)
+     desk action (latest action)       <- routing tracker_status         non-empty on 8123/8123 (100.0%)
+     desk direction (NOT shown today)  <- routing sign                   non-empty on 8123/8123 (100.0%)
+  FIELDS THE ROUTING AUDIT DOES NOT CARRY AT ALL (zero rows have them):
+     sponsor
+     ncos (CosponsorCount)
+     summary (bill_summary)
+     url (DetailLink)
+  routing title vs archive Title: identical=7203 differs=387 archive-row-absent=533
+
+  JOIN COVERAGE for the 4 missing fields over the routing-SELECTED bill universe:
+     distinct (bill, congress) the switched desk would render = 512
+     bill_repository_live.json (by <congress>:<type>:<num> key)                     covers 449/512 (87.7%)
+     Sentinel Bill Ledger (Title/Sponsor/Cosponsor Count/Detail Link/Summary)       covers 505/512 (98.6%)
+     selected archive All Bills (Sponsor/CosponsorCount/DetailLink/bill_summary)    covers 438/512 (85.5%)
+     manual_bill_evidence.csv                                                       covers 64/512 (12.5%)
+     UNION of those four                                                            covers 512/512 (100.0%)
+     (bill, congress) with NO join source for sponsor/ncos/summary/url = 0 []
+     archive All Bills non-empty rate: {'Sponsor': 10181, 'CosponsorCount': 10072, 'DetailLink': 10181, 'bill_summary': 4144} of 10181 rows
+
+  [state] C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\measN5\d3_d4_state.json
+DONE

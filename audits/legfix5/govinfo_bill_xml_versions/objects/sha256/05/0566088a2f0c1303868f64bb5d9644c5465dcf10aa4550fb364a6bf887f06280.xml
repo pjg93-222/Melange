@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H59E89B7B39B14123B5BCA101924A0792" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6716 IH: Save Animals Through Operational Shelters Act of 2025</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-12-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6716</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251215">December 15, 2025</action-date><action-desc><sponsor name-id="H001103">Mr. Hernández</sponsor> (for himself, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, and <cosponsor name-id="T000468">Ms. Titus</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To establish a program to provide grants and loans to facilitate the care, rehabilitation, and welfare of domestic animals in rural areas, and for other purposes.</official-title></form><legis-body id="H94B1A04D8ECE43B0BD9C07C143D54369" style="OLC"> 
+<section id="HBAC1B7EF6AD04324B8E11566E3451096" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Save Animals Through Operational Shelters Act of 2025</short-title></quote> or the <quote><short-title>SATOS Act of 2025</short-title></quote>.</text></section> 
+<section id="HBF47F09FF2EB497492C97FA4C4FC5FEA"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text> <paragraph id="HCA4CBAC5604F4E06A2DDE14816DF3302"><enum>(1)</enum><text display-inline="yes-display-inline">Rural communities often lack adequate infrastructure (including animal shelters and veterinary care facilities) to support animal welfare.</text></paragraph> 
+<paragraph id="H10FA6029D9134287838A361BE6E7E5D8"><enum>(2)</enum><text display-inline="yes-display-inline">Associations, units of general local government, nonprofit corporations, and Indian Tribes play a critical role in promoting the health, safety, and humane treatment of animals.</text></paragraph> <paragraph id="H1BC490AF05CE4A29A3CE2D75DE49B81B"><enum>(3)</enum><text>Investment in animal care facilities contributes to public health, safety, and community well-being.</text></paragraph></section> 
+<section id="HE059A9626F994769B3CC3D8D38E48BE4"><enum>3.</enum><header>Grants and loans for domestic animal care facilities in rural areas</header> 
+<subsection id="H4F2D1DB4BCA1470786677FDCB502D83C"><enum>(a)</enum><header>Establishment</header><text display-inline="yes-display-inline">The Secretary shall establish a program to provide a grant or loan to an eligible entity—</text> <paragraph id="H5346FA7320EB4A0BBDB7FC703F85B002"><enum>(1)</enum><text display-inline="yes-display-inline">to construct, expand, or renovate a facility in a rural area for—</text> 
+<subparagraph id="H8D95CFEE8E5944408CD1E19A971E49DC"><enum>(A)</enum><text>an animal shelter;</text></subparagraph> <subparagraph id="HB9F8676B7E154B04A8F2ECB300A0F587"><enum>(B)</enum><text>an animal adoption center;</text></subparagraph> 
+<subparagraph id="H80F820565869449D8262B68DEDE5A2A2"><enum>(C)</enum><text>a veterinary care clinic;</text></subparagraph> <subparagraph id="H73AB5D449390470B8C332E6B065A6F48"><enum>(D)</enum><text>a spay and neuter clinic;</text></subparagraph> 
+<subparagraph id="H37C213D24987436BB62C1C6E1EC1D339"><enum>(E)</enum><text>an animal control operation; or</text></subparagraph> <subparagraph id="HDDAD3CD0B9AC41E5A17A06F872F88B88"><enum>(F)</enum><text>an emergency animal shelter; or</text></subparagraph> </paragraph> 
+<paragraph id="HAAE7049478B54221BF4E2F87D086C5C5"><enum>(2)</enum><text>to purchase or install equipment, furnishings, vehicles, or technology for such a facility.</text></paragraph></subsection> <subsection id="HCC5C83062E4E4BC38BBAB4D8DE7DBE5E"><enum>(b)</enum><header>Terms of grant</header> <paragraph id="H8CF29AFC01E642E8AEBB18356532AE54"><enum>(1)</enum><header>Amount</header><text display-inline="yes-display-inline">The total amount that may be provided as grants under subsection (a) for a fiscal year may not exceed $10,000,000.</text></paragraph> 
+<paragraph id="H65E86906EBB14FB2B2DFEC1C01525288"><enum>(2)</enum><header>Federal share</header> 
+<subparagraph id="HED8F5D9416DA4C809C8D8DBD01E6501E"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">Except as provided in subparagraphs (B) and (C), the Secretary shall, by rule, establish the amount of the Federal share of the cost of developing a facility pursuant to a grant under subsection (a).</text></subparagraph> <subparagraph id="H854151DA724941DA9FC3FA90ED316035"><enum>(B)</enum><header>Maximum amount</header><text display-inline="yes-display-inline">The amount of a grant provided under subsection (a) for a facility may not exceed 75 percent of the cost of developing such facility.</text></subparagraph> 
+<subparagraph id="HD0C02D4B47364C73A8283DEF70F177CE"><enum>(C)</enum><header>Graduated scale</header><text display-inline="yes-display-inline">The Secretary shall establish a graduated scale for the amount of the Federal share provided under this paragraph, with a greater Federal share, not more than the maximum amount described in subparagraph (B), for a facility located in a community that has a lesser population or income level, as determined by the Secretary.</text></subparagraph> </paragraph></subsection> <subsection id="H4E17CACFEF5C418A8E612137017D1B2E" commented="no"> <enum>(c)</enum> <header>Technical assistance and training</header> <paragraph id="H6D32D0B392774B58AC47F755331280E3" commented="no"> <enum>(1)</enum> <header>In general</header> <text>The Secretary may make a grant to an eligible entity to procure technical assistance and training to—</text>
+                    <subparagraph id="H5BFFF5076B174654B93F5027E85D6728" commented="no">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">assist such eligible entity in identifying and planning for the needs of a facility developed pursuant to a grant or loan under subsection (a);</text>
+                    </subparagraph>
+                    <subparagraph id="H581607FF162D4543B3A43C8F7F8D7F42" commented="no">
+                        <enum>(B)</enum>
+ <text>identify resources to finance the needs of such a facility;</text> </subparagraph> <subparagraph id="H78FFF8029975408589922B0D08E4E59A" commented="no"> <enum>(C)</enum> <text display-inline="yes-display-inline">prepare a report or survey to be included in an application for a grant or loan under subsection (a);</text>
+                    </subparagraph>
+                    <subparagraph id="H898416E323D146348AE02CC1451F42FB" commented="no">
+                        <enum>(D)</enum>
+ <text>prepare an application for such grant or loan;</text> </subparagraph> <subparagraph id="H9B8646C3A3D54D57A761B6548CB65311" commented="no"> <enum>(E)</enum> <text display-inline="yes-display-inline">improve the administration, including financial administration, of such a facility; and</text>
+                    </subparagraph>
+                    <subparagraph id="H018E660646E0434399FA308DF856A87C" commented="no">
+                        <enum>(F)</enum>
+ <text display-inline="yes-display-inline">assist with any other area of need, as identified by the Secretary, relating to the administration of—</text>
+                        <clause id="H536E27912F6148DDA9FD7FA62E03B8AA">
+                            <enum>(i)</enum>
+ <text>such a facility; or</text> </clause> <clause id="HBDDB08E1AA7542AC8ABF96FD34837838"> <enum>(ii)</enum> <text display-inline="yes-display-inline">a grant or loan under subsection (a).</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="HDF35CFE7EC234E0FA8D9FCFD6FB92673" commented="no">
+                    <enum>(2)</enum>
+                    <header>Selection priority</header>
+ <text display-inline="yes-display-inline">In selecting a recipient of a grant under this subsection, the Secretary shall give priority to an eligible entity that has experience in the planning, design, operation, or management of a facility described in subsection (a)(1), as demonstrated in the application for such grant submitted by such eligible entity.</text>
+                </paragraph>
+                <paragraph id="H64C400F853674DE1BAF926BB1D94C03A" commented="no">
+                    <enum>(3)</enum>
+                    <header>Funding</header>
+ <text>Not less than 3 nor more than 5 percent of any funds appropriated to carry out this section for a fiscal year shall be reserved for grants under this subsection.</text>
+                </paragraph>
+            </subsection> 
+<subsection id="H4CD3733826C749A4838217CE7613217D"><enum>(d)</enum><header>Rule making</header><text display-inline="yes-display-inline">Within 180 days after the date of enactment of this Act, the Secretary shall finalize a rule to carry out this section.</text></subsection> <subsection id="H49AB0157A45846F5956C675D0EEB53CB"><enum>(e)</enum><header>Implementation</header><text display-inline="yes-display-inline">Within 1 year after the date of enactment of this Act, the Secretary shall begin providing grants and loans under subsection (a).</text></subsection> 
+<subsection id="HA087AD02B8A5458B98E090B423A0B284"><enum>(f)</enum><header>Reports</header><text display-inline="yes-display-inline">Within 2 years after the date of enactment of this Act, and not less frequently than every 2 years thereafter, the Secretary shall submit to the Committee on Agriculture of the House of Representatives and the Committee on Agriculture, Nutrition, and Forestry of the Senate a report describing—</text> <paragraph id="H5CCBA3C4D85447BA9D808AE8AEE46E15"><enum>(1)</enum><text>the amount of grants and loans provided under subsections (a) and (c);</text></paragraph> 
+<paragraph id="HDD5F74F18EFD4327B984180FF5E8493B"><enum>(2)</enum><text>the geographic distribution of the recipients of such grants and loans;</text></paragraph> <paragraph id="H656229EFDFD34CDDABAFCC9C45BDE423"><enum>(3)</enum><text>the outcomes achieved by such grants and loans; and</text></paragraph> 
+<paragraph id="H5DF91B749B57460DB1307A50FB25ED69"><enum>(4)</enum><text>any recommendations for improving the effectiveness of the program established under subsection (a).</text> </paragraph></subsection> <subsection id="HEBD2AA4EBBDE48CA88463B4A05FF21AC"><enum>(g)</enum><header>Definitions</header><text>In this section:</text> 
+<paragraph id="H4CE7FD3E152F45F0AE27BC93C8FBDE01"><enum>(1)</enum><text>The term <quote>domestic animal</quote> means an animal, including a dog, cat, guinea pig, hamster, rabbit, or bird, that is not kept by the owner for any commercial purpose.</text></paragraph> <paragraph id="HF71A25FB52914448B209F084C82A9816"><enum>(2)</enum><text>The term <quote>eligible entity</quote> means—</text> 
+<subparagraph id="HA7D38B5F5CCA4EC492FC73B2F53903E1" display-inline="no-display-inline"><enum>(A)</enum><text>a State, local, or Tribal government or an agency thereof; or</text></subparagraph> <subparagraph id="H27B0F0C9E5FA45F5AE80E1178D5EA476" display-inline="no-display-inline"><enum>(B)</enum><text>a nonprofit corporation.</text> </subparagraph></paragraph> 
+<paragraph id="H382236C5FB354E1084B53E25DBD8640E"><enum>(3)</enum><text>The term <quote>rural area</quote> means any area other than—</text> <subparagraph id="H1E73E0429E4B4528B7F7009254928DED"><enum>(A)</enum><text>a city or town that has a population of greater than 50,000 inhabitants; and</text></subparagraph> 
+<subparagraph id="H82A0C847917E49CABC7BE14EEB69A287"><enum>(B)</enum><text>the urbanized area contiguous and adjacent to such a city or town.</text> </subparagraph></paragraph> <paragraph id="H84F8BB502A514E6BAB82C7C054FC7824"><enum>(4)</enum><text display-inline="yes-display-inline">The term <quote>Secretary</quote> means the Secretary of Agriculture, acting through the Under Secretary of Agriculture for Rural Development.</text></paragraph></subsection> </section> 
+</legis-body></bill>
+

@@ -1,0 +1,122 @@
+﻿edges with >=1 contributing window : 9734   (shipped edges 8017)
+total contributing windows         : 18225
+sum artifact n_scored              : 15892
+
+==============================================================================
+P4 RESULTS  (shipped edges only)
+==============================================================================
+shipped edges with >=2 contributing windows identical after whitespace normalisation : 157
+  = 1.96% of shipped edges
+SURPLUS window count (double/triple/... counted)                                    : 170
+  = 1.07% of the artifact's 15892 scored windows
+multiplicity histogram (max identical-group size per edge): {2: 150, 3: 6, 4: 1}
+
+edges that would FALL BELOW the consumers' n_scored>=2 floor if identical windows counted once : 53
+  (currently drawn by build_dashboard_bundle.py:238, would stop being drawn)
+edges currently drawn (n_scored>=2) with ANY surplus : 157
+edges whose n_scored is ENTIRELY duplicate-inflated (distinct==1, n_scored>=2): 53
+
+by source mix of duplicate-bearing edges:
+   ('CREC',)                                         59
+   ('CREC', 'INTERVIEW')                             35
+   ('INTERVIEW',)                                    25
+   ('X',)                                            24
+   ('CHRG', 'CREC')                                   5
+   ('CREC', 'X')                                      3
+   ('CHRG',)                                          2
+   ('INTERVIEW', 'X')                                 1
+   ('CREC', 'INTERVIEW', 'X')                         1
+   ('CHRG', 'CREC', 'INTERVIEW')                      1
+   ('CHRG', 'INTERVIEW')                              1
+
+surplus windows by source (source of the duplicated window):
+   {'CREC': 71, 'INTERVIEW': 61, 'X': 33, 'CHRG': 5}
+
+signed impact:
+   duplicate-bearing edges that are SIGNED (pos+neg>0) : 144
+   ...and drawn (n_scored>=2)                          : 144
+   NOTE: net = (pos-neg)/(pos+neg+neu) is a RATIO, so identical windows (identical cache
+         key -> identical label) leave net unchanged; they inflate n_scored only.
+
+=== 25 worst duplicate-bearing edges ===
+Ritchie Torres             -> Gregory Meeks              win=4 distinct=1 surplus=3 n_scored=4 net=+1.00 src={'X': 4}
+      x4 [X] Today, @RepGregoryMeeks and I announced that the Federal Home Loan Bank of New York (FHLBNY) can now pledge mortgage col
+Mitch McConnell            -> Steve Daines               win=7 distinct=5 surplus=2 n_scored=7 net=+0.67 src={'CREC': 8, 'INTERVIEW': 5, 'PRESS_OFFICIAL_MENTION': 1}
+      x3 [INTERVIEW] Rally to Ken Paxton in Texas May 27 Senate Majority Leader John Thune Returns To The Program May 13 President Donald Tru
+Mike Lee                   -> Ted Cruz                   win=5 distinct=3 surplus=2 n_scored=5 net=+1.00 src={'CREC': 2, 'INTERVIEW': 6, 'PRESS_OFFICIAL_MENTION': 3}
+      x3 [INTERVIEW] It was an all-out attack against Ted Cruz and me. It was unflattering, it was unfair, it was demeaning. It was demeaning
+Jack Reed                  -> Chuck Grassley             win=4 distinct=2 surplus=2 n_scored=4 net=+1.00 src={'CREC': 15, 'CHRG': 1, 'PRESS_OFFICIAL_MENTION': 1}
+      x2 [CREC] Mr. President, the Public Company Accounting Oversight Board PCAOB Enforcement Transparency Act, which I am reintroducin
+      x2 [CREC] Mr. President, today, I am introducing the Stronger Enforcement of Civil Penalties Act along with Senator Grassley. Our 
+Jack Reed                  -> Lisa Murkowski             win=4 distinct=2 surplus=2 n_scored=4 net=+1.00 src={'CREC': 9, 'PRESS_OFFICIAL_MENTION': 3}
+      x2 [CREC] Mr. President, I am pleased to be introducing the Educating Medical Professionals and Optimizing Workforce Efficiency an
+      x2 [CREC] Mr. President, today, along with Senator Murkowski, we are introducing legislation to provide relief to all Federal stud
+Tim Kaine                  -> Margaret Hassan            win=4 distinct=2 surplus=2 n_scored=4 net=+1.00 src={'CREC': 4}
+      x2 [CREC] and their families. Today, I am pleased to introduce the Direct Creation, Advancement, and Retention of Employment Oppor
+      x2 [CREC] ade their health worse. Today, I am pleased to introduce the Supporting Our Direct Care Workforce and Family Caregivers 
+Jack Reed                  -> Alma Adams                 win=4 distinct=2 surplus=2 n_scored=4 net=+1.00 src={'CREC': 6}
+      x2 [CREC] Hollen, Wyden, Stabenow, Merkley, and Heinrich, I am reintroducing the EDUCATORS for America Act to provide the blueprin
+      x2 [CREC] Stabenow, Merkley, and Heinrich, I am reintroducing the EDUCATORS for America Act to provide the blueprint for building 
+Thom Tillis                -> Chuck Grassley             win=4 distinct=2 surplus=2 n_scored=4 net=+0.00 src={'CREC': 1, 'INTERVIEW': 9, 'PRESS_OFFICIAL_MENTION': 2}
+      x2 [INTERVIEW] e margin for error and several senators are uncommitted, like Utah's Mitt Romney. And some senators in the past have bee
+      x2 [INTERVIEW] for error and several senators are uncommitted, like Utah's Mitt Romney. And some senators in the past have been wary ab
+Derrick Van Orden          -> Nancy Pelosi               win=4 distinct=2 surplus=2 n_scored=4 net=-1.00 src={'INTERVIEW': 4}
+      x3 [INTERVIEW] claiming to be fiscal conservatives, just voted with every single Democrat in the House of Representatives. That would b
+Andy Biggs                 -> James Comer                win=3 distinct=1 surplus=2 n_scored=3 net=+0.00 src={'INTERVIEW': 3}
+      x3 [INTERVIEW] tious Capitol Hill hearing, United States Secret Service Director Kimberly Cheatle found few allies. Now bipartisan call
+Pete Stauber               -> Steve Daines               win=3 distinct=1 surplus=2 n_scored=3 net=+1.00 src={'X': 3}
+      x3 [X] Hunting is a big part of our way of life in northern Minnesota. Glad to see my friend @SteveDaines has been freed on Twi
+Roger Marshall             -> Steve Daines               win=3 distinct=1 surplus=2 n_scored=3 net=+1.00 src={'X': 3}
+      x3 [X] I stand with Steve! Glad Senator @SteveDaines’s twitter account is unlocked! https://t.co/VOF2oM08z2 Safari Club Interna
+Joe Wilson                 -> Mike Rogers                win=8 distinct=7 surplus=1 n_scored=8 net=+1.00 src={'CREC': 8, 'INTERVIEW': 4}
+      x2 [INTERVIEW] Thank you, Chairman Mike Rogers, for your leadership working with President Donald Trump. As the grateful father of four
+Charles Schumer            -> Elizabeth Warren           win=8 distinct=7 surplus=1 n_scored=8 net=+0.86 src={'CREC': 13, 'INTERVIEW': 9}
+      x2 [INTERVIEW] dges. And what that will do, I believe, is unite not only Democrats in the Senate. You've seen in our leadership team th
+Charles Schumer            -> Raphael Warnock            win=8 distinct=7 surplus=1 n_scored=8 net=+1.00 src={'CREC': 9, 'INTERVIEW': 10}
+      x2 [CREC] Madam President, if there is no further business to come before the Senate, I ask that it stand adjourned under the prev
+Charles Schumer            -> Mitch McConnell            win=8 distinct=7 surplus=1 n_scored=8 net=+0.38 src={'CREC': 642, 'INTERVIEW': 267}
+      x2 [INTERVIEW] The Netanyahu coalition no longer fits the needs of Israel after October 7th. SEN. MITCH McCONNELL: This is unprecedente
+Charles Schumer            -> Bernard Sanders            win=8 distinct=7 surplus=1 n_scored=8 net=+0.00 src={'CREC': 22, 'INTERVIEW': 14}
+      x2 [INTERVIEW] ugh. To do small things with 50 votes is rough. To pass such a major piece of legislation with only 50 votes, an intrans
+Thom Tillis                -> Charles Schumer            win=8 distinct=7 surplus=1 n_scored=8 net=-1.00 src={'CREC': 9, 'INTERVIEW': 12, 'CHRG': 2}
+      x2 [INTERVIEW] The first vote that Cal Cunningham would make would be for Chuck Schumer for leader, and Chuck Schumer will absolutely w
+Susan Collins              -> Jack Reed                  win=7 distinct=6 surplus=1 n_scored=7 net=+0.80 src={'CREC': 18, 'CHRG': 39}
+      x2 [CREC] ation Act, legislation to help preserve access by our Nation's fishermen and maritime workers to the waterfronts in coas
+Bernard Sanders            -> Charles Schumer            win=7 distinct=6 surplus=1 n_scored=7 net=-0.14 src={'CREC': 13, 'INTERVIEW': 15}
+      x2 [INTERVIEW] Leaders of our country, President Trump, President-elect Biden, Minority Leader Chuck Schumer, the speaker of the House,
+Ted Lieu                   -> Jim Jordan                 win=7 distinct=6 surplus=1 n_scored=7 net=-1.00 src={'INTERVIEW': 3, 'X': 6}
+      x2 [X] Dear Chair @Jim_Jordan: Censoring someone would be to prevent them from saying something. Like when Trump tried to take 
+James McGovern             -> Steve Scalise              win=7 distinct=6 surplus=1 n_scored=7 net=-0.29 src={'CREC': 4, 'INTERVIEW': 3}
+      x2 [INTERVIEW] blicans are bitterly divided, the race to elect the next speaker is in full swing. Two leading contenders for the role a
+John Thune                 -> Tim Scott                  win=6 distinct=5 surplus=1 n_scored=6 net=+1.00 src={'CREC': 26, 'INTERVIEW': 2}
+      x2 [INTERVIEW] Tim Scott is the real deal. MCKEND (voice-over): Scott joins a growing field of GOP hopefuls.
+John Cornyn                -> Tim Scott                  win=6 distinct=5 surplus=1 n_scored=6 net=+1.00 src={'CREC': 22, 'INTERVIEW': 2, 'PRESS_OFFICIAL_MENTION': 1}
+      x2 [CREC] their partnership on this legislation. I especially want to recognize the chairman of the Banking Committee, which has p
+Amy Klobuchar              -> Ted Cruz                   win=6 distinct=5 surplus=1 n_scored=6 net=-1.00 src={'CREC': 2, 'INTERVIEW': 16}
+      x2 [INTERVIEW] will drive women to the polls and men, anyone, that 80 percent of the public who believes that health care decisions sho
+
+=== cross-check on the exact cache-key slice w[:400] ===
+edges with duplicate w[:400] : 157 | surplus 170
+
+=== X-source duplicate tweets (July: duplicate tweets counted 2-4x) ===
+duplicate-bearing edges touching X : 29
+X identical-group sizes: {2: 26, 3: 2, 4: 1}
+   Ritchie Torres           -> Gregory Meeks            win=4 distinct=1 n_scored=4
+        x4 [X] Today, @RepGregoryMeeks and I announced that the Federal Home Loan Bank of New York (FHLBNY) can now pledge mortgage collateral us
+   Pete Stauber             -> Steve Daines             win=3 distinct=1 n_scored=3
+        x3 [X] Hunting is a big part of our way of life in northern Minnesota. Glad to see my friend @SteveDaines has been freed on Twitter. @Saf
+   Roger Marshall           -> Steve Daines             win=3 distinct=1 n_scored=3
+        x3 [X] I stand with Steve! Glad Senator @SteveDaines’s twitter account is unlocked! https://t.co/VOF2oM08z2 Safari Club International (@S
+   James McGovern           -> Elizabeth Warren         win=5 distinct=4 n_scored=5
+        x2 [X] Count me in, @SenWarren. After the 2008 financial crisis, Congress said “never again,” yet Trump rolled back regulations after Big
+   Ted Lieu                 -> Jim Jordan               win=7 distinct=6 n_scored=7
+        x2 [X] Dear Chair @Jim_Jordan: Censoring someone would be to prevent them from saying something. Like when Trump tried to take down tweet
+   Elizabeth Warren         -> Charles Schumer          win=4 distinct=3 n_scored=4
+        x2 [X] .@MOHELA, one of the nation’s largest student loan servicers, is reportedly failing to do the most basic functions of the job, del
+   Mike Collins             -> Jim Jordan               win=3 distinct=2 n_scored=3
+        x2 [X] Chairman @Jim_Jordan brought receipts. https://t.co/MYE2Avbetl Greg Price (@greg_price11): Rep. Daniel Goldman (who bought a congr
+   Delia Ramirez            -> Ayanna Pressley          win=4 distinct=3 n_scored=4
+        x2 [X] Thank you @RepPressley for standing up for the people of Chicago! Congresswoman Ayanna Pressley (@RepPressley): The @CFPB is an es
+
+wrote receipts/06_p4_duplicate_edges.json (157 edges)
+DONE 06

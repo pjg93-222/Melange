@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H2F450CADEBDD447ABFEEA06245902060" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2552 IH: Protecting Local Access to Care for Everyone Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2552</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190507">May 7, 2019</action-date><action-desc><sponsor name-id="K000381">Mr. Kilmer</sponsor> (for himself and <cosponsor name-id="S001196">Ms. Stefanik</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To direct the Secretary of Health and Human Services to prevent certain payment reductions for
+			 clinic visit services furnished at excepted off-campus outpatient
+			 departments of a provider under the Medicare program.</official-title></form>
+	<legis-body id="HA764382673354B31AC3966E022573A0B" style="OLC">
+ <section id="H3D527D16DDE34377A0E2632E032ED620" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting Local Access to Care for Everyone Act of 2019</short-title></quote> or the <quote><short-title>PLACE Act of 2019</short-title></quote>.</text> </section><section id="H31C2DBE13B374CFD895FB8F289753665"><enum>2.</enum><header>Preventing certain payment reductions for clinic visit services furnished at excepted off-campus outpatient departments of a provider under the Medicare program</header> <subsection id="H899D6606A5B04D87A11C48D213A8498C"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of Health and Human Services shall, for purposes of payment under part B of title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395j">42 U.S.C. 1395j</external-xref> et seq.) for clinic visit services (as defined in subsection (c)) furnished during the period beginning on January 1, 2019, and ending on December 31, 2020, by an applicable provider (as defined in such subsection), treat such services as if such services had been furnished by a department of a provider located on the campus (as defined in section 413.65(a)(2) of title 42, Code of Federal Regulations (or any successor regulation)) of such provider.</text>
+ </subsection><subsection id="H76373B195E034FEDAA275EA2BDFEEFCB"><enum>(b)</enum><header>Reimbursement</header><text display-inline="yes-display-inline">In the case of such clinic visit services furnished during the period described in subsection (a) by such an applicable provider for which payment has already been made under such part B as of the date of the enactment of this Act, the Secretary of Health and Human Services shall promptly reimburse such provider in an amount equal to the difference between the payment for such services under subsection (a) and the amount actually paid for such services.</text>
+ </subsection><subsection id="HC4CEF91941AC4E00B0EBF9AAF453A538"><enum>(c)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="HCC461544C0E746C5ABAFFD8E0BEF8989"><enum>(1)</enum><header>Applicable provider</header><text display-inline="yes-display-inline">The term <quote>applicable provider</quote> means a department of a provider that would be an off-campus outpatient department of a provider (as defined in section 1833(t)(21)(B) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395l">42 U.S.C. 1395l(t)(21)(B)</external-xref>) but for the application of clause (ii) or (iv) of such section.</text>
+ </paragraph><paragraph id="HC9CD7C23E9CD47B0B95FF1112BD7E006"><enum>(2)</enum><header>Clinic visit services</header><text display-inline="yes-display-inline">The term <quote>clinic visit services</quote> means those services identified by Healthcare Common Procedure Coding System code G0463 (or a successor code).</text>
+ </paragraph><paragraph id="H766699088E27463D8B9F4E6484C65767"><enum>(3)</enum><header>Department of a provider</header><text display-inline="yes-display-inline">The term <quote>department of a provider</quote> has the meaning given such term in section 413.65(a)(2) of title 42, Code of Federal Regulations, as in effect as of the date of the enactment of this Act.</text>
+				</paragraph></subsection></section></legis-body></bill>
+
+

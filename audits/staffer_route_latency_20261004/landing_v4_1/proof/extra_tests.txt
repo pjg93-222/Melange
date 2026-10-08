@@ -1,0 +1,26 @@
+# The tests that mention staffer_live but are not named test_staffer_* (run_suites.py does not reach them): the dashboard, clean workspace, combined section, network html, edge startup and desktop tests.
+# Same method (scripts/run_extra.py: one process per file), at 79ef9f1b7, at the v4.1 tip, and on the applied tree.
+
+## 79ef9f1b7 (the v4 tip)
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0    py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 1.34s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0    script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0    py     pass 4    fail 0   err 0  skip 0   4 passed in 0.78s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0    script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0    py     pass 9    fail 0   err 0  skip 0   9 passed in 0.84s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0    py     pass 2    fail 0   err 0  skip 0   2 passed in 0.55s
+
+## the v4.1 tip
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0    py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 1.34s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0    script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0    py     pass 4    fail 0   err 0  skip 0   4 passed in 0.58s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0    script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0    py     pass 9    fail 0   err 0  skip 0   9 passed in 0.85s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0    py     pass 2    fail 0   err 0  skip 0   2 passed in 0.81s
+
+## the applied tree
+fec/tests/surfaces/test_clean_workspace_loading.py             rc=0    py     pass 7    fail 0   err 0  skip 2   7 passed, 2 skipped in 1.08s
+fec/tests/surfaces/test_combined_staffer_section.py            rc=0    script pass 46   fail 0   err 0  skip 0   46 passed, 0 failed
+fec/tests/surfaces/test_edge_startup.py                        rc=0    py     pass 4    fail 0   err 0  skip 0   4 passed in 0.56s
+fec/tests/surfaces/test_make_staffer_network_html.py           rc=0    script pass 219  fail 0   err 0  skip 0   219 passed, 0 failed
+fec/tests/surfaces/test_melange_dashboard.py                   rc=0    py     pass 9    fail 0   err 0  skip 0   9 passed in 1.14s
+fec/tests/surfaces/test_moneyball_desktop.py                   rc=0    py     pass 2    fail 0   err 0  skip 0   2 passed in 0.89s

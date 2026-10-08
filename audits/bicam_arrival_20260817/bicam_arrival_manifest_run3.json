@@ -1,0 +1,86 @@
+{
+  "schema": "bicam-arrival-manifest-v1",
+  "snapshot_id": "bicam-net-2026-08-17-sha256-verified-zips-textsprojected",
+  "source_manifest_sha256": "9f5158147b8b394ce2ec2c9f400e3666b0d90e7f72340702a0369d6bc8f03778",
+  "component_order": [
+    "bills",
+    "bills_texts",
+    "bills_sponsored",
+    "members",
+    "committees",
+    "hearings",
+    "committee_reports"
+  ],
+  "components": {
+    "bills": {
+      "relative_path": "bills.csv",
+      "format": "csv",
+      "bytes": 129706006,
+      "sha256": "b1c21c729eedcc9868424d9f8813bf8d40c074d120445428ea90bbca99025832",
+      "row_count": 414376,
+      "columns": {
+        "bill_id": "bill_id",
+        "congress": "congress",
+        "bill_type": "bill_type",
+        "bill_number": "bill_number"
+      }
+    },
+    "bills_texts": {
+      "relative_path": "bills_texts_ids.csv",
+      "format": "csv",
+      "bytes": 4297343,
+      "sha256": "e6354017bed0078ad82982ae399f9a14c150327d5d0460d4df664fe09aa3d6cf",
+      "row_count": 371806,
+      "columns": {
+        "bill_id": "bill_id"
+      }
+    },
+    "bills_sponsored": {
+      "relative_path": "bills_sponsored.csv",
+      "format": "csv",
+      "bytes": 127593268,
+      "sha256": "c5c3fd49f2f3466bcc733f058b2c06dfc498f633f54a96158fa03b18ad033824",
+      "row_count": 4277522,
+      "columns": {
+        "bill_id": "bill_id",
+        "member_id": "member_id",
+        "relationship": "relationship"
+      }
+    },
+    "members": {
+      "relative_path": "members_staged.csv",
+      "format": "csv",
+      "bytes": 802640,
+      "sha256": "14216970d31290445e5132991574c7ae438fdc63c886707e23398ceaa93cf57e",
+      "row_count": 2555,
+      "columns": {
+        "member_id": "member_id",
+        "bioguide_id": "bioguide_id"
+      }
+    },
+    "committees": {
+      "relative_path": "committees.csv",
+      "format": "csv",
+      "bytes": 82950,
+      "sha256": "2d94c6ff3e4f33ebeb1da34f542f3d9e967af09a4b69a47394729acc2c2fdb50",
+      "row_count": 806,
+      "columns": {}
+    },
+    "hearings": {
+      "relative_path": "hearings.csv",
+      "format": "csv",
+      "bytes": 9623971,
+      "sha256": "324599f772a2854b3f3bc45fae55d24478c1418e4f6b5066ed3137b699d1b63d",
+      "row_count": 45432,
+      "columns": {}
+    },
+    "committee_reports": {
+      "relative_path": "committeereports_ids.csv",
+      "format": "csv",
+      "bytes": 1498713,
+      "sha256": "77b533a2324446b8203bd91d42d48651bcc3d452b748b0be6364af53d732da45",
+      "row_count": 106498,
+      "columns": {}
+    }
+  }
+}

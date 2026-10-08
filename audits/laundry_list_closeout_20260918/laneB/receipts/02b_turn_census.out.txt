@@ -1,0 +1,137 @@
+﻿==============================================================================
+FULL-CORPUS TURN-ARTEFACT CENSUS (every speeches row)
+==============================================================================
+rows scanned: 270489
+
+-- source='CHRG'  rows=10308  mean_len=899
+     null_or_empty_text            0  (0.000%)
+     len_gt_2000                 667  (6.471%)
+     len_gt_6000                  60  (0.582%)
+     has_newline                   0  (0.000%)
+     has_>>                        0  (0.000%)
+     has_crosstalk_marker         23  (0.223%)
+     has_ALLCAPS_tag               4  (0.039%)
+
+-- source='CREC'  rows=106605  mean_len=2498
+     null_or_empty_text            0  (0.000%)
+     len_gt_2000               33665  (31.579%)
+     len_gt_6000                9544  (8.953%)
+     has_newline                   0  (0.000%)
+     has_>>                        0  (0.000%)
+     has_crosstalk_marker          2  (0.002%)
+     has_ALLCAPS_tag             392  (0.368%)
+
+-- source='INTERVIEW'  rows=153576  mean_len=455
+     null_or_empty_text            0  (0.000%)
+     len_gt_2000                2400  (1.563%)
+     len_gt_6000                 203  (0.132%)
+     has_newline                   0  (0.000%)
+     has_>>                        4  (0.003%)
+     has_crosstalk_marker        731  (0.476%)
+     has_ALLCAPS_tag              78  (0.051%)
+
+=== ALLCAPS-tag examples (these are the only turn-boundary candidates) ===
+-- CHRG
+   member=Susan Collins            tag='FMR'                  ctx='along with a synopsis of the three main components of each FMR: a base rent, an inflation adjustment and a trend factor.\\1\\'
+   member=Susan Collins            tag='DOI'                  ctx='Affordability and Child Well-Being, Housing Policy Debate, DOI: 10.1080/10511482.2014.899261 ------------------------------'
+   member=Brian Schatz             tag='GAO'                  ctx='y Seating Policy........................................ 49 GAO: Report: On Aviation Safety Bi-laterals and Validation......'
+   member=Tina Smith               tag='USA'                  ctx='urko and Molloy 2014. \\11\\ Sonia Hirt. 2015. ``Zoned in the USA: The Origins and Implications of American Land-Use Regulatio'
+-- CREC
+   member=Peter Welch              tag='PADILLA'              ctx='esent in the great United States of America. ______ By Mr. PADILLA: S. 2260. A bill to provide for the water quality restoratio'
+   member=Charles Schumer          tag='FEMA'                 ctx='Weather Service, and across FEMA. Here are the facts about FEMA: A day after the Texas flooding, FEMA laid off workers--hund'
+   member=Deborah Ross             tag='SNAP'                 ctx='s. Erica from Wilson, North Carolina, had this to say about SNAP: ``As a grandmother who is having to raise my granddaughter,'
+   member=Wesley Bell              tag='P.S.'                 ctx='blic media. We should be investing in that, not gutting it. P.S.: Release the Epstein files.'
+   member=Lisa Murkowski           tag='KUCB'                 ctx='king at a text I received from the station manager there at KUCB: Three staff members worked at sea level in our studio to ge'
+   member=Alex Padilla             tag='DURBIN'               ctx='ealth for Latinos Act as quickly as possible. ______ By Mr. DURBIN: S. 2457. A bill to authorize dedicated domestic terrorism o'
+   member=Jeff Merkley             tag='CNN'                  ctx='aker of the House. July 15, House Speaker Mike Johnson told CNN: We should put everything out there and let the people decid'
+   member=Alex Padilla             tag='DURBIN'               ctx='ately and rapidly respond to economic events. ______ By Mr. DURBIN: S. 2548. A bill to designate the Camp Hutchins Wilderness a'
+   member=Raphael Warnock          tag='WCNSF'                ctx="estruction. There is this phrase in Gaza. It is an acronym. WCNSF: Wounded child, no surviving family. I can't think of a wors"
+   member=Charles Schumer          tag='CNN'                  ctx="avorable, 33 percent favorable about the ``Big Ugly Bill.'' CNN: 61 percent oppose, 39 percent approve. These are not just m"
+   member=Jeff Merkley             tag='CNN'                  ctx='n are for sale. On July 15, House Speaker Mike Johnson told CNN: We should put everything out there and let the people decid'
+   member=Mike Bost                tag='RELIEF ACT'           ctx="er Residence Protection Act''. SEC. 2. SERVICEMEMBERS CIVIL RELIEF ACT: TOLLING OF PERIOD OF ADVERSE POSSESSION. (a) In General.--S"
+-- INTERVIEW
+   member=Tammy Baldwin            tag='BALDWIN'              ctx='BALDWIN: So, I believe that China cheats. That the government there'
+   member=Alexandria Ocasio-Cortez tag='ICE'                  ctx='at our greatest fear is and has been for a long time around ICE: that this will be used as an anti-civilian force that has n'
+   member=Elizabeth Warren         tag='BANKING COMMITTEE'    ctx="ank you, Mr. Chairman. SEN. TIM SCOTT (R-SC), CHAIR, SENATE BANKING COMMITTEE:: Well, there you have it. I'll just say it. It is interesti"
+   member=John Kennedy             tag='MARGARET BRENNAN'     ctx="It's okay. MARGARET BRENNAN:--since I have you here. Last time you were with us--"
+   member=John Kennedy             tag='MARGARET BRENNAN'     ctx='Mm-Hm. MARGARET BRENNAN:--clear was opened after a Trump campaign aide, George Papad'
+   member=Josh Gottheimer          tag='CHUCK TODD'           ctx="to any tax increases that hurt the families in my district. CHUCK TODD:And it's not clear whether the White House can unite progres"
+   member=Mitch McConnell          tag='CHUCK TODD'           ctx="Really? Because-- CHUCK TODD:I mean, I'm just asking, that is a-- look, any senator can h"
+   member=Susan Collins            tag='CHUCK TODD'           ctx='Thank you. CHUCK TODD:Look, it’s going to be Pollyanna-ish and you guys are going'
+   member=Rand Paul                tag='CHUCK TODD'           ctx='gress without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in respo'
+   member=Charles Schumer          tag='DONALD TRUMP'         ctx="We disagree. PRES. DONALD TRUMP:And I'll tell you what. SEN. CHUCK SCHUMER:We disagree."
+   member=Susan Collins            tag='CHUCK TODD'           ctx='in the Medicaid/Medicare program as a result of this bill. CHUCK TODD:All right. We will be watching that commitment that was made'
+   member=Amy Klobuchar            tag='CHUCK TODD'           ctx="ravel to these states and we're going to be doing events -- CHUCK TODD:Let me ask -- SEN. AMY KLOBUCHAR:-- in nearly all of them."
+
+==============================================================================
+`package` FIELD -- C-SPAN IDENTIFIABILITY
+==============================================================================
+INTERVIEW  rows=153576 distinct package=52482
+CHRG       rows=10308 distinct package=191
+CREC       rows=106605 distinct package=1189
+
+=== top 25 package values overall ===
+  'CREC-2023-11-02'                                                  436
+  'CREC-2023-09-27'                                                  419
+  'CREC-2025-03-31'                                                  403
+  'CREC-2023-11-14'                                                  388
+  'CREC-2024-07-23'                                                  375
+  'CREC-2023-11-08'                                                  359
+  'CREC-2019-06-12'                                                  359
+  'CREC-2023-07-13'                                                  322
+  'CREC-2023-03-29'                                                  310
+  'CREC-2023-01-26'                                                  308
+  'CREC-2019-12-18'                                                  303
+  'CREC-2026-04-29'                                                  299
+  'CREC-2023-11-07'                                                  299
+  'CREC-2022-07-13'                                                  285
+  'CREC-2024-09-24'                                                  276
+  'CREC-2023-09-26'                                                  269
+  'CHRG-118hhrg53388'                                                269
+  'CREC-2026-06-04'                                                  267
+  'CREC-2024-06-04'                                                  258
+  'CREC-2023-09-28'                                                  258
+  'CREC-2024-06-26'                                                  257
+  'CREC-2025-05-21'                                                  255
+  'CREC-2025-07-17'                                                  253
+  'CREC-2024-09-25'                                                  248
+  'CREC-2025-02-05'                                                  246
+
+=== rows whose package matches c-span/cspan, by source ===
+  INTERVIEW       7116
+
+=== distinct c-span package values (top 30) ===
+  'https://www.c-span.org/program/washington-journal/rep-ralph-no'      39
+  'https://www.c-span.org/program/washington-journal/rep-tim-burc'      29
+  'https://www.c-span.org/program/washington-journal/rep-john-cur'      29
+  'https://www.c-span.org/program/washington-journal/rep-adriano-'      29
+  'https://www.c-span.org/program/washington-journal/rep-mike-flo'      28
+  'https://www.c-span.org/program/washington-journal/rep-jeff-hur'      28
+  'https://www.c-span.org/program/washington-journal/rep-don-baco'      28
+  'https://www.c-span.org/program/washington-journal/representati'      27
+  'https://www.c-span.org/program/washington-journal/rep-greg-lan'      27
+  'https://www.c-span.org/program/washington-journal/rep-don-baco'      27
+  'https://www.c-span.org/program/washington-journal/representati'      26
+  'https://www.c-span.org/program/washington-journal/representati'      26
+  'https://www.c-span.org/program/washington-journal/rep-ami-bera'      26
+  'https://www.c-span.org/program/washington-journal/rep-adriano-'      26
+  'https://www.c-span.org/program/washington-journal/senator-king'      25
+  'https://www.c-span.org/program/washington-journal/representati'      25
+  'https://www.c-span.org/program/washington-journal/representati'      25
+  'https://www.c-span.org/program/washington-journal/representati'      25
+  'https://www.c-span.org/program/washington-journal/rep-tom-mccl'      25
+  'https://www.c-span.org/program/washington-journal/rep-peter-we'      25
+  'https://www.c-span.org/program/washington-journal/rep-glenn-gr'      25
+  'https://www.c-span.org/program/washington-journal/rep-ami-bera'      25
+  'https://www.c-span.org/program/washington-journal/representati'      24
+  'https://www.c-span.org/program/washington-journal/representati'      24
+  'https://www.c-span.org/program/washington-journal/rep-tom-mccl'      24
+  'https://www.c-span.org/program/washington-journal/rep-tom-mccl'      24
+  'https://www.c-span.org/program/washington-journal/rep-tom-mccl'      24
+  'https://www.c-span.org/program/washington-journal/rep-sean-cas'      24
+  'https://www.c-span.org/program/washington-journal/rep-ritchie-'      24
+  'https://www.c-span.org/program/washington-journal/rep-rich-mcc'      24
+
+=== INTERVIEW package prefix census (token before first "_" or ":") ===
+  'https'                                       153576
+DONE 02b

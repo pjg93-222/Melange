@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H8C85B5E120A5437CA46CEBE8577CAE57" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 658 IH: Expressing support for the designation “Housing America Month” and honoring the importance of affordable housing and community development programs and resources that allow communities across the country to provide access to safe, secure housing for all Americans, regardless of income level.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-10-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 658</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191028">October 28, 2019</action-date><action-desc><sponsor name-id="C001049">Mr. Clay</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Expressing support for the designation <quote>Housing America Month</quote> and honoring the importance of affordable housing and community development programs and resources
+			 that allow communities across the country to provide access to safe,
+			 secure housing for all Americans, regardless of income level.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas for over 80 years it has been the policy of this Nation to promote the general welfare of the Nation by employing its funds and credit to assist States and localities to remedy housing conditions, and create and preserve housing that is decent, safe, and sanitary under the United States Housing Act of 1937;</text>
+ </whereas><whereas><text>Whereas the House of Representatives, which has, over a period of many years, endeavored to address affordable housing and community development needs and has been successful in doing so through related appropriations and authorizing legislation has committed itself to meeting the affordable housing and community development needs of the country; and</text>
+ </whereas><whereas><text>Whereas the National Association of Housing and Redevelopment Officials has celebrated October as Housing America Month for over a decade and has honored the children living in subsidized housing through a calendar featuring their artwork: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="HCB1020893AFA4873AED2DEC41DDEF7C9" style="OLC">
+ <section display-inline="yes-display-inline" id="HF98A712F1A174026B04AC88F18CFD98E" section-type="undesignated-section"><enum></enum><text display-inline="yes-display-inline">That the House of Representatives supports the designation of <quote>Housing America Month</quote> and honors the importance of our Nation’s housing and community development programs.</text> </section></resolution-body></resolution> 
+

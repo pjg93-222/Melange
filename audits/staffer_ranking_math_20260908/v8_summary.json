@@ -1,0 +1,107 @@
+{
+  "generation": "staffer_social_network_20260908_v8_math_primary",
+  "spine": "hill_personnel_spine_20260908_v8_primary",
+  "people": 144692,
+  "scored_people": 120993,
+  "isolates": 23699,
+  "shared_people_in_top100": 18,
+  "edge_counts": {
+    "co_tenure_guaranteed": 4546099,
+    "co_tenure_possible_only_zero_weight": 766885,
+    "co_tenure_zero_overlap_REJECTED_never_emitted": 10103526,
+    "edges_file_rows_emitted": 5312984,
+    "groups": 3641,
+    "largest_co_tenure_eligible_container_person_count": 1038,
+    "largest_container_person_count": 3373,
+    "membership": 187788,
+    "operator_edges": 4546099,
+    "policy_area_membership": 11525,
+    "politico_review_only": 100256,
+    "revolving": 5999,
+    "revolving_in_operator": 0,
+    "revolving_person_registrant": 4370,
+    "sequence_person_person": 0,
+    "total_rows_emitted": 5526307
+  },
+  "max_office_strength_conservation_error": 1.1652900866465643e-12,
+  "max_isolate_pagerank_error": 2.117582368135751e-22,
+  "eigenvector_null_count": 0,
+  "ranking_math": {
+    "attenuated_edges": 257427,
+    "attribution": "within-container union days times shared-role factor, divided by sum over supplying containers",
+    "interpretation": "exploratory damping; not a calibrated probability or a cap on total person strength",
+    "maximum_attenuation": 1.0,
+    "minimum_attenuation": 0.04999999999999999,
+    "shared_person_container_cells": 8196,
+    "shared_role_factor": 0.05,
+    "title_basis": "Exact normalized title_last in person/container span; no person-wide title blacklist",
+    "version": "staffer-ranking-duration-v1"
+  },
+  "top25_ids": [
+    "person:hill:person:663fd42787bc2f7d3537997ce116ed495640d51510f0a3d855c3fb874849cad3",
+    "person:hill:person:f5cf61f61726288bafdda9594a0786ab39d5b321763c257c642db42ce6861628",
+    "person:hill:person:3f25f16fba28c043ef3e4450a36cc58ab98d6c27e2fd6ac6b5bbdba25756e94e",
+    "person:hill:person:2d015f5c9ef6fa40e46f5a233ecc4233ba8546826a82dc0facb248ced61c2529",
+    "person:hill:person:dc4e6bf5432f740085b622b577dfcaf94aa4279a12314d46745aaa12d6bec71f",
+    "person:hill:person:83ae35490a30a58bb21f66e4ec923ff122a4161d925432375d2aba27e3c242ef",
+    "person:hill:person:da1d3f0fdf4985e719aafe88cc3e6f55acb3e09c068e956e18a4e0e8153d0300",
+    "person:hill:person:28a53f116c9c3115c8715089be2b4e90abe3cf008553a33f5d907f2c475efac1",
+    "person:hill:person:7ef09209cd2936da235f58f0e94abf41d00d4ba3d973c30f3801e5045a0522a2",
+    "person:hill:person:7eb25cbba8cbef4a817eb484bcdda2ec4810bad23c398310676ca34418259100",
+    "person:hill:person:8736c2cc62963387fc2d3ed0c655c64bfd52d8a3d88bcb2a15116414db663d71",
+    "person:hill:person:2393604e935a217d84acf93e6988709841980dd6764e44d1b75785b825459e73",
+    "person:hill:person:57c48ef089e14393c8b1afbe469448e4f15288a8e11d58e4835216badf89a478",
+    "person:hill:person:876b311522a199cc86757f93470d160b6dc942cf242f9ac51864795b3cad3ecb",
+    "person:hill:person:24262c4cd713d73e1bec9264a1eab482c594d8b1bdcbb76513e2ae5cb859335f",
+    "person:hill:person:f6ef7a90bfcb3b209b129f68c8e1fdf0c7cb5c216469270e3df632ad637e39f9",
+    "person:hill:person:11cbd7dd8bdc09b995c5c09bca3ffadc0f4cd5f9621e1b8f999464810a2f5227",
+    "person:hill:person:b815bc0a21937df692b7946d829bc6403c82ec32ab0889b0a1738986df1e26fc",
+    "person:hill:person:9d71d65acd80a6b980aafd1414e3b690f87da6ecc981384cd0b288d835b205c1",
+    "person:hill:person:bbf9c5517fd22fff36018d1985333fad1c50a5ca91243f34fc951f6ee3e1e648",
+    "person:hill:person:fa9e9c261f8a5b2161d24026dc3530831129e515b749cecaa3745897e7dd9787",
+    "person:hill:person:93ce121bc6c9979dd3c4a48ab4277772107e304a2425bf23aa707a0fab82ad35",
+    "person:hill:person:f7875e43cea5286a235803bfdbb78615962700fcc5fcf240d35ecf0cc35ab0d2",
+    "person:hill:person:14b368d4b3f61c5115abb75988b6786153ccc9cc6edbae2b62deb5100ef26a58",
+    "person:hill:person:1c5aea0d80ad9cf93521b5cb665ddc89f68110e1a4e12e602256ae7bbceea22b"
+  ],
+  "source_binding": {
+    "bindings": [
+      {
+        "build_spine_generation": "hill_personnel_spine_20260908_v8_primary",
+        "build_spine_sha256": "1e81e1e83aca9f522d387dbab5b23a5966da14cd0e48e95f1d72a83a7cedc871",
+        "file": "hill_person_office_spans.ndjson.gz",
+        "links_bound_generation": "hill_personnel_spine_20260903_v6_primary",
+        "links_bound_sha256": "f2825bf7fb8a510e6c6ead3d395578f6ccf5442363d9403bb69b287ca628af90",
+        "same_generation": false
+      },
+      {
+        "build_spine_generation": "hill_personnel_spine_20260908_v8_primary",
+        "build_spine_sha256": "c8d26b0423e6f5a713127c4d53a72c2c2cfc9769190682b4a3ac2e5b740da302",
+        "file": "hill_person_spine.ndjson.gz",
+        "links_bound_generation": "hill_personnel_spine_20260903_v6_primary",
+        "links_bound_sha256": "a6ffb3f5e683fd8741b51ddc971e39648271636f4ea46c9f856fd7d66bb3fad7",
+        "same_generation": false
+      }
+    ],
+    "links_bind_the_spine_being_built_against": false,
+    "politico_spine_ids_present_in_current_spine_after_remap": 7712,
+    "politico_spine_ids_remapped": 7712,
+    "politico_spine_ids_seen": 7712,
+    "politico_spine_ids_unchanged": 0,
+    "politico_spine_ids_unmapped": 0,
+    "remap_applied": true,
+    "remap_not_applied_reason": null,
+    "rule": "the Politico direct-link receipt's bound Hill spine sha256 defines the id namespace of its spine_person_id values; a build against a different spine generation must remap them through that spine's published re-key map (--spine-id-map, rows {legacy_person_id, person_id, reason}). Remap order is MAP FIRST, then fall through: an id the map does not list is assumed unchanged, and an id that is neither mapped nor present in the current spine is UNMAPPED and fails the build.",
+    "spine_id_map_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_network\\spine_identity_adjudication_20260908\\spine_id_map_v6_to_v8.ndjson.gz",
+    "spine_id_map_stats": {
+      "distinct_legacy_ids": 144693,
+      "identity_rows": 0,
+      "rows_by_reason": {
+        "EXACT_V6_OBSERVATION_PARTITION": 144693
+      },
+      "rows_read": 144693
+    },
+    "spine_id_map_supplied": true
+  },
+  "isolate_example_id": "person:hill:person:000498fad5bea0ec9550fe1d613ad17880a7fc6109aa92d62f84ff488471b886"
+}

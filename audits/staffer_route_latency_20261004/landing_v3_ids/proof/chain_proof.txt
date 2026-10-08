@@ -1,0 +1,35 @@
+scratch tree: 13 files edited by landing_v2 at LIVE pre-image bytes, 1 extra file(s) the follow-up edits (LIVE's own); 31 paths are watched
+PASS  start (LIVE-as-it-is): every one of the 31 watched paths is as expected
+
+== 1. the follow-up before landing_v2
+PASS  v3 --apply on the tree without landing_v2: rc=2, REFUSED
+PASS  after the refusal: every one of the 31 watched paths is as expected
+
+== 2. landing_v2, then the follow-up
+PASS  landing_v2 --apply: rc=0
+PASS  after landing_v2: every one of the 31 watched paths is as expected
+PASS  v3 dry run after landing_v2: rc=0
+PASS  after the v3 dry run: every one of the 31 watched paths is as expected
+      ok      edit fec/surfaces/staffer_closeness_routes.py                       expected 990838332bde  actual 990838332bde
+      ok      edit fec/surfaces/staffer_live/README.md                            expected af8934ade0fe  actual af8934ade0fe
+      ok      edit fec/surfaces/staffer_live/staffer-inventory-worker.js          expected 7a4960d7d5ab  actual 7a4960d7d5ab
+      ok      edit fec/surfaces/staffer_live/staffer-live.js                      expected bf1c11a20ca7  actual bf1c11a20ca7
+      ok      new  fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs       expected c11062f50703  actual c11062f50703
+      ok      new  fec/tests/surfaces/test_staffer_live_query_ids.cjs             expected (absent)  actual (absent)
+      apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+PASS  v3 --apply: rc=0
+PASS  after v3: every one of the 31 watched paths is as expected
+PASS  every file of the follow-up changed (7), and no other watched file did
+PASS  the other 24 watched files kept their landing_v2 bytes
+
+== 3. back out, in reverse order
+PASS  landing_v2 rollback while the follow-up is still on is refused (rc=1): the follow-up must come off first
+PASS  after that refusal: every one of the 31 watched paths is as expected
+PASS  v3 --rollback: rc=0
+PASS  after the v3 rollback: every one of the 31 watched paths is as expected
+PASS  landing_v2 --rollback: rc=0
+PASS  after the landing_v2 rollback (LIVE-as-it-is again): every one of the 31 watched paths is as expected
+PASS  every file either patch set created is gone
+
+result: ALL PASS

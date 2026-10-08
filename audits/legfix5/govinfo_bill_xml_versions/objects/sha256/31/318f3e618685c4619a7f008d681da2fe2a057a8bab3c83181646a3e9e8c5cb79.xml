@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S335 IS: ZTE Enforcement Review and Oversight Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-02-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 335</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190205">February 5, 2019</action-date><action-desc><sponsor name-id="S350">Mr. Rubio</sponsor> (for himself, <cosponsor name-id="S390">Mr. Van Hollen</cosponsor>, <cosponsor name-id="S252">Ms. Collins</cosponsor>, <cosponsor name-id="S327">Mr. Warner</cosponsor>, <cosponsor name-id="S347">Mr. Moran</cosponsor>, <cosponsor name-id="S366">Ms. Warren</cosponsor>, and <cosponsor name-id="S393">Mr. Jones</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require the Secretary of Commerce to ensure that ZTE Corporation complies with all probationary
+			 conditions set forth in the settlement agreement entered into between ZTE
+			 Corporation and the Bureau of Industry and Security of the Department of
+			 Commerce.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC">
+ <section id="idCD529BB3E3E24C3A97D15D88E28077FF" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>ZTE Enforcement Review and Oversight Act</short-title></quote>.</text> </section><section id="idA4C32C1B7B7D4B37A798A4C84631C4B9"><enum>2.</enum><header>Compliance by ZTE Corporation with probationary conditions of settlement agreement with Bureau of Industry and Security of Department of Commerce</header> <subsection id="idCDC0C3788EBC447989D4B178B16CD80A"><enum>(a)</enum><header>Compliance with settlement conditions</header><text>The Secretary of Commerce shall ensure that ZTE Corporation complies with all conditions set forth in paragraph 3 of the settlement agreement that are required of ZTE Corporation during the 10-year probationary period specified in that paragraph.</text>
+			</subsection><subsection id="id1633B6696ECF4274B8C6FA83C84DD819"><enum>(b)</enum><header>Report on compliance</header>
+ <paragraph id="idFA85FFDCB56D43CCAD863F99FF441EAF"><enum>(1)</enum><header>In general</header><text>Not later than 90 days after the date of the enactment of this Act, and not less frequently than every 90 days thereafter, the Secretary of Commerce shall submit to Congress a report on the compliance of ZTE Corporation with the conditions described in subsection (a).</text>
+ </paragraph><paragraph id="id3A66744DE43E4441A652FAABBD95F874"><enum>(2)</enum><header>Certification of compliance</header><text>Each report submitted under paragraph (1) shall include a certification of whether ZTE Corporation is in full compliance with—</text>
+ <subparagraph id="id75f6f2c228214e34a9cf473df802f461"><enum>(A)</enum><text>the conditions described in subsection (a); and</text> </subparagraph><subparagraph id="idD5A8A9CC7E2B43929AD48A6AC0170562"><enum>(B)</enum><text>all sanctions and export control laws of the United States and all licenses and orders issued by the Government of the United States.</text>
+ </subparagraph></paragraph></subsection><subsection id="id13021680d82f4d86883d75c5fb4a8c82"><enum>(c)</enum><header>Transmittal of audits</header><text>The Secretary of Commerce shall transmit to the appropriate congressional committees all audits completed by ZTE Corporation pursuant to paragraph 3.c of the settlement agreement that are provided to the Secretary.</text>
+ </subsection><subsection id="id18559ff986c146929efae4460a534eac"><enum>(d)</enum><header>Penalties</header><text>If the Secretary of Commerce determines that ZTE Corporation is not in full compliance with the conditions described in subsection (a), the Secretary shall—</text>
+ <paragraph id="idad902a5e62a04b5089db081d3d911b76"><enum>(1)</enum><text>waive the suspension period described in paragraph 3.h of the settlement agreement for the denial order described in paragraph 3.g of the settlement agreement; and</text>
+ </paragraph><paragraph id="id2168af9ce8e04e238a98af5542241f4a"><enum>(2)</enum><text>require the immediate payment by ZTE Corporation to the Department of Commerce of the $400,000,000 held in escrow pursuant to paragraph 3.a of the settlement agreement.</text>
+ </paragraph></subsection><subsection id="id5a234ce58af84bedb5c1e51603a04226"><enum>(e)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="ida54383be2b8a4b3f95fa1a05e817f665"><enum>(1)</enum><header>Appropriate congressional committees</header><text>The term <term>appropriate congressional committees</term> means—</text>
+ <subparagraph id="id58e670a333a74c27b5d1f492aab26910"><enum>(A)</enum><text>the Committee on Appropriations, the Committee on Banking, Housing, and Urban Affairs, the Committee on Commerce, Science, and Transportation, the Committee on Foreign Relations, and the Select Committee on Intelligence of the Senate; and</text>
+ </subparagraph><subparagraph id="id860d928ebce1491eaeee6a0b997642ee"><enum>(B)</enum><text>the Committee on Appropriations, the Committee on Financial Services, the Committee on Energy and Commerce, the Committee on Foreign Affairs, and the Permanent Select Committee on Intelligence of the House of Representatives.</text>
+ </subparagraph></paragraph><paragraph id="id7C68B7503E01446D9847858760C989CE"><enum>(2)</enum><header>Settlement agreement</header><text>The term <term>settlement agreement</term> means the Superseding Settlement Agreement dated June 7, 2018, between Zhongxing Telecommunications Equipment Corporation, ZTE Kangxun Telecommunications Ltd., and the Bureau of Industry and Security of the Department of Commerce.</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="ide908bedd2a674d57a954aa4f02edd02e"><enum>(3)</enum><header>ZTE Corporation</header><text>The term <term>ZTE Corporation</term> means the Zhongxing Telecommunications Equipment Corporation and any subsidiary of that corporation.</text></paragraph></subsection></section></legis-body></bill>
+
+

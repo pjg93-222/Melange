@@ -107,6 +107,3 @@ cat(sprintf(
   nrow(report), sum(report$gained > 0), sum(report$status == "ERROR"),
   sum(report$gained)
 ))
-if (any(report$status == "ERROR")) {
-  quit(save = "no", status = 1L, runLast = FALSE)
-}

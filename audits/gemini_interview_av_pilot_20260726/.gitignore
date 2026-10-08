@@ -1,0 +1,16 @@
+media/
+media_fable/
+media_fable_v2/
+raw/
+raw_v2_cli/
+results/
+results_v2_cli/
+results_web/
+results_web_v2/
+paper_augmentations/extracted/
+paper_augmentations/v3_media/
+paper_augmentations/v3_source_repairs/
+paper_augmentations/v3_results/
+paper_augmentations/v3_raw/
+__pycache__/
+*.pyc

@@ -1,0 +1,89 @@
+﻿====================================================================================================
+G2  P2-A PRECISION  (n=40 hit windows, seed 20260918, population 249)
+====================================================================================================
+grades: {'TRUE-BLEED': 40}
+  TRUE-BLEED  40/40 = 100.0%   95% CP CI [ 91.2%, 100.0%]   -> 227-249 of 249 (point 249)
+  GENUINE      0/40 =   0.0%   95% CP CI [  0.0%,   8.8%]   -> 0-22 of 249 (point 0)
+  UNCLEAR      0/40 =   0.0%   95% CP CI [  0.0%,   8.8%]   -> 0-22 of 249 (point 0)
+
+  SECOND TAG marker_valid=False (flag fired on a spurious marker, though the mention is
+  still outside the attributed speaker's turn): rows [1, 37, 38]
+  mech. valid 37/40 =  92.5%   95% CP CI [ 79.6%,  98.4%]   -> 198-245 of 249 (point 230)
+  bleed_class: {'DOC_STRUCTURE': 7, 'INTERVIEW_TURN': 33}  (DOC_STRUCTURE = CHRG/CREC whole-document row, not a broadcast turn)
+  of the 40, scored into n_scored: 23 ; tone classes on those: {'formality': 9, 'neutral-substantive': 9, 'negative': 4, 'positive': 1}
+wrote G2_p2_sample40_GRADED.csv (40 rows)
+
+====================================================================================================
+G3  P3b PRECISION  (n=40 hit windows, seed 20260918, population 749)
+====================================================================================================
+grades: {'ARTEFACT': 40}
+  ARTEFACT    40/40 = 100.0%   95% CP CI [ 91.2%, 100.0%]   -> 683-749 of 749 (point 749)
+  GENUINE      0/40 =   0.0%   95% CP CI [  0.0%,   8.8%]   -> 0-66 of 749 (point 0)
+  UNCLEAR      0/40 =   0.0%   95% CP CI [  0.0%,   8.8%]   -> 0-66 of 749 (point 0)
+  list_type: {'HOUSE_ROLLCALL': 13, 'SENATE_SIGNATURE_BLOCK': 16, 'PRESS_COSIGNER_LIST': 11}
+  of the 40, scored into n_scored: 23 ; tone classes on those: {'formality': 22, 'neutral-substantive': 1}
+wrote G3_p3b_sample40_GRADED.csv (40 rows)
+
+====================================================================================================
+G5a  P2-A RECALL PROBE  (n=40 UNFLAGGED INTERVIEW windows, population 11158)
+====================================================================================================
+grades: {'GENUINE': 34, 'TRUE-BLEED': 6}
+  TRUE-BLEED   6/40 =  15.0%   95% CP CI [  5.7%,  29.8%]   -> 637-3329 of 11158 (point 1674)
+  GENUINE     34/40 =  85.0%   95% CP CI [ 70.2%,  94.3%]   -> 7829-10521 of 11158 (point 9484)
+  UNCLEAR      0/40 =   0.0%   95% CP CI [  0.0%,   8.8%]   -> 0-983 of 11158 (point 0)
+wrote G5a_p2_unflagged40_GRADED.csv (40 rows)
+
+====================================================================================================
+G5b  P3b RECALL PROBE  (n=40 UNFLAGGED CREC windows, population 28153)
+====================================================================================================
+grades: {'GENUINE': 40}
+  ARTEFACT     0/40 =   0.0%   95% CP CI [  0.0%,   8.8%]   -> 0-2480 of 28153 (point 0)
+  GENUINE     40/40 = 100.0%   95% CP CI [ 91.2%, 100.0%]   -> 25673-28153 of 28153 (point 28153)
+  UNCLEAR      0/40 =   0.0%   95% CP CI [  0.0%,   8.8%]   -> 0-2480 of 28153 (point 0)
+wrote G5b_p3b_unflagged40_GRADED.csv (40 rows)
+
+====================================================================================================
+G4  SCALED WRONG-EDGE ESTIMATES
+  ASSUMPTION (stated, not tested): window-level precision is UNIFORM across edges, i.e.
+  the probability that an edge's contaminating window is truly contaminated equals the
+  sampled window precision.  Edges carrying several hits are then slightly UNDER-counted
+  as errors (any one true hit contaminates the edge), so these are conservative-low.
+====================================================================================================
+
+P2-A  precision 40/40 = 100.0%  95% CP CI [91.2%, 100.0%]
+   shipped_any_hit    126 shipped edges  ->  wrong: 115-126  (point 126)
+   shipped_scored_hit  96 shipped edges  ->  wrong: 88-96  (point 96)
+   signed              69 shipped edges  ->  wrong: 63-69  (point 69)
+   drawn               75 shipped edges  ->  wrong: 68-75  (point 75)
+   signed_and_drawn    64 shipped edges  ->  wrong: 58-64  (point 64)
+
+P3b  precision 40/40 = 100.0%  95% CP CI [91.2%, 100.0%]
+   shipped_scored_hit  78 shipped edges  ->  wrong: 71-78  (point 78)
+   signed              72 shipped edges  ->  wrong: 66-72  (point 72)
+   drawn               77 shipped edges  ->  wrong: 70-77  (point 77)
+
+====================================================================================================
+G4  EXACT: drawn edges that lose ALL scored support if the detector's hits are excluded
+====================================================================================================
+sanity: shipped edges whose re-derived scored count != artifact n_scored : 0 (expect 0)
+
+P2-A
+  shipped edges with >=1 SCORED hit                 : 96
+  of those DRAWN (artifact n_scored >= 2)           : 75
+  DRAWN edges left with ZERO scored support         : 4   (of which SIGNED: 0)
+  DRAWN edges dropping below n_scored=2 (not drawn) : 21
+     Adam Schiff            -> Nancy Pelosi           n_scored=4 pos=0 neg=0 tone=None
+     Alexandria Ocasio-Cort -> Lindsey Graham         n_scored=4 pos=0 neg=0 tone=None
+     Paul Gosar             -> David Joyce            n_scored=2 pos=0 neg=0 tone=None
+     Ted Cruz               -> Daniel Goldman         n_scored=2 pos=0 neg=0 tone=None
+  wrote G4_P2A_zero_support_edges.json
+
+P3b
+  shipped edges with >=1 SCORED hit                 : 78
+  of those DRAWN (artifact n_scored >= 2)           : 77
+  DRAWN edges left with ZERO scored support         : 1   (of which SIGNED: 0)
+  DRAWN edges dropping below n_scored=2 (not drawn) : 27
+     James Lankford         -> Brian Schatz           n_scored=2 pos=0 neg=0 tone=None
+  wrote G4_P3b_zero_support_edges.json
+
+DONE G4

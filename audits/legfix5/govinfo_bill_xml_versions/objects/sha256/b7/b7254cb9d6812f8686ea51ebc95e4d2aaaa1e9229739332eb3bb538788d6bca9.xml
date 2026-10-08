@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HCCDE14F8BFB74D75A07A6AC1AFE9999A" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 991 EH: Extension of the Caribbean Basin Economic Recovery Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 991</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To extend certain provisions of the Caribbean Basin Economic Recovery Act until September 30, 2030, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H145239D4599A4ECD835517236AC7C073" style="OLC"> 
+<section id="H26B32BFCC0394032A2A5092819A38D77" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Extension of the Caribbean Basin Economic Recovery Act</short-title></quote>.</text></section> <section id="HAC2BA1F3C42B40918F2302ED84B03307"><enum>2.</enum><header>Extension of the Caribbean Basin Economic Recovery Act</header><text display-inline="no-display-inline">Section 213 of the Caribbean Basin Economic Recovery Act (<external-xref legal-doc="usc" parsable-cite="usc/19/2703">19 U.S.C. 2703</external-xref>) is amended as follows:</text> 
+<paragraph id="H6476E9F3C88C4D2384AD4F97B19CECAE"><enum>(1)</enum><header>Extension for certain knit apparel articles</header><text display-inline="yes-display-inline">In clause (iii) of subsection (b)(2)(A)—</text> <subparagraph id="H5CCF6DB6E6A74502BFB23F30C52C43B8"><enum>(A)</enum><text>in subclause (II)(cc), by striking <quote>September 30, 2020</quote> and inserting <quote>September 30, 2030</quote>; and</text></subparagraph> 
+<subparagraph id="HCEF80B3A5B7448839A4D42172F818E2C"><enum>(B)</enum><text>in subclause (IV)(dd), by striking <quote>September 30, 2020</quote> and inserting <quote>September 30, 2030</quote>.</text></subparagraph></paragraph> <paragraph id="H1A7267C68398495FAB6027B88A301439"><enum>(2)</enum><header>Extension of limitation with respect to certain other apparel articles</header><text display-inline="yes-display-inline">In clause (iv)(II) of such subsection, by striking <quote>18</quote> and inserting <quote>28</quote>.</text></paragraph> 
+<paragraph id="H30B564A57BE94E3AB021445B67189CE1"><enum>(3)</enum><header>Extension of transition period</header><text>In subsection (b)(5)(D)(i), by striking <quote>September 30, 2020</quote> and inserting <quote>September 30, 2030</quote>.</text></paragraph></section> <section id="HC9D80DFF9D3E48DFBD3B135B3B62A8D2"><enum>3.</enum><header>Customs user fees</header> <subsection id="H5AA2BDD27E54426F952DF6AF39BE3EF9"><enum>(a)</enum><header>In general</header><text>Section 13031(j)(3) of the Consolidated Omnibus Budget Reconciliation Act of 1985 (<external-xref legal-doc="usc" parsable-cite="usc/19/58c">19 U.S.C. 58c(j)(3)</external-xref>) is amended—</text> 
+<paragraph id="H52A64F046C0F463C94CB86FC9BE5E30A"><enum>(1)</enum><text>in subparagraph (A), by striking <quote>September 30, 2029</quote> and inserting <quote>October 21, 2029</quote>; and</text></paragraph> <paragraph id="HC53DF9F294C94E268022DBC99500985D"><enum>(2)</enum><text>in subparagraph (B)(i), by striking <quote>September 30, 2029</quote> and inserting <quote>October 21, 2029</quote>.</text></paragraph></subsection> 
+<subsection id="H72E087B0753547E1A7A2168FEE14573E"><enum>(b)</enum><header>Rate for merchandise processing fees</header><text>Section 503 of the United States–Korea Free Trade Agreement Implementation Act (<external-xref legal-doc="public-law" parsable-cite="pl/112/41">Public Law 112–41</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/19/3805">19 U.S.C. 3805</external-xref> note) is amended by striking <quote>September 30, 2029</quote> and inserting <quote>October 21, 2029</quote>.</text></subsection></section> <section id="HFFAAF8FC308C4E9B854D1640E92055D1"><enum>4.</enum><header>Determination of budgetary effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage. </text></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20200922" chamber="House">Passed the House of Representatives September 22, 2020.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

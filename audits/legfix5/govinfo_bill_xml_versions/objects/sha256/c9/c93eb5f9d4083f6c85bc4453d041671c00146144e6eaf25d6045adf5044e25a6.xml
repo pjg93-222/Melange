@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H2975F983D0CE4344A0CE81CDAA8E2285" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 8539 IH: Housing Access Improvement Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-07-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8539</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20220727">July 27, 2022</action-date><action-desc><sponsor name-id="P000613">Mr. Panetta</sponsor> (for himself, <cosponsor name-id="C001112">Mr. Carbajal</cosponsor>, <cosponsor name-id="C001080">Ms. Chu</cosponsor>, <cosponsor name-id="E000215">Ms. Eshoo</cosponsor>, <cosponsor name-id="L000551">Ms. Lee of California</cosponsor>, <cosponsor name-id="L000582">Mr. Lieu</cosponsor>, <cosponsor name-id="L000397">Ms. Lofgren</cosponsor>, and <cosponsor name-id="S001193">Mr. Swalwell</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To increase the percentage of authorized units that a public housing agency may use for project-based assistance, and for other purposes.</official-title></form><legis-body id="HED4F8D1AD2404C8BB64E1357CDB5E91C" style="OLC"> 
+<section id="H6AE7B7325B3542EB870A9BACFE69D6E1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing Access Improvement Act</short-title></quote>. </text></section> <section id="H5535D854FA7B4DF293B32B33BE6B132A"><enum>2.</enum><header>Project-based assistance </header><text display-inline="no-display-inline">Section 8(o)(13)(B)(i) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(o)(13)</external-xref>) is amended by striking <quote>not more than 20 percent</quote> and inserting <quote>not more than 50 percent</quote>. </text> </section> 
+</legis-body></bill>
+

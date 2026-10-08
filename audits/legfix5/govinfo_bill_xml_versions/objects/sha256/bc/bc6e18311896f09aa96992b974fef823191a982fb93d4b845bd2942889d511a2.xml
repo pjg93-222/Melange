@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H750A33FC100D4502BC28503BEA8D3E10" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5135 IH: Housing Homeless Veterans Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-11-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5135</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191118">November 18, 2019</action-date><action-desc><sponsor name-id="B001300">Ms. Barragán</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To give priority in allocation of rental assistance vouchers under the Veterans Affairs Supported
+			 Housing program of the Department of Housing and Urban Development to
+			 areas having the largest populations of homeless veterans, and for other
+			 purposes.</official-title></form>
+	<legis-body id="HC16F4AACCEF44C918C4B771328C0CE95" style="OLC">
+ <section id="HF217EA290887458EA05D006725F44CB2" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing Homeless Veterans Act of 2019</short-title></quote>.</text> </section><section id="HBDB8CA0FF36E4DDCB39A222CB8E5FF50"><enum>2.</enum><header>Allocation of HUD–VASH vouchers</header> <subsection id="H01AF73B19845465F9530383FF0C57E28"><enum>(a)</enum><header>Amendment to VASH program</header><text display-inline="yes-display-inline">Paragraph (19) of section 8(o) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(o)(19)</external-xref>) is amended by adding at the end the following new subparagraphs:</text>
+				<quoted-block display-inline="no-display-inline" id="HF4BFE44C2F2C458B8859C0843D07ED20" style="OLC">
+ <subparagraph id="HF8BF3FA60C214C4694F4E57E23AB6CA3"><enum>(D)</enum><header>Allocation criteria</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law (including paragraph (6) under the heading <quote>Public and Indian Housing—Tenant-Based Rental Assistance</quote> in title II of division K of <external-xref legal-doc="public-law" parsable-cite="pl/115/31">Public Law 115–31</external-xref>), in making amounts for assistance under this paragraph available among public housing agencies in each fiscal year, the Secretary shall give priority to public housing agencies that—</text>
+ <clause id="HAE30BB79DA4B469187936B6BDF7BD93A"><enum>(i)</enum><text>serve areas having the highest numbers of homeless veterans; and</text> </clause><clause id="H3C1C6B9BCA1A4A43821654A64CF6FD27"><enum>(ii)</enum><text>have fully utilized their available funds under this paragraph for the preceding fiscal year and have a demonstrated need for incremental assistance under this paragraph.</text>
+						</clause></subparagraph><subparagraph id="HB257F7C243F0438F83755D1E757F6614"><enum>(E)</enum><header>Reallocation of unused vouchers for VASH assistance</header>
+ <clause id="H8554E01818494A8BA52CA61E3F557ACF"><enum>(i)</enum><header>Recapture and reallocation</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law, the Secretary shall—</text> <subclause id="HACA2D9C3FD6F4665B2DD2DFEF6C306DA"><enum>(I)</enum><text>recapture from any public housing agency described in clause (ii) any amounts of assistance provided under this paragraph to the agency that are not—</text>
+ <item id="H7EB23276FA0F48B8BE579644904F4C85"><enum>(aa)</enum><text>under lease after 24 months;</text> </item><item id="H58F966633FA04DE3AAF9B54D544CAAF4"><enum>(bb)</enum><text display-inline="yes-display-inline">committed under an agreement to enter into a housing assistance payments contract; or</text>
+ </item><item id="H931F5ECAE5B04050A41112D75830D375"><enum>(cc)</enum><text>committed, under a commitment of award letter that has been approved by the board of governors or other similar governing body of the public housing agency, for project-based voucher assistance for a project; and</text>
+ </item></subclause><subclause id="H436F66B8679A4A759AFBB65193B0D4C7"><enum>(II)</enum><text>reallocate any recaptured amounts to public housing authorities that have leased their entire allocation of assistance under this paragraph.</text>
+ </subclause></clause><clause id="H21E4D974C4184B1C93BE7A5712BABCD7"><enum>(ii)</enum><header>Agencies subject to recapture</header><text>An agency described in this clause is an agency whose jurisdiction is located within an area within which the homeless population has decreased, according to the point-in-time information of the Secretary for the two most recent reporting periods for such information.</text></clause></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H5B5E1AA19EAA42049736EA638D738381"><enum>(b)</enum><header>Applicability</header><text>The amendment made by subsection (a) shall apply to amounts made available—</text> <paragraph id="HCA1AE0BECA244AFE8CB1E8B836B23D9C"><enum>(1)</enum><text>by paragraph (6) under the heading <quote>Public and Indian Housing—Tenant-Based Rental Assistance</quote> in title II of division K of <external-xref legal-doc="public-law" parsable-cite="pl/115/31">Public Law 115–31</external-xref>, to the extent such amounts remain unobligated as of the date of the enactment of this Act; and</text>
+ </paragraph><paragraph id="HABEAA71D2F9046308642638D6C34AC29"><enum>(2)</enum><text>by any other provision of law enacted after the date of the enactment of this Act.</text> </paragraph></subsection></section></legis-body></bill> 
+

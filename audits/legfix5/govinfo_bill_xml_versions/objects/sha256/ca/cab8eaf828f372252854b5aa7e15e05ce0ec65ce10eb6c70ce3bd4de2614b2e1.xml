@@ -1,0 +1,403 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-TAM25B00-X2D-MH-2PV">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3097 IS: Health Information Privacy Reform Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3097</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251104">November 4, 2025</action-date>
+            <action-desc><sponsor name-id="S373">Mr. Cassidy</sponsor> introduced the following
+                bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and
+                Pensions</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To provide additional protections with respect to health information, and
+            for other purposes.</official-title>
+    </form>
+    <legis-body>
+        <section id="id6a815964cb624a419810ca4b6190370a" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Health Information Privacy Reform Act</short-title></quote>.</text>
+        </section>
+        <section id="id8191ac5aed3045ecbf114bdf633bfa68">
+            <enum>2.</enum>
+            <header>Protections for applicable health information</header>
+            <subsection id="id88d14ca44ff14f0985bf3c55b6f128b0">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text>The Secretary of Health and Human Services, in consultation with the Federal Trade Commission, shall promulgate regulations setting privacy, security, and breach notifications standards for the processing of applicable health information by regulated entities and their service providers. Such standards shall provide protections that are at least commensurate with, and wherever feasible and appropriate harmonize with, the protections provided through the privacy, security, and breach notification rules promulgated under section 264(c) of the Health Insurance Portability and Accountability Act of 1996 (<external-xref legal-doc="usc" parsable-cite="usc/42/1320d-2">42 U.S.C. 1320d–2</external-xref> note) and section 13402 of the HITECH Act (<external-xref legal-doc="usc" parsable-cite="usc/42/17932">42 U.S.C. 17932</external-xref>) that apply to covered entities and business associates with respect to protected health information under such rules. Such regulations promulgated under this section shall include the following:</text>
+                <paragraph commented="no" display-inline="no-display-inline" id="id6c7db70f36c943ccaf22df35448bfb88">
+                    <enum>(1)</enum>
+ <text display-inline="yes-display-inline">Privacy requirements, including the following:</text>
+                    <subparagraph id="idf321a02a165445baa18e833551c4b3f3">
+                        <enum>(A)</enum>
+ <text>Permitted uses and disclosures of applicable health information without an individual’s written authorization that are consistent with the individual’s reasonable expectations.</text>
+                    </subparagraph>
+                    <subparagraph id="id4b6fd9cda8a9424eb48ed9430e75ae61">
+                        <enum>(B)</enum>
+ <text>Other permitted uses and disclosures of applicable health information without an individual’s written authorization for certain public policy purposes, such as public health, health oversight, law enforcement, judicial and administrative proceedings, and any conditions for such uses and disclosures.</text>
+                    </subparagraph>
+                    <subparagraph id="ida6e61685185744229d51f52c39ad1def">
+                        <enum>(C)</enum>
+ <text>Uses and disclosures of applicable health information that require the individual’s written authorization and the requirements related to such written authorizations.</text>
+                    </subparagraph>
+                    <subparagraph id="idd9aeb62558074a07ae5b4e10cd5d41ef">
+                        <enum>(D)</enum>
+ <text>Prohibited uses and disclosures of applicable health information.</text>
+                    </subparagraph>
+                    <subparagraph id="id1396d86f39da4250922dada1fa17b02a">
+                        <enum>(E)</enum>
+ <text>Minimum necessary requirements for the request, use, and disclosure of applicable health information and any exceptions.</text>
+                    </subparagraph>
+                    <subparagraph id="id70bf33e5c9df4d369de739c1afd28330">
+                        <enum>(F)</enum>
+ <text>Standards and requirements related to legal representatives of the individual.</text>
+                    </subparagraph>
+                    <subparagraph id="id253a24e98bc34f5c8a77589f8670c65d">
+                        <enum>(G)</enum>
+ <text>Standards and requirements related to service providers.</text> </subparagraph> <subparagraph id="idc279ad1eae38426da65dd2ab04af59e9"> <enum>(H)</enum> <text>Individual rights with respect to applicable health information, including the right of the individual to receive a privacy notice from the regulated entity, access to applicable health information, amendment of applicable health information, deletion of applicable health information, and portability of applicable health information, and any exceptions to such rights (such as with respect to applicable health information collected for research purposes), any conditions on such rights, and any other requirements related to such rights, including timeframes for responding to requests.</text>
+                    </subparagraph>
+                    <subparagraph id="id0d68f466c78e4011be4859e06f49fe21">
+                        <enum>(I)</enum>
+ <text>Administrative safeguards, including designation of a privacy officer, policies and procedures, training of workforce members, non-retaliation, documentation, and mitigation.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id96a73da7724942d8860dc0abfcdb96cf">
+                    <enum>(2)</enum>
+ <text>Security requirements, including the following:</text> <subparagraph id="id864799b6ad5540f895f957378f10bc57"> <enum>(A)</enum> <text>Physical, technical, and administrative safeguards for applicable health information in any form.</text>
+                    </subparagraph>
+                    <subparagraph id="idcf496f64f1f8425b878ab5387dd12e5f">
+                        <enum>(B)</enum>
+ <text>For electronic applicable health information, such safeguards shall be based on well-established national frameworks, such as cybersecurity performance goals of the National Institute of Standards and Technology or the Department of Health and Human Services.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="iddd8c1e8563aa4ef58ef0a270e3635c26" commented="no">
+                    <enum>(3)</enum>
+ <text>Breach notification requirements in the event of a breach of applicable health information that are substantially similar to the breach notification requirements under subpart D of part 164 of title 45, Code of Federal Regulations (or any successor regulations).</text>
+                </paragraph>
+            </subsection>
+            <subsection id="id7122e0b8d2da4ed2b4570ebcbe397eca">
+                <enum>(b)</enum>
+                <header>Enforcement authority</header>
+ <text>The Secretary, in consultation with the Federal Trade Commission, is authorized to enforce all provisions of this Act as described in subsection (c).</text>
+            </subsection>
+            <subsection id="id668a1fb92c9a481e8509344ed1b776bd" commented="no">
+                <enum>(c)</enum>
+                <header>Civil penalties</header>
+ <text>In addition to any other sanctions or remedies that may be available under any provision of Federal law, in the case of a regulated entity or service provider that violates this section, subpart D of part 160 of title 45, Code of Federal Regulations (or any successor regulations), shall apply to the regulated entity or service provider with respect to such violation of this section in the same manner that such subpart applies to a person with respect to a violation of part 160 of title 45, Code of Federal Regulations (or any successor regulations).</text>
+            </subsection>
+            <subsection id="idb9a4727970cf44e7a38977132995b97f" commented="no">
+                <enum>(d)</enum>
+                <header>Extension of HITECH Act amendment to regulated entities and service
+                    providers</header>
+ <text>The privacy and security practices under section 13412 of the Health Information Technology for Economic and Clinical Health Act (<external-xref legal-doc="usc" parsable-cite="usc/42/17941">42 U.S.C. 17941</external-xref>) shall apply to regulated entities and service providers with respect to applicable health information in the same manner that such section applies to covered entities and business associates.</text>
+            </subsection>
+            <subsection id="ida72665b24b0d46308f54fb9f03484008">
+                <enum>(e)</enum>
+                <header>Definitions</header>
+ <text>In this section:</text> <paragraph commented="no" display-inline="no-display-inline" id="id91dffe30c575468083fe0ef001bb1fd5"> <enum>(1)</enum> <header display-inline="yes-display-inline">Applicable health information</header> <text>The term <term>applicable health information</term>—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id4cb6c810f45342328ce25457f59ec345">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">means information (including demographic information) that—</text>
+                        <clause commented="no" display-inline="no-display-inline" id="id2d13592d44cb4a9cacd2d2840dd6eb2c">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">identifies an individual or with respect to which there is a reasonable basis to believe that the information could be used to identify an individual; and</text>
+                        </clause>
+                        <clause id="idd0a4ac33a7da4744a6008ca7bb150b64" commented="no" display-inline="no-display-inline">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">relates to the past, present, or future physical or mental health or condition of an individual, the provision of health care to an individual, or the past, present, or future payment for the provision of health care to an individual; and</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="idd52d20e14c0c47d187d9ae54fe6f37d5">
+                        <enum>(B)</enum>
+ <text>may include information described in subparagraph (A) that was not created or received by a health care provider, health plan, employer, or health care clearinghouse.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="idf87451c871484c71b0270748babe7676" commented="no">
+                    <enum>(2)</enum>
+                    <header>Covered entities; business associates</header>
+ <text>The terms <term>covered entities</term> and <term>business associates</term> have the meanings given such terms in section 160.103 of title 45, Code of Federal Regulations (or any successor regulations).</text>
+                </paragraph>
+                <paragraph id="idee1936ec5897475e9b0e45a85e5ae019" commented="no">
+                    <enum>(3)</enum>
+                    <header>Regulated entity</header>
+ <text>The term <term>regulated entity</term>—</text> <subparagraph commented="no" display-inline="no-display-inline" id="id95ea8fc4752e410895fb8649ad3d85de"> <enum>(A)</enum> <text display-inline="yes-display-inline">means a natural or legal person that, alone or jointly with others, determines the purpose and means of processing applicable health information; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="idc29e1e69772b4b62a56bea83c45e6181">
+                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">does not include—</text> <clause commented="no" display-inline="no-display-inline" id="id583c1b17e7cd458d80c656700b517252"> <enum>(i)</enum> <text display-inline="yes-display-inline">a governmental entity such as a body, authority, board, bureau, commission, district, agency, or political subdivision of the Federal, State, or local government;</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="ida8e0912a05004027bb7d9c0ebd4b8a72">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">a person or an entity that is collecting, processing, or transferring covered data on behalf of or a Federal, State, Tribal, territorial, or local government entity; and</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id2e12788e062945f0be8c04691a7e50e5">
+                            <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">a covered entity or business associate, as such terms are defined in section 160.103 of title 45, Code of Federal Regulations (or any successor regulations).</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id433e432463db4c8f958a61ff724b7792">
+                    <enum>(4)</enum>
+                    <header>Service provider</header>
+ <text display-inline="yes-display-inline">The term <term>service provider</term> means a natural or legal entity that processes applicable health information on a behalf of a regulated entity and that is not a covered entity or business associate, as such terms are defined in section 160.103 of title 45, Code of Federal Regulations (or any successor regulations).</text>
+                </paragraph>
+            </subsection>
+        </section>
+        <section id="idb472b33d221045da97f8b049a2d40e74">
+            <enum>3.</enum>
+            <header>Rights and requirements regarding access to certain protected health
+                information</header>
+            <subsection id="idd626d238ce7e4be781fe73d2d82e7805">
+                <enum>(a)</enum>
+                <header>Time and manner of access</header>
+ <text>In applying section 13405(e) of the Health Information Technology for Economic and Clinical Health Act (<external-xref legal-doc="usc" parsable-cite="usc/42/17935">42 U.S.C. 17935(e)</external-xref>) or section 164.524(c)(3)(ii) of title 45, Code of Federal Regulations (or any successor regulations), in the case that an individual requests that a covered entity or any business associate of a covered entity transmit, produce, or provide access to a copy of the individual’s protected health information to a person, including an entity, designated by the individual, and except where permitted without authorization under section 164.506(c) of title 45, Code of Federal Regulations (or any successor regulations)—</text>
+                <paragraph id="id62d9d68c958747e8a9e3b9c6cee6d509">
+                    <enum>(1)</enum>
+ <text>the individual’s request shall meet all requirements of a valid authorization under section 164.508(b) of title 45, Code of Federal Regulations (or any successor regulations); and</text>
+                </paragraph>
+                <paragraph id="id2c124f8833fb4f4283dfcee4e748d077">
+                    <enum>(2)</enum>
+ <text>the covered entity or business associate may condition the transmittal, production, or provision of access upon the person to whom the information is to be transmitted or produced or to whom access is to be provided—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id2ed51c58fc314c2dbe01a2cf5c8ab804">
+                        <enum>(A)</enum>
+ <text>paying fees, in accordance with applicable State law and consistent with subsection (b), in advance of such transmittal, production, or access; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id21bd1361dc304e049072c33bf91c0c6e">
+                        <enum>(B)</enum>
+ <text display-inline="yes-display-inline">acknowledging and accepting the terms, limitations, and conditions of use and disclosure contained in the request made by the individual as the legally binding obligation of the person receiving the information.</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="id5a14bff8b96a4f8795d2cb259ba319b1">
+                <enum>(b)</enum>
+                <header>Fees</header>
+                <paragraph id="id9553a02098344bb8b5ce287cb4f24183">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>In applying section 13405(e)(3) of the Health Information Technology for Economic and Clinical Health Act (<external-xref legal-doc="usc" parsable-cite="usc/42/17935">42 U.S.C. 17935(e)(3)</external-xref>) or section 164.524(c)(4) of title 45, Code of Federal Regulations (or any successor regulations), each such section shall apply only—</text>
+                    <subparagraph id="id8159e571059c418b8ecf3b78a2cf08e2">
+                        <enum>(A)</enum>
+ <text>to the provision of access to, or the production, copying, or transmittal of, protected health information directly to—</text>
+                        <clause id="id24f2e3e3d03b457d926963e724570bc3">
+                            <enum>(i)</enum>
+ <text>the individual, or the individual’s personal representative for health care purposes as described in section 164.502(g) of title 45, Code of Federal Regulations (or any successor regulations);</text>
+                        </clause>
+                        <clause id="idc7b0642145854769b42402979355df6b">
+                            <enum>(ii)</enum>
+ <text>subject to paragraph (2) and section 164.510(b) of title 45, Code of Federal Regulations (or any successor regulation), any other person identified in, and subject to the limitations of, such section; or</text>
+                        </clause>
+                        <clause id="ide02b921484c446d28de46487d1253c80">
+                            <enum>(iii)</enum>
+ <text>the individual’s health care provider or the business associates of such provider; and</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="id947ed36dc2144564bd5677908dded9ca">
+                        <enum>(B)</enum>
+ <text>as directed by the individual, to the electronic transmittal of the individual’s electronic health record to the patient portal or mobile medical application used and maintained by the individual’s health care provider or for the health care provider by its business associate.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id6b9b8004275b4fc4a38b5d3e6c938307">
+                    <enum>(2)</enum>
+                    <header>Additional limitations</header>
+ <text>In the case of the provision of access to, or the production, copying, or transmittal of, protected health information under paragraph (1)(A) directly to a person described in clause (ii) of such paragraph, such protected health information shall, in accordance with section 164.510(b) of title 45, Code of Federal Regulations (or any successor regulations), be limited to only such information that is—</text>
+                    <subparagraph id="id108bdebb6fc148ae911e1acdb1fc2d51">
+                        <enum>(A)</enum>
+ <text>directly relevant to the person’s involvement with the care of the individual or with the payment relevant to the care of the individual; or</text>
+                    </subparagraph>
+                    <subparagraph id="id0226cd5aaae54e5f94eef30c470c7aba">
+                        <enum>(B)</enum>
+ <text>needed for notification purposes described in such section.</text> </subparagraph> </paragraph> </subsection> <subsection id="id289a5c25cda64d7f88839e6461095427"> <enum>(c)</enum> <header>Definitions</header> <text>In this section, the terms <term>business associate</term>, <term>covered entity</term>, <term>health care provider</term>, <term>individual</term>, <term>person</term>, and <term>protected health information</term> have the meanings given such terms in section 160.103 of title 45, Code of Federal Regulations (or any successor regulations).</text>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="id99f02523979f44229bcc2908ff5a6b56">
+                <enum>(d)</enum>
+                <header>Guidance</header>
+ <text>Not later than 180 days after the date of enactment of this Act, the Secretary of Health and Human Services shall amend existing guidance as necessary to implement subsections (a) and (b).</text>
+            </subsection>
+        </section>
+        <section id="idcf5ec574fc11446c9621b24e62d107f0">
+            <enum>4.</enum>
+            <header>Confidentiality of records</header>
+ <text display-inline="no-display-inline">Section 543 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/290dd-2">42 U.S.C. 290dd–2</external-xref>) is amended—</text>
+            <paragraph id="iddddb8ffe29d94a8cac99aa4bb3218d5e">
+                <enum>(1)</enum>
+ <text>in subsection (a), by striking <quote>subsection (b)</quote> and inserting <quote>the HIPAA regulations</quote>;</text>
+            </paragraph>
+            <paragraph commented="no" display-inline="no-display-inline" id="id75d6c32ebe7640b28bf2aa5ac29599c3">
+                <enum>(2)</enum>
+ <text>in subsection (b)—</text> <subparagraph id="id9b8b114965474c019829425d4d032be7"> <enum>(A)</enum> <text>in paragraph (2), by redesignating subparagraphs (A) through (D) as paragraphs (1) through (4), respectively, and adjusting the margins accordingly; and</text>
+                </subparagraph>
+                <subparagraph commented="no" display-inline="no-display-inline" id="ida183655bc89e4fe3af30d0a40a06dc2a">
+                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">by striking <quote>(b) <header-in-text style="OLC" level="subsection">Permitted disclosure</header-in-text></quote> and all that follows through <quote>(2) <header-in-text style="OLC" level="paragraph">Method for disclosure—</header-in-text>Whether</quote> and inserting the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline" id="idF3A30E43FAB54F9C81AE9B5EB7A81D3F">
+                        <subsection id="id396cec4594eb43f8ad1e88bc85fd76b1">
+                            <enum>(b)</enum>
+                            <header>Permitted disclosure</header>
+ <text>Whether</text> </subsection> <after-quoted-block>;</after-quoted-block> </quoted-block> </subparagraph> </paragraph> <paragraph commented="no" display-inline="no-display-inline" id="id536dd2caac1f400fad891d20eb505731"> <enum>(3)</enum> <text>in subsection (c), in the matter preceding paragraph (1), by striking <quote>subsection (b)(2)(C)</quote> and inserting <quote>subsection (b)(3)</quote>; and</text>
+            </paragraph>
+            <paragraph commented="no" display-inline="no-display-inline" id="id6b5c513c09a3459084981013b94cd948">
+                <enum>(4)</enum>
+ <text>in subsection (g), by striking <quote>subsection (b)(2)(C)</quote> and inserting <quote>subsection (b)(3)</quote>.</text>
+            </paragraph>
+        </section>
+        <section id="ideeea96d095d146519d4fe9e92fae4764">
+            <enum>5.</enum>
+            <header>NAS study on compensation to patients for sharing identifiable data for research
+                purposes</header>
+            <subsection id="id0bd3f22786a8406788ff71dd44a4ba87">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text>Not later than 60 days after the date of enactment of this Act, the Secretary of Health and Human Services shall seek to enter into a contract with the National Academies of Sciences, Engineering, and Medicine to conduct a study examining potential risks and benefits of paying compensation to patients for sharing their identifiable data for research purposes.</text>
+            </subsection>
+            <subsection id="idea2ce982764d495cb9b13fbe76b32f18">
+                <enum>(b)</enum>
+                <header>Inclusions</header>
+ <text>The study conducted pursuant to the contract under subsection (a) shall include an examination of—</text>
+                <paragraph id="id480adb7940fb4dd8b2afaa7afdb74f50">
+                    <enum>(1)</enum>
+ <text>the risks to patient privacy posed by the integration of identifiable, de-identified, and aggregated health information into datasets used for research;</text>
+                </paragraph>
+                <paragraph id="id797d3855705440ac9e809e07aa0f6c93">
+                    <enum>(2)</enum>
+ <text>privacy enhancing tools and methods for the protection of patient health data;</text>
+                </paragraph>
+                <paragraph id="idc42d05deadc1472cb781aa9a882cb78f">
+                    <enum>(3)</enum>
+ <text>the feasibility of tracking patient data and consent for the integration of patient health data into datasets used for research;</text>
+                </paragraph>
+                <paragraph id="id2156fa756e7147b28f9daec306974841">
+                    <enum>(4)</enum>
+ <text>ethical considerations for compensating patients for use of their identifiable and de-identified health data;</text>
+                </paragraph>
+                <paragraph id="id975d96180b1d4b42acd4da9fcdc2f3f2">
+                    <enum>(5)</enum>
+ <text>whether the existing exemptions permitting de-identified data to be used for research should consider whether a patient was given an opportunity to opt-in or opt-out of participation; and</text>
+                </paragraph>
+                <paragraph id="idfef30195bca34b52b65cc5e82216613c">
+                    <enum>(6)</enum>
+ <text>risk of re-identification of de-identified data.</text> </paragraph> </subsection> </section> <section id="id443a9a147a9c48dd800fdc5dba489ef2"> <enum>6.</enum> <header>Patient notification requirements under the HIPAA privacy regulations</header> <subsection commented="no" display-inline="no-display-inline" id="id7a355fa6f2df4afa8dbfb018292ea01e"> <enum>(a)</enum> <header display-inline="yes-display-inline">Patient notification upon removal</header> <text>Any regulated entity or service provider who gains access to the protected health information of an individual through the patient right of access under section 164.524 of title 45, Code of Federal Regulations (or any successor regulations) shall—</text>
+                <paragraph id="idc474b8c5ef4142d18b635f676989d89f">
+                    <enum>(1)</enum>
+ <text>provide a written plain language notification to such individual prior to accessing such information—</text>
+                    <subparagraph id="ida840e9a1fac94a23aafe0be65d65d0fa">
+                        <enum>(A)</enum>
+ <text>that such protected health information will no longer be subject to the protections under the HIPAA privacy regulation; and</text>
+                    </subparagraph>
+                    <subparagraph id="id6f82ae3b216641d9a44171b217d82d2e">
+                        <enum>(B)</enum>
+ <text>that includes an explanation of how and to which entities such protected health information may be redisclosed; and</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id341d77cdd68c4f9a803f69de00f804ad">
+                    <enum>(2)</enum>
+ <text>require the consent of the individual before selling such protected health information to third parties.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="idf743947cc64948b5ab115251afdbdbca">
+                <enum>(b)</enum>
+                <header>Patient notification regarding wellness data</header>
+                <paragraph commented="no" display-inline="no-display-inline" id="idb621ba5746ff461892e882648710663e">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Any regulated entity or service provider who offers digital technology that generates wellness data about individuals shall, with respect to each individual who uses such technology—</text>
+                    <subparagraph id="id403132429534460f937a09c5e2b0fe24">
+                        <enum>(A)</enum>
+ <text>provide a written plain language notification to the individual in advance of initiating the generation of such data that such data will not be subject to the protections of the HIPAA privacy regulation; and</text>
+                    </subparagraph>
+                    <subparagraph id="id90933d52504e496fba7e96d79b6cf55e">
+                        <enum>(B)</enum>
+ <text>offer the individual an opportunity to opt out of such wellness data generation.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id3fd0e7c4ed8141f88eb891e5ea78b291">
+                    <enum>(2)</enum>
+                    <header>Wellness data</header>
+ <text>In this subsection, the term <term>wellness data</term> means data generated for the purpose of promoting health or preventing disease, which may include vital statistics, step counts, and medical regimen compliance.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="id8d0bf08fe57247a79d0b49477fcc2303">
+                <enum>(c)</enum>
+                <header>Definitions</header>
+ <text>In this section—</text> <paragraph commented="no" display-inline="no-display-inline" id="id52d6dd65ca1d464d8a1a85d3d76372d4"> <enum>(1)</enum> <text display-inline="yes-display-inline">the terms <term>business associate</term>, <term>covered entity</term>, and <term>protected health information</term> have the meanings given such terms in section 160.103 of title 45, Code of Federal Regulations (or any successor regulations);</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="idd5b1701c6f704dd0821dcaea049b04d3">
+                    <enum>(2)</enum>
+ <text>the term <term>HIPAA privacy regulation</term> has the meaning given such term in section 1180(b)(3) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1320d-9">42 U.S.C. 1320d–9(b)(3)</external-xref>); and</text>
+                </paragraph>
+                <paragraph id="id6af038f83db24f6f922d98fc3637fb57">
+                    <enum>(3)</enum>
+ <text>the terms <term>regulated entity</term> and <term>service provider</term> have the meanings given such terms in section 2.</text>
+                </paragraph>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="idf67ec3f7b36c4e78b2cd7b570f49b327">
+                <enum>(d)</enum>
+                <header>Effective date</header>
+ <text>This section shall take effect beginning one year after the date of enactment of this Act.</text>
+            </subsection>
+        </section>
+        <section id="id84eb2c98771f4355b359c6ca8e2210af">
+            <enum>7.</enum>
+            <header>Minimum necessary guidance</header>
+ <text display-inline="no-display-inline">Not later than 1 year after the date of enactment of this Act, the Secretary of Health and Human Services shall publish guidance on the application of the minimum necessary standard to data used for artificial intelligence and other machine learning applications and relevant requirements, including health data interoperability requirements under section 3001(c)(9) of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/300jj-11">42 U.S.C. 300jj–11(c)(9)</external-xref>) and the use of limited data sets pursuant to section 13405(b) of the HITECH Act (<external-xref legal-doc="usc" parsable-cite="usc/42/17935">42 U.S.C. 17935(b)</external-xref>).</text>
+        </section>
+        <section id="id1bdd1e4590794d1d85d1c2d209cac521">
+            <enum>8.</enum>
+            <header>De-identified information</header>
+            <subsection id="idbe124c42293641ad8907b34b5b587c50">
+                <enum>(a)</enum>
+                <header>Establishment of standards</header>
+ <text>Not later than 1 year after the date of enactment of this Act, the Secretary of Health and Human Services shall promulgate regulations establishing unified national standards for rendering applicable health information as de-identified information, in a manner similar to the manner in which individually identifiable health information may be rendered de-identified information pursuant to part 164 of title 45, Code of Federal Regulations (or any successor regulations).</text>
+            </subsection>
+            <subsection id="id38aee267c1b04178a2ac8a604dd04002">
+                <enum>(b)</enum>
+                <header>Composition of standards</header>
+ <text>Such standards shall—</text> <paragraph id="ide3752a87c154405cb29fa44ff43e7998"> <enum>(1)</enum> <text>be at least equivalent to or exceed the de-identification standard specified in section 164.514(b) of title 45, Code of Federal Regulations (or any successor regulations);</text>
+                </paragraph>
+                <paragraph id="iddbf4465e49f848db952f6bbd8a5cd407">
+                    <enum>(2)</enum>
+ <text>specify standards for the use of privacy-enhancing technologies as a method for creating de-identified information; and</text>
+                </paragraph>
+                <paragraph id="id594b7fb8dc684bcaa5fd3e38ec0326ca">
+                    <enum>(3)</enum>
+ <text>specify that information shall not qualify as de-identified information when provided by a regulated entity, service provider, covered entity, or business associate to another person or entity unless such person or entity contractually agrees in writing not to re-identify or attempt to re-identify the information, and to require the same of any person or entity to whom such person or entity provides the information.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="idb06a0e6bf55e4cb8a66192c16ba2005a">
+                <enum>(c)</enum>
+                <header>Definitions</header>
+ <text>In this section—</text> <paragraph commented="no" display-inline="no-display-inline" id="id34dce03b86854f82aa359fe5e2a22bf9"> <enum>(1)</enum> <text display-inline="yes-display-inline">the term <term>applicable health information</term> has the meaning given such term in section 2;</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id7bfada5aa82a4ae5b685665d5526a3e4">
+                    <enum>(2)</enum>
+ <text display-inline="yes-display-inline">the terms <term>business associate</term>, <term>covered entity</term>, and <term>individually identifiable health information</term> have the meanings given such terms in section 160.103 of title 45, Code of Federal Regulations (or any successor regulations); and</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id6e840b3244174c57bed4dc85b0a15e11">
+                    <enum>(3)</enum>
+ <text display-inline="yes-display-inline">the term <term>privacy enhancing technologies</term> means any software or hardware solution, technical process, or other technological means of mitigating individuals’ privacy risks arising from data processing by enhancing predictability, manageability, disassociability, and confidentiality.</text>
+                </paragraph>
+            </subsection>
+        </section>
+        <section id="id49325ef41ea4480fa2ffdd8fb461cd2f">
+            <enum>9.</enum>
+            <header>Preemption</header>
+ <text display-inline="no-display-inline">Section 160.203 of title 45, Code of Federal Regulations (or any successor regulations) shall apply to the requirements set forth under this Act in the same manner and to the same extent as such section applies to the standards, requirements, and implementation specifications under subchapter C of chapter I of subtitle A of title 45, Code of Federal Regulations (or any successor regulations).</text>
+        </section>
+    </legis-body>
+</bill>
+

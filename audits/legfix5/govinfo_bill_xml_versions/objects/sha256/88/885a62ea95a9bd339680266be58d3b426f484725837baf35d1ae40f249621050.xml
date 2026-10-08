@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HFEC816DC4EAE45E3A8CB2680C33CBE94" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4654 IH: Student Veteran Protection Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-10-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4654</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191011">October 11, 2019</action-date><action-desc><sponsor name-id="L000590">Mrs. Lee of Nevada</sponsor> (for herself and <cosponsor name-id="B001299">Mr. Banks</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to provide for the treatment of certain overpayments made by
+			 educational institutions to persons entitled to educational assistance
+			 under the laws administered by the Secretary of Veterans Affairs, and for
+			 other purposes.</official-title></form>
+	<legis-body id="H762B0A43CB584D868F7709936BB6C21C" style="OLC">
+ <section id="H1929C867B20E4806B1BABC080C3794C4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Student Veteran Protection Act</short-title></quote>.</text> </section><section id="HBB0B32C4B29848E6897694A8D5664824"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress makes the following findings:</text>
+ <paragraph id="H58CAF2CBFBD64D4582FFD69BD080187D"><enum>(1)</enum><text display-inline="yes-display-inline">The Department of Veterans Affairs provided $10,800,000,000 in educational assistance under the Post-9/11 Educational Assistance Program benefits to almost 800,000 veterans during fiscal year 2014.</text>
+ </paragraph><paragraph id="H034FFA69F79A4E2099051C64FD740594"><enum>(2)</enum><text>According to the General Accountability Office’s October 2015 report, the Department of Veterans Affairs identified $416,000,000 in overpayments under such Program during fiscal year 2014, affecting approximately one-in-four veteran beneficiaries and about 6,000 schools.</text>
+ </paragraph><paragraph id="HED02B46DE64943E08478149A11327E17"><enum>(3)</enum><text>According to such report, <quote>while veterans using other VA education programs have to verify their enrollment each month, VA generally does not require those using the Post-9/11 GI Bill to do so. By not requiring veterans to verify their enrollment every month, which can cause significant time to lapse between when veterans drop courses and when this is reported, VA's process allows veterans to incur thousands of dollars in overpayments and also increases the program's costs associated with collecting these debts.</quote>.</text>
+ </paragraph></section><section display-inline="no-display-inline" id="H2859C7D876284F9EB5A36A4E45F954A6" section-type="subsequent-section"><enum>3.</enum><header>Overpayments to eligible persons or veterans</header><text display-inline="no-display-inline">Subsection (b) of section 3685 of title 38, United States Code, is amended to read as follows:</text> <quoted-block display-inline="no-display-inline" id="HC2888253D0AD4BE28C2D75EB28D7AC30" style="USC"> <subsection id="H42CD5F033EC2445F8537277220A42406"><enum>(b)</enum><text display-inline="yes-display-inline">Any overpayment by an educational institution to a veteran or eligible person shall constitute a liability of the educational institution to the United States if—</text>
+ <paragraph id="H1029309CD1CF4342903112E548592ABB"><enum>(1)</enum><text>the Secretary finds that the overpayment has been made as the result of—</text> <subparagraph id="HD026CF970C394BED9E5DA1C81E5293B0"><enum>(A)</enum><text>the willful or negligent failure of an educational institution to report, as required under this chapter or chapter 34 or 35 of this title, to the Department of Veterans Affairs excessive absences from a course, or discontinuance or interruption of a course by the veteran or eligible person; or</text>
+ </subparagraph><subparagraph id="H556C1DD7941A4371B08C685D69232CE0"><enum>(B)</enum><text>the willful or negligent false certification by an educational institution; or</text> </subparagraph></paragraph><paragraph id="HBB41ED66D4D2425FB1EC33FF6693AF42"><enum>(2)</enum><text>the payment is made pursuant to—</text>
+ <subparagraph id="H60430D31D7FF4EFFA04F7BFD3DA6627E"><enum>(A)</enum><text>section 3313(h) of this title;</text> </subparagraph><subparagraph id="HB71F19A38EBE4555A0C5D919ABBF703A"><enum>(B)</enum><text>section 3317 of this title; or</text>
+ </subparagraph><subparagraph id="H066B6BCEFBAC49469E7682A2EC8D1EE2"><enum>(C)</enum><text>section 3680(d) of this title.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </section></legis-body></bill> 
+

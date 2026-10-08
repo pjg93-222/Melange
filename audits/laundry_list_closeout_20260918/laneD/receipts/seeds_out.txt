@@ -1,0 +1,46 @@
+### budget_frontier_electoral.json
+   Examination & Supervision        base  205.1  end  237.6  seeds 60  contest 0 defend 20  knee 3000000  False
+   Credit Union Capital Requirement base  249.0  end  280.5  seeds 60  contest 0 defend 24  knee 3000000  False
+   NCUA Budget & Share Insurance Fu base  282.1  end  314.9  seeds 60  contest 0 defend 29  knee 3000000  False
+   Interchange                      base    4.0  end   64.3  seeds 49  contest 3 defend 1  knee 1000000  True
+   Payments                         base   57.2  end   99.1  seeds 51  contest 2 defend 4  knee 800000   True
+   Technology & Emerging Issues     base  220.0  end  261.4  seeds 60  contest 0 defend 23  knee 2600000  True
+   Fraud Prevention                 base  362.1  end  394.6  seeds 60  contest 0 defend 27  knee 3000000  False
+   Data Privacy & Cybersecurity     base  340.9  end  377.4  seeds 60  contest 0 defend 30  knee 2900000  True
+   Charter Modernization & Governan base  188.3  end  223.8  seeds 60  contest 0 defend 24  knee 3000000  False
+   Defense Credit Union Issues      base  193.4  end  241.2  seeds 60  contest 0 defend 21  knee 500000   True
+   Field of Membership              base   79.5  end  112.5  seeds 51  contest 0 defend 6  knee 1150000  True
+   CDFI Fund                        base  250.6  end  287.8  seeds 60  contest 0 defend 28  knee 3000000  False
+   CFPB Restrain                    base  133.4  end  177.8  seeds 60  contest 0 defend 20  knee 2150000  True
+   Telephone Consumer Protection Ac base  115.8  end  158.2  seeds 54  contest 0 defend 9  knee 1300000  True
+   Credit Card & Consumer-Fee Manda base   65.6  end   99.2  seeds 60  contest 1 defend 15  knee 1650000  True
+   Member Business Lending          base  316.2  end  353.6  seeds 60  contest 0 defend 30  knee 3000000  False
+   Mortgage Lending & Housing       base  274.5  end  310.9  seeds 60  contest 0 defend 28  knee 3000000  False
+   Credit Union Tax Status          base   51.3  end  109.8  seeds 56  contest 0 defend 11  knee 550000   True
+   TOTAL contest_seeds=6 defend_seeds=350 ; knee_found 10/18 topics
+   path-entry keys: ['b', 'seed', 'spread', 'type']
+   sample path[0:3] of Interchange: [{"b": 0, "spread": 4.0, "seed": null}, {"b": 50000, "spread": 8.7, "seed": "Andy Barr", "type": "coalition"}, {"b": 100000, "spread": 12.2, "seed": "Vicente Gonzalez", "type": "coalition"}]
+
+### budget_frontier.json
+   Examination & Supervision        base  219.0  end  240.5  seeds 45  contest 0 defend 0  knee 2050000  True
+   Credit Union Capital Requirement base  265.8  end  283.9  seeds 44  contest 0 defend 0  knee 1800000  True
+   NCUA Budget & Share Insurance Fu base  302.6  end  319.8  seeds 44  contest 0 defend 0  knee 2050000  True
+   Interchange                      base    7.1  end   64.5  seeds 45  contest 0 defend 0  knee 650000   True
+   Payments                         base   64.5  end   98.5  seeds 45  contest 0 defend 0  knee 800000   True
+   Technology & Emerging Issues     base  246.6  end  272.5  seeds 44  contest 0 defend 0  knee 1950000  True
+   Fraud Prevention                 base  386.3  end  404.6  seeds 45  contest 0 defend 0  knee 2250000  False
+   Data Privacy & Cybersecurity     base  368.6  end  388.5  seeds 43  contest 0 defend 0  knee 2050000  True
+   Charter Modernization & Governan base  207.6  end  229.8  seeds 45  contest 0 defend 0  knee 2250000  False
+   Defense Credit Union Issues      base  208.9  end  242.9  seeds 45  contest 0 defend 0  knee 200000   True
+   Field of Membership              base   84.7  end  111.0  seeds 45  contest 0 defend 0  knee 950000   True
+   CDFI Fund                        base  274.4  end  294.4  seeds 44  contest 0 defend 0  knee 2000000  True
+   CFPB Restrain                    base  154.8  end  184.1  seeds 45  contest 0 defend 0  knee 1550000  True
+   Telephone Consumer Protection Ac base  126.1  end  157.6  seeds 45  contest 0 defend 0  knee 700000   True
+   Credit Card & Consumer-Fee Manda base   72.6  end   99.2  seeds 45  contest 0 defend 0  knee 1000000  True
+   Member Business Lending          base  348.3  end  369.6  seeds 44  contest 0 defend 0  knee 2150000  True
+   Mortgage Lending & Housing       base  299.6  end  319.1  seeds 45  contest 0 defend 0  knee 2000000  True
+   Credit Union Tax Status          base   62.0  end  108.3  seeds 45  contest 0 defend 0  knee 500000   True
+   TOTAL contest_seeds=0 defend_seeds=0 ; knee_found 16/18 topics
+   path-entry keys: ['b', 'seed', 'spread', 'type']
+   sample path[0:3] of Interchange: [{"b": 0, "spread": 7.1, "seed": null}, {"b": 50000, "spread": 12.1, "seed": "Andy Barr", "type": "coalition"}, {"b": 100000, "spread": 15.8, "seed": "French Hill", "type": "coalition"}]
+

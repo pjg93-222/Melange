@@ -1,0 +1,57 @@
+{
+  "status": "REVIEW_REQUIRED",
+  "counts": {
+    "nodes": 195847,
+    "episodes": 478819,
+    "references": 6,
+    "date_evidence": {
+      "not_specified": 52994,
+      "presence_within_report": 253000,
+      "printed_service_dates": 172825
+    }
+  },
+  "automatic_aliases_before": 5872,
+  "automatic_aliases_after": 5860,
+  "aliases_removed": {
+    "politico:b1741b7a-18a1-4b3e-8068-79e7085262da": "person:hill:person:0f98d65d5cfcb4150cdaa9663c981cb8e31155251d117e2d55b6d35e2f950bd2",
+    "person:hill:person:582bce720c3f3c6b75b0356593a7035aa0d0a81237375370ccce7d2fa7f559f5": "person:hill:person:307f027ff1e7061804734f0db6db9e54864845e903988a26e1337eea044dcd06",
+    "politico:80cce157-011a-41d8-8dd0-3b9288041ad8": "person:hill:person:401397cb827cccc61b88f0658b853608a8260be9aa129dde5472ad5f33fa677a",
+    "politico:98ac13c3-81ac-4b52-8827-d46c75e389e5": "person:hill:person:495ef059160b4d728a8aee4e5c5f2436ffc3091c1ef07c5c8f1a77b0fefa340f",
+    "politico:183c5a4c-dc72-4d0c-9478-ad04bd8c99f1": "person:hill:person:4ed746d4b31cf419b5e7e31ec953bac93dbef12ba0f6ef6834f380db11d901a6",
+    "politico:6f1edfe7-f475-48c9-85fe-d08415f76021": "person:hill:person:6e50a40a23288072bd852bc2aeb6412271435552a413c89b6294c8d85e339938",
+    "politico:6996e609-2223-499f-af0f-693052a952c4": "person:hill:person:831dd42429eb503446cac63f3b36f33fa7dc523ef58cc9fcd77f290f2ddd5bad",
+    "politico:1a66b5e0-f6b6-49c3-bbda-3d9e978b8eff": "person:hill:person:99275f1151f8f28c77d244faa0f0f58d6af0f983c70aa228a7e2e6cd6c9c9591",
+    "politico:837e27e6-a87e-4563-9386-c236372c049f": "person:hill:person:9b7836004d5a710dc775018530fd900c415e6bb074957b916c333276d5b3b060",
+    "politico:822c0411-2974-4c33-86d9-24e4276fb914": "person:hill:person:acfc63b66705966d7d807d26b155e1ffcfd77f5902598680a21d6208f103e389",
+    "politico:d0ed7a95-5710-41cd-b109-b99b893800c1": "person:hill:person:b76be9c5e38577d33f13174eec20f146f748f6a741c9bc9bbf2b65f9afcddce0",
+    "politico:4dcacbe5-cd36-4081-a4dc-d57f4852d66c": "person:hill:person:c9e639046811c2297f76b72d2d75ce09799db3cdb2be2f9499a1f34ca5ac0e48"
+  },
+  "aliases_added": {},
+  "reference_revision": "1788696453624249300",
+  "affected_labels": {
+    "person:hill:person:0f98d65d5cfcb4150cdaa9663c981cb8e31155251d117e2d55b6d35e2f950bd2": "Kristen D Nothdurft",
+    "person:hill:person:307f027ff1e7061804734f0db6db9e54864845e903988a26e1337eea044dcd06": "Kimberly Rudolph",
+    "person:hill:person:401397cb827cccc61b88f0658b853608a8260be9aa129dde5472ad5f33fa677a": "Charles E Love-Rhames",
+    "person:hill:person:495ef059160b4d728a8aee4e5c5f2436ffc3091c1ef07c5c8f1a77b0fefa340f": "Keanu J Reynolds-Rivera",
+    "person:hill:person:4ed746d4b31cf419b5e7e31ec953bac93dbef12ba0f6ef6834f380db11d901a6": "Jorge F Morales-Lopez",
+    "person:hill:person:582bce720c3f3c6b75b0356593a7035aa0d0a81237375370ccce7d2fa7f559f5": "Kimberly Clifton-Rudolph",
+    "person:hill:person:6e50a40a23288072bd852bc2aeb6412271435552a413c89b6294c8d85e339938": "Gwen L Schur-Palin",
+    "person:hill:person:831dd42429eb503446cac63f3b36f33fa7dc523ef58cc9fcd77f290f2ddd5bad": "Melanie A Mccormick-Torres",
+    "person:hill:person:99275f1151f8f28c77d244faa0f0f58d6af0f983c70aa228a7e2e6cd6c9c9591": "Patrick D Stewart-Hester",
+    "person:hill:person:9b7836004d5a710dc775018530fd900c415e6bb074957b916c333276d5b3b060": "Kaif Aalim-Johnson",
+    "person:hill:person:acfc63b66705966d7d807d26b155e1ffcfd77f5902598680a21d6208f103e389": "Lisa A Damon-Brown",
+    "person:hill:person:b76be9c5e38577d33f13174eec20f146f748f6a741c9bc9bbf2b65f9afcddce0": "Rumer J Alleyne-Legendre",
+    "person:hill:person:c9e639046811c2297f76b72d2d75ce09799db3cdb2be2f9499a1f34ca5ac0e48": "Constance J White-Williams",
+    "politico:183c5a4c-dc72-4d0c-9478-ad04bd8c99f1": "Jorge Lopez",
+    "politico:1a66b5e0-f6b6-49c3-bbda-3d9e978b8eff": "Patrick Hester",
+    "politico:4dcacbe5-cd36-4081-a4dc-d57f4852d66c": "Constance Williams",
+    "politico:6996e609-2223-499f-af0f-693052a952c4": "Melanie Torres",
+    "politico:6f1edfe7-f475-48c9-85fe-d08415f76021": "Gwen Palin",
+    "politico:80cce157-011a-41d8-8dd0-3b9288041ad8": "Charles Rhames",
+    "politico:822c0411-2974-4c33-86d9-24e4276fb914": "Lisa Brown",
+    "politico:837e27e6-a87e-4563-9386-c236372c049f": "Kaif Johnson",
+    "politico:98ac13c3-81ac-4b52-8827-d46c75e389e5": "Keanu Rivera",
+    "politico:b1741b7a-18a1-4b3e-8068-79e7085262da": "Kristen Daimler-Nothdurft",
+    "politico:d0ed7a95-5710-41cd-b109-b99b893800c1": "Rumer LeGendre"
+  }
+}

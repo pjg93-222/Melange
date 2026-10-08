@@ -1,0 +1,38 @@
+{
+ "by_cut_class": {},
+ "by_detector_class_on_truncated_rows": {},
+ "chars_removed": 0,
+ "colonless_class_E": true,
+ "counters": {
+  "rows_flagged": 657,
+  "rows_skipped": 657,
+  "skipped_binding_credit_union_stance_channel_row": 16,
+  "skipped_binding_kept_text_under_min_turn_words": 538,
+  "skipped_binding_label_or_gold_record_points_here": 103,
+  "skipped_credit_union_stance_channel_row": 16,
+  "skipped_kept_text_under_min_turn_words": 554,
+  "skipped_label_or_gold_record_points_here": 103
+ },
+ "db": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\social_media.db",
+ "db_bytes": 500842496,
+ "every_row_reconstructs": true,
+ "interview_rows": 153576,
+ "interview_words": 12156955,
+ "ledger_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\\scratchpad\\applyN12v2\\v2_dry_run_ledger_after.jsonl",
+ "protection_rows": 2105,
+ "rows_flagged": 657,
+ "rows_would_insert": 0,
+ "rows_would_skip": 657,
+ "rows_would_truncate": 0,
+ "share_of_interview_words_removed": 0.0,
+ "share_of_words_kept": null,
+ "speeches_rows": 270489,
+ "tags_by_ownership": {
+  "foreign": 783,
+  "own": 22
+ },
+ "tool_version": "interview-turn-bleed-v2-truncate-only",
+ "words_before_on_truncated_rows": 0,
+ "words_kept_on_truncated_rows": 0,
+ "words_removed": 0
+}

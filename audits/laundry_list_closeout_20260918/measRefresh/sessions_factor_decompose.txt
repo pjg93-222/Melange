@@ -1,0 +1,89 @@
+== primacy_factors.json member block (LIVE = AFTER) ==
+  -- Pete Sessions --
+     adjudicated_credit       0.0
+     adjudicated_events       []
+     adjudicated_score_credit 0.0
+     agenda_credit            12.25
+     amendment_credit         0.0
+     factor_ranked            0.521096
+     factor_raw               0.532653
+     factor_shrunk            0.523407
+     lambda                   0.816667
+     mix                      {"shared": 8.5, "cu_primary": 1.75, "letter": 0.5, "bank_primary": 0.75, "crypto_primary": 0.5, "fintech": 0.25}
+  -- Daniel Meuser --
+     adjudicated_credit       0.0
+     adjudicated_events       []
+     adjudicated_score_credit 0.0
+     agenda_credit            22.75
+     amendment_credit         0.0
+     factor_ranked            0.515934
+     factor_raw               0.515934
+     factor_shrunk            0.515934
+     lambda                   1.0
+     mix                      {"shared": 18.0, "cu_primary": 2.25, "bank_primary": 1.0, "crypto_primary": 1.25, "fintech": 0.25}
+  -- Jim Costa --
+     adjudicated_credit       0.0
+     adjudicated_events       []
+     adjudicated_score_credit 0.0
+     agenda_credit            7.25
+     amendment_credit         0.0
+     factor_ranked            0.523325
+     factor_raw               0.598276
+     factor_shrunk            0.538315
+     lambda                   0.483333
+     mix                      {"shared": 4.0, "letter": 1.0, "cu_primary": 1.5, "offtopic": 0.5, "bank_primary": 0.25}
+
+== primacy_factors population constants (shared by every member) ==
+   act_weights                    {"cu_primary": 1.0, "shared": 0.5, "bank_primary": 0.15, "crypto_primary": 0.15, "fintech": 0.15, "offtopic": 0.0, "oppose": -1.0}
+   active_adjudication_events     5
+   acu_position_relevance         {"OPPOSE": -1.0, "SUPPORT": 0.5}
+   adjudication_ledger            "data/engine/primacy_adjudication_ledger.ndjson"
+   amendment_measure_weight       0.5
+   classified_act_count           653
+   cu_tensor_cells_applied        5
+   letter_weight                  0.6
+   letter_weight_overrides        {"LTR-119-CUTAX-CISCOMANI|119": 1.0}
+   measure_weight_policy          {"name": "original_method_bill_1_amendment_0_5", "bill_or_resolution_weight": 1.0, "amendment_weight": 0.5, "amendment_measure_types": ["hamdt", "samdt"], "congress_decay_is_separate": true}
+   role_weights                   {"sponsor": 1.0, "original": 0.5, "cosponsor": 0.25}
+   roster_baseline                0.482222
+   shrink_anchor                  15.0
+   uncertainty_penalty_k          0.25
+   top-level _doc                 "Primacy factors for the tier board and allocation engine. Producer: fec/engine/primacy_factors.py. Active adjudication credits enter the same numerator/denominator math as classified roles; they are not display positions."
+
+== per_area_grade.json member block (LIVE = AFTER), grade inputs ==
+  -- Pete Sessions --
+     bioguide                 "S000250"
+     chamber                  "House"
+     grade                    9.484961
+     grade_percentile         0.96527
+     n_press                  0.65972
+     press_items              8
+     press_proportion         0.25
+     rates                    {"CDFI Fund": {"n_leg": 0.53009, "rate": 0.043795, "signed": 0.25}, "CFPB": {"n_leg": 0.95601, "rate": 0.376637, "signed": 2.15}, "CU Capital Requirements": {"n_leg": 0.72685, "rate": 0.122626, "signed": 0.7}, "CU Tax Status": {"n_leg": 0.0, "rate": 0.0, "sign
+     years                    5.708419
+  -- Daniel Meuser --
+     bioguide                 "M001204"
+     chamber                  "House"
+     grade                    11.108565
+     grade_percentile         0.99768
+     n_press                  0.86342
+     press_items              137
+     press_proportion         0.70073
+     rates                    {"CDFI Fund": {"n_leg": 0.00231, "rate": 0.0, "signed": 0.0}, "CFPB": {"n_leg": 0.99074, "rate": 0.595612, "signed": 3.4}, "CU Capital Requirements": {"n_leg": 0.98379, "rate": 0.332842, "signed": 1.9}, "CU Tax Status": {"n_leg": 0.0, "rate": 0.0, "signed": 0.
+     years                    5.708419
+  -- Jim Costa --
+     bioguide                 "C001059"
+     chamber                  "House"
+     grade                    8.0362
+     grade_percentile         0.91435
+     n_press                  0.69907
+     press_items              8
+     press_proportion         0.375
+     rates                    {"CDFI Fund": {"n_leg": 0.53009, "rate": 0.043795, "signed": 0.25}, "CFPB": {"n_leg": 0.08333, "rate": -0.070072, "signed": -0.4}, "CU Capital Requirements": {"n_leg": 0.38888, "rate": 0.026277, "signed": 0.15}, "CU Tax Status": {"n_leg": 0.92361, "rate": 0.04
+     years                    5.708419
+
+== hunting BEFORE board numbers in transition_report.json ==
+  BEFORE top-level: ['boundary_ties', 'evidence_counts', 'fields', 'generation_id', 'overall_board', 'overall_policy', 'overall_priority_tier_counts', 'overall_record_pattern_counts', 'overall_rows', 'overall_stance_counts', 'policy', 'schema', 'transitions', 'vote_weight_sensitivity']
+     BEFORE['overall_board']['priority_tiers']["Pete Sessions"] = 2
+  AFTER top-level: ['boundary_ties', 'evidence_counts', 'fields', 'generation_id', 'overall_board', 'overall_policy', 'overall_priority_tier_counts', 'overall_record_pattern_counts', 'overall_rows', 'overall_stance_counts', 'policy', 'schema', 'transitions', 'vote_weight_sensitivity']
+     AFTER['overall_board']['priority_tiers']["Pete Sessions"] = 1

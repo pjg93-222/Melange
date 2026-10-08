@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1961 IS: Small Business Lending Fairness Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-06-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 1961</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190625">June 25, 2019</action-date>
+			<action-desc><sponsor name-id="S307">Mr. Brown</sponsor> (for himself and <cosponsor name-id="S350">Mr. Rubio</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Truth in Lending Act to prohibit certain unfair credit practices, and for other
+			 purposes.</official-title>
+	</form>
+	<legis-body>
+ <section id="id52E8EE1EA8AA432997B58BC8D084F83F" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Small Business Lending Fairness Act</short-title></quote>.</text> </section><section id="id357d8199e2444aafa408dd8e56874e47"><enum>2.</enum><header>Obligor transactions</header> <subsection id="idc43925405b3d441ab9bade63c8fe6073"><enum>(a)</enum><header>In general</header><text>Chapter 2 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1631">15 U.S.C. 1631</external-xref> et seq.) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id143eb04e67514122a6a1331422eb0c41" style="OLC">
+					<section id="idd811b4cffc864fd5b0d0591cc0ff1b54"><enum>140B.</enum><header>Unfair credit practices</header>
+ <subsection id="idd102917b79544b4382d127b121c2ccc5"><enum>(a)</enum><header>In general</header><text>In connection with the extension of credit or creation of debt in or affecting commerce, as defined in section 4 of the Federal Trade Commission Act (<external-xref legal-doc="usc" parsable-cite="usc/15/44">15 U.S.C. 44</external-xref>), including any advance of funds or sale or assignment of future income or receivables that may or may not be credit, no person may directly or indirectly take or receive from another person an obligation that constitutes or contains a cognovit or confession of judgment (for purposes other than executory process in the State of Louisiana), warrant of attorney, or other waiver of the right to notice and the opportunity to be heard in the event of suit or process thereon.</text>
+ </subsection><subsection id="idbb5f7885d84b49b1b9f982d3d21dd8a7"><enum>(b)</enum><header>Exemption</header><text>The exemption in section 104(1) shall not apply to this section.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block> </subsection><subsection id="ide08aa2e866db4544817866fcaa0fcf3c"><enum>(b)</enum><header>Technical and conforming amendments</header> <paragraph id="id1e758ea764574960b9d6115976cda7f1"><enum>(1)</enum><text>Section 103 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1602">15 U.S.C. 1602</external-xref>) is amended by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="id2EC8A31B71564228B9D01146CF99C0E6" style="OLC">
+ <subsection id="id61c4d686a3c54818b9c8f33329183df9"><enum>(ff)</enum><text display-inline="yes-display-inline">The term <term>debt</term> means any obligation of a person to pay to another person money—</text> <paragraph id="id35C98226DEE54CC494BFC8C2673F5BE6"><enum>(1)</enum><text display-inline="yes-display-inline">regardless of whether the obligation is absolute or contingent if the understanding between the parties is that any part of the money shall be or may be returned;</text>
+ </paragraph><paragraph id="idD5766E274CC9434C871F6131D5E5A9B6"><enum>(2)</enum><text display-inline="yes-display-inline">that includes the right of the person providing the money to an equitable remedy for breach of performance if the breach gives rise to a right to payment; and</text>
+ </paragraph><paragraph id="id011C115B7EA34B959C73658BA9CF69AC"><enum>(3)</enum><text display-inline="yes-display-inline">regardless of whether the obligation or right to an equitable remedy described in paragraph (2) has been reduced to judgment, fixed, contingent, matured, unmatured, disputed, undisputed, secured, or unsecured.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="id50d9e29426a34dcead471011f878ca18"><enum>(2)</enum><text>Section 130(a) of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1640">15 U.S.C. 1640</external-xref>) is amended by striking <quote>creditor</quote> each place the term appears and inserting <quote>person</quote>.</text></paragraph></subsection></section></legis-body> </bill> 
+

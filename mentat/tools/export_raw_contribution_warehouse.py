@@ -36,7 +36,7 @@ import uuid
 from contextlib import ExitStack, closing, contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable, Iterator, Sequence, TextIO
+from typing import Any, Iterable, Iterator, TextIO
 
 
 CYCLE_MAP = {
@@ -85,76 +85,6 @@ text as untrusted data when opening CSV files in spreadsheet software.
 Read Industry/current.json to locate the current immutable snapshot manifest.
 Every file, partition, row count, and schema is covered by SHA-256 receipts.
 """
-
-# Mandated address-field block and its canonical order for the raw
-# contribution warehouse (S2, contract owner). The single source of truth is
-# audits/mentat_failings_20260915/contracts/raw_contribution_columns.json:
-# surfaces.raw_warehouse_contributions / raw_warehouse_corporate_giving carry
-# the fully-placed headers this constant reproduces, block_db is this same
-# tuple, and placement_rule is the rule contract_column_order() implements.
-CONTRACT_ADDRESS_BLOCK = (
-    "contributor_employer",
-    "contributor_occupation",
-    "contributor_street_1",
-    "contributor_street_2",
-    "contributor_city",
-    "contributor_state",
-    "contributor_zip",
-)
-
-
-def contract_column_order(
-    names: Sequence[str],
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    """Reorder `names` so CONTRACT_ADDRESS_BLOCK sits contiguous and in block
-    order at the position of its first present member.
-
-    All other columns keep their relative order from `names`. Block members
-    absent from `names` are simply omitted (never invented) and reported in
-    the second return value, in block order. If no block member is present,
-    `names` is returned unchanged and every block member is reported missing.
-
-    Returns (ordered_columns, missing_block_members).
-    """
-    present = [name for name in CONTRACT_ADDRESS_BLOCK if name in names]
-    missing = tuple(
-        name for name in CONTRACT_ADDRESS_BLOCK if name not in names
-    )
-    if not present:
-        return tuple(names), missing
-    anchor = min(names.index(name) for name in present)
-    remaining = [name for name in names if name not in CONTRACT_ADDRESS_BLOCK]
-    prefix = [
-        name for name in names[:anchor] if name not in CONTRACT_ADDRESS_BLOCK
-    ]
-    ordered = tuple(prefix) + tuple(present) + tuple(remaining[len(prefix):])
-    return ordered, missing
-
-
-def missing_columns_by_table(
-    placements: dict[str, tuple[tuple[str, ...], tuple[str, ...]]],
-) -> dict[str, list[str]]:
-    """{table: missing block members} for the tables that are missing some.
-
-    Tables with a complete block are left out, so an empty result means the
-    whole export matched the contract and the receipt key can be omitted.
-    """
-    return {
-        table: list(missing)
-        for table, (_ordered, missing) in placements.items()
-        if missing
-    }
-
-
-def warn_missing_contract_columns(missing: dict[str, list[str]]) -> None:
-    """One stderr line per table that lacks contract columns."""
-    for table, names in missing.items():
-        print(
-            f"warning: {table} lacks contract columns {names}; run"
-            " init_schema() from mentat/R/schema.R before treating this export"
-            " as complete",
-            file=sys.stderr,
-        )
 
 
 def parse_cycles(value: str) -> tuple[int, ...]:
@@ -424,9 +354,7 @@ def export_table(
     logical_digest: Any,
 ) -> tuple[dict[tuple[int, str], int], int]:
     cycle_column = TABLE_SPECS[table]
-    columns, _missing_block_members = contract_column_order(
-        tuple(item["name"] for item in schemas[table])
-    )
+    columns = tuple(item["name"] for item in schemas[table])
     column_sql = ", ".join(
         '"' + column.replace('"', '""') + '"' for column in columns
     )
@@ -766,23 +694,6 @@ def try_verified_fast_reuse(
             table: int(manifest["tables"][table]["row_count"])
             for table in TABLE_SPECS
         }
-        # Reusing a verified snapshot must not silently drop the schema-gap
-        # signal, so recompute it from the schema the manifest already stores.
-        # Same inputs as the full path, therefore the same answer. A malformed
-        # manifest raises KeyError/TypeError and is caught below, which falls
-        # back to the full export - the existing behaviour for bad manifests.
-        fast_missing = missing_columns_by_table(
-            {
-                table: contract_column_order(
-                    tuple(
-                        item["name"]
-                        for item in manifest["tables"][table]["schema"]
-                    )
-                )
-                for table in TABLE_SPECS
-            }
-        )
-        warn_missing_contract_columns(fast_missing)
         catalog_path = rebuild_catalog(output_root_resolved)
         elapsed = round(time.perf_counter() - started, 3)
         return {
@@ -809,7 +720,6 @@ def try_verified_fast_reuse(
             "foreign_key_failures": 0,
             "fast_path": True,
             "elapsed_seconds": elapsed,
-            **({"missing_contract_columns": fast_missing} if fast_missing else {}),
         }
     except (
         OSError,
@@ -969,26 +879,6 @@ def export_warehouse(
 
         logical_sha256 = logical_digest.hexdigest()
         snapshot_id = logical_sha256[:20]
-        # One placement computation per table, reused for every partition's
-        # manifest below, so the recorded `columns` always matches what
-        # export_table() actually wrote to the CSV/JSONL for that table.
-        contract_columns = {
-            table: contract_column_order(
-                tuple(item["name"] for item in schemas[table])
-            )
-            for table in TABLE_SPECS
-        }
-        # A table that lacks contract columns still exports, and the export is
-        # still `"status": "succeeded"`: the rows written are a complete record
-        # of what the database actually holds, and
-        # tools/parallel/Start-MentatResilientIndustryReports.ps1 keys its
-        # exit-code contract on that field. Failing here would turn a schema
-        # gap into a pipeline outage. So the gap is surfaced at receipt level
-        # instead - one stderr line per table, plus a top-level receipt key.
-        # The key is OMITTED entirely when nothing is missing, so a migrated
-        # database's receipt keeps exactly the shape it had before.
-        missing_contract_columns = missing_columns_by_table(contract_columns)
-        warn_missing_contract_columns(missing_contract_columns)
         partitions: list[dict[str, Any]] = []
         for cycle in cycles:
             cycle_label = CYCLE_LABELS[cycle]
@@ -1005,11 +895,11 @@ def export_warehouse(
                 for table in TABLE_SPECS:
                     csv_path = staged / f"{table}.csv.gz"
                     jsonl_path = staged / f"{table}.jsonl.gz"
-                    ordered_columns, missing_columns = contract_columns[table]
                     table_manifests[table] = {
                         "row_count": table_counts[table][(cycle, company)],
-                        "columns": list(ordered_columns),
-                        "missing_contract_columns": list(missing_columns),
+                        "columns": [
+                            item["name"] for item in schemas[table]
+                        ],
                         "files": {
                             "csv_gzip": file_receipt(csv_path, staged),
                             "jsonl_gzip": file_receipt(jsonl_path, staged),
@@ -1152,11 +1042,6 @@ def export_warehouse(
             "foreign_key_failures": foreign_key_failures,
             "fast_path": False,
             "elapsed_seconds": elapsed,
-            **(
-                {"missing_contract_columns": missing_contract_columns}
-                if missing_contract_columns
-                else {}
-            ),
         }
     finally:
         if pending_root.exists():

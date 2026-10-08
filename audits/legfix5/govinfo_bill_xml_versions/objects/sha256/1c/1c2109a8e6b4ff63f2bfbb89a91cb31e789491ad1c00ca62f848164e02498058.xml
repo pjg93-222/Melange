@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H1B8228768F8E4DAB8CBF1F4C5A5FD4C2" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1310 IH: VAWA Protections for Rural Women Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-19</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1310</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190219">February 19, 2019</action-date><action-desc><sponsor name-id="G000581">Mr. Gonzalez of Texas</sponsor> (for himself, <cosponsor name-id="H001074">Mr. Hollingsworth</cosponsor>, <cosponsor name-id="G000587">Ms. Garcia of Texas</cosponsor>, and <cosponsor name-id="W000812">Mrs. Wagner</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Violence Against Women Act of 1994 to include the rural development voucher program as
+			 a covered housing program, and for other purposes.</official-title></form>
+	<legis-body id="H07B7AE68DB624F6599B078BB770798A2" style="OLC">
+ <section id="H59B545D8A8004D5F97FB11D578B4E014" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>VAWA Protections for Rural Women Act of 2019</short-title></quote>.</text> </section><section id="H820C1BAA0FC44741996C067F2D0B2581" section-type="subsequent-section"><enum>2.</enum><header>Covered housing programs</header><text display-inline="no-display-inline">Paragraph (3) of section 41411(a) of the Violence Against Women Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/34/12491">34 U.S.C. 12491(a)(3)</external-xref>) is amended—</text>
+ <paragraph id="HA4C0950F6BB1456CAAB45B8D4010EFC5"><enum>(1)</enum><text>in subparagraph (I), by striking <quote>and</quote> at the end;</text> </paragraph><paragraph id="H4EFC319BBFC848CD9E0FC77B5059B9B0"><enum>(2)</enum><text display-inline="yes-display-inline">by redesignating subparagraph (J) as subparagraph (K); and</text>
+ </paragraph><paragraph id="H97128AFD85A24F7CADB590953B26E9F5"><enum>(3)</enum><text>by inserting after subparagraph (I) the following new subparagraph:</text> <quoted-block display-inline="no-display-inline" id="H83552E1D33BA42C997FCF88B0FACB446" style="OLC"> <subparagraph id="HFD82B1D37BB644F2BEBEF30630E2E268"><enum>(J)</enum><text display-inline="yes-display-inline">rural development housing voucher assistance provided by the Secretary of Agriculture pursuant to section 542 of the Housing Act of 1949 (<external-xref legal-doc="usc" parsable-cite="usc/42/1490r">42 U.S.C. 1490r</external-xref>), without regard to subsection (b) of such section, and applicable appropriation Acts; and</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section></legis-body></bill>
+
+

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H3459EECCD04945CA90264129CFCA99DF" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 7257 IH: To direct the Secretary of Defense to carry out activities to develop, secure, and effectively implement fifth generation information and communications technology within the Department of Defense.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-06-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 7257</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20200618">June 18, 2020</action-date>
+<action-desc><sponsor name-id="L000560">Mr. Larsen of Washington</sponsor> (for himself and <cosponsor name-id="G000579">Mr. Gallagher</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAS00">Committee on Armed Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To direct the Secretary of Defense to carry out activities to develop, secure, and effectively implement fifth generation information and communications technology within the Department of Defense.</official-title>
+</form>
+<legis-body id="H48B509A3DDA04A94927CD4E95E010B9B" style="OLC">
+<section id="H9E648D3423BC4F978693A916451EBAF0" section-type="section-one"><enum>1.</enum><header>Telecommunications security program</header>
+<subsection id="H9260B18BCF814862A3C049599A4861A7"><enum>(a)</enum><header>Program required</header><text>The Secretary of Defense shall carry out a program to identify and mitigate vulnerabilities in the telecommunications infrastructure of the Department of Defense.</text></subsection> <subsection id="H608C63B04F89400F9102F21DD83784E0"><enum>(b)</enum><header>Elements</header><text>In carrying out the program under subsection (a), the Secretary shall—</text>
+<paragraph id="H96DD65AFDAEC44B699DDD6218F1D66F6"><enum>(1)</enum><text>develop a capability to communicate clearly and authoritatively about threats by foreign actors;</text></paragraph> <paragraph id="HAA1D455F25094845801B99E540617FFE"><enum>(2)</enum><text>conduct independent red-team security analysis of Department of Defense systems, subsystems, devices, and components including no-knowledge testing and testing with limited or full knowledge of expected functionalities;</text></paragraph>
+<paragraph id="HD738D009DCF8435897DBBDF6007A16A9"><enum>(3)</enum><text>verify the integrity of personnel who are tasked with design fabrication, integration, configuration, storage, test, and documentation of noncommercial 5G technology to be used by the Department of Defense;</text></paragraph> <paragraph id="H92D8EC602EFD452F8BEF72810C6F29F9"><enum>(4)</enum><text>verify the efficacy of the physical security measures used at Department of Defense locations where system design, fabrication, integration, configuration, storage, test, and documentation of 5G technology occurs;</text></paragraph>
+<paragraph id="H3D7DBC0127864B608194F173BE05DDA5"><enum>(5)</enum><text>direct the Chief Information Officer of the Department of Defense to use the Federal Risk and Authorization Management Program (commonly known as <quote>FedRAMP</quote>) moderate or high cloud standard baselines, supplemented with the Department’s FedRAMP cloud standard controls and control enhancements, to assess 5G core service providers whose services will be used by the Department of Defense through the Department’s provisional authorization process; and</text></paragraph> <paragraph id="H054B1D88AA524B94919623329040729C"><enum>(6)</enum><text display-inline="yes-display-inline">direct the Defense Information Systems Agency and the United States Cyber Command to Develop a capability for continuous, independent monitoring of packet streams for 5G data on frequencies assigned to the Department of Defense to validate availability, confidentiality, and integrity of Department of Defense communications systems.</text></paragraph></subsection>
+<subsection id="HDAF61099AF3848B6AD522192DF090D85"><enum>(c)</enum><header>Implementation plan</header><text>Not later than 90 days after the date of the enactment of this Act, the Secretary of Defense shall submit to Congress a plan for the implementation of the program under subsection (a).</text></subsection> <subsection id="H0F6E22F78F1044058E7FBADA59870B3C"><enum>(d)</enum><header>Report required</header><text>Not later than 180 days after submitting the plan under subsection (c), the Secretary of Defense shall submit to Congress a report that includes—</text>
+<paragraph id="HD96C6DB16CAE40F0B0C485C4BC59A40A"><enum>(1)</enum><text>a comprehensive assessment of the findings and conclusions of the program under subsection (a);</text></paragraph> <paragraph id="HA9A9241C694C4948BFD012C4AA6C352B"><enum>(2)</enum><text>recommendations on how to mitigate vulnerabilities in the Department of Defense telecommunications infrastructure; and</text></paragraph>
+<paragraph id="HDDE00AE25A874B3490944CA161DDBF93"><enum>(3)</enum><text>an explanation of how the Department of Defense plans to implement such recommendations.</text></paragraph></subsection></section> </legis-body> </bill> 
+

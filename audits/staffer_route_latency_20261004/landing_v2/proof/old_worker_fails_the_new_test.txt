@@ -1,0 +1,341 @@
+# The record browser's worker as it was at 722a55ba7 (git blob, sha256 prefix 46ca0231), placed where the test expects it, run under the new test: it fails 12 of 14 (exit 1).
+# It passes only the two checks that guard what must NOT change (bare uuids, unchanged columns).
+✖ a piece of an id finds nothing by way of the id (5.5287ms)
+✖ a whole id finds its row and lists it first, trimmed and in any case (5.904ms)
+✔ the bare uuid of a politico id is a whole id too (2.2269ms)
+✖ a whole id outranks a row that matches only by words (1.0439ms)
+✔ every other column searches as before (1.2609ms)
+✖ over a seeded world the new answers equal the ruling and the previous filter equals the previous rules (7.8808ms)
+✖ negative control: the previous search fails the ruling checks that are the ruling and passes the others (8.752ms)
+✖ negative control: the id is searched with the rest again is caught by fragments (0.3515ms)
+✖ negative control: no whole-id match is caught by wholeIds and bareUuids (0.132ms)
+✖ negative control: a case-sensitive id is caught by wholeIds (0.1536ms)
+✖ negative control: an untrimmed query is caught by wholeIds (0.0907ms)
+✖ negative control: no bare uuid is caught by bareUuids (0.0768ms)
+✖ negative control: the whole-id rows after the rest is caught by wholeIds and ranking (0.067ms)
+✖ negative control: the whole-id rows in row order is caught by wholeIds and ranking (0.0836ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 2
+ℹ fail 12
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 123.7505
+
+✖ failing tests:
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:98:1
+✖ a piece of an id finds nothing by way of the id (5.5287ms)
+  AssertionError [ERR_ASSERTION]: a piece of an id must find nothing by way of the id: po
+  + actual - expected
+  
+  + [
+  +   1,
+  +   2,
+  +   3
+  + ]
+  - []
+  
+      at Object.fragments (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:68:37)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 1, 2, 3 ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:99:1
+✖ a whole id finds its row and lists it first, trimmed and in any case (5.904ms)
+  AssertionError [ERR_ASSERTION]: the whole id "staff:ada-5" must list its row first
+  + actual - expected
+  
+    [
+  +   0
+  -   10
+    ]
+  
+      at Object.wholeIds (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:73:14)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 0 ],
+    expected: [ 10 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:101:1
+✖ a whole id outranks a row that matches only by words (1.0439ms)
+  AssertionError [ERR_ASSERTION]: the id row comes before a row that matches only by words, though it is later in row order
+  + actual - expected
+  
+    [
+  +   0,
+      10,
+  -   0
+    ]
+  
+      at Object.ranking (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:83:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 0, 10 ],
+    expected: [ 10, 0 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:150:1
+✖ over a seeded world the new answers equal the ruling and the previous filter equals the previous rules (7.8808ms)
+  AssertionError [ERR_ASSERTION]: ruling: "a"
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      1,
+      2,
+  +   3,
+      4,
+      5,
+      8,
+  +   10,
+  +   11,
+      15,
+      16,
+      17,
+      23,
+      25,
+  +   26,
+  +   27,
+      30,
+      32,
+      36,
+      40,
+      42,
+      43,
+  +   45,
+  +   54,
+  +   61,
+      65,
+      66,
+  +   67,
+      68,
+      69,
+      71,
+      74,
+      75,
+  ...
+      85,
+  +   89,
+      90,
+      91,
+      92,
+  +   94,
+      97,
+      100,
+      102,
+  +   107,
+  +   110
+    ]
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:156:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [
+        1,   2,   3,  4,  5,  8, 10, 11, 15, 16,  17,
+       23,  25,  26, 27, 30, 32, 36, 40, 42, 43,  45,
+       54,  61,  65, 66, 67, 68, 69, 71, 74, 75,  76,
+       77,  83,  84, 85, 89, 90, 91, 92, 94, 97, 100,
+      102, 107, 110
+    ],
+    expected: [
+       1,  2,  4,  5,  8,  15,  16, 17, 23,
+      25, 30, 32, 36, 40,  42,  43, 65, 66,
+      68, 69, 71, 74, 75,  76,  77, 83, 84,
+      85, 90, 91, 92, 97, 100, 102
+    ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:167:1
+✖ negative control: the previous search fails the ruling checks that are the ruling and passes the others (8.752ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      bareUuids: 'pass',
+  +   fragments: 'fail',
+  +   ranking: 'fail',
+  -   fragments: 'pass',
+  -   ranking: 'pass',
+      unchanged: 'pass',
+  +   wholeIds: 'fail'
+  -   wholeIds: 'pass'
+    }
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:170:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { fragments: 'fail', wholeIds: 'fail', bareUuids: 'pass', ranking: 'fail', unchanged: 'pass' },
+    expected: { fragments: 'pass', wholeIds: 'pass', bareUuids: 'pass', ranking: 'pass', unchanged: 'pass' },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:181:46
+✖ negative control: the id is searched with the rest again is caught by fragments (0.3515ms)
+  AssertionError [ERR_ASSERTION]: the worker source must hold the line to break exactly once: r.slice(1,7)
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:182:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:181:46
+✖ negative control: no whole-id match is caught by wholeIds and bareUuids (0.132ms)
+  AssertionError [ERR_ASSERTION]: the worker source must hold the line to break exactly once: if(want&&wholeId(r[0],want)){named.push(i);continue;}
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:182:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:181:46
+✖ negative control: a case-sensitive id is caught by wholeIds (0.1536ms)
+  AssertionError [ERR_ASSERTION]: the worker source must hold the line to break exactly once: id=String(id).toLowerCase();
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:182:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:181:46
+✖ negative control: an untrimmed query is caught by wholeIds (0.0907ms)
+  AssertionError [ERR_ASSERTION]: the worker source must hold the line to break exactly once: want=text.trim().toLowerCase()
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:182:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:181:46
+✖ negative control: no bare uuid is caught by bareUuids (0.0768ms)
+  AssertionError [ERR_ASSERTION]: the worker source must hold the line to break exactly once: ||(id.startsWith(POLITICO)&&id.length>POLITICO.length&&id.slice(POLITICO.length)===want)
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:182:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:181:46
+✖ negative control: the whole-id rows after the rest is caught by wholeIds and ranking (0.067ms)
+  AssertionError [ERR_ASSERTION]: the worker source must hold the line to break exactly once: matches=named.concat(others)
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:182:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at ..\..\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:181:46
+✖ negative control: the whole-id rows in row order is caught by wholeIds and ranking (0.0836ms)
+  AssertionError [ERR_ASSERTION]: the worker source must hold the line to break exactly once: named.push(i);continue;
+  
+  0 !== 1
+  
+      at TestContext.<anonymous> (C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems\4f30368b-c2d1-47f6-a368-3d68b2892c85\scratchpad\uuid_merge\oldworker\fec\tests\surfaces\test_staffer_inventory_worker_ids.cjs:182:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 0,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

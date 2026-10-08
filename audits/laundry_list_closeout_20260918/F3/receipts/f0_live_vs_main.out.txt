@@ -1,0 +1,33 @@
+====================================================================================================
+F3 r0  LIVE vs main @HEAD, line-ending normalized   run 2026-09-19T00:04:00
+====================================================================================================
+HEAD = 776ce0d3af46f8c46d8a660d06bcba0333e71920
+
+path                                           in main   in LIVE   verdict
+----------------------------------------------------------------------------------------------------
+fec/stance/per_category_stance.py              True      True      IDENTICAL (content)
+fec/stance/build_media_blend.py                True      True      DIFFERS  (51 changed lines; main 468 ln / live 481 ln)
+fec/stance/press_stream.py                     False     False     absent both
+fec/press_stream.py                            True      True      IDENTICAL (content)
+fec/stance/workbook_stance_views.py            True      True      DIFFERS  (4 changed lines; main 123 ln / live 123 ln)
+fec/moneyball_core.py                          True      True      IDENTICAL (content)
+fec/surfaces/build_dashboard_bundle.py         True      True      IDENTICAL (content)
+fec/stance/media_rules.py                      True      True      IDENTICAL (content)
+fec/stance/stance_rules.py                     True      True      IDENTICAL (content)
+fec/stance/press_stance_stack.py               True      True      DIFFERS  (30 changed lines; main 160 ln / live 160 ln)
+fec/stance/overall_stance_policy.py            True      True      IDENTICAL (content)
+fec/stance/adjudicated_corroboration.py        True      True      IDENTICAL (content)
+fec/stance/say_do_gap.py                       True      True      IDENTICAL (content)
+fec/stance/resolve_attribution_domain.py       True      True      IDENTICAL (content)
+
+-- sha256 of the LIVE files this lane pins line numbers to --
+   fec/stance/per_category_stance.py              36bfca97e65ad917     13690 B  mtime 2026-09-08T19:43:41  lines(raw)=187
+   fec/stance/build_media_blend.py                fbe13974e00a581a     34356 B  mtime 2026-09-16T16:38:23  lines(raw)=480
+   fec/press_stream.py                            ef239590e332f9ab      6202 B  mtime 2026-09-01T14:08:09  lines(raw)=154
+   fec/stance/workbook_stance_views.py            437e28afd5e0bbca      5635 B  mtime 2026-09-08T19:49:09  lines(raw)=122
+   fec/surfaces/build_dashboard_bundle.py         30af0646be45db44     54087 B  mtime 2026-09-17T13:32:52  lines(raw)=783
+   fec/moneyball_core.py                          ee190494e8be4e71     50715 B  mtime 2026-09-16T13:59:24  lines(raw)=825
+   fec/stance/media_rules.py                      0ab22dccd6327dae     11615 B  mtime 2026-07-16T23:16:16  lines(raw)=201
+   fec/stance/stance_rules.py                     09e9e01b04d0dc16      6956 B  mtime 2026-07-28T23:52:23  lines(raw)=181
+
+DONE F3 r0

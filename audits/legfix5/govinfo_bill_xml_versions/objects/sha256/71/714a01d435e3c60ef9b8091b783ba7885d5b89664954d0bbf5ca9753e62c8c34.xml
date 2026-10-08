@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public" slc-id="S1-MIR19C89-KDV-CL-VNN">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3639 IS: Housing Financial Literacy Act of 2020</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-05-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>116th CONGRESS</congress><session>2d Session</session>
+<legis-num>S. 3639</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20200507">May 7, 2020</action-date>
+<action-desc><sponsor name-id="S380">Mr. Peters</sponsor> (for himself and <cosponsor name-id="S287">Mr. Cornyn</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To require the Secretary of Housing and Urban Development to discount FHA single-family mortgage insurance premium payments for first-time homebuyers who complete a financial literacy housing counseling program.</official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" id="HD437471618A74B148C950ED6FE2D93AE" style="OLC">
+<section id="H041CBA03AA9A4CF9AE96C8C30948E4B9" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing Financial Literacy Act of 2020</short-title></quote>.</text></section> <section id="H529CF35056E84BCBAA40C1777A100C8E"><enum>2.</enum><header>Discount on mortgage insurance premium payments for first-time homebuyers who complete financial literacy housing counseling programs</header><text display-inline="no-display-inline">The second sentence of section 203(c)(2)(A) of the National Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1709">12 U.S.C. 1709(c)(2)(A)</external-xref>) is amended by striking <quote>not exceed 2.75 percent of the amount of the original insured principal obligation of the mortgage.</quote> and inserting <quote>be, in the case of a mortgage insured during the 4-year period beginning on the date that is 1 year after the date of enactment of the <short-title>Housing Financial Literacy Act of 2020</short-title>, 25 basis points lower than the premium payment amount established by the Secretary under the first sentence of this subparagraph, and, in the case of a mortgage insured after that 4-year period, set by the Secretary at a number of basis points lower than that premium payment amount that corresponds to the reduced risk of loss, if any, due to the counseling.</quote>.</text></section>
+</legis-body>
+</bill> 
+
+

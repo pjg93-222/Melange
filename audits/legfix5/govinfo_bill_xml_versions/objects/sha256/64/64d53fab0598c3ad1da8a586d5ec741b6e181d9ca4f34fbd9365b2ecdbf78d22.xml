@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB932E62D8C0E44CC82F5C425DCC5850F" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 6864 IH: HUD Accountability Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-12-19</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6864</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20231219">December 19, 2023</action-date><action-desc><sponsor name-id="L000599">Mr. Lawler</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Department of Housing and Urban Development Act to require the Secretary of Housing and Urban Development to testify on an annual basis before the Congress.</official-title></form><legis-body id="H0319768FCA204DD7A0301193952F2F27" style="OLC"> 
+<section id="H91BC73E7262B4486A4E2A6B7A38A4DB5" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>HUD Accountability Act of 2023</short-title></quote>.</text></section> <section id="HABFD44BCDBC74D8D976622A70B43AB5C"><enum>2.</enum><header>Requirement to testify</header><text display-inline="no-display-inline"> Section 7 of the Department of Housing and Urban Development Act (<external-xref legal-doc="usc" parsable-cite="usc/42/3535">42 U.S.C. 3535</external-xref>) is amended by adding at the end the following new subsection: </text> 
+<quoted-block style="OLC" id="H8DC0EFB9B89E4BFB9202E426EA3129A7" display-inline="no-display-inline"> 
+<subsection id="H4B9C7A2575834C25A9041C32A6EAA42B"><enum>(u)</enum><header>Annual testimony</header><text display-inline="yes-display-inline">The Secretary shall appear before the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate at an annual hearing and present testimony regarding the operations of the Department during the preceding year, including regarding the following topics:</text> <paragraph id="H10F1EB3162634A5FA37AA02AA7BA3A09"><enum>(1)</enum><text>The physical condition of all public housing and other housing assisted by the Department.</text></paragraph> 
+<paragraph id="H95854D0EFD00401DAE51C169E139BC15"><enum>(2)</enum><text display-inline="yes-display-inline">The financial health of the mortgage insurance funds of the FHA.</text></paragraph> <paragraph id="HF8006528B2344B45A03379D1BC18081D"><enum>(3)</enum><text>Oversight by the Department of grantees and sub-grantees engaging in waste, fraud, and abuse.</text></paragraph> 
+<paragraph id="H8E7B9D0364564AECA8D7144D32B0BDB0"><enum>(4)</enum><text>Ongoing activities of the Department, as appropriate.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </section> </legis-body></bill>
+

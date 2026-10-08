@@ -1,0 +1,19 @@
+﻿(a) P2-A hit file identity
+    laneB sha256 8a541e911d7d1ca35280126039e72ffc47480e98a75ac87f4268288bf36d5f0b (286355 bytes)
+    F2    sha256 8a541e911d7d1ca35280126039e72ffc47480e98a75ac87f4268288bf36d5f0b (286355 bytes)
+    IDENTICAL: True
+
+(b) recall-miss mechanisms
+    O`DONNELL: Joining us now a member of the committee, Congressman Raja Krishnamoorthi.        COLON=None qualifies=- boundaries=0
+    O'DONNELL: Joining us now a member of the committee, Congressman Raja Krishnamoorthi.        COLON=O'DONNELL qualifies=False boundaries=0
+    WALLACE (voice-over): We will discuss compromise with House Democratic Leader Nancy Pelosi.  COLON=WALLACE (voice-over) qualifies=False boundaries=0
+    SULLIVAN (voice-over): The announcement comes after House Speaker Mike Johnson tweeted.      COLON=SULLIVAN (voice-over) qualifies=True boundaries=1
+
+    'o`donnell' char U+0060 between O and D : backtick is NOT in the name class [A-Z.'-]
+    roster surname? wallace=False sullivan=True odonnell=False donnell=False
+
+(c) population arithmetic
+    INTERVIEW raw mentions 11365 - P2-A INTERVIEW hits 207 = 11158 (G5a population)
+    CREC      raw mentions 28720 - P3b CREC hits 567       = 28153 (G5b population)
+    total re-derived mentions: 53011
+DONE G6

@@ -1,0 +1,143 @@
+﻿====================================================================================================
+R2  ROUTING / DISPLAY-COLUMN CENSUS   run 2026-09-18T23:31:08
+====================================================================================================
+workbook 11316932  mtime 2026-09-18 02:09:29.560623
+
+media router raw categories (media_rules.RAW_PATTERNS / build_media_blend HDRMAP): 20
+sheets: 33
+
+-- A. sheet 'Press Release - Raw' (build_media_blend.py:279-282 write target) --
+header cells in cols 1..30: 25
+   col  1  member
+   col  2  chamber
+   col  3  state
+   col  4  party
+   col  5  Examination & Supervision
+   col  6  Credit Union Capital Requirements
+   col  7  NCUA Budget & Share Insurance Fund
+   col  8  Interchange
+   col  9  Payments
+   col 10  Technology & Emerging Issues
+   col 11  Fraud Prevention
+   col 12  Data Privacy & Cybersecurity
+   col 13  Charter Modernization & Governance
+   col 14  Defense Credit Union Issues
+   col 15  Field of Membership
+   col 16  Credit Union Tax Status
+   col 17  CDFI Fund
+   col 18  CU-Bank Competitive Dynamics
+   col 19  CFPB Issues & Structural Reform
+   col 20  Credit Card & Consumer-Fee Mandates
+   col 21  Telephone Consumer Protection Act
+   col 22  Member Business Lending
+   col 23  Mortgage Lending & Housing
+   col 24  General Credit Union
+   col 26  MEDIA BLEND 2026-09-17: cells = press(p80-scaled)+social(p80-scaled, half-life 0.50y) at 50/50 (thin-cat shrink ON, RT weight 0.50). Backup: Moneyball Main Version - Blended.BACKUP-20260917-020844.xlsx | +CU floor-speech learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35) | +CU hearing channel (GOLD ONLY; own-source 0.85, half-life 2.0y; non-gold excluded) | +CU interview learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35)
+
+RULE (build_media_blend.py:432-433)  col=hdr.get(hname);  if not col: print('  !! header not found:',hname); continue
+media categories WITHOUT a column in this sheet -> value never written: 0
+media categories WITH a column: 20
+sheet headers that are not media categories (5): ['member', 'chamber', 'state', 'party', 'MEDIA BLEND 2026-09-17: cells = press(p80-scaled)+social(p80-scaled, half-life 0.50y) at 50/50 (thin-cat shrink ON, RT weight 0.50). Backup: Moneyball Main Version - Blended.BACKUP-20260917-020844.xlsx | +CU floor-speech learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35) | +CU hearing channel (GOLD ONLY; own-source 0.85, half-life 2.0y; non-gold excluded) | +CU interview learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35)']
+
+Z1 provenance note:
+   MEDIA BLEND 2026-09-17: cells = press(p80-scaled)+social(p80-scaled, half-life 0.50y) at 50/50 (thin-cat shrink ON, RT weight 0.50). Backup: Moneyball Main Version - Blended.BACKUP-20260917-020844.xlsx | +CU floor-speech learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35) | +CU hearing channel (GOLD ONLY; own-source 0.85, half-life 2.0y; non-gold excluded) | +CU interview learned stack (gold 1.0, unanimous 0.9, majority 0.6, review 0.35)
+
+-- B. dashboard issue columns --
+per_topic_alloc.json keys = the desk/dashboard issue SOURCE list (make_member_desk.py:19,45): 19
+   Examination & Supervision
+   Credit Union Capital Requirements
+   NCUA Budget & Share Insurance Fund
+   Interchange
+   Payments
+   Technology & Emerging Issues
+   Fraud Prevention
+   Data Privacy & Cybersecurity
+   Charter Modernization & Governance
+   Defense Credit Union Issues
+   Field of Membership
+   CDFI Fund
+   CFPB Restrain
+   CFPB Reach (-)
+   Telephone Consumer Protection Act Issues
+   Credit Card & Consumer-Fee Mandates
+   Member Business Lending
+   Mortgage Lending & Housing
+   Credit Union Tax Status
+
+dashboard issue contract: 18 source issues -> 18 canonical categories
+display-clone dropped by DROPPED_DISPLAY_CLONES: ['CFPB Reach (-)']
+canonical categories displayed as an issue column:
+   CDFI Fund
+   CFPB
+   CU Capital Requirements
+   CU Tax Status
+   Charter Modernization
+   Credit Card Mandates
+   Data Privacy & Cyber
+   Defense CU Issues
+   Examination & Supervision
+   Field of Membership
+   Fraud Prevention
+   Interchange
+   Member Business Lending
+   Mortgage & Housing
+   NCUA Budget & Insurance
+   Payments
+   TCPA
+   Technology & Emerging
+
+-- C. media category -> canonical -> dashboard issue? --
+media raw category                     canonical (RAW_TO_STANCE)    wb col    dash col 
+Examination & Supervision              Examination & Supervision    YES       YES      
+Credit Union Capital Requirements      CU Capital Requirements      YES       YES      
+NCUA Budget & Share Insurance Fund     NCUA Budget & Insurance      YES       YES      
+Interchange                            Interchange                  YES       YES      
+Payments                               Payments                     YES       YES      
+Technology & Emerging Issues           Technology & Emerging        YES       YES      
+Fraud Prevention                       Fraud Prevention             YES       YES      
+Data Privacy & Cybersecurity           Data Privacy & Cyber         YES       YES      
+Charter Modernization & Governance     Charter Modernization        YES       YES      
+Defense Credit Union Issues            Defense CU Issues            YES       YES      
+Field of Membership                    Field of Membership          YES       YES      
+CDFI Fund                              CDFI Fund                    YES       YES      
+CFPB Issues & Structural Reform        CFPB                         YES       YES      
+Credit Card & Consumer-Fee Mandates    Credit Card Mandates         YES       YES      
+Telephone Consumer Protection Act      TCPA                         YES       YES      
+Member Business Lending                Member Business Lending      YES       YES      
+Mortgage Lending & Housing             Mortgage & Housing           YES       YES      
+Credit Union Tax Status                CU Tax Status                YES       YES      
+CU-Bank Competitive Dynamics           CU-Bank Competitive Dynamics YES       NO       
+General Credit Union                   General Credit Union         YES       NO       
+
+media categories with NO dashboard issue column: 2
+   CU-Bank Competitive Dynamics           -> CU-Bank Competitive Dynamics
+   General Credit Union                   -> General Credit Union
+
+-- D. dashboard_data.json shipped issue list --
+dashboard_data.json mtime 2026-09-18 02:23:53.548837
+bundle issues (19): ['Examination & Supervision', 'Credit Union Capital Requirements', 'NCUA Budget & Share Insurance Fund', 'Interchange', 'Payments', 'Technology & Emerging Issues', 'Fraud Prevention', 'Data Privacy & Cybersecurity', 'Charter Modernization & Governance', 'Defense Credit Union Issues', 'Field of Membership', 'CDFI Fund', 'CFPB Restrain (pro-CU; limits agency reach)', 'Telephone Consumer Protection Act Issues', 'Credit Card & Consumer-Fee Mandates', 'Member Business Lending', 'Mortgage Lending & Housing', 'Credit Union Tax Status', 'Overall CU stance']
+bundle engine.categories (19): ['Examination & Supervision', 'CU Capital Requirements', 'NCUA Budget & Insurance', 'Interchange', 'Payments', 'Technology & Emerging', 'Fraud Prevention', 'Data Privacy & Cyber', 'Charter Modernization', 'Defense CU Issues', 'Field of Membership', 'CDFI Fund', 'CFPB', 'TCPA', 'Credit Card Mandates', 'Member Business Lending', 'Mortgage & Housing', 'CU Tax Status', None]
+
+-- E. category_stance.json matrix categories (the per-category stance surface) --
+members in matrix: 533
+matrix categories (18):
+   CDFI Fund                      present on 533 members
+   CFPB                           present on 533 members
+   CU Capital Requirements        present on 533 members
+   CU Tax Status                  present on 533 members
+   Charter Modernization          present on 533 members
+   Credit Card Mandates           present on 533 members
+   Data Privacy & Cyber           present on 533 members
+   Defense CU Issues              present on 533 members
+   Examination & Supervision      present on 533 members
+   Field of Membership            present on 533 members
+   Fraud Prevention               present on 533 members
+   Interchange                    present on 533 members
+   Member Business Lending        present on 533 members
+   Mortgage & Housing             present on 533 members
+   NCUA Budget & Insurance        present on 533 members
+   Payments                       present on 533 members
+   TCPA                           present on 533 members
+   Technology & Emerging          present on 533 members
+
+DONE R2

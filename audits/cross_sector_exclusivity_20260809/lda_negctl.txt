@@ -1,0 +1,176 @@
+ERROR: missing identity client.id crosswalk: C:\Users\pgoff\AppData\Local\Temp\tmp8pfwup17\id_crosswalk.json
+  OK   test_bill_regex_formal_variants
+  OK   test_bill_regex_boundaries_multi_and_unparsed
+  OK   test_dotless_bare_s_sba_lookbehind_wins_over_context
+  OK   test_dotless_bare_s_us_census_lookbehind_wins_over_context
+  OK   test_dotless_bare_s_bank_of_america_5300_and_1160
+  OK   test_dotless_and_dotted_s_in_same_activity_both_resolve
+  OK   test_dotless_bare_s_without_formal_context_is_rejected
+  OK   test_dotless_bare_s_over_range_and_absent_is_rejected
+  OK   test_dotless_bare_s_recovery_and_rejection_receipts
+  OK   test_bill_number_runs_into_title_six_verbatim_citations
+  OK   test_run_into_title_keeps_thousands_separator_protection
+  OK   test_run_into_title_keeps_six_digit_boundary_protection
+  OK   test_run_into_title_keeps_existing_hyphen_behavior
+  OK   test_runs_into_title_recovery_receipt_bucket
+  OK   test_sponsor_map_synthetic_billstatus
+  OK   test_multi_congress_same_number_resolution
+  OK   test_title_normalization_guard_ambiguity_boundary_and_longest
+  OK   test_stale_citation_original_congress_and_strict_generous
+  OK   test_multi_suffix_stale_citations_forward_binding
+  OK   test_distinct_bill_dyad_counting
+  OK   test_title_union_with_formal_is_distinct
+  OK   test_per_activity_scope_congress_and_contradiction
+  OK   test_sponsorless_intersection_receipt
+  OK   test_cross_comparison_arithmetic
+  OK   test_collector_manifest_idempotency
+  OK   test_collector_schema_identity_and_resume_validation
+  OK   test_collector_timeout_redirect_and_transient_retries
+  OK   test_incremental_manifest_writer
+  OK   test_year_partitioned_resume_paths
+  OK   test_sweep_page_validation
+  OK   test_worklist_filing_year_validation
+  OK   test_strict_uuid_and_pinned_lob_scope
+  OK   test_worklist_boolean_normalization
+  OK   test_bridge3_member_blocked_two_cycle_joint_move
+  OK   test_bridge3_fractional_ranks_and_singleton_party_cell
+  OK   test_bridge3_committee_snapshot_parser
+  OK   test_bridge3_sweep_ingestion_duplicate_and_wrong_year
+  OK   test_bridge3_client_attribution_and_near_miss_receipt
+  OK   test_bridge3_stable_client_id_harvest_and_collision
+  OK   test_bridge3_all_year_id_harvest_matches_unseen_sweep_name
+  OK   test_bridge3_id_harvest_plausibility_guard_rejects_cross_attribution
+lda rebuild: 2021:g0/s0 | receipts C:\Users\pgoff\AppData\Local\Temp\tmpzudf5jra\Melange\lda_rebuild\derived\rebuild_receipts.json
+  OK   test_legacy_2021_build_does_not_consult_identity_harvest_loader
+  OK   test_bridge3_zero_match_org_has_per_year_coverage_gap_receipt
+  OK   test_bridge3_first_word_title_index_matches_naive
+  OK   test_bridge3_xhat_battery_construction_sanity
+  OK   test_round4b_y_distinct_directional_bill_construction
+  OK   test_round4b_congestion_x_stratum_field_mapping
+  OK   test_round4b_entry_and_void_exact_boundaries
+  OK   test_round4b_battery_never_loads_real_y
+  OK   test_quarterly_period_vocabulary_and_unknown
+  OK   test_quarterly_aggregation_distinctness
+  OK   test_position_calibration_join_and_three_class_collapse
+  OK   test_position_dataset_accepts_their_five_label_vocabulary
+  OK   test_position_dataset_unknown_label_names_row
+  OK   test_position_three_class_collapse_both_directions
+  OK   test_position_agreement_primary_and_restricted_secondary_n
+  OK   test_position_prompt_exactness
+  OK   test_position_jsonl_and_flat_csv_round_trip
+  OK   test_position_fewshot_prompt_pinned_order_and_label_mapping
+  OK   test_position_fewshot_selection_excludes_calibration_pairs
+  OK   test_position_fewshot_shortfall_receipt_and_cache_reuse
+  OK   test_position_reply_parsing_and_unparseable_receipt
+  OK   test_position_content_hash_resume_behavior
+  OK   test_position_title_only_official_allows_empty_short
+  OK   test_position_title_display_fallback_receipted
+  OK   test_position_title_zero_items_raises
+  OK   test_position_title_both_preserves_short_and_prefers_introduced
+  OK   test_position_absent_billstatus_key_skipped_with_samples
+  OK   test_position_present_billstatus_key_without_titles_still_raises
+  OK   test_position_present_billstatus_key_with_titles_unchanged
+  OK   test_association_name_normalizer_fixed_cases
+  OK   test_association_set_directional_threshold_rule
+  OK   test_association_crosswalk_is_exact_only_and_receipts_near_name
+  OK   test_association_global_id_matches_despite_name_mismatch
+  OK   test_association_id_and_name_channels_have_union_semantics
+  OK   test_association_client_scoped_id_never_attributes_identity
+  OK   test_association_main_fails_loud_without_id_crosswalk
+  OK   test_association_work_item_determinism_and_schema_mirror
+  OK   test_association_id_guard_rejects_ufcw_for_sound_banking
+  OK   test_association_id_guard_accepts_nafcu_rename
+  OK   test_association_id_guard_accepts_nonempty_subset
+  OK   test_association_id_guard_rejects_shared_stopwords_only
+  OK   test_association_id_rejection_receipt_carries_both_token_sets
+  OK   test_lobby_champions_structural_controls_bite
+  OK   test_lobby_champions_zero_fills_roster_member
+  OK   test_lobby_champions_under_min_links_receipted
+  OK   test_lobby_champions_rank_deficiency_receipted
+  OK   test_lobby_champions_csv_determinism
+  OK   test_lobby_champions_sector_mean_is_genuine_leave_one_out
+  OK   test_lobby_champions_single_org_sector_fields_are_null_not_zero
+  OK   test_attention_vs_stance_bioguide_join_survives_display_name_difference
+  OK   test_attention_vs_stance_known_member_enters_worked_adversaries_cell
+  OK   test_attention_vs_stance_json_and_csv_are_deterministic
+  OK   test_lobby_forecast_no_leakage_by_construction
+  OK   test_lobby_forecast_persistence_reproduces_82_percent_carryover
+  OK   test_lobby_forecast_churn_subset_excludes_persistent_dyad
+  OK   test_lobby_forecast_temporal_split_never_trains_on_t_plus_1
+  OK   test_lobby_forecast_rank_deficiency_is_reported
+  OK   test_lobby_forecast_determinism
+  OK   test_lobby_forecast_coverage_guard_rejects_mixed_basis
+  OK   test_lobby_forecast_schiff_transition_does_not_break_seniority
+  OK   test_lobby_forecast_mid_congress_move_prefers_senate_with_receipt
+  OK   test_lobby_forecast_icpsr_difference_prefers_other_congress_match
+  OK   test_lobby_forecast_same_chamber_conflicting_state_still_raises
+  OK   test_lobby_forecast_committee_congress_keys_normalize_to_int
+  OK   test_lobby_forecast_committee_error_names_only_genuine_missing
+  OK   test_lobby_forecast_allow_missing_committee_drops_split_feature
+  OK   test_lobby_forecast_missing_committee_without_flag_still_raises
+  OK   test_lobby_forecast_churn_headline_names_winning_popularity_baseline
+  OK   test_lobby_forecast_persistence_churn_is_annotated_structurally_zero
+  OK   test_lobby_forecast_overall_verdict_counts_losses_and_leads_with_failure
+  OK   test_cosponsor_forecast_no_leakage_and_sponsor_excluded
+  OK   test_cosponsor_forecast_prior_features_never_read_target_congress
+  OK   test_cosponsor_forecast_three_baselines_known_structure
+  OK   test_cosponsor_forecast_headline_names_best_baseline_and_loss
+  OK   test_cosponsor_forecast_rank_deficiency_detected_not_silent
+  OK   test_cosponsor_forecast_output_determinism
+  OK   test_cosponsor_forecast_voteview_universe_includes_cheney_fixture
+  OK   test_cosponsor_forecast_streamed_normal_equations_match_direct_solve
+  OK   test_cosponsor_forecast_streamed_auc_matches_direct_fixture
+  OK   test_cosponsor_forecast_gram_rank_deficiency_detected
+  OK   test_cosponsor_forecast_campbell_switch_carries_forward_identity
+  OK   test_cosponsor_forecast_final_congress_switch_uses_higher_icpsr
+  OK   test_cosponsor_forecast_out_of_scope_voteview_conflict_is_not_validated
+  OK   test_cosponsor_forecast_in_scope_state_conflict_still_raises
+  OK   test_cosponsor_forecast_same_chamber_only_excludes_and_drops_constant
+  OK   test_cosponsor_forecast_candidate_configurations_have_correct_base_rates
+  OK   test_cosponsor_forecast_penalized_standard_errors_finite_positive
+  OK   test_cosponsor_forecast_policy_area_coefficients_carry_bill_counts
+  OK   test_sector_spend_amendment_supersession_latest_dt_and_receipt
+  OK   test_sector_spend_registration_types_excluded_and_receipted
+  OK   test_sector_spend_components_support_exact_total
+  OK   test_sector_spend_cuna_nafcu_dba_variants_one_family
+  OK   test_sector_spend_individual_excluded_and_reported_separately
+  OK   test_sector_spend_2026_is_partial_year
+  OK   test_sector_spend_output_determinism
+  OK   test_org_mentions_paywall_strip_removes_stub_but_keeps_real_prefix_mention
+  OK   test_org_mentions_strict_block_rejects_generic_qualifier_and_verb_use
+  OK   test_org_mentions_strict_family_aliases_cannot_mutually_corroborate
+  OK   test_org_mentions_strict_tier_b_requires_second_same_org_alias
+  OK   test_org_mentions_slash_alias_keeps_full_name_without_minting_bare_state
+  OK   test_org_mentions_slash_alias_readmits_coined_token_but_not_strategy
+  OK   test_org_mentions_source_pattern_cannot_self_qualify_tier_b_alias
+  OK   test_org_mentions_tier_b_accepts_same_sector_org_in_same_sentence
+  OK   test_org_mentions_authority_dedup_prefers_entity_and_unions_aliases
+  OK   test_org_mentions_coinbase_family_counts_document_once_in_one_row
+  OK   test_org_mentions_press_dates_normalize_and_undated_rows_are_receipted
+  OK   test_org_mentions_bluesky_verified_only_and_unverified_receipt
+  OK   test_org_mentions_schema_receipts_and_channels_are_never_summed
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4bh87o2i\lobby-network.html (123,893 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4bh87o2i\lobby-champions.html (108,690 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4bh87o2i\lobby-forecast.html (97,502 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4bh87o2i\lobby-bills.html (98,872 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4bh87o2i\lobby-screen.html (95,454 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpo1ydvggq\lobby-network.html (125,052 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpo1ydvggq\lobby-champions.html (108,810 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpo1ydvggq\lobby-forecast.html (97,622 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpo1ydvggq\lobby-bills.html (98,992 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpo1ydvggq\lobby-screen.html (95,574 bytes)
+  OK   test_org_mentions_surface_renders_landing_company_and_absent_states
+  OK   test_champions_v2_veto_never_reaches_champions_and_routes_to_threats
+  OK   test_champions_v2_corroborated_opposed_sponsor_is_opposition_leadership
+  OK   test_champions_v2_crowned_opposition_leader_routes_to_mixed_and_receipts
+  OK   test_champions_v2_crowned_low_opposition_is_omitted_uniformly
+  OK   test_champions_v2_identical_noncrown_profile_still_routes_to_threats
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\r-category-stats-loop-69c0dc\fec\tests\lobbying\test_lda_rebuild.py", line 10516, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\r-category-stats-loop-69c0dc\fec\tests\lobbying\test_lda_rebuild.py", line 10507, in main
+    test()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\r-category-stats-loop-69c0dc\fec\tests\lobbying\test_lda_rebuild.py", line 9987, in test_champions_v2_assert_boards_rejects_crown_threat
+    CV2._assert_boards("crypto", boards, {"C000001"}, set())
+TypeError: _assert_boards() takes 3 positional arguments but 4 were given

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Focused tests for the 19-category adjudication review queue builder.
 
-Run with the house runner (there is no pytest on this machine)::
+Run with::
 
-    python fec/tests/run_focused_tests.py \
-        fec/tests/legislation/test_build_legislation_category_review_queue.py
+    python -m pytest fec/tests/legislation/test_build_legislation_category_review_queue.py -q
 """
 
 from __future__ import annotations

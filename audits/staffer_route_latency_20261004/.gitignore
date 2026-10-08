@@ -1,0 +1,4 @@
+# The repository .gitignore treats *.json and *.txt as regenerable data. In this packet they are the receipts
+# (manifests, summaries, sums and proof captures) of the staffer people-network latency landings: track them.
+!*.json
+!*.txt

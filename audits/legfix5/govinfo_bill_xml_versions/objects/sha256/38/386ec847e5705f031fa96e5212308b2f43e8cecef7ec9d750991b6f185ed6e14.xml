@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HCCDE14F8BFB74D75A07A6AC1AFE9999A" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 991 IH: Extension of the Caribbean Basin Economic Recovery Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 991</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190206">February 6, 2019</action-date><action-desc><sponsor name-id="S001185">Ms. Sewell of Alabama</sponsor> (for herself, <cosponsor name-id="W000815">Mr. Wenstrup</cosponsor>, <cosponsor name-id="B001270">Ms. Bass</cosponsor>, <cosponsor name-id="S001183">Mr. Schweikert</cosponsor>, <cosponsor name-id="H000324">Mr. Hastings</cosponsor>, and <cosponsor name-id="L000287">Mr. Lewis</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To extend certain provisions of the Caribbean Basin Economic Recovery Act until September 30, 2030, and for other purposes.</official-title></form><legis-body id="H145239D4599A4ECD835517236AC7C073" style="OLC"> 
+<section id="H26B32BFCC0394032A2A5092819A38D77" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Extension of the Caribbean Basin Economic Recovery Act</short-title></quote>.</text></section> <section id="HAC2BA1F3C42B40918F2302ED84B03307"><enum>2.</enum><header>Extension of the Caribbean Basin Economic Recovery Act</header><text display-inline="no-display-inline">Section 213 of the Caribbean Basin Economic Recovery Act (<external-xref legal-doc="usc" parsable-cite="usc/19/2703">19 U.S.C. 2703</external-xref>) is amended as follows:</text> 
+<paragraph id="H6476E9F3C88C4D2384AD4F97B19CECAE"><enum>(1)</enum><header>Extension for certain knit apparel articles</header><text display-inline="yes-display-inline">In clause (iii) of subsection (b)(2)(A)—</text> <subparagraph id="H5CCF6DB6E6A74502BFB23F30C52C43B8"><enum>(A)</enum><text>in subclause (II)(cc), by striking <quote>September 30, 2020</quote> and inserting <quote>September 30, 2030</quote>; and</text></subparagraph> 
+<subparagraph id="HCEF80B3A5B7448839A4D42172F818E2C"><enum>(B)</enum><text>in subclause (IV)(dd), by striking <quote>September 30, 2020</quote> and inserting <quote>September 30, 2030</quote>.</text></subparagraph></paragraph> <paragraph id="H1A7267C68398495FAB6027B88A301439"><enum>(2)</enum><header>Extension of limitation with respect to certain other apparel articles</header><text display-inline="yes-display-inline">In clause (iv)(II) of such subsection, by striking <quote>18</quote> and inserting <quote>28</quote>.</text></paragraph> 
+<paragraph id="H30B564A57BE94E3AB021445B67189CE1"><enum>(3)</enum><header>Extension of transition period</header><text>In subsection (b)(5)(D)(i), by striking <quote>September 30, 2020</quote> and inserting <quote>September 30, 2030</quote>.</text></paragraph></section> </legis-body></bill>
+

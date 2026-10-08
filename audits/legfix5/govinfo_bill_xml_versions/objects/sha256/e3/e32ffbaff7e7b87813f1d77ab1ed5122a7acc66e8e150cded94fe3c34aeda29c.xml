@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H2BFD7C0226974A04BD60ED6D9540BD4C" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6784 IH: Time to Repeal an Archaic Policy Act of 2020</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-05-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 6784</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20200508">May 8, 2020</action-date><action-desc><sponsor name-id="R000610">Mr. Reschenthaler</sponsor> (for himself, <cosponsor name-id="S001214">Mr. Steube</cosponsor>, <cosponsor name-id="A000377">Mr. Armstrong</cosponsor>, <cosponsor name-id="P000605">Mr. Perry</cosponsor>, <cosponsor name-id="N000181">Mr. Nunes</cosponsor>, and <cosponsor name-id="J000289">Mr. Jordan</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 18, United States Code, to repeal the provision relating to private correspondence with foreign governments, and for other purposes.</official-title></form><legis-body id="H6B245E36AD024753BE0634C7DC070D9D" style="OLC"><section id="H72899A9802134453BEC6458109AE2799" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Time to Repeal an Archaic Policy Act of 2020</short-title></quote> or the <quote><short-title>TRAP Act of 2020</short-title></quote> .</text></section><section id="H77586FD78B5C40D1ACFF1C8DB0D4E973"><enum>2.</enum><header>Repeal of provision relating to private correspondence with foreign governments</header><subsection id="H5B83E60F1CC9482BB4DF48B048D51BAA"><enum>(a)</enum><header>Repeal</header><text display-inline="yes-display-inline">Section 953 of title 18, United States Code, is repealed.</text></subsection><subsection id="H2EF63DEEE5F04F38ADE8D845A4C8A2E9"><enum>(b)</enum><header>Conforming amendment</header><text display-inline="yes-display-inline">The table of sections at the beginning of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/18/45">chapter 45</external-xref> of title 18, United States Code, is amended by striking the item relating to section 953.</text></subsection><subsection id="H9B63CE1F99644BDE9C2BB4123E8FF1A5"><enum>(c)</enum><header>Effective date</header><text>The repeal made by subsection (a) shall take effect on the date of the enactment of this Act. </text></subsection></section></legis-body></bill> 
+

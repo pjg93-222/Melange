@@ -1,0 +1,80 @@
+== before landing_v4: a tree that holds what LIVE held before it (the apply refuses, writes nothing)
+PASS  the tree differs from LIVE-now in 6 files v4 edits (at its pre-image) and 4 v4.1 edits that landing_v4 creates (absent)
+PASS  dry run on LIVE-before-landing_v4: rc=2, REFUSED
+      MISMATCH edit fec/surfaces/staffer_closeness_routes.py                           expected 76c0347eb942  actual 02922dffd027
+      MISMATCH edit fec/surfaces/staffer_distinct_routes.py                            expected 8fab7ea38bc8  actual 41a0edb6e390
+      MISMATCH edit fec/surfaces/staffer_live/README.md                                expected 07a757393a05  actual 8efd198264c8
+      MISMATCH edit fec/surfaces/staffer_live/staffer-route.js                         expected d5e5ad28823c  actual 77a7c19904f4
+      MISMATCH edit fec/surfaces/staffer_live_service.py                               expected a512c5c7dcfe  actual f311203438a6
+      MISMATCH edit fec/surfaces/staffer_routing.py                                    expected c9b0896a0081  actual 05fa3f38b029
+      MISMATCH edit fec/tests/surfaces/test_staffer_left_out_staff.cjs                 expected c34f37e52e63  actual (absent)
+      MISMATCH edit fec/tests/surfaces/test_staffer_office_covered_staff.py            expected 72323acb4fdb  actual (absent)
+      MISMATCH edit fec/tests/surfaces/test_staffer_prewarm.py                         expected bf8319795c04  actual (absent)
+      MISMATCH edit fec/tests/surfaces/test_staffer_unreachable_hint.py                expected 15dbe2ef7359  actual (absent)
+      REFUSED: this patch is cut against the bytes LIVE holds after landing_v4 is applied. Required first: landing_v4 (staffer_route_v4.patch) applied to LIVE (and landing_v2 and landing_v3_ids before it). Apply it first, or find what changed these files:
+        - fec/surfaces/staffer_closeness_routes.py does not hold its pre-image (LIVE working file now = landing_v4 post-image)
+        - fec/surfaces/staffer_distinct_routes.py does not hold its pre-image (LIVE working file now = landing_v4 post-image)
+        - fec/surfaces/staffer_live/README.md does not hold its pre-image (LIVE working file now = landing_v4 post-image)
+        - fec/surfaces/staffer_live/staffer-route.js does not hold its pre-image (LIVE working file now = landing_v4 post-image)
+        - fec/surfaces/staffer_live_service.py does not hold its pre-image (LIVE working file now = landing_v4 post-image)
+        - fec/surfaces/staffer_routing.py does not hold its pre-image (LIVE working file now = landing_v4 post-image)
+        - fec/tests/surfaces/test_staffer_left_out_staff.cjs is missing (its pre-image is LIVE working file now = landing_v4 post-image)
+        - fec/tests/surfaces/test_staffer_office_covered_staff.py is missing (its pre-image is LIVE working file now = landing_v4 post-image)
+        - fec/tests/surfaces/test_staffer_prewarm.py is missing (its pre-image is LIVE working file now = landing_v4 post-image)
+        - fec/tests/surfaces/test_staffer_unreachable_hint.py is missing (its pre-image is LIVE working file now = landing_v4 post-image)
+PASS  --apply on LIVE-before-landing_v4: rc=2, REFUSED
+PASS  nothing was written (every hash is as it was, the new file still absent)
+
+== a tree that holds landing_v4 except for one file v4.1 edits (a moved target)
+PASS  --apply on a moved target: rc=2, MISMATCH named fec/surfaces/staffer_closeness_routes.py
+PASS  nothing was written, the other files included
+
+== a tree that already holds the new file (the apply refuses to overwrite it)
+PASS  --apply with the new file already present: rc=2, refused
+PASS  nothing was written
+
+== after landing_v4: a tree that holds its post-images (LIVE as it is now)
+      ok      edit fec/surfaces/staffer_closeness_routes.py                           expected 76c0347eb942  actual 76c0347eb942
+      ok      edit fec/surfaces/staffer_distinct_routes.py                            expected 8fab7ea38bc8  actual 8fab7ea38bc8
+      ok      edit fec/surfaces/staffer_live/README.md                                expected 07a757393a05  actual 07a757393a05
+      ok      edit fec/surfaces/staffer_live/staffer-route.js                         expected d5e5ad28823c  actual d5e5ad28823c
+      ok      edit fec/surfaces/staffer_live_service.py                               expected a512c5c7dcfe  actual a512c5c7dcfe
+      ok      edit fec/surfaces/staffer_routing.py                                    expected c9b0896a0081  actual c9b0896a0081
+      ok      edit fec/tests/surfaces/test_staffer_left_out_staff.cjs                 expected c34f37e52e63  actual c34f37e52e63
+      ok      edit fec/tests/surfaces/test_staffer_office_covered_staff.py            expected 72323acb4fdb  actual 72323acb4fdb
+      ok      edit fec/tests/surfaces/test_staffer_prewarm.py                         expected bf8319795c04  actual bf8319795c04
+      ok      new  fec/tests/surfaces/test_staffer_request_work_index.py              expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_unreachable_hint.py                expected 15dbe2ef7359  actual 15dbe2ef7359
+      dry run (git apply --check, read-only): rc=0
+PASS  dry run: rc=0
+PASS  the dry run wrote nothing
+      apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+PASS  --apply: rc=0
+PASS  every post-image hash matches the manifest (11 files)
+PASS  a second --apply is refused (the targets moved): rc=2
+PASS     and it changed nothing
+
+== rollback_landing.py on that tree
+      restore pre-image  fec/surfaces/staffer_closeness_routes.py
+      restore pre-image  fec/surfaces/staffer_distinct_routes.py
+      restore pre-image  fec/surfaces/staffer_live/README.md
+      restore pre-image  fec/surfaces/staffer_live/staffer-route.js
+      restore pre-image  fec/surfaces/staffer_live_service.py
+      restore pre-image  fec/surfaces/staffer_routing.py
+      restore pre-image  fec/tests/surfaces/test_staffer_left_out_staff.cjs
+      restore pre-image  fec/tests/surfaces/test_staffer_office_covered_staff.py
+      restore pre-image  fec/tests/surfaces/test_staffer_prewarm.py
+      remove new file    fec/tests/surfaces/test_staffer_request_work_index.py
+      restore pre-image  fec/tests/surfaces/test_staffer_unreachable_hint.py
+      plan only; rerun with --rollback to restore
+PASS  plan only: rc=0
+PASS  the plan wrote nothing
+PASS  a file edited after the apply stops the rollback and nothing changes: rc=1
+PASS     (the edited file and the rest are untouched)
+      rolled back 11 files
+PASS  --rollback: rc=0
+PASS  every pre-image is back, byte for byte (10 files)
+PASS  the 1 new file is gone
+PASS  a second rollback changes nothing
+
+result: ALL PASS

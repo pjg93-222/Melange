@@ -1,0 +1,81 @@
+====================================================================================================
+N14 FINAL CHECKS: THE Q5 GAP AND THE OWNER-RECORD CONFLICT   run 2026-09-19T13:07:37
+====================================================================================================
+-- A. WHICH RAW DISAGREEMENTS THE DESK'S OWN CORRECTION NEUTRALISES --
+   When _press_corr hits, the desk sets stance = the override and ssrc = 'corrected' on
+   BOTH sides, so a raw disagreement on that release never reaches the screen.
+
+   _press_corr hits inside the 57 stance disagreements : 1
+      Tim Scott              Credit union board modernization part of updated hou sheet=neutral  csv=support  override=support
+   _press_corr hits inside the 493 stance_src keys     : 2
+      Tim Scott              Industry win: Judge vacates CFPB credit card late fe override=neutral (ssrc becomes 'corrected' on both sides)
+      Tim Scott              Credit union board modernization part of updated hou override=support (ssrc becomes 'corrected' on both sides)
+
+   ARITHMETIC CHECK
+      57 raw stance disagreements  - 1 corrected = 56 displayed changes   (Q5 measured 56)
+      493 raw stance_src keys      - 2 corrected = 491 displayed changes   (Q5 measured 491)
+
+----------------------------------------------------------------------------------------------------
+-- B. THE FOUR RELEASES WHERE TWO OWNER RECORDS DISAGREE --
+   cu_stance_label_set.csv  2026-06-30T18:56:09  552 rows
+   cu_golden_labels.csv     2026-07-04T15:47:06  760 rows
+   cu_golden_labels source census: {'augmented_v2': 448, 'goldqueue_adjudicated': 217, 'augmented_v2+goldqueue': 95}
+
+   of the 57, releases present in BOTH owner records : 57
+   the two records AGREE on                         : 53
+   the two records CONFLICT on                      : 4
+
+   ................................................................................................
+   Jon Ossoff  |  El Senador Ossoff Presenta Proyecto de Ley Bipartidista para Proteger a 
+   url   https://www.ossoff.senate.gov/press-releases/el-senador-ossoff-presenta-proyecto-de-ley-bipartidista-para-proteger-a-los-ninos-de-los-depredadores-en-linea-y-la-explotacion-sexual/
+   SHEET stance=neutral   CSV stance=oppose  
+   cu_stance_label_set.csv  row=461   split=train    pre_label=oppose   human_label=oppose  
+   cu_stance_label_set.csv  row=461   split=train    pre_label=oppose   human_label=oppose  
+   cu_golden_labels.csv     label=neutral  split=train  source=augmented_v2+goldqueue   conflict=user-resolved: neutral (was aug=oppose queue=neutral) review_flag=ok
+                            gold_stance_toward_target=support    gold_target_cu_valence=0          gold_target=Bipartisan bill to protect children from
+   cu_golden_labels.csv     label=neutral  split=train  source=augmented_v2+goldqueue   conflict=user-resolved: neutral (was aug=oppose queue=neutral) review_flag=ok
+                            gold_stance_toward_target=support    gold_target_cu_valence=0          gold_target=Bipartisan bill to protect children from
+
+   ................................................................................................
+   Kirsten Gillibrand  |  Gillibrand Slams Trump Administration For Making Seniors More Vulnerable
+   url   https://www.gillibrand.senate.gov/news/press/release/gillibrand-slams-trump-administration-for-making-seniors-more-vulnerable-to-financial-frauds-and-scams/
+   SHEET stance=neutral   CSV stance=oppose  
+   cu_stance_label_set.csv  row=199   split=train    pre_label=oppose   human_label=oppose  
+   cu_stance_label_set.csv  row=199   split=train    pre_label=oppose   human_label=oppose  
+   cu_golden_labels.csv     label=neutral  split=train  source=augmented_v2+goldqueue   conflict=user-resolved: neutral (was aug=oppose queue=neutral) review_flag=HARD-transitive
+                            gold_stance_toward_target=neutral    gold_target_cu_valence=0          gold_target=Trump administration cuts undermining fr
+   cu_golden_labels.csv     label=neutral  split=train  source=augmented_v2+goldqueue   conflict=user-resolved: neutral (was aug=oppose queue=neutral) review_flag=HARD-transitive
+                            gold_stance_toward_target=neutral    gold_target_cu_valence=0          gold_target=Trump administration cuts undermining fr
+
+   ................................................................................................
+   Lance Gooden  |  Interchange bill should be rejected in any form
+   url   https://www.americascreditunions.org/news-media/news/interchange-bill-should-be-rejected-any-form#G000589
+   SHEET stance=oppose    CSV stance=support 
+   cu_stance_label_set.csv  row=377   split=test     pre_label=support  human_label=support 
+   cu_stance_label_set.csv  row=377   split=test     pre_label=support  human_label=support 
+   cu_golden_labels.csv     label=oppose   split=test   source=augmented_v2+goldqueue   conflict=user-resolved: oppose (was aug=support queue=oppose) review_flag=HARD-transitive
+                            gold_stance_toward_target=oppose     gold_target_cu_valence=1          gold_target=Credit Card Competition Act / interchang
+   cu_golden_labels.csv     label=oppose   split=test   source=augmented_v2+goldqueue   conflict=user-resolved: oppose (was aug=support queue=oppose) review_flag=HARD-transitive
+                            gold_stance_toward_target=oppose     gold_target_cu_valence=1          gold_target=Credit Card Competition Act / interchang
+
+   ................................................................................................
+   Roger Marshall  |  America’s Credit Unions joins with other industry groups in opposition t
+   url   https://www.americascreditunions.org/news-media/news/americas-credit-unions-joins-other-industry-groups-opposition-ndaa-interchange#M001198
+   SHEET stance=oppose    CSV stance=support 
+   cu_stance_label_set.csv  row=107   split=train    pre_label=support  human_label=support 
+   cu_stance_label_set.csv  row=107   split=train    pre_label=support  human_label=support 
+   cu_golden_labels.csv     label=oppose   split=train  source=augmented_v2+goldqueue   conflict=user-resolved: oppose (was aug=support queue=oppose) review_flag=HARD-transitive
+                            gold_stance_toward_target=support    gold_target_cu_valence=-1         gold_target=NDAA interchange amendments (Credit Card
+   cu_golden_labels.csv     label=oppose   split=train  source=augmented_v2+goldqueue   conflict=user-resolved: oppose (was aug=support queue=oppose) review_flag=HARD-transitive
+                            gold_stance_toward_target=support    gold_target_cu_valence=-1         gold_target=NDAA interchange amendments (Credit Card
+
+   THIS LANE DOES NOT RESOLVE THESE FOUR.  Two files both recorded by the owner give
+   different labels for the same release; which is current is the owner's call.
+
+   what the ENGINE scored for those four (press_stance_final.csv stack_label/tier):
+      Jon Ossoff             El Senador Ossoff Presenta Proyecto de Ley B stack=('neutral', 'majority')
+      Kirsten Gillibrand     Gillibrand Slams Trump Administration For Ma stack=('neutral', 'review')
+      Lance Gooden           Interchange bill should be rejected in any f stack=('oppose', 'review')
+      Roger Marshall         America’s Credit Unions joins with other ind stack=('oppose', 'majority')
+wrote n14_q7_gap_and_conflict.json
+DONE N14 FINAL CHECKS

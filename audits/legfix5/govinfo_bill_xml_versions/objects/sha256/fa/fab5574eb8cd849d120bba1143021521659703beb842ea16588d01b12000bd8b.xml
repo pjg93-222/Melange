@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HBF7868E8B0BD4919BA9A1160F7250469" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1167 IH: To create a zero interest loan program for Federal and District of Columbia employees furloughed or excepted from such furlough during a lapse in Federal appropriations, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1167</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190213">February 13, 2019</action-date><action-desc><sponsor name-id="H001077">Mr. Higgins of Louisiana</sponsor> (for himself and <cosponsor name-id="R000576">Mr. Ruppersberger</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To create a zero interest loan program for Federal and District of Columbia employees furloughed or
+			 excepted from such furlough during a lapse in Federal appropriations, and
+			 for other purposes.</official-title></form>
+	<legis-body id="H7BFD5BB174FB48919F78108CEA5A6D1C" style="OLC">
+		<section id="H989F67BBB5F04646BC100AF3B51C5AB9" section-type="section-one"><enum>1.</enum><header>Zero interest loans for Federal and District of Columbia employees</header>
+ <subsection id="HBA9387CAFB2C4ED888DFA2B848F856ED"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of the Treasury shall, each Federal fiscal year, enroll each covered bank in a program to be known as the zero interest Federal and District of Columbia employee loan program unless such covered bank has elected not to participate in such program for such Federal fiscal year.</text>
+			</subsection><subsection id="HEB515FE083754211AB4E5071F9434A5E"><enum>(b)</enum><header>Zero Interest Loan</header>
+ <paragraph id="HCE0EE36ECEF44DF4965F0F227D906C8E"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Any covered bank enrolled in the zero interest Federal and District of Columbia employee loan program under subsection (a) shall, for the first 90 days of any lapse in Federal appropriations, upon request, extend a zero interest loan to any covered employee.</text>
+ </paragraph><paragraph id="H1AB331726DEF434390D28335DE54716A"><enum>(2)</enum><header>Amount of loan</header><text>Any loan or loans provided to a covered employee under paragraph (1) shall be equal to the amount paid to the covered employee by the United States or the District of Columbia during the pay period immediately preceding the lapse in Federal appropriations.</text>
+ </paragraph><paragraph id="HF3F48509CDA2453781030C0BCAA03DD0"><enum>(3)</enum><header>Maximum aggregate loan amount</header><text display-inline="yes-display-inline">A covered bank enrolled in the zero interest Federal and District of Columbia employee loan program shall not be required to extend a loan, or loans in the aggregate, in an amount greater than $9,000 to any individual covered employee with respect to each lapse in Federal appropriations.</text>
+ </paragraph><paragraph id="HF9CB951AD4F64228B022ED397D46CF37"><enum>(4)</enum><header>Terms of Loan</header><text>Any covered bank that extends a loan under this subsection may not require repayment of such loan until 30 days after the conclusion of the lapse in Federal appropriations.</text>
+ </paragraph></subsection><subsection id="H18DC3D69066E4F6D840523A9A715FC13"><enum>(c)</enum><header>Safety and soundness safe harbor</header><text display-inline="yes-display-inline">A covered bank shall not extend any loan under this section if such loan would threaten the safety and soundness of the covered bank.</text>
+ </subsection><subsection id="H79FDC9A3620449FFA05BFB9DA36A60A5"><enum>(d)</enum><header>Published list</header><text display-inline="yes-display-inline">The Secretary of the Treasury shall publish and maintain, on the Department of the Treasury website, a list of all covered banks enrolled in the zero interest Federal and District of Columbia employee loan program for each Federal fiscal year.</text>
+ </subsection><subsection id="HD07220B385094125AD2628F5D62ECEF2"><enum>(e)</enum><header>Other assistance</header><text display-inline="yes-display-inline">Covered banks may provide other forms of assistance to any covered employee during any lapse in appropriations beginning on or after December 22, 2018.</text>
+ </subsection><subsection id="H9B3C0FC8494042768037083F1828E5D5"><enum>(f)</enum><header>Rulemaking</header><text display-inline="yes-display-inline">The Secretary of the Treasury shall issue rules to carry out this Act.</text> </subsection><subsection id="HD419029F09AF45B38D9FBCAD998EC5FF"><enum>(g)</enum><header>Definitions</header><text>In this Act—</text>
+ <paragraph id="H69DCA5B2933948A5A2409FDA1D9639B2"><enum>(1)</enum><header>Covered bank</header><text display-inline="yes-display-inline">The term <quote>covered bank</quote> means a bank holding company that has been identified by the Board of Governors of the Federal Reserve System as a global systemically important bank holding company pursuant to section 217.402 of title 12, Code of Federal Regulations, and each subsidiary and affiliate of such a bank holding company.</text>
+ </paragraph><paragraph id="H077583C2093A4D7CB93FECF02EEFD4CB"><enum>(2)</enum><header>Covered employee</header><text display-inline="yes-display-inline">The term <quote>covered employee</quote> means a Federal or District of Columbia employee furloughed or excepted from such furlough during any lapse in Federal appropriations beginning on or after December 22, 2018, who is not a Member of Congress.</text>
+				</paragraph></subsection></section></legis-body></bill>
+
+

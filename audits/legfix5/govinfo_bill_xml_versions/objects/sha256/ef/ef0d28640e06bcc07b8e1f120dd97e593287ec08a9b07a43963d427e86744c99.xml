@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H9192C0C30BE54639970837AA0F0386EA" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 6777 IH: Protecting Against Paperless and Electronic Requirements Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-12-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6777</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20231213">December 13, 2023</action-date><action-desc><sponsor name-id="T000463">Mr. Turner</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To prohibit covered entities from requiring consumers to solely use digital monthly statements, and for other purposes.</official-title></form><legis-body id="H11B0ECB68CC84E76902D389B390C3A97" style="OLC"> 
+<section id="HF13EBCE9F1324867839B79281709145B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting Against Paperless and Electronic Requirements Act</short-title></quote> or the <quote><short-title>PAPER Act</short-title></quote>. </text></section> <section id="H96AA16C2BAB64B3A8E44EF02F7F88A74"><enum>2.</enum><header>Requirement</header> <subsection id="HA770F35C65AA44C8A3980F011089E1C4"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Each covered entity shall offer each consumer of such entity the option of receiving paper copies of their monthly statements.</text></subsection> 
+<subsection id="H50C2D5CE17E840F7A5444767C405C04B"><enum>(b)</enum><header>Prohibition</header><text display-inline="yes-display-inline">A covered entity may not condition the use of any services offered by such entity on the sole use of digital monthly statements by a consumer.</text></subsection> <subsection id="H4FCA6D51FAFF44AAB325AED3CBB4C57B"><enum>(c)</enum><header>Definitions</header> <paragraph id="H270AA2B4EE8B4AE3B5FB3B24B3A8D3E9"><enum>(1)</enum><header>Depository institution</header><text display-inline="yes-display-inline">The term <term>depository institution</term> has the meaning given the term in section 3 of the Federal Deposit Act.</text></paragraph> 
+<paragraph id="H819E25E171EA47D89483BBF79744E45A"><enum>(2)</enum><header>Credit union</header><text display-inline="yes-display-inline">The term <term>credit union</term> has the meaning given the term in section 101 of the Federal Credit Union Act.</text></paragraph> <paragraph id="H05B637CD83314225A8C71CB004666EFD"><enum>(3)</enum><header>Covered entity</header><text>The term <term>covered entity</term> means a depository institution or a credit union. </text> </paragraph></subsection></section> 
+</legis-body></bill>
+

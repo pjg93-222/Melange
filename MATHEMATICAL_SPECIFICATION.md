@@ -89,6 +89,27 @@ DESK_PRESS_SOURCE=engine (2026-09-19, packet audits/laundry_list_closeout_202609
 REF_PRESS_OWN_DOMAIN=1 · REF_ROSTER_FILTER=1 · REF_IDENTICAL_ONCE=1 (2026-09-19 member-reference admission filters, packet audits/laundry_list_closeout_20260918 B6/B4/B5: a PRESS headline counts only off the speaker's own .house.gov/.senate.gov domain; roll-call rosters and signature blocks are not references; identical windows on one edge count once in n_scored/pos/neg/neu while n_raw keeps every mention. Each 0 restores the prior behaviour exactly; census in the artifact's `admission_filters` block) ·
 MONEYBALL_ROOT / MONEYBALL_DRAFT (paths.py)`
 
+`COMPET_MULT=1` (**default ON since Paul 2026-10-06**; unset or `''` = on, `0` = the revert switch, anything else raises; built by Paul's 2026-10-05 rulings; with `COMPET_MULT=0` the behaviour is **exactly** the pre-dial one, byte for byte, and the off path reads no file).
+When on, a per-member competitiveness multiplier **c = 1 + 1.0 · exp(−max(lean, 0) / 5)**, range (1, 2], rounded to 6 dp at the source,
+scales the member's **effective dollars** on **both** money legs of the flip family: `pflip` uses `(c·cu + 1)/((c·cu + 1) + HALFF·R)` for the CU term
+and `(c·ind + 1)/((c·ind + 1) + HALFF·R)` for the industry term (the same c on both, so equal money and equal peer pull still give pflip = 0.5);
+`money_response.shift_lean` uses `r = c·amount/receipts` on both legs; `lt_priming` uses `money_units` × c and `dollars_for_units` ÷ c; the member desk ROI and the
+dashboard JS mirror the same arithmetic (`engine.cmult`). The per-member $10k cap, the INC step and the pot stay in **real** dollars. In `budget_frontier` the
+Ballotpedia `lev` factor is **replaced** by c in the same position (dial off: `lev` unchanged; bystander activation `min(.9, ind/BSCALE)` untouched).
+`lean = Cook PVI signed points × (+1 if the member's oriented party is R, −1 if D)` (PVI signed R positive, D negative, EVEN = 0): the points the seat leans toward
+the member's own party. House: Cook 2026 district PVI; Senate: Paul's state PVI table, all senators regardless of 2026 class; open seats/retirees keep the boost and are flagged.
+`AMPLITUDE = 1.0` and `SCALE = 5.0` are **Paul's judgment constants — uncalibrated, not fitted to any outcome — and the reciprocity they encode (dollars buy more
+where a seat is competitive) is NOT validated.** Rank authority is untouched in either dial position (`RA_SCORE` ranks must not move); only allocation-family
+outputs move. Inputs live in `data/money/cook_pvi_2026/` with `PROVENANCE.json` (sha256s; the House table's 435 rows carry `boundary_currency_status`
+VERIFIED by Paul 2026-10-06 (the Cook package's UNVERIFIED-HERE column is superseded); mid-decade-redistricted states AL CA FL LA MO NC OH TN TX UT and |PVI2026 − PVI2025| ≥ 5 rows are flagged, never altered). The chain step
+`build_competitiveness.py` (right after `build_electoral.py`) writes `data/money/competitiveness_c.json` (a build failure is fatal unless `COMPET_MULT=0`); the kernel accessor `moneyball_core.cmult(n)`
+loads and validates it (all 533 members present, c in [1, 2], c recomputes from lean, constants and roster hash match) and RAISES on any failure, and with the dial on
+and only a `.candidate` present it refuses unless `COMPET_SRC` names it. Members whose district-number join lands on a Cook row held by another incumbent (Calvert, Doggett) get c = 1.0 exactly, flagged (Paul 2026-10-06 ruling of 2026-10-05). The legislation shadow runners pin `COMPET_MULT=0` because their frozen input contracts carry no competitiveness artifact. Join order: engine name → bioguide → `votes/HS119_members.csv` (highest-ICPSR row, as
+`MC.party()`); House members first by Cook's own incumbent placement, else by district number (at-large Voteview district 1 → `SS-00`); DC → state row; PR delegate,
+the unoriented independent (Kiley) and any unmatched member → c = 1.0 exactly, flagged; Sanders and King orient D (flagged).
+`PTF_OUT` / `SAL_OUT` are no-clobber output redirects for `per_topic_flip.py` / `salience_shock.py` (default: the production paths).
+`OPTIMIZE_RESULT_PATH` (unset = `optimize_result.json`, the production plan) points `make_member_desk.py` at another optimizer result, so a candidate desk shows the candidate plan; it is hashed into the dashboard-integrity input fingerprint when set and is cleared/pinned off in the legislation shadow runners.
+
 ## Regeneration & verification protocol
 Data refresh: collectors (`fetch_congressional_record`, `tweet_collector`, Quorum) →
 `big5_traits` → `social_interaction_layer` → `build_multilayer_network` → `build_media_blend` →

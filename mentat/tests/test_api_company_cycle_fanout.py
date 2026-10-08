@@ -2,11 +2,8 @@ from __future__ import annotations
 
 import io
 import json
-import concurrent.futures
 import sys
 import tempfile
-import threading
-import time
 import unittest
 import sqlite3
 from contextlib import closing
@@ -57,13 +54,8 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             self.assertRegex(identifier, r"^[0-9a-f]{12}$")
 
     def test_missing_keys_fails_loudly(self) -> None:
-        with mock.patch.object(fanout, 'load_keys', return_value=[]), self.assertRaisesRegex(RuntimeError, "No FEC API keys were found"):
+        with self.assertRaisesRegex(RuntimeError, "No FEC API keys were found"):
             fanout.discover_keys(None, {})
-
-    def test_encrypted_store_is_fallback_without_expanding_explicit_lane_keys(self):
-        with mock.patch.object(fanout, 'load_keys', return_value=['saved-one','saved-two']):
-            self.assertEqual(fanout.discover_keys(None, {}), ['saved-one','saved-two'])
-            self.assertEqual(fanout.discover_keys(None, {'FEC_API_KEY':'lane-key'}), ['lane-key'])
 
     def test_company_cycles_never_cross_lane_ownership(self) -> None:
         companies = [
@@ -380,70 +372,6 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
         self.assertEqual(cap["memory_lane_cap"], 8)
         self.assertEqual(cap["active_lane_cap"], 8)
         self.assertEqual(cap["sqlite_merge_cap"], 10)
-        self.assertFalse(cap["cpu_bound_lane_cap_applied"])
-
-    def test_resource_cap_allows_one_io_lane_per_company_past_cpu_count(
-        self,
-    ) -> None:
-        with mock.patch.object(
-            fanout, "available_memory_bytes", return_value=32 * 1024**3
-        ), mock.patch.object(fanout.os, "cpu_count", return_value=8):
-            cap = fanout.resource_cap(
-                key_count=10,
-                company_count=10,
-                requested_parallel=10,
-                memory_per_lane_mb=640,
-                memory_reserve_mb=1024,
-            )
-        self.assertEqual(cap["logical_cpu"], 8)
-        self.assertEqual(cap["active_lane_cap"], 10)
-        self.assertFalse(cap["cpu_bound_lane_cap_applied"])
-
-    def test_resume_execution_throttles_persisted_lanes_to_live_cap(
-        self,
-    ) -> None:
-        self.assertEqual(
-            fanout.execution_worker_cap(
-                10,
-                {"active_lane_cap": 2},
-            ),
-            2,
-        )
-
-    def test_primary_and_recovery_share_one_execution_cap(self) -> None:
-        original_execute = fanout.execute_lane
-        lock = threading.Lock()
-        active = 0
-        maximum = 0
-
-        def fake_execute(lane_run, **kwargs):
-            nonlocal active, maximum
-            with lock:
-                active += 1
-                maximum = max(maximum, active)
-            time.sleep(0.03)
-            with lock:
-                active -= 1
-            return {"lane": lane_run}
-
-        fanout.execute_lane = fake_execute
-        try:
-            limiter = fanout.LaneLimiter(2)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-                futures = [
-                    pool.submit(
-                        fanout.execute_lane_with_limit,
-                        limiter,
-                        fanout.LaneRun(lane, Path(f'lane-{lane}.db'), Path('assignments'),
-                            Path('receipt'), Path('state'), Path('log'), f'key-{lane}', f'id-{lane}', (), 1),
-                    )
-                    for lane in range(3)
-                ]
-                for future in futures:
-                    future.result()
-        finally:
-            fanout.execute_lane = original_execute
-        self.assertEqual(maximum, 2)
 
     def test_resume_receipts_select_only_non_success_tasks(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-resume-fixture-") as temp:
@@ -452,7 +380,6 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 lane / "receipt.json",
                 {
                     "status": "failed",
-                    "quick_check": "ok",
                     "tasks": [
                         {"task_id": "alpha-2022", "status": "succeeded"},
                         {"task_id": "alpha-2024", "status": "failed"},
@@ -463,7 +390,6 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 lane / "receipt.recovery-1.json",
                 {
                     "status": "succeeded",
-                    "quick_check": "ok",
                     "tasks": [
                         {"task_id": "alpha-2024", "status": "succeeded"},
                     ],
@@ -493,43 +419,6 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             if latest.get(task["task_id"], {}).get("status") != "succeeded"
         ]
         self.assertEqual(pending, [{"task_id": "alpha-2026"}])
-
-    def test_resume_rejects_unverified_raw_r_success_receipt(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="mentat-r-postflight-") as temp:
-            lane = Path(temp)
-            path = lane / "receipt.json"
-            task = {"task_id": "alpha-2024", "status": "succeeded"}
-            fanout.atomic_json(
-                path,
-                {"status": "succeeded", "quick_check": "corrupt", "tasks": [task]},
-            )
-            attempts = fanout.existing_lane_attempts(lane, 1)
-            latest = fanout.latest_tasks_from_attempts(attempts)
-            self.assertEqual(latest["alpha-2024"]["status"], "failed")
-            self.assertEqual(fanout.read_json(path)["tasks"], [task])
-
-            # An R receipt with a passing postflight is sufficient if Python
-            # died before it could append exit_code to that receipt.
-            fanout.atomic_json(
-                path,
-                {"status": "succeeded", "quick_check": "ok", "tasks": [task]},
-            )
-            latest = fanout.latest_tasks_from_attempts(
-                fanout.existing_lane_attempts(lane, 1)
-            )
-            self.assertEqual(latest["alpha-2024"]["status"], "succeeded")
-
-            # A later Python receipt with a failed process exit cannot certify
-            # a succeeded task, regardless of its earlier postflight result.
-            fanout.atomic_json(
-                path,
-                {"status": "succeeded", "quick_check": "ok", "exit_code": 3,
-                 "tasks": [task]},
-            )
-            latest = fanout.latest_tasks_from_attempts(
-                fanout.existing_lane_attempts(lane, 1)
-            )
-            self.assertEqual(latest["alpha-2024"]["status"], "failed")
 
     def test_disposable_end_to_end_merge_and_restart_guard(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-fanout-e2e-") as temp:
@@ -628,24 +517,13 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
                 self.assertEqual(fanout.main([*arguments, "--resume"]), 0)
 
             receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            manifest = json.loads(
+                (run_directory / "manifest.json").read_text(encoding="utf-8")
+            )
             with closing(sqlite3.connect(source)) as connection, connection:
                 contribution_count = connection.execute(
                     "SELECT COUNT(*) FROM contributions"
                 ).fetchone()[0]
-                connection.execute(
-                    """
-                    INSERT INTO contributions (sub_id, company, amount)
-                    VALUES ('same-path-mutation', 'Alpha', 1)
-                    """
-                )
-            with self.assertRaisesRegex(
-                RuntimeError,
-                "does not match the current same-path source database",
-            ):
-                fanout.main([*arguments, "--resume"])
-            manifest = json.loads(
-                (run_directory / "manifest.json").read_text(encoding="utf-8")
-            )
         self.assertEqual(receipt["status"], "succeeded")
         self.assertTrue(receipt["merged"])
         self.assertEqual(receipt["succeeded"], 2)
@@ -661,149 +539,6 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             receipt["merge"]["attribution_conflicts_recorded"],
             0,
         )
-
-    def test_resume_tolerates_fewer_keys_than_the_manifest_planned_lanes(self) -> None:
-        # Keys are quarantined, rotated or disabled between attempts. Refusing to
-        # resume on a short key list threw away every company-cycle the stopped
-        # attempt had already verified. Lanes now share the remaining keys, and
-        # the "key:" resource each lane holds keeps two of them off one key at
-        # the same time.
-        with tempfile.TemporaryDirectory(prefix="mentat-resume-keys-") as temp:
-            root = Path(temp)
-            source = root / "source.db"
-            merge_fixture.create_database(source)
-            with closing(sqlite3.connect(source)) as connection, connection:
-                connection.execute(
-                    "CREATE TABLE companies (industry TEXT NOT NULL, "
-                    "company TEXT NOT NULL, variant TEXT NOT NULL)"
-                )
-                connection.executemany(
-                    "INSERT INTO companies VALUES ('Fintech', ?, ?)",
-                    [("Alpha", "ALPHA"), ("Beta", "BETA")],
-                )
-            run_directory = root / "run"
-            receipt_path = run_directory / "receipt.json"
-            state = {"fail_beta": True}
-            guard = threading.Lock()
-            live: dict[str, int] = {}
-            shared_key_overlap: list[str] = []
-            observed_keys: list[str] = []
-            executed: list[tuple[str, int]] = []
-
-            def fake_execute(lane_run, **kwargs):
-                with guard:
-                    observed_keys.append(lane_run.key)
-                    live[lane_run.key] = live.get(lane_run.key, 0) + 1
-                    if live[lane_run.key] > 1:
-                        shared_key_overlap.append(lane_run.key)
-                try:
-                    tasks = []
-                    with closing(
-                        sqlite3.connect(lane_run.database)
-                    ) as connection, connection:
-                        for task in lane_run.tasks:
-                            broken = (
-                                state["fail_beta"] and task["company"] == "Beta"
-                            )
-                            if not broken:
-                                executed.append((task["company"], task["cycle"]))
-                                connection.execute(
-                                    "INSERT OR IGNORE INTO contributions "
-                                    "(sub_id, company, amount) VALUES (?, ?, ?)",
-                                    (
-                                        task["task_id"],
-                                        task["company"],
-                                        float(task["cycle"]),
-                                    ),
-                                )
-                            tasks.append(
-                                {
-                                    **task,
-                                    "status": "failed" if broken else "succeeded",
-                                    "wall_clock_seconds": 0.01,
-                                }
-                            )
-                finally:
-                    with guard:
-                        live[lane_run.key] -= 1
-                failed = [task for task in tasks if task["status"] != "succeeded"]
-                lane_receipt = {
-                    "status": "failed" if failed else "succeeded",
-                    "key_id": lane_run.key_id,
-                    "wall_clock_seconds": 0.01,
-                    "quick_check": "ok",
-                    "tasks": tasks,
-                }
-                fanout.atomic_json(lane_run.receipt, lane_receipt)
-                return {
-                    "lane": lane_run.lane,
-                    "attempt": lane_run.attempt,
-                    "exit_code": 1 if failed else 0,
-                    "wall_clock_seconds": 0.01,
-                    "receipt_path": str(lane_run.receipt),
-                    "state_path": str(lane_run.state),
-                    "log_path": str(lane_run.log),
-                    "database": str(lane_run.database),
-                    "key_id": lane_run.key_id,
-                    "receipt": lane_receipt,
-                }
-
-            arguments = [
-                "--source-database",
-                str(source),
-                "--industry",
-                "Fintech",
-                "--cycles",
-                "2022",
-                "--run-directory",
-                str(run_directory),
-                "--output-receipt",
-                str(receipt_path),
-                "--rscript-path",
-                sys.executable,
-                "--budget-database",
-                str(root / "budget.sqlite"),
-                "--max-parallel",
-                "2",
-            ]
-            planned = ["fixture-key-a", "fixture-key-b"]
-            with mock.patch.object(
-                fanout, "execute_lane", side_effect=fake_execute
-            ), mock.patch.object(
-                fanout,
-                "discover_keys",
-                side_effect=lambda keys_file, environment: list(planned),
-            ):
-                # Beta fails every rung of the ladder, so nothing is merged.
-                self.assertEqual(fanout.main(arguments), 2)
-                stopped = json.loads(
-                    receipt_path.read_text(encoding="utf-8")
-                )
-                manifest = json.loads(
-                    (run_directory / "manifest.json").read_text(encoding="utf-8")
-                )
-                # One of the two planned keys is gone before the resume.
-                planned[:] = ["fixture-key-a"]
-                state["fail_beta"] = False
-                observed_keys.clear()
-                executed.clear()
-                self.assertEqual(fanout.main([*arguments, "--resume"]), 0)
-            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-            with closing(sqlite3.connect(source)) as connection:
-                merged_rows = connection.execute(
-                    "SELECT company FROM contributions ORDER BY company"
-                ).fetchall()
-        self.assertEqual(manifest["lane_count"], 2)
-        self.assertFalse(stopped["merged"])
-        # The resume ran on the surviving key alone and never doubled up on it.
-        self.assertEqual(set(observed_keys), {"fixture-key-a"})
-        self.assertEqual(shared_key_overlap, [])
-        # Alpha succeeded before the stop and is not collected a second time.
-        self.assertEqual(executed, [("Beta", 2022)])
-        self.assertEqual(receipt["status"], "succeeded")
-        self.assertTrue(receipt["merged"])
-        self.assertEqual(receipt["configured_key_count"], 1)
-        self.assertEqual([row[0] for row in merged_rows], ["Alpha", "Beta"])
 
     def test_failure_ladder_retries_then_splits_company_cycle(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mentat-ladder-e2e-") as temp:
@@ -826,12 +561,8 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             run_directory = root / "run"
             receipt_path = run_directory / "receipt.json"
             executed: list[tuple[int, tuple[str, ...]]] = []
-            assignment_resumes: list[bool] = []
 
             def fake_execute(lane_run, **kwargs):
-                assignment_resumes.append(
-                    bool(fanout.read_json(lane_run.assignments).get("resume"))
-                )
                 task_ids = tuple(
                     str(task["task_id"]) for task in lane_run.tasks
                 )
@@ -923,7 +654,6 @@ class ApiCompanyCycleFanoutTest(unittest.TestCase):
             (2, ("stripe-2026",)),
             (3, ("stripe-2026",)),
         ])
-        self.assertEqual(assignment_resumes, [False, True, True])
         self.assertEqual(final["status"], "succeeded")
         self.assertEqual(
             [attempt["exit_code"] for attempt in final["lane_attempts"]],

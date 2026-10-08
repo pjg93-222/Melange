@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HBFF351E5716F4C608C10835F8B1CFBE9" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5330 IH: Consumer Protection for Medical Debt Collections Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-12-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5330</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191205">December 5, 2019</action-date><action-desc><sponsor name-id="T000481">Ms. Tlaib</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Fair Debt Collection Practices Act to provide a timetable for verification of medical
+			 debt and to increase the efficiency of credit markets with more perfect
+			 information, to prohibit consumer reporting agencies from issuing consumer
+			 reports containing information about debts related to medically necessary
+			 procedure, about and for other purposes.</official-title></form>
+	<legis-body id="H1BDC3C7068DD46C097DE93F9CFBFE40C" style="OLC">
+ <section id="H93D7CA96673E4683AA2B3F1D3C436541" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Consumer Protection for Medical Debt Collections Act</short-title></quote>.</text> </section><section display-inline="no-display-inline" id="H76436822EB5A43908ED9839647D72991" section-type="subsequent-section"><enum>2.</enum><header>Amendments to the Fair Debt Collection Practices Act</header> <subsection id="H2CF8B84B06214A14912C6DAC600B959A"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 809 of the Fair Debt Collection Practices Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1692g">15 U.S.C. 1692g</external-xref>) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="HAD45AC12AB604087AD1E797483286CA1" style="OLC">
+					<subsection id="HE2F535B3CB9C4E409C1F4827E2286B93"><enum>(f)</enum><header>Additional notice requirements for medical debt</header>
+ <paragraph id="H0D515E6711EA4355A2224C99513F342C"><enum>(1)</enum><header>Definitions</header><text display-inline="yes-display-inline">In this subsection:</text> <subparagraph id="H3E117376DC4349428A809C7DB2D21767"><enum>(A)</enum><header>Consumer reporting agency</header><text>The term <term>consumer reporting agency</term> has the meaning given the term in section 603(f) of the Fair Credit Reporting Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1681a">15 U.S.C. 1681a(f)</external-xref>).</text>
+ </subparagraph><subparagraph id="H082A091A02854F538A5BAC2C669D9048"><enum>(B)</enum><header>Medical debt</header><text display-inline="yes-display-inline">The term <term>medical debt</term> means a debt arising from the receipt of medical services, products, or devices.</text> </subparagraph></paragraph><paragraph id="H9756C12F0D4E413D9CB46E86F393B13F"><enum>(2)</enum><header>Notice about credit reporting</header><text display-inline="yes-display-inline">Before furnishing information regarding a medical debt of a consumer to a consumer reporting agency, the person furnishing the information shall send a statement to the consumer that includes the following:</text>
+ <subparagraph id="H89D6CE3E695C4955B46E9DA93362798A"><enum>(A)</enum><text display-inline="yes-display-inline">A notification that the medical debt may not be reported to a consumer reporting agency until the end of the 1-year period beginning on the later of—</text>
+ <clause id="H94B1CBD8750F436D9748928138591310"><enum>(i)</enum><text>the date on which the person sends the statement; and</text> </clause><clause id="H92C4637A31FA468AADED5AAD12DA0422"><enum>(ii)</enum><text>the last date on which the consumer made any payment to the person with respect to the medical debt.</text>
+ </clause></subparagraph><subparagraph id="H7EAA70804D554989A9BA8CE2CA47F473"><enum>(B)</enum><text>A notification that, if the debt is settled or paid by the consumer or an insurance company before the end of the 1-year period described under subparagraph (A)—</text>
+ <clause id="H36888680522144D9BDAFAFB63689B376"><enum>(i)</enum><text>the debt may not be reported to a consumer reporting agency; and</text> </clause><clause id="H75225D87320F4F7A8E8D3D89034AEDAD"><enum>(ii)</enum><text>the consumer may, any time before the end of such that 1-year period—</text>
+ <subclause id="HD64B5E3AE19C4D28A9830F04A7F7E64A"><enum>(I)</enum><text>communicate with an insurance company to determine coverage for the debt; or</text> </subclause><subclause id="HE683C04D97074041B7620C696A9853F1"><enum>(II)</enum><text>apply for financial assistance.</text>
+									</subclause></clause></subparagraph></paragraph><paragraph id="H1A5F412BBE2A46B891B3C5DF76A361DB"><enum>(3)</enum><header>No reporting before the end of the 1-year period</header>
+ <subparagraph id="H4D37ACC8359141EF8BBFF8197E887DE6"><enum>(A)</enum><header>In general</header><text>Before the end of the 1-year period described in paragraph (2)(A), no person may communicate with, or report any information to, any consumer reporting agency regarding a debt described in that paragraph.</text>
+ </subparagraph><subparagraph id="HD4309DAE1CD5422191E5E0A09E755A61"><enum>(B)</enum><header>Reporting after the end of the 1-year period</header><text display-inline="yes-display-inline">Nothing in this subsection shall prohibit a person from communicating with, or reporting any information to, a consumer reporting agency regarding a medical debt of a consumer after the end of the 1-year period described in paragraph (2)(A) with respect to the debt.</text>
+ </subparagraph></paragraph><paragraph id="H5DF59E1D840B44FFAC1AF91250CAC254"><enum>(4)</enum><header>No debt collection before the end of the 1-year period</header><text display-inline="yes-display-inline">With respect to a medical debt, before the end of the 1-year period described in paragraph (2)(A), a debt collector may not engage in activities to collect or attempt to collect such medical debt owed or due or asserted to be owed.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H6DBCC6717D024E6DB7776ED9AA01D820"><enum>(b)</enum><header>Effective date</header><text>The amendment made by this section shall take effect on the date that is 180 days after the date of enactment of this Act.</text>
+			</subsection></section><section id="H9DD0744369464646B52269601C25D57B"><enum>3.</enum><header>Prohibition on reporting medically necessary procedures</header>
+ <subsection id="H744F73AC266D4D008C22758270AB323E"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 605(a) of the Fair Credit Reporting Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1681c">15 U.S.C. 1681c(a)</external-xref>) is amended by adding at the end the following new paragraph:</text>
+				<quoted-block display-inline="no-display-inline" id="H7A64BF03D90E4EC4A4DFF2BD76D84F67" style="USC">
+ <paragraph id="HFDD43647A94D4DEEAA124726B6C8158D"><enum>(9)</enum><text display-inline="yes-display-inline">Any information related to a debt arising from a medically necessary procedure.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block> </subsection><subsection id="H6905FB3A6FC34A6085E47EF5F1B745AC"><enum>(b)</enum><header>Effective date</header><text>The amendment made by this section shall take effect on the date that is 180 days after the date of enactment of this Act.</text>
+			</subsection></section></legis-body></bill>
+
+

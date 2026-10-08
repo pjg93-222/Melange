@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H9E7306E857254AAA8891535CF55A1CA6" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3328 IH: Citizenship Affordability Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3328</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190618">June 18, 2019</action-date><action-desc><sponsor name-id="T000474">Mrs. Torres of California</sponsor> (for herself, <cosponsor name-id="E000297">Mr. Espaillat</cosponsor>, <cosponsor name-id="O000173">Ms. Omar</cosponsor>, <cosponsor name-id="S001165">Mr. Sires</cosponsor>, <cosponsor name-id="G000586">Mr. García of Illinois</cosponsor>, and <cosponsor name-id="C001112">Mr. Carbajal</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To limit the fees charged and collected from applicants for naturalization and related benefits
+			 based on poverty, and for other purposes.</official-title></form>
+	<legis-body id="H40218971866E440A968ACCC6F4FCA9CE" style="OLC">
+ <section id="HD4CCD556F8DA41338A05D9A90B3B8337" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Citizenship Affordability Act</short-title></quote>.</text> </section><section id="H8B7C9B87B7C9451493399372C5842508"><enum>2.</enum><header>Permanent full and partial income-based naturalization fee waivers</header><text display-inline="no-display-inline">Section 344(b) of the Immigration and Nationality Act (<external-xref legal-doc="usc" parsable-cite="usc/8/1455">8 U.S.C. 1455(b)</external-xref>) is amended—</text>
+ <paragraph id="H8D1F7312FF054216BCA456349065D6E1"><enum>(1)</enum><text>in the enumerator, by striking <quote>(b)</quote> and inserting <quote>(b)(1)</quote>; and</text> </paragraph><paragraph id="H5EACD2E8BA8B4F25B8272A1722AE4993"><enum>(2)</enum><text>by adding at the end the following:</text>
+				<quoted-block id="HC2FFE83D8B864891ACA015A0FE92202D" style="OLC">
+ <paragraph id="HEE0F640AD3344C57AE1FC011E4D91B3C"><enum>(2)</enum><text display-inline="yes-display-inline">Notwithstanding the provisions of this Act or any other law, the following fee waivers shall apply:</text> <subparagraph id="H63ABAFE7659B4C1D9B98183BC459E6C7"><enum>(A)</enum><text display-inline="yes-display-inline">In the case of an alien whose income is less than 150 percent of the Federal poverty line, no fee shall be charged or collected for—</text>
+ <clause id="HCBE80EDB72864F9AA15348D89B8343AC"><enum>(i)</enum><text>the filing of an application for naturalization or the issuance of a certificate of naturalization upon admission to citizenship;</text>
+ </clause><clause id="HED832A95DD7E460FA091140A82505466"><enum>(ii)</enum><text>the filing of an application to preserve residence for naturalization purposes;</text> </clause><clause id="H8AB55D4A827B4F5FBABBB2B2C5BB6044"><enum>(iii)</enum><text>the filing of an application for a replacement naturalization or citizenship document;</text>
+ </clause><clause id="H96AF46BE8C96443CA291EC44F63EB7F2"><enum>(iv)</enum><text>the filing of an application for citizenship and issuance of certificate of citizenship under section 322 (Form N–600K);</text>
+ </clause><clause commented="no" id="H2A127B69310E4C8A847737B5CC7D242B"><enum>(v)</enum><text>the filing of an application for certificate of citizenship (Form N–600); or</text> </clause><clause id="H47D031180B944B2A9EFE4873FF9E75CC"><enum>(vi)</enum><text>a biometrics capture or background check associated with any application described in clauses (i), (ii), (iii), and (iv).</text>
+ </clause></subparagraph><subparagraph id="H8E154BD76781455BA8BE1479D7169AD3"><enum>(B)</enum><text display-inline="yes-display-inline">In the case of an alien whose income is less than 250 percent of the Federal poverty line, not more than 50 percent of the applicable fee shall be charged or collected for—</text>
+ <clause id="HF09CECE2D1D847D99C762059F69D8F6F"><enum>(i)</enum><text>the filing of an application for naturalization or the issuance of a certificate of naturalization upon admission to citizenship;</text>
+ </clause><clause id="H67E60A0FA65F454E83E416A3D64B82AD"><enum>(ii)</enum><text>the filing of an application to preserve residence for naturalization purposes;</text> </clause><clause id="HABF7386D70A54E3DB34ACFA3C1086BDD"><enum>(iii)</enum><text>the filing of an application for a replacement naturalization or citizenship document;</text>
+ </clause><clause display-inline="no-display-inline" id="H81BF7CB39C5446188284E52D1060D25D"><enum>(iv)</enum><text>the filing of an application for citizenship and issuance of certificate of citizenship under section 322 (Form N–600K);</text>
+ </clause><clause commented="no" id="H0D02246651CC4C3C859C5C6EE5E20A1A"><enum>(v)</enum><text>the filing of an application for certificate of citizenship (Form N–600); or</text> </clause><clause id="HA22E74A41A184719978B9E578FC25D83"><enum>(vi)</enum><text>a biometrics capture or background check associated with any application described in clauses (i), (ii), (iii), and (iv).</text>
+ </clause></subparagraph></paragraph><paragraph id="H3FCA04AE143F4FE0A1A54D649EEAABBF"><enum>(3)</enum><text>Notwithstanding any other provision of law, the Secretary of Homeland Security shall consider the receipt of means-tested benefits as a criterion for the purpose of demonstrating eligibility for a fee waiver under paragraph (2).</text>
+ </paragraph><paragraph id="H36E64EECD0F9492FB8F8F72FEEDA2923"><enum>(4)</enum><text>In this subsection, the term <quote>Federal poverty line</quote> has the meaning given such term by the Director of the Office of Management and Budget, as revised annually by the Secretary of Health and Human Services in accordance with section 673(2) of the Omnibus Budget Reconciliation Act of 1981 (<external-xref legal-doc="usc" parsable-cite="usc/42/9902">42 U.S.C. 9902</external-xref>).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section></legis-body></bill>
+
+

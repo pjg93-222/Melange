@@ -1,0 +1,625 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-PAT25936-P1M-2C-9FC">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3126 IS: Fair Credit for Farmers Act of 2025</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3126</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251106">November 6, 2025</action-date>
+            <action-desc><sponsor name-id="S422">Mr. Welch</sponsor> (for himself and <cosponsor name-id="S331">Mrs. Gillibrand</cosponsor>) introduced the following bill; which
+                was read twice and referred to the <committee-name committee-id="SSAF00">Committee
+                    on Agriculture, Nutrition, and Forestry</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To amend the Consolidated Farm and Rural Development Act to reform farm
+            loans, to amend the Department of Agriculture Reorganization Act of 1994 to reform the
+            National Appeals Division process, and for other purposes.</official-title>
+    </form>
+    <legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="HA6A4CB0B165F4A40B2F80017A4561152">
+        <section section-type="section-one" id="HA2AF50CDEA684129A35B8941A4B429F4">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fair Credit for Farmers Act of 2025</short-title></quote>.</text>
+        </section>
+        <section id="H07DA7174E0BD416A84CC7ED69898C68F">
+            <enum>2.</enum>
+            <header>Deferment of payments for borrowers of farm loans</header>
+            <subsection id="H19EAAB97E9424B4AA161CC1050D5CCB2">
+                <enum>(a)</enum>
+                <header>Definitions</header>
+ <text>In this section:</text> <paragraph id="HB4840A2BADDD4889A6C8B63549D3D143"> <enum>(1)</enum> <header>Covered producer</header> <text>The term <term>covered producer</term> means—</text>
+                    <subparagraph id="HF55ED38D99084521BB04E5B9B0693EE8">
+                        <enum>(A)</enum>
+ <text>a limited resource farmer or rancher (as defined in section 718.2 of title 7, Code of Federal Regulations (as in effect on the date of enactment of this Act));</text>
+                    </subparagraph>
+                    <subparagraph id="H31A894121A894FA89F235879A9CDFC3A">
+                        <enum>(B)</enum>
+ <text>a socially disadvantaged farmer or rancher (as defined in section 2501(a) of the Food, Agriculture, Conservation, and Trade Act of 1990 (<external-xref legal-doc="usc" parsable-cite="usc/7/2279">7 U.S.C. 2279(a)</external-xref>));</text>
+                    </subparagraph>
+                    <subparagraph id="H2B7D7544A8E64EEC97C5F1D7A1EC594E">
+                        <enum>(C)</enum>
+ <text>a beginning farmer or rancher (as defined in that section); and</text> </subparagraph> <subparagraph id="H8F462B0B9B434E8A91B48C9923B2ED85" commented="no" display-inline="no-display-inline"> <enum>(D)</enum> <text>a veteran farmer or rancher (as defined in that section).</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="HA7236EE2A5C4405EA925F9CCD8FD6FD5">
+                    <enum>(2)</enum>
+                    <header>Eligible borrower</header>
+ <text>The term <term>eligible borrower</term> means a borrower that is a farmer or rancher that is—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="HC78587F31E3F4654AC20F41D9584C45E">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">delinquent, as described in the definition of the term <term>delinquent borrower</term> in section 761.2(b) of title 7, Code of Federal Regulations (as in effect on the date of enactment of this Act); or</text>
+                    </subparagraph>
+                    <subparagraph id="HD9A375C88E4C44CBAC21902DDCC4BF54" commented="no" display-inline="no-display-inline">
+                        <enum>(B)</enum>
+ <text>financially distressed, as described in the definition of the term <term>financially distressed borrower</term> in section 761.2(b) of title 7, Code of Federal Regulations (as in effect on the date of enactment of this Act).</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H9EE45445D0AF44E8BFF0DA43F5C77B20">
+                    <enum>(3)</enum>
+                    <header>Farm loan</header>
+ <text>The term <term>farm loan</term> means a direct or guaranteed—</text> <subparagraph id="H6D2CA37DF73249E09DA7A67E503240A9"> <enum>(A)</enum> <text>farm ownership loan under subtitle A of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1922">7 U.S.C. 1922 et seq.</external-xref>);</text>
+                    </subparagraph>
+                    <subparagraph id="H3CB2BEA765DD433EA3CB82EE8E8DC034">
+                        <enum>(B)</enum>
+ <text>operating loan under subtitle B of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1941">7 U.S.C. 1941 et seq.</external-xref>); or</text>
+                    </subparagraph>
+                    <subparagraph id="HB4B1989554D24A6780168E1EFB03B092">
+                        <enum>(C)</enum>
+ <text>emergency loan under subtitle C of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1961">7 U.S.C. 1961 et seq.</external-xref>).</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H1B52ED8A1B9A479D8B131376B7EBAD05">
+                    <enum>(4)</enum>
+                    <header>Secretary</header>
+ <text>The term <term>Secretary</term> means the Secretary of Agriculture.</text> </paragraph> </subsection> <subsection id="H8BEA1975BB8B4158BCF52A9876963A52"> <enum>(b)</enum> <header>Deferment of payments on direct farm loans</header> <paragraph id="HF47E8DBE631A4FA99CE178F3EB3C9A47"> <enum>(1)</enum> <header>In general</header> <text>The Secretary shall—</text>
+                    <subparagraph id="H54619B150E994CD89B7E208F6DC2760C">
+                        <enum>(A)</enum>
+ <text>defer payments of principal and interest due on direct farm loans by eligible borrowers during the 2-year period beginning on the date of enactment of this Act; and</text>
+                    </subparagraph>
+                    <subparagraph id="HB81505DDB6374CBA977150C70949FCF8">
+                        <enum>(B)</enum>
+ <text>extend by 2 years the maturity date and repayment period of each direct farm loan the payments on which are deferred under subparagraph (A).</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="H4BD3900261664C45A7041C31493F2CF3">
+                    <enum>(2)</enum>
+                    <header>Exclusion</header>
+ <text display-inline="yes-display-inline">Paragraph (1) does not apply to a direct farm loan the term of which is 12 months or less.</text>
+                </paragraph>
+                <paragraph id="H3A1129C014954447ACB9FFE4A6D1DFE1">
+                    <enum>(3)</enum>
+                    <header>Authority to exceed loan maturity dates</header>
+ <text display-inline="yes-display-inline">In extending a date under paragraph (1)(B), the Secretary may exceed by not more than 2 years—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id3289403c95174c38ab6d4b5574bea7ff">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">the maximum period of repayment described in section 307 of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1927">7 U.S.C. 1927</external-xref>) for a farm ownership loan under subtitle A of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1922">7 U.S.C. 1922 et seq.</external-xref>);</text>
+                    </subparagraph>
+                    <subparagraph id="H5DB126BB78154BC6BE1D2E04E114B5BE">
+                        <enum>(B)</enum>
+ <text>the maximum period of repayment described in section 316(b) of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1946">7 U.S.C. 1946(b)</external-xref>) for an operating loan under subtitle B of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1941">7 U.S.C. 1941 et seq.</external-xref>); and</text>
+                    </subparagraph>
+                    <subparagraph id="H894BE7C657D540769596BAA6BCD5BE3B">
+                        <enum>(C)</enum>
+ <text>the maximum period of repayment described in section 324(d) of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1964">7 U.S.C. 1964(d)</external-xref>) for an emergency loan under subtitle C of that Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1961">7 U.S.C. 1961 et seq.</external-xref>).</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="H56616D0436AF4AB1B83C2DF4736FB5E8">
+                <enum>(c)</enum>
+                <header>Interest rate during deferral</header>
+ <text>The Secretary shall modify each direct farm loan of an eligible borrower that is outstanding as of the date of enactment of this Act such that the interest rate on all remaining principal of the farm loan is 0.125 percent during the 2-year period beginning on that date of enactment.</text>
+            </subsection>
+            <subsection id="H32C66D0207774D3399E918E476DE1D8B">
+                <enum>(d)</enum>
+                <header>Waiver of guaranteed farm loan fees for covered producers</header>
+                <paragraph id="H2BEF7C59AC424D2D881DB1E836113EDA">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>The Secretary shall require lenders of guaranteed farm loans to covered producers to waive guarantee fees (as described in section 762.130(d)(4) of title 7, Code of Federal Regulations (as in effect on the date of enactment of this Act)) on those loans during the period—</text>
+                    <subparagraph id="HC4EEAAA88E8C4211ACD5FF6BA3D2AB48">
+                        <enum>(A)</enum>
+ <text>beginning on the date of enactment of this Act; and</text> </subparagraph> <subparagraph id="HA8E7B6CD269142628D5F0FAA43021987"> <enum>(B)</enum> <text>ending not earlier than 2 years after that date of enactment.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="HE217D677604A4A80B05CCDFE9C0A8502">
+                    <enum>(2)</enum>
+                    <header>Extension</header>
+ <text display-inline="yes-display-inline">The Secretary may extend a deadline under paragraph (1)(B) by an additional 180 days if the Secretary determines the extension to be necessary.</text>
+                </paragraph>
+            </subsection>
+        </section>
+        <section id="H1DB4B93CB70342C2845E93374EF2A503">
+            <enum>3.</enum>
+            <header>Farm loan reform</header>
+            <subsection id="H52DE9CFDF444450EB9D17C5C00547009">
+                <enum>(a)</enum>
+                <header>General reforms</header>
+                <paragraph id="H78BD16B7194043ECB97A1A093A81ED85">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Subtitle D of the Consolidated Farm and Rural Development Act is amended by inserting after section 374 (<external-xref legal-doc="usc" parsable-cite="usc/7/2008i">7 U.S.C. 2008i</external-xref>) the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline" id="H4C372F7D07F449FD996D2FE54FCF140D">
+                        <section id="HD28DD4DC3097443BAE82114B288DF57C">
+                            <enum>375.</enum>
+                            <header>Farmer program loan reform</header>
+                            <subsection id="HB5D171053DE94D858AEBD0B9722232DE">
+                                <enum>(a)</enum>
+                                <header>Definitions</header>
+ <text>In this section:</text> <paragraph id="HF5A43555913742EDA1304F1440DA91B3"> <enum>(1)</enum> <header>Adverse decision</header> <text>The term <term>adverse decision</term> has the meaning given the term in section 271 of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/6991">7 U.S.C. 6991</external-xref>).</text>
+                                </paragraph>
+                                <paragraph id="H142DC64FD6C64CD9B19CBD6398B9A857">
+                                    <enum>(2)</enum>
+                                    <header>Principal residence</header>
+ <text>The term <term>principal residence</term> means the principal residence (as determined by the Secretary) of a borrower of a farmer program loan, including a residence and not more than 10 acres of adjoining land possessed and occupied by the borrower.</text>
+                                </paragraph>
+                            </subsection>
+                            <subsection id="HFEF982D8379D48A18E9D17E85D9D90CA">
+                                <enum>(b)</enum>
+                                <header>Determination letters and adverse decisions</header>
+                                <paragraph id="H12705834B5FB479BA9AAB18E5E1E84EA">
+                                    <enum>(1)</enum>
+                                    <header>In general</header>
+ <text>In the case of any adverse decision relating to a farmer program loan, a Farm Service Agency program benefit, or the noninsured crop disaster assistance program established by section 196 of the Federal Agriculture Improvement and Reform Act of 1996 (<external-xref legal-doc="usc" parsable-cite="usc/7/7333">7 U.S.C. 7333</external-xref>), the Secretary shall include in a determination letter provided to the applicant, to the maximum extent practicable—</text>
+                                    <subparagraph id="H489EABF348364ED6A0E8D1ACC69385E2">
+                                        <enum>(A)</enum>
+ <text>a description of each reason known, or that reasonably should have been known, to the Secretary for that adverse decision;</text>
+                                    </subparagraph>
+                                    <subparagraph id="H47C6A1FB475D458F9F5625D82C1B8C01">
+                                        <enum>(B)</enum>
+ <text>a reference to each regulation and each relevant instruction in the Farm Loan Programs handbook, the Noninsured Crop Disaster Assistance Program handbook, or any other appropriate handbook published by the Farm Service Agency; and</text>
+                                    </subparagraph>
+                                    <subparagraph id="HD15D194CBA6F475F943A237CA5F4360A">
+                                        <enum>(C)</enum>
+ <text>instructions for accessing the Electronic Code of Federal Regulations and the handbooks described in subparagraph (B) online.</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="H82C96DAD754C44D38A90132ED0A67E67">
+                                    <enum>(2)</enum>
+                                    <header>Effect of failure to state reasons</header>
+ <text>If the Secretary issues any adverse decision relating to an application for a farmer program loan, a Farm Service Agency program benefit, or the noninsured crop disaster assistance program established by section 196 of the Federal Agriculture Improvement and Reform Act of 1996 (<external-xref legal-doc="usc" parsable-cite="usc/7/7333">7 U.S.C. 7333</external-xref>) and does not include in a determination letter provided to the applicant a reason known or which should have reasonably been known to the Secretary for that adverse decision, the Secretary may not subsequently issue an adverse decision to that applicant on the basis of the same reason, known or which should have reasonably been known to the Secretary, unless the circumstances of the applicant have substantially changed since the issuance of the prior adverse decision.</text>
+                                </paragraph>
+                            </subsection>
+                            <subsection id="H8C50687FC0024E86B24C9C466736423A">
+                                <enum>(c)</enum>
+                                <header>Collateralization</header>
+                                <paragraph id="H42730420A2C940BD83BAAB46FB209086">
+                                    <enum>(1)</enum>
+                                    <header>Origination</header>
+ <text>The Secretary may secure a direct farmer program loan with a principal residence only if the total value of other assets available to secure the farmer program loan does not provide adequate security (as defined in section 761.2(b) of title 7, Code of Federal Regulations (as in effect on the date of enactment of the <short-title>Fair Credit for Farmers Act of 2025</short-title>)) for the loan.</text>
+                                </paragraph>
+                                <paragraph id="H407C2FA6430C415C928ACC5917714EDF">
+                                    <enum>(2)</enum>
+                                    <header>Partial release of principal residence security</header>
+ <text>In the case of a farmer program loan secured in part by a principal residence, the Secretary shall initiate a partial release of the principal residence as security in accordance with subpart H of part 765 of title 7, Code of Federal Regulations (as in effect on the date of enactment of the <short-title>Fair Credit for Farmers Act of 2025</short-title>), without any action required by the borrower, when the total value of other assets securing the farmer program loan is equal to 100 percent of the remaining loan amount.</text>
+                                </paragraph>
+                                <paragraph id="HA97B4398F7B046F7BED3709C5B247E9E">
+                                    <enum>(3)</enum>
+                                    <header>Loan servicing</header>
+                                    <subparagraph id="HF93B87EB1D32492B9A8472A5DF382B22">
+                                        <enum>(A)</enum>
+                                        <header>In general</header>
+ <text>In the case of a farmer program loan borrower who is delinquent prior to restructuring the farmer program loan, the borrower shall execute and provide to the Secretary a lien on assets necessary to achieve not more than 100 percent collateralization of the loan value.</text>
+                                    </subparagraph>
+                                    <subparagraph id="H5F6B5792D4624CEAB042FCFE85E14D81">
+                                        <enum>(B)</enum>
+                                        <header>Best lien</header>
+ <text>Except as provided in section 764.106 of title 7, Code of Federal Regulations (as in effect on the date of enactment of the <short-title>Fair Credit for Farmers Act of 2025</short-title>), the Secretary shall take the best lien obtainable on assets described in subparagraph (A), subject to the condition that a primary residence shall be the last option available to the Secretary to achieve 100 percent collateralization of the loan value.</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="HA122C43350CC49628D1024F49A8C5506">
+                                    <enum>(4)</enum>
+                                    <header>Prohibition on additional security</header>
+ <text>The Secretary may not secure a direct farmer program loan with any property that provides security in excess of the amount of security value equal to the loan amount.</text>
+                                </paragraph>
+                            </subsection>
+                            <subsection id="HA007274331CC4D169013777D05185E0D">
+                                <enum>(d)</enum>
+                                <header>Eligibility requirements</header>
+ <text>The Secretary shall not impose any limitation relating to the number of years in which a farmer program loan may be closed by a borrower.</text>
+                            </subsection>
+                        </section>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+                <paragraph id="HD87A97F1D7D649588CF62116F4B2A37D">
+                    <enum>(2)</enum>
+                    <header>Conforming amendment</header>
+ <text display-inline="yes-display-inline">Section 196(b) of the Federal Agriculture Improvement and Reform Act of 1996 (<external-xref legal-doc="usc" parsable-cite="usc/7/7333">7 U.S.C. 7333(b)</external-xref>) is amended by adding at the end the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline" id="H0DFD7A20E29C4BDE89AE447DA5F139CD">
+                        <paragraph id="H0B60FD9FBE404A93BFF5834C564A43BF">
+                            <enum>(5)</enum>
+                            <header>Adverse decisions</header>
+ <text display-inline="yes-display-inline">In the case of an adverse decision relating to an application under this subsection, section 375(b) of the Consolidated Farm and Rural Development Act shall apply.</text>
+                        </paragraph>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="idf20f605565774b0ba46d1bb2759b403f">
+                <enum>(b)</enum>
+                <header>Farm loan eligibility</header>
+                <paragraph commented="no" display-inline="no-display-inline" id="id1bcaa149b8d14ebabfaff8eb05fa0081">
+                    <enum>(1)</enum>
+                    <header>Persons eligible for direct farm ownership loans</header>
+ <text display-inline="yes-display-inline">Section 302(b) of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1922">7 U.S.C. 1922(b)</external-xref>) is amended—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="idf82deac2b3e64a52933e711cca7c487e">
+                        <enum>(A)</enum>
+ <text>by striking paragraph (1) and inserting the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="id842B63A0DCB54256917297B267D4DFD8"> <paragraph commented="no" display-inline="no-display-inline" id="id33a384a3d3b7404486133cbed34d5bdd"> <enum>(1)</enum> <header>In general</header> <text>The Secretary may make a direct loan under this subtitle only to a farmer or rancher who has at least 1 year of experience substantially participating in the management and business operations of a farm or ranch, as determined by the Secretary.</text>
+                            </paragraph>
+                            <after-quoted-block>; and</after-quoted-block>
+                        </quoted-block>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="idc57a5aa4d5344b8b8d660b6f5d617231">
+                        <enum>(B)</enum>
+ <text>by striking paragraphs (3) and (4) and inserting the following:</text> <quoted-block id="id7B101FA8B28A4060B55AD2404DA50040" display-inline="no-display-inline" style="OLC"> <paragraph commented="no" display-inline="no-display-inline" id="ida229b12e4e414064b00d4619f50d7727"> <enum>(3)</enum> <header>Waiver authority</header> <text>In the case of a qualified beginning farmer or rancher, the Secretary may waive the 1-year requirement described in paragraph (1) if the qualified beginning farmer or rancher—</text>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="idea6b84fa46ce4c20a5d6f6cf82dba24f">
+                                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">has an established relationship with an individual who has experience in farming or ranching, or with a local farm or ranch operator or organization, approved by the Secretary, that is committed to mentoring the qualified beginning farmer or rancher; or</text>
+                                </subparagraph>
+                                <subparagraph id="idc793b9ad2f5e421987fbafb88ffc71cd" commented="no" display-inline="no-display-inline">
+                                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">has other acceptable education or experience for an appropriate period of time, as determined by the Secretary.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <after-quoted-block>.</after-quoted-block>
+                        </quoted-block>
+                    </subparagraph>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="id2312c67ac5d6444b92c4d80e1724890f">
+                    <enum>(2)</enum>
+                    <header>Persons eligible for direct farm operating loans</header>
+ <text>Section 311 of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1941">7 U.S.C. 1941</external-xref>) is amended by striking subsection (c).</text>
+                </paragraph>
+            </subsection>
+            <subsection id="HE93FAC6502994C35A829E588CE0A4480">
+                <enum>(c)</enum>
+                <header>Refinancing of debt with farm loans</header>
+                <paragraph id="HBA2E0CBCF2CC4551B407616AAB0C8852">
+                    <enum>(1)</enum>
+                    <header>Allowed purposes of farm ownership loans</header>
+ <text>Section 303(a)(1) of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1923">7 U.S.C. 1923(a)(1)</external-xref>) is amended by striking subparagraph (E) and inserting the following:</text>
+                    <quoted-block id="id065c64feb7fb46b7b5b7aba55585bdda" display-inline="no-display-inline" style="OLC">
+                        <subparagraph commented="no" display-inline="no-display-inline" id="idd15d2c3bdede417492848db4861cd705">
+                            <enum>(E)</enum>
+ <text>refinancing the indebtedness of the farmer or rancher, if the farmer or rancher—</text>
+                            <clause commented="no" display-inline="no-display-inline" id="ide87a7c8206824252b612382e0c23a333">
+                                <enum>(i)</enum>
+ <text>has used a direct loan under this subtitle to refinance indebtedness not more than 4 times previously; and</text>
+                            </clause>
+                            <clause id="id0b8acec5adb74d66992519c6be7fb223" commented="no" display-inline="no-display-inline">
+                                <enum>(ii)</enum>
+ <text>is refinancing a debt obtained from a creditor other than the Secretary, including a guaranteed loan.</text>
+                            </clause>
+                        </subparagraph>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+                <paragraph id="H1CFC1FF8A95D452EB5C14318B49C11BC">
+                    <enum>(2)</enum>
+                    <header>Allowed purposes of direct operating loans</header>
+ <text>Section 312(a) of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1942">7 U.S.C. 1942(a)</external-xref>) is amended by striking paragraph (9) and inserting the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline" id="H9CB9C5288BBD4A0FB9AAD87D3B108A0C">
+                        <paragraph id="HAEB43E3470D34DDC954F966D29F23682">
+                            <enum>(9)</enum>
+ <text>refinancing the indebtedness of a borrower; or</text> </paragraph> <after-quoted-block>.</after-quoted-block> </quoted-block> </paragraph> </subsection> <subsection id="id7cbcda49d47d43ceacfb2e8b4170e0b9"> <enum>(d)</enum> <header>Effect of preferred lender certification</header> <text>Section 339(d)(4)(B) of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1989">7 U.S.C. 1989(d)(4)(B)</external-xref>) is amended—</text>
+                <paragraph commented="no" display-inline="no-display-inline" id="id4f5e7d24b1074b3b9398cc5b7e482032">
+                    <enum>(1)</enum>
+ <text display-inline="yes-display-inline">by striking <quote>institutions to</quote> and inserting the following:</text>
+                    <quoted-block style="OLC" display-inline="yes-display-inline" id="id4A4D1AE949E04BB1B021B17F32D9BE6A">
+ <text>institutions—</text> <clause commented="no" display-inline="no-display-inline" id="id3b13c2a0b27948c3948b46efa67c02d0"> <enum>(i)</enum> <text display-inline="yes-display-inline">to</text>
+                        </clause>
+                        <after-quoted-block>; and</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="iddcfc7ae4c45844b9825347846c69e3b0">
+                    <enum>(2)</enum>
+ <text display-inline="yes-display-inline">in clause (i) (as so designated)—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id40339ace374249cb92449f777e394e3e">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">by striking <quote>subsection relating</quote> and inserting <quote>subsection, relating</quote>;</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id07401488651f4633b531ffbeb6bf47af">
+                        <enum>(B)</enum>
+ <text>by striking <quote>worthiness, the</quote> and inserting <quote>worthiness or the</quote>; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id11af8bd443f94bc4aefcc2b13dff478a">
+                        <enum>(C)</enum>
+ <text display-inline="yes-display-inline">by striking <quote>collection and liquidation of loans, and to</quote> and inserting the following:</text>
+                        <quoted-block style="OLC" display-inline="yes-display-inline" id="id83C4BC7CAD1E40EF9C5DE2D67F084CAB">
+ <text>or collection of loans; and</text> <clause commented="no" display-inline="no-display-inline" id="id5a12fc70c6b641989c77b593d5937793"> <enum>(ii)</enum> <text>to</text>
+                            </clause>
+                            <after-quoted-block>.</after-quoted-block>
+                        </quoted-block>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="id2ba8e930a45845b9a278500f0b7c800c">
+                <enum>(e)</enum>
+                <header>Loan fund set-Asides for beginning farmers and ranchers</header>
+ <text display-inline="yes-display-inline">Section 346(b)(2) of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1994">7 U.S.C. 1994(b)(2)</external-xref>) is amended—</text>
+                <paragraph commented="no" display-inline="no-display-inline" id="idf560509a93ee43ae8724c85c1547e954">
+                    <enum>(1)</enum>
+ <text>in subparagraph (A)—</text> <subparagraph commented="no" display-inline="no-display-inline" id="idae85ffc1670d420594f5f024ddc0362c"> <enum>(A)</enum> <text>in clause (i)(II), by inserting <quote>, to the extent practicable</quote> after <quote>April 1 of the fiscal year</quote>; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id2bfacac82d6b468b9f3b940a5e9debd6">
+                        <enum>(B)</enum>
+ <text>in clause (iii), by inserting <quote>, to the extent practicable</quote> after <quote>September 1 of the fiscal year</quote>; and</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id6cd6cafd0e0e4efda53db950f733daa8" commented="no" display-inline="no-display-inline">
+                    <enum>(2)</enum>
+ <text>in subparagraph (B)(iii), by inserting <quote>, to the extent practicable</quote> after <quote>April 1 of the fiscal year</quote>.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="H81A6B45EB2FE41AE83B0FC2271614522">
+                <enum>(f)</enum>
+                <header>Removal of eligibility restriction based on previous debt write-Down or
+                    other loss</header>
+ <text>Section 373 of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/2008h">7 U.S.C. 2008h</external-xref>) is amended—</text>
+                <paragraph id="H8A1935AC2F44484EB0C2112B36EF289B">
+                    <enum>(1)</enum>
+ <text>in subsection (b)(2)(A)—</text> <subparagraph id="HAAFAC137EA644B87A89AAAB2D942CEB5"> <enum>(A)</enum> <text>by striking clause (i);</text>
+                    </subparagraph>
+                    <subparagraph id="H13DEF79546424ED2A373414C5DECE0AB">
+                        <enum>(B)</enum>
+ <text>in clause (ii), by striking <quote>chapters 11, 12, or 13 of Title 11 of the</quote> and inserting <quote>chapter 11, 12, or 13 of title 11,</quote>; and</text>
+                    </subparagraph>
+                    <subparagraph id="HF124E7AF265A47E3AF976BFBBFB7223E">
+                        <enum>(C)</enum>
+ <text>by redesignating clauses (ii) and (iii) as clauses (i) and (ii), respectively; and</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="HB4D60DD39C3F4E35A186967855739BDB">
+                    <enum>(2)</enum>
+ <text>by striking subsection (c) and inserting the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="HF1DAD4672CB64508959D1E04D07642C7"> <subsection id="HC52494B1211C434BBC29BAD93F4C277C"> <enum>(c)</enum> <header>Prohibition on eligibility restriction based on debt write-Down or other loss</header> <text>The Secretary shall not restrict the eligibility of a borrower for a farm ownership or operating loan under subtitle A or B based on a previous debt write-down or other loss to the Secretary.</text>
+                        </subsection>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+            </subsection>
+            <subsection id="H0E126ECD346D45CE8DB2F1B7728BC3D9">
+                <enum>(g)</enum>
+                <header>Equitable relief</header>
+                <paragraph commented="no" display-inline="no-display-inline" id="id58ec659a5fa34d47a7d20c7b28c14126">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Section 366 of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/2008a">7 U.S.C. 2008a</external-xref>) is amended—</text>
+                    <subparagraph id="H5D7391A076C441EFB242A3F470BAB955">
+                        <enum>(A)</enum>
+ <text>in subsection (a)—</text> <clause id="H9C26B29724E04D42B7470EABB5E5E439"> <enum>(i)</enum> <text>in paragraph (1), by striking <quote>(1) received</quote> and inserting <quote>(1)(A) received</quote>;</text>
+                        </clause>
+                        <clause id="H1E8A053A541A4116ADCC1095F7972854">
+                            <enum>(ii)</enum>
+ <text>in paragraph (2)—</text> <subclause id="H25E80CC8548E474294F10BD6AD24378C"> <enum>(I)</enum> <text>by striking the period at the end and inserting <quote>; or</quote>; and</text>
+                            </subclause>
+                            <subclause id="H8133A7CD6BD145BAB17AF648D7F44852">
+                                <enum>(II)</enum>
+ <text>by striking <quote>(2) the Secretary</quote> and inserting <quote>(B) the Secretary</quote>; and</text>
+                            </subclause>
+                        </clause>
+                        <clause id="HD582F7FD03E148A0A8F301A04CE5D92B">
+                            <enum>(iii)</enum>
+ <text>by adding at the end the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="H95C5DF71051A41F2A54CF5251012CB3B"> <paragraph id="H28D5E8F4E8CA4D20A9BF13AA0999156E"> <enum>(2)</enum> <subparagraph commented="no" display-inline="yes-display-inline" id="HE36D17364FE04BD196F54BD00D23044D"> <enum>(A)</enum> <text>received a benefit under any other program administered by an agency (as defined in section 271 of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/6991">7 U.S.C. 6991</external-xref>)); and</text>
+                                    </subparagraph>
+                                    <subparagraph commented="no" display-inline="no-display-inline" indent="up1" id="H17C8DB4D081C41468E5F524E9DD3E350">
+                                        <enum>(B)</enum>
+ <text>the Secretary determines is not in compliance with the requirements of the provisions of law that authorize that program.</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <after-quoted-block>;</after-quoted-block>
+                            </quoted-block>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="H686677037EF84460A15087BD58EEE4A4">
+                        <enum>(B)</enum>
+ <text>in subsection (b)(2), by inserting <quote>, including having made management or financial decisions for the farming or ranching operation of the farmer or rancher that were detrimental due to the erroneous nature of an official communication from the Department of Agriculture, regardless of whether a financial benefit was received or only promised</quote> before the period at the end;</text>
+                    </subparagraph>
+                    <subparagraph id="HCBE8D78F32B94A4DB6C441A45A3AE1BD">
+                        <enum>(C)</enum>
+ <text>in subsection (c)(1), by striking <quote>(a)(2)</quote> and inserting <quote>(a)(1)(B)</quote>;</text>
+                    </subparagraph>
+                    <subparagraph id="H981B2CDD6F324088803AFCEED516C019">
+                        <enum>(D)</enum>
+ <text>in subsection (e), by striking <quote>section</quote> in the matter preceding paragraph (1) and all that follows through <quote>shall not be</quote> in paragraph (2) and inserting <quote>section shall be</quote>; and</text>
+                    </subparagraph>
+                    <subparagraph id="HB745BF39E8384D54904787B1AF6CBA5B">
+                        <enum>(E)</enum>
+ <text>by adding at the end the following:</text> <quoted-block style="OLC" display-inline="no-display-inline" id="H48AF8858D12A4BC7B938041C06E4D7DD"> <subsection commented="no" id="H08C8B1BD64C94C58955CC87979D306F4"> <enum>(f)</enum> <header>Authority of National Appeals Division hearing officers</header> <paragraph commented="no" display-inline="no-display-inline" id="H1145BC5D9AA749DC9EAB459EFE8F0973"> <enum>(1)</enum> <header>In general</header> <text display-inline="yes-display-inline">A hearing officer (as defined in section 271 of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/6991">7 U.S.C. 6991</external-xref>)) may provide equitable relief under this section.</text>
+                                </paragraph>
+                                <paragraph commented="no" display-inline="no-display-inline" id="HEA928787F023467985DAE9A692DD0A74">
+                                    <enum>(2)</enum>
+                                    <header>Review</header>
+ <text>The Secretary may review a decision of a hearing officer (as so defined) to grant equitable relief pursuant to paragraph (1).</text>
+                                </paragraph>
+                            </subsection>
+                            <subsection commented="no" display-inline="no-display-inline" id="H9C7A3560B22748E6946030029616E58F">
+                                <enum>(g)</enum>
+                                <header>Cases in which an applicant is eligible</header>
+                                <paragraph id="H7D0F0396796A47B9BE14B0E1ACB49182">
+                                    <enum>(1)</enum>
+                                    <header>Definitions</header>
+ <text>In this subsection:</text> <subparagraph id="HE1FA6DB816FB42FAA22CD1CD487A770B"> <enum>(A)</enum> <header>Adverse decision</header> <text>The term <term>adverse decision</term> has the meaning given the term in section 271 of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/6991">7 U.S.C. 6991</external-xref>).</text>
+                                    </subparagraph>
+                                    <subparagraph id="H3EC981A6CE9A4C3C8AED57F1EF6CB952">
+                                        <enum>(B)</enum>
+                                        <header>Applicant</header>
+ <text>The term <term>applicant</term> means a person who submitted to, or attempted to submit to, the Farm Service Agency an application for—</text>
+                                        <clause commented="no" display-inline="no-display-inline" id="H1F8170ADB67F48199C4C49ABF8609610">
+                                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">a direct farm ownership, operating, or emergency loan under this title; or</text>
+                                        </clause>
+                                        <clause commented="no" display-inline="no-display-inline" id="H827A44A170A34996B14B466FD1F1BC89">
+                                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">a Farm Service Agency program benefit.</text>
+                                        </clause>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="H68160DB75F3141FA9D9747F8BAD662D7">
+                                    <enum>(2)</enum>
+                                    <header>Denial based on feasibility</header>
+                                    <subparagraph id="HEBFE73F320EC4FBAA65CDBBD15C71F8D">
+                                        <enum>(A)</enum>
+                                        <header>In general</header>
+ <text>A loan applicant shall be eligible for equitable relief under this section if—</text>
+                                        <clause id="H4E54D62A8A7A4DFC804701894EABADC7">
+                                            <enum>(i)</enum>
+ <text>the National Appeals Division determines that the Farm Service Agency was in error in denying the loan, benefit, or payment based on feasibility;</text>
+                                        </clause>
+                                        <clause id="H5DD74D7FF1B44B31AB2E44D2335E5F5D">
+                                            <enum>(ii)</enum>
+ <text>the National Appeals Division has confirmed the accuracy of the projected income and projected expenses described in the original application submitted by the applicant; and</text>
+                                        </clause>
+                                        <clause id="H983E9591F6004C1BB4C14837425EE691">
+                                            <enum>(iii)</enum>
+ <text>the original application submitted by the applicant is no longer feasible due to the delay caused by the erroneous denial by the Farm Service Agency and the length of the appeals process.</text>
+                                        </clause>
+                                    </subparagraph>
+                                    <subparagraph id="HFC894562FBBE44818CAFB4BAFA420EF7">
+                                        <enum>(B)</enum>
+                                        <header>Amount</header>
+ <text>The amount of equitable relief under subparagraph (A) shall be the amount equal to the difference between—</text>
+                                        <clause id="H4461CCA70E294016BCB86D76FDA0E034">
+                                            <enum>(i)</enum>
+ <text>the projected income described in the application; and</text>
+                                        </clause>
+                                        <clause id="HC32481F4292E42A291B210EAB3D03387">
+                                            <enum>(ii)</enum>
+ <text>the projected expenses described in the application.</text>
+                                        </clause>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="H59CF2B472DB6498FBBC21FF216BA0DCE">
+                                    <enum>(3)</enum>
+                                    <header>Denial based on eligibility</header>
+ <text>A loan applicant shall be eligible for equitable relief under this section if—</text>
+                                    <subparagraph id="H41E21224F01D4640AF4577416803C901">
+                                        <enum>(A)</enum>
+ <text>feasibility was not listed as a reason for an adverse decision in the determination letter provided to the applicant;</text>
+                                    </subparagraph>
+                                    <subparagraph id="H9A3F4E28C7C2424DB840EF1011777586">
+                                        <enum>(B)</enum>
+ <text>eligibility was listed as a reason for an adverse decision in the determination letter provided to the applicant;</text>
+                                    </subparagraph>
+                                    <subparagraph id="HE31CADA4C0F7435D9A0F362073EF8D99">
+                                        <enum>(C)</enum>
+ <text>the National Appeals Division determines that the Farm Service Agency was in error in denying the loan based on eligibility; and</text>
+                                    </subparagraph>
+                                    <subparagraph id="H0FD82851ACBD4E5D840DCFE0D728018F">
+                                        <enum>(D)</enum>
+ <text>the original application submitted by the applicant is no longer feasible due to the delay caused by the erroneous denial by the Farm Service Agency and the length of the appeals process.</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="HDFFDC0084AB94BF982E5396DECEB24A5">
+                                    <enum>(4)</enum>
+                                    <header>Subsequently withdrawn adverse decision</header>
+ <text>An applicant shall be eligible for equitable relief under this section if—</text>
+                                    <subparagraph id="HA7570C265DDC4F01AE45A88495A7F5AB">
+                                        <enum>(A)</enum>
+ <text>the Farm Service Agency issued an adverse decision on an application that the Farm Service Agency subsequently withdrew; and</text>
+                                    </subparagraph>
+                                    <subparagraph id="HA4192329EC9E45A4BEE0D493A9DBBE9F">
+                                        <enum>(B)</enum>
+ <text>the original application submitted by the applicant is no longer feasible due to the delay caused by the adverse decision.</text>
+                                    </subparagraph>
+                                </paragraph>
+                                <paragraph id="HD61FF16A2D3245EEA18C338B4E68D06C">
+                                    <enum>(5)</enum>
+                                    <header>Promised program benefits not received</header>
+ <text>An applicant shall be eligible for equitable relief under this section if—</text>
+                                    <subparagraph id="H3C05AEA644D6427690DCD4B948ECEB68">
+                                        <enum>(A)</enum>
+ <text>the Farm Service Agency indicated in an official communication made after the date of enactment of this subsection that the applicant could expect the loan, benefit, or payment, and then reversed its decision; and</text>
+                                    </subparagraph>
+                                    <subparagraph id="H0BB05DF9F7CA4767B6683D0270E87DB2">
+                                        <enum>(B)</enum>
+ <text>the applicant acted in good faith.</text> </subparagraph> </paragraph> </subsection> <after-quoted-block>.</after-quoted-block> </quoted-block> </subparagraph> </paragraph> <paragraph commented="no" display-inline="no-display-inline" id="id2ba9c513079b48218599f80ba02583df"> <enum>(2)</enum> <header>Application</header> <text>Subsection (g) of section 366 of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/2008a">7 U.S.C. 2008a</external-xref>)—</text>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id26269d8333174027994a15a80afdf245">
+                        <enum>(A)</enum>
+ <text display-inline="yes-display-inline">applies only with respect to applications submitted or attempted to be submitted, and decisions or communications made, after the date of enactment of this Act; and</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline" id="id3c1cd256606b47f88586154186ec1b0b">
+                        <enum>(B)</enum>
+ <text>does not apply retroactively with respect to—</text> <clause commented="no" display-inline="no-display-inline" id="idea602cbd066046dd80bd29ca43cec22a"> <enum>(i)</enum> <text display-inline="yes-display-inline">any application submitted or attempted to be submitted, or decision or communication made, before that date of enactment; or</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="idfada89a4ba414251bdd5efb7218e03c1">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">any action, inaction, or consequence resulting from a decision or communication made before that date of enactment.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+        </section>
+        <section id="HC2E15546DCE04840A6E8BB8100955F73">
+            <enum>4.</enum>
+            <header>National appeals division reform</header>
+            <subsection id="H8AF688E920184C03BADC4C6BE21E81E9">
+                <enum>(a)</enum>
+                <header>Burden of proof</header>
+ <text>Section 277(c)(4) of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/6997">7 U.S.C. 6997(c)(4)</external-xref>) is amended—</text>
+                <paragraph id="H2CFF7EAA50EB4F25A7D34D45FBBC2197">
+                    <enum>(1)</enum>
+ <text>by striking <quote>The appellant</quote> and inserting the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline" id="H51511BC8D94A40DAB8D1BBB06723DEBD">
+                        <subparagraph id="HA7DE3508E84A4960A042643BD99A7121">
+                            <enum>(A)</enum>
+                            <header>In general</header>
+ <text>Except as provided in subparagraph (B), the appellant</text> </subparagraph> <after-quoted-block>; and</after-quoted-block> </quoted-block> </paragraph> <paragraph id="HDE2C9EFE41C648CA97F72BAB526C6703"> <enum>(2)</enum> <text>by adding at the end the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline" id="H421C181220434881BFD00944A95693F1">
+                        <subparagraph id="H22F59CB52C694CBB90CFEB5FADFD63C6">
+                            <enum>(B)</enum>
+                            <header>Appellants below income threshold</header>
+                            <clause id="HD1BA15FFD1EF42408430A6A8A4DE3259">
+                                <enum>(i)</enum>
+                                <header>In general</header>
+ <text>In the case of an appellant described in clause (ii), the agency shall bear the burden of proving by substantial evidence that the adverse decision of the agency was not erroneous.</text>
+                            </clause>
+                            <clause id="H684859F9C20B408CADB18634EEF09D4F">
+                                <enum>(ii)</enum>
+                                <header>Appellants described</header>
+ <text>An appellant referred to in clause (i) is an appellant—</text> <subclause id="H4065844F1408430180AEFD6631A41DAD"> <enum>(I)</enum> <text>the adjusted gross income of which for the previous year is not more than $300,000; or</text>
+                                </subclause>
+                                <subclause id="HE5D88682C61745B9B5766BE4CCE3BFC1">
+                                    <enum>(II)</enum>
+ <text>the average annual adjusted gross income of which for the previous 5-year period is not more than $300,000.</text>
+                                </subclause>
+                            </clause>
+                        </subparagraph>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+            </subsection>
+            <subsection id="H8A3B9AB710D748078616F7363CAC3B31">
+                <enum>(b)</enum>
+                <header>Implementation</header>
+ <text>Section 280 of the Department of Agriculture Reorganization Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/7/7000">7 U.S.C. 7000</external-xref>) is amended—</text>
+                <paragraph id="HF0968A63D112487BB24BB30B95E6FAC6">
+                    <enum>(1)</enum>
+ <text>by redesignating subsection (b) as subsection (c); and</text> </paragraph> <paragraph id="HE84923656B594C00BDE2CE5BFD41E271"> <enum>(2)</enum> <text>by inserting after subsection (a) the following:</text>
+                    <quoted-block style="OLC" display-inline="no-display-inline" id="H94A5DB75BC2640B4AB08A83E7FB773D4">
+                        <subsection id="HA78B8FD823C3484496B7A0025553211B">
+                            <enum>(b)</enum>
+                            <header>Requirement</header>
+ <text>In implementing a final determination in accordance with subsection (a), the head of an agency shall use the information used by the Division to make the final determination, without requiring additional information on which implementation would be conditioned, except as otherwise provided in the decision letter relating to the final determination.</text>
+                        </subsection>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

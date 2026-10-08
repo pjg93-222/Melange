@@ -1,0 +1,215 @@
+census extras by detector class:
+  D_mixed_case_label           28
+  E_colonless_honorific         1
+
+============================================================================================
+EVERY ROW THE MIGRATION WOULD INSERT (source member -> new row member), verbatim
+============================================================================================
+ 1. from rowid=66969   Chuck Grassley         -> Patty Murray           2024-04-17 cnc [E_colonless_honorific/reattributed]
+    tag  : 'SEN. PATTY MURRAY (D-WA)'
+    text : I do. Yes. At this time, I will administer the oath to all Senators in the chamber in conformance with the Article I, Section 3, Clause 6 of the Constitution, and the Senate impeachment rules. Will all Senators now stand and raise their right hands? Do you solemnly swear that in all things appertain
+ 2. from rowid=66973   Ted Cruz               -> Patty Murray           2024-04-17 cnc [E_colonless_honorific/reattributed]
+    tag  : 'SEN. PATTY MURRAY (D-WA)'
+    text : . The Senator will recognize that the Senate is in a non-debatable position. The Senator has a right to offer his point of order but - or his motion. But we are in a non-debatable position.
+ 3. from rowid=68279   Chip Roy               -> Carlos Gimenez         2024-06-16 ip [E_colonless_honorific/reattributed]
+    tag  : 'REP. CARLOS GIMENEZ (R-FL)'
+    text : ; I think Bob Good has made a lot of -- a lot of enemies.
+ 4. from rowid=68730   Christopher Murphy     -> Maxine Waters          2024-07-08 ow [A_anchored_caps/reattributed]
+    tag  : 'REP. MAXINE WATERS (D-CA 43RD DISTRICT)'
+    text : Biden is not going anywhere. He has been strong in saying that in the last day or two. He's not going to be pushed out.
+ 5. from rowid=68730   Christopher Murphy     -> Adam Schiff            2024-07-08 ow [A_anchored_caps/reattributed]
+    tag  : 'REP. ADAM SCHIFF (D-CA 30TH DISTRICT)'
+    text : He should take a moment to make the best informed judgment. And if the judgment is run, then run hard and beat that S.O.B. Meanwhile, it appears Donald Trump is very close to picking his running mate. Indications are that Trump is deciding among senators J.D. Vance and Marco Rubio or North Dakota Go
+ 6. from rowid=68832   Ayanna Pressley        -> Bennie Thompson        2024-07-09 ow [A_anchored_caps/reattributed]
+    tag  : 'REP. BENNIE THOMPSON (D-MS 2ND DISTRICT)'
+    text : He's a good man. He has good policies. There's no reason to change.
+ 7. from rowid=68832   Ayanna Pressley        -> Mike Quigley           2024-07-09 ow [A_anchored_caps/reattributed]
+    tag  : 'REP. MIKE QUIGLEY (D-IL 5TH DISTRICT)'
+    text : He just has to step down because he can't win. And my colleagues need to recognize that a dismissive letter is not going to change any mind.
+ 8. from rowid=73089   Bryan Steil            -> Amy Klobuchar          2025-01-06 se [E_colonless_honorific/reattributed]
+    tag  : 'SEN. AMY KLOBUCHAR (D-MN)'
+    text : Madam President, the certificate of the electoral vote of the Commonwealth of Virginia seems to be regular in form and authentic, and it appears therefrom that Kamala D. Harris of the state of California received 13 votes for president and Tim Walz of the state of Minnesota received 13 votes for vic
+ 9. from rowid=75643   Bernard Sanders        -> Alexandria Ocasio-Cort 2025-03-24 ip [A_anchored_caps/reattributed]
+    tag  : 'REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT)'
+    text : Are we ready to fight? Are we ready to win and we will never, ever, ever give up.
+10. from rowid=79884   John Barrasso          -> John Thune             2025-09-05 ip [E_colonless_honorific/reattributed]
+    tag  : 'SEN. JOHN THUNE (R-SD)'
+    text : (voiceover): Well, it's not exactly what I think. What I think it's the president ultimately to whom he answers, so if the president has confidence in him.
+11. from rowid=80238   Jon Husted             -> Bill Cassidy           2025-09-17 ip [E_colonless_honorific/reattributed]
+    tag  : 'SEN. BILL CASSIDY'
+    text : , (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &
+12. from rowid=82752   Ruben Gallego          -> Richard Blumenthal     2025-10-01 acd [E_colonless_honorific/reattributed]
+    tag  : 'SEN. RICHARD BLUMENTHAL (D-CT)'
+    text : There is no question that this shutdown will be painful but we need to take a stand.
+13. from rowid=84935   Josh Hawley            -> Eric Schmitt           2025-11-20 tsiem [E_colonless_honorific/reattributed]
+    tag  : 'SEN. ERIC SCHMITT'
+    text : (R- I've been saying for a long time that I think that all the credible information that can be released should be released, and so that's where we're at.
+14. from rowid=89101   Josh Hawley            -> Eric Burlison          2026-03-19 arena [E_colonless_honorific/reattributed]
+    tag  : 'REP. ERIC BURLISON'
+    text : (R-Mop: It'll give me comfort if they pass an audit, and then I'll know that at least they're keeping track of the dollars.
+15. from rowid=89353   Susie Lee              -> Richard Blumenthal     2026-03-25 sitroom [A_anchored_caps/reattributed]
+    tag  : "SEN. RICHARD BLUMENTHAL (D-Can't)"
+    text : As long as Donald Trump is holding America hostage to pass a measure that would in effect purge voter rolls and suppress voters, there will be no deal.
+16. from rowid=89961   Elizabeth Warren       -> Tim Scott              2026-04-21 ctw [E_colonless_honorific/reattributed]
+    tag  : 'SEN. TIM SCOTT (R-SC)'
+    text : , CHAIR, SENATE BANKING COMMITTEE:: Well, there you have it. I'll just say it. It is interesting that we're going to hear from Senator Dave McCormick and his introduction of Kevin Warsh was last time unanimously confirmed by the United States Senate, unanimously confirmed by the U.S. Senate. Dave, t
+17. from rowid=91180   Thom Tillis            -> Susan Collins          2026-05-22 tsiem [E_colonless_honorific/reattributed]
+    tag  : 'SEN. SUSAN COLLINS (R-ME)'
+    text : I do not believe that individuals who were convicted of violence against police officers on January 6 should be entitled to reimbursement for their legal fees.
+18. from rowid=91491   Thom Tillis            -> Susan Collins          2026-06-02 ctmo [E_colonless_honorific/reattributed]
+    tag  : 'SEN. SUSAN COLLINS (R-ME)'
+    text : ; I do not support the weaponization fund as it has been described.
+19. from rowid=102837  Thom Tillis            -> John Cornyn            2018-01-24 ben-shapiro-co [E_colonless_honorific/reattributed]
+    tag  : 'SEN. JOHN CORNYN, R-TEXAS'
+    text : , "THIS WEEK"/ABC, DEC. 17, 2017 : I have a lot of admiration and respect for Director Mueller.
+20. from rowid=102837  Thom Tillis            -> Chris Van Hollen       2018-01-24 ben-shapiro-co [E_colonless_honorific/reattributed]
+    tag  : 'SEN. CHRIS VAN HOLLEN, D-MD.'
+    text : , "THIS WEEK"/ABC, DEC. 17, 2017: You've got somebody who, by all accounts, is an independent person, somebody who's got lots of integrity. UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017: He enjoys very broad support in the Senate both among Republicans and Democrats because of his long service as the FBI d
+21. from rowid=104285  Rand Paul              -> Tim Kaine              2017-04-09 meet-the-press [E_colonless_honorific/reattributed]
+    tag  : 'SEN. TIM KAINE'
+    text : Doing this without consulting Congress without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in responding to Syria’s chemical attack than the U.S. ambassador to the United Nations Nikki Haley. Haley has been the face of the administrati
+22. from rowid=104834  Joaquin Castro         -> Pramila Jayapal        2023-12-17 meet-the-press [E_colonless_honorific/reattributed]
+    tag  : 'REP. PRAMILA JAYAPAL'
+    text : Senate Democrats and the White House must not agree to these extreme demands [END TAPE]
+23. from rowid=106351  Christopher Murphy     -> Andy Kim               2025-02-23 meet-the-press [E_colonless_honorific/reattributed]
+    tag  : 'SEN. ANDY KIM'
+    text : We are basically on the cusp of a constitutional crisis. [END TAPE]
+24. from rowid=108647  Richard Durbin         -> Richard Durbin         2018-07-08 meet-the-press [E_colonless_honorific/own_later_turn]
+    tag  : 'SENATOR DICK DURBIN'
+    text : :It is a dilemma in one respect but not in another. I will tell you, the men and women that I work with on the Democratic side really take this seriously. They understand it's an historic decision. It's about more than the next election. It's about what country the United States of America is going 
+25. from rowid=108647  Richard Durbin         -> Richard Durbin         2018-07-08 meet-the-press [E_colonless_honorific/own_later_turn]
+    tag  : 'SENATOR DICK DURBIN'
+    text : :I can tell you this: what we see in this process, forcibly removing children from their parents at the border and then putting them adrift on a bureaucratic sea where they can't even find them. If you take a child into a hospital for treatment the first thing they do is strap a bracelet on the wris
+26. from rowid=108647  Richard Durbin         -> Richard Durbin         2018-07-08 meet-the-press [E_colonless_honorific/own_later_turn]
+    tag  : 'SENATOR DICK DURBIN'
+    text : :I can tell you, they have the resources to get it done. Chuck, this is not an accident. This is a policy of deterrence to stop future flow, to be mean to these kids and their families to say to others, "Don't even try it." And that, to me, is cruel. It's not what America's all about. CHUCK TODD:Sen
+27. from rowid=108647  Richard Durbin         -> Richard Durbin         2018-07-08 meet-the-press [E_colonless_honorific/own_later_turn]
+    tag  : 'SENATOR DICK DURBIN'
+    text : :Thanks. Good to be with you-- CHUCK TODD:By the way, NBC News will provide live coverage of President Trump's Supreme Court announcement tomorrow evening at 9:00 Eastern, 6:00 p.m. on the West Coast. Later on the broadcast we'll talk to President Trump's lawyer, Rudy Giuliani. But up next, the figh
+28. from rowid=111034  Lindsey Graham         -> Charles Schumer        2017-05-14 meet-the-press [E_colonless_honorific/reattributed]
+    tag  : 'SEN. CHUCK SCHUMER'
+    text : :Yeah, I didn’t see Senator Graham but I just want to join him in wishing all the moms of America, and your family Chuck, Happy Mother’s Day and particularly to my mom who , god willing, will turn 89 in three weeks. CHUCK TODD:Well done. Okay, let me start with the issue of a special prosecutor. Why
+29. from rowid=111034  Lindsey Graham         -> Charles Schumer        2017-05-14 meet-the-press [E_colonless_honorific/reattributed]
+    tag  : 'SEN. CHUCK SCHUMER'
+    text : :Well, there are two separate lines of activity here. One is the oversight function of the Intelligence Committee, they are doing their job. Mark Warner has done a very good job. I’ve had some differences with Senator Burr in the last week. People tell me that he was very upset with Comey’s firing a
+30. from rowid=120706  Nancy Pelosi           -> Richard Durbin         2018-02-05 carter-page-on [E_colonless_honorific/reattributed]
+    tag  : 'SEN. DICK DURBIN, D-ILL.'
+    text : , "STATE OF THE UNION"/CNN: I will just tell you, this could participate in in a constitutional crisis.
+31. from rowid=167914  Jeanne Shaheen         -> Christopher Coons      2018-04-12 ex-doj-attorne [E_colonless_honorific/reattributed]
+    tag  : 'SEN. CHRIS COONS'
+    text : , D—DELAWARE: Do you believe Special Counsel Mueller's investigation is an attack on our country and all we stand for?
+32. from rowid=167914  Jeanne Shaheen         -> Christopher Murphy     2018-04-12 ex-doj-attorne [E_colonless_honorific/reattributed]
+    tag  : 'SEN. CHRIS MURPHY'
+    text : , D—CONNECTICUT: It will be really troubling if you couldn't say here today that you don't believe that the Mueller investigation is an attack on America.
+33. from rowid=187143  Charles Schumer        -> Christopher Murphy     2018-03-14 hannity-mccabe [E_colonless_honorific/reattributed]
+    tag  : 'SEN. CHRIS MURPHY'
+    text : , D—CONN.: I want to know, are you prepared to do whatever it takes to beat the gun lobby?
+34. from rowid=187143  Charles Schumer        -> Richard Blumenthal     2018-03-14 hannity-mccabe [E_colonless_honorific/reattributed]
+    tag  : 'SEN. RICHARD BLUMENTHAL'
+    text : , D—CONN.: Are we going to ban assault weapons? Are we going to have universal background checks?
+35. from rowid=192027  Lucy McBath            -> Steve Scalise          2019-03-02 ndaysat [E_colonless_honorific/reattributed]
+    tag  : 'REP. STEVE SCALISE'
+    text : , (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+36. from rowid=197182  Elizabeth Warren       -> Bernard Sanders        2019-06-10 ath [E_colonless_honorific/reattributed]
+    tag  : 'SEN. BERNIE SANDERS (I-VT)'
+    text : ; I understand that there are some well- intentioned Democrats and candidates who believe that the best way forward is a middle-ground strategy that antagonizes no one, that stands up to nobody, and that changes nothing. In my view, that approach is not just bad public policy, but it is a failed pol
+37. from rowid=198345  Charles Schumer        -> Tim Kaine              2017-05-10 levin-schumer- [E_colonless_honorific/reattributed]
+    tag  : 'SEN. TIM KAINE, D-VA.'
+    text : , "GMA"/ABC: We have a deeply insecure president who understands that the noose is tightening because of this Russia investigation. And that's why I believe he has let Jim Comey go.
+38. from rowid=206687  Mike Johnson           -> Pramila Jayapal        2019-12-12 es [A_anchored_caps/reattributed]
+    tag  : "REP. PRAMILA JAYAPAL (D-WASHINGTON'S 7TH DISTRICT)"
+    text : The president is the smoking gun. The smoking gun is reloaded.
+39. from rowid=208795  Bernard Sanders        -> Elizabeth Warren       2020-01-19 ip [E_colonless_honorific/reattributed]
+    tag  : 'SEN. ELIZABETH WARREN (D-MA)'
+    text : , PRESIDENTIAL CANDIDATE Bernie is my friend, and I am not here to try to fight with Bernie. Can a woman beat Donald Trump? Look at the man on this stage. Collectively, they have last 10 elections. The only people on this stage who have won every single election that they've been in, are the women. 
+40. from rowid=215057  Lindsey Graham         -> Josh Hawley            2020-12-09 cnr [E_colonless_honorific/reattributed]
+    tag  : 'SEN. JOSH HAWLEY (R-MO)'
+    text : (voice over): The president has every right to present his case and every court that he wants to go to and has every right to be heard. [11:50:05]
+41. from rowid=215756  Mitch McConnell        -> John Thune             2021-01-08 cnr [E_colonless_honorific/reattributed]
+    tag  : 'SEN. JOHN THUNE (R-S.D.)'
+    text : (Voice Over, Captioned): "Had we not had senators who decided to object, we probably wouldn't have had that many people in town, if the president hadn't encouraged them all to come to town. And there was a lot of anger and a lot of emotion based upon, in most cases, just a lot of false information. 
+42. from rowid=218597  Alex Padilla           -> Alex Padilla           2021-03-23 cnnt [A_anchored_caps/own_later_turn]
+    tag  : 'PADILLA (on camera)'
+    text : Well, Don, it shouldn't be, and that's my point. As I mentioned in committee earlier today, it seems like we have our priorities backwards, and -- see the impact of you know, the voter suppression efforts election after election and we see the consequences of lack of gun safety laws in mass shooting
+43. from rowid=219462  Andrew Clyde           -> Ralph Norman           2021-05-13 nday [E_colonless_honorific/reattributed]
+    tag  : 'REP. RALPH NORMAN (R-SC)'
+    text : ; At 2:07, a mob of Trump supporters breached the steps. I don't know who did a poll that it's Trump supporters.
+44. from rowid=223251  Pete Aguilar           -> Bennie Thompson        2021-11-18 cnr [E_colonless_honorific/reattributed]
+    tag  : 'REP. BENNIE THOMPSON (D-MS)'
+    text : (voice-over): We have information that that phone may or may not be in his possession. The number is not active anymore that he used, so we just want to know. [03:55:02]
+45. from rowid=226287  Jim Jordan             -> Bennie Thompson        2022-06-11 cnr [E_colonless_honorific/reattributed]
+    tag  : 'REP. BENNIE THOMPSON (D)'
+    text : , CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6
+46. from rowid=227229  Christopher Murphy     -> Lindsey Graham         2017-02-03 president-trum [E_colonless_honorific/reattributed]
+    tag  : 'SEN. LINDSEY GRAHAM, R-S.C.'
+    text : I don't want a war with Iran, but they deserved to be sanctioned.
+47. from rowid=230193  John Thune             -> Thom Tillis            2022-09-22 se [E_colonless_honorific/reattributed]
+    tag  : 'SEN. THOM TILLIS (R-NC)'
+    text : I believe there's a formal process it needs to go through it - that needs to be gone through, and documented.
+48. from rowid=241054  Jim Jordan             -> Tom Cotton             2017-03-14 speaker-ryan-t [A_anchored_caps/reattributed]
+    tag  : 'SEN. TOM COTTON, R-ARKANSAS (through telephone)'
+    text : There is no three-phase process. There is no three-step plan. That is just political talk. It's just politicians engaging in spin. There is not going to be phase three legislation. It's phase one and done.
+49. from rowid=242833  Mitch McConnell        -> Richard Durbin         2012-04-19 tax-bill-caugh [E_colonless_honorific/reattributed]
+    tag  : 'SEN. DICK DURBIN'
+    text : , SENATE MAJORITY WHIP D-Ill.: Many of the same senators who are criticizing congressionally directed spending, or earmarks, have earmarks in the bill. That is the height of hypocrisy, to stand up and request earmark, have it included in the bill, and then fold your arms and piously announce I'm aga
+50. from rowid=243863  Tim Burchett           -> Don Bacon              2023-06-21 cnc [E_colonless_honorific/reattributed]
+    tag  : 'REP. DON BACON (R-NE)'
+    text : I believe, in the end, you had a Trump-appointed attorney. I don't know who this judge is in this case. But I trust our justice system to get it right.
+51. from rowid=245558  Mike Johnson           -> Mike Johnson           2023-08-17 qmb [C_unanchored_paren/own_later_turn]
+    tag  : 'JOHNSON (voice-over)'
+    text : My name is Mike Johnson. I'm the chief of conservation for Summit Metro Parks. We are at the Valley View Area of Cascade Valley Metro Park. Today, you would never know that this was ever a golf course. The vegetation that you see behind me, 90 percent of it is native; whereas when this was a golf co
+52. from rowid=245558  Mike Johnson           -> Mike Johnson           2023-08-17 qmb [A_anchored_caps/own_later_turn]
+    tag  : 'JOHNSON (voice-over)'
+    text : The first choice we had to make is, do we allow it to restore on its own? Just kind of let it go? Or do we take a more active role in that process? And because this was a golf course, we decided it was necessary to take a more active role. We had to undo the golf course before we could restore the l
+53. from rowid=245558  Mike Johnson           -> Mike Johnson           2023-08-17 qmb [C_unanchored_paren/own_later_turn]
+    tag  : 'JOHNSON (voice-over)'
+    text : This is the Cuyahoga River and we are looking out over a vast restored flood plain. When we acquired the property, the banks of the river were steep. They had been channelized. The golf course, they wanted to keep the water out. We wanted to bring the water back into the landscape. (MUSIC PLAYING)
+54. from rowid=245558  Mike Johnson           -> Mike Johnson           2023-08-17 qmb [C_unanchored_paren/own_later_turn]
+    tag  : 'JOHNSON (voice-over)'
+    text : The Cuyahoga River is significant. This is the river that burned. It actually burned several times throughout history because it was so polluted from industrial dumping. There was a time in recent memory where this stretch of river that we have here in Valley View supported almost no fish or aquatic
+55. from rowid=245558  Mike Johnson           -> Mike Johnson           2023-08-17 qmb [A_anchored_caps/own_later_turn]
+    tag  : 'JOHNSON (voice-over)'
+    text : These parks and the wetlands and the streams filter pollutants from the water that we eventually drink. They clean the air, they provide habitat for wildlife, including a large array of endangered species we have here in Summit County. They're also important for people. These are places for people t
+56. from rowid=249127  Ritchie Torres         -> Pramila Jayapal        2023-11-08 cnr [E_colonless_honorific/reattributed]
+    tag  : 'REP. PRAMILA JAYAPAL (D-WA)'
+    text : It is outrageous. I am embarrassed for those Democrats who voted to censure their own colleague, who voted against free speech. It is an embarrassment.
+57. from rowid=253028  Nancy Mace             -> Pat Fallon             2024-02-22 cnap [E_colonless_honorific/reattributed]
+    tag  : 'REP. PAT FALLON (R-TX)'
+    text : (voice-over): This, ladies and gentlemen, is gold. This is direct evidence of naked corruption and bribery.
+58. from rowid=254901  Lindsey Graham         -> John Kennedy           2019-07-18 pbs-newshour [D_mixed_case_label/reattributed]
+    tag  : 'Sen. John Kennedy, La.'
+    text : I'm just ready to move on. I mean, this is -- I don't hate anybody. I think this is America. You're entitled to your opinion.
+59. from rowid=260196  Charles Schumer        -> Nancy Pelosi           2018-12-11 pbs-newshour [D_mixed_case_label/reattributed]
+    tag  : 'Rep. Nancy Pelosi, De-Calif.'
+    text : Let me -- let me say one thing. The fact is that you do not have the votes in the House.
+60. from rowid=260198  Mitch McConnell        -> Nancy Pelosi           2018-12-11 pbs-newshour [D_mixed_case_label/reattributed]
+    tag  : 'Rep. Nancy Pelosi, De-Calif.'
+    text : Good afternoon. We just had a meeting of which you saw the introduction to.
+61. from rowid=265823  Lindsey Graham         -> Bill Cassidy           2018-09-26 msnow [E_colonless_honorific/reattributed]
+    tag  : 'SEN. BILL CASSIDY'
+    text : , (R) LOUISIANA; And we`re being told that a woman went to 10 different parties where women were being gang raped and never reported it.
+62. from rowid=273301  Lindsey Graham         -> Elise Stefanik         2021-05-07 msnow [E_colonless_honorific/reattributed]
+    tag  : 'REP. ELISE STEFANIK (R-NY)'
+    text : (voice over): We have to work with President Trump to win back the majority. We need fighters. President Trump is a fighter on behalf of the American people, and voters want fighters to stand up for them, and that`s what I`m committed to doing.
+63. from rowid=274112  Charles Schumer        -> Jeff Merkley           2021-09-13 msnow [E_colonless_honorific/reattributed]
+    tag  : 'SENATOR JEFF MERKLEY (D-OR)'
+    text : :Well, right now, I`m so pleased that a group of seven senators have come together, that includes Joe Manchin. We have worked to address a whole variety of issues that had been raised by various secretary of states or election officials regarding automatic voter registration, voter ID, gerrymanderin
+64. from rowid=274922  Adam Schiff            -> Pramila Jayapal        2022-01-06 msnow [A_anchored_caps/reattributed]
+    tag  : 'REP. PRAMILA JAYAPAL (D-WA4)'
+    text : I remember every moment vividly. I viscerally feel the pounding on the gallery doors.
+
+inserted rows by (class, disposition):
+  ('A_anchored_caps', 'own_later_turn')             3
+  ('A_anchored_caps', 'reattributed')               9
+  ('C_unanchored_paren', 'own_later_turn')          3
+  ('D_mixed_case_label', 'reattributed')            3
+  ('E_colonless_honorific', 'own_later_turn')       4
+  ('E_colonless_honorific', 'reattributed')        42
+total inserts: 64
+
+============================================================================================
+DOES ANY INSERTED / LEDGERED SEGMENT START WITH TAG RESIDUE (an ALL-CAPS role tail)?
+============================================================================================
+inserted segments starting with >=2 ALL-CAPS tokens : 0
+ledger-only segments starting with >=2 ALL-CAPS tokens: 15 (ledger only, never displayed)
+DONE

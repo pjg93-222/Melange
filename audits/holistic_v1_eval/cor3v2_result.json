@@ -1,0 +1,96 @@
+{
+ "matched": 1866,
+ "missing": 8,
+ "missing_detail": [
+  {
+   "edge": [
+    "M001226",
+    "B001288"
+   ],
+   "cu_w": 0.4929408366463619,
+   "cu_NBills": 2,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  },
+  {
+   "edge": [
+    "M001226",
+    "C001056"
+   ],
+   "cu_w": 0.1333333333333333,
+   "cu_NBills": 1,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  },
+  {
+   "edge": [
+    "M001226",
+    "C001075"
+   ],
+   "cu_w": 0.4929408366463619,
+   "cu_NBills": 2,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  },
+  {
+   "edge": [
+    "M001226",
+    "G000555"
+   ],
+   "cu_w": 0.4929408366463619,
+   "cu_NBills": 2,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  },
+  {
+   "edge": [
+    "M001226",
+    "H001079"
+   ],
+   "cu_w": 0.4929408366463619,
+   "cu_NBills": 2,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  },
+  {
+   "edge": [
+    "M001226",
+    "K000393"
+   ],
+   "cu_w": 0.4929408366463619,
+   "cu_NBills": 2,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  },
+  {
+   "edge": [
+    "M001226",
+    "V000128"
+   ],
+   "cu_w": 0.4929408366463619,
+   "cu_NBills": 2,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  },
+  {
+   "edge": [
+    "M001226",
+    "W000437"
+   ],
+   "cu_w": 0.4929408366463619,
+   "cu_NBills": 2,
+   "reverse_present": false,
+   "from_out_deg_hol": 89
+  }
+ ],
+ "aggregate_matched_only": 4.280596584352457,
+ "aggregate_all": 4.257678500266693,
+ "ratio_quantiles": {
+  "p05": 0.3333333333333333,
+  "p25": 1.0,
+  "median": 2.131370849898476,
+  "p75": 5.4801212293697175,
+  "p95": 20.148242927627322
+ },
+ "share_dominant": 0.7829581993569131
+}

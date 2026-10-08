@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="HA869AFFFFCE341B78D0B3E2F175AC4DB" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 79 IH: Expressing the sense of the House of Representatives that Government shutdowns are detrimental to the Nation and should not occur.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 79</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190128">January 28, 2019</action-date><action-desc><sponsor name-id="W000825">Ms. Wexton</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Reform</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Expressing the sense of the House of Representatives that Government shutdowns are detrimental to
+			 the Nation and should not occur.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas a portion of the United States Government was shut down from December 22, 2018, to January 25, 2019;</text>
+ </whereas><whereas><text>Whereas the shutdown resulted from the President of the United States attempting to use a lapse in appropriations in order to achieve a legislative end that he had not achieved in the regular order of the appropriations process;</text>
+ </whereas><whereas><text>Whereas the Senate, on December 19, 2018, unanimously passed legislation to fund Government operations and avert a Government shutdown;</text>
+ </whereas><whereas><text>Whereas the President of the United States on December 20, 2018, announced that he would refuse to sign that legislation due to the President’s insistence that appropriations for particular items be provided at his preferred levels;</text>
+ </whereas><whereas><text>Whereas as a result of the President’s refusal to sign legislation continuing funding for certain other operations of Government, appropriations lapsed on December 22, 2018;</text>
+ </whereas><whereas><text>Whereas the Government shutdown lasted for 35 days, the longest Government shutdown in the history of our country;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations deprived Americans of important services and caused 800,000 Federal workers to go without pay for more than a month, imposing significant financial hardships on those workers and their families;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations detrimentally affected the Federal Government’s ability to recruit and retain career public servants;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations put at risk thousands of small businesses with Federal contracts and created severe financial hardship for tens of thousands of employees of Federal contractors;</text>
+ </whereas><whereas><text>Whereas the top economic advisor to the President of the United States predicted that the Government shutdown would reduce economic growth by 0.1 percent for each week it lasted;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations forced Transportation Security Administration screeners and air traffic controllers to work without pay, causing many to be unable to afford to work and thereby putting at risk the safety and well-being of the traveling public, leading to flight delays, and harming airport security operations;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations put the health of all Americans at risk by curtailing and delaying food safety inspections;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations made our Nation less safe by impeding Federal Bureau of Investigation efforts to crack down on child trafficking, violent crime, and terrorism;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations resulted in the shuttering of and, in some cases, damage to, countless national parks, monuments and other public lands;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations furloughed numerous Federal employees at the Federal Emergency Management Agency and the Department of Housing and Urban Development (HUD), limiting the Federal Government’s ability to help communities rebuild after natural disasters;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations resulted in a majority of Environmental Protection Agency employees being furloughed, with negative consequences for public health and the environment, such as halted clean-up work at hundreds of toxic Superfund sites across the country, a cessation in inspection and enforcement activities, and a stop to new chemical and pesticide safety evaluations and approvals;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations delayed payment of Department of Agriculture loans, operating loan decisions, planting and marketing decisions and much-needed assistance for farmers harmed by retaliatory tariffs imposed on American agricultural exports, prevented the implementation of a new farm bill with critical support for struggling dairy farmers and other operations, and cast damaging uncertainty on the nutrition assistance relied on by millions of vulnerable Americans;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations delayed the issuance of tax refunds to America’s hard-working taxpayers;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations penalized small business owners by halting the approval of Small Business Administration loans;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations impeded the operations of United States embassies abroad, undermining the ability of United States personnel to combat terror, enforce sanctions, and strengthen alliances;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations undermined the ability of the Department of Homeland Security to respond to increased cybersecurity threats, natural disasters, and terror threats;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations delayed approval of FHA-backed mortgages, putting Americans at risk of losing the house they were attempting to buy or sell;</text>
+ </whereas><whereas><text>Whereas the lapse in appropriations hobbled the ability of the Department of Housing and Urban Development to administer the Section 8 low-income housing program that allows for HUD to provide affordable rental housing to low-income tenants, including the elderly and disabled;</text>
+ </whereas><whereas commented="no"><text>Whereas Senator Mitch McConnell has called shutdowns <quote>a failed policy</quote>;</text> </whereas><whereas><text>Whereas Representative Kevin McCarthy said on December 13, 2018, that <quote>going into a shutdown is stupid</quote> and said on January 13, 2019, that <quote>it is unacceptable that 800,000 U.S. employees are not being paid;</quote></text>
+ </whereas><whereas><text>Whereas Representative Mike Simpson said on January 23, 2019, that <quote>this shutdown is stupid</quote>;</text> </whereas><whereas><text>Whereas Senator Susan Collins said on January 23, 2019, <quote>shutdowns represent the ultimate failure to govern and should never be used as a weapon to achieve an outcome</quote>; and</text>
+ </whereas><whereas><text>Whereas Senator Lamar Alexander said on January 24, 2019, <quote>it is always wrong for either side to use shutting down the Government as a bargaining chip in budget negotiations—it should be as off-limits as chemical weapons are to warfare</quote>: Now, therefore, be it</text>
+		</whereas></preamble>
+	<resolution-body id="H1889D6637F5040E288968986DD205CE9" style="traditional">
+ <section display-inline="yes-display-inline" id="H6CBE0BD4BCAF48FDA087B1E4682D2767" section-type="undesignated-section"><enum></enum><text display-inline="yes-display-inline">That it is the sense of the House of Representatives that—</text> <paragraph id="H29B09A44F4AC40E88C8235CB80F2253C"><enum>(1)</enum><text>the shutdown of the Government of the United States, or any portion thereof, causes substantial damage to Federal employees, to every American who benefits directly or indirectly from Federal services, to our Nation’s economy, and to the reputation of the United States around the world;</text>
+ </paragraph><paragraph id="HB1DE605BF352489D834C2BE24AFF90AB"><enum>(2)</enum><text>shutting down the Government of the United States, or any portion thereof, is not an acceptable tactic or strategy for resolving differences regarding policy, funding levels, or governing philosophy; and</text>
+ </paragraph><paragraph id="HD58487714495460A83AED50DE18A564D"><enum>(3)</enum><text>in the future the Congress must ensure the continued, uninterrupted operations of the Government of the United States and its services as well as its duty to protect and promote the security of the American people.</text>
+			</paragraph></section></resolution-body></resolution>
+
+

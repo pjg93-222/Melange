@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HD448797C66DF414CB17D73E1B2124221" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 96 IH: To amend title 38, United States Code, to require the Secretary of Veterans Affairs to furnish dental care in the same manner as any other medical service, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 96</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190103">January 3, 2019</action-date><action-desc><sponsor name-id="B001285">Ms. Brownley of California</sponsor> (for herself and <cosponsor name-id="D000191">Mr. DeFazio</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to require the Secretary of Veterans Affairs to furnish
+			 dental care in the same manner as any other medical service, and for other
+			 purposes.</official-title></form>
+	<legis-body id="H7FCECB66F974417689D20818700504EB" style="OLC">
+		<section id="H37C8152B758F45D6AF68E2332F79B9FF" section-type="section-one"><enum>1.</enum><header>Requirement that Secretary of Veterans Affairs furnish dental care in the same manner as any other
+			 medical service</header>
+			<subsection id="HFF48C978369943E986CFCF1AB4298C41"><enum>(a)</enum><header>Dental benefits</header>
+ <paragraph id="H6A6E6303EE904A7F929C8CB75AB7B09E"><enum>(1)</enum><header>In general</header><text>Title 38, United States Code, is amended—</text> <subparagraph id="H987227B38D7A40D3A21A1B16335A8C77"><enum>(A)</enum><text>in section 1701(6), by striking <quote>as described in sections 1710 and 1712 of this title</quote>;</text>
+ </subparagraph><subparagraph id="H8E50799B3E814DCA8668EF8DE9CD0519"><enum>(B)</enum><text>in section 1710(c), by striking the second sentence;</text> </subparagraph><subparagraph id="H3CAD52546DD646A3B876F06E64DFBFE7"><enum>(C)</enum><text>in section 1712—</text>
+ <clause id="H4F28B74D2776442AAE8208A86C7FCA35"><enum>(i)</enum><text>by striking subsections (a) and (b);</text> </clause><clause id="H9C8FF9CAE308483FB87122CEE7E4CE95"><enum>(ii)</enum><text>by redesignating subsections (c), (d), (e), and (f) as subsections (a), (b), (c), and (d), respectively; and</text>
+ </clause><clause id="H93650439226E48A9A1B81B69B12782DB"><enum>(iii)</enum><text>in subsection (a), as redesignated by subparagraph (B)—</text> <subclause id="H6358F02EB9F0428AA1F19D5CC9FAF3DD"><enum>(I)</enum><text>by striking <quote>Dental appliances</quote> and inserting <quote>The Secretary may furnish dentures, dental appliances</quote>; and</text>
+ </subclause><subclause id="H3BDEA346E1034AC18A7808C2759BAC32"><enum>(II)</enum><text>by striking <quote>to be furnished by the Secretary under this section may be procured by the Secretary</quote> and inserting <quote>under this section and may procure such appliances</quote>; and</text> </subclause></clause></subparagraph><subparagraph id="H89A801D18181487BA73747F875FFE776"><enum>(D)</enum><text>by striking section 2062.</text>
+ </subparagraph></paragraph><paragraph id="H0FFF91BC2DF847FC850B77D68223B743"><enum>(2)</enum><header>Phased eligibility</header><text display-inline="yes-display-inline">The amendments made by paragraph (1) shall apply as follows:</text> <subparagraph id="H94FA761CEF3A4754B91E582E07F85993"><enum>(A)</enum><text display-inline="yes-display-inline">In the case of an individual who is eligible for dental services and appliances furnished by the Secretary of Veterans Affairs under <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/38/17">chapter 17</external-xref> of title 38, United States Code, on the date of the enactment of this Act, beginning on the date of the enactment of this Act.</text>
+ </subparagraph><subparagraph id="H49B0B87C3C8F4329A9C08A7422330A0C"><enum>(B)</enum><text>In the case of a veteran who is not so eligible on the date of the enactment of this Act and who is described in paragraph (1) or (2) of subsection (a) of section 1705 of such title, beginning on the date that is one year after the date of the enactment of this Act.</text>
+ </subparagraph><subparagraph id="H3E162482487849FAA7A9651BA5E6628E"><enum>(C)</enum><text display-inline="yes-display-inline">In the case of a veteran who is not so eligible on the date of the enactment of this Act and who is described in paragraph (3) or (4) of subsection (a) of section 1705 of such title, beginning on the date that is two years after the date of the enactment of this Act.</text>
+ </subparagraph><subparagraph id="H6A0B7161AFC3496C8BAFA14D511E61EE"><enum>(D)</enum><text display-inline="yes-display-inline">In the case of a veteran who is not so eligible on the date of the enactment of this Act and who is described in paragraph (5) or (6) of subsection (a) of section 1705 of such title, beginning on the date that is three years after the date of the enactment of this Act.</text>
+ </subparagraph><subparagraph id="HAF30AE5C109D41D38CAAF2105D1F1966"><enum>(E)</enum><text>In the case of a veteran who is not so eligible on the date of the enactment of this Act and who is described in paragraph (7) or (8) of subsection (a) of section 1705 of such title, beginning on the date that is four years after the date of the enactment of this Act.</text>
+ </subparagraph></paragraph></subsection><subsection id="H432AA40856414A2496DDFE5CC9C45FAB"><enum>(b)</enum><header>Conforming amendments</header><text>Title 38, United States Code, is further amended—</text> <paragraph id="HB5F612DC24DB4CD79ABCF82FEEF7E1EB"><enum>(1)</enum><text>in section 1525(a), by striking <quote>medicines under section 1712(d)</quote> and inserting <quote>medicines under section 1712(b)</quote>; and</text>
+ </paragraph><paragraph id="HB4C3BABF7E6C4D3EB63650466D875F17"><enum>(2)</enum><text>in section 1703(a)(7), by striking <quote>, for a veteran described in section 1712(a)(1)(F) of this title</quote>.</text> </paragraph></subsection><subsection id="HCF2B5BEAFE714CFBA5EAF88D4EC4AB4F"><enum>(c)</enum><header>Clerical amendments</header><text>Such title is further amended—</text>
+ <paragraph id="H4C0CD37B66E748159CB6D6189BF09E09"><enum>(1)</enum><text>in section 1712, in the heading for such section, by striking <quote><header-in-text level="section" style="USC">Dental care</header-in-text></quote> and inserting <quote><header-in-text level="section" style="USC">Appliances</header-in-text></quote>;</text> </paragraph><paragraph id="H253DF549F0F949DC9B8FAB0D8EC3A96A"><enum>(2)</enum><text>in the table of sections at the beginning of chapter 17, by striking the item relating to section 1712 and inserting the following new item:</text>
+					<quoted-block display-inline="no-display-inline" id="HE199605B259942FBA93918191621540C" style="USC">
+						<toc regeneration="no-regeneration">
+							<toc-entry level="section">1712. Appliances; drugs and medicines for certain disabled veterans; vaccines.</toc-entry></toc><after-quoted-block>;</after-quoted-block></quoted-block>
+ <continuation-text continuation-text-level="paragraph">and</continuation-text></paragraph><paragraph id="HA4653145020D4520A31D94B2ACB88072"><enum>(3)</enum><text>in the table of sections at the beginning of chapter 20, by striking the item relating to section 2062.</text>
+				</paragraph></subsection></section></legis-body></bill>
+
+

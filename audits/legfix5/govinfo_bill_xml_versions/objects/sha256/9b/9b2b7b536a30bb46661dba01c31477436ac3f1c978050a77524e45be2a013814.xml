@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H7EDDE97DF91F4045BEC8B99DC709BEE2"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6324 IH: Retirement Simplification and Clarity Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-11-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code> 
+<congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 6324</legis-num> 
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<action display="yes"> 
+<action-date date="20251128">November 28, 2025</action-date> 
+<action-desc><sponsor name-id="P000613">Mr. Panetta</sponsor> (for himself, <cosponsor name-id="L000585">Mr. LaHood</cosponsor>, <cosponsor name-id="M001222">Mr. Miller of Ohio</cosponsor>, <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>, <cosponsor name-id="D000096">Mr. Davis of Illinois</cosponsor>, <cosponsor name-id="M001224">Mr. Moran</cosponsor>, <cosponsor name-id="D000617">Ms. DelBene</cosponsor>, and <cosponsor name-id="S001190">Mr. Schneider</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc> 
+</action> 
+<legis-type>A BILL</legis-type> 
+<official-title display="yes">To amend the Internal Revenue Code of 1986 to provide for in-service rollovers for individual retirement annuity purchases.</official-title> 
+</form> 
+<legis-body id="H33863FDD6A0A4CAD8002964C05B34994"> 
+<section id="H617A5E3FEA424C1D89DE82B10DCC3753" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Retirement Simplification and Clarity Act</short-title></quote>.</text></section> <section id="H8D9CE5E1DBD14618A8224950420B24D9"><enum>2.</enum><header>In-service rollovers for annuity purchases</header> <subsection id="HE430CD04F4EF42499571FB739AD570CC"><enum>(a)</enum><header>In general</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/401">Section 401(k)</external-xref> of the Internal Revenue Code of 1986 is amended by adding at the end the following new paragraph:</text> 
+<paragraph id="HDB85BFA357FD4959A0D3E19ACD3AF8BB"><enum>“(17)</enum><header>Special rule for pre-retirement rollover</header><text>Notwithstanding the requirements of paragraph (2)(B)(i), a plan may permit a participant who has attained age 50 or older to elect a direct rollover of all or a portion the accrued benefit of the participant attributable to employer contributions made pursuant to the employee’s election to an individual retirement annuity (as defined in section 408(b)).”.</text></paragraph></subsection> <subsection id="H3C9D21075C4B4686B9F979CA441B1E68"><enum>(b)</enum><header>Safe Harbor</header><text>Section 402(f) of such Code is amended by redesignating paragraph (2) as paragraph (3) and by inserting after paragraph (1) the following new paragraph:</text> 
+<quoted-block id="HF5733C93E75D4F2A8B2E5020D0047863" style="OLC"> 
+<paragraph id="HB8D52EC71EB646D7ADEF4EC4C42A6C2B"><enum>(2)</enum><header>Safe harbor</header> 
+<subparagraph id="HAACEB887052349F7BD28CC33B552C8A6"><enum>(A)</enum><header>In general</header><text>A written explanation shall satisfy the requirements of paragraph (1) if it includes the following information in concise, plain language:</text> <clause id="HDE98B42512E541C2A95DADF31141C468"><enum>(i)</enum><text>The taxpayer has 30 days to review such explanation before they must take any action.</text></clause> 
+<clause id="H1B303B20D0B64394AF5B78FA8460512E"><enum>(ii)</enum><text>Distributions made directly to the taxpayer will be subject to income tax withholding and added to gross income to the extent taxable.</text></clause> <clause id="HD3DAE969BE6A4F42B01E27C89FF88E1E"><enum>(iii)</enum><text>The taxpayer may owe an additional 10 percent tax on a distribution issued before the taxpayer attains age 59½.</text></clause> 
+<clause id="H2AEA7426A5674A6E9389BB014547C48A"><enum>(iv)</enum><text>A 20 percent income tax withholding will apply to distributions that are not eligible for rollover.</text></clause> <clause id="H9170458C6D454991B474F5C5A861D712"><enum>(v)</enum><text>A taxpayer can defer Federal income tax on eligible distributions by rolling such distribution over to another qualified plan or individual retirement arrangement.</text></clause> 
+<clause id="H439A65A481D14617BA9A460AD194C5C4"><enum>(vi)</enum><text>A taxpayer may not rollover—</text> <subclause id="H840AC50690824BD8BB37701CB660C23A"><enum>(I)</enum><text>required minimum distributions,</text></subclause> 
+<subclause id="HE7B5A36111BC41E9AA1BE44E3E2C7C49"><enum>(II)</enum><text>hardship distributions,</text></subclause> <subclause id="HE2F921DD94294544B6D51C5D91A0D63A"><enum>(III)</enum><text>a series of payments to be made over a number of years,</text></subclause> 
+<subclause id="H5D02B485FD1346848D1EF9160661B7F0"><enum>(IV)</enum><text>employee stock ownership plan dividends, or</text></subclause> <subclause id="HD4A8A7FA76734A1F868753B433B6D70F"><enum>(V)</enum><text>corrective distributions.</text></subclause></clause> 
+<clause id="H124DD2461C684B2BAB81063292DAABB5"><enum>(vii)</enum><text>The plan administrator can be contacted for information regarding whether all or a portion of a payment to the taxpayer is eligible for rollover.</text></clause> <clause id="HE0D018903C8E421A981E1F30AC983885"><enum>(viii)</enum><text>A plan may require the taxpayer to take a distribution upon the taxpayer’s attainment of the plan’s retirement age, or in the case of a benefit that is less than $7,000, the plan may automatically pay the benefit directly to the taxpayer or in a rollover to a traditional IRA or, for designated Roth amounts, a Roth IRA it establishes for the taxpayer.</text></clause> 
+<clause id="HBB5157C240F24D90AF7E8D9462792E75"><enum>(ix)</enum><text>Eligible amounts may be rolled over to a new plan or to an IRA when a taxpayer changes jobs, and the administrator of the new plan can confirm how to accomplish such a rollover.</text></clause> <clause id="H8F0C4F6B949A454A9E0DEC9AAD8E41A3"><enum>(x)</enum><text>The taxpayer may choose to leave eligible amounts in their original plan.</text></clause> 
+<clause id="HF5B53A87725249568B5E060EA9BA341B"><enum>(xi)</enum><text>The taxpayer may rollover an eligible distribution to a traditional IRA, individual retirement annuity, or a Roth IRA for designated Roth contributions.</text></clause> <clause id="H9A93255F92EE40C196468C2B8D310C23"><enum>(xii)</enum><text>Direct rollovers are not subject to the mandatory 20 percent withholding, and the distribution may be in the form of a check payable to the new plan or arrangement or by electronic transfer.</text></clause> 
+<clause id="H93F5154433294D67B9CD2D5E3644F614"><enum>(xiii)</enum><text>If the taxpayer receives a payment directly, the taxpayer has up to 60 days from the date of distribution to rollover an amount equal to the eligible amount received plus the dollar amount that was withheld and sent to the Internal Revenue Service.</text></clause> <clause id="HD02DB57B9EDC4FAD9FBFF5F41AA788E9"><enum>(xiv)</enum><text>The taxpayer may obtain additional information from the Internal Revenue Service.</text></clause></subparagraph> 
+<subparagraph id="H42B8EFA191B64AE3998FF9A894391AC1"> <enum>(B)</enum> <header>Regulations and Guidance</header> <text>The Secretary may promulgate such regulations and guidance as are necessary to administer this section, including regulations updating the list in subparagraph (A) as necessary.</text> </subparagraph></paragraph> <after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="H43FA16DD93D041C0A06A558043D432C3"><enum>(c)</enum><header>Effective Date</header><text>The amendments made by this section shall apply to taxable years beginning after December 31, 2025.</text></subsection></section> 
+</legis-body> 
+</bill> 
+
+

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB3A6401B9FA146E7A3996DF9881690B6" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 662 IH: Block Grant Assistance Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-01-31</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 662</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230131">January 31, 2023</action-date><action-desc><sponsor name-id="F000472">Mr. C. Scott Franklin of Florida</sponsor> (for himself and <cosponsor name-id="W000797">Ms. Wasserman Schultz</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Disaster Relief Supplemental Appropriations Act, 2023 to improve disaster relief funding for agricultural producers, and for other purposes.</official-title></form><legis-body id="H0A103A2C4E864750B52817B890FB016C" style="OLC"><section id="HD24DA702FAF447569A8F8151A8BAFF09" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Block Grant Assistance Act of 2023</short-title></quote>.</text></section><section id="HA8127E4424964C828FDDEB0113104A26"><enum>2.</enum><header>Disaster Relief Supplemental Appropriations Act, 2023 amendment</header><text display-inline="no-display-inline">Title I of the Disaster Relief Supplemental Appropriations Act, 2023 (division N of <external-xref legal-doc="public-law" parsable-cite="pl/117/328">Public Law 117–328</external-xref>), is amended, in the matter under the heading <quote><header-in-text style="appropriations" level="appropriations-intermediate">Office of the Secretary</header-in-text></quote> under the heading <quote><header-in-text style="appropriations" level="appropriations-intermediate">Processing, Research and Marketing</header-in-text></quote> under the heading <quote><header-in-text style="appropriations" level="appropriations-major">AGRICULTURAL PROGRAMS</header-in-text></quote> under the heading <quote><header-in-text style="appropriations" level="appropriations-major">DEPARTMENT OF AGRICULTURE</header-in-text></quote>, by inserting <quote>: <proviso><italic>Provided further</italic></proviso>, That the Secretary of Agriculture may provide assistance for losses described under this heading in this Act in the form of block grants to eligible States and territories</quote> before the period at the end.</text></section></legis-body></bill>
+
+

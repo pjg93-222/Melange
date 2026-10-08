@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HF7857EF707E04C829A61F609A0215F7A" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7139 IH: Housing Choice Voucher Fairness Act of 2025</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-01-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7139</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260116">January 16, 2026</action-date><action-desc><sponsor name-id="K000401">Mr. Kiley of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the United States Housing Act of 1937 to address the payment of tenant-based assistance in cases where a family moves, and for other purposes.</official-title></form><legis-body id="H9624C05D1BE548C6876E52C98B9E3E91" style="OLC"> 
+<section id="H671174AD5556458289A4A6FCB2B794B3" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline"> This Act may be cited as the <quote><short-title>Housing Choice Voucher Fairness Act of 2025</short-title></quote>.</text></section> <section id="H1B73B2061C0847A99E643219B1328188"><enum>2.</enum><header>Transferring housing choice voucher billing</header><text display-inline="no-display-inline"> Section 8(r) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(r)</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" id="H46C989D42670435490A5AE6ACBC2BA8E" display-inline="no-display-inline"> 
+<subsection id="H4A9FEAC431444FED85DCCF0589524884"><enum>(6)</enum><text display-inline="yes-display-inline">If an agency provides tenant-based assistance to a family on or after January 1, 2026 and such family moves to a dwelling unit located in an area outside of the area covered by such agency, such agency shall continue providing tenant-based assistance to such family unless the cost of providing rental assistance for such dwelling unit is greater than 10 percent more than the cost of providing rental assistance for such family when they lived in the area covered by such agency. </text> </subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> </legis-body></bill>
+

@@ -1,0 +1,4 @@
+Error: unexpected string constant in:
+"  write_batch_event(
+    ""
+Execution halted

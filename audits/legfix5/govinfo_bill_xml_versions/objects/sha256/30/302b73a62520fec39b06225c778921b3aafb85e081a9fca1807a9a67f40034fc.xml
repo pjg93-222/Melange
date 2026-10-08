@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" bill-type="olc" dms-id="HBEB11287499D40AF9CCCBC850BBB4C36" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1158 RH: DHS Cyber Incident Response Teams Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IB</distribution-code>
+		<calendar display="yes">Union Calendar No. 64</calendar>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 1158</legis-num>
+		<associated-doc display="yes" role="report">[Report No. 116–89]</associated-doc>
+		<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190213">February 13, 2019</action-date>
+			<action-desc><sponsor name-id="M001157">Mr. McCaul</sponsor> (for himself, <cosponsor name-id="L000559">Mr. Langevin</cosponsor>, <cosponsor name-id="K000386">Mr. Katko</cosponsor>, <cosponsor name-id="R000576">Mr. Ruppersberger</cosponsor>, and <cosponsor name-id="R000601">Mr. Ratcliffe</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HHM00">Committee on Homeland Security</committee-name></action-desc>
+		</action>
+		<action>
+			<action-date>May 30, 2019</action-date>
+			<action-desc>Committed to the Committee of the Whole House on the State of the Union and ordered to be printed<pagebreak></pagebreak></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To authorize cyber incident response teams at the Department of Homeland Security, and for other
+			 purposes.<pagebreak></pagebreak></official-title>
+	</form>
+	<legis-body id="HB8655CC7900D41D59AEDF15AA988D588" style="OLC">
+ <section id="H8D3E94C9DEA2469FA5F171257AF0BBF9" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>DHS Cyber Incident Response Teams Act of 2019</short-title></quote>.</text> </section><section id="H88018289FB89436CA2ACC3AB9240B98D"><enum>2.</enum><header>Department of Homeland Security cyber incident response teams</header> <subsection id="HD13CA4BB038849CF9F91A921999ADA10"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 2209 of the Homeland Security Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/148">6 U.S.C. 148</external-xref>) is amended—</text>
+ <paragraph id="H0E06D058E99743A3BF3B64A66FD456B7"><enum>(1)</enum><text>in subsection (d)(1)(B)(iv), by inserting <quote>, including cybersecurity specialists</quote> after <quote>entities</quote>;</text> </paragraph><paragraph id="H2A031536C9944F699BC57B49947D31FE"><enum>(2)</enum><text>by redesignating subsections (f) through (m) as subsections (g) through (n), respectively;</text>
+ </paragraph><paragraph id="HF112E5E9A4094830A04CDEA59FB194DA"><enum>(3)</enum><text>by inserting after subsection (d) the following new subsection (f):</text> <quoted-block display-inline="no-display-inline" id="H4F47248265C6429F956DB8C572BE59D7" style="USC"> <subsection id="H91F77D92F56D48369DA93DE741DA62BA"><enum>(f)</enum><header>Cyber incident response teams</header> <paragraph id="H03045AEF8E7B4D788630655B4B894FF4"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Center shall maintain cyber hunt and incident response teams for the purpose of providing, as appropriate and upon request, assistance, including the following:</text>
+ <subparagraph id="HE3938B7AF605471EBAAF7D24FD937FC1"><enum>(A)</enum><text>Assistance to asset owners and operators in restoring services following a cyber incident.</text> </subparagraph><subparagraph id="H8B91DCAE10664677921B08AAC9B9F861"><enum>(B)</enum><text>The identification of cybersecurity risk and unauthorized cyber activity.</text>
+ </subparagraph><subparagraph id="H6E1C9442C68646EBB4AB03FA2C97CFAD"><enum>(C)</enum><text>Mitigation strategies to prevent, deter, and protect against cybersecurity risks.</text> </subparagraph><subparagraph id="H3CBE90FBC3394B8CAD26130E87F2994B"><enum>(D)</enum><text>Recommendations to asset owners and operators for improving overall network and control systems security to lower cybersecurity risks, and other recommendations, as appropriate.</text>
+ </subparagraph><subparagraph id="H4A0EA49F100B4C65AB7B2B158B86A5B6"><enum>(E)</enum><text>Such other capabilities as the Under Secretary appointed under section 103(a)(1)(H) determines appropriate.</text>
+ </subparagraph></paragraph><paragraph id="H8EECEC142B0B4284A4EFEE478BDB5808"><enum>(2)</enum><header>Cybersecurity specialists</header><text display-inline="yes-display-inline">The Secretary may include cybersecurity specialists from the private sector on cyber hunt and incident response teams.</text>
+ </paragraph><paragraph id="HF30FAC5875514E04BC9FB9B770557170"><enum>(3)</enum><header>Associated metrics</header><text display-inline="yes-display-inline">The Center shall continually assess and evaluate the cyber incident response teams and their operations using robust metrics.</text>
+ </paragraph><paragraph id="HEAE220346BAF4FF382436ABFC0A5085A"><enum>(4)</enum><header>Submittal of information to Congress</header><text display-inline="yes-display-inline">Upon the conclusion of each of the first four fiscal years ending after the date of the enactment of this subsection, the Center shall submit to the Committee on Homeland Security of the House of Representatives and the Homeland Security and Governmental Affairs Committee of the Senate, information on the metrics used for evaluation and assessment of the cyber incident response teams and operations pursuant to paragraph (3), including the resources and staffing of such cyber incident response teams. Such information shall include each of the following for the period covered by the report:</text>
+ <subparagraph id="H097D4002EA3D48BB81AC4B494DD73DD8"><enum>(A)</enum><text>The total number of incident response requests received.</text> </subparagraph><subparagraph id="HA5BACB08D665496BADAAF0C9E47D4ED0"><enum>(B)</enum><text>The number of incident response tickets opened.</text>
+ </subparagraph><subparagraph id="H2B456024586E46A2878F32812C2A4D20"><enum>(C)</enum><text>All interagency staffing of incident response teams.</text> </subparagraph><subparagraph id="H440DBE7DD013450789B02D09F89D1CE9"><enum>(D)</enum><text>The interagency collaborations established to support incident response teams.</text></subparagraph></paragraph></subsection><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="HAEBB5D1C1E4A4058A1274B86F7CD1BA0"><enum>(4)</enum><text>in subsection (g), as redesignated by paragraph (2)—</text> <subparagraph id="H1A3AA34F97EF42158990A2D5121E61CE"><enum>(A)</enum><text>in paragraph (1), by inserting <quote>, or any team or activity of the Center,</quote> after <quote>Center</quote>; and</text>
+ </subparagraph><subparagraph id="HFE666B795B2B4A0299FE10D75B24664C"><enum>(B)</enum><text>in paragraph (2), by inserting <quote>, or any team or activity of the Center,</quote> after <quote>Center</quote>.</text> </subparagraph></paragraph></subsection><subsection id="H99DB3D90968145FFBBCC222ED7A3E857"><enum>(b)</enum><header>No additional funds authorized</header><text display-inline="yes-display-inline">No additional funds are authorized to be appropriated to carry out the requirements of this Act and the amendments made by this Act. Such requirements shall be carried out using amounts otherwise authorized to be appropriated.</text>
+			</subsection></section></legis-body>
+	<endorsement display="yes">
+		<action-date>May 30, 2019</action-date>
+		<action-desc>Committed to the Committee of the Whole House on the State of the Union and ordered to be printed</action-desc></endorsement>
+</bill>
+
+

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 140 STAT. ?>
+<?I98 140 STAT. ?>
+<?I99 140 STAT. ?>
+<?I50 PUBLIC LAW 119–89—MAY 11, 2026?>
+<?I51 PUBLIC LAW 119–89—MAY 11, 2026?>
+<?I52 PUBLIC LAW 119–89—MAY 11, 2026?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 119–89: To require the Federal Communications Commission to establish a vetting process for prospective applicants for high-cost universal service program funding.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>89</docNumber>
+<citableAs>Public Law 119–89</citableAs><citableAs>140 Stat. 818</citableAs>
+<approvedDate>2026-05-11</approvedDate>
+<dc:date>2026-05-11</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-05-18</processedDate>
+<congress>119</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 119–89—MAY 11, 2026</centerRunningHead>
+<page identifier="/us/stat/140/818">140 STAT. 818</page>
+<dc:type>Public Law</dc:type><docNumber>119–89</docNumber>
+<congress value="119">119th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To require the Federal Communications Commission to establish a vetting process for prospective applicants for high-cost universal service program funding.<sidenote><p class="centered fontsize8" id="xfd448511-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658076"><approvedDate date="2026-05-11">May 11, 2026</approvedDate></p><p class="centered fontsize8" id="xfd448512-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658076">[<ref href="/us/bill/119/s/98">S. 98</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xfd448513-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658180">Rural Broadband Protection Act of 2025.</p></sidenote>
+<section id="d418e88" identifier="/us/pl/119/89/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xfd448514-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658180"><ref href="/us/usc/t47/s609">47 USC 609 note</ref>.</p></sidenote><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Rural Broadband Protection Act of 2025</shortTitle>”.</content></section>
+<section id="d418e103" identifier="/us/pl/119/89/s2" role="instruction" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>VETTING PROCESS FOR PROSPECTIVE HIGH-COST UNIVERSAL SERVICE FUND APPLICANTS.</heading><content class="firstIndent0 fontsize10" id="xfd44d335-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658120">  Section 254 of the Communications Act of 1934 (<ref href="/us/usc/t47/s254">47 U.S.C. 254</ref>) <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="add">adding</amendingAction> at the end the following:<quotedContent><subsection class="firstIndent0 fontsize10" id="yfd454866-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="m">“(m) </num><heading class="fontsize10"><inline class="smallCaps">Vetting of High-Cost Fund Recipients</inline>.—</heading><paragraph class="fontsize10" id="yfd454867-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">“(1) </num><heading class="fontsize10"><inline class="smallCaps">Definitions</inline>.—</heading><chapeau>In this subsection—</chapeau><subparagraph class="fontsize10" id="yfd454868-52cf-11f1-8881-4b76bc008a6a" role="definitions" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">“(A) </num><content>the term ‘<term>covered funding</term>’ means any new offer of high-cost universal service program funding, including funding provided through a reverse competitive bidding mechanism provided under this section, for the deployment of a broadband-capable network and the provision of supported services over the network; and</content></subparagraph>
+<subparagraph class="fontsize10" id="yfd454869-52cf-11f1-8881-4b76bc008a6a" role="definitions" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">“(B) </num><content>the term ‘<term>new covered funding award</term>’ means an award of covered funding that is made based on an application submitted to the Commission on or after the date on which rules are promulgated under paragraph (2).</content></subparagraph>
+</paragraph>
+<paragraph class="fontsize10" id="yfd45486a-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">“(2) </num><heading class="fontsize10"><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xfd45486b-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658180">Deadline.</p></sidenote><inline class="smallCaps">Commission rulemaking</inline>.—</heading><content>Not later than 180 days after the date of enactment of this subsection, the Commission shall initiate a rulemaking proceeding to establish a vetting process for applicants for, and other recipients of, a new covered funding award.</content></paragraph>
+<paragraph class="fontsize10" id="yfd456f7c-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="3">“(3) </num><heading class="fontsize10"><inline class="smallCaps">Contents</inline>.—</heading><subparagraph class="fontsize10" id="yfd456f7d-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">“(A) </num><heading class="fontsize10"><inline class="smallCaps">In general</inline>.—</heading><content>In promulgating rules under paragraph (2), the Commission shall provide that, consistent with principles of technology neutrality, the Commission will only award covered funding to applicants that can demonstrate that they meet the qualifications in subparagraph (B).</content></subparagraph>
+<subparagraph class="fontsize10" id="yfd456f7e-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">“(B) </num><heading class="fontsize10"><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xfd456f7f-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658180">Proposal.</p><p class="leftAlign firstIndent0 fontsize8" id="xfd456f80-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658180">Records.</p></sidenote><inline class="smallCaps">Qualifications described</inline>.—</heading><content>An applicant for a new covered funding award shall include in the initial application a proposal containing sufficient detail and documentation for the Commission to ascertain that the applicant possesses the technical, financial, and operational capabilities, and has a reasonable business plan, to deploy the proposed network and deliver services with the relevant <page identifier="/us/stat/140/819">140 STAT. 819</page>
+performance characteristics and requirements defined by the Commission and as pledged by the applicant.</content></subparagraph>
+<subparagraph class="fontsize10" id="yfd456f81-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="C">“(C) </num><heading class="fontsize10"><inline class="smallCaps">Evaluation of proposal</inline>.—</heading><chapeau>The Commission shall evaluate a proposal described in subparagraph (B) against—</chapeau><clause class="fontsize10" id="yfd456f82-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658126"><num class="fontsize10" style="-uslm-lc:emspace2" value="i">“(i) </num><content>reasonable and well-established technical, financial, and operational standards, including the technical standards adopted by the Commission in orders of the Commission relating to Establishing the Digital Opportunity Data Collection (WC Docket No. 19–195) (or orders of the Commission relating to modernizing any successor collection) for purposes of entities that must report broadband availability coverage; and</content></clause>
+<clause class="fontsize10" id="yfd456f83-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658126"><num class="fontsize10" style="-uslm-lc:emspace2" value="ii">“(ii) </num><content>the applicant’s history of complying with requirements in Commission and other government broadband deployment funding programs.</content></clause>
+</subparagraph>
+<subparagraph class="fontsize10" id="yfd456f84-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="D">“(D) </num><heading class="fontsize10"><inline class="smallCaps">Penalties for pre-authorization defaults</inline>.—</heading><content>In adopting rules for any new covered funding award, the Commission shall set a penalty for pre-authorization defaults of at least $9,000 per violation and may not limit the base forfeiture to an amount less than 30 percent of the applicant’s total support, unless the Commission demonstrates the need for lower penalties in a particular instance.”</content></subparagraph>
+</paragraph>
+</subsection>
+</quotedContent>.</content></section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2026-05-11">May 11, 2026</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/119/s/98">S. 98</ref> (<ref href="/us/bill/119/hr/2399">H.R. 2399</ref>):</heading>
+<note>
+<headingText style="-uslm-lc:I658032">HOUSE REPORTS:</headingText> ┐No. <ref href="/us/hrpt/119/78">119–78</ref> (<committee>Comm. on Energy and Commerce</committee>) accompanying <ref href="/us/bill/119/hr/2399">H.R. 2399</ref>.
+</note>
+<note>
+<headingText style="-uslm-lc:I658032">SENATE REPORTS:</headingText> ┐No. <ref href="/us/srpt/119/14">119–14</ref> (<committee>Comm. on Commerce, Science, and Transportation</committee>).
+</note>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD:</heading>
+<subheading style="-uslm-lc:I658033">Vol. 171 (2025):</subheading>
+<p class="indentUp2 firstIndent-1" id="xfd459695-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658034">June 26, considered and passed Senate.</p><subheading style="-uslm-lc:I658033">Vol. 172 (2026):</subheading>
+<p class="indentUp2 firstIndent-1" id="xfd459696-52cf-11f1-8881-4b76bc008a6a" style="-uslm-lc:I658034">Apr. 20, considered and passed House.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

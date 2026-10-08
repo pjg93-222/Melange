@@ -318,7 +318,7 @@ def classify(key, texts, categories, *, model, key_path, transport='api'):
         'canonical_key': key, 'allowed_categories': categories,
         'official_documents': texts,
         'output_shape': {'canonical_key':key,'disposition':'include|exclude|hold',
-            'confidence':'high|medium|low','beneficiary_class':'cu_primary|shared|bank_primary|crypto_primary|fintech|offtopic|oppose',
+            'confidence':'high|medium|low','beneficiary_class':'cu_primary|shared|bank_primary|crypto_primary|fintech|telecom_primary|offtopic|oppose',
             'rationale':'substantive explanation',
             'categories':[{'category':'exact allowed category','direction':1,'rationale':'why enactment helps (+1), harms (-1), or is neutral (0) for credit unions','source_url':'exact supplied URL','quote':'exact contiguous substantive quotation'}],
             'exclusion_source_url':'required for exclude','exclusion_quote':'required affirmative text for exclude'}

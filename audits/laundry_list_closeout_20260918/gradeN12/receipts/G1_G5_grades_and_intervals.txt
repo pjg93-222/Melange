@@ -1,0 +1,74 @@
+====================================================================================================
+H1  THE PBS ANCHOR LABEL THAT CLASS D CANNOT SEE (non-ASCII letter / lower-case particle)
+    flagged rows whose KEPT text still contains a PBS anchor label:
+      Laura Barrón-López            7  e.g. [154423, 257913, 258130, 258736, 258820]
+      Fred de Sam Lazaro            1  e.g. [257343]
+    distinct rows affected: 6
+    (all 40 class-D rows are pbs-newshour/csis/aei/aspensf; the shape is the anchor label,
+     and MIXED requires ASCII [A-Za-z] name tokens, so an accent or a "de" particle hides it)
+
+====================================================================================================
+H2  THE "FORMER U.S. | PRESIDENT" CUT (an abbreviation period satisfies the sentence anchor)
+    rowid=70812   member=Lindsey Graham         kept ends 'ns. Focus on those. [06:43:28] DONALD TRUMP (R), FORMER U.S.'  -> first tag 'PRESIDENT AND'
+    rowid=71147   member=Mitch McConnell        kept ends 'ere provoked by the president. DONALD TRUMP (R), FORMER U.S.'  -> first tag 'PRESIDENT AND'
+    rowid=82055   member=Raphael Warnock        kept ends 'at is a dangerous proposition. DONALD TRUMP (R), FORMER U.S.'  -> first tag 'PRESIDENT AND'
+    rowid=205497  member=Daniel Goldman         kept ends ' tell you that he told Mr. Yermak? TIM MORRISON, FORMER U.S.'  -> first tag 'ADVISER TO PRESIDENT TRUMP ON RUSSIA AND'
+
+====================================================================================================
+H3  CLASS C CUTS THAT LEAVE THE NEXT SPEAKER'S NAME IN THE MEMBER'S KEPT TEXT
+    rowid=70149   member=Lateefah Simon         kept ends 'BRIAN NELSON'               -> tag 'GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTIC'
+    rowid=83941   member=Robert Wittman         kept ends 'KIM PHAM'                   -> tag 'GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through te'
+    rowid=192133  member=Ilhan Omar             kept ends 'SUZANNE MALVEAUX'           -> tag 'NATIONAL CORRESPONDENT, CNN(off-camera)'
+    rowid=193439  member=Alexandria Ocasio-Cortez kept ends 'SUNLEN SERFATY'             -> tag 'CONGRESSIONAL CORRESPONDENT, CNN (voice over)'
+    rows: 4
+
+====================================================================================================
+G1  SPEAKER GRADE OF EVERY PLANNED INSERT (n=64)
+    C    CORRECT-SPEAKER                          20
+    CD   CORRECT-SPEAKER(label debris in text)    26
+    PF   NOT-CORRECT:partial-foreign-words        10
+    NS   NOT-SPEECH                               3
+    WS   WRONG-SPEAKER                            5
+    speaker-correct (clean or debris-carrying)      : 46 / 64
+    exact 95% CI on the speaker-correct rate       : 0.5924 - 0.8240
+    NOT-CORRECT-SPEAKER (PF+NS+WS)                 : 18 / 64  (28.1%), 95% CI 0.1760 - 0.4076
+    STRICTLY clean (no label debris at all)        : 20 / 64, 95% CI 0.2024 - 0.4406
+    class E (colon-less)   n=46  speaker-correct=34  (73.9%) 95% CI 0.5887 - 0.8573  | PF=9 NS=3 WS=0
+    all other classes      n=18  speaker-correct=12  (66.7%) 95% CI 0.4099 - 0.8666  | PF=1 NS=0 WS=5
+
+====================================================================================================
+G2  KEPT TEXT (n=60, stratified 20 E / 20 D / 20 other)
+    {'CLEAN': 52, 'KF': 8}
+    CLEAN 52/60 = 86.7%, exact 95% CI 0.7541 - 0.9406
+    KEPT-FOREIGN-WORDS 8/60, exact 95% CI 0.0594 - 0.2459
+    CUT-MEMBER-WORDS 0/60  (none found)
+      stratum E  CLEAN 18/20, exact 95% CI 0.6830 - 0.9877
+      stratum D  CLEAN 15/20, exact 95% CI 0.5090 - 0.9134
+      stratum O  CLEAN 19/20, exact 95% CI 0.7513 - 0.9987
+
+====================================================================================================
+G3  REMOVED TEXT (same 60 rows)
+    {'NONE': 59, 'SOME': 1}
+    SOME-MEMBER-WORDS-REMOVED 1/60 = 1.7%, exact 95% CI 0.0004 - 0.0894
+    NONE 59/60, exact 95% CI 0.9106 - 0.9996
+
+    second, independent read of the deletion risk: a seeded 30-row sample of the 174 deleted
+    segments that name the member AND carry a sentence-initial first person (receipt
+    G3G5_deletion_risk.txt) graded 1 SOME (rowid 244163, Warner's own written statement
+    quoted by the correspondent), 1 UNCLEAR (rowid 215035), 28 NONE.
+    -> within that enriched risk stratum: 1/30, exact 95% CI 0.0008 - 0.1722
+
+====================================================================================================
+G5  SCALING TO THE WHOLE MIGRATION
+    kept text not clean (G2)     8/60 -> 781 rows of 5859  (95% CI 348 - 1441 rows)
+    member words removed (G3)    1/60 -> 98 rows of 5859  (95% CI 2 - 524 rows)
+    NOTE the G2/G3 sample is NOT a simple random sample of the 5,859: class D (40 rows) and
+    class E (289 rows) are over-sampled 30x and 2x. The stratum-weighted estimate of
+    "kept text not clean" is:
+      stratum E  N=289   bad rate 2/20 -> 29 rows
+      stratum D  N=40    bad rate 5/20 -> 10 rows
+      stratum O  N=5530  bad rate 1/20 -> 277 rows
+      weighted total: 315 of 5,859 rows (5.4%)
+    INSERTS: 18 of 64 are not CORRECT-SPEAKER -> the migration would create 18 new rows
+      that carry words the attributed member did not say (3 pure chyron, 5 a different
+      Mike Johnson, 10 a member turn with another speaker's words glued on).

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H53333CC230B64B0C9564094424A69D6D" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 9337 IH: Ensuring America’s Critical Infrastructure Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-11-17</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 9337</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20221117">November 17, 2022</action-date><action-desc><sponsor name-id="J000304">Mr. Jackson</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HHM00">Committee on Homeland Security</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the USA PATRIOT Act to designate critical infrastructures, and for other purposes.</official-title></form><legis-body id="HCAD2E78C46BD43BC864311E93A47EDD0" style="OLC"> 
+<section id="H8C182ACCC0C74D608EEFEEACE4C2C405" section-type="section-one" commented="no"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Ensuring America’s Critical Infrastructure Act</short-title></quote>.</text></section> <section id="HFB6BC96D9D51490298CB6FD12C7D19BF"><enum>2.</enum><header>Critical infrastructure defined</header> <text display-inline="no-display-inline">Section 1016(e) of the USA PATRIOT Act (<external-xref legal-doc="usc" parsable-cite="usc/42/5195c">42 U.S.C. 5195c(e)</external-xref>) is amended to read as follows:</text> 
+<quoted-block style="OLC" id="H25AF6E14A8A347729511894B2D44E2F2" display-inline="no-display-inline"> 
+<subsection id="H70BA7A1DDD1E412C87E2851718C2A470"><enum>(e)</enum><header>Critical infrastructure defined</header><text display-inline="yes-display-inline">In this section, the term <term>critical infrastructure</term>—</text> <paragraph id="H47F2F8C31DFF4C0FB70F96D314047EE7"><enum>(1)</enum><text display-inline="yes-display-inline">means systems and assets, whether physical or virtual, so vital to the United States that the incapacity or destruction of such systems and assets would have a debilitating impact on security, national economic security, national public health or safety, or any combination of those matters; and</text></paragraph> 
+<paragraph id="HE9F1898B07FD4C53BFFA0A81880B53A1"><enum>(2)</enum><text>includes the following sectors:</text> <subparagraph id="H032991CF205142C8A1245A172D395AA7"><enum>(A)</enum><text display-inline="yes-display-inline">Chemical.</text></subparagraph> 
+<subparagraph id="H153D0CC9AFE449808B9A9004EF740030"><enum>(B)</enum><text>Commercial facilities.</text></subparagraph> <subparagraph id="H501343E2839A484BA10CE86934443BDD"><enum>(C)</enum><text>Communications.</text></subparagraph> 
+<subparagraph id="H8DB828318B10443B8A3F32E8CE43C29D"><enum>(D)</enum><text>Critical manufacturing.</text></subparagraph> <subparagraph id="H96CA4BA65DA34D23A49A47C82BC8244D"><enum>(E)</enum><text>Dams.</text></subparagraph> 
+<subparagraph id="H1EE4DA8F209F42B68EB46241BE87BB95"><enum>(F)</enum><text>Defense industrial base.</text></subparagraph> <subparagraph id="HAFE15C1ED9644388B618F25E123D87C1"><enum>(G)</enum><text>Emergency services.</text></subparagraph> 
+<subparagraph id="HC5032590673641D598BC2180692FCA7E"><enum>(H)</enum><text>Energy.</text></subparagraph> <subparagraph id="H5F83A6F4177A496C9EC2E4E67E8574D6"><enum>(I)</enum><text>Financial services.</text></subparagraph> 
+<subparagraph id="HA3A42F5270AD4933A972027200FC162D"><enum>(J)</enum><text>Food and agriculture.</text></subparagraph> <subparagraph id="H7169FBBD481E4C468F15F8FB10CF7A35"><enum>(K)</enum><text>Government facilities.</text></subparagraph> 
+<subparagraph id="H4AAC28640430433C90ECBFD6E4417D17"><enum>(L)</enum><text>Healthcare and public health.</text></subparagraph> <subparagraph id="HE806780400654849AFE4FF6BA442B147"><enum>(M)</enum><text>Information technology.</text></subparagraph> 
+<subparagraph id="H9A99ABFB01374A9CB315FF21867566B8"><enum>(N)</enum><text>Nuclear reactors, materials, and waste.</text></subparagraph> <subparagraph id="H3E1408278CB74EFFB7D19C14EA6725D1"><enum>(O)</enum><text>Transportation systems.</text></subparagraph> 
+<subparagraph id="H983251AAC3134A51B1AEF444D0EEECEB"><enum>(P)</enum><text>Water and wastewater systems.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> </legis-body></bill>
+

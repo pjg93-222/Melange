@@ -1,0 +1,20 @@
+[
+ {
+  "cut_class": "E_colonless_honorific",
+  "cut_tag": "SEN. JOHN THUNE (R-SD)",
+  "member": "John Cornyn",
+  "rowid": 71801,
+  "tests": [
+   "member_firstname_in_tag"
+  ]
+ },
+ {
+  "cut_class": "E_colonless_honorific",
+  "cut_tag": "REP. ADAM SMITH",
+  "member": "Adam Schiff",
+  "rowid": 188603,
+  "tests": [
+   "member_firstname_in_tag"
+  ]
+ }
+]

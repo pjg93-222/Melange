@@ -1,0 +1,15 @@
+﻿P2-A  population 249   sample 40
+  field            population                         sample (expected at 40/249=16.06%)
+  source           {'CREC': 19, 'INTERVIEW': 207, 'CHRG': 23} {'CHRG': 5, 'INTERVIEW': 33, 'CREC': 2}   exp {'CREC': 3.1, 'INTERVIEW': 33.3, 'CHRG': 3.7}
+  marker kind      {'NOCOLON': 129, 'COLON': 120}     {'NOCOLON': 25, 'COLON': 15}   exp {'NOCOLON': 20.7, 'COLON': 19.3}
+  names_target     {'True': 120, 'False': 129}        {'False': 16, 'True': 24}   exp {'True': 19.3, 'False': 20.7}
+  inside_tag       {'True': 114, 'False': 135}        {'False': 16, 'True': 24}   exp {'True': 18.3, 'False': 21.7}
+  scored           {'False': 103, 'True': 146}        {'True': 23, 'False': 17}   exp {'False': 16.5, 'True': 23.5}
+
+P3b  sample 40 vs the 749 population (source/form marginals from lane B's own census)
+  population by source {CREC: 567, PRESS_OFFICIAL_MENTION: 182}  -> expected 30.3 / 9.7 at 40/749
+  sample     by source {'CREC': 29, 'PRESS_OFFICIAL_MENTION': 11}
+  population by form   {BARE: 555, TITLE: 12, TYPED: 182}        -> expected 29.6 / 0.6 / 9.7
+  sample     by form   {'BARE': 29, 'TYPED': 11}
+  sample     scored    {'True': 23, 'False': 17}
+DONE G7

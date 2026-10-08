@@ -74,8 +74,8 @@ spending_recipient_classification_reference <- function(
         )
     ]
     if (is_registered_conduit) {
-      category <- "Carey"
-      category_source <- "fec:hybrid_committee_type:registered_conduit"
+      category <- "Super PAC"
+      category_source <- "user_rule:registered_conduit_super_pac"
     } else if (nrow(category_match)) {
       category <- category_match$category[[1L]]
       category_source <- if (

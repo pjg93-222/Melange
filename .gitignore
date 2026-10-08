@@ -85,3 +85,12 @@ node_modules/
 *.bin
 !fec/config/primacy_press_v1.ndjson
 !fec/config/primacy_press_v1.json
+
+# Pinned Cook PVI source snapshot and its hash-bound provenance.
+!source_data/cook_pvi/2026/cook_pvi_2026_districts.csv
+!source_data/cook_pvi/2026/cook_pvi_2026_districts.json
+!source_data/cook_pvi/2026/source_manifest.json
+!source_data/cook_pvi/2026/raw/dataset.csv
+!source_data/cook_pvi/2026/raw/datawrapper_fejB0_v1.html
+outputs/cook_pvi_integration_20261005/*.js
+outputs/cook_pvi_refresh_*/*.js

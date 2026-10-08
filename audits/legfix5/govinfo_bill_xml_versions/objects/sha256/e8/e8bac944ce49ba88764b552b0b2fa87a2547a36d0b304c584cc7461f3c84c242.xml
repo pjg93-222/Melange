@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H641C24F56C4C423EB8F77B038DBB3CAC" key="H" public-private="public" resolution-stage="Engrossed-in-House" resolution-type="house-resolution" star-print="no-star-print" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 28 EH: Providing for consideration of the bill (H.R. 264) making appropriations for financial services and general government for the fiscal year ending September 30, 2019, and for other purposes; providing for consideration of the bill (H.R. 265) making appropriations for Agriculture, Rural Development, Food and Drug Administration, and Related Agencies programs for the fiscal year ending September 30, 2019, and for other purposes; providing for consideration of the bill (H.R. 266) making appropriations for the Department of the Interior, environment, and related agencies for the fiscal year ending September 30, 2019, and for other purposes; providing for consideration of the bill (H.R. 267) making appropriations for the Department of Transportation, and Housing and Urban Development, and related agencies for the fiscal year ending September 30, 2019, and for other purposes; and waiving a requirement of clause 6(a) of rule XIII with respect to consideration of certain resolutions reported from the Committee on Rules.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-09</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IV</distribution-code> 
+<congress display="no">116th CONGRESS</congress> 
+<session display="no">1st Session</session> 
+<legis-num>H. RES. 28</legis-num> 
+<current-chamber display="yes">In the House of Representatives, U. S.,</current-chamber> 
+<action> 
+<action-date date="20190109">January 9, 2019</action-date> 
+</action> 
+<legis-type display="yes">RESOLUTION</legis-type> 
+<official-title display="no">Providing for consideration of the bill (H.R. 264) making appropriations for financial services and general government for the fiscal year ending September 30, 2019, and for other purposes; providing for consideration of the bill (H.R. 265) making appropriations for Agriculture, Rural Development, Food and Drug Administration, and Related Agencies programs for the fiscal year ending September 30, 2019, and for other purposes; providing for consideration of the bill (H.R. 266) making appropriations for the Department of the Interior, environment, and related agencies for the fiscal year ending September 30, 2019, and for other purposes; providing for consideration of the bill (H.R. 267) making appropriations for the Department of Transportation, and Housing and Urban Development, and related agencies for the fiscal year ending September 30, 2019, and for other purposes; and waiving a requirement of clause 6(a) of rule XIII with respect to consideration of certain resolutions reported from the Committee on Rules.</official-title> 
+</form> 
+<resolution-body id="H65310369BE2D4B42B513FA86263A9A25" style="traditional"> 
+<section display-inline="yes-display-inline" id="H0ED092A02E4B444CA6F583DF6CEBE44F" section-type="undesignated-section"><enum></enum><text display-inline="yes-display-inline">That upon adoption of this resolution it shall be in order to consider in the House any bill specified in section 2 of this resolution. All points of order against consideration of each such bill are waived. Each such bill shall be considered as read. All points of order against provisions in each such bill are waived. The previous question shall be considered as ordered on each such bill and on any amendment thereto to final passage without intervening motion except: (1) one hour of debate equally divided and controlled by the chair and ranking minority member of the Committee on Appropriations or their respective designees; and (2) one motion to recommit.</text> </section> <section id="H02BA3EF0741A46AE805190C901030F28"><enum>2.</enum><text display-inline="yes-display-inline">The bills referred to in the first section of this resolution are as follows:</text> 
+<subsection id="H2A31713A146142089E35DF009C3D4BDA"><enum>(a)</enum><text display-inline="yes-display-inline">The bill (H.R. 264) making appropriations for financial services and general government for the fiscal year ending September 30, 2019, and for other purposes.</text> </subsection> <subsection id="H2774F08D66994273A6D8D06A0ECDEE46"><enum>(b)</enum><text>The bill (H.R. 265) making appropriations for Agriculture, Rural Development, Food and Drug Administration, and Related Agencies programs for the fiscal year ending September 30, 2019, and for other purposes.</text> </subsection> 
+<subsection id="H747159D889BD4B52868A78AECD255925"><enum>(c)</enum><text>The bill (H.R. 266) making appropriations for the Department of the Interior, environment, and related agencies for the fiscal year ending September 30, 2019, and for other purposes.</text> </subsection> <subsection id="H6A15FFCC63E4406E9C10200E62AB3D3E"><enum>(d)</enum><text>The bill (H.R. 267) making appropriations for the Department of Transportation, and Housing and Urban Development, and related agencies for the fiscal year ending September 30, 2019, and for other purposes.</text> </subsection></section> 
+<section id="H325DD156D0E644A9BB99484421E371D5"><enum>3.</enum><text display-inline="yes-display-inline">The requirement of clause 6(a) of rule XIII for a two-thirds vote to consider a report from the Committee on Rules on the same day it is presented to the House is waived with respect to any resolution reported through the legislative day of January 15, 2019, relating to a measure making or continuing appropriations for the fiscal year ending September 30, 2019.</text> </section> </resolution-body> <attestation><attestation-group><attestor display="no">Karen L. Haas,</attestor><role>Clerk.</role></attestation-group></attestation> </resolution> 
+

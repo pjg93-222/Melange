@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H34C7C7B2CE634A6F9B2D017A56217C7D">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8311 IH: Protecting American Consumers from Robocalls Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8311</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20260415">April 15, 2026</action-date>
+<action-desc><sponsor name-id="S001145">Ms. Schakowsky</sponsor> (for herself and <cosponsor name-id="M001225">Mr. Mullin</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To expand the scope of the Do Not Call rules under the Telephone Consumer Protection Act to include all telephone subscribers, to expand the private right of action for calls in violation of those rules, and to modify the definition of the term <quote>automatic telephone dialing system</quote>.</official-title>
+</form>
+<legis-body id="H509682237DBF43EEBFF35EB0BFF03B99">
+<section section-type="section-one" id="H03A9D3185CB04A9EB3F18574A5120486"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting American Consumers from Robocalls Act</short-title></quote>.</text></section> <section commented="no" display-inline="no-display-inline" id="H99723BB914F844DEB4150D6FDA923B66"><enum>2.</enum><header display-inline="yes-display-inline">Expanding scope of Do Not Call rules and private right of action</header> <subsection commented="no" display-inline="no-display-inline" id="HCDA53B6D27934DC0A4E21C1E259E98E5"><enum>(a)</enum><header display-inline="yes-display-inline">In general</header><text display-inline="yes-display-inline">Section 227(c) of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227(c)</external-xref>) is amended—</text>
+<paragraph id="H04842E5A58F44163BD4198F0DAC8B7ED"><enum>(1)</enum><text>in paragraph (1), in the matter preceding subparagraph (A), by striking <quote>residential</quote>;</text></paragraph> <paragraph id="HBA8826A127F34135A715709D3F8B9B13"><enum>(2)</enum><text display-inline="yes-display-inline">in paragraph (3)—</text>
+<subparagraph commented="no" display-inline="no-display-inline" id="H41A3EBD2CA1C42B687D08BA930925D12"><enum>(A)</enum><text display-inline="yes-display-inline">in the matter preceding subparagraph (A), by striking <quote>residential</quote>; and</text></subparagraph> <subparagraph commented="no" display-inline="no-display-inline" id="HF1C37662A2C742C895579D76F5AE705F"><enum>(B)</enum><text>in subparagraph (E), by striking <quote>residential</quote>; and</text></subparagraph></paragraph>
+<paragraph commented="no" display-inline="no-display-inline" id="H769F0C4F75744FC39A350172FA494ED6"><enum>(3)</enum><text display-inline="yes-display-inline">in paragraph (5)—</text> <subparagraph commented="no" display-inline="no-display-inline" id="H3E8BC56721F947DB8CF17D82137EE7B8"><enum>(A)</enum><text display-inline="yes-display-inline">in the matter preceding subparagraph (A), by striking <quote>more than one telephone call within any 12-month period by or on behalf of the same entity</quote> and inserting <quote>a telephone call by or on behalf of an entity</quote>; and</text></subparagraph>
+<subparagraph id="H97ED968B0CA64501883F6C6924672043"><enum>(B)</enum><text>in subparagraph (B), by striking <quote>up to</quote>.</text></subparagraph></paragraph></subsection> <subsection commented="no" display-inline="no-display-inline" id="HFB162417B33B4B7587E088BDC70B702E"><enum>(b)</enum><header>Revised regulations</header><text>Not later than 270 days after the date of enactment of this Act, the Federal Communications Commission shall revise the regulations prescribed under section 227(c) of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227(c)</external-xref>) as necessary to implement the amendments made by subsection (a) of this section.</text></subsection></section>
+<section commented="no" display-inline="no-display-inline" id="H901D5F4ADE884AF48E5986C274F63C63"><enum>3.</enum><header display-inline="yes-display-inline">Definition of automatic telephone dialing system</header><text display-inline="no-display-inline">Section 227(a)(1) of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227(a)(1)</external-xref>) is amended—</text> <paragraph id="H0DEE5D735F21472894146DE7EA361BE5"><enum>(1)</enum><text>in subparagraph (A), by inserting <quote>or a list of telephone numbers</quote> after <quote>using a random or sequential number generator</quote>; and</text></paragraph>
+<paragraph id="H3CA9A92DC72642C08E48C6A14F6E8822" commented="no" display-inline="no-display-inline"><enum>(2)</enum><text display-inline="yes-display-inline">in subparagraph (B), by inserting <quote>successively without human intervention</quote> after <quote>to dial such numbers</quote>.</text></paragraph></section> </legis-body> </bill>
+

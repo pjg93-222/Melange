@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H687286CEA2354317B53D293CEB8D1F97"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 2272 IH: To provide for a limitation on availability of funds for US Department of Agriculture, Rural Development Programs, Rural Development, Salaries and Expenses for fiscal year 2024.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-03-29</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2272</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230329">March 29, 2023</action-date><action-desc><sponsor name-id="B001302">Mr. Biggs</sponsor> (for himself, <cosponsor name-id="R000103">Mr. Rosendale</cosponsor>, <cosponsor name-id="G000578">Mr. Gaetz</cosponsor>, <cosponsor name-id="G000595">Mr. Good of Virginia</cosponsor>, <cosponsor name-id="R000614">Mr. Roy</cosponsor>, and <cosponsor name-id="C001132">Mr. Crane</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To provide for a limitation on availability of funds for US Department of Agriculture, Rural Development Programs, Rural Development, Salaries and Expenses for fiscal year 2024.</official-title></form><legis-body><section id="H32F891CC025143BF93B1DAF361977921" section-type="section-one"><enum>1.</enum><header>Limitation on availability of funds for US Department of Agriculture, Rural Development Programs, Rural Development, Salaries and Expenses for fiscal year 2024</header><text display-inline="no-display-inline">Notwithstanding any other provision of the law, amounts authorized to be appropriated or otherwise available for US Department of Agriculture, Rural Development Programs, Rural Development, Salaries and Expenses for fiscal year 2024 may not exceed $236,835,000.</text></section></legis-body></bill>
+
+

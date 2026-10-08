@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HB8703CB4A245436C9CFC643D4B89E7B8" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5315 IH: Expanding Opportunity for Minority Depository Institutions (MDIs) Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-12-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5315</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191205">December 5, 2019</action-date><action-desc><sponsor name-id="B001281">Mrs. Beatty</sponsor> (for herself, <cosponsor name-id="M001137">Mr. Meeks</cosponsor>, <cosponsor name-id="H001064">Mr. Heck</cosponsor>, <cosponsor name-id="G000553">Mr. Green of Texas</cosponsor>, and <cosponsor name-id="C001061">Mr. Cleaver</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 to establish a
+			 Financial Agent Mentor-Protégé Program within the Department of the
+			 Treasury, and for other purposes.</official-title></form>
+	<legis-body id="HAA0CF21096534C38BC8CF92B80379AA5" style="OLC">
+ <section id="H07920071C6574CA4BF16EA86745CD508" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Expanding Opportunity for Minority Depository Institutions (MDIs) Act</short-title></quote>.</text> </section><section id="H98A2598B0D7F46A5812CF10611DFEC20" section-type="subsequent-section"><enum>2.</enum><header>Establishment of Financial Agent Mentor-Protégé Program</header> <subsection id="H86BE86999CF74F0CADCAFF0EB462BB42"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 308 of the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 (<external-xref legal-doc="usc" parsable-cite="usc/12/1463">12 U.S.C. 1463</external-xref> note) is amended by adding at the end the following new subsection:</text>
+				<quoted-block display-inline="no-display-inline" id="H0635071C0CD64DDF8666442DA3A2D658" style="OLC">
+					<subsection id="HD70E94DF196C44208D4E1749D0BF5734"><enum>(d)</enum><header>Financial Agent Mentor-Protégé Program</header>
+ <paragraph id="HB84D466914B94C7C83790969CD399B36"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of the Treasury shall establish a program to be known as the <quote>Financial Agent Mentor-Protégé Program</quote> (in this subsection referred to as the <quote>Program</quote>) under which a financial agent shall serve as a mentor to a minority depository institution so that such minority depository institution may become a financial agent.</text>
+ </paragraph><paragraph id="H5C62F879C2CD4EC08D777EBF248F2DBC"><enum>(2)</enum><header>Outreach</header><text display-inline="yes-display-inline">The Secretary shall hold outreach events to promote the participation of financial agents and minority depository institutions in the Program at least once a year.</text>
+ </paragraph><paragraph id="H43EF3AC7C2114ED4980422DA087AE958"><enum>(3)</enum><header>Exclusion</header><text display-inline="yes-display-inline">The Secretary may exclude financial agents and minority depository institutions from participation in the Program.</text>
+ </paragraph><paragraph id="H2B507F64199A4396BBCC2897495F950E"><enum>(4)</enum><header>Report</header><text>The Office of Minority and Women Inclusion of the Department of the Treasury shall include in the report submitted to Congress under section 342(e) of the Dodd-Frank Wall Street Reform and Consumer Protection Act information pertaining to the Program, including—</text>
+ <subparagraph display-inline="no-display-inline" id="HDEE281861BBE49179DA1DF5C1F4019A0"><enum>(A)</enum><text>the number of financial agents participating in such Program; and</text> </subparagraph><subparagraph id="H7B872F9DB8F84BD7B263D6BD3A852A3A"><enum>(B)</enum><text>the number of outreach events described in paragraph (2) held during the year covered by such report.</text>
+ </subparagraph></paragraph><paragraph id="H572F7F7869894C668008FFBF4ED00603"><enum>(5)</enum><header>Financial agent defined</header><text>In this subsection, the term <quote>financial agent</quote> means any national banking association selected by the Secretary of the Treasury to be employed as a financial agent of the Government in accordance with section 5153 of the Revised Statutes of the United States.</text>
+						</paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H1D9CC2C055A947A196B91566026D7F2D"><enum>(b)</enum><header>Community Reinvestment Act credit</header><text display-inline="yes-display-inline">Section 804 of the Community Reinvestment Act of 1977 (<external-xref legal-doc="usc" parsable-cite="usc/12/2903">12 U.S.C. 2903</external-xref>) is amended by adding at the end the following new subsection:</text>
+				<quoted-block display-inline="no-display-inline" id="H88FD2E25AE584CA1920365518597A80B" style="OLC">
+ <subsection id="H0BB5CB69FDF54F8EAD94DD2150C5954F"><enum>(e)</enum><header>Financial Agent Mentor-Protégé Program participation</header><text display-inline="yes-display-inline">In assessing and taking into account, under subsection (a), the record of a financial institution, the appropriate Federal financial supervisory agency shall consider as a factor the financial institution’s participation as a mentor financial agent in the Financial Agent Mentor-Protégé Program of the Department of the Treasury (established under section 308(d) of the Financial Institutions Reform, Recovery, and Enforcement Act of 1989).</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="HB19396172E2640C08AF3A054CE74022C"><enum>(c)</enum><header>Effective date</header><text>This Act and the amendments made by this Act shall take effect 90 days after the date of the enactment of this Act.</text>
+			</subsection></section></legis-body></bill>
+
+

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Engrossed-in-House" resolution-type="house-resolution" star-print="no-star-print" dms-id="H11163c62-e350-4162-8969-f5fde25d3399" public-private="public" key="H" stage-count="1">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HRES 847 EH: Providing for consideration of the bill (H.R. 4664) making appropriations for financial services and general government for the fiscal year ending September 30, 2024, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-11-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IV</distribution-code>
+<congress display="no">118th CONGRESS</congress>
+<session display="no">1st Session</session>
+<legis-num display="yes">H. RES. 847</legis-num>
+<current-chamber display="yes">In the House of Representatives, U. S.,</current-chamber>
+<action>
+<action-date date="20231107">November 7, 2023</action-date>
+</action>
+<legis-type display="yes">RESOLUTION</legis-type>
+<official-title display="no">Providing for consideration of the bill (H.R. 4664) making appropriations for financial services and general government for the fiscal year ending September 30, 2024, and for other purposes.</official-title>
+</form>
+<resolution-body style="traditional" id="Haf37bdb1-ba33-4c65-a982-5ad0982f03f8">
+<section display-inline="yes-display-inline" section-type="undesignated-section" id="H7c9e9cab-fd31-408e-9b16-7cef388934aa"><enum/><text display-inline="yes-display-inline">That at any time after adoption of this resolution the Speaker may, pursuant to clause 2(b) of rule XVIII, declare the House resolved into the Committee of the Whole House on the state of the Union for consideration of the bill (H.R. 4664) making appropriations for financial services and general government for the fiscal year ending September 30, 2024, and for other purposes. The first reading of the bill shall be dispensed with. All points of order against consideration of the bill are waived. General debate shall be confined to the bill and shall not exceed one hour equally divided and controlled by the chair and ranking minority member of the Committee on Appropriations or their respective designees. After general debate the bill shall be considered for amendment under the five-minute rule. The amendment printed in part A of the report of the Committee on Rules accompanying this resolution shall be considered as adopted in the House and in the Committee of the Whole. The bill, as amended, shall be considered as read. All points of order against provisions in the bill, as amended, are waived.</text></section> <section id="H39F3B676DC284142B63DC5256E3B26A6"><enum>2.</enum> <subsection commented="no" display-inline="yes-display-inline" id="H24FB86F3DF8D42FAA549E90B7D1EC413"><enum>(a)</enum><text display-inline="yes-display-inline">No further amendment to H.R. 4664, as amended, shall be in order except those printed in part B of the report of the Committee on Rules accompanying this resolution, amendments en bloc described in section 3 of this resolution, and pro forma amendments described in section 4 of this resolution.</text></subsection>
+<subsection id="HBADB6A95AEBF46B294D624744D071777"><enum>(b)</enum><text display-inline="yes-display-inline">Each further amendment printed in part B of the report of the Committee on Rules shall be considered only in the order printed in the report, may be offered only by a Member designated in the report, shall be considered as read, shall be debatable for the time specified in the report equally divided and controlled by the proponent and an opponent, shall not be subject to amendment except as provided by section 4 of this resolution, and shall not be subject to a demand for division of the question in the House or in the Committee of the Whole.</text></subsection> <subsection id="HD3335518391F42E0A3CD1C2ABFE02228"><enum>(c)</enum><text display-inline="yes-display-inline">All points of order against further amendments printed in part B of the report of the Committee on Rules or against amendments en bloc described in section 3 of this resolution are waived.</text></subsection></section>
+<section id="HC24E0CE38726422FA83BD18EB6702ECD"><enum>3.</enum><text display-inline="yes-display-inline">It shall be in order at any time for the chair of the Committee on Appropriations or her designee to offer amendments en bloc consisting of further amendments printed in part B of the report of the Committee on Rules accompanying this resolution not earlier disposed of. Amendments en bloc offered pursuant to this section shall be considered as read, shall be debatable for 20 minutes equally divided and controlled by the chair and ranking minority member of the Committee on Appropriations or their respective designees, shall not be subject to amendment except as provided by section 4 of this resolution, and shall not be subject to a demand for division of the question in the House or in the Committee of the Whole.</text></section> <section id="HF0E8C7DA9E724C27980BB644426BC9C2"><enum>4.</enum><text display-inline="yes-display-inline">During consideration of H.R. 4664 for amendment, the chair and ranking minority member of the Committee on Appropriations or their respective designees may offer up to 10 pro forma amendments each at any point for the purpose of debate.</text></section>
+<section id="H7A1C251F19914CB69A883246706DA714"><enum>5.</enum><text display-inline="yes-display-inline">At the conclusion of consideration of H.R. 4664 for amendment the Committee shall rise and report the bill, as amended, to the House with such further amendments as may have been adopted. The previous question shall be considered as ordered on the bill, as amended, and on any further amendment thereto to final passage without intervening motion except one motion to recommit.</text></section> </resolution-body> <attestation><attestation-group><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation> </resolution> 
+

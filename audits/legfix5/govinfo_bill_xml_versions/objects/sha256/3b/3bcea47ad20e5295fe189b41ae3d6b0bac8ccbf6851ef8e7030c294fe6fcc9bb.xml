@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-TAM23032-L6T-H7-VF0">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 S164 IS: Guarding against Injustice based on Vaccine-status, Ensuring Lifesaving Intervention For Everyone Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2023-01-31</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>118th CONGRESS</congress><session>1st Session</session>
+<legis-num>S. 164</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20230131">January 31, 2023</action-date>
+<action-desc><sponsor name-id="S355">Mr. Cruz</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To prohibit the consideration of COVID–19 vaccination status in determining eligibility for organ donation or transplantation, and in providing services to Medicare or Medicaid beneficiaries.</official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" id="H25ABB465B2C041B69D3207628C7B29F5">
+<section section-type="section-one" id="S1"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Guarding against Injustice based on Vaccine-status, Ensuring Lifesaving Intervention For Everyone Act</short-title></quote>, the <quote><short-title>GIVE LIFE Act</short-title></quote>, or <quote><short-title>Doss's Act</short-title></quote>.</text></section> <section id="idAD849B36B6B94F6D98E48A5924FA33A3"><enum>2.</enum><header>Prohibitions</header> <subsection id="idBB2BFFB8AB17441CBEB1F9FFA926D8E3"><enum>(a)</enum><header>In general</header><text>Notwithstanding any other provision of law—</text>
+<paragraph id="idFA773C8633784B63B29278E38A666675"><enum>(1)</enum><text>no individual may be determined to be ineligible for organ donation or receipt of an organ transplant on the basis of the COVID–19 vaccination status of the individual; </text></paragraph> <paragraph id="idD51180288B8D45CBBD17AE753D0A59B8"><enum>(2)</enum><text>no individual may be given a higher or lower priority for such a donation or receipt on such basis; </text></paragraph>
+<paragraph id="id468060CD0E134A3C8D6BC626F391E81E"><enum>(3)</enum><text>the incidence of COVID–19 positive rates in a geographic area or region, as determined by public health officials, may not be a factor in determining eligibility to donate organs or to receive organs; and</text></paragraph> <paragraph id="idBA3942ED98D149FDA2C3CC164E6FF647"><enum>(4)</enum><text>any provider who denies services to any individual based on the COVID–19 vaccination status of the individual (other than services furnished by a skilled nursing facility (as defined in section 1819(a) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395i-3">42 U.S.C. 1395i–3(a)</external-xref>)), a nursing facility (as defined in section 1919(a) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1396r">42 U.S.C. 1396r(a)</external-xref>)), a hospice program (as defined in section 1861(dd)(2) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395x">42 U.S.C. 1395x(dd)(2)</external-xref>)), or a long-term care facility) shall not be eligible for reimbursement under the Medicare program under title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395">42 U.S.C. 1395 et seq.</external-xref>), and Federal financial participation shall not be available for any payment made by a State to such a provider for services furnished as medical assistance under the State’s Medicaid program under title XIX of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1396">42 U.S.C. 1396 et seq.</external-xref>).</text></paragraph></subsection>
+<subsection id="id707E86716745480E9A2A13142A4BDD7B"><enum>(b)</enum><header>Application of requirements</header><text>Paragraphs (1) through (3) of subsection (a) shall apply with respect to all organ donations and receipt of organ transplants in the United States, including under the laws administered by the Secretary of Veterans Affairs and the laws administered by the Secretary of Defense.</text></subsection> <subsection id="idEBBB1381A0C245C1B144E3756F8D8343"><enum>(c)</enum><header>Organ procurement and transplantation network</header><text>Section 372(b) of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/274">42 U.S.C. 274(b)</external-xref>) is amended by adding at the end the following:</text>
+<quoted-block style="OLC" display-inline="no-display-inline" id="id3BE1ACCF800F497396FD280B6C140418">
+<paragraph id="id2511F805738249338EB9E57C5F4FE665"><enum>(4)</enum><header>Clarification regarding COVID–19 vaccination status</header><text>The criteria and standards established under paragraph (2) may not include any consideration of the COVID–19 vaccination status of organ donors or recipients, or of the incidence of COVID–19 positive rates in a geographic area or region, as determined by public health officials.</text></paragraph><after-quoted-block>. </after-quoted-block></quoted-block></subsection></section> </legis-body> </bill> 
+

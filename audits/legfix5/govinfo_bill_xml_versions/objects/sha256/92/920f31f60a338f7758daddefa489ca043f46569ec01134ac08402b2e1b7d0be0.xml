@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1959 IS: Ensuring Representation for Survivors Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-06-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 1959</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190625">June 25, 2019</action-date>
+			<action-desc><sponsor name-id="S383">Mr. Sullivan</sponsor> (for himself and <cosponsor name-id="S387">Ms. Harris</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSJU00">Committee on the Judiciary</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To expand and improve the Legal Assistance for Victims Grant Program to ensure legal assistance is
+			 provided
+			 for survivors in proceedings related to domestic violence and sexual
+			 assault, and for other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Ensuring Representation for Survivors Act</short-title></quote>.</text>
+		</section><section id="id9ccbdf73a954484b9073ba9620831721"><enum>2.</enum><header>Ensuring access to legal assistance in proceedings related to domestic violence and
+ sexual assault</header><text display-inline="no-display-inline">Section 1201 of the Violence Against Women Act of 2000 (<external-xref legal-doc="usc" parsable-cite="usc/34/20121">34 U.S.C. 20121</external-xref>) is amended—</text> <paragraph id="id675EE28B9C9847058DCE8693D47D2F42"><enum>(1)</enum><text display-inline="yes-display-inline">by redesignating subsection (f) as subsection (g);</text>
+ </paragraph><paragraph id="id0FAA5533F3544F52A04A035F2C61A0C6"><enum>(2)</enum><text>by inserting after subsection (e) the following:</text> <quoted-block display-inline="no-display-inline" id="id1B62A3EDCB73446B9287114662FB2A04" style="OLC"> <subsection id="id5A956A1CE3564A7390340B414FD10E47"><enum>(f)</enum><header>Grants to States To ensure access to legal assistance</header> <paragraph id="id5E78EDA2DEED470087E463B57041483B"><enum>(1)</enum><header>In general</header><text>In each fiscal year, the Attorney General shall award to each State submitting an application under paragraph (3) a grant in an amount equal to .5 percent of the total amount appropriated under subsection (g) for the fiscal year, to be used to provide legal assistance to survivors of domestic violence, dating violence, stalking, and sexual assault, with the goal of all survivors of domestic violence, dating violence, stalking, and sexual assault receiving legal assistance.</text>
+						</paragraph><paragraph id="id7ED872A735FE4A5E9B6C9F31890D929B"><enum>(2)</enum><header>Use of funds</header>
+ <subparagraph id="id07B0C81D923E486681EB2CC893FD9D48"><enum>(A)</enum><header>In general</header><text>Any funds received by a State under this subsection shall be distributed by the State to public or private entities within the State to implement, expand, and establish efforts and projects to provide legal assistance, including pro bono representation and legal advocacy, to help survivors of domestic violence, dating violence, stalking, or sexual assault—</text>
+ <clause id="idD759CB47E5224DF78FFA497DAFAA87FC"><enum>(i)</enum><text>assert their rights as victims in a criminal proceeding, other than prosecution, directly related to the victimization, or otherwise protect their safety, privacy, or other interests as victims in such proceedings;</text>
+ </clause><clause id="idC8A41DE3C6E344EB8C49DC5F1F2F7472"><enum>(ii)</enum><text>initiate or respond to motions to vacate or expunge a conviction, or similar actions, where the jurisdiction permits such a legal action based on a person’s being a crime victim; and</text>
+ </clause><clause id="idB36EFAD9DA3740198829B282E81FDB54"><enum>(iii)</enum><text>other legal actions, other than tort actions, which, in the civil context, are reasonably necessary as a direct result of the victimization, such as—</text>
+ <subclause id="id7F413016510B47D2A36ADCFC9CA62EBD"><enum>(I)</enum><text>civil legal assistance with divorce, child custody, child welfare, and support proceedings with corresponding enforcement;</text>
+ </subclause><subclause id="idEBDC35B077E549C58E749B8BD0184ABA"><enum>(II)</enum><text>assistance with and representation at proceedings for protective orders, restraining orders, or other stay-away orders;</text>
+ </subclause><subclause id="idD166461A9EF24007870CD3F07FC26942"><enum>(III)</enum><text>assistance with contract, housing, employment, education, healthcare, benefits, and privacy matters; and</text>
+ </subclause><subclause id="id51BEC31811D24C29A6C74D45E8193642"><enum>(IV)</enum><text>intervention with creditors, law enforcement officers, and other entities on behalf of survivors of identity theft and financial fraud.</text>
+ </subclause></clause></subparagraph><subparagraph id="id447F98E78F61465BB602E05859F5F93B"><enum>(B)</enum><header>Eligibility</header><text>A public or private entity seeking distribution of grant funds received by a State under this subsection shall meet the eligibility requirements described in subsection (d).</text>
+ </subparagraph></paragraph><paragraph id="idEC464D7E492247B9943696573DCA3D6C"><enum>(3)</enum><header>Application</header><text>Each State seeking a grant under this subsection shall submit an application to the Attorney General at such time and in such manner as the Attorney General may reasonably require.</text></paragraph></subsection><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="id5F9C0BAB5C8D4DE9AF80805E3FF3456F"><enum>(3)</enum><text>in subsection (g), as so redesignated, by striking <quote>$57,000,000 for each of fiscal years 2014 through 2018</quote> and inserting <quote>$80,000,000 for each of fiscal years 2020 through 2024</quote>.</text></paragraph></section></legis-body> </bill> 
+

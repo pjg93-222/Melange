@@ -1,0 +1,293 @@
+== members whose legislative_pillar.agenda (RAW leg input) changed ==
+  count: 20
+   Tony Wied                  agenda   3.0000 ->   1.0000 (-2.0000)   rank 366 -> 434
+   John Rose                  agenda  42.4640 ->  42.7640 (+0.3000)   rank 17 -> 17
+   Warren Davidson            agenda  43.0465 ->  43.3465 (+0.3000)   rank 47 -> 47
+   Zachary Nunn               agenda  32.9800 ->  33.2800 (+0.3000)   rank 11 -> 11
+   Gregory Murphy             agenda   4.6400 ->   4.9400 (+0.3000)   rank 352 -> 341
+   John Carter                agenda   3.5600 ->   3.8600 (+0.3000)   rank 445 -> 427
+   Julie Fedorchak            agenda   2.7500 ->   3.0500 (+0.3000)   rank 461 -> 454
+   Michael Rulli              agenda   2.3500 ->   2.6500 (+0.3000)   rank 376 -> 368
+   Morgan Griffith            agenda   7.9420 ->   8.2420 (+0.3000)   rank 341 -> 326
+   Ryan Zinke                 agenda   6.1000 ->   6.4000 (+0.3000)   rank 383 -> 379
+   Todd Young                 agenda   4.8400 ->   5.1400 (+0.3000)   rank 251 -> 245
+   Brad Knott                 agenda   1.8000 ->   2.1000 (+0.3000)   rank 476 -> 471
+   Thomas Tiffany             agenda   1.2800 ->   1.5800 (+0.3000)   rank 512 -> 498
+   Andy Biggs                 agenda  12.3000 ->  12.6000 (+0.3000)   rank 125 -> 123
+   Lisa McClain               agenda   9.7960 ->  10.0960 (+0.3000)   rank 160 -> 161
+   Tim Moore                  agenda  30.3000 ->  30.6000 (+0.3000)   rank 40 -> 41
+   Adelita Grijalva           agenda   0.6000 ->   1.3500 (+0.7500)   rank 525 -> 514
+   Deb Fischer                agenda  10.5760 ->  11.3260 (+0.7500)   rank 118 -> 117
+   Jahana Hayes               agenda  11.4880 ->  12.7880 (+1.3000)   rank 129 -> 111
+   Marilyn Strickland         agenda   7.6480 ->   8.9480 (+1.3000)   rank 202 -> 180
+
+== members whose legislative_pillar.efficiency changed ==
+   James Himes                efficiency 0.21511839708561023 -> 0.23333333333333336 (+0.0182149)  rank 144 -> 142
+
+== members whose efficiency_percentile changed ==
+   Luis Correa                eff_pct 0.81766 -> 0.81578 (-0.00188)
+   Barry Loudermilk           eff_pct 0.80451 -> 0.80263 (-0.00188)
+   Bill Hagerty               eff_pct 0.80263 -> 0.80075 (-0.00188)
+   Cleo Fields                eff_pct 0.80451 -> 0.80263 (-0.00188)
+   John Moolenaar             eff_pct 0.81578 -> 0.8139 (-0.00188)
+   Mike Flood                 eff_pct 0.80451 -> 0.80263 (-0.00188)
+   Roger Williams             eff_pct 0.81203 -> 0.81015 (-0.00188)
+   Vicente Gonzalez           eff_pct 0.81015 -> 0.80827 (-0.00188)
+   Donald Beyer               eff_pct 0.8139 -> 0.81203 (-0.00187)
+   James Himes                eff_pct 0.80075 -> 0.81578 (+0.01503)
+
+== automatic_bill_effects diff (legislative_pillar.automatic_bill_effects) ==
+  added  : []
+  removed: []
+
+== unknown_advancement diff (legislative_pillar.unknown_advancement) ==
+  count 292 -> 297
+  ADDED (5):
+    + {"bill": "H.R.1653", "congress": 119, "member": "Andy Barr"}
+    + {"bill": "H.R.1653", "congress": 119, "member": "Jared Moskowitz"}
+    + {"bill": "H.R.1653", "congress": 119, "member": "Vicente Gonzalez"}
+    + {"bill": "H.R.4936", "congress": 119, "member": "James Himes"}
+    + {"bill": "H.R.4936", "congress": 119, "member": "Zachary Nunn"}
+  REMOVED (0):
+
+== advancement_rates per-member changes (legislative_pillar.advancement_rates[cat][member]) ==
+   Fraud Prevention           James Himes                0.26229508196721313 -> 0.4444444444444445
+
+== official_membership_movements.json diff (BEFORE backup vs LIVE data/legislation/) ==
+  schema               'official-membership-movements-v1' -> 'official-membership-movements-v1'
+  status               'PASS' -> 'PASS'
+  checked_at           '2026-09-14T04:38:34Z' -> '2026-09-19T19:46:30Z'
+  repository_sha256    'd4f63b660d69d09dfc34a67362cbb3848ef95bf6d196065f06698223db3f7020' -> 'fdb12754f131b9f719aacbf2b0f368811cbccf0eb7be1c3422e18fd26d989248'
+  len(facts       )   5683 ->   5704 (+21)
+  len(additions   )    207 ->     45 (-162)
+  len(unresolved  )    960 ->    960 (+0)
+  fact keys ADDED   : 21
+  fact keys REMOVED : 0
+  facts with ROLE changed     : 0
+  facts with WITHDRAWN changed: 0
+  withdrawn=True facts before/after: 2 / 2
+  members with FEWER movement facts: 0
+  members with MORE movement facts: 21
+    INC Zachary Nunn               29 -> 30 (+1)
+    INC Warren Davidson            31 -> 32 (+1)
+    INC Tony Wied                  4 -> 5 (+1)
+    INC Todd Young                 3 -> 4 (+1)
+    INC Tim Moore                  18 -> 19 (+1)
+    INC Thomas Tiffany             10 -> 11 (+1)
+    INC Ryan Zinke                 7 -> 8 (+1)
+    INC Morgan Griffith            9 -> 10 (+1)
+    INC Michael Rulli              4 -> 5 (+1)
+    INC Marilyn Strickland         11 -> 12 (+1)
+    INC Lisa McClain               12 -> 13 (+1)
+    INC Julie Fedorchak            4 -> 5 (+1)
+    INC John Rose                  31 -> 32 (+1)
+    INC John Carter                4 -> 5 (+1)
+    INC Jahana Hayes               19 -> 20 (+1)
+    INC Gregory Murphy             5 -> 6 (+1)
+    INC George Whitesides          4 -> 5 (+1)
+    INC Deb Fischer                12 -> 13 (+1)
+    INC Brad Knott                 2 -> 3 (+1)
+    INC Andy Biggs                 10 -> 11 (+1)
+    INC Adelita Grijalva           2 -> 3 (+1)
+
+  movement facts touching agenda-changed members:
+    ADDED  Marilyn Strickland         key=('119:hr:4167', 'S001159') role=cosponsor withdrawn=False
+    ADDED  Adelita Grijalva           key=('119:hr:4936', 'G000606') role=cosponsor withdrawn=False
+    ADDED  Jahana Hayes               key=('119:hr:5689', 'H001081') role=cosponsor withdrawn=False
+    ADDED  Tony Wied                  key=('119:hr:7035', 'W000829') role=cosponsor withdrawn=False
+    ADDED  Andy Biggs                 key=('119:hr:987', 'B001302') role=cosponsor withdrawn=False
+    ADDED  John Carter                key=('119:hr:987', 'C001051') role=cosponsor withdrawn=False
+    ADDED  Warren Davidson            key=('119:hr:987', 'D000626') role=cosponsor withdrawn=False
+    ADDED  Julie Fedorchak            key=('119:hr:987', 'F000482') role=cosponsor withdrawn=False
+    ADDED  Morgan Griffith            key=('119:hr:987', 'G000568') role=cosponsor withdrawn=False
+    ADDED  Brad Knott                 key=('119:hr:987', 'K000405') role=cosponsor withdrawn=False
+    ADDED  Lisa McClain               key=('119:hr:987', 'M001136') role=cosponsor withdrawn=False
+    ADDED  Gregory Murphy             key=('119:hr:987', 'M001210') role=cosponsor withdrawn=False
+    ADDED  Tim Moore                  key=('119:hr:987', 'M001236') role=cosponsor withdrawn=False
+    ADDED  Zachary Nunn               key=('119:hr:987', 'N000193') role=cosponsor withdrawn=False
+    ADDED  John Rose                  key=('119:hr:987', 'R000612') role=cosponsor withdrawn=False
+    ADDED  Michael Rulli              key=('119:hr:987', 'R000619') role=cosponsor withdrawn=False
+    ADDED  Thomas Tiffany             key=('119:hr:987', 'T000165') role=cosponsor withdrawn=False
+    ADDED  Ryan Zinke                 key=('119:hr:987', 'Z000018') role=cosponsor withdrawn=False
+    ADDED  Deb Fischer                key=('119:s:2019', 'F000463') role=cosponsor withdrawn=False
+    ADDED  Todd Young                 key=('119:s:401', 'Y000064') role=cosponsor withdrawn=False
+  unresolved rows before/after: 960 / 960
+
+== legislation_routing_audit.json (LIVE, AFTER only -- no before copy exists) ==
+  schema 'legislation-routing-audit-v1' source 'congress_bills_archive_20260825_115305.xlsx + Sentinel Bill Ledger'
+  source_rows 10847 selected_events 8148 sentinel_ledger_rows 18910 sentinel_verified_rows 290
+  dispositions: {"duplicate-lower-role": 19, "duplicate-same-role": 135, "excluded-override": 53, "excluded-title": 578, "neutral-official-evidence": 1, "neutral-override": 12, "neutral-registry": 33, "official-membership-withdrawn-or-role-superseded": 1854, "selected": 8148, "unmatched-member": 14}
+  total rows: 10847
+
+  -- Tony Wied : 6 routing rows | agenda 3.0 -> 1.0
+     dispositions: {'selected': 6}
+     selected                                   H.R.1181       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Data Privacy & Cyber
+     selected                                   H.R.6256       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     selected                                   H.R.7035       cong=119  role=cosponsor          sign=-1   dw=1.0   contrib=-1.0     cat=Interchange
+     selected                                   H.R.976        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=CFPB
+     selected                                   H.R.976        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+     selected                                   H.R.987        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+
+  -- Marilyn Strickland : 29 routing rows | agenda 7.648000000000003 -> 8.948000000000004
+     dispositions: {'selected': 19, 'official-membership-withdrawn-or-role-superseded': 6, 'excluded-title': 4}
+     excluded-title                             H.R.1280       cong=117  role=original-cosponsor sign=None dw=None  contrib=None     cat=None
+     excluded-title                             H.R.1280       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     excluded-title                             H.R.1783       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     excluded-title                             H.R.1783       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1443       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.8285       cong=118  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     selected                                   H.R.1010       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Member Business Lending
+     selected                                   H.R.1443       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Member Business Lending
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=CU Capital Requirements
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=NCUA Budget & Insurance
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Fraud Prevention
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Member Business Lending
+     selected                                   H.R.2094       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=CU Capital Requirements
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Fraud Prevention
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Member Business Lending
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.3170       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.3962       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Technology & Emerging
+     selected                                   H.R.4167       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Charter Modernization
+     selected                                   H.R.4167       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+     selected                                   H.R.4495       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Mortgage & Housing
+     selected                                   H.R.7910       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Fraud Prevention
+     selected                                   H.R.793        cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Member Business Lending
+     selected                                   H.R.8285       cong=118  role=original-cosponsor sign=1    dw=0.8   contrib=1.6      cat=Mortgage & Housing
+
+  -- Jahana Hayes : 39 routing rows | agenda 11.488000000000007 -> 12.788000000000007
+     dispositions: {'selected': 27, 'official-membership-withdrawn-or-role-superseded': 7, 'excluded-title': 4, 'neutral-registry': 1}
+     excluded-title                             H.R.1280       cong=117  role=original-cosponsor sign=None dw=None  contrib=None     cat=None
+     excluded-title                             H.R.1280       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     excluded-title                             H.R.1783       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     excluded-title                             H.R.1783       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     neutral-registry                           H.R.1215       cong=117  role=cosponsor          sign=0    dw=None  contrib=0.0      cat=CFPB
+     official-membership-withdrawn-or-role-superseded H.R.1443       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.1996       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.8285       cong=118  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.8340       cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     selected                                   H.R.1443       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Member Business Lending
+     selected                                   H.R.1848       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Fraud Prevention
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=CU Capital Requirements
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=NCUA Budget & Insurance
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Fraud Prevention
+     selected                                   H.R.1996       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Member Business Lending
+     selected                                   H.R.2064       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     selected                                   H.R.2094       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=CU Capital Requirements
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Fraud Prevention
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Member Business Lending
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.3170       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.4231       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.4233       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.4495       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Mortgage & Housing
+     selected                                   H.R.5689       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Charter Modernization
+     selected                                   H.R.5689       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+     selected                                   H.R.5739       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Charter Modernization
+     selected                                   H.R.5739       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Member Business Lending
+     selected                                   H.R.6125       cong=119  role=original-cosponsor sign=1    dw=1.0   contrib=2.0      cat=Mortgage & Housing
+     selected                                   H.R.7910       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Fraud Prevention
+     selected                                   H.R.793        cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Member Business Lending
+     selected                                   H.R.8285       cong=118  role=original-cosponsor sign=1    dw=0.8   contrib=1.6      cat=Mortgage & Housing
+     selected                                   H.R.8340       cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Mortgage & Housing
+     selected                                   H.R.837        cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.8714       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+
+  -- John Carter : 6 routing rows | agenda 3.56 -> 3.86
+     dispositions: {'selected': 6}
+     selected                                   H.R.1919       cong=119  role=original-cosponsor sign=1    dw=1.0   contrib=2.0      cat=Technology & Emerging
+     selected                                   H.R.5403       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Technology & Emerging
+     selected                                   H.R.800        cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=TCPA
+     selected                                   H.R.976        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=CFPB
+     selected                                   H.R.976        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+     selected                                   H.R.987        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+
+  -- Earl Carter : 19 routing rows | agenda 8.526 -> 8.526
+     dispositions: {'excluded-override': 1, 'selected': 15, 'official-membership-withdrawn-or-role-superseded': 3}
+     excluded-override                          H.R.5502       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     official-membership-withdrawn-or-role-superseded H.R.2743       cong=118  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.R.5009       cong=118  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.Res.1076     cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     selected                                   H.R.1181       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Data Privacy & Cyber
+     selected                                   H.R.1382       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=CFPB
+     selected                                   H.R.1729       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Member Business Lending
+     selected                                   H.R.1799       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Examination & Supervision
+     selected                                   H.R.2743       cong=118  role=original-cosponsor sign=1    dw=0.8   contrib=1.6      cat=Member Business Lending
+     selected                                   H.R.3633       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Examination & Supervision
+     selected                                   H.R.3633       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Technology & Emerging
+     selected                                   H.R.5009       cong=118  role=original-cosponsor sign=1    dw=0.8   contrib=1.6      cat=Defense CU Issues
+     selected                                   H.R.5403       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Technology & Emerging
+     selected                                   H.R.5577       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     selected                                   H.R.582        cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=NCUA Budget & Insurance
+     selected                                   H.R.582        cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Charter Modernization
+     selected                                   H.R.987        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+     selected                                   H.Res.1076     cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Member Business Lending
+     selected                                   LTR-119-CDFI-KIMCRAPO cong=119  role=original-cosponsor sign=1    dw=1.0   contrib=2.0      cat=CDFI Fund
+
+  -- Troy Carter : 21 routing rows | agenda 5.624000000000001 -> 5.624000000000001
+     dispositions: {'excluded-override': 2, 'selected': 14, 'official-membership-withdrawn-or-role-superseded': 3, 'duplicate-same-role': 2}
+     duplicate-same-role                        H.R.2094       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     duplicate-same-role                        H.R.5484       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     excluded-override                          H.R.5746       cong=117  role=original-cosponsor sign=None dw=None  contrib=None     cat=None
+     excluded-override                          H.R.5746       cong=117  role=cosponsor          sign=None dw=None  contrib=None     cat=None
+     official-membership-withdrawn-or-role-superseded H.R.4349       cong=118  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.Res.1076     cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     official-membership-withdrawn-or-role-superseded H.Res.634      cong=117  role=cosponsor          sign=None dw=None  contrib=0.0      cat=None
+     selected                                   H.R.2094       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=CU Capital Requirements
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Fraud Prevention
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Member Business Lending
+     selected                                   H.R.2891       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.3170       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Mortgage & Housing
+     selected                                   H.R.4349       cong=118  role=original-cosponsor sign=1    dw=0.8   contrib=1.6      cat=Mortgage & Housing
+     selected                                   H.R.5484       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Mortgage & Housing
+     selected                                   H.R.5802       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Mortgage & Housing
+     selected                                   H.R.5848       cong=119  role=original-cosponsor sign=1    dw=1.0   contrib=2.0      cat=Mortgage & Housing
+     selected                                   H.R.7910       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Fraud Prevention
+     selected                                   H.Res.1076     cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Member Business Lending
+     selected                                   H.Res.634      cong=117  role=original-cosponsor sign=1    dw=0.6400000000000001 contrib=1.2800000000000002 cat=Member Business Lending
+     selected                                   LTR-119-CDFI-WATERS cong=119  role=original-cosponsor sign=1    dw=1.0   contrib=2.0      cat=CDFI Fund
+
+  -- Morgan Griffith : 13 routing rows | agenda 7.942000000000001 -> 8.242
+     dispositions: {'selected': 13}
+     selected                                   H.R.1059       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Technology & Emerging
+     selected                                   H.R.1382       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=CFPB
+     selected                                   H.R.1729       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Member Business Lending
+     selected                                   H.R.1777       cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Technology & Emerging
+     selected                                   H.R.2743       cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Member Business Lending
+     selected                                   H.R.3962       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Technology & Emerging
+     selected                                   H.R.582        cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=NCUA Budget & Insurance
+     selected                                   H.R.582        cong=118  role=cosponsor          sign=1    dw=0.8   contrib=0.8      cat=Charter Modernization
+     selected                                   H.R.6889       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=NCUA Budget & Insurance
+     selected                                   H.R.6889       cong=117  role=cosponsor          sign=1    dw=0.6400000000000001 contrib=0.6400000000000001 cat=Charter Modernization
+     selected                                   H.R.975        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Charter Modernization
+     selected                                   H.R.975        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=NCUA Budget & Insurance
+     selected                                   H.R.987        cong=119  role=cosponsor          sign=1    dw=1.0   contrib=1.0      cat=Member Business Lending
+
+== archive_leg.json (LIVE) per-category for the named members ==
+  Tony Wied              {"Mortgage & Housing": 1.0, "CFPB": 1.0, "Member Business Lending": 2.0, "Data Privacy & Cyber": 1.0, "Interchange": -1.0}
+     recomputed agenda = 1.0 ; ranks agenda = 1.0
+  Marilyn Strickland     {"CU Capital Requirements": 2.08, "NCUA Budget & Insurance": 1.2800000000000002, "Technology & Emerging": 0.6400000000000001, "Fraud Prevention": 2.72, "Member Business Lending": 5.640000000000001, "Mortgage & Housing": 4.84, "Charter Modernization": 1.0}
+     recomputed agenda = 8.948 ; ranks agenda = 8.948000000000004
+  Jahana Hayes           {"CU Capital Requirements": 2.08, "NCUA Budget & Insurance": 1.2800000000000002, "Fraud Prevention": 3.3600000000000003, "Charter Modernization": 1.8, "Member Business Lending": 5.800000000000001, "Mortgage & Housing": 12.32}
+     recomputed agenda = 12.788000000000002 ; ranks agenda = 12.788000000000007
+  John Carter            {"Technology & Emerging": 2.8, "TCPA": 0.8, "CFPB": 1.0, "Member Business Lending": 2.0}
+     recomputed agenda = 3.8599999999999994 ; ranks agenda = 3.86
+  Earl Carter            {"NCUA Budget & Insurance": 0.8, "Technology & Emerging": 1.8, "Charter Modernization": 0.8, "Defense CU Issues": 1.6, "CFPB": 0.8, "Member Business Lending": 4.5200000000000005, "Examination & Supervision": 2.0, "Mortgage & Housing": 1.0, "Data Privacy & Cyber": 1.0, "CDFI Fund": 2.0}
+     recomputed agenda = 8.526 ; ranks agenda = 8.526
+  Troy Carter            {"CU Capital Requirements": 0.8, "Fraud Prevention": 1.4400000000000002, "Member Business Lending": 3.3600000000000003, "Mortgage & Housing": 7.84, "CDFI Fund": 2.0}
+     recomputed agenda = 5.6240000000000006 ; ranks agenda = 5.624000000000001
+  Morgan Griffith        {"NCUA Budget & Insurance": 2.4400000000000004, "Technology & Emerging": 2.4400000000000004, "Charter Modernization": 2.4400000000000004, "CFPB": 0.8, "Member Business Lending": 2.4400000000000004}
+     recomputed agenda = 8.242 ; ranks agenda = 8.242
+
+== topic_weights ==
+  {"CDFI Fund": 0.1, "CFPB": 1.0, "CU Capital Requirements": 0.25, "CU Tax Status": 3.0, "Charter Modernization": 1.0, "Credit Card Mandates": 3.0, "Data Privacy & Cyber": 1.0, "Defense CU Issues": 0.2, "Examination & Supervision": 0.75, "Field of Membership": 1.0, "Fraud Prevention": 0.75, "Interchange": 2.0, "Member Business Lending": 0.3, "Mortgage & Housing": 0.4, "NCUA Budget & Insurance": 1.0, "Payments": 0.75, "TCPA": 0.2, "Technology & Emerging": 0.75}

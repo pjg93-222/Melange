@@ -234,7 +234,7 @@ _s=importlib.util.spec_from_file_location('fmA',ENG+r'\flip_model.py'); _fm=impo
 _wn=collections.Counter()
 for c in _fm.cats:
     cs,ct,nA,nB,mAt,mBt,tgt=_fm.topic_setup(c,_fm.CS0)
-    for n in _fm.members: _wn[n]+=tgt[n]*_fm.pflip(_fm.cu0[n],_fm.ind0[n],_fm.R[n],nA[n],nB[n],mAt,mBt)
+    for n in _fm.members: _wn[n]+=tgt[n]*_fm.pflip(_fm.cu0[n],_fm.ind0[n],_fm.R[n],nA[n],nB[n],mAt,mBt,cm=_fm.CM[n])   # COMPET_MULT: same c as flip_model.flip_value (dial OFF -> 1.0)
 _nd=sum(1 for n,_ in _wn.most_common(20) if n in _fm.nodata)
 ck('no zero-FEC-data member ranks top-20 winnability (missing != no-opposition)', _nd==0, '%d of top-20 are data-less'%_nd)
 # Impute only absent money evidence; verified PAC zeros survive missing receipts.
@@ -856,18 +856,14 @@ finally:
     os.environ.pop('PILLAR_SNAPSHOT_FREEZE',None)
 ck('python pillar shadow-compute parity (rank math reproducible, 533/533)','PARITY: CLEAN' in _pp,
    _pp.strip().splitlines()[-1] if _pp else 'no output')
-# rank-integrity guards (2026-07-17): (a) the pillar snapshot must not silently serve a stale
-# leg/inf/demo basis (the 2026-07-16 522-rank incident class); (b) the own-source channel inputs
+# rank-integrity guards: validate the basis selected by compute_pillars. Live mode
+# binds current source hashes and shadow parity; legacy mode retains the 14-day
+# O/E/F snapshot tripwire (the 2026-07-16 522-rank incident class).
+from audit.pillar_freshness import check_pillar_freshness
+ck(*check_pillar_freshness(B, authority_parity='PARITY: CLEAN' in _pp))
+# The own-source channel inputs
 # must not silently freeze while their channels are ON (extractors are not chain-wired yet —
 # collection runs on Paul's 3-week cadence, so the ceiling is cadence+grace = 28 days).
-_snp=B+r'\data\engine\pillar_inputs_snapshot.json'
-_sn_stamp=(json.load(open(_snp,encoding='utf-8')).get('stamped') if os.path.exists(_snp) else None)
-if _sn_stamp:
-    import datetime as _dt2
-    _sn_age=(_dt2.datetime.now().astimezone()-_dt2.datetime.fromisoformat(_sn_stamp)).days
-    ck('pillar snapshot vintage <= 14 days (stale-basis tripwire)', _sn_age<=14, 'stamped %s (%dd)'%(_sn_stamp,_sn_age))
-else:
-    ck('pillar snapshot vintage <= 14 days (stale-basis tripwire)', True, 'unstamped pre-guard snapshot (stamps on next compute run)')
 _dbm=os.path.getmtime(B+r'\social_media.db') if os.path.exists(B+r'\social_media.db') else None
 _chstale=[]
 for _cf in ('speeches_cu.csv','data/stance/hearings_cu.csv','data/stance/interviews_cu.csv','data/stance/bluesky_cu.csv'):
@@ -2082,8 +2078,9 @@ if _g:
                         str(row.get('congress') or '').strip())
                for row in _effective_tags.values()}
     # 2026-08-10 bank-anchor expansion 633->640 -> 644 crypto/fintech association sweep
+    # 2026-10-07 telecom association anchors 644 -> 648 (written by the bank-anchor backfill)
     ck('frozen beneficiary baseline and evidence-backed admissions are classified',
-       _tag_count==644 and len(_tag_keys)==len(_effective_tags),
+       _tag_count==648 and len(_tag_keys)==len(_effective_tags),
        '%d baseline tags + %d admitted acts'%(_tag_count,len(_tag_keys)-_tag_count))
     _desk_path=B+r'\member_desk_bundle.json'
     _desk_for_closure=(json.load(open(_desk_path,encoding='utf-8'))
@@ -2133,7 +2130,7 @@ if _g:
        and _registry_counts.get('missing_before')==6
        and _registry_counts.get('missing_after')==0
        and _registry_counts.get('recovered_anchors')==6
-       and _registry_counts.get('classified_act_universe')==644
+       and _registry_counts.get('classified_act_universe')==648
        and _registry_receipt.get('missing_after')==[],
        _registry_counts or 'registry reconciliation missing')
     ck('registry sidecar resolves 73 official member links across six acts',

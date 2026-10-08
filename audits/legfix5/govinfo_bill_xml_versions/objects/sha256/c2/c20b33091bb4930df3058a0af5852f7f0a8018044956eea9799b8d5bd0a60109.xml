@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HAA913F6863D64D888FAF25A197DDD43D" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5509 EH: Electronic Permitting Modernization Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 5509</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To modernize permitting systems at the Department of the Interior, and for other purposes.</official-title> 
+</form> 
+<legis-body id="HB2756F9289CA4368901C00C1BF6A382A" style="OLC"> 
+<section id="HC1696A89BC8B4EABB030B6A734326379" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Electronic Permitting Modernization Act</short-title></quote>. </text></section> <section id="H66572B1045054AE3B4F7C9D7C69C427E"><enum>2.</enum><header>Department of the Interior permit accessibility</header> <subsection id="HBFBE60CCED784FFEA12F4F5CED328E97"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">In order to improve the overall economy, efficiency, and management of operations and activities of the Department of the Interior (referred to in this section as the <quote>Department</quote>), reduce paperwork, and provide high-quality services and access to the public, the Secretary of the Interior shall, to the extent practicable—</text> 
+<paragraph id="H8C7706A9B14B43B8AE5257333A8CB9DA"><enum>(1)</enum><text>design and deliver modernized electronic permitting systems to accept, process, and record applications (including plan submissions, payment activity, and other related correspondence) for permits, forms, and other paperwork required for activities regulated by the Department;</text></paragraph> <paragraph id="H131964DE66D54FC39751CDACEA8C4AF1"><enum>(2)</enum><text> provide a centralized electronic permitting system online repository, available to the public on the Department’s website, that includes—</text> 
+<subparagraph id="HD3CA3B7121D5428C903E5AAE9EAE31C2"><enum>(A)</enum><text>hyperlinks to facilitate navigation to all Department electronic permitting systems; and</text></subparagraph> <subparagraph id="HA6C332493FE7460C9EB0B5C2D38AE29E"><enum>(B)</enum><text>with respect to permits, the contact information for the appropriate Department employees providing assistance to State, Tribal, and local governments; and</text></subparagraph></paragraph> 
+<paragraph id="H40FBCB044C664AE5A45272568A171B04"><enum>(3)</enum><text display-inline="yes-display-inline">provide to the Committee on Natural Resources of the House of Representatives and the Committee on Energy and Natural Resources of the Senate periodic updates on the implementation of paragraphs (1) and (2).</text></paragraph></subsection> <subsection id="HB26C05A150C7439B9779D6641F6089F1"><enum>(b)</enum><header>Disclosure of Information prohibited</header><text display-inline="yes-display-inline">No information described in section 552(b) of title 5, United States Code, or protected from disclosure by another law of the United States shall be disclosed under this Act.</text></subsection> 
+<subsection id="H554320C8FD914DB4BA67927BE9B597A2"><enum>(c)</enum><header>Duplication of systems not permitted</header><text display-inline="yes-display-inline">No system shall be duplicated under this Act.</text></subsection> <subsection id="H6D0A2272FA86421280391B4FD45D2506"><enum>(d)</enum><header>Consultation</header><text display-inline="yes-display-inline">In developing the permitting systems required under section 2 of this Act, the Secretary of the Interior shall consult with States, local governments, Indian Tribes and other stakeholders who apply for agency permits and will use the permitting systems.</text></subsection></section> 
+<section id="H70690774F46543BC8EC40AFDC60E6940"><enum>3.</enum><header>Conforming amendment to ensure consistency with the Fiscal Responsibility Act of 2023</header><text display-inline="no-display-inline"> In developing the permitting systems required under section 2 of this Act, the Secretary of the Interior shall ensure that the Department’s electronic permitting systems are consistent with the priorities identified in section 110 of the National Environmental Policy Act of 1969 (<external-xref legal-doc="usc" parsable-cite="usc/42/4336d">42 U.S.C. 4336d</external-xref>) with respect to any permit that requires review under that Act. </text></section> </legis-body> <attestation><attestation-group><attestation-date date="20240924" chamber="House">Passed the House of Representatives September 24, 2024.</attestation-date><attestor display="no">Kevin F. McCumber,</attestor><role>Clerk.</role></attestation-group></attestation> <endorsement display="yes"></endorsement> </bill> 
+

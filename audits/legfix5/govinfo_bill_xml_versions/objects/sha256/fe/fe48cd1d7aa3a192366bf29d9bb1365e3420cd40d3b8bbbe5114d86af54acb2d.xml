@@ -1,0 +1,222 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H15AAC9F8BA304B83A56EA79AD5DE189B" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8265 IH: Empowering Shareholders Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8265</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260414">April 14, 2026</action-date><action-desc><sponsor name-id="H001058">Mr. Huizenga</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Investment Advisers Act of 1940 to establish requirements for proxy voting of passively managed funds, and for other purposes.</official-title></form><legis-body id="HE1F676F3FDD94A468FAB82A696DFA202" style="OLC"> 
+<section id="H6BA53C6C769044F99855D23B08119275" section-type="section-one" commented="no"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Empowering Shareholders Act of 2026</short-title></quote>.</text></section> 
+<section id="H3090230690514FD486DFE59F88A95523"><enum>2.</enum><header>Proxy voting of passively managed funds</header> 
+<subsection id="HDC950D58CDCD4C60B5D75468D0E0336D">
+        <enum>(a)</enum>
+        <header>In general</header>
+ <text>The Investment Advisers Act of 1940 (<external-xref legal-doc="usc" parsable-cite="usc/15/80b-1">15 U.S.C. 80b–1 et seq.</external-xref>) is amended by inserting after section 208 (<external-xref legal-doc="usc" parsable-cite="usc/15/80b-8">15 U.S.C. 80b–8</external-xref>) the following:</text>
+        <quoted-block id="H3969B2E8E47F4D2D90D6FF6321C3278B" style="OLC">
+          <section id="HD1BBF51CBC174952B6E1D60AB137A1B4">
+            <enum>208A.</enum>
+            <header>Proxy voting of passively managed funds</header>
+            <subsection id="H989395DE2C704371864A7C149D37B70B">
+              <enum>(a)</enum>
+              <header>Investment adviser proxy voting</header>
+              <paragraph id="H79CBE946EC344EBC9E148C1C34B01C41">
+                <enum>(1)</enum>
+                <header>In general</header>
+ <text>An investment adviser that holds authority to vote a proxy solicited by an issuer pursuant to section 14 of the Securities Exchange Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/15/78n">15 U.S.C. 78n</external-xref>) in connection with any vote of covered securities held by a passively managed fund shall—</text>
+                <subparagraph id="H6421E69121CC416B968EFC5600248C13" commented="no">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">vote in accordance with the instructions (which may include the selection of a published voting policy) of the beneficial owner (or fiduciary or other designee with proxy voting authority on their behalf) of a voting security of the passively managed fund;</text>
+                </subparagraph>
+                <subparagraph id="HEA7AF617F5494E7F99893304EC744D1B">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">vote in accordance with the voting recommendations of the board of directors (or similar governing body) of such issuer;</text>
+                </subparagraph>
+                <subparagraph id="HD4C2C53DD7B94A07ACC597E709AFF6C3">
+                  <enum>(C)</enum>
+ <text display-inline="yes-display-inline">abstain from voting such securities but make reasonable efforts to be considered present for purposed of establishing a quorum; or</text>
+                </subparagraph>
+                <subparagraph id="H7AC50734D2F04AA98AF05F611A76EF88">
+                  <enum>(D)</enum>
+ <text>pursuant to rules issued by the Commission, instruct vote tabulators to make a reasonable effort to mirror vote shares to reflect the elections of the other shareholders in the covered security.</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="HA0B2E8DFA07F49189BEB798CEA1E77B1">
+                <enum>(2)</enum>
+                <header>Exception</header>
+ <text>Paragraph (1) shall not apply with respect to a vote on a routine matter.</text>
+              </paragraph>
+            </subsection>
+            <subsection id="H7282CCB5DB974F2BAEDB81EF6C14E9FC">
+              <enum>(b)</enum>
+              <header>Safe harbor</header>
+ <text display-inline="yes-display-inline">With respect to a routine or non-routine vote, voted in the manner required by subsection (a)(1), an investment adviser shall not be liable to any person under any law or regulation of the United States, any constitution, law, or regulation of any State or political subdivision thereof, or under any contract or other legally enforceable agreement (including any arbitration agreement), for any of the following:</text>
+              <paragraph id="H4D22427B703D43AAA76D6121E55E2AE9">
+                <enum>(1)</enum>
+ <text display-inline="yes-display-inline">Voting in accordance with the instructions of the beneficial owner (or that beneficial owner’s designee with proxy voting authority) of a voting security of the passively managed fund.</text>
+              </paragraph>
+              <paragraph id="H66DE0B4715BF433FAC68EE9FAFC5E1BD">
+                <enum>(2)</enum>
+ <text>Not soliciting voting instructions from any person.</text> </paragraph> <paragraph id="H4490B77C570B46B787946D8BF9E43FDF"> <enum>(3)</enum> <text display-inline="yes-display-inline">Voting in accordance with the voting recommendations of an issuer under subsection (a)(1)(B) with respect to such vote.</text>
+              </paragraph>
+              <paragraph id="H3679C637079D4E8AAF0E66F03F455843">
+                <enum>(4)</enum>
+ <text display-inline="yes-display-inline">Abstaining from voting in accordance with subsection (a)(1)(C) with respect to such vote.</text>
+              </paragraph>
+              <paragraph id="H87269B93060A4396B91F1EEDE80FD0C8">
+                <enum>(5)</enum>
+ <text display-inline="yes-display-inline">Instructing vote tabulators to make a reasonable effort to mirror vote shares to reflect the elections of the other shareholders in a covered security, pursuant to rules issued by the Commission described in subsection (a)(1)(D).</text>
+              </paragraph>
+            </subsection>
+            <subsection id="HF9846DF138084EE9BCD5EC28825AF73B">
+              <enum>(c)</enum>
+              <header>Foreign private issuers exemption</header>
+ <text>Subsection (a) shall not apply with respect to a foreign private issuer if the published voting policy of the investment advisor with respect to such foreign private issuer is fully and fairly disclosed to beneficial owners, including the extent to which such policy differs from the published voting policy for non-exempt issuers.</text>
+            </subsection>
+            <subsection id="HBA0FDC5689ED49C5B0E2F9C5ED6FA104">
+              <enum>(d)</enum>
+              <header>Dissemination of information</header>
+              <paragraph id="H3D6EB3386C3C44B28BDF1E9BB1BF9E72" commented="no">
+                <enum>(1)</enum>
+                <header>In general</header>
+ <text>Any investment adviser subject to the requirements of subsection (a)(1) shall, with respect to the dissemination of information and other material to a voting person, comply with the following requirements, unless the voting person affirmatively declines to receive that information and other material:</text>
+                <subparagraph id="HF5C79B3B9478472BBAF3372301FD6F94" commented="no">
+                  <enum>(A)</enum>
+ <text display-inline="yes-display-inline">Provide the voting person (or the relevant intermediary with whom the investment adviser has access) with a form to select a published voting policy.</text>
+                </subparagraph>
+                <subparagraph id="H48E61295BC9945AFB2A6818F61B352B0" commented="no">
+                  <enum>(B)</enum>
+ <text>Provide the voting person with not less than 5 business days after the date on which the voting person receives the form described under subparagraph (A) to return that form to the investment adviser.</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H6D306656AB1D43CAB9B99A633E6A9CF5">
+                <enum>(2)</enum>
+                <header>Electronic delivery</header>
+ <text>All, or any portion, of the materials that an investment adviser is required to provide under paragraph (1)(A) may be provided electronically, including through—</text>
+                <subparagraph id="HF4E3FEF6C3104198B0246B41556FF17B">
+                  <enum>(A)</enum>
+ <text>an internet website;</text> </subparagraph> <subparagraph id="HC10A09BE2BB54B80B62EB5284B627508"> <enum>(B)</enum> <text display-inline="yes-display-inline">another digital, internet, or electronic-based information repository; or</text>
+                </subparagraph>
+                <subparagraph id="H7ABCD2AA7BDB41698793F24A3D86583C">
+                  <enum>(C)</enum>
+ <text>a mobile application.</text> </subparagraph> </paragraph> </subsection> <subsection id="HCE795D2547D94522B73167493607791C"> <enum>(e)</enum> <header>Definitions</header> <text>In this section:</text>
+              <paragraph id="H1E5FF94492944B17BAECA7E7081DBEC6">
+                <enum>(1)</enum>
+                <header>Covered security</header>
+ <text>The term <term>covered security</term>—</text> <subparagraph id="H3E0C336889E746D2A4302243E05E20D4"> <enum>(A)</enum> <text>means a voting security, as that term is defined in section 2(a) of the Investment Company Act of 1940 (<external-xref legal-doc="usc" parsable-cite="usc/15/80a-2">15 U.S.C. 80a–2(a)</external-xref>), in which a qualified fund is invested; and</text>
+                </subparagraph>
+                <subparagraph id="H300D34BDFCC045728B91D7F82503E3FF">
+                  <enum>(B)</enum>
+ <text>does not include any voting security (as defined in subparagraph (A)) of an issuer registered with the Commission as an investment company under section 8 of the Investment Company Act of 1940 (<external-xref legal-doc="usc" parsable-cite="usc/15/80a-8">15 U.S.C. 80a–8</external-xref>).</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H623BA305E16A4BF6BBDF231010C62CE8">
+                <enum>(2)</enum>
+                <header>Passively managed fund</header>
+ <text>The term <term>passively managed fund</term> means a qualified fund—</text> <subparagraph id="H65C82EF4EB5D45DB89A14F7D06009281"> <enum>(A)</enum> <text>that—</text>
+                  <clause id="HB16569AE03D74228A6321A9151DE275B">
+                    <enum>(i)</enum>
+ <text>is designed to track, or is derived from, an index of securities or a portion of such an index;</text>
+                  </clause>
+                  <clause id="H6EEC8510ED2A4D33A1223FEE34BC8452">
+                    <enum>(ii)</enum>
+ <text>discloses that the qualified fund is a passive index fund; or</text> </clause> <clause id="H8E4F900BB93240CEA4315B60E2C020D0"> <enum>(iii)</enum> <text>allocates not less than 60 percent of the total assets of the qualified fund to an investment strategy that is designed to track, or is derived from, an index of securities or a portion of such an index fund; and</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HD3151611B5A041A5BC6E17776FD2BDDA" commented="no">
+                  <enum>(B)</enum>
+ <text display-inline="yes-display-inline">that commits to refrain from exercising control over an issuer through voting or investment authority.</text>
+                </subparagraph>
+              </paragraph>
+              <paragraph id="H4462A3C5993341F7B12E01A13B2D3264">
+                <enum>(3)</enum>
+                <header>Published voting policy</header>
+ <text display-inline="yes-display-inline">The term <quote>published voting policy</quote> means—</text>
+                <subparagraph id="H11CDAA2D0E064BC586EED85B3B0336CF">
+                  <enum>(A)</enum>
+ <text>a policy that—</text> <clause id="HC8432C07406D46A1AEBA990CAE647F18"> <enum>(i)</enum> <text display-inline="yes-display-inline">articulates how proportionate shares would be expected to be voted in anticipated proxy voting matters; and</text>
+                  </clause>
+                  <clause id="H9EA9AF484C9B4150BB04744AF14CC35A">
+                    <enum>(ii)</enum>
+ <text>is made available to investors, including via website or other electronic means; and</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="HB8A00169592946928D9C77075FA4B5D3">
+                  <enum>(B)</enum>
+ <text>in the case of a policy of a passively managed fund or an investment adviser, a policy that does not—</text>
+                  <clause id="HE2C20FDA583D4DE784B0B59751E608F0">
+                    <enum>(i)</enum>
+ <text>seek to set the strategy or day-to-day management decisions of the issuer;</text>
+                  </clause>
+                  <clause id="H214E0DB74E2443119527314A9A0828F2">
+                    <enum>(ii)</enum>
+ <text>involve submitting shareholder proposals;</text> </clause> <clause id="H8347EA85EB7C4B4A9534847E1CBBA04E"> <enum>(iii)</enum> <text>seek to nominate directors; and</text>
+                  </clause>
+                  <clause id="HA18F99666E4143E1940DAD910C4334FE">
+                    <enum>(iv)</enum>
+ <text>coordinate votes with other index managers.</text> </clause> </subparagraph> </paragraph> <paragraph id="HEF89ADD23E02482E86787ABF10E5CCD7"> <enum>(4)</enum> <header>Qualified fund</header> <text>The term <term>qualified fund</term> means—</text>
+                <subparagraph id="HC693F18013CD4E7C9B937BF2C4ABD49B">
+                  <enum>(A)</enum>
+ <text>an investment company;</text> </subparagraph> <subparagraph id="H134E92CC2EBE4134B563E74CD2C85ED1"> <enum>(B)</enum> <text>a private fund;</text>
+                </subparagraph>
+                <subparagraph id="H4AE7BF7AB1EB48A494E79DFE38CCE2C1">
+                  <enum>(C)</enum>
+ <text>an eligible deferred compensation plan, as that term is defined in <external-xref legal-doc="usc" parsable-cite="usc/26/457">section 457(b)</external-xref> of the Internal Revenue Code of 1986;</text>
+                </subparagraph>
+                <subparagraph id="H476D01175DEA4D70BF42925E30066EF3">
+                  <enum>(D)</enum>
+ <text>a trust, plan, account, or other entity described in section 3(c)(11) of the Investment Company Act of 1940 (<external-xref legal-doc="usc" parsable-cite="usc/15/80a-3">15 U.S.C. 80a–3(c)(11)</external-xref>);</text>
+                </subparagraph>
+                <subparagraph id="HBDECECED9302412781DEBED07A573ADA">
+                  <enum>(E)</enum>
+ <text>a plan maintained by an employer described in clause (i), (ii), or (iii) of <external-xref legal-doc="usc" parsable-cite="usc/26/403">section 403(b)(1)(A)</external-xref> of the Internal Revenue Code of 1986 to provide annuity contracts described in section 403(b) of such Code;</text>
+                </subparagraph>
+                <subparagraph id="H9BA3A44AC9514628B1483649197F2DC6">
+                  <enum>(F)</enum>
+ <text>a common trust fund, or similar fund, maintained by a bank;</text> </subparagraph> <subparagraph id="H050407B294754A868D05AB97D5B6A26D"> <enum>(G)</enum> <text>any fund established under section 8438(b)(1) of title 5, United States Code; or</text>
+                </subparagraph>
+                <subparagraph id="HDEFA348DC73E42B18798984142FBAF4D">
+                  <enum>(H)</enum>
+ <text>any separate managed account of a client of an investment adviser.</text> </subparagraph> </paragraph> <paragraph id="H65E7E43471FE419F8703E33B6C836286"> <enum>(5)</enum> <header>Routine matter</header> <text>The term <term>routine matter</term>—</text>
+                <subparagraph id="H187F20A9A2FA4C52957BE21088307F51">
+                  <enum>(A)</enum>
+ <text>includes a proposal that relates to—</text> <clause id="H9BCDB8AC437C4B96889EC5636BF5F35A"> <enum>(i)</enum> <text>an election with respect to the board of directors of a registrant;</text>
+                  </clause>
+                  <clause id="H722143A1D9CB4D21AEA4E0D3CC311058">
+                    <enum>(ii)</enum>
+ <text>the compensation of management or the board of directors of a registrant;</text>
+                  </clause>
+                  <clause id="H0171D9471F20421499219D0C0EE812CE">
+                    <enum>(iii)</enum>
+ <text>the selection of auditors; or</text> </clause> <clause id="H5EAFC41202F54C0698CF809E7D6BA335"> <enum>(iv)</enum> <text>declassification; and</text>
+                  </clause>
+                </subparagraph>
+                <subparagraph id="H4DD404F03A164185B2E2A26E0B509635">
+                  <enum>(B)</enum>
+ <text>does not include—</text> <clause id="H0E8F2813F75B4ED9BDE578B6002C276A"> <enum>(i)</enum> <text>a proposal that is not submitted to a holder of covered securities by means of a proxy statement comparable to that described in section 240.14a–101 of title 17, Code of Federal Regulations, or any successor regulation; or</text>
+                  </clause>
+                  <clause id="HFE9BF65F887C491E8EFE03D246E110BF">
+                    <enum>(ii)</enum>
+ <text>a proposal that is—</text> <subclause id="HC759461A5FBA4707871B38EA8F2228FF"> <enum>(I)</enum> <text>the subject of a counter-solicitation; or</text>
+                    </subclause>
+                    <subclause id="HBFA9CB5D21924B7EA37B18EFD59693AC">
+                      <enum>(II)</enum>
+ <text>part of a proposal made by a person other than the applicable registrant.</text>
+                    </subclause>
+                  </clause>
+                </subparagraph>
+              </paragraph>
+            </subsection>
+          </section>
+          <after-quoted-block>.</after-quoted-block>
+        </quoted-block>
+      </subsection> 
+<subsection id="H40B6E044779B4458967BCB3EE1096A86"><enum>(b)</enum><header>Effective date</header><text display-inline="yes-display-inline">The amendment made by this section shall take effect 1 year after the date of enactment of this Act.</text></subsection></section> </legis-body></bill>
+

@@ -1,0 +1,83 @@
+P5c -- migration tool DRY RUN against the LIVE store, run AFTER the landing (LIVE HEAD ce0dc5b21).
+
+COMMAND (no --apply, no --restore; --dry-run is the argparse default branch):
+  python fec\members\migrate_interview_turn_bleed.py
+    --db        "<LIVE>\social_media.db"
+    --protected "<LIVE>\audits\laundry_list_closeout_20260918\fixN12v2\v2_skipset_plus7.json"
+    --out       <scratch>\dryout
+
+WHY A DRY RUN CANNOT WRITE (read before trusting the numbers):
+  - main() at migrate_interview_turn_bleed.py:521-552 puts --dry-run / --apply / --restore in one
+    mutually exclusive group; with neither --apply nor --restore the else-branch (:543) runs, so a
+    dry run is what you get by default and by omission.
+  - run_dry() (:414-428) takes its connection from open_ro() (:147-150), which is
+    sqlite3.connect('file:...?mode=ro', uri=True) followed by PRAGMA query_only=ON. A write is
+    refused by SQLite itself, not merely avoided by the code path.
+  - open_rw() and apply_plans()/run_restore() (the only UPDATE statements, :333, :391, :395) are
+    reachable only from --apply / --restore, neither of which was passed.
+
+OBSERVED NON-EFFECT ON THE STORE:
+  social_media.db size AND mtime identical before and after the run:
+    before: size=500842496  mtime=1789846698.2869048
+    after : size=500842496  mtime=1789846698.2869048
+
+HEADLINE RESULT -- the tool plans NOTHING:
+  rows_would_truncate = 0
+  rows_would_insert   = 0
+  words_removed       = 0
+  chars_removed       = 0
+  rows_flagged        = 657   (every one of them SKIPPED)
+    skipped_label_or_gold_record_points_here      = 103
+    skipped_credit_union_stance_channel_row       =  16
+    skipped_kept_text_under_min_turn_words        = 554
+  protection_rows     = 2105   (from v2_skipset_plus7.json)
+  interview_rows      = 153576
+  speeches_rows       = 270489
+
+READING: the v2 truncate-only repair is already applied to the live store and the migrator is
+idempotent against it. The 657 rows that still carry a detectable tag are exactly the protected
+population the repair was designed to leave alone -- gold/label-bound rows, the credit-union
+interview stance-channel rows, and rows whose kept text would fall under the minimum turn length.
+Re-running the tool would change nothing.
+
+==============================================================================
+RAW TOOL OUTPUT
+==============================================================================
+{
+ "by_cut_class": {},
+ "by_detector_class_on_truncated_rows": {},
+ "chars_removed": 0,
+ "colonless_class_E": true,
+ "counters": {
+  "rows_flagged": 657,
+  "rows_skipped": 657,
+  "skipped_binding_credit_union_stance_channel_row": 16,
+  "skipped_binding_kept_text_under_min_turn_words": 538,
+  "skipped_binding_label_or_gold_record_points_here": 103,
+  "skipped_credit_union_stance_channel_row": 16,
+  "skipped_kept_text_under_min_turn_words": 554,
+  "skipped_label_or_gold_record_points_here": 103
+ },
+ "db": "C:/Users/pgoff/OneDrive/Desktop/Melange Systems/social_media.db",
+ "db_bytes": 500842496,
+ "every_row_reconstructs": true,
+ "interview_rows": 153576,
+ "interview_words": 12156955,
+ "ledger_path": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\claude\\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\\scratchpad\\landN12v2\\dryout\\dry_run_ledger.jsonl",
+ "protection_rows": 2105,
+ "rows_flagged": 657,
+ "rows_would_insert": 0,
+ "rows_would_skip": 657,
+ "rows_would_truncate": 0,
+ "share_of_interview_words_removed": 0.0,
+ "share_of_words_kept": null,
+ "speeches_rows": 270489,
+ "tags_by_ownership": {
+  "foreign": 783,
+  "own": 22
+ },
+ "tool_version": "interview-turn-bleed-v2-truncate-only",
+ "words_before_on_truncated_rows": 0,
+ "words_kept_on_truncated_rows": 0,
+ "words_removed": 0
+}

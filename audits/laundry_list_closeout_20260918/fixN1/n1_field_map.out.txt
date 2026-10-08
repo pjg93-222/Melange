@@ -1,0 +1,105 @@
+﻿press_stream ROOT  : C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv
+press_stream REFR  : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data\stance\press_refresh_tone.csv
+exists base/refresh: True True
+
+workbook sheets containing "Press": ['Press Release - Normalized', 'Press Release - Raw', 'Press Release Articles']
+
+-- SHEET "Press Release Articles" header (28 columns) --
+    0  'member'
+    1  'bioguide'
+    2  'chamber'
+    3  'state'
+    4  'party'
+    5  'date'
+    6  'title'
+    7  'url'
+    8  'categories'
+    9  'relevance'
+   10  'score'
+   11  'score_graded'
+   12  'score_label'
+   13  'stance'
+   14  'stance_sign'
+   15  'p_support'
+   16  'p_oppose'
+   17  'p_neutral'
+   18  'stance_conf'
+   19  'n_words'
+   20  'lsd_pos'
+   21  'lsd_neg'
+   22  'lsd_net'
+   23  'lsd_net_norm'
+   24  'lsd_charge'
+   25  'stance_src'
+   26  'press_value'
+   27  'recency_weight'
+
+-- the 13 columns the desk actually reads (pv(r, k) call sites) --
+   member         sheet index 0
+   bioguide       sheet index 1
+   url            sheet index 7
+   stance_src     sheet index 25
+   score          sheet index 10
+   stance_sign    sheet index 14
+   score_graded   sheet index 11
+   title          sheet index 6
+   stance         sheet index 13
+   stance_conf    sheet index 18
+   date           sheet index 5
+   categories     sheet index 8
+   relevance      sheet index 9
+
+sheet data rows: 3701   billstatus: rows: 1310
+
+-- python type census per desk-read column --
+   member         {'str': 3701}
+   bioguide       {'str': 3701}
+   url            {'str': 3701}
+   stance_src     {'str': 3701}
+   score          {'int': 3701}
+   stance_sign    {'int': 3701}
+   score_graded   {'int': 605, 'float': 3096}
+   title          {'str': 3701}
+   stance         {'str': 3701}
+   stance_conf    {'float': 3027, 'int': 674}
+   date           {'datetime': 3457, 'str': 244}
+   categories     {'str': 3701}
+   relevance      {'str': 3701}
+
+-- sheet date shape (what fdate() sees) --
+   datetime|digit4                  3457
+   str|NOT-digit4                    244
+
+-- sheet stance_src values (the `if src == 'bill'` branch) --
+   debate                       2391
+   bill                         1310
+
+-- 3 sheet rows verbatim --
+   {'member': 'Aaron Bean', 'bioguide': 'B001314', 'url': 'https://www.americascreditunions.org/news-media/news/league-contributes-450k-naf-advance-credit-union-priorities#B001314', 'stance_src': 'debate', 'score': 0, 'stance_sign': 1, 'score_graded': 0, 'title': 'The League contributes $450K to NAF to advance credit union priorities', 'stance': 'support', 'stance_conf': 0.9994, 'date': datetime.datetime(2025, 3, 14, 0, 0), 'categories': 'General Credit Union', 'relevance': 'credit-union mention'}
+   {'member': 'Aaron Bean', 'bioguide': 'B001314', 'url': 'https://bean.house.gov/media/press-releases/bean-bill-simplify-social-security-moves-forward', 'stance_src': 'debate', 'score': 1, 'stance_sign': 0, 'score_graded': 0.4, 'title': 'Bean Bill to Simplify Social Security Moves Forward', 'stance': 'neutral', 'stance_conf': 0.9999, 'date': datetime.datetime(2025, 9, 17, 0, 0), 'categories': 'Technology & Emerging Issues', 'relevance': 'tracked bill only'}
+   {'member': 'Aaron Bean', 'bioguide': 'B001314', 'url': 'https://bean.house.gov/media/press-releases/congressman-bean-another-great-year-fighting-northeast-floridians', 'stance_src': 'debate', 'score': 1, 'stance_sign': 0, 'score_graded': 0.4, 'title': 'Congressman Bean: Another Great Year of Fighting for Northeast Floridians', 'stance': 'neutral', 'stance_conf': 0.9969, 'date': datetime.datetime(2025, 12, 31, 0, 0), 'categories': 'Technology & Emerging Issues; Fraud Prevention', 'relevance': 'tracked bill only'}
+
+-- TONE CSV headers --
+base    (2388 rows) 28 cols: ['member', 'bioguide', 'chamber', 'state', 'party', 'date', 'title', 'url', 'categories', 'relevance', 'score', 'score_graded', 'score_label', 'stance', 'stance_sign', 'p_support', 'p_oppose', 'p_neutral', 'stance_conf', 'n_words', 'lsd_pos', 'lsd_neg', 'lsd_net', 'lsd_net_norm', 'lsd_charge', 'stance_src', 'press_value', 'recency_weight']
+refresh (291 rows) 30 cols: ['member', 'bioguide', 'chamber', 'state', 'party', 'date', 'title', 'url', 'categories', 'relevance', 'score', 'score_graded', 'score_label', 'stance', 'stance_sign', 'p_support', 'p_oppose', 'p_neutral', 'stance_conf', 'n_words', 'lsd_pos', 'lsd_neg', 'lsd_net', 'lsd_net_norm', 'lsd_charge', 'stance_src', 'press_value', 'recency_weight', 'source_run', 'source']
+
+desk-read columns MISSING from base   : []
+desk-read columns MISSING from refresh: []
+
+sheet columns with NO base-CSV counterpart: []
+base-CSV columns with NO sheet counterpart: []
+refresh-CSV columns with NO sheet counterpart: ['source_run', 'source']
+
+-- tone CSV date shapes (what fdate() would see UNCHANGED) --
+   base     {'NOT-digit4(NA)': 244, 'NOT-digit4(7/17/2025)': 35, 'NOT-digit4(5/20/2026)': 31, 'NOT-digit4(3/12/2026)': 30, 'NOT-digit4(2/6/2025)': 20, 'NOT-digit4(3/5/2026)': 19}
+   refresh  {'digit4': 291}
+
+-- tone CSV stance_src values --
+   base     {'debate': 1891, 'human_label': 497}
+   refresh  {'press_refresh_rules_v1': 291}
+
+-- tone CSV relevance values --
+   base     {'credit-union mention': 1322, 'tracked bill only': 852, 'anti-big-bank (pro-CU)': 214}
+   refresh  {'tracked bill only': 187, 'credit-union mention': 89, 'anti-big-bank (pro-CU)': 15}
+
+DONE probe_map

@@ -1,0 +1,51 @@
+====================================================================================================
+Q2c  the FIVE workbook 'Sponsor Interactions' Tim Scott x Member Business Lending rows, traced
+====================================================================================================
+
+-- S.2486 (119th)  sponsor role_weight 3.0 x decay 1.00 = 3.00 signed weight
+   workbook['Sponsor Interactions'] sections for Tim Scott: ['Member Business Lending']
+   selected archive: rows for this bill = 9 ; roles present = ['original-cosponsor', 'sponsor'] ; sections = ['Member Business Lending']
+   selected archive: Tim Scott rows = [('Member Business Lending', 'sponsor')]
+   sentinel verified: Tim Scott rows = []
+   routing audit: [('Member Business Lending', 'sponsor', 'Member Business Lending', 'selected', 3.0)]
+
+-- S.3382 (117th)  sponsor role_weight 3.0 x decay 0.64 = 1.92 signed weight
+   workbook['Sponsor Interactions'] sections for Tim Scott: ['Member Business Lending']
+   selected archive: rows for this bill = 37 ; roles present = ['cosponsor', 'original-cosponsor'] ; sections = ['Member Business Lending']
+   selected archive: Tim Scott rows = []
+   sentinel verified: Tim Scott rows = []
+   routing audit: []
+
+-- S.3992 (118th)  sponsor role_weight 3.0 x decay 0.80 = 2.40 signed weight
+   workbook['Sponsor Interactions'] sections for Tim Scott: ['Member Business Lending']
+   selected archive: rows for this bill = 28 ; roles present = ['cosponsor', 'original-cosponsor'] ; sections = ['Member Business Lending']
+   selected archive: Tim Scott rows = []
+   sentinel verified: Tim Scott rows = []
+   routing audit: []
+
+-- S.762 (117th)  sponsor role_weight 3.0 x decay 0.64 = 1.92 signed weight
+   workbook['Sponsor Interactions'] sections for Tim Scott: ['Charter Modernization & Governance', 'Member Business Lending', 'Mortgage Lending & Housing']
+   selected archive: rows for this bill = 14 ; roles present = ['cosponsor', 'original-cosponsor', 'sponsor'] ; sections = ['Charter Modernization & Governance', 'Member Business Lending', 'Mortgage Lending & Housing']
+   selected archive: Tim Scott rows = [('Charter Modernization & Governance', 'sponsor'), ('Mortgage Lending & Housing', 'sponsor')]
+   sentinel verified: Tim Scott rows = []
+   routing audit: [('Charter Modernization & Governance', 'sponsor', 'Charter Modernization', 'selected', 1.9200000000000004), ('Mortgage Lending & Housing', 'sponsor', 'Mortgage & Housing', 'selected', 1.9200000000000004)]
+
+-- S.J.Res.18 (119th)  sponsor role_weight 3.0 x decay 1.00 = 3.00 signed weight
+   workbook['Sponsor Interactions'] sections for Tim Scott: ['Credit Union Capital Requirements', 'Member Business Lending']
+   selected archive: rows for this bill = 34 ; roles present = ['cosponsor', 'original-cosponsor', 'sponsor'] ; sections = ['Credit Union Capital Requirements', 'Member Business Lending']
+   selected archive: Tim Scott rows = [('Credit Union Capital Requirements', 'sponsor'), ('Member Business Lending', 'sponsor')]
+   sentinel verified: Tim Scott rows = []
+   routing audit: [('Credit Union Capital Requirements', 'sponsor', 'CFPB', 'selected', 3.0), ('Member Business Lending', 'sponsor', 'CFPB', 'duplicate-same-role', 3.0)]
+
+   workbook sponsor-row total signed weight = 12.24   (July finding: 12.24)
+
+-- what the stance matrix actually holds --
+   archive_leg.json['Tim Scott']['Member Business Lending'] = 10.7600
+   sum of Tim Scott MBL 'selected' routing contributions = 10.7600 across 6 rows
+      S.2486         C=119  sponsor              +3.000
+      S.293          C=118  original-cosponsor   +1.600
+      S.389          C=117  original-cosponsor   +1.280
+      S.401          C=119  original-cosponsor   +2.000
+      S.563          C=117  original-cosponsor   +1.280
+      S.J.Res.32     C=118  original-cosponsor   +1.600
+   archive_leg.json['Tim Scott']['CFPB'] = 13.6800  (S.J.Res.18's +3.00 lands here via bill_overrides.csv)

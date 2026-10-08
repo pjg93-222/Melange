@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ELL25691-0R3-D4-K68">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3023 IS: Safe Cloud Storage Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-10-21</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3023</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251021">October 21, 2025</action-date>
+            <action-desc><sponsor name-id="S396">Mrs. Blackburn</sponsor> (for herself, <cosponsor name-id="S311">Ms. Klobuchar</cosponsor>, <cosponsor name-id="S287">Mr.
+                    Cornyn</cosponsor>, and <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>)
+                introduced the following bill; which was read twice and referred to the
+                    <committee-name committee-id="SSJU00">Committee on the
+                    Judiciary</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To limit liability for certain entities storing child sexual abuse material
+            for law enforcement agencies, and for other purposes.</official-title>
+    </form>
+    <legis-body>
+        <section id="S1" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Safe Cloud Storage Act</short-title></quote>.</text>
+        </section>
+        <section section-type="subsequent-section" commented="no" display-inline="no-display-inline" id="idcfab6d1153b24d2db2cdfb9036db1573">
+            <enum>2.</enum>
+            <header>Storage of child sexual abuse material</header>
+            <subsection commented="no" display-inline="no-display-inline" id="idad1fc6457678432e9fe8ef4afced8f32">
+                <enum>(a)</enum>
+                <header display-inline="yes-display-inline">In general</header>
+ <text display-inline="yes-display-inline">Title II of the PROTECT Our Children Act of 2008 (<external-xref legal-doc="usc" parsable-cite="usc/34/21101">34 U.S.C. 21101 et seq.</external-xref>) is amended by inserting after section 201 the following:</text>
+                <quoted-block style="OLC" display-inline="no-display-inline" id="idb830e7ed3a8f47cf9cd4b35f00528008">
+                    <section id="idac1bda7f82274d5baa95aa0e1594e598">
+                        <enum>202.</enum>
+                        <header>Modernizing law enforcement's ability to store child pornography and
+                            child obscenity and limited liability for approved vendors</header>
+                        <subsection id="ida18486711b624ea2bdc43ab423ab1fe8">
+                            <enum>(a)</enum>
+                            <header>Definitions</header>
+ <text>In this section:</text> <paragraph commented="no" display-inline="no-display-inline" id="idf853d6e1136244428a1201aea8a5738a"> <enum>(1)</enum> <header>Approved vendor</header> <text display-inline="yes-display-inline">The term <term>approved vendor</term> means an organization, corporation, or entity that—</text>
+                                <subparagraph id="id98fb91ebb091445d91fe795ef011ff60">
+                                    <enum>(A)</enum>
+ <text>offers digital storage services, including remote or cloud-based storage, and analytical and forensic tool processing support; and</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="id7cc8189117484f95aa510ce521913120">
+                                    <enum>(B)</enum>
+ <text>has been contractually retained and designated by a law enforcement or prosecutorial agency based in the United States to support the duties of such agency by—</text>
+                                    <clause commented="no" display-inline="no-display-inline" id="idaadf7c3ee23140299b0d264360c004a0">
+                                        <enum>(i)</enum>
+ <text>storing digital child pornography or child obscenity;</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="id674a16c0124549d2935d870b33c3b72f">
+                                        <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">making such child pornography or child obscenity available to the contracting agency, or any law enforcement or prosecutorial agency designated by the contracting agency, upon request; and</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline" id="iddde2e423c0e749ddb705ec5e748d8eee">
+                                        <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">providing maintenance, technical and analytical assistance, and forensic tool processing support upon request by the contracting agency.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph commented="no" display-inline="no-display-inline" id="id3bdf4a58831d4fca9248b0e619d9df2b">
+                                <enum>(2)</enum>
+                                <header>Child pornography</header>
+ <text>The term <term>child pornography</term> has the meaning given that term in section 2256 of title 18, United States Code.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="idd23f60d8bdce489f99aab6f8289e0a57">
+                            <enum>(b)</enum>
+                            <header>Limited liability for approved vendors</header>
+                            <paragraph id="id9c69e55c657743ed8892f837d8e7357b">
+                                <enum>(1)</enum>
+                                <header>Limited liability for law enforcement approved
+                                    vendors</header>
+ <text>Except as provided in paragraph (2), a civil claim or criminal charge may not be brought in any Federal or State court against an approved vendor relating to the approved vendor's performance of any contractual obligation or service described in subsection (a)(1).</text>
+                            </paragraph>
+                            <paragraph id="idbcdc70b2b10f4051999c0592f6b969c2">
+                                <enum>(2)</enum>
+                                <header>Intentional, reckless, or other misconduct</header>
+ <text>A civil claim or criminal charge may be brought in any Federal or State court against an approved vendor if the approved vendor—</text>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="id103d84fb771248ee9ade9162821e3439">
+                                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">engaged in—</text> <clause id="id9a896d5c82b84a44a6122f6dfeab305b"> <enum>(i)</enum> <text>intentional misconduct; or</text>
+                                    </clause>
+                                    <clause id="id7dfa3f23fcaa45a7bea329c43d483097">
+                                        <enum>(ii)</enum>
+ <text>negligent conduct;</text> </clause> </subparagraph> <subparagraph id="id7ad9756ea2ce479f946e6f816c7f1008"> <enum>(B)</enum> <text>acted, or failed to act—</text>
+                                    <clause id="id6549872a4b9c406e914e3c7df772da52">
+                                        <enum>(i)</enum>
+ <text>with actual malice;</text> </clause> <clause id="id1b339ed8b8ed4955bdca1b698b9bfa76"> <enum>(ii)</enum> <text>with reckless disregard to a substantial risk of causing injury without legal justification; or</text>
+                                    </clause>
+                                    <clause id="id6d48362a7f20485286ccd54e8aacd4bc">
+                                        <enum>(iii)</enum>
+ <text>for a purpose unrelated to the performance of any responsibility or function described in subsection (a)(1)(B).</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="ida2cfaad6396447179cdc91c04a937d8b">
+                            <enum>(c)</enum>
+                            <header>Vendor cybersecurity requirements</header>
+ <text>With respect to any visual depiction stored and available for analysis in the cloud storage service of an approved vendor, and pursuant to the duties of law enforcement in the investigation of the sexual exploitation of children, an approved vendor shall—</text>
+                            <paragraph id="id3cd1c51c7b0742f2be345378d0838ae9">
+                                <enum>(1)</enum>
+ <text>secure such visual depiction in a manner that is consistent with the most recent version of the Cybersecurity Framework developed by the National Institute of Standards and Technology, or any successor thereto;</text>
+                            </paragraph>
+                            <paragraph id="id251f77a6102e4f6cbce6461fd3dcf2fc">
+                                <enum>(2)</enum>
+ <text>only access the visual depictions upon consent of the law enforcement or prosecutorial agency contracting the service and for the purpose of providing maintenance, technical assistance, and forensic tool processing support in the cloud;</text>
+                            </paragraph>
+                            <paragraph id="id0891b6a518de473b82e211f398dc7707">
+                                <enum>(3)</enum>
+ <text>minimize the number of employees that may be able to obtain access to such visual depiction;</text>
+                            </paragraph>
+                            <paragraph id="id9209e23978db4da1a2cf60b762778a6b">
+                                <enum>(4)</enum>
+ <text>employ end-to-end encryption for data storage and transfer functions, or an equivalent technological standard;</text>
+                            </paragraph>
+                            <paragraph id="iddfea0fcd69944fda8d831bb13653bec5">
+                                <enum>(5)</enum>
+ <text>undergo an independent annual cybersecurity audit to determine whether such visual depiction is secured as required under paragraph (1); and</text>
+                            </paragraph>
+                            <paragraph id="id307f299ffdcc4cd9b280a31c2a5a045b">
+                                <enum>(6)</enum>
+ <text>promptly address all issues identified by an audit described in paragraph (5).</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="iddc8ef60ddb9c449f89547996e78bf7b9">
+                            <enum>(d)</enum>
+                            <header>Evidence storage</header>
+ <text>Any law enforcement or prosecutorial agency that stores evidence of child pornography and child obscenity using cloud-based or remote storage services shall retain such evidence—</text>
+                            <paragraph id="id302a9454f3224d159bef564cd0112fdf">
+                                <enum>(1)</enum>
+ <text>in compliance with the security policy of the Criminal Justice Information Services of the Federal Bureau of Investigation;</text>
+                            </paragraph>
+                            <paragraph id="id924759bd42a24952be4f7727e2d83939">
+                                <enum>(2)</enum>
+ <text>for a period consistent with the evidence retention requirements applicable to the investigating or prosecuting agency under the relevant Federal, State, or local law, rule of criminal procedure, or prosecutorial policy; or</text>
+                            </paragraph>
+                            <paragraph id="id05348dfb51124ae29be8e7dc2298b58d">
+                                <enum>(3)</enum>
+ <text>in the absence of such law, rule, or policy, for a period not less than the applicable statute of limitations or the duration of any sentence imposed, including the period of post-conviction review.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="id80c92bb410814e22816f4a60ca9ac1e0">
+                            <enum>(e)</enum>
+                            <header>Additional requirements for approved vendors</header>
+                            <paragraph id="idf4b7f248afdf4128942f9ca4d00e1a99">
+                                <enum>(1)</enum>
+                                <header>In general</header>
+ <text>Each approved vendor shall ensure that cloud-based storage and analytics of child pornography and child obscenity under this section remain in the United States.</text>
+                            </paragraph>
+                            <paragraph id="idb4eaf577f396497f9943b9bd4e896190">
+                                <enum>(2)</enum>
+                                <header>Notification letter</header>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="id85a6b6217f08481bbd1dbc87b8f6294b">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text display-inline="yes-display-inline">Approved vendors shall file a notification letter with the Department of Justice not later than 30 days after entering into a contract described in subsection (a)(1)(B). </text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="idd5b87148b8254c3eb3c61e4020ca2199">
+                                    <enum>(B)</enum>
+                                    <header>Contents</header>
+ <text display-inline="yes-display-inline">The notification letter shall include the entity name and point of contact information of the approved vendor, the name of the contracting agency, the period of performance of the contract, and an acknowledgment by the approved vendor that the approved vendor will notify the Department of Justice of any changes to the information in the letter.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id0cc7de2257724b24a13996d814c4b149">
+                                <enum>(3)</enum>
+                                <header>Breach of contract</header>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="idc837b87f7ae64a7e80e80d2a2dea2ccb">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text display-inline="yes-display-inline">If a law enforcement or prosecutorial agency fails to make required payment under a contract, breaches any material term of such contract, or otherwise terminates such contract without establishing lawful transfer of the evidence, the approved vendor shall, not later than 30 days after the failure, breach, or termination, notify the Department of Justice, or in the case of a State or local agency, the appropriate State attorney general.</text>
+                                </subparagraph>
+                                <subparagraph id="idfad5304e4f344dfea19335e93bfbf895">
+                                    <enum>(B)</enum>
+                                    <header>Maintenance of evidence</header>
+ <text>Upon making a notification under subparagraph (A), the approved vendor shall continue to preserve and maintain the integrity of the evidence until a lawful transfer of custody occurs to the Department of Justice or another Federal, State, or local law enforcement agency with jurisdiction.</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                    </section>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+            <subsection commented="no" display-inline="no-display-inline" id="id85717b980d1241e2a2f8fa5819e7b8e9">
+                <enum>(b)</enum>
+                <header>Clerical amendment</header>
+ <text>Section 1(b) of the PROTECT Our Children Act of 2008 (<external-xref legal-doc="public-law" parsable-cite="pl/110/401">Public Law 110–401</external-xref>; 122 Stat. 4229) is amended by inserting after the item relating to section 201 the following:</text>
+                <quoted-block style="OLC" display-inline="no-display-inline" id="idb17fc5deb5064f84af2dd190e4c1f1e3">
+                    <toc>
+                        <toc-entry level="section" bold="off">Sec. 202. Modernizing law
+                            enforcement's ability to store child pornography and child obscenity and
+                            limited liability for approved vendors.</toc-entry>
+                    </toc>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

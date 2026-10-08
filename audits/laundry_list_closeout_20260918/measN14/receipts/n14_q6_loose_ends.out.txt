@@ -1,0 +1,56 @@
+====================================================================================================
+N14 LOOSE ENDS   run 2026-09-19T13:06:11
+====================================================================================================
+-- 1. SHARED KEYS THE DESK DROPS (unresolved member) --
+   shared keys 2376 | dropped for an unresolved member 2
+   James Moylan                 bioguide=M001219    in the 57: no  in the 493 human_label set: no 
+      title FEDERAL EMPLOYEE GOVERNMENT SHUTDOWN RESOURCE GUIDE
+   Stacey Plaskett              bioguide=P000610    in the 57: no  in the 493 human_label set: no 
+      title PLASKETT ANNOUNCES OVER $2 BILLION DOLLARS FOR VI WASTEWATER SYSTEM REPLACEMENT
+   => the 57 disagreements the DESK would actually display: 57
+   => the 493 stance_src keys the DESK would actually display: 493
+
+-- 2. cu_stance_label_set VINTAGE: csv vs the two xlsx mirrors --
+   Draft csv   mtime 2026-06-30T18:56:09  sha256 bcdd9e8f82937a8e
+   Draft xlsx  mtime 2026-06-23T22:45:01  sha256 783d465c2a881337
+   LIVE  xlsx  mtime 2026-06-30T00:17:20  sha256 3a3bd0a2944d697b
+   Draft cu_stance_label_set.xlsx   [To Rework     ] of the 57: {'xlsx agrees with the CSV': 17, 'xlsx agrees with the SHEET': 5}   | rows whose human_label DIFFERS from the csv: 9
+   Draft cu_stance_label_set.xlsx   [Done (locked) ] of the 57: {'xlsx agrees with the CSV': 18, 'xlsx agrees with the SHEET': 15, 'xlsx agrees with NEITHER': 2}   | rows whose human_label DIFFERS from the csv: 25
+   LIVE  cu_stance_label_set.xlsx   [To Rework     ] of the 57: {'xlsx agrees with the CSV': 18, 'xlsx agrees with the SHEET': 4}   | rows whose human_label DIFFERS from the csv: 8
+   LIVE  cu_stance_label_set.xlsx   [Done (locked) ] of the 57: {'xlsx agrees with the CSV': 18, 'xlsx agrees with the SHEET': 15, 'xlsx agrees with NEITHER': 2}   | rows whose human_label DIFFERS from the csv: 25
+   The csv (2026-06-30T18:56) is the LATEST label-set artifact; both xlsx copies predate
+   it.  A row where the older xlsx agrees with the SHEET and the newer csv does not is a
+   release whose label MOVED between the two owner passes.
+
+-- 3. cu_golden_labels.csv (2026-07-04, the NEWEST owner press-label record found) --
+   rows 760 | url-keyed 758 | mtime 2026-07-04T15:47:06
+   {'gold == CSV stance': 53, 'gold == SHEET stance': 4}
+      Jon Ossoff             El Senador Ossoff Presenta Proyecto de Ley Bipar gold=neutral   sheet=neutral  csv=oppose   split=train
+      Kirsten Gillibrand     Gillibrand Slams Trump Administration For Making gold=neutral   sheet=neutral  csv=oppose   split=train
+      Lance Gooden           Interchange bill should be rejected in any form  gold=oppose    sheet=oppose   csv=support  split=test
+      Roger Marshall         America’s Credit Unions joins with other industr gold=oppose    sheet=oppose   csv=support  split=train
+
+-- 4. CU_Press_Stance_Tone.xlsx: Draft copy vs LIVE-root copy --
+   Draft Releases: 2387 rows, 2375 distinct release urls, dates - .. -
+   LIVE  Releases: 3631 rows, 3619 distinct release urls, dates 2022-01-05 .. 2026-06-21
+   The LIVE-root copy holds ~1,240 more releases than the Draft copy that shares the
+   base tone CSV's mtime.  UNKNOWN: which run wrote the LIVE-root copy -- no repo script
+   names it (grep over fec/ for CU_Press_Stance_Tone returns no writer).
+
+-- 5. THE 37 TITLE DISAGREEMENTS: WHICH SIDE IS MOJIBAKE? --
+   title disagreements: 37
+   SHEET side carries mojibake, CSV clean : 36
+   CSV side carries mojibake, SHEET clean : 0
+   neither/both                           : 1
+      sheet='ICYMI â€“ Bera on CNN: â€œTrump Could End This Shutdown With One'
+      csv  ='ICYMI – Bera on CNN: “Trump Could End This Shutdown With One Cal'
+      sheet='BOYLE RE-INTRODUCES â€œMEMBERSâ€\x9d RESOLUTION'
+      csv  ='BOYLE RE-INTRODUCES “MEMBERS” RESOLUTION'
+      sheet='Sullivan Recognizes Longtime Staff Member Kathlene Rowell as â€œ'
+      csv  ='Sullivan Recognizes Longtime Staff Member Kathlene Rowell as “Al'
+      sheet='Congressman Meuser Helps Lead Passage of the GENIUS Act, Anti-CB'
+      csv  ='Congressman Meuser Helps Lead Passage of the GENIUS Act, Anti-CB'
+      sheet='Ranking Member Markey Criticizes Trumpâ€™s â€œFreedom 250â€\x9d and'
+      csv  ='Ranking Member Markey Criticizes Trump’s “Freedom 250” and Corpo'
+wrote n14_q6_loose_ends.json
+DONE N14 LOOSE ENDS

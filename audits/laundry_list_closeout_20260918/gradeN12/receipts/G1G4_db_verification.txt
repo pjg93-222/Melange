@@ -1,0 +1,50 @@
+V1  the qmb package rowid 245558 belongs to (5 of the 64 inserts come from this one row)
+    rowid=245558  Mike Johnson           nw=612   You see there are these large flowers down there. There's some white ones, some pink ones; that's a native hibiscus. It's in the mallow fami
+
+V2  Mike Johnson INTERVIEW rows by show (top 12):
+    show=cnr              rows=356
+    show=cnc              rows=254
+    show=ctmo             rows=234
+    show=meet-the-press   rows=160
+    show=cg               rows=146
+    show=pbs-newshour     rows=138
+    show=ip               rows=115
+    show=face-the-nation  rows=112
+    show=sitroom          rows=103
+    show=skc              rows=90
+    show=washington-journal rows=80
+    show=npr-all-things-considered rows=70
+
+V3  every Daniel Webster INTERVIEW row:
+    rowid=142675  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=79    Well, it probably is unfortunate what happened. But my problem is not with any of the individuals running for speaker. My problem is with the way the House of R
+    rowid=142676  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=111   Oh, they will get the advantage. Every rank-and-file member will have an advantage. When a few people at the top of the pyramid of power make all the decisions,
+    rowid=142677  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=54    Well, I'm the opposite of that. I want to have a flattened-out pyramid of power, where every member gets to be a part. And the advantage to that is this. And th
+    rowid=142678  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=51    When I was in the state legislature, we had about the same kind of polling, until we took over and we changed everything. We took up the most important issues f
+    rowid=142679  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=10    No, because we're going to take up the issues first.
+    rowid=142680  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=15    We're going to get them done first. And it works. And then in the end...
+    rowid=142681  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=82    Well, here's what I'm telling you. When you do what I'm just describing, our numbers flipped right side up, 56-27. Name any legislative body in the country that
+    rowid=142682  2015-10-06 daniel-webster-makes-pitch-to-be-next-house-speaker nw=9     Good seeing you. Thanks for letting me be on.
+    rowid=187839  2015-10-25 house-freedom-caucus-playing-central-role-in-speaker-race-american-sergeant-gives-his-life-to-save-hostages-from-isis nw=28    I am surely interested in being speaker because I'm fighting against the way the process is. A power based process. I want to see everything based on principle.
+    rowid=225986  2022-05-29 cnr        nw=75    Their rates of gun violence declined quite substantially, both with respect to homicides and with suicides. And it virtually eliminated fatal mass shootings. TO
+    rowid=225987  2022-05-29 cnr        nw=30    It's the simple structure of our government in the United States that gives substantially undue power to low population, mostly rural states that are not too ke
+    rowid=251777  2015-09-28 what-new-polls-reveal-about nw=56    No, what I'm promising is a principle-based, member-driven congress. I believe that's the most important thing. Power and principle cannot coexist. So what I wo
+    rowid=251778  2015-09-28 what-new-polls-reveal-about nw=115   Well, I think the real key here -- I didn't cause the problem. I only exposed one. The exposing of a problem is similar to what I did in Florida when I became t
+    rowid=251779  2015-09-28 what-new-polls-reveal-about nw=101   I think one of the key things is to take up the most important things first. That's it. And I know in Florida when I did that, the session before I became speak
+    rowid=256396  2023-06-22 npr-morning-edition nw=57    An epidemic is a rapid spread of disease to many at-risk individuals in a given population within a relatively short period of time. MARTÍNEZ: That's Daniel Web
+    rowid=256397  2023-06-22 npr-morning-edition nw=47    Well, that's the classic thing from a public health textbook. But we have long been thinking about gun violence as a public health problem that has many analogi
+    rowid=256398  2023-06-22 npr-morning-edition nw=139   Well, of course, it has impact on the kind of indicators that we think about in public health. It affects mortality risk, injury risk, mental health. But also, 
+    rowid=256399  2023-06-22 npr-morning-edition nw=99    Almost definitely it's a public health emergency. And again, just to be clear, I would consider gun violence also an epidemic. It is a leading cause of death fo
+    rowid=256400  2023-06-22 npr-morning-edition nw=306   So I'll start with gun policy. And the policy that we have found to have the largest impact across many forms of gun violence is purchaser licensing requirement
+    rowid=256401  2023-06-22 npr-morning-edition nw=130   Thank you. Copyright © 2023 NPR. All rights reserved. Visit our website terms of use and permissions pages at www.npr.org for further information. Accuracy and 
+    rowid=277115  2019-08-08 npr-all-things-considered nw=19    I'm a little bit dubious that safe storage will be relevant to the vast majority of suicides with firearms.
+    rowid=277116  2019-08-08 npr-all-things-considered nw=28    There is no law in place now that says that CDC can't talk about the research and what's been learned about the connection between firearms and suicide risk.
+
+V4  rowid 83061 (Maxine Dexter) full stored text; the removed segment holds her own words:
+    I need people to not take the bait. PROKUPECZ (voice-over): That's why Maxine Dexter wants all these protesters to leave the ICE facility. The Democratic congresswoman from Portland supports their message, but fears they're playing into President Trump's hands. The question is, are we being strategic? Are we being effective? And I would argue that being down there, taking a risk, that you become a player in this reality TV vision that Donald Trump has of Portland is a mistake. [20:40:11] PROKUPECZ (voice-over): It seems unlikely she'll get her wish. Protester Justin Allen doesn't think any of these people are going away.
+
+V5  two of the four untouched rows are a duplicate ingest of one CNN package:
+    rowid=69544   James Comer    date=2024-07-23 nw=64
+            package=https://transcripts.cnn.com/show/cnr/date/2024-07-23/segment/23
+    rowid=244993  James Comer    date=2023-07-23 nw=64
+            package=https://transcripts.cnn.com/show/cnr/date/2023-07-23/segment/23
+    (member,text) INTERVIEW duplicate groups in the corpus TODAY: 3295

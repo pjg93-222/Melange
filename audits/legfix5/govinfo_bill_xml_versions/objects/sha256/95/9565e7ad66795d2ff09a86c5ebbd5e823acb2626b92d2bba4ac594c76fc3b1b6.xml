@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H51AF2DD33C254CB4BF9E7D6C2AF42EFF" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5363 IH: Fostering Undergraduate Talent by Unlocking Resources for Education Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-12-09</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5363</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191209">December 9, 2019</action-date><action-desc><sponsor name-id="A000370">Ms. Adams</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Labor</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To reauthorize mandatory funding programs for historically Black colleges and universities and
+			 other minority-serving institutions, and for other purposes.</official-title></form>
+	<legis-body id="HC915B281A84E4043B64FBA03FB9132FD" style="OLC">
+		<section id="H903541201BBD40F682B1E3292300F12E" section-type="section-one"><enum>1.</enum><header>Short title; references</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fostering Undergraduate Talent by Unlocking Resources for Education Act</short-title></quote> or the <quote><short-title>FUTURE Act</short-title></quote>.</text> </section><section id="HB17B914B9EA0489E9A843AF71E1573C1"><enum>2.</enum><header>Continued support for minority-serving institutions</header><text display-inline="no-display-inline">Section 371(b)(1)(A) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1067q">20 U.S.C. 1067q(b)(1)(A)</external-xref>) is amended by striking <quote>for each of the fiscal years 2008 through 2019.</quote> and all that follows through the end of the subparagraph and inserting <quote>for fiscal year 2020 and each fiscal year thereafter.</quote>.</text>
+ </section><section id="HB211DCD595A84ACB9CD323966686BC07"><enum>3.</enum><header>Increased funding for Federal Pell Grants</header><text display-inline="no-display-inline">Section 401(b)(7)(A)(iv) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1070a">20 U.S.C. 1070a(b)(7)(A)(iv)</external-xref>) is amended—</text>
+ <paragraph id="HFCA6B55124914BA682E5A9221C3F7510"><enum>(1)</enum><text display-inline="yes-display-inline">in subclause (X), by striking <quote>$1,430,000,000</quote> and inserting <quote>$1,455,000,000</quote>; and</text> </paragraph><paragraph id="H1C27A893133541748DCDD9B3BF75C56B"><enum>(2)</enum><text display-inline="yes-display-inline">in subclause (XI), by striking <quote>$1,145,000,000</quote> and inserting <quote>$1,170,000,000</quote>.</text>
+			</paragraph></section></legis-body></bill>
+
+

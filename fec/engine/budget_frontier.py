@@ -46,8 +46,21 @@ CRN=os.environ.get('FRONTIER_CRN','1')!='0'
 DELIV=os.environ.get('FRONTIER_DELIVERY','1')!='0'
 # QME 2026-10-01 (fix 7): knee/peak from the TRUE un-clamped path (clamped display curve hides MC dips so its marginals were biased up/zeroed). 0 = old.
 KNEE_RAW=os.environ.get('FRONTIER_KNEE_RAW','1')!='0'
+def frontier_knee(path,raw=True):
+    """Inclusive quarter-peak rule on the stored one-decimal spread path, in exact tenths."""
+    if len(path)<2: return 0,False
+    key='spread_raw' if raw else 'spread'
+    ticks=[int(round(p[key]*10)) for p in path]   # recover the already-rounded decimal lattice before subtraction
+    gains=[ticks[i]-ticks[i-1] for i in range(1,len(ticks))]
+    peak=max(gains); knee=0
+    for point,gain in zip(path[1:],gains):
+        if 4*gain>=peak: knee=point['b']
+    return knee,0<knee<path[-1]['b']
 bpf=MBC.bpf()
 EL=json.load(open(B+r'\data\money\electoral.json')); lev={m:(EL.get(m,{}).get('leverage',1.0) if LEVON else 1.0) for m in members}
+# COMPET_MULT (Paul 2026-10-05): when ON the Ballotpedia leverage factor is REPLACED by the Cook-PVI competitiveness multiplier c, same position in `fac`
+# (REPFAC*lev / lev below). Dial OFF leaves lev exactly as above. Bystander activation min(.9,ind/BSCALE) is untouched; build_electoral.py is untouched.
+lev=({m:MBC.cmult(m) for m in members} if MBC.compet_on() else lev)
 ELECTORAL=os.environ.get('ELECTORAL','0')=='1' or '--electoral' in sys.argv   # toggleable mode: add contest plays to the frontier
 REPFAC=float(os.environ.get('REPFAC','0.6'))                                   # primary-win feasibility discount on contest plays
 EP=json.load(open(B+r'\data\money\electoral_plays.json'))
@@ -154,19 +167,14 @@ for sc in blocks:
         else:
             heapq.heappush(pq,(-marg(c,S,D,cur),c,it))
     # diminishing-returns knee: last seed whose marginal >= 25% of the best marginal
-    _k='spread_raw' if KNEE_RAW else 'spread'   # QME 2026-10-01 fix 7: raw marginals (FRONTIER_KNEE_RAW=0 = old clamped); audit_frontier re-derives from the stored rounded path
-    margs=[path[i][_k]-path[i-1][_k] for i in range(1,len(path))]
-    peak=max(margs) if margs else 0; knee=0
-    for i,mg in enumerate(margs):
-        if mg>=0.25*peak: knee=(i+1)*CAP
-    knee_found=0<knee<path[-1]['b']
+    knee,knee_found=frontier_knee(path,KNEE_RAW)   # exact tenths: a stored 0.3 gain qualifies at a 1.2 peak
     nrep=sum(1 for p in path[1:] if p.get('type')=='contest'); ndef=sum(1 for p in path[1:] if p.get('type')=='defend')
     frontier[lab]={'base':round(base,1),'core_seeds':len(Aseed),'knee':knee,'knee_found':knee_found,
                    'contest_seeds':nrep,'defend_seeds':ndef,'path':path}
     print('%-26s core %3d (base %.0f) -> +%d (%dR %dD) to %.0f | knee $%dk | first: %s'%(
         lab[:26],len(Aseed),base,len(S)+len(D),nrep,ndef,cur,knee//1000,', '.join(p['seed'].split()[-1]+{'contest':'*','defend':'^'}.get(p.get('type'),'') for p in path[1:4])))
 defend_ov=sorted([m for m in members if EP.get(m,{}).get('play')=='defend'],key=lambda m:-EP[m]['value'])[:20]
-out={'mode':'electoral' if ELECTORAL else 'coalition','leverage':LEVON,'topic':ONLY,
+out={'mode':'electoral' if ELECTORAL else 'coalition','leverage':LEVON,'topic':ONLY,**({'compet_mult':True,'leverage_source':'competitiveness_c','compet_artifact_sha256':MBC.compet_record()[1]} if MBC.compet_on() else {}),
      'defend_overview':[{'m':m,'v':EP[m]['value'],'party':EP[m].get('party'),'elavg':EP[m].get('elavg')} for m in defend_ov],
      'topics':frontier}
 # QME 2026-10-01 fix 6: a SEED!=7 or MC!=20 sensitivity run with neither FRONTIER_OUT nor TOPIC used to overwrite the production artifact; it now gets a

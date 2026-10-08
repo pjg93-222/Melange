@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H67382792A91543F4BE49CDE39C77A5D5" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4961 IH: Standing Against Dirty Diplomacy Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-10-31</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4961</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191031">October 31, 2019</action-date><action-desc><sponsor name-id="H001068">Mr. Huffman</sponsor> (for himself, <cosponsor name-id="T000481">Ms. Tlaib</cosponsor>, and <cosponsor name-id="B001300">Ms. Barragán</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAP00">Committee on Appropriations</committee-name>, and in addition to the Committees on <committee-name committee-id="HBA00">Financial Services</committee-name>, and <committee-name committee-id="HFA00">Foreign Affairs</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To limit financial support for certain international energy projects.</official-title></form>
+	<legis-body id="HCEFECE40B7CE41CEB7563217DB8F81EF" style="OLC">
+ <section id="H02F9B98ACE0B46ECA5E4046CD8B98668" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Standing Against Dirty Diplomacy Act</short-title></quote> or the <quote><short-title>SADD Act</short-title></quote>.</text> </section><section id="H201ABE948A234187B91749B7ED2F9BD7"><enum>2.</enum><header>Definition of fossil fuel project</header><text display-inline="no-display-inline">In this Act, the term <term>fossil fuel project</term> means a project that—</text>
+ <paragraph id="H3DA821245019429D82A368A010715B5D"><enum>(1)</enum><text>is designed to extract, refine, or produce coal, petroleum, natural gas, or any derivative of coal, petroleum, or natural gas that is used for fuel;</text>
+ </paragraph><paragraph id="H6DEDD8DA6898486B800C2ED729F89695"><enum>(2)</enum><text>is designed, in whole or in part, for the transportation of coal, petroleum, natural gas, or any derivative of coal, petroleum, or natural gas that is used for fuel; or</text>
+ </paragraph><paragraph id="H2A7A0AAAD5E948ABA26386076C391B0F"><enum>(3)</enum><text display-inline="yes-display-inline">is designed to generate electricity, and would use as a fuel source coal, petroleum, natural gas, or any derivative of coal, petroleum, or natural gas.</text>
+			</paragraph></section><section id="H0CBDC30284BF41FB99CED018004FBAFE"><enum>3.</enum><header>Limitation on funding of international dirty energy projects</header>
+ <subsection id="HAFF91852AF084EB0B5256A9470E2E8C3"><enum>(a)</enum><header>Rescission</header><text>There are rescinded all unobligated balances of amounts made available—</text> <paragraph id="H396AD20C8CD741A6A9B03CB97EDACFB8"><enum>(1)</enum><text display-inline="yes-display-inline">to the United States International Development Finance Corporation, the Trade and Development Agency, or the Export-Import Bank of the United States to carry out any project, transaction, or other activity that supports a fossil fuel project; or</text>
+ </paragraph><paragraph id="H56A864212C074A2C91277B8270B2E0CD"><enum>(2)</enum><text>for payment to the International Bank for Reconstruction and Development and the International Development Association (in this Act, collectively known as the <quote>World Bank</quote>) or any other international financial institution (as defined in section 1701(c)(2) of the International Financial Institutions Act (<external-xref legal-doc="usc" parsable-cite="usc/22/262r">22 U.S.C. 262r(c)(2)</external-xref>)) to carry out any project, transaction, or activity that supports a fossil fuel project.</text>
+ </paragraph></subsection><subsection id="H2A9C5F9A2DB143CBAFC7BCB6E56696A9"><enum>(b)</enum><header>Limitation on use of subsequently appropriated funds</header><text display-inline="yes-display-inline">Any amounts appropriated on or after the date of the enactment of this Act for the United States International Development Finance Corporation, the Overseas Private Investment Corporation, or the Export-Import Bank of the United States, and any amounts appropriated on or after the date of enactment of this Act for payment to the World Bank or any other international financial institution (as so defined) shall not be made available to any such entity until the date on which the Secretary of the Treasury has certified to the Congress that the payee has policies in place to ensure that the amounts are not used to carry out any fossil fuel project.</text>
+			</subsection></section></legis-body></bill>
+
+

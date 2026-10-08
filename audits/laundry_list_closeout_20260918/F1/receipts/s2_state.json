@@ -1,0 +1,1266 @@
+{
+ "resolver_control": {
+  "agree": 9550,
+  "disagree": 0
+ },
+ "row_present_wrong_member": [],
+ "rows": [
+  {
+   "bill": "H.R.1020",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Phillips, Dean",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1020|117",
+   "member_rows": 4,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Phillips, Dean",
+   "sponsor_member": "Phillips, Dean",
+   "title": "New Business Preservation Act"
+  },
+  {
+   "bill": "H.R.1059",
+   "categories": [
+    "Technology & Emerging"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Armstrong, Kelly",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1059|118",
+   "member_rows": 37,
+   "sections": [
+    "Technology & Emerging Issues"
+   ],
+   "sponsor_cell": "Armstrong, Kelly",
+   "sponsor_member": "Armstrong, Kelly",
+   "title": "SECURE Notarization Act of 2023"
+  },
+  {
+   "bill": "H.R.1280",
+   "categories": [
+    "Data Privacy & Cyber"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Bass, Karen",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1280|117",
+   "member_rows": 256,
+   "sections": [
+    "Data Privacy & Cybersecurity"
+   ],
+   "sponsor_cell": "Bass, Karen",
+   "sponsor_member": "Bass, Karen",
+   "title": "George Floyd Justice in Policing Act of 2021"
+  },
+  {
+   "bill": "H.R.1313",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Mooney, Alexander X.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1313|118",
+   "member_rows": 38,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Mooney, Alexander X.",
+   "sponsor_member": "Mooney, Alexander X.",
+   "title": "Transparency in CFPB Cost-Benefit Analysis Act"
+  },
+  {
+   "bill": "H.R.1410",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Luetkemeyer, Blaine",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1410|118",
+   "member_rows": 2,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Luetkemeyer, Blaine",
+   "sponsor_member": "Luetkemeyer, Blaine",
+   "title": "Consumer Financial Protection Commission Act"
+  },
+  {
+   "bill": "H.R.1411",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Luetkemeyer, Blaine",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1411|118",
+   "member_rows": 2,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Luetkemeyer, Blaine",
+   "sponsor_member": "Luetkemeyer, Blaine",
+   "title": "CFPB\u2013IG Reform Act of 2023"
+  },
+  {
+   "bill": "H.R.154",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Rush, Bobby L.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.154|117",
+   "member_rows": 9,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Rush, Bobby L.",
+   "sponsor_member": "Rush, Bobby L.",
+   "title": "RESCUE Act for Black and Community Banks"
+  },
+  {
+   "bill": "H.R.1540",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Cartwright, Matt",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1540|118",
+   "member_rows": 2,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Cartwright, Matt",
+   "sponsor_member": "Cartwright, Matt",
+   "title": "National Flood Insurance Program Affordability Act"
+  },
+  {
+   "bill": "H.R.1602",
+   "categories": [
+    "Examination & Supervision"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Porter, Katie",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1602|118",
+   "member_rows": 83,
+   "sections": [
+    "Examination & Supervision"
+   ],
+   "sponsor_cell": "Porter, Katie",
+   "sponsor_member": "Porter, Katie",
+   "title": "SVB Act"
+  },
+  {
+   "bill": "H.R.1651",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Phillips, Dean",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1651|118",
+   "member_rows": 2,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Phillips, Dean",
+   "sponsor_member": "Phillips, Dean",
+   "title": "Small Business 7(a) Loan Agent Transparency Act"
+  },
+  {
+   "bill": "H.R.1711",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Scott, David",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1711|117",
+   "member_rows": 1,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Scott, David",
+   "sponsor_member": "Scott, David",
+   "title": "Financial Inclusion in Banking Act of 2021"
+  },
+  {
+   "bill": "H.R.1841",
+   "categories": [
+    "Fraud Prevention"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "McNerney, Jerry",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1841|117",
+   "member_rows": 4,
+   "sections": [
+    "Fraud Prevention"
+   ],
+   "sponsor_cell": "McNerney, Jerry",
+   "sponsor_member": "McNerney, Jerry",
+   "title": "Digital Equity Act of 2021"
+  },
+  {
+   "bill": "H.R.1996",
+   "categories": [
+    "CU Capital Requirements",
+    "Fraud Prevention",
+    "Member Business Lending",
+    "NCUA Budget & Insurance"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Perlmutter, Ed",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.1996|117",
+   "member_rows": 764,
+   "sections": [
+    "Credit Union Capital Requirements",
+    "Fraud Prevention",
+    "Member Business Lending",
+    "NCUA Budget & Share Insurance Fund"
+   ],
+   "sponsor_cell": "Perlmutter, Ed",
+   "sponsor_member": "Perlmutter, Ed",
+   "title": "Secure and Fair Enforcement Banking Act of 2021 or the SAFE Banking Act of 2021"
+  },
+  {
+   "bill": "H.R.2568",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Mooney, Alexander X.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.2568|118",
+   "member_rows": 2,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Mooney, Alexander X.",
+   "sponsor_member": "Mooney, Alexander X.",
+   "title": "IMAGES Act of 2023"
+  },
+  {
+   "bill": "H.R.3712",
+   "categories": [
+    "Technology & Emerging"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Mooney, Alexander X.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.3712|118",
+   "member_rows": 28,
+   "sections": [
+    "Technology & Emerging Issues"
+   ],
+   "sponsor_cell": "Mooney, Alexander X.",
+   "sponsor_member": "Mooney, Alexander X.",
+   "title": "Digital Dollar Pilot Prevention Act"
+  },
+  {
+   "bill": "H.R.4481",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Phillips, Dean",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.4481|117",
+   "member_rows": 7,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Phillips, Dean",
+   "sponsor_member": "Phillips, Dean",
+   "title": "Small Business 7(a) Loan Agent Transparency Act"
+  },
+  {
+   "bill": "H.R.4686",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-IS-CURRENT-MEMBER-ROW-MISSING",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Luna, Anna Paulina",
+     "resolves_to": "Anna Luna",
+     "source": "selected-archive Sponsor column"
+    },
+    {
+     "name": "Anna Luna",
+     "resolves_to": "Anna Luna",
+     "source": "Sentinel verified sponsor row Member"
+    }
+   ],
+   "key": "h.r.4686|118",
+   "member_rows": 21,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Luna, Anna Paulina",
+   "sponsor_member": "Anna Luna",
+   "title": "Flood Insurance Affordability Act"
+  },
+  {
+   "bill": "H.R.4766",
+   "categories": [
+    "Examination & Supervision"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "McHenry, Patrick T.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.4766|118",
+   "member_rows": 1,
+   "sections": [
+    "Examination & Supervision"
+   ],
+   "sponsor_cell": "McHenry, Patrick T.",
+   "sponsor_member": "McHenry, Patrick T.",
+   "title": "Clarity for Payment Stablecoins Act of 2023"
+  },
+  {
+   "bill": "H.R.4773",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Luetkemeyer, Blaine",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.4773|117",
+   "member_rows": 35,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Luetkemeyer, Blaine",
+   "sponsor_member": "Luetkemeyer, Blaine",
+   "title": "Consumer Financial Protection Commission Act"
+  },
+  {
+   "bill": "H.R.5739",
+   "categories": [
+    "Charter Modernization",
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Wexton, Jennifer",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.5739|118",
+   "member_rows": 32,
+   "sections": [
+    "Charter Modernization & Governance",
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Wexton, Jennifer",
+   "sponsor_member": "Wexton, Jennifer",
+   "title": "Shutdown Guidance for Financial Institutions Act"
+  },
+  {
+   "bill": "H.R.6038",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Luetkemeyer, Blaine",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.6038|117",
+   "member_rows": 27,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Luetkemeyer, Blaine",
+   "sponsor_member": "Luetkemeyer, Blaine",
+   "title": "CFPB\u2013IG Reform Act of 2021"
+  },
+  {
+   "bill": "H.R.6410",
+   "categories": [
+    "Data Privacy & Cyber"
+   ],
+   "class": "SPONSOR-IS-CURRENT-MEMBER-ROW-MISSING",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Luna, Anna Paulina",
+     "resolves_to": "Anna Luna",
+     "source": "selected-archive Sponsor column"
+    },
+    {
+     "name": "Anna Luna",
+     "resolves_to": "Anna Luna",
+     "source": "Sentinel verified sponsor row Member"
+    }
+   ],
+   "key": "h.r.6410|118",
+   "member_rows": 5,
+   "sections": [
+    "Data Privacy & Cybersecurity"
+   ],
+   "sponsor_cell": "Luna, Anna Paulina",
+   "sponsor_member": "Anna Luna",
+   "title": "U.S. Data on U.S. Soil Act"
+  },
+  {
+   "bill": "H.R.7412",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Mooney, Alexander X.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.7412|117",
+   "member_rows": 22,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Mooney, Alexander X.",
+   "sponsor_member": "Mooney, Alexander X.",
+   "title": "Transparency in CFPB Cost-Benefit Analysis Act"
+  },
+  {
+   "bill": "H.R.7440",
+   "categories": [
+    "Examination & Supervision"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "McHenry, Patrick T.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.7440|118",
+   "member_rows": 2,
+   "sections": [
+    "Examination & Supervision"
+   ],
+   "sponsor_cell": "McHenry, Patrick T.",
+   "sponsor_member": "McHenry, Patrick T.",
+   "title": "Financial Services Innovation Act of 2024"
+  },
+  {
+   "bill": "H.R.7628",
+   "categories": [
+    "Fraud Prevention",
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Luetkemeyer, Blaine",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.7628|117",
+   "member_rows": 44,
+   "sections": [
+    "Fraud Prevention",
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Luetkemeyer, Blaine",
+   "sponsor_member": "Luetkemeyer, Blaine",
+   "title": "IMPROVE the SBA Act"
+  },
+  {
+   "bill": "H.R.7643",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Crist, Charlie",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.7643|117",
+   "member_rows": 1,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Crist, Charlie",
+   "sponsor_member": "Crist, Charlie",
+   "title": "FAITH Act of 2022"
+  },
+  {
+   "bill": "H.R.7776",
+   "categories": [
+    "Data Privacy & Cyber",
+    "Defense CU Issues"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "DeFazio, Peter A.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.7776|117",
+   "member_rows": 8,
+   "sections": [
+    "Data Privacy & Cybersecurity",
+    "Defense Credit Union Issues"
+   ],
+   "sponsor_cell": "DeFazio, Peter A.",
+   "sponsor_member": "DeFazio, Peter A.",
+   "title": "James M. Inhofe National Defense Authorization Act for Fiscal Year 2023"
+  },
+  {
+   "bill": "H.R.793",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Blumenauer, Earl",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.793|117",
+   "member_rows": 98,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Blumenauer, Earl",
+   "sponsor_member": "Blumenauer, Earl",
+   "title": "RESTAURANTS Act of 2021"
+  },
+  {
+   "bill": "H.R.804",
+   "categories": [
+    "Technology & Emerging"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Luetkemeyer, Blaine",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.804|118",
+   "member_rows": 7,
+   "sections": [
+    "Technology & Emerging Issues"
+   ],
+   "sponsor_cell": "Luetkemeyer, Blaine",
+   "sponsor_member": "Luetkemeyer, Blaine",
+   "title": "Chinese CBDC Prohibition Act of 2023"
+  },
+  {
+   "bill": "H.R.8285",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Swalwell, Eric",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.8285|118",
+   "member_rows": 14,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Swalwell, Eric",
+   "sponsor_member": "Swalwell, Eric",
+   "title": "Educator Down Payment Assistance Act of 2024"
+  },
+  {
+   "bill": "H.R.8340",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Swalwell, Eric",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.8340|117",
+   "member_rows": 2,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Swalwell, Eric",
+   "sponsor_member": "Swalwell, Eric",
+   "title": "Educator Down Payment Assistance Act of 2022"
+  },
+  {
+   "bill": "H.R.8950",
+   "categories": [
+    "Technology & Emerging"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Maloney, Sean Patrick",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.8950|117",
+   "member_rows": 2,
+   "sections": [
+    "Technology & Emerging Issues"
+   ],
+   "sponsor_cell": "Maloney, Sean Patrick",
+   "sponsor_member": "Maloney, Sean Patrick",
+   "title": "Digital Commodities Consumer Protection Act of 2022"
+  },
+  {
+   "bill": "H.R.9588",
+   "categories": [
+    "Data Privacy & Cyber"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Luetkemeyer, Blaine",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.9588|117",
+   "member_rows": 12,
+   "sections": [
+    "Data Privacy & Cybersecurity"
+   ],
+   "sponsor_cell": "Luetkemeyer, Blaine",
+   "sponsor_member": "Luetkemeyer, Blaine",
+   "title": "Consumer Information Notification Requirement Act"
+  },
+  {
+   "bill": "H.R.982",
+   "categories": [
+    "CFPB"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Deutch, Theodore E.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "h.r.982|117",
+   "member_rows": 4,
+   "sections": [
+    "CFPB Issues & Structural Reform"
+   ],
+   "sponsor_cell": "Deutch, Theodore E.",
+   "sponsor_member": "Deutch, Theodore E.",
+   "title": "Seniors Fraud Prevention Act of 2021"
+  },
+  {
+   "bill": "S.1514",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Rubio, Marco",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.1514|118",
+   "member_rows": 30,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Rubio, Marco",
+   "sponsor_member": "Rubio, Marco",
+   "title": "HELPER Act of 2023"
+  },
+  {
+   "bill": "S.2034",
+   "categories": [
+    "Fraud Prevention"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Rubio, Marco",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.2034|117",
+   "member_rows": 6,
+   "sections": [
+    "Fraud Prevention"
+   ],
+   "sponsor_cell": "Rubio, Marco",
+   "sponsor_member": "Rubio, Marco",
+   "title": "Small Business Credit Protection Act"
+  },
+  {
+   "bill": "S.2131",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Tester, Jon",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.2131|117",
+   "member_rows": 3,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Tester, Jon",
+   "sponsor_member": "Tester, Jon",
+   "title": "Improving FHA Support for Small-Dollar Mortgages Act of 2021"
+  },
+  {
+   "bill": "S.2658",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Casey, Robert P., Jr.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.2658|117",
+   "member_rows": 13,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Casey, Robert P., Jr.",
+   "sponsor_member": "Casey, Robert P., Jr.",
+   "title": "REAADI for Disasters Act"
+  },
+  {
+   "bill": "S.2788",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Rubio, Marco",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.2788|117",
+   "member_rows": 10,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Rubio, Marco",
+   "sponsor_member": "Rubio, Marco",
+   "title": "NFIP Extension Act of 2021"
+  },
+  {
+   "bill": "S.2801",
+   "categories": [
+    "Examination & Supervision"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Sinema, Kyrsten",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.2801|117",
+   "member_rows": 2,
+   "sections": [
+    "Examination & Supervision"
+   ],
+   "sponsor_cell": "Sinema, Kyrsten",
+   "sponsor_member": "Sinema, Kyrsten",
+   "title": "SMART Act of 2022"
+  },
+  {
+   "bill": "S.2981",
+   "categories": [
+    "Mortgage & Housing"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Rubio, Marco",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.2981|117",
+   "member_rows": 14,
+   "sections": [
+    "Mortgage Lending & Housing"
+   ],
+   "sponsor_cell": "Rubio, Marco",
+   "sponsor_member": "Rubio, Marco",
+   "title": "HELPER Act of 2021"
+  },
+  {
+   "bill": "S.3382",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-IS-CURRENT-MEMBER-ROW-MISSING",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Scott, Tim",
+     "resolves_to": "Tim Scott",
+     "source": "selected-archive Sponsor column"
+    },
+    {
+     "name": "Tim Scott",
+     "resolves_to": "Tim Scott",
+     "source": "workbook 'Sponsor Interactions' Member"
+    }
+   ],
+   "key": "s.3382|117",
+   "member_rows": 37,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Scott, Tim",
+   "sponsor_member": "Tim Scott",
+   "title": "Protecting Access to Credit for Small Businesses Act"
+  },
+  {
+   "bill": "S.3902",
+   "categories": [
+    "Examination & Supervision"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Tester, Jon",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.3902|118",
+   "member_rows": 2,
+   "sections": [
+    "Examination & Supervision"
+   ],
+   "sponsor_cell": "Tester, Jon",
+   "sponsor_member": "Tester, Jon",
+   "title": "Appraisal Industry Improvement Act"
+  },
+  {
+   "bill": "S.3992",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-IS-CURRENT-MEMBER-ROW-MISSING",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Scott, Tim",
+     "resolves_to": "Tim Scott",
+     "source": "selected-archive Sponsor column"
+    },
+    {
+     "name": "Tim Scott",
+     "resolves_to": "Tim Scott",
+     "source": "workbook 'Sponsor Interactions' Member"
+    }
+   ],
+   "key": "s.3992|118",
+   "member_rows": 28,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Scott, Tim",
+   "sponsor_member": "Tim Scott",
+   "title": "Protecting Access to Credit for Small Businesses Act"
+  },
+  {
+   "bill": "S.4008",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Cardin, Benjamin L.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.4008|117",
+   "member_rows": 2,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Cardin, Benjamin L.",
+   "sponsor_member": "Cardin, Benjamin L.",
+   "title": "Small Business COVID Relief Act of 2022"
+  },
+  {
+   "bill": "S.4264",
+   "categories": [
+    "Examination & Supervision"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Sinema, Kyrsten",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.4264|118",
+   "member_rows": 4,
+   "sections": [
+    "Examination & Supervision"
+   ],
+   "sponsor_cell": "Sinema, Kyrsten",
+   "sponsor_member": "Sinema, Kyrsten",
+   "title": "SMART Act of 2024"
+  },
+  {
+   "bill": "S.4325",
+   "categories": [
+    "Charter Modernization",
+    "NCUA Budget & Insurance"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Sinema, Kyrsten",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.4325|117",
+   "member_rows": 42,
+   "sections": [
+    "Charter Modernization & Governance",
+    "NCUA Budget & Share Insurance Fund"
+   ],
+   "sponsor_cell": "Sinema, Kyrsten",
+   "sponsor_member": "Sinema, Kyrsten",
+   "title": "Credit Union Board Modernization Act"
+  },
+  {
+   "bill": "S.4760",
+   "categories": [
+    "Technology & Emerging"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Stabenow, Debbie",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.4760|117",
+   "member_rows": 9,
+   "sections": [
+    "Technology & Emerging Issues"
+   ],
+   "sponsor_cell": "Stabenow, Debbie",
+   "sponsor_member": "Stabenow, Debbie",
+   "title": "Digital Commodities Consumer Protection Act of 2022"
+  },
+  {
+   "bill": "S.5025",
+   "categories": [
+    "NCUA Budget & Insurance"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Manchin, Joe, III",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.5025|117",
+   "member_rows": 6,
+   "sections": [
+    "NCUA Budget & Share Insurance Fund"
+   ],
+   "sponsor_cell": "Manchin, Joe, III",
+   "sponsor_member": "Manchin, Joe, III",
+   "title": "Fair Hiring in Banking Act"
+  },
+  {
+   "bill": "S.588",
+   "categories": [
+    "Charter Modernization",
+    "Examination & Supervision"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Feinstein, Dianne",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.588|117",
+   "member_rows": 24,
+   "sections": [
+    "Charter Modernization & Governance",
+    "Examination & Supervision"
+   ],
+   "sponsor_cell": "Feinstein, Dianne",
+   "sponsor_member": "Feinstein, Dianne",
+   "title": "Addressing Climate Financial Risk Act of 2021"
+  },
+  {
+   "bill": "S.610",
+   "categories": [
+    "Charter Modernization",
+    "NCUA Budget & Insurance"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "118",
+   "evidence": [
+    {
+     "name": "Sinema, Kyrsten",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.610|118",
+   "member_rows": 68,
+   "sections": [
+    "Charter Modernization & Governance",
+    "NCUA Budget & Share Insurance Fund"
+   ],
+   "sponsor_cell": "Sinema, Kyrsten",
+   "sponsor_member": "Sinema, Kyrsten",
+   "title": "Credit Union Board Modernization Act"
+  },
+  {
+   "bill": "S.63",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Cardin, Benjamin L.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.63|117",
+   "member_rows": 5,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Cardin, Benjamin L.",
+   "sponsor_member": "Cardin, Benjamin L.",
+   "title": "Unlocking Opportunities in Emerging Markets Act of 2021"
+  },
+  {
+   "bill": "S.64",
+   "categories": [
+    "Member Business Lending"
+   ],
+   "class": "SPONSOR-NOT-IN-ROSTER",
+   "congress": "117",
+   "evidence": [
+    {
+     "name": "Cardin, Benjamin L.",
+     "resolves_to": null,
+     "source": "selected-archive Sponsor column"
+    }
+   ],
+   "key": "s.64|117",
+   "member_rows": 3,
+   "sections": [
+    "Member Business Lending"
+   ],
+   "sponsor_cell": "Cardin, Benjamin L.",
+   "sponsor_member": "Cardin, Benjamin L.",
+   "title": "UPLIFT Act of 2021"
+  }
+ ]
+}

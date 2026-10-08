@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HE3314A30DE7E4BCF961670A6F5FCFF2D" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2115 IH: Public Disclosure of Drug Discounts Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-04-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">I</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 2115</legis-num>
+		<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190408">April 8, 2019</action-date>
+			<action-desc><sponsor name-id="S001209">Ms. Spanberger</sponsor> (for herself, <cosponsor name-id="A000375">Mr. Arrington</cosponsor>, and <cosponsor name-id="B001296">Mr. Brendan F. Boyle of Pennsylvania</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To amend title XI of the Social Security Act to provide greater transparency of discounts provided
+			 by drug manufacturers.</official-title>
+	</form>
+	<legis-body id="HCDA420F0BA98487E8535DF704667CD74" style="OLC">
+ <section id="H6EB7E7669EF54E178EF10CBBDCF1BD2F" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Public Disclosure of Drug Discounts Act</short-title></quote>.</text> </section><section id="H113949193C324961BBE1B3508F48BAFC" section-type="subsequent-section"><enum>2.</enum><header>Public disclosure of drug discounts</header><text display-inline="no-display-inline">Section 1150A of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1320b-23">42 U.S.C. 1320b–23</external-xref>) is amended—</text>
+ <paragraph id="HC6A2264DB7674CDBACBF626397B5D3CB"><enum>(1)</enum><text>in subsection (c), in the matter preceding paragraph (1), by inserting <quote>(other than as permitted under subsection (e))</quote> after <quote>disclosed by the Secretary</quote>; and</text> </paragraph><paragraph id="H95AEF598347B4CCF999AC94ECE0A7601"><enum>(2)</enum><text>by adding at the end the following new subsection:</text>
+				<quoted-block display-inline="no-display-inline" id="H77F30D57F08B4380ABFEF8AEF416CF64" style="OLC">
+					<subsection id="H2DD70E2A0E3D4227B75959A4B8D7CFC8"><enum>(e)</enum><header>Public availability of certain information</header>
+ <paragraph id="H8550EF7081BD4419AD4FBF506814B3B1"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">In order to allow the comparison of PBMs’ ability to negotiate rebates, discounts, and price concessions and the amount of such rebates, discounts, and price concessions that are passed through to plan sponsors, beginning January 1, 2020, the Secretary shall make available on the Internet website of the Department of Health and Human Services the information with respect to the second preceding calendar year provided to the Secretary on generic dispensing rates (as described in paragraph (1) of subsection (b)) and information provided to the Secretary under paragraphs (2) and (3) of such subsection that, as determined by the Secretary, is with respect to each PBM.</text>
+ </paragraph><paragraph id="H48BF4DF5C4CB4E1794104DACA98F206E"><enum>(2)</enum><header>Availability of data</header><text>In carrying out paragraph (1), the Secretary shall ensure the following:</text> <subparagraph id="HE07D1B28AECC4464B9FB6F2A6C7544B7"><enum>(A)</enum><header>Confidentiality</header><text>The information described in such paragraph is displayed in a manner that prevents the disclosure of information on rebates, discounts, and price concessions, with respect to an individual drug or an individual plan.</text>
+ </subparagraph><subparagraph id="H4964B7FA6A774F8C93B40247D1EDCF26"><enum>(B)</enum><header>Class of drug</header><text>The information described in such paragraph is made available by class of drug, using an existing classification system, but only if the class contains such number of drugs, as specified by the Secretary, to ensure confidentiality of proprietary information or other information that is prevented to be disclosed under subparagraph (A).</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section></legis-body>
+</bill>
+
+

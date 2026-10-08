@@ -1,0 +1,29 @@
+# Mutation checks (scripts/mutations.py): each is one edit to production code in a scratch copy of the tip export; the named tests must fail with it.
+
+flag_never_set                                       CAUGHT  in  28.0s  rc=1  5 failed, 30 deselected, 1 error in 25.27s
+collection_at_every_prewarm                          CAUGHT  in   4.9s  rc=1  1 failed, 34 deselected in 2.74s
+flag_never_cleared                                   CAUGHT  in   5.0s  rc=1  2 failed, 33 deselected in 2.85s
+flag_set_for_the_same_router                         CAUGHT  in   5.3s  rc=1  1 failed, 34 deselected in 2.41s
+abandoned_prewarm_collects                           CAUGHT  in  10.3s  rc=1  2 failed, 33 deselected in 7.33s
+no_scope_for_distinct                                CAUGHT  in   7.1s  rc=1  5 failed, 12 deselected in 4.23s
+no_scope_for_the_yen_loop                            CAUGHT  in   7.5s  rc=1  1 failed, 16 deselected in 2.98s
+scope_never_closed                                   CAUGHT  in   5.8s  rc=1  1 failed, 16 deselected in 2.70s
+index_ignores_the_scope                              CAUGHT  in   7.0s  rc=1  4 failed, 13 deselected in 3.96s
+release_does_not_mark_the_router                     CAUGHT  in  25.0s  rc=1  10 failed, 42 deselected, 1 error in 21.62s
+finished_build_put_back                              CAUGHT  in  11.8s  rc=1  3 failed, 49 deselected in 7.91s
+released_router_stores_hop_rows                      CAUGHT  in   6.7s  rc=1  5 failed, 12 deselected in 3.15s
+unstored_rows_not_shared_by_the_passes               CAUGHT  in   5.8s  rc=1  2 failed, 15 deselected in 2.80s
+release_search_state_skips_a_fresh_router            CAUGHT  in   6.0s  rc=1  3 failed, 2 passed, 12 deselected in 3.11s
+basis_always_payroll_or_roster                       CAUGHT  in   6.1s  rc=1  2 failed, 1 passed, 64 deselected in 3.23s
+basis_always_roster                                  CAUGHT  in   6.8s  rc=1  2 failed, 1 passed, 64 deselected in 2.84s
+distinct_loop_drops_the_basis                        MISSED  in   6.3s  rc=0  3 passed, 64 deselected in 3.19s   <- EQUIVALENT MUTANT, see below
+page_ignores_the_basis                               CAUGHT  in  50.9s  rc=1    }
+explanation_not_the_message                          CAUGHT  in  16.4s  rc=1  2 failed, 4 passed, 20 deselected in 13.79s
+note_added_after_a_reasoned_explanation              CAUGHT  in  16.7s  rc=1  2 failed, 4 passed, 20 deselected in 13.82s
+reason_without_message_still_reasoned            CAUGHT  in   5.1s  rc=1  1 failed, 25 deselected in 2.41s   (re-run: the first run's -k matched no test, rc=5, which the harness had counted as caught; the harness now counts only rc=1)
+20 of 21 mutations caught; the 21st is an equivalent mutant
+
+distinct_loop_drops_the_basis is an equivalent mutant, not a gap: every pass of a distinct or independent office request returns a result that already carries uncovered_basis (ClosenessRoutes.route puts it
+in the result it builds for every office request, found or not), and distinct_routes builds each route from that result, so naming the basis in `left_out` as well changes nothing a caller can see. With the
+edit in place all 67 tests of test_staffer_office_covered_staff.py, all 26 of test_staffer_unreachable_hint.py and all 13 of test_staffer_distinct_routes.py still pass. The member of the tuple keeps the three
+fields of an office answer written in one place (the counts have to be carried, because a later pass is given fewer staff); it is the one line of this round that no test can tell from its absence.

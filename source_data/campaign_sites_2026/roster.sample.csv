@@ -1,0 +1,4 @@
+state,district,candidate_name,party,incumbent_bioguide,url,official_url,notes
+MN,01,SAMPLE-Alpha,DEMO,,https://example.com/,,Direct URL demo
+MN,02,SAMPLE-Beta,DEMO,B000000,,https://example.com/official/,Official incumbent routing demo
+MN,03,SAMPLE-Gamma,DEMO,,,,No URL demo

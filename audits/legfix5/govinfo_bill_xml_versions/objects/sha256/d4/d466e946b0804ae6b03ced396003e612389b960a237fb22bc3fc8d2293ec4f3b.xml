@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H4D716B8880BB494597BFC181C7573B7A" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5382 IH: HUD Equity Action Plan Elimination Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-09-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 5382</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230908">September 8, 2023</action-date>
+<action-desc><sponsor name-id="S001224">Mr. Self</sponsor> (for himself and <cosponsor name-id="R000103">Mr. Rosendale</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the Committee on <committee-name committee-id="HJU00">the Judiciary</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To prohibit funding for implementation of the Equity Action Plan of the Department of Housing and Urban Development, and for other purposes.</official-title>
+</form>
+<legis-body id="H9B8B810F57724FBC9AB7A064A1FF36E2" style="OLC">
+<section id="H7BEBDC92EDD743A4A1CF22CF048DF5E7" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>HUD Equity Action Plan Elimination Act of 2023</short-title></quote>.</text></section> <section id="H0AB9DE1EA2D040C2AD6408FCF8B6E74F"><enum>2.</enum><header>Prohibition on funding</header><text display-inline="no-display-inline">Beginning on the date of the enactment of this Act and notwithstanding any other provision of law, no Federal funds may be obligated or expended to implement or carry out the Equity Action Plan of the Department of Housing and Urban Development.</text></section>
+<section id="H04AF281EBD7C49DFBB0C732C918A267D"><enum>3.</enum><header>Nullification of proposed rule</header><text display-inline="no-display-inline">The Congress disapproves the proposed rule of the Department of Housing and Urban Development relating to <quote>Affirmatively Furthering Fair Housing</quote>, published in the Federal Register on February 9, 2023 (88 Fed. Reg. 8516; Docket No. FR–6250–P–01), such Department may not issue a final rule based on or substantially similar to such proposed rule, and such proposed rule and any final rule based on or substantially similar to such proposed rule shall have no force or effect.</text></section> </legis-body> </bill> 
+

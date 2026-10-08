@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-GAI20640-R69-0G-7PD"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S4330 IS: To provide for the collection of death information from States for purposes of the Do Not Pay Initiative, and for other purposes.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-07-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>2d Session</session><legis-num>S. 4330</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20200727">July 27, 2020</action-date><action-desc><sponsor name-id="S389">Mr. Kennedy</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To provide for the collection of death information from States for purposes of the Do Not Pay Initiative, and for other purposes.</official-title></form><legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H716917D59E51402EAB5E0421478EFB03"><section section-type="section-one" id="H6E7764A580E74F6093BDC85C244D8CFE"><enum>1.</enum><header>Collection of death information from States</header><text display-inline="no-display-inline">Not later than January 1, 2023, the head of the agency operating the Do Not Pay working system described in section 3354(c) of title 31, United States Code, shall establish a program under which—</text><paragraph id="H762CCAE05B3044D68A6A658D68071FF6"><enum>(1)</enum><text display-inline="yes-display-inline">States (or political subdivisions thereof) voluntarily contract with the head of such agency to furnish such agency head periodically with information (in a form established by such agency head in consultation with the States) concerning individuals with respect to whom death certificates (or equivalent documents maintained by the States or subdivisions) have been officially filed with them;</text></paragraph><paragraph id="H26231A162929423187A015189A8CE639"><enum>(2)</enum><text>such information, and access for its use, shall be included through the Do Not Pay Initiative under such section; and</text></paragraph><paragraph id="HBFFC335D49A44F69830E151847075D81"><enum>(3)</enum><text display-inline="yes-display-inline">each State (or political subdivision thereof) which furnishes the head of such agency with such information may be paid by such agency head from amounts available for administration of this Act the reasonable costs (established by such agency head in consultations with the States) for transcribing and transmitting such information to such agency head.</text></paragraph></section></legis-body></bill> 
+

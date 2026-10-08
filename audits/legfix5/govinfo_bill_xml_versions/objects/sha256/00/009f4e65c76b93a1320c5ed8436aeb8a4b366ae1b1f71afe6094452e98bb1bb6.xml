@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HEA22889183D84AEFA06E43FE99E97E6A" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5386 IH: Promoting Better Patient Data Security Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-12-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5386</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191210">December 10, 2019</action-date><action-desc><sponsor name-id="M001166">Mr. McNerney</sponsor> (for himself and <cosponsor name-id="B001275">Mr. Bucshon</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Health Information Technology for Economic and Clinical Health Act to require
+			 consideration, in certain circumstances, of whether a covered entity or
+			 business associate has adequately demonstrated that it had recognized
+			 security practices, and for other purposes.</official-title></form>
+	<legis-body id="H1532746BBEF140CB871173ACD93E16C1" style="OLC">
+ <section id="id9156B7FF3A8641D7B5A8E4844BC3532D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Promoting Better Patient Data Security Act of 2019</short-title></quote>.</text></section><section id="H1EA575D30E90442E9DEDE30FBCF31721" section-type="subsequent-section"><enum>2.</enum><header>Recognition of security practices</header><text display-inline="no-display-inline">Part 1 of subtitle D of the Health Information Technology for Economic and Clinical Health Act (<external-xref legal-doc="usc" parsable-cite="usc/42/17931">42 U.S.C. 17931</external-xref> et seq.) is amended by adding at the end the following:</text>
+			<quoted-block id="H52F5C38A3DA14A7C81B65C06C475992B" style="OLC">
+				<section id="HD7FAE5FFA0464A07A9547C093A6CAB46"><enum>13412.</enum><header>Recognition of security practices</header>
+ <subsection id="H3CDFE19322554F868E9B7AEEB302EF07"><enum>(a)</enum><header>In general</header><text>Consistent with the authority of the Secretary under sections 1176 and 1177 of the Social Security Act, when making determinations relating to fines under section 13410, decreasing the length and extent of an audit under section 13411, or remedies otherwise agreed to by the Secretary, the Secretary shall consider whether the covered entity or business associate has adequately demonstrated that it had, for not less than the previous 12 months, recognized security practices in place that may—</text>
+ <paragraph id="H4ED2032C2873403C91CA165731A30364"><enum>(1)</enum><text>mitigate fines under section 13410;</text> </paragraph><paragraph id="HF1657C72316E427CB78667120D3BD7BA"><enum>(2)</enum><text>result in the early, favorable termination of an audit under section 13411; and</text>
+ </paragraph><paragraph id="H600CE440C6D444ACA06C4907C4E9F72C"><enum>(3)</enum><text>mitigate the remedies that would otherwise be agreed to in any agreement with respect to resolving potential violations of the HIPAA Security rule (part 160 of title 45 Code of Federal Regulations and subparts A and C of part 164 of such title) between the covered entity or business associate and the Department of Health and Human Services.</text>
+						</paragraph></subsection><subsection id="H7E592516AE24472383C515EE1339F3F5"><enum>(b)</enum><header>Definition and miscellaneous provisions</header>
+ <paragraph id="HE49D2DD5257F463E8B881A38E85757FD"><enum>(1)</enum><header>Recognized security practices</header><text>The term <quote>recognized security practices</quote> means the standards, guidelines, best practices, methodologies, procedures, and processes developed under section 2(c)(15) of the National Institute of Standards and Technology Act, the approaches promulgated under section 405(d) of the Cybersecurity Act of 2015, and other programs and processes that address cybersecurity and that are developed, recognized, or promulgated through regulations under other statutory authorities. Such practices shall be determined by the covered entity or business associate.</text>
+ </paragraph><paragraph id="HB9150A927B40425EB5A571FE16AFC1C5"><enum>(2)</enum><header>Limitation</header><text>Nothing in this section shall be construed as providing the Secretary authority to increase fines under section 13410, or the length, extent or quantity of audits under section 13411, due to a lack of compliance with the recognized security practices.</text>
+ </paragraph><paragraph id="HCF530B9D295F42EFBEAC20DF48E02AC7"><enum>(3)</enum><header>No liability for nonparticipation</header><text>Subject to paragraph (4), nothing in this section shall be construed to subject a covered entity or business associate to liability for electing not to engage in the recognized security practices defined by this section.</text>
+ </paragraph><paragraph id="HADF1D2BF1475413297D7F640D1F28EF2"><enum>(4)</enum><header>Rule of construction</header><text>Nothing in this section shall be construed to limit the Secretary’s authority to enforce the HIPAA Security rule (part 160 of title 45 Code of Federal Regulations and subparts A and C of part 164 of such title), or to supersede or conflict with an entity or business associate’s obligations under the HIPAA Security rule.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

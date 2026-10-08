@@ -1,0 +1,117 @@
+{
+    "captured_utc":  "2026-08-17T23:15:30Z",
+    "purpose":  "ENV-4 baseline (pre-holistic-code reference vintage; recapture at G3 start)",
+    "live_tree_head":  "56f1f84c7",
+    "worktree_head":  "22c55d0ac",
+    "env3":  "no python processes, no live-root writes in prior 30 min (checked this session)",
+    "files":  [
+                  {
+                      "name":  "congress_cosponsor_network_20260624_124324.xlsx",
+                      "bytes":  148250,
+                      "sha256":  "9AC23E8F2757B95149B2EE3D9E72977B3A6D43736FD5B8736993874671AD043D",
+                      "mtime_utc":  "2026-06-26T22:18:02Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_20260624_125437.xlsx",
+                      "bytes":  153293,
+                      "sha256":  "E1CEC71F44ADEDE8B61E9149DD0BA6BEFFE175811B6D46A83AD5B792135C02DE",
+                      "mtime_utc":  "2026-06-26T22:18:02Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_20260624_125641.xlsx",
+                      "bytes":  153287,
+                      "sha256":  "4426B4A3C505F232803331526054C228635C1DA90ABA70652A34AB8D56BAB716",
+                      "mtime_utc":  "2026-06-26T22:18:02Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_20260624_153333.xlsx",
+                      "bytes":  154772,
+                      "sha256":  "A3BC601DABBA50B8317FD10C790EE3A2912BA5FE5CAD71C6EECC5742A52E5CAF",
+                      "mtime_utc":  "2026-06-26T22:18:02Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_20260625_133929.xlsx",
+                      "bytes":  154783,
+                      "sha256":  "F1E3B17F861E8E457F562DCA6012C376E967A7732B870845906666A3276F0E61",
+                      "mtime_utc":  "2026-06-26T22:18:02Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_20260625_184604.xlsx",
+                      "bytes":  173189,
+                      "sha256":  "701E401EB32F16180DCDB5906881CB1494D7BADF242154DF4EC970F025FCFED9",
+                      "mtime_utc":  "2026-06-26T22:18:02Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_20260625_205554.xlsx",
+                      "bytes":  163691,
+                      "sha256":  "1FEAE7E161D134B9B98F0B8CE19B24C340499F6DEC09A8009E580C6B611BD0BB",
+                      "mtime_utc":  "2026-06-26T22:18:02Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260702.xlsx",
+                      "bytes":  136648,
+                      "sha256":  "2E833C086E430EBC6310003CFC49240E108D0449C6B6F9AAC85EE4CA0DA76F50",
+                      "mtime_utc":  "2026-07-03T01:00:44Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260705.xlsx",
+                      "bytes":  136645,
+                      "sha256":  "32A3CF166852E94D6A84CBEDE8B8A9DD20DF203FF1F10C5B7843E3FBC6D91C0D",
+                      "mtime_utc":  "2026-07-06T03:39:00Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260706.xlsx",
+                      "bytes":  136646,
+                      "sha256":  "EBEB5A18E21C7EE5999755A29561D9C00D99320576416CAA44A9B4146AD6856B",
+                      "mtime_utc":  "2026-07-06T06:47:37Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260707.xlsx",
+                      "bytes":  136649,
+                      "sha256":  "DC383ABD7061474199F1732BDA306CB0E73B355761176D7239B7F7E95E25DB87",
+                      "mtime_utc":  "2026-07-07T18:33:10Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260712.xlsx",
+                      "bytes":  136328,
+                      "sha256":  "0E0FA7E850122EB14A099F5AA54CBFD08ABA0AA2CFC0A57EEF750655B591B35C",
+                      "mtime_utc":  "2026-07-12T11:29:48Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260719.xlsx",
+                      "bytes":  136049,
+                      "sha256":  "38C760EEDDE997E9FE5FD81BC57895F665FA9843F16E5A39069DA31D5F726F2E",
+                      "mtime_utc":  "2026-07-19T11:34:05Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260726.xlsx",
+                      "bytes":  136050,
+                      "sha256":  "F83A0A5A8E56D4A3CD2745EDE708E788AAC7421EEFD9C1B21ED368D0E0065EB6",
+                      "mtime_utc":  "2026-07-26T11:33:10Z"
+                  },
+                  {
+                      "name":  "congress_cosponsor_network_AUG20260802.xlsx",
+                      "bytes":  136050,
+                      "sha256":  "55C11019C761976C0BEF4065278482CF75E1B3C30D8E274924E5AF4C5B48B009",
+                      "mtime_utc":  "2026-08-02T10:39:11Z"
+                  },
+                  {
+                      "name":  "ranks_python.json",
+                      "bytes":  232244,
+                      "sha256":  "DB1279C33D5914A022822362BD8C6FE178BAF233102458200BA36C81C475DCAF",
+                      "mtime_utc":  "2026-08-17T16:14:04Z"
+                  },
+                  {
+                      "name":  "dashboard_data.json",
+                      "bytes":  492695,
+                      "sha256":  "DF7547D27A57C2784703BDD4C641D290B9DB4FB89995C0DE37854672F93E30A1",
+                      "mtime_utc":  "2026-08-17T15:46:37Z"
+                  },
+                  {
+                      "name":  "bipartisan.json",
+                      "bytes":  11141,
+                      "sha256":  "429BF5DEAA178036F4DE33480A606F32927D601F216CECE2609C453BC0BED191",
+                      "mtime_utc":  "2026-08-17T15:46:37Z"
+                  }
+              ]
+}

@@ -1,0 +1,275 @@
+{
+  "schema": "legfix3-tier1-direction-wiring-v1",
+  "as_of": "2026-07-25",
+  "archive": {
+    "filename": "congress_bills_archive_20260624_115822.xlsx",
+    "sha256": "4ca1c81af641a2e255ab54cd78dc4c8eb43aa7d2c156893c753cdbe4faa05a73"
+  },
+  "precedence": [
+    "existing bill_directions.csv",
+    "cu_bill_directions.json",
+    "bill_direction_queue_FILLED.csv"
+  ],
+  "title_matcher": {
+    "normalization": [
+      "NFKC",
+      "casefold",
+      "collapse whitespace",
+      "strip punctuation"
+    ],
+    "match_if": [
+      "normalized equality",
+      "normalized substring in either direction",
+      "token-set Jaccard >= 0.6 after stopword removal",
+      "all-caps acronym equals initials of consecutive significant words"
+    ],
+    "stopwords": [
+      "act",
+      "of",
+      "the",
+      "a",
+      "an",
+      "to",
+      "and",
+      "for",
+      "on",
+      "in"
+    ],
+    "failure_policy": "quarantine before precedence"
+  },
+  "counts": {
+    "source_rows": {
+      "existing_live": 60,
+      "existing_congress_expanded": 62,
+      "cu_total": 63,
+      "cu_support": 54,
+      "cu_oppose": 6,
+      "cu_monitor": 1,
+      "cu_blank_position": 2,
+      "queue_total": 216,
+      "queue_exact_direction": 57,
+      "queue_blank_or_malformed_direction": 159
+    },
+    "existing_category_semantics": {
+      "source": {
+        "CFPB:Reduce": 49,
+        "CFPB:Expand": 5,
+        "CFPB:Neutral": 6
+      },
+      "congress_expanded": {
+        "CFPB:Reduce": 50,
+        "CFPB:Expand": 6,
+        "CFPB:Neutral": 6
+      }
+    },
+    "resolution_attempts": {
+      "existing": 62,
+      "cu": 61,
+      "queue": 57,
+      "total": 180
+    },
+    "quarantined_before_precedence": 7,
+    "precedence_decisions": 47,
+    "wired_rows": {
+      "existing": 62,
+      "cu": 47,
+      "queue": 17,
+      "total": 126
+    },
+    "direction": {
+      "1": 107,
+      "-1": 12,
+      "0": 7
+    },
+    "archive_active_rows": 112,
+    "new_archive_active_rows": 50,
+    "archive_absent_inert_rows": 14
+  },
+  "precedence_decisions": [
+    {"bill": "H.J.Res.59", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.1652", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.2331", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.3445", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.4735", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.654", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.940", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.976", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.2419", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.557", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.J.Res.18", "congress": "119", "kept_source": "existing", "dropped_source": "cu_bill_directions", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.1791", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.1799", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.1806", "congress": "118", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.1919", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.2094", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.2543", "congress": "117", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.2702", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.2808", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.3170", "congress": "118", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.3380", "congress": "", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.3633", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.3709", "congress": "", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.4167", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.4437", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.4544", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.4568", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.4735", "congress": "119", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.507", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.654", "congress": "119", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.6644", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.6732", "congress": "117", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.7000", "congress": "118", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.7056", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.941", "congress": "119", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "H.R.975", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.110", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.1467", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.1582", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.1978", "congress": "", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": -1, "dropped_direction": -1},
+    {"bill": "S.2019", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.2419", "congress": "119", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.2486", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.3017", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.522", "congress": "119", "kept_source": "cu_bill_directions", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.J.Res.18", "congress": "119", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1},
+    {"bill": "S.J.Res.32", "congress": "118", "kept_source": "existing", "dropped_source": "queue", "kept_direction": 1, "dropped_direction": 1}
+  ],
+  "quarantines": [
+    {
+      "source": "cu_bill_directions.json",
+      "bill": "H.R.2392",
+      "congress": "119",
+      "known_title": "GENIUS Act",
+      "archive_titles": [
+        "STABLE Act of 2025",
+        "Stablecoin Transparency and Accountability for a Better Ledger Economy Act of 2025 or the STABLE Act of 2025"
+      ]
+    },
+    {
+      "source": "cu_bill_directions.json",
+      "bill": "S.2704",
+      "congress": "117",
+      "known_title": "CDFI Fund Transparency Act",
+      "archive_titles": [
+        "Small Business Surcharge Relief Act"
+      ]
+    },
+    {
+      "source": "cu_bill_directions.json",
+      "bill": "S.919",
+      "congress": "117",
+      "known_title": "GENIUS Act",
+      "archive_titles": [
+        "21",
+        "Data Care Act of 2021"
+      ],
+      "wired_matching_congress": "119"
+    },
+    {
+      "source": "bill_direction_queue_FILLED.csv",
+      "bill": "H.R.4479",
+      "congress": "119",
+      "known_title": "SUPPLY Act – Supporting Upgraded Property Projects and Lending for Yards [title-matched HR4568]",
+      "archive_titles": [
+        "To amend the National Housing Act to direct the Secretary of Housing and Urban Development to establish a program to insure certain second liens secured against property for the purpose of financing the construction of an accessory dwelling unit, and for other purposes."
+      ]
+    },
+    {
+      "source": "bill_direction_queue_FILLED.csv",
+      "bill": "H.R.4763",
+      "congress": "118",
+      "known_title": "Anti-CBDC Surveillance State Act [title-matched S1124]",
+      "archive_titles": [
+        "Financial Innovation and Technology for the 21st Century Act"
+      ]
+    },
+    {
+      "source": "bill_direction_queue_FILLED.csv",
+      "bill": "H.R.6955",
+      "congress": "119",
+      "known_title": "Protecting Access to Credit for Small Businesses Act [title-matched S2486]",
+      "archive_titles": [
+        "Main Street Act"
+      ]
+    },
+    {
+      "source": "bill_direction_queue_FILLED.csv",
+      "bill": "S.394",
+      "congress": "119",
+      "known_title": "Anti-CBDC Surveillance State Act [title-matched S1124]",
+      "archive_titles": [
+        "GENIUS Act of 2025"
+      ]
+    }
+  ],
+  "inert_rows": [
+    {"bill": "S.427", "direction": 1, "source": "cu_bill_directions.json"},
+    {"bill": "H.R.3380", "direction": 1, "source": "cu_bill_directions.json"},
+    {"bill": "S.3940", "direction": 1, "source": "cu_bill_directions.json"},
+    {"bill": "S.1880", "direction": 1, "source": "cu_bill_directions.json"},
+    {"bill": "S.1978", "direction": -1, "source": "cu_bill_directions.json"},
+    {"bill": "H.R.3709", "direction": 1, "source": "cu_bill_directions.json"},
+    {"bill": "H.R.1", "direction": 0, "source": "bill_direction_queue_FILLED.csv"},
+    {"bill": "H.R.4460", "direction": 1, "source": "bill_direction_queue_FILLED.csv"},
+    {"bill": "H.R.4478", "direction": 1, "source": "bill_direction_queue_FILLED.csv"},
+    {"bill": "S.1071", "direction": 1, "source": "bill_direction_queue_FILLED.csv"},
+    {"bill": "S.52", "direction": 1, "source": "bill_direction_queue_FILLED.csv"},
+    {"bill": "S.3443", "direction": 1, "source": "bill_direction_queue_FILLED.csv"},
+    {"bill": "S.3052", "direction": 1, "source": "bill_direction_queue_FILLED.csv"},
+    {"bill": "H.R.1640", "direction": 1, "source": "bill_direction_queue_FILLED.csv"}
+  ],
+  "skips": {
+    "monitor": [
+      {
+        "bill": "H.R.1",
+        "source": "cu_bill_directions.json",
+        "position": "MONITOR",
+        "reason": "monitor is not a position; the separately adjudicated queue direction 0 is retained as an inert row"
+      }
+    ],
+    "blank_positions": [
+      {"bill": "H.R.8398", "source": "cu_bill_directions.json"},
+      {"bill": "H.R.8413", "source": "cu_bill_directions.json"}
+    ],
+    "malformed_directions": {
+      "source": "bill_direction_queue_FILLED.csv",
+      "count": 159,
+      "reason": "direction_+1_0_-1 is blank; only exact 1, -1, or 0 is accepted",
+      "bills": [
+        "S2024", "S2025", "S2022", "S6", "S2026", "HR2", "HR5284", "S44",
+        "S2017", "HR7704", "HR5907", "SJRES28", "S2023", "S0", "S964", "S970",
+        "HR4590", "S2018", "HR5913", "HR6726", "HR2031", "S142", "S1959", "HR6293",
+        "S10", "HR2672", "HR4660", "HR4810", "S7", "HR4669", "HR1606", "HR5",
+        "HR3716", "S500", "HR5577", "HR4130", "HR336", "HR8686", "HR6551", "HR6550",
+        "HR1078", "HR4823", "HR4648", "HR4790", "HR3937", "HR347", "S99", "S4533",
+        "S4255", "S4198", "HR2071", "S43", "S325", "HJRES109", "S2009", "HR7006",
+        "HR6323", "HR6408", "HR5921", "HR6015", "HR4691", "HR6245", "HJRES42", "HR5319",
+        "HR309", "HR3304", "S180", "S13", "HR3950", "HR3595", "HR554", "HR555",
+        "HR556", "HR557", "HR605", "HR82", "HR4583", "HR9024", "S445", "S3907",
+        "S2027", "S36", "HR5534", "S14", "S34", "S1504", "S537", "S2021",
+        "S114", "HJRES12", "HR1321", "HR7776", "HR5911", "HR3234", "HR5429", "S30",
+        "HR5348", "HR3459", "S9", "SJRES88", "SJRES77", "S20", "HR1226", "HR1932",
+        "HR10511", "HR9767", "HR4216", "HR4233", "HR5263", "HR6327", "HR7791", "HR5990",
+        "HR6363", "HR6727", "HR5591", "HR7792", "HR6025", "HR1981", "HR2362", "HR965",
+        "HR4989", "HR7504", "S3", "S741", "S4667", "S2113", "S401", "S33",
+        "HR2987", "HR4426", "HR6498", "HR6392", "HR6472", "HR6502", "S2155", "S90",
+        "S12", "S11", "S300", "S4418", "S4072", "S3321", "S2136", "S1991",
+        "S3259", "HR7075", "S800", "HR7688", "HR7521", "HR6126", "HR8369", "HR5961",
+        "HR6046", "HR340", "HR9456", "HR1398", "HR8333", "HR5947", "HJRES178"
+      ]
+    }
+  },
+  "predicted_effects": {
+    "new_archive_direction_rows": 50,
+    "new_inert_rows": 14,
+    "precedence_sign_flips": 0,
+    "active_registry_neutral_exclusions": 6,
+    "inert_registry_neutral_exclusions": 1,
+    "reroutes": [
+      "S.J.Res.18/119 -> CFPB",
+      "H.J.Res.59/119 -> CFPB",
+      "H.R.6955/119 -> CU Capital Requirements"
+    ],
+    "runtime_cell_deltas": "not computed in this edit-only lane; RUNBOOK_W2.md assigns the scratch-only comparison to Claude"
+  }
+}

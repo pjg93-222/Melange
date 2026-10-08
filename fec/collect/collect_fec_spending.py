@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Standalone ingest for Mentat FEC industry spending through 2026-06-30.
 
-Inputs are five industry workbooks in the configured FEC spending raw
+Inputs are six industry workbooks in the configured FEC spending raw
 directory and a read-only legislators.csv candidate-id crosswalk. Outputs are
 member attribution, industry-cycle receipts, a normalized committee map, and a
 fail-closed source manifest in the output directory.
@@ -24,6 +24,13 @@ Decision log (2026-07-31): Credit Arms ships three stacked views distinguished
 by Fact Type; only Recipient is consumed because it reconciles exactly and
 carries Committee IDs, while summing Employee/Recipient/Master would
 triple-count the same dollars.
+Decision log (2026-10-07): Telecom ships a COMPACT 12-column cycle sheet
+(Fact Type, Company, Employee Tier, Amount, Analysis Amount, Party, Recipient
+Category, Recipient Key, Gift Count, Include in Analysis, Person Key, Logic
+Check) with no Cycle and no Committee ID column and no dates. The adapter
+derives Cycle from the sheet name and Committee ID from the Recipient Key
+(FEC:C########); only Fact Type Recipient is consumed, exactly as for Credit
+Arms, and Telecom is therefore cycle_only. Full-schema workbooks are untouched.
 """
 
 import os as _o, sys as _s; _s.path.insert(0, _o.path.dirname(_o.path.dirname(_o.path.abspath(__file__)))); from paths import ROOT as MB_ROOT
@@ -96,6 +103,10 @@ WORKBOOKS = {
         "filename": "Credit Arms Industry Spending Overview.xlsx",
         "side": "opposition",
     },
+    "telecom": {
+        "filename": "Telecom Industry Spending Overview.xlsx",
+        "side": "opposition",
+    },
 }
 
 REQUIRED_DETAIL_COLUMNS = (
@@ -107,6 +118,18 @@ REQUIRED_DETAIL_COLUMNS = (
     "Committee ID",
     "Include in Analysis",
 )
+# Compact cycle-sheet schema (Telecom): the full-schema Cycle and Committee ID
+# columns are absent, so they are derived (see _detail_headers).
+COMPACT_DETAIL_COLUMNS = (
+    VIEW_COLUMN,
+    "Company",
+    "Amount",
+    "Analysis Amount",
+    "Recipient Category",
+    "Recipient Key",
+    "Include in Analysis",
+)
+RECIPIENT_KEY_PREFIX = "FEC:"
 OPTIONAL_DETAIL_COLUMNS = (
     "Date",
     "Employee Tier",
@@ -276,6 +299,41 @@ def _headers(ws, row_number, required, workbook_name):
 def _cell(row, positions, column):
     index = positions[column]
     return row[index] if index < len(row) else None
+
+
+def _detail_headers(ws, row_number, workbook_name):
+    """Return (positions, compact) for a detail or exception sheet.
+
+    A sheet that carries Cycle or Committee ID is read exactly as before. A
+    sheet that carries neither is the compact schema: it must supply
+    COMPACT_DETAIL_COLUMNS, and "Cycle" and "Committee ID" are mapped to two
+    virtual columns appended by _expand_compact_row.
+    """
+    probe = _headers(ws, row_number, (), workbook_name)
+    if "Cycle" in probe or "Committee ID" in probe:
+        return _headers(ws, row_number, REQUIRED_DETAIL_COLUMNS, workbook_name), False
+    positions = _headers(ws, row_number, COMPACT_DETAIL_COLUMNS, workbook_name)
+    width = max(positions.values()) + 1
+    positions["Cycle"] = width
+    positions["Committee ID"] = width + 1
+    return positions, True
+
+
+def _expand_compact_row(row, positions, sheet_name, workbook_name, row_number):
+    """Append the derived Cycle (sheet name) and Committee ID (Recipient Key)."""
+    width = positions["Cycle"]
+    padded = list(row[:width]) + [None] * (width - len(row))
+    key = _text(padded[positions["Recipient Key"]])
+    if not key:
+        committee_id = ""
+    elif key.upper().startswith(RECIPIENT_KEY_PREFIX):
+        committee_id = key[len(RECIPIENT_KEY_PREFIX):].strip().upper()
+    else:
+        raise IngestError(
+            f"{workbook_name}/{sheet_name} row {row_number}: Recipient Key "
+            f"{key!r} is not an {RECIPIENT_KEY_PREFIX}<committee id> key"
+        )
+    return tuple(padded) + (sheet_name, committee_id)
 
 
 def _decimal(value, workbook_name, sheet_name, row_number, column):
@@ -899,14 +957,16 @@ def _new_total_aggregate(industry, side, cycle, category):
 
 
 def _count_exception_rows(ws, workbook_name):
-    positions = _headers(ws, 4, REQUIRED_DETAIL_COLUMNS, workbook_name)
+    positions, compact = _detail_headers(ws, 4, workbook_name)
     all_rows = 0
     kept_rows = 0
     for row in ws.iter_rows(min_row=5, values_only=True):
         if not _row_has_data(row):
             continue
         all_rows += 1
-        if VIEW_COLUMN not in positions or _text(
+        # Compact exception rows carry the single Fact Type "Exception", so every
+        # one of them is a kept (unstacked) row.
+        if compact or VIEW_COLUMN not in positions or _text(
             _cell(row, positions, VIEW_COLUMN)
         ).casefold() == VIEW_KEEP.casefold():
             kept_rows += 1
@@ -997,13 +1057,13 @@ def _process_workbook(path, industry, side, fec_to_bioguide):
                 )
 
         detail_positions = {}
+        compact_sheets = {}
         optional_columns = {}
         date_presence = []
         for sheet_name in DETAIL_SHEETS:
-            positions = _headers(
+            positions, compact_sheets[sheet_name] = _detail_headers(
                 workbook[sheet_name],
                 4,
-                REQUIRED_DETAIL_COLUMNS,
                 workbook_name,
             )
             detail_positions[sheet_name] = positions
@@ -1119,6 +1179,10 @@ def _process_workbook(path, industry, side, fec_to_bioguide):
                     if fact_type.casefold() != VIEW_KEEP.casefold():
                         view_rows_skipped += 1
                         continue
+                if compact_sheets[sheet_name]:
+                    row = _expand_compact_row(
+                        row, positions, sheet_name, workbook_name, row_number
+                    )
                 data_rows += 1
                 receipt["total_rows"] += 1
 
@@ -1290,6 +1354,15 @@ def _process_workbook(path, industry, side, fec_to_bioguide):
             "roster": roster,
             "reconciliation": reconciliation,
         }
+        if any(compact_sheets.values()):
+            workbook_manifest["detail_schema"] = {
+                "kind": "compact_cycle_sheet",
+                "cycle": "sheet name",
+                "committee_id": "Recipient Key without the FEC: prefix",
+                "compact_sheets": sorted(
+                    name for name, flag in compact_sheets.items() if flag
+                ),
+            }
         if view_column_present:
             workbook_manifest.update(
                 {

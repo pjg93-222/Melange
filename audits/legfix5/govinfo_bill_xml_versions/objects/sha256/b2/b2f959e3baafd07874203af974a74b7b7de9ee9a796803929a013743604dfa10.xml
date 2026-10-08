@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB88F6F6EE257479299ECF9FC08945CEB" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 110 IH: Farewell to Unnecessary Energy Lifelines Reform Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-01-09</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 110</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230109">January 9, 2023</action-date><action-desc><sponsor name-id="B001302">Mr. Biggs</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name>, and in addition to the Committees on <committee-name committee-id="HGO00">Oversight and Accountability</committee-name>, and <committee-name committee-id="HSY00">Science, Space, and Technology</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To repeal the Department of Agriculture bioenergy subsidy programs and other related subsidy programs.</official-title></form><legis-body id="HDD0155BDE45745E592301D3CCDD847FC" style="OLC"> 
+<section id="HCDBDB5F20F6C4B7087A62634F63C8E86" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Farewell to Unnecessary Energy Lifelines Reform Act of 2023</short-title></quote> or the <quote><short-title>FUEL Reform Act</short-title></quote>.</text></section> <section id="H7DD52A8D470E4A2AA943CF4492626A5C"><enum>2.</enum><header>Repeal of Department of Agriculture bioenergy subsidy programs and other related subsidy programs</header><text display-inline="no-display-inline">Title IX of the Farm Security and Rural Investment Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/7/8101">7 U.S.C. 8101 et seq.</external-xref>) is repealed.</text></section> 
+</legis-body></bill>
+

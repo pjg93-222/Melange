@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S996 IS: Microloan Program Enhancement Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-04-02</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 996</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190402">April 2, 2019</action-date>
+			<action-desc><sponsor name-id="S386">Ms. Duckworth</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSSB00">Committee on Small Business and Entrepreneurship</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To modify the microloan program of the Small Business Administration, and for other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Microloan Program Enhancement Act of 2019</short-title></quote>.</text>
+		</section><section id="id5D5E5EECE184495A9C48B0B17832D0B3"><enum>2.</enum><header>Microloan program</header>
+ <subsection id="id094FA1A2F0D040DFA96BC83C9B2F4B4A"><enum>(a)</enum><header>In general</header><text>Section 7(m) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/636">15 U.S.C. 636(m)</external-xref>) is amended—</text> <paragraph id="id8B7A5F37C7D947EB947059175980DE53"><enum>(1)</enum><text>in paragraph (3)(C)—</text>
+ <subparagraph id="id76079A1D2C3845C7954C274990355045"><enum>(A)</enum><text>by striking <quote>and $6,000,000</quote> and inserting <quote>, $7,000,000, in the aggregate,</quote>; and</text> </subparagraph><subparagraph id="id4857525C033943F6B5C25B13EDD320AE"><enum>(B)</enum><text>by inserting before the period at the end the following: <quote>, and $3,000,000 in any of those remaining years</quote>;</text>
+ </subparagraph></paragraph><paragraph id="id5BE2D683D5E1475099662C6026BB2284"><enum>(2)</enum><text>in paragraph (4)—</text> <subparagraph id="id9A3B2FC74EBC4B5C9174A4E8C29ED2A7"><enum>(A)</enum><text>in subparagraph (A), by striking <quote>subparagraph (C)</quote> each place that term appears and inserting <quote>subparagraphs (C) and (G)</quote>;</text>
+ </subparagraph><subparagraph id="id3A3AC4A4101B49A8A13D0C94B2038A7E"><enum>(B)</enum><text>in subparagraph (C)(i), by striking <quote>subparagraph (A)</quote> and inserting <quote>subparagraphs (A) and (G)</quote>; and</text> </subparagraph><subparagraph id="idAA76187B84A34CF5B845C7BB8FA86341"><enum>(C)</enum><text>by adding at the end the following:</text>
+						<quoted-block display-inline="no-display-inline" id="id47CE165A6DBC48F7BC55B4555D5E777A" style="OLC">
+ <subparagraph id="id534D6F7DB2CF43A5B76714178D72640C"><enum>(G)</enum><header>Grant amounts based on appropriations</header><text>In any fiscal year in which the amount appropriated to make grants under subparagraph (A) is sufficient to provide to each intermediary that receives a loan under paragraph (1)(B)(i) a grant of not less than 25 percent of the total outstanding balance of loans made to the intermediary under this subsection, the Administration shall make a grant under subparagraph (A) to each intermediary of not less than 25 percent and not more than 30 percent of that total outstanding balance for the intermediary.</text>
+							</subparagraph><after-quoted-block>; </after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="id23959FD277D0425D97F0A9FDEE80BCF6"><enum>(3)</enum><text>in paragraph (8)—</text> <subparagraph id="idAF421AD69BAA40DA8254D769C66225FF"><enum>(A)</enum><text>by striking <quote>In approving</quote> and inserting the following:</text>
+						<quoted-block display-inline="no-display-inline" id="id724D6DA6A7C941C199DFE66B2E29236C" style="OLC">
+ <subparagraph id="id3F1CBD9875FA4A8885A63527CBAFFF77"><enum>(A)</enum><header>In general</header><text>In approving</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block> </subparagraph><subparagraph id="id21F50DB460514B349A1A8F141BA3A7C3"><enum>(B)</enum><text>by adding at the end the following:</text>
+						<quoted-block display-inline="no-display-inline" id="id767390250B1F4BB7BE04A6013ED4A96A" style="OLC">
+ <subparagraph id="id6F45007ABCFD4E89A93D3157528E917C"><enum>(B)</enum><header>Annual report</header><text>The Administrator shall, on an annual basis, submit to the Committee on Small Business and Entrepreneurship of the Senate and the Committee on Small Business of the House of Representatives, and make publicly available on the website of the Administration, a report on how the Administration has met the requirements of subparagraph (A).</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="id2A8C9FBF67954C90A008B987DC9AE0F4"><enum>(4)</enum><text>in paragraph (10)—</text> <subparagraph id="id80DD462584D0408D9A2196E0A0AB587B"><enum>(A)</enum><text>in the matter preceding subparagraph (A)—</text>
+ <clause id="idCDFB679A8D934969B6D5608A3897A5F6"><enum>(i)</enum><text>by striking <quote>On November 1, 1995, the Administration shall</quote> and inserting <quote>The Administration shall, on an annual basis,</quote>;</text> </clause><clause id="idBC46A7AD9E8C40FFB476D979E348AD57"><enum>(ii)</enum><text>by inserting <quote>and make available to the public on the website of the Administration</quote> after <quote>Representatives</quote>; and</text>
+ </clause><clause id="idE2D5C8F562074625B4B367EFD20E696F"><enum>(iii)</enum><text>by striking <quote>of the first 3 <fraction>1/2</fraction> years</quote>;</text> </clause></subparagraph><subparagraph id="id27A20CFF72DD40AB8339E45E521A37DE"><enum>(B)</enum><text>in subparagraph (F), by striking <quote>and</quote> at the end;</text>
+ </subparagraph><subparagraph id="idD596BEAADAE24FCE82D310C35EAB2B64"><enum>(C)</enum><text>by redesignating subparagraph (G) as subparagraph (I); and</text> </subparagraph><subparagraph id="idDAB9E3EF84BF4D109E89BB748B88453C"><enum>(D)</enum><text>by inserting after subparagraph (F) the following:</text>
+						<quoted-block display-inline="no-display-inline" id="idCED4DCB0C6BC43C897C894CA79766B1B" style="OLC">
+ <subparagraph id="idACD0F242381249C592CA6611860A3139"><enum>(G)</enum><text>the number of small business concerns that received a microloan that remain in business after completing the final payment of the microloan;</text>
+ </subparagraph><subparagraph id="id941FA3367AAD47809C180DAAC7FE3EBF"><enum>(H)</enum><text>the number of jobs created and retained by small business concerns after completing the final payment of the microloan; and</text>
+							</subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subparagraph></paragraph></subsection><subsection id="id0F4B330FC7C94B7496BF4D41FCA7D67C"><enum>(b)</enum><header>Minimum allocation</header><text>Section 7(m) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/636">15 U.S.C. 636(m)</external-xref>) is amended by striking paragraph (7) and inserting the following:</text>
+				<quoted-block act-name="" id="idCE47A4DA01A84900B551281C91EBF773" style="OLC">
+ <paragraph id="id6BAAF61A860744E680DA3F9A638751EF"><enum>(7)</enum><header>Program funding for microloans</header><text>Under the program authorized by this subsection, the Administration may fund, on a competitive basis, not more than 300 intermediaries.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="idABDA0666F38A4BE0AAAB71C7D0E9CC91"><enum>(c)</enum><header>Program levels</header><text>Section 20 of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/631">15 U.S.C. 631</external-xref> note) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id5419D720D73D4F9B9C9E2331C17D5DD5" style="OLC">
+ <subsection id="idC6154A1970B7447F93C24150E9E61751"><enum>(h)</enum><header>Microloan program</header><text>The following program levels are authorized for the microloan program under section 7(m):</text> <paragraph id="idD422B6B6B36A4258B8DF6FEDA9C513A1"><enum>(1)</enum><header>Fiscal year 2020</header><text display-inline="yes-display-inline">For the programs authorized by this Act, the Administration is authorized to make, for fiscal year 2020—</text>
+ <subparagraph commented="no" display-inline="no-display-inline" id="ID70BEDE7994814E2D80BDF34BB85AD811"><enum>(A)</enum><text>$80,000,000 in technical assistance grants, as provided in section 7(m); and</text> </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ID376C6FA482A2446F99822E3AEC742D96"><enum>(B)</enum><text>$110,000,000 in direct loans, as provided in section 7(m).</text>
+ </subparagraph></paragraph><paragraph id="id6E4D98F9562C4DC2AA4154090FB1FDCF"><enum>(2)</enum><header>Fiscal year 2021</header><text display-inline="yes-display-inline">For the programs authorized by this Act, the Administration is authorized to make, for fiscal year 2021—</text>
+ <subparagraph commented="no" display-inline="no-display-inline" id="idC0348468E51E4C249F63F9587D074E5A"><enum>(A)</enum><text>$80,000,000 in technical assistance grants, as provided in section 7(m); and</text> </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id978824850EA840B1BA17C50B95B2D458"><enum>(B)</enum><text>$110,000,000 in direct loans, as provided in section 7(m).</text>
+ </subparagraph></paragraph><paragraph id="idDD62D92A66234AF2BCF517E7687D02C1"><enum>(3)</enum><header>Fiscal year 2022</header><text display-inline="yes-display-inline">For the programs authorized by this Act, the Administration is authorized to make, for fiscal year 2022—</text>
+ <subparagraph commented="no" display-inline="no-display-inline" id="id63CCAA539C2948E493753745FEC583AA"><enum>(A)</enum><text>$80,000,000 in technical assistance grants, as provided in section 7(m); and</text> </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA08CB0A22F9F4857B55B7D5C30AA9FBB"><enum>(B)</enum><text>$110,000,000 in direct loans, as provided in section 7(m).</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section></legis-body>
+</bill>
+
+

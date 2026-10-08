@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HF21AA367EE0C401CA7A47A05EDBB3E4E" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3062 IH: Patient Access to Higher Quality Health Care Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3062</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190603">June 3, 2019</action-date><action-desc><sponsor name-id="B001248">Mr. Burgess</sponsor> (for himself, <cosponsor name-id="G000581">Mr. Gonzalez of Texas</cosponsor>, <cosponsor name-id="B001302">Mr. Biggs</cosponsor>, <cosponsor name-id="V000132">Mr. Vela</cosponsor>, <cosponsor name-id="B001275">Mr. Bucshon</cosponsor>, <cosponsor name-id="M001187">Mr. Meadows</cosponsor>, <cosponsor name-id="B001274">Mr. Brooks of Alabama</cosponsor>, <cosponsor name-id="M001198">Mr. Marshall</cosponsor>, <cosponsor name-id="B001291">Mr. Babin</cosponsor>, <cosponsor name-id="W000819">Mr. Walker</cosponsor>, <cosponsor name-id="H001071">Mr. Hice of Georgia</cosponsor>, <cosponsor name-id="W000813">Mrs. Walorski</cosponsor>, <cosponsor name-id="L000583">Mr. Loudermilk</cosponsor>, <cosponsor name-id="M001190">Mr. Mullin</cosponsor>, <cosponsor name-id="C001063">Mr. Cuellar</cosponsor>, <cosponsor name-id="P000605">Mr. Perry</cosponsor>, and <cosponsor name-id="C001053">Mr. Cole</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To repeal changes made by health care reform laws to the Medicare exception to the prohibition on
+			 certain physician referrals for hospitals, and for other purposes.</official-title></form>
+	<legis-body id="H39ADC991A204469996D2FC9668D7AE2D" style="OLC">
+ <section id="H08D9912729464AB490FC4BEFA224D846" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Patient Access to Higher Quality Health Care Act of 2019</short-title></quote>.</text> </section><section id="HE2AF5F3FED9A4854828942F33E5C09DC"><enum>2.</enum><header>Repeal of health care reform provisions limiting Medicare exception to the prohibition on certain physician referrals for hospitals</header><text display-inline="no-display-inline">Sections 6001 and 10601 of the Patient Protection and Affordable Care Act (<external-xref legal-doc="public-law" parsable-cite="pl/111/148">Public Law 111–148</external-xref>; 124 Stat. 684, 1005) and section 1106 of the Health Care and Education Reconciliation Act of 2010 (<external-xref legal-doc="public-law" parsable-cite="pl/111/152">Public Law 111–152</external-xref>; 124 Stat. 1049) are repealed and the provisions of law amended by such sections are restored as if such sections had never been enacted.</text>
+		</section></legis-body></bill>
+
+

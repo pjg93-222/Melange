@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2419 IS: To provide for the conveyance of a small parcel of Coconino National Forest land in the State of Arizona.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-08-01</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2419</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190801">August 1, 2019</action-date>
+			<action-desc><sponsor name-id="S400">Ms. McSally</sponsor> (for herself and <cosponsor name-id="S403">Ms. Sinema</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSEG00">Committee on Energy and Natural Resources</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To provide for the conveyance of a small parcel of Coconino National Forest land in the State of
+			 Arizona.</official-title>
+	</form>
+	<legis-body>
+		<section id="id9B70976831BF47CCABFF10199080D01A" section-type="section-one"><enum>1.</enum><header>Coconino National Forest Land Conveyance, Arizona</header>
+ <subsection id="idac319b0a5c6144b3817e856aab9d7b9e"><enum>(a)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="idc31c662145e648bda0e85806da5ed63e"><enum>(1)</enum><header>ABOR</header><text>The term <term>ABOR</term> means the Arizona Board of Regents, on behalf of the University of Arizona Experiment Station.</text>
+ </paragraph><paragraph id="idc2b7170896114d558af949ed895b7f54"><enum>(2)</enum><header>Federal land</header><text>The term <term>Federal land</term> means the approximately 13.3 acres of land within the Coconino National Forest, in Yavapai County, Arizona—</text>
+ <subparagraph id="idED1CD4DA2E764B0C9F32AF77A697EE80"><enum>(A)</enum><text>located near 4005 N. Forest Road 618, Rimrock, Arizona; and</text>
+ </subparagraph><subparagraph id="idDD865B0C398F4E96B71B22A7404EDD67"><enum>(B)</enum><text>generally depicted on the map entitled <quote>Act to Convey Certain NFS Land and non-Federal Land in Arizona Winter Quarters</quote> and dated June 20, 2019.</text> </subparagraph></paragraph><paragraph id="ide42aa40a31034c0c8f60f0bcd165581b"><enum>(3)</enum><header>Non-Federal land</header><text>The term <term>non-Federal land</term> means the approximately 43 acres of land generally depicted on the map entitled <quote>Act to Convey Certain NFS Land and non-Federal Land in Arizona Summer Quarters</quote> and dated June 20, 2019.</text>
+ </paragraph><paragraph id="idcb93730e5f19449ebeaa8be9e8bc325c"><enum>(4)</enum><header>Secretary</header><text>The term <term>Secretary</term> means the Secretary of Agriculture.</text> </paragraph></subsection><subsection id="id7415625190c7498fb1b6502a5f9c0721"><enum>(b)</enum><header>Appraisals of Federal land, non-Federal land, and easement</header> <paragraph id="id3c4c23e65f424f8981417be1f7bbd9ad"><enum>(1)</enum><header>In general</header><text>The Federal land, the non-Federal land, and the easement described in subsection (c)(5) shall be appraised by an independent, qualified appraiser that is—</text>
+ <subparagraph id="idef93e488825e4ffa94ab885a3e5e27a6"><enum>(A)</enum><text>selected from a list of appraisers in the State of Arizona; and</text> </subparagraph><subparagraph id="id906123552491426e94db1c60186c8eb6"><enum>(B)</enum><text>mutually agreed to by—</text>
+ <clause id="id4B78BC395CF944C197C59BC8CDAE2E69"><enum>(i)</enum><text>the Secretary; and</text> </clause><clause id="id725170CC400A48C9854B10306EFF29A9"><enum>(ii)</enum><text>ABOR.</text>
+ </clause></subparagraph></paragraph><paragraph id="id7be165f928a444569cfe3b9f32b9bd4e"><enum>(2)</enum><header>Requirements</header><text>Each appraisal under paragraph (1) shall be conducted in accordance with—</text> <subparagraph id="id50fd33b9b44942f39ed1c082d36eeafc"><enum>(A)</enum><text>the Uniform Appraisal Standards for Federal Land Acquisitions; and</text>
+ </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id751318c9a5124d2581fdc4c2105e6945"><enum>(B)</enum><text>the Uniform Standards of Professional Appraisal Practice.</text> </subparagraph></paragraph></subsection><subsection id="id559b9e04de6f4fa28e2f56f0ecc48189"><enum>(c)</enum><header>Land exchange</header> <paragraph id="id14F3DA2B1FCB443E9FBDBB079D4FF0F6"><enum>(1)</enum><header>Identification of offered portion of non-Federal land</header><text>Based on the relevant appraisal conducted under subsection (b)(1), ABOR may identify a portion of the non-Federal land that—</text>
+ <subparagraph id="idF7C8E14452E24E9A98991FF8524124D3"><enum>(A)</enum><text>is equal in value to the Federal land; and</text> </subparagraph><subparagraph id="idAFB6898787954B02A246394226BBFDC7"><enum>(B)</enum><text>will be offered in exchange for the Federal land under paragraph (2).</text>
+ </subparagraph></paragraph><paragraph id="id8E8743FF6DC347DABEB95B50810F682C"><enum>(2)</enum><header>Offer by ABOR</header><text>On identification under paragraph (1) of the portion of non-Federal land to be offered in exchange for the Federal land (referred to in this subsection as the <term>offered portion of the non-Federal land</term>), ABOR may submit to the Secretary an offer to convey all right, title, and interest of ABOR in and to the offered portion of the non-Federal land.</text>
+ </paragraph><paragraph id="idF4FDC2F34E2D43468B4A9D64EAEC148A"><enum>(3)</enum><header>Action by Secretary</header><text>Subject to paragraph (4), on receipt of an offer under paragraph (2), the Secretary shall—</text> <subparagraph id="id6d792f9338fb4ab7b2e45ad373cdb067"><enum>(A)</enum><text>accept the offer; and</text>
+ </subparagraph><subparagraph id="id02b74bd3198e4ab79ea021bfc4b74ad8"><enum>(B)</enum><text>on receipt of acceptable title to the offered portion of the non-Federal land, convey to ABOR—</text> <clause id="id4e08d4a44b4b4dab92f0d3943d0f5066"><enum>(i)</enum><text>all right, title, and interest of the United States in and to the Federal land; and</text>
+ </clause><clause id="id25950cd60fb34fab838a006937049a0e"><enum>(ii)</enum><text>the easement described in paragraph (5) and depicted on the map referred to in subsection (a)(2)(B).</text>
+						</clause></subparagraph></paragraph><paragraph id="id141e4382b01143089bb872010c442e90"><enum>(4)</enum><header>Requirements</header>
+ <subparagraph id="id67F156E8C3D443348925BD059070CC3C"><enum>(A)</enum><header>Equal value</header><text>The Secretary may carry out paragraph (3) only if the Secretary determines, based on the appraisals under subsection (b)(1), that the value of the Federal land is equal to the value of the offered portion of the non-Federal land.</text>
+ </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3c3bdafa09014373805fa8eb86b8ca2c"><enum>(B)</enum><header display-inline="yes-display-inline">Additional terms and conditions</header><text display-inline="yes-display-inline">The land exchange under this subsection shall be subject to the payment by ABOR of the reasonable cost of any survey, appraisal, or any other administrative costs associated with the exchange.</text>
+ </subparagraph></paragraph><paragraph id="ida095b3aeeb304290b2c584101605f5fe"><enum>(5)</enum><header>Description of easement</header><text>The easement referred to in paragraph (3)(B)(ii) is an easement under which—</text> <subparagraph id="id6cc26cfe4fdb4ae699e4517193e9811b"><enum>(A)</enum><text>ABOR is authorized to fully maintain and use, at the expense of ABOR, Forest Service Road 9201D from its junction with Forest Service Road 0618 (commonly known as <quote>Beaver Creek</quote>), in accordance with the historic use and maintenance patterns of ABOR; and</text>
+ </subparagraph><subparagraph id="id437edab632bd416984acdc4178ea840b"><enum>(B)</enum><text>the Forest Service retains all other rights to Forest Service Road 9201D from its junction with Forest Service Road 0618, including full and continued administrative access to the road in accordance with a Forest Service travel management plan.</text>
+					</subparagraph></paragraph><paragraph id="id6ecff8835d854acb97eb06d15c73ec2f"><enum>(6)</enum><header>Maps, estimates, and descriptions</header>
+ <subparagraph id="idd1b3dd5e29944edfa6bf0836af81a3ea"><enum>(A)</enum><header>In general</header><text>As soon as practicable after the date of enactment of this Act, the Secretary shall—</text> <clause id="idb81be0c3d29c438b896dbe03198c2996"><enum>(i)</enum><text>finalize a map and legal description for each of the Federal land and the offered portion of the non-Federal land to be exchanged under this subsection; and</text>
+ </clause><clause id="id5b24023ad86b4717b4883352efaf9321"><enum>(ii)</enum><text>ensure that the maps and legal descriptions are on file and available for public inspection in the headquarters of the Coconino National Forest.</text>
+ </clause></subparagraph><subparagraph id="id7d9fd1b4821849b0b7103c338d547120"><enum>(B)</enum><header>Minor adjustments; errors</header><text>The Secretary and ABOR may, by mutual agreement—</text> <clause id="idB37BB1EF5B13426BBA16E5685C714986"><enum>(i)</enum><text>make minor boundary adjustments to the Federal land and the offered portion of the non-Federal land exchanged under this subsection; and</text>
+ </clause><clause id="idF904C619A62246D0B5B8ECB4C5336741"><enum>(ii)</enum><text>correct any minor errors in any map, acreage estimate, or description of the Federal land and the offered portion of the non-Federal land exchanged under this subsection.</text>
+						</clause></subparagraph></paragraph></subsection><subsection id="id44b5d1cd334b4d9384f0f24c2fa1baa6"><enum>(d)</enum><header>Conveyance timeline</header>
+ <text>It is the intent of Congress that the land exchange under subsection (c) shall be completed by not later than 3 years after the date of enactment of this Act.</text>
+ </subsection><subsection id="id5a643bbd9f9347f4a6e8d6b1bbaa66cd"><enum>(e)</enum><header>Management and status of acquired land</header><text>Any non-Federal land acquired by the Secretary under subsection (c) shall be managed by the Secretary in accordance with—</text>
+ <paragraph id="idb9aa5e06c3c745f691f3d0282fcc4330"><enum>(1)</enum><text>the Act of March 1, 1911 (commonly known as the <quote>Weeks Law</quote>) (36 Stat. 961, chapter 186; <external-xref legal-doc="usc" parsable-cite="usc/16/480">16 U.S.C. 480</external-xref> et seq.); and</text> </paragraph><paragraph id="id2aec8bbb60214a6ba80fa176849ee61e"><enum>(2)</enum><text>any other laws (including regulations) applicable to the National Forest System.</text>
+				</paragraph></subsection></section></legis-body>
+</bill>
+
+

@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1222 IS: Compact of Free Association Veterans Review Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-04-29</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 1222</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190429">April 29, 2019</action-date>
+			<action-desc><sponsor name-id="S353">Mr. Schatz</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSVA00">Committee on Veterans' Affairs</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To require the Secretary of Veterans Affairs to carry out a pilot program to provide hospital care
+			 and medical services to veterans  in the Freely Associated
+			 States of the Republic of Palau, the Republic of
+			 the Marshall Islands, and the Federated States of Micronesia, and to
+			 conduct a study on the feasibility and advisability
+			 of establishing
+			 regional offices, suboffices, contact units, or other subordinate offices
+			 of the Department of Veterans Affairs in the Freely Associated States to
+			 provide such care and services, and for
+			 other purposes. </official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Compact of Free Association Veterans Review Act of 2019</short-title></quote> or the <quote><short-title>COFA Veterans Review Act of 2019</short-title></quote>.</text>
+ </section><section id="idA2D3163877894AA48801CE8EDA222D67"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text> <paragraph id="id482E8BA40E8947139E1977501D639E5B"><enum>(1)</enum><header>Appropriate committees of Congress</header><text>The term <term>appropriate committees of Congress</term> means—</text>
+ <subparagraph id="idE78838208C4D4DACBD962C1F6CDB2DEB"><enum>(A)</enum><text>the Committee on Veterans’ Affairs and the Committee on Appropriations of the Senate; and</text> </subparagraph><subparagraph id="id0F320E435E384B5E8FA5B59AC5C86563"><enum>(B)</enum><text>the Committee on Veterans’ Affairs and the Committee on Appropriations of the House of Representatives.</text>
+ </subparagraph></paragraph><paragraph commented="no" id="idB196D69094894E518A947082BF4094B6"><enum>(2)</enum><header>Department</header><text>The term <term>Department</term> means the Department of Veterans Affairs.</text> </paragraph><paragraph commented="no" display-inline="no-display-inline" id="id396AC053037C44B0B471667290D88FAC"><enum>(3)</enum><header display-inline="yes-display-inline">Freely Associated States</header><text display-inline="yes-display-inline">The term <term>Freely Associated States</term> means the Republic of Palau, the Republic of the Marshall Islands, and the Federated States of Micronesia, which have each entered into a Compact of Free Association with the United States.</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="idCD3EF8C0162A4BCC913B178BCF1CC226"><enum>(4)</enum><header>Hospital care; medical services</header><text>The terms <term>hospital care</term> and <term>medical services</term> have the meanings given those terms in section 1701 of title 38, United States Code.</text> </paragraph><paragraph commented="no" display-inline="no-display-inline" id="idF49AC71B454643EF9C4D54241E26F2BB"><enum>(5)</enum><header>Patient aligned care team</header><text>The term <term>patient aligned care team</term> means a team of health care professionals of the Department that provides comprehensive primary care in partnership with the patient and manages and coordinates comprehensive health care services consistent with agreed-upon goals of care.</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="idA8BB2A5698A2424E9887294FABFF234F"><enum>(6)</enum><header>Project ECHO education and training</header><text>The term <term>Project ECHO education and training</term> means education and training provided under the Project Extension for Community Health Outcomes.</text> </paragraph><paragraph commented="no" display-inline="no-display-inline" id="idBE23A003AC9A4D6CB06F6F828744964C"><enum>(7)</enum><header>Secretary</header><text>The term <term>Secretary</term> means the Secretary of Veterans Affairs.</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="id8966AFBB2E7947CC94A4C2663EC99D3D"><enum>(8)</enum><header>Service-connected; non-service-connected</header><text>The terms <term>service-connected</term> and <term>non-service-connected</term> have the meanings given those terms in section 101 of title 38, United States Code.</text> </paragraph><paragraph commented="no" display-inline="no-display-inline" id="id07F57209FF534D298CCBDB5D8E5FD9EC"><enum>(9)</enum><header>Veterans service organization</header><text>The term <term>veterans service organization</term> means any organization recognized by the Secretary for the representation of veterans under section 5902 of title 38, United States Code.</text>
+			</paragraph></section><section id="id5DE83E8E0BB04C2C91BAE13A1D2FAD85"><enum>3.</enum><header>Pilot program on providing hospital care and medical services
+			 to veterans residing in the Freely Associated States</header>
+ <subsection id="id513084483F0146BF98FBB5A37F84B13E"><enum>(a)</enum><header>Pilot program required</header><text>Commencing not later than January 1, 2020, the Secretary shall carry out a pilot program to provide hospital care, medical services, and other related services to veterans residing in the Freely Associated States.</text>
+ </subsection><subsection id="id8077AF02B284413C9FD30C8C9BA7286A"><enum>(b)</enum><header>Duration</header><text>The Secretary shall carry out the pilot program required by subsection (a) during the three-year period beginning on the date of the commencement of the pilot program.</text>
+ </subsection><subsection id="idA73C97C7FE5A4D93B0CB2690B1CB9AEF"><enum>(c)</enum><header>Services provided</header><text>In carrying out the pilot program required by subsection (a), the Secretary shall ensure that the pilot program—</text>
+ <paragraph id="id73F5B60BA08F409F874A56E34AF53FF3"><enum>(1)</enum><text>emphasizes the use of telehealth;</text> </paragraph><paragraph id="idD18F6352CF9B42EE91B53C2F8EA49D22"><enum>(2)</enum><text>provides Project ECHO education and training to employees of the Department responsible for carrying out the pilot program;</text>
+ </paragraph><paragraph id="id771CF08B37ED41788BD8EB2880459A33"><enum>(3)</enum><text>includes the use of primary and specialty care provided by patient aligned care teams and specialty care providers; and</text>
+ </paragraph><paragraph id="id6F8DC7978AE64711A2BC6FC749C55441"><enum>(4)</enum><text>includes the provision of compensation and pension medical examinations.</text> </paragraph></subsection><subsection id="idD87DC3950C1F4E019F4BC9409CB333A6"><enum>(d)</enum><header>Outreach program</header><text>As part of the pilot program required by subsection (a), the Secretary shall conduct a program of outreach to inform veterans in the Freely Associated States about the pilot program and the services available under the pilot program.</text>
+ </subsection><subsection id="id52B815807A024A24937D7D1D49BCFD22"><enum>(e)</enum><header>Authorization of appropriations</header><text>There are authorized to be appropriated to the Secretary such funds as may be necessary to carry out the pilot program.</text>
+			</subsection></section><section id="idEE2655634BD04F04BB1104CE820AABBC"><enum>4.</enum><header>Study on providing hospital care and medical services to
+			 veterans residing in the Freely Associated States</header>
+			<subsection id="id5BA6BEB86E4C4035815C7C83A98257C7"><enum>(a)</enum><header>Study required</header>
+ <paragraph id="id6B8A57A9B8DD4C648872D5C6894BEA26"><enum>(1)</enum><header>In general</header><text>The Secretary shall conduct a study on the feasibility and advisability of establishing one or more regional offices, suboffices, contact units, or other subordinate offices of the Department in the remote Pacific islands, including the Freely Associated States, to provide hospital care and medical services to veterans residing in the remote Pacific islands, including the Freely Associated States.</text>
+ </paragraph><paragraph id="id8FB503E16EB24434A683E84C49C589AD"><enum>(2)</enum><header>Considerations and analysis</header><text>In conducting the study required by paragraph (1), the Secretary shall consider and analyze the following:</text>
+ <subparagraph id="id8B4781471C4D4CA691315B2A0ACFF8CE"><enum>(A)</enum><text>The results of the pilot program required by section 3(a).</text> </subparagraph><subparagraph id="idED5BC9BA996144EABF0D0FE1DB7E648F"><enum>(B)</enum><text>The ability of the Department to provide hospital care and medical services to veterans residing or traveling outside the United States, including veterans residing in the Freely Associated States.</text>
+ </subparagraph><subparagraph id="id67764F2F994F4D2FA1A557C4877C005F"><enum>(C)</enum><text>The feasibility, efficacy, and advisability of building clinics or leasing space on embassy compounds or in consulate facilities of the United States in the Freely Associated States or insular areas for the purposes of providing hospital care and medical services to veterans residing or traveling outside the United States, including veterans residing in the Freely Associated States.</text>
+ </subparagraph><subparagraph id="id71006FC3073A4B01A1C421C79214BB95"><enum>(D)</enum><text>The feasibility and advisability of providing services, such as telehealth, Project ECHO education and training, primary and specialty care provided by patient aligned care teams and specialty care providers, and compensation and pension medical examinations, to veterans residing in the Freely Associated States.</text>
+ </subparagraph><subparagraph id="id9213F45B4C4F4ECDBCECCC219FC1ACCF"><enum>(E)</enum><text>Updates to census data of the Department on the number of veterans residing in the Freely Associated States to determine whether such data supports the establishment of a permanent patient aligned care team of the Department based in the Freely Associated States.</text>
+ </subparagraph><subparagraph id="idB52F130FDC724F049782FDE46AE253AD"><enum>(F)</enum><text>With respect to the United States and the Freely Associated States, the data standards for—</text> <clause id="id867E3861BAE54FD7A711BE291296D8D5"><enum>(i)</enum><text>patient medical record information; and</text>
+ </clause><clause id="id2DCDE2DBE93B4DE98B074B9A8F8CCDDD"><enum>(ii)</enum><text>the electronic interchange of such information.</text>
+ </clause></subparagraph><subparagraph id="id6C2C04B1EB4E48BEBE078DC818AAA4EE"><enum>(G)</enum><text>The feasibility and advisability of providing hospital care and medical services to veterans residing in the Freely Associated States for non-service-connected disabilities.</text>
+ </subparagraph><subparagraph id="id3C13EB4F80974DF1A070A5AC4F3B5C23"><enum>(H)</enum><text>The feasibility and advisability of providing continuity of care to veterans for service-connected disabilities that cannot be treated by the Department within a regional office, suboffice, contact unit, or other subordinate office of the Department in the remote Pacific islands, including the Freely Associated States.</text>
+ </subparagraph><subparagraph id="id7AA341A163A348AAA1BC1BF33355A0A9"><enum>(I)</enum><text>Such other matters as the Secretary considers appropriate.</text> </subparagraph></paragraph><paragraph id="idE81B0EA648A5491A85A1DF77BB787728"><enum>(3)</enum><header>Cooperation and consultation</header><text>The Secretary shall conduct the study required by paragraph (1)—</text>
+ <subparagraph id="id25965D80A05D42A1B1891DB7E9A172B4"><enum>(A)</enum><text>in cooperation with—</text> <clause id="id5F342B29B66842859FA2E84B63E37820"><enum>(i)</enum><text>the Secretary of Defense;</text>
+ </clause><clause id="idBD827C9A803141DDA797FD55F075EF51"><enum>(ii)</enum><text>the Secretary of Health and Human Services;</text> </clause><clause id="id650BF8D2257D44FAB5EDA95E7FAA7E10"><enum>(iii)</enum><text>the Secretary of the Interior;</text>
+ </clause><clause id="idE57FBB88BBB94677905749584E4A248E"><enum>(iv)</enum><text>the Secretary of State; and</text> </clause><clause id="id13241D17A5794A68AB52DCB03FCFE3CB"><enum>(v)</enum><text>such other heads of Federal agencies as may be interested in the study; and</text>
+ </clause></subparagraph><subparagraph id="idC06043D72AA24FEA8A1E9A7254404DDE"><enum>(B)</enum><text>in consultation with—</text> <clause id="id6E4E346F488E4793AC03E37E9C416869"><enum>(i)</enum><text>such representatives of State and local governments as the Secretary determines may be interested in the study;</text>
+ </clause><clause id="id9AA8A1F6A77949E6A48061CFD4D43342"><enum>(ii)</enum><text>each government of the Freely Associated States;</text> </clause><clause id="id1D2B4237FA5141B5B250F63BE1B29EC1"><enum>(iii)</enum><text>veterans service organizations;</text>
+ </clause><clause id="id14F516ABA0DB42708C6971C8CDE6266E"><enum>(iv)</enum><text>such nongovernmental organizations as the Secretary considers appropriate; and</text> </clause><clause id="idC89B155C59C44D1C9474F9269AACDDFB"><enum>(v)</enum><text>the public.</text>
+						</clause></subparagraph></paragraph></subsection><subsection id="idF3E26FF91981407DB9789D31EFC881AD"><enum>(b)</enum><header>Report required</header>
+ <paragraph id="id236C2B7E461444BD97F200A5760B5D75"><enum>(1)</enum><header>In general</header><text>Not later than 270 days after the date on which the pilot program required by section 3(a) terminates, the Secretary shall submit to the appropriate committees of Congress a report on the findings of the Secretary with respect to the study required by subsection (a)(1).</text>
+ </paragraph><paragraph id="id0D8713ECFEB549B6A0F88E6B8D9DFDB1"><enum>(2)</enum><header>Contents</header><text>The report submitted under paragraph (1) shall include the following:</text> <subparagraph id="id11A39B0A09D04A1E919882A4CA79C094"><enum>(A)</enum><text>A description of the processes required for the Secretary to establish one or more regional offices, suboffices, contact units, or other subordinate offices in the Freely Associated States.</text>
+ </subparagraph><subparagraph id="idE8FCCAB69A1D41EBB6234747FBECA140"><enum>(B)</enum><text>The number of veterans expected to receive hospital care and medical services provided under laws administered by the Secretary in the Freely Associated States.</text>
+ </subparagraph><subparagraph id="id479807E3C90347DA9B6F93AF12C4AD81"><enum>(C)</enum><text>A resource management plan for the Department to provide hospital care and medical services in the Freely Associated States, including an assessment of the effect that such provision would have on the Department of Veterans Affairs Pacific Islands Health Care System.</text>
+ </subparagraph><subparagraph id="id6A2A6ABCA37045BFA447D579CC5B3468"><enum>(D)</enum><text>An explanation of the guidelines that the Department will use to provide hospital care and medical services under laws administered by the Secretary in the Freely Associated States, including an explanation of benefits for service-connected and non-service-connected disabilities.</text>
+ </subparagraph><subparagraph id="idAEF88B31810849ACBC5F0EA850673C31"><enum>(E)</enum><text>An explanation of how the Department expects to provide continuity of care to veterans for service-connected disabilities that cannot be treated within a regional office, suboffice, contact unit, or other subordinate office in the Freely Associated States, including how the Department plans to communicate with such veterans regarding their continuity of care.</text>
+ </subparagraph><subparagraph id="idBC3BCD55D91749A988421C5C217A19AE"><enum>(F)</enum><text>An assessment of the budgetary resources required to establish and provide hospital care and medical services to veterans in the Freely Associated States during the 10-year period beginning on the date of the submittal of the report.</text>
+					</subparagraph></paragraph></subsection></section></legis-body>
+</bill>
+
+

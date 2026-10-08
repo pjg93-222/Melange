@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H9350D10BD86F4794A374DF9F5AE68041" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 2521 EH: Delivering Optimally Urgent Labor Access for Veterans Affairs Act of 2022</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 2521</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To require the Secretary of Veterans Affairs to conduct a study on the feasibility and advisability of furnishing doula services to certain veterans, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H9BE8B5A5C103442E9C427D50FDC61C4F" style="OLC"> 
+<section id="HDD89A5FCD58046238724D01A20153ABA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Delivering Optimally Urgent Labor Access for Veterans Affairs Act of 2022</short-title></quote> or the <quote><short-title>DOULA for VA Act of 2022</short-title></quote>.</text></section> <section id="HD39C39105EA642FCBC4B831219874DE1"><enum>2.</enum><header>Feasibility and advisability study on doula support for veterans</header> <subsection id="H846FAE3851A5430EAA02EF68343BC2DA"><enum>(a)</enum><header>Study</header><text display-inline="yes-display-inline">The Secretary of Veterans Affairs shall carry out a study on the feasibility and advisability of furnishing doula services to covered vetearns. Such study shall include an analysis of—</text> 
+<paragraph id="H62149A64C82249538DE91DCE8821F138"><enum>(1)</enum><text>measures taken by other Federal, State, and local entities to ensure the appropriate certification of doulas; and</text></paragraph> <paragraph id="H056C182492944519B87624B52BE238BC"><enum>(2)</enum><text>the extent to which such measures, or similar measures, may be adequate for purposes of such furnishment.</text></paragraph></subsection> 
+<subsection id="H86D95E94063D44B295188BA0F0844F4A"><enum>(b)</enum><header>Report</header><text display-inline="yes-display-inline">Not later than 18 months after the date of the enactment of this Act, the Secretary shall submit to the Committees on Veterans’ Affairs of the House of Representatives and the Senate a report on the findings of the study under subsection (a) that shall include a determination by the Secretary as to whether furnishing doula services to covered veterans is feasible and advisable.</text> </subsection> <subsection id="H6E64E18BDEEC41B9A6BCFE8CD2E85E54"><enum>(c)</enum><header>Covered veteran defined</header><text>In this section, the term <term>covered veteran</term> means a pregnant veteran or a formerly pregnant veteran (with respect to doula services to be furnished post-partum) who is enrolled in the patient enrollment system of the Department of Veterans Affairs under section 1705 of title 38, United States Code. </text> </subsection></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20221201" chamber="House">Passed the House of Representatives December 1, 2022.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

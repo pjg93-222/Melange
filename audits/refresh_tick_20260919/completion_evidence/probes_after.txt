@@ -1,0 +1,34 @@
+{
+  "modified_between_ticks": {
+    "code": 0,
+    "outcome": "PUBLISHED",
+    "seconds": 5.89,
+    "tail": "26:25Z] financial_other discovery (review sheet) START   (timeout 1800s, COMPUTING)\r\n[2026-09-20 04:26:25Z] financial_other discovery (review sheet) OK        0s  stub financial_other_discovery.py wrote 60 rows (invocation 2)\r\n[2026-09-20 04:26:26Z] forecast ledger (freeze+score) START   (timeout 900s, COMPUTING)\r\n[2026-09-20 04:26:26Z] forecast ledger (freeze+score) OK        0s  stub forecast_ledger.py wrote 60 rows (invocation 2)\r\n[2026-09-20 04:26:26Z] PUBLISHED \u2014 every evidence source refreshed inside its cadence window\r\n[2026-09-20 04:26:26Z] collected 27 superseded manifest file(s)\r\n[2026-09-20 04:26:26Z] ===== REFRESH TICK PUBLISHED (exit 0) \u2014 27 step(s) run, 27 ok, 0 filed =====\r\n\r\n",
+    "root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_bg9wh67z",
+    "bad_manifest_outputs": []
+  },
+  "zero_then_noop": {
+    "first": {
+      "code": 1,
+      "outcome": "COLLECTED_NOT_PUBLISHED",
+      "seconds": 0.48,
+      "tail": "TART   (timeout 3000s, COLLECTING)\r\n[2026-09-20 04:26:28Z] CREC floor speeches            OK        0s  stub fetch_congressional_record.py|crec|--since wrote 60 rows (invocation 2)\r\n[2026-09-20 04:26:28Z] CREC floor speeches            COVERAGE SUSPECT \u2014 1 file(s) that carried >= 50 rows now carry none\r\n[2026-09-20 04:26:28Z] compute phase wanted: evidence is not currently publishable (CREC floor speeches: coverage is SUSPECT)\r\n[2026-09-20 04:26:28Z] BLOCKER \u2014 CREC floor speeches: coverage is SUSPECT\r\n[2026-09-20 04:26:28Z] NOT ELIGIBLE \u2014 1 evidence source(s) block publication\r\n[2026-09-20 04:26:28Z] ===== REFRESH TICK COLLECTED_NOT_PUBLISHED (exit 1) \u2014 1 step(s) run, 0 ok, 0 filed =====\r\n\r\n"
+    },
+    "second": {
+      "code": 1,
+      "outcome": "COLLECTED_NOT_PUBLISHED",
+      "seconds": 0.72,
+      "tail": "       START   (timeout 3000s, RETRYING_FILED)\r\n[2026-09-20 04:26:28Z] CHRG finance hearings          OK        0s  \r\n[2026-09-20 04:26:29Z]    outputs TORN \u2014 this step wrote before it died; publication waits for its next success\r\n[2026-09-20 04:26:29Z] compute phase wanted: evidence is not currently publishable (CREC floor speeches: coverage is SUSPECT)\r\n[2026-09-20 04:26:29Z] BLOCKER \u2014 CREC floor speeches: coverage is SUSPECT\r\n[2026-09-20 04:26:29Z] BLOCKER \u2014 CHRG finance hearings: outputs are torn\r\n[2026-09-20 04:26:29Z] NOT ELIGIBLE \u2014 2 evidence source(s) block publication\r\n[2026-09-20 04:26:29Z] ===== REFRESH TICK COLLECTED_NOT_PUBLISHED (exit 1) \u2014 2 step(s) run, 0 ok, 1 filed =====\r\n\r\n"
+    },
+    "root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_zsq5pkq2",
+    "coverage": "SUSPECT"
+  },
+  "locked_manifest_due_zero": {
+    "code": 1,
+    "outcome": "COLLECTED_NOT_PUBLISHED",
+    "seconds": 1.06,
+    "tail": "plxz\\\\data\\\\engine\\\\refresh_manifests\\\\crec-floor-speeches.51fce3e2) \u2014 the step keeps its recorded state; its baseline is unknown for this tick\r\n[2026-09-20 04:26:34Z] BLOCKER \u2014 CREC floor speeches: manifest cannot be read; preserving its baseline\r\n[2026-09-20 04:26:34Z] compute phase wanted: evidence is not currently publishable (CREC floor speeches: manifest cannot be read; evidence is unverified)\r\n[2026-09-20 04:26:34Z] BLOCKER \u2014 CREC floor speeches: manifest cannot be read; evidence is unverified\r\n[2026-09-20 04:26:34Z] NOT ELIGIBLE \u2014 1 evidence source(s) block publication\r\n[2026-09-20 04:26:34Z] ===== REFRESH TICK COLLECTED_NOT_PUBLISHED (exit 1) \u2014 0 step(s) run, 0 ok, 0 filed =====\r\n\r\n",
+    "root": "C:\\Users\\pgoff\\AppData\\Local\\Temp\\refresh_tick_test_bb27plxz",
+    "coverage": "OK"
+  }
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H0F91522BC018455E996C2ACE6FACA7A2" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 465 IH: Protect U.S. Investments Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-01-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 465</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230124">January 24, 2023</action-date>
+<action-desc><sponsor name-id="G000565">Mr. Gosar</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HFA00">Committee on Foreign Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Foreign Assistance Act of 1961 to improve the protection of United States investors against certain prejudicial actions taken by the government of a foreign country.</official-title>
+</form>
+<legis-body id="HF7F9AFABE3A549139712C860D4982EA2" style="OLC"> 
+<section id="HAC3ADE0817A8480896A1D9BFDDD7477F" section-type="section-one" commented="no"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protect U.S. Investments Act of 2023</short-title></quote>.</text></section> <section id="H92CB4C9235314231869203CA2D39DB2E"><enum>2.</enum><header>Protection of United States investors</header><text display-inline="no-display-inline">Section 620(e) of the Foreign Assistance Act of 1961 (<external-xref legal-doc="usc" parsable-cite="usc/22/2370">22 U.S.C. 2370(e)</external-xref>) is amended—</text> 
+<paragraph id="H09A1568F05E54B76980C62432337054E"><enum>(1)</enum><text>in paragraph (1)—</text> <subparagraph id="H66A392BA78B34B248B485CEBDF34D509"><enum>(A)</enum><text>in subparagraph (B), by inserting <quote>, including by failing to meet, confer, or engage in good faith consultations and negotiations through a duly authorized representative with any such United States citizen or corporation, partnership, or association, as contemplated by any governing investment treaty, such as Article 10.15 of the Dominican Republic-Central America-United States Free Trade Agreement, not later than 30 days after having been served a written request for such treaty consultations or negotiations, separately or in connection with a notice of intent to arbitrate</quote> after <quote>citizens</quote>; and</text> </subparagraph> 
+<subparagraph id="H82936330A3B3446FAC45FF03CEDB28DD"><enum>(B)</enum><text>by adding at the end the following new sentence: <quote>For purposes of this subsection and in addition to any other forms otherwise provided for by law, the term <term>assistance</term> includes any direct or indirect transfer, grant, loan, or guarantee, which is subject to appropriation by Congress, to the government of any foreign country, but does not include assistance primarily supporting United States law enforcement or national security interests.</quote>; and</text> </subparagraph></paragraph> <paragraph id="H8906E83B550847699EF47E4C16F2A3A8"><enum>(2)</enum><text>by adding at the end the following new paragraphs: </text> 
+<quoted-block style="OLC" id="HCCE41671ED904AC8A118F40C98BBCF81" display-inline="no-display-inline"> 
+<paragraph id="HBC767D2EBF07481D85BD32CE676817AD" indent="up1"><enum>(3)</enum><text display-inline="yes-display-inline">A United States citizen or corporation, partnership, or association, whose investment comes within the scope of paragraph (1) shall have—</text> <subparagraph id="HBAAA999DDE074A5DA251480C31BD60FF"><enum>(A)</enum><text>the right to petition the Foreign Claims Settlement Commission of the United States, or its successor, to render an advisory report to the President, not later than 120 days after service of such petition, regarding the merits of enforcing this subsection with respect to the alleged treatment of said investment by the identified foreign country; and</text></subparagraph> 
+<subparagraph id="H1A1FC8582BE5490A91129CF16093326D"><enum>(B)</enum><text>in the event that the Foreign Claims Settlement Commission of the United States, or its successor, shall fail to timely render such advisory report, to file an action in the nature of a mandamus to compel the suspension of assistance under this subsection as to the identified foreign country, as referred to in subparagraph (A) in any court of competent jurisdiction.</text></subparagraph></paragraph> <paragraph id="H7FABB446E79B4342A89E4DF3C54E15C5" indent="up1"><enum>(4)</enum><text display-inline="yes-display-inline">Any public official of the government of any foreign country who has materially assisted in any prejudicial action relative to an investment in that country by any United States citizen or corporation, partnership or association, whose investment comes within the scope of paragraph (1), may not be provided any immigration status or issued a visa under the immigration laws (as such term is defined in section 101 of the Immigration and Nationality Act), or be admitted to the United States, until such prejudicial action is rescinded, reversed, permanently enjoined, or fully remediated.</text></paragraph> 
+<paragraph id="H159B8848C8E547CDBDFE6BE4A2B276BC" indent="up1"><enum>(5)</enum><text display-inline="yes-display-inline">Any public official of the government of any foreign country who has materially assisted in any prejudicial action relative to an investment in that country by any United States citizen or corporation, partnership or association, whose investment comes within the scope of paragraph (1), shall be denied remittances by every financial institution located in the United States until such prejudicial action is rescinded, reversed, permanently enjoined, or fully remediated.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> <section id="HB97C3706483C4F8BB91B8127D1746C8F"><enum>3.</enum><header>Effective date</header><text display-inline="no-display-inline">The amendments made by section 2 shall take effect on the date of the enactment of this Act and shall apply with respect to any controversy arising before, on, or after such date that involves an investment within the scope of section 620(e)(1) of the Foreign Assistance Act of 1961 (<external-xref legal-doc="usc" parsable-cite="usc/22/2370">22 U.S.C. 2370(e)(1)</external-xref>).</text> </section> 
+</legis-body>
+</bill> 
+
+

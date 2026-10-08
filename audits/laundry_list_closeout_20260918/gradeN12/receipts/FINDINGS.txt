@@ -1,0 +1,190 @@
+INDEPENDENT ADVERSARIAL GRADE OF THE N12 INTERVIEW TURN-BLEED MIGRATION (gradeN12)
+graded 2026-09-19 from audits/laundry_list_closeout_20260918/fixN12/dry_run_ledger.jsonl
+READ-ONLY: nothing under the live tree was written, no tracked file in the worktree changed,
+the migration was never run in --apply or --restore, no production module under fec/ was
+imported, and social_media.db was opened only as file:...?mode=ro with PRAGMA query_only=ON.
+
+------------------------------------------------------------------------------- G0 reproduction
+Every number in the builder's dry_run_summary.json reproduces from the ledger independently
+(receipt G0_independent_census.json, script 01_census.py):
+  5,863 ledger records / 5,863 distinct rowids; 5,859 UPDATEs; 64 INSERTs (54 reattributed +
+  10 own_later_turn); 6,257 segments; 2,182,540 chars removed; 0 reconstruct failures;
+  4 skipped rows = 69544, 244993, 278454, 278528; 0 colliding insert keys.
+The arithmetic is sound. The DEFECTS below are in the grammar's judgement, not its bookkeeping.
+46 of the 64 INSERTs come from the colon-less class E - the class the builder graded itself.
+
+------------------------------------------------------------------------ G1  every INSERT (n=64)
+grade                                             n     receipt
+CORRECT-SPEAKER, text clean                      20     G1_grades.csv
+CORRECT-SPEAKER, label debris inside the text     26     G1_grades.csv, G_probes_mechanical P3
+NOT CORRECT - partial foreign words               10     G1_grades.csv, G_probes_mechanical P4
+NOT-SPEECH (the whole insert is a chyron)          3     rowids 80238, 192027, 226287
+WRONG-SPEAKER (a different person entirely)        5     rowid 245558, all five segments
+speaker-correct            46/64 = 71.9%   exact 95% CI 0.5924 - 0.8240
+NOT CORRECT-SPEAKER        18/64 = 28.1%   exact 95% CI 0.1760 - 0.4076
+strictly clean             20/64 = 31.3%   exact 95% CI 0.2024 - 0.4406
+class E (colon-less) n=46: 34 speaker-correct (73.9%, CI 0.5887-0.8573); 9 partial, 3 NOT-SPEECH
+other classes        n=18: 12 speaker-correct (66.7%, CI 0.4099-0.8666); 1 partial, 5 WRONG
+
+THE THREE NOT-SPEECH INSERTS (new rows whose entire content is a chyron fragment):
+  80238  -> Bill Cassidy     ", (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &"
+  192027 -> Steve Scalise    ", (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF"   (nwords=8, exactly
+                             at MIN_TURN_WORDS, so the 8-word floor does not stop it)
+  226287 -> Bennie Thompson  ", CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6"
+  MECHANISM: turn_tags.TAG puts TAIL before PAREN, so a label written NAME (PARTY), ROLE... is
+  only matched up to the parenthetical; class E's NOCOLON_TAIL likewise ends at "(R-XX)". The
+  role tail after it becomes the "speech".
+
+THE FIVE WRONG-SPEAKER INSERTS - all from rowid 245558 (show qmb, 2023-08-17):
+  the row's speaker says in the text "My name is Mike Johnson. I'm the chief of conservation for
+  Summit Metro Parks" (Akron, Ohio). names_member() accepts a bare surname with no first-name
+  test, so 'JOHNSON (voice-over)' reads as the member's own tag. The row is ALREADY mis-attributed
+  today (one row, 612 words); the migration would turn that into 1 kept row + 5 new rows, all
+  under Rep. Mike Johnson (V1 in G1G4_db_verification.txt: the package holds only this row today).
+
+THE TEN PARTIAL-FOREIGN INSERTS (member's words with another speaker's glued on):
+  68730  -> Adam Schiff        ~75 of 100 words are CNN anchor copy
+  102837 -> Chris Van Hollen   carries 'UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017: ...' + '(END VIDEO CLIPS)'
+  104285 -> Tim Kaine          ~66 of 81 words are Chuck Todd's
+  108647 -> Richard Durbin     x4 own-turn inserts, each carrying Todd's next question;
+                               seg6 is ~60 of 67 words Todd's programming note
+  111034 -> Charles Schumer    x2, each carrying Todd's question
+  242833 -> Richard Durbin     ~215 of 262 words are Bret Baier's ('BRET BAIER, HOST OF "SPECIAL
+                               REPORT": The omnibus spending bill...')
+  MECHANISM 1: NBC/MTP writes 'CHUCK TODD:It' with NO space after the colon; TAG requires
+  (?=\s|$|--|em-dash) after the colon, so every MTP host turn is invisible. 29 corpus rows carry
+  that shape (G_probes_mechanical P5).
+  MECHANISM 2: TAIL's character class excludes digits, commas and curly quotes, so
+  'UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017:' and 'BRET BAIER, HOST OF "SPECIAL REPORT":' cannot
+  match. 34 corpus rows carry an UNIDENTIFIED MALE/FEMALE label.
+
+LABEL DEBRIS: 35 of the 64 inserts begin with label remains (',', ';', ':', '(voice-over): ',
+'(R-', ', D-CONN.:', ', PRESIDENTIAL CANDIDATE', ', "GMA"/ABC:' ...) - all 35 are class E, which
+matches a tag WITHOUT its colon and therefore cannot consume the separator (G_probes_mechanical P3).
+Two inserts also carry a trailing '[END TAPE]' and two a trailing CNN timestamp.
+
+--------------------------------------------------- G2  KEPT TEXT (n=60, 20 E / 20 D / 20 other)
+sample = seed 20260919, ids in G2G3_sample60_ids.json, text in G2G3_sample60_text.txt,
+grades in G2G3_grades.csv.
+  CLEAN                52/60 = 86.7%   exact 95% CI 0.7541 - 0.9406
+  KEPT-FOREIGN-WORDS    8/60 = 13.3%   exact 95% CI 0.0594 - 0.2459
+  CUT-MEMBER-WORDS      0/60            exact 95% CI 0.0000 - 0.0598
+  UNCLEAR               0/60
+  by stratum: E 18/20 clean (CI 0.6830-0.9877), D 15/20 (CI 0.5090-0.9134), other 19/20
+  (CI 0.7513-0.9987)
+The eight KEPT-FOREIGN rows are three distinct mechanisms, none of them a bad cut of the
+member's own sentence:
+ (a) PBS anchor label invisible to class D - 5 rows (258736, 258820, 258130, 257343, 258713).
+     MIXED's name tokens are ASCII-only, so 'Laura Barron-Lopez:' (curly-accented o) and
+     'Fred de Sam Lazaro:' (lower-case particle) never match, and up to 270 words of anchor
+     narration stay in the member's row. 6 flagged rows show this (receipt H1).
+ (b) an abbreviation period satisfies the sentence anchor - 3 rows in the sample family
+     (82055, 71147; also 70812, 205497 corpus-wide, receipt H2). extend_over_allcaps_run stops
+     at a token ending in '.', so 'DONALD TRUMP (R), FORMER U.S.' stays with the member and the
+     tag becomes 'PRESIDENT AND'.
+ (c) already the wrong person - 1 row (225986). The kept words are Daniel W. Webster of Johns
+     Hopkins on Australian gun law, stored under Rep. Daniel Webster. Proof in V3 of
+     G1G4_db_verification.txt: rows 256396-256400 for the same member are NPR public-health
+     interviews whose own text reads 'MARTINEZ: That's Daniel Web[ster]...'. Pre-existing.
+Two further cut-quality families found mechanically, both OUTSIDE the sampled 60:
+ (d) class C is unanchored, so 4 rows keep the next speaker's NAME: 70149 'BRIAN NELSON,',
+     83941 'KIM PHAM,', 192133 'SUZANNE MALVEAUX,', 193439 'SUNLEN SERFATY,' (receipt H3).
+ (e) the CURLY apostrophe U+2019 is not in NAMETOK (the repair added the backtick for MS NOW but
+     not U+2019, which ABC/this-week writes), so 10 flagged rows keep a bare "O'" and the tag is
+     recorded as the half-name 'BRIEN (voice over)'. Corpus-wide 176 INTERVIEW rows carry a
+     curly-apostrophe ALL-CAPS tag and 164 of them the migration never flags at all
+     (G_probe_curly_apostrophe.txt).
+A seeded 20-row sample of the 139 rows whose kept text does not end on a sentence terminator
+(all 139 are class-C-first rows) found 16 benign (the kept text ends on a CNN timestamp) and 4
+of family (e) - G2_classC_boundary_sample20.txt. No row in any sample was cut mid-sentence
+through the member's own speech.
+
+------------------------------------------------------------ G3  REMOVED TEXT (same 60 rows)
+  NONE                       59/60           exact 95% CI 0.9106 - 0.9996
+  SOME-MEMBER-WORDS-REMOVED   1/60 = 1.7%    exact 95% CI 0.0004 - 0.0894
+  UNCLEAR                     0/60
+The one case is rowid 83061 (Maxine Dexter, show acd, 2025-10-07). The removed
+'PROKUPECZ (voice-over)' segment (disposition ledger_only_unresolved, so it is DELETED, not
+re-attributed) ends with Dexter's own untagged words, which the CNN transcript never re-tagged:
+  "The question is, are we being strategic? Are we being effective? And I would argue that being
+   down there, taking a risk, that you become a player in this reality TV vision that Donald
+   Trump has of Portland is a mistake."
+Her kept text is 8 words; those ~45 words would leave the live corpus (full text in V4 of
+G1G4_db_verification.txt).
+Second, enriched read: of the 174 deleted segments that name the row's own member AND carry a
+sentence-initial first person, a seeded 30-row sample graded 28 NONE, 1 SOME (rowid 244163 -
+the correspondent quotes Mark Warner's own written statement to CNN verbatim: "Today, we're
+talking about TikTok, but as the growth of Lemon8 shows... No more Whac-a-Mole."), 1 UNCLEAR
+(rowid 215035, a garbled Don Lemon monologue whose first clause parses as neither speaker).
+1/30 in that enriched stratum, exact 95% CI 0.0008 - 0.1722 (G3G5_deletion_risk.txt).
+
+------------------------------------------------------------------------ G4  the five named rows
+69544 and 244993 (James Comer, both 64 words, identical text): NOT wholly mis-attributed. The
+  row is "OK. OK. WILD (voice-over): Members of the Committee pressed Cheatle..." - Comer's own
+  two-word utterance followed by CNN correspondent Whitney Wild's voice-over. The grammar read
+  "OK. OK." as part of the tag ('OK. OK. WILD (voice-over)'), which emptied the kept text and
+  tripped the row_has_no_member_words guard. The correct split keeps "OK. OK." and removes from
+  "WILD". Consequence of leaving them alone: 62 words of Wild's narration stay attributed to
+  Comer. Also note these two rows are a DUPLICATE INGEST of one CNN package under two dates
+  (2024-07-23 and 2023-07-23), and the whole nine-row package group is duplicated (69538-69546 /
+  244987-244995). The corpus holds 3,077 (member,text) INTERVIEW duplicate groups today - a
+  pre-existing condition, outside this migration.
+278454 (Bill Cassidy, CFR) and 278528 (Chris Van Hollen, CFR): same shape. The row is "OK. Q:
+  <question>" - the member's one-word "OK." plus the moderator's question; the tag matched
+  'OK. Q'. Not wholly mis-attributed. Sibling rows in both packages (278455, 278460, 278517,
+  278520, 278521, 278529 ...) carry the same "Q: ..." bleed and are NOT flagged, because a bare
+  'Q:' is one token that can never satisfy qualifies(). 121 corpus rows carry a bare "Q: " turn.
+66969 (Chuck Grassley): the builder's characterisation is REFUTED as stated. The kept text is an
+  oath in the SINGULAR - "Do you solemnly swear ... So help you, God." - and the very next words
+  are the removed segment's "SEN. PATTY MURRAY (D-WA) I do. Yes. At this time, I will administer
+  the oath to all Senators in the chamber...". Murray ANSWERS the kept oath, so the kept text is
+  the oath administered TO the presiding officer, not BY her; Murray is then the one who swears
+  in all Senators (which is why INSERT 01 grades CORRECT-SPEAKER). The row's own words prove the
+  kept text is not Murray's; they cannot prove it is Grassley's, and Senate practice for swearing
+  in the presiding officer of an impeachment trial is consistent with the stored attribution. The
+  package holds only rowid 66969 and one Eric Burlison row, so there is no third-party evidence
+  in the corpus either way. Grade: kept text NOT the presiding officer's; attribution plausible,
+  UNVERIFIED.
+
+------------------------------------------------------------------------------ G5  scale and harm
+Word accounting over the 5,859 UPDATEd rows (W1 in G3G5_deletion_risk.txt):
+  611,385 words today -> 251,185 kept with the member, 3,304 moved into the 64 new rows,
+  342,352 words (56%) DELETED from the live corpus, recoverable only from the ledger via
+  --restore. 342,188 of those are 'unresolved' speakers, 156 short turns, 8 a duplicate key.
+Scaled estimates (the G2/G3 sample is stratified, not simple-random, so both are given):
+  naive 8/60 -> 781 of 5,859 rows with a not-clean kept text (95% CI 348 - 1,441)
+  stratum-weighted (E 289, D 40, other 5,530) -> 315 rows (5.4%), driven by the 'other' stratum
+  whose one observed defect was the pre-existing wrong person; the mechanical censuses give the
+  firm floors instead: 6 rows (PBS anchor), 4 (abbreviation anchor), 4 (class-C name), 10 (curly
+  apostrophe) = 24 demonstrated rows, plus 164 rows the migration does not touch at all.
+  member's words deleted 1/60 -> ~98 of 5,859 rows (95% CI 2 - 524).
+639 of the 5,859 rows (10.9%) would keep FEWER than 8 words - below turn_tags.MIN_TURN_WORDS,
+the collector's own floor for writing a turn at all (W3). 'The face of incompetence.' (4 words),
+'Yes.' (2 words), '-- Ranking Member Raskin will be --' (7 words).
+
+WOULD APPLYING THE MIGRATION MAKE THE STORED DATA WORSE THAN IT IS TODAY?  YES, in four
+specific and enumerated places (everything else it touches it improves or leaves neutral):
+ 1. three new rows whose entire text is a chyron fragment, attributed to a member who spoke none
+    of it: 80238 (Cassidy), 192027 (Scalise), 226287 (Thompson). Today that text sits inside
+    another member's row; after, three members each gain a row they did not speak.
+ 2. five new rows attributing a Summit Metro Parks conservation officer to Rep. Mike Johnson
+    (rowid 245558). Word count unchanged, row count 1 -> 6.
+ 3. ten new rows that newly attribute another speaker's words - usually the programme host's - to
+    a NAMED member who did not say them (the worst: 242833, 215 of 262 words are Bret Baier's;
+    108647 seg6, 60 of 67 are Chuck Todd's; 68730, 75 of 100 are the CNN anchor's). The host text
+    is mis-attributed today too, but to a different member: the migration moves the error onto a
+    new member and into a new row rather than removing it.
+ 4. at least one row (83061) deletes ~45 words of the member's own speech from the live corpus.
+Against that, the corpus-wide under-repair the same evidence shows: 164 curly-apostrophe rows,
+121 bare-'Q:' rows, 29 no-space-colon rows and 34 UNIDENTIFIED-label rows carry the same defect
+family and are never flagged.
+
+UNKNOWNS I could not settle from the text (no network, no paid API, per contract):
+ - rowid 66969: whether the kept oath is Grassley's own voice (proved only that it is not
+   Murray's).
+ - rowid 215035: the first clause of the deleted Lemon monologue parses as neither speaker.
+ - the 'other' stratum's true not-clean rate: 0 split-quality defects in 20 sampled rows, but
+   N=5,530, so the 95% upper bound is 16.8% (930 rows); the four mechanical censuses (H2/H3/H4)
+   are floors, not ceilings, because each was written to one known shape.
+ - I did not re-derive the 5,835-row measR1d census; I graded the 5,863 rows this dry run
+   produced, including the 29 new ids and the one (225128) it lost.

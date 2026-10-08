@@ -1,0 +1,70 @@
+# Excluded from GitHub (Melange)
+
+Blobs over 50,000,000 bytes in local `main` at 0896c9ba7 were NOT published to this branch (GitHub limits; earlier full-history pushes returned HTTP 500).
+They remain in the local repository and on the local LIVE tree. The path is absent from this branch unless origin already held it.
+
+Total: 61 paths, 14591458393 bytes (14.59 GB).
+
+| size (bytes) | blob sha | path |
+|---:|---|---|
+| 56488411 | 3e190267a6d843f256c3c3fbe7a00c774920be50 | audits/legfix5/billstatus_bulk_enrichment/review_sidecars/2bb1a380d5e7eb791cc8f49b1d177a708a960486a5c61aa12a0427f2c577e224/measure_metadata.ndjson |
+| 209700168 | c7c1b92c7e9fe2b4d98efa275afc4c4ddd73b04b | audits/legfix5/billstatus_bulk_enrichment/review_sidecars/2bb1a380d5e7eb791cc8f49b1d177a708a960486a5c61aa12a0427f2c577e224/member_measure_edges.ndjson |
+| 69630122 | 4729606c3f0be773c958328e7112a230b89dfae9 | audits/legfix5/billstatus_bulk_enrichment/review_sidecars/2bb1a380d5e7eb791cc8f49b1d177a708a960486a5c61aa12a0427f2c577e224/source_gap_ledger.ndjson |
+| 189042177 | 63d06321f5c8f907b3e2a755b07e251e00dd8bcf | audits/legfix5/billstatus_bulk_enrichment/structured_relevance_sidecars/6a418bdd5b2cae26cad44009691ccb9b23058c925c48c2b2e307e8b2ce0f71b0/measures.ndjson |
+| 189042177 | 63d06321f5c8f907b3e2a755b07e251e00dd8bcf | audits/legfix5/billstatus_bulk_enrichment/structured_relevance_sidecars/e56bef4afd790ec1b66b4f3d63562067591851cf54aaf4e9cb28bc0490ea0034/measures.ndjson |
+| 72367241 | 3964ef936eccc055892d91242070ae9fa3e49bac | audits/legfix5/category_review_queue/queues/58a4bd2e40cf9340ee98fb9752021c6a63c091aa39f43fbe806e87fd1826dfd1/candidate_worksheets.ndjson |
+| 204210549 | d7a3a4fb442806526dd890727901dd02ca94904c | audits/legfix5/category_review_queue/queues/58a4bd2e40cf9340ee98fb9752021c6a63c091aa39f43fbe806e87fd1826dfd1/queue.ndjson |
+| 71264161 | 8df014b605a980a313736d5112fbd8f87f404d33 | audits/legfix5/category_review_queue/queues/f397218c236a7c4d8d8b2f562f6fd4b1d24b12159da76e506e76dff8e721e3a8/candidate_worksheets.ndjson |
+| 202935618 | 0bed511d9c8e58dba2907f2b9ef8e3744cd9fd6d | audits/legfix5/category_review_queue/queues/f397218c236a7c4d8d8b2f562f6fd4b1d24b12159da76e506e76dff8e721e3a8/queue.ndjson |
+| 200301160 | a49858993d80b98a9e4726a5b99d2f9ba35c4c24 | audits/legfix5/congress_advanced_pages_20260725/candidate_membership_review/membership_review_ledger.ndjson |
+| 200301160 | 4ea73d6ea58e4aca341abae8bcddf8340e38287c | audits/legfix5/congress_advanced_pages_20260725/candidate_membership_review/sorted_review_queue.ndjson |
+| 200094439 | ae4a8f1f23bf44e7c3e7f70e3d5dfe6319221059 | audits/legfix5/congress_advanced_pages_20260725/candidate_membership_review/unresolved_memberships.ndjson |
+| 65297543 | 3dd0df27569a86e9288ee5df5d6d4e022e445241 | audits/legfix5/congress_advanced_pages_20260725/congress_advanced_memberships.ndjson |
+| 53118184 | 2c9306783067bae877d186efc5769f9aff7638df | audits/legfix5/congress_advanced_pages_20260725/congress_advanced_records.ndjson |
+| 312129291 | 4cde37837a94bb7b446c578d8ee8ba19ded21c6a | audits/legfix5/core62_membership_review_staging/membership_review_ledger.ndjson |
+| 312129291 | c03d46df526a87237e9f091821de06942e3cfba9 | audits/legfix5/core62_membership_review_staging/sorted_review_queue.ndjson |
+| 311742269 | 07e4fff6b41fe52eacdfea04eeef81f096faed94 | audits/legfix5/core62_membership_review_staging/unresolved_memberships.ndjson |
+| 98182483 | d59748aa9e51d4e141266841e093cf1f5d86ab35 | audits/legfix5/identifier_probe_fast_20260726/congress_advanced_memberships.ndjson |
+| 2759889104 | 27cab9ce30cde06d04943e03980b4ed5d70e7a35 | audits/legfix5/opus_adjudication/packets/10ddf7efa28bcd26a8ee3e805133f57c73078050585122152a09c29978cf8b59/packets.ndjson |
+| 439373395 | f354046cfc28ed73db611b4cf11600e7ae47ffe5 | audits/legfix5/opus_adjudication/packets/4a4aac994b410f7e0392e71eeaf4046bf9e0ff57f61985cd0f8077865b05d44a/packets.ndjson |
+| 571862576 | c963ac19bc5144e19e9f70d2be3a816b87ca1d31 | audits/legfix5/opus_adjudication/packets/97a4cea6f3306576fb1bedfe91571b0371560058368bfb943229ad26e72c3036/packets.ndjson |
+| 281051176 | e2a51fbd6540f6b6ab0f3df5d9639e97b548b727 | audits/legfix5/partial_review_prefill/snapshots/21694e0593b8b1f0e571488d9f12155169c2f8afa748d153de91c46093ec582c/membership_review_proposals.ndjson |
+| 64922509 | 50410aa530640e0929b72960d0e61b15d7b506cb | audits/legfix5/partial_review_prefill/snapshots/21694e0593b8b1f0e571488d9f12155169c2f8afa748d153de91c46093ec582c/selected_memberships.ndjson |
+| 52601482 | 469474bef201e476e26d8b474e5d20096647c4fe | audits/legfix5/partial_review_prefill/snapshots/21694e0593b8b1f0e571488d9f12155169c2f8afa748d153de91c46093ec582c/selected_records.ndjson |
+| 408440512 | 558ea8f20ff803fea3521154008b667b9c3e6e20 | audits/legfix5/partial_review_prefill/snapshots/3edafb5aecda61f83c28407d745f5c196936d25c1200cd441f2558c540c8afe2/membership_review_proposals.ndjson |
+| 64922509 | 50410aa530640e0929b72960d0e61b15d7b506cb | audits/legfix5/partial_review_prefill/snapshots/3edafb5aecda61f83c28407d745f5c196936d25c1200cd441f2558c540c8afe2/selected_memberships.ndjson |
+| 52601482 | 469474bef201e476e26d8b474e5d20096647c4fe | audits/legfix5/partial_review_prefill/snapshots/3edafb5aecda61f83c28407d745f5c196936d25c1200cd441f2558c540c8afe2/selected_records.ndjson |
+| 408440512 | 558ea8f20ff803fea3521154008b667b9c3e6e20 | audits/legfix5/partial_review_prefill/snapshots/9d54652b421decd391c81474595a1a506fa2bf91d1613ad6fe30745fe7bbf2dd/membership_review_proposals.ndjson |
+| 64922509 | 50410aa530640e0929b72960d0e61b15d7b506cb | audits/legfix5/partial_review_prefill/snapshots/9d54652b421decd391c81474595a1a506fa2bf91d1613ad6fe30745fe7bbf2dd/selected_memberships.ndjson |
+| 52601482 | 469474bef201e476e26d8b474e5d20096647c4fe | audits/legfix5/partial_review_prefill/snapshots/9d54652b421decd391c81474595a1a506fa2bf91d1613ad6fe30745fe7bbf2dd/selected_records.ndjson |
+| 336552981 | 1149e16983695338866949452e99e5a346c7e215 | audits/legfix5/partial_review_prefill/snapshots/b1884e6f876a63333731b17043042a8c64bf6c3193bb43bed94f775064eca90a/membership_review_proposals.ndjson |
+| 64922509 | 50410aa530640e0929b72960d0e61b15d7b506cb | audits/legfix5/partial_review_prefill/snapshots/b1884e6f876a63333731b17043042a8c64bf6c3193bb43bed94f775064eca90a/selected_memberships.ndjson |
+| 52601482 | 469474bef201e476e26d8b474e5d20096647c4fe | audits/legfix5/partial_review_prefill/snapshots/b1884e6f876a63333731b17043042a8c64bf6c3193bb43bed94f775064eca90a/selected_records.ndjson |
+| 336551668 | aa04f7d94c7f78840e311f95dead38416b62be98 | audits/legfix5/partial_review_prefill/snapshots/b4102ae3796ad7653f6b8357431188fabd860847efb204f8e9afe0774af12e7b/membership_review_proposals.ndjson |
+| 64922509 | 50410aa530640e0929b72960d0e61b15d7b506cb | audits/legfix5/partial_review_prefill/snapshots/b4102ae3796ad7653f6b8357431188fabd860847efb204f8e9afe0774af12e7b/selected_memberships.ndjson |
+| 52601482 | 469474bef201e476e26d8b474e5d20096647c4fe | audits/legfix5/partial_review_prefill/snapshots/b4102ae3796ad7653f6b8357431188fabd860847efb204f8e9afe0774af12e7b/selected_records.ndjson |
+| 186118692 | a67c470304d6076410d9420987b0b19d720874eb | audits/legfix5/partial_review_queue/snapshots/131dfa2fa12dfd03a6c9604315b8f6c5d787edbd869a9ce00b600e489297b0e5/missing_official_evidence_visibility.ndjson |
+| 646154363 | bb555bfa1b1484f2d2a7350d2bc85195b1da0534 | audits/legfix5/partial_review_queue/snapshots/131dfa2fa12dfd03a6c9604315b8f6c5d787edbd869a9ce00b600e489297b0e5/staged_review_queue.ndjson |
+| 186118692 | 4a7f936452f03a917c760a42b106fa08bfe17b5d | audits/legfix5/partial_review_queue/snapshots/55bb70c7ae167868482926c6da910bf451d0e28f68464f7505654d3f6dbff8e8/missing_official_evidence_visibility.ndjson |
+| 646154363 | 7344f620b51451a3aaa1a1331695e346fc34e404 | audits/legfix5/partial_review_queue/snapshots/55bb70c7ae167868482926c6da910bf451d0e28f68464f7505654d3f6dbff8e8/staged_review_queue.ndjson |
+| 139022990 | 01799f2423c0fb35c4bf72ebc45b3d1ed0e6d4af | audits/legfix5/partial_review_queue/snapshots/60afbbb5fc9621569ab35ed212b23a119a21969f074f75f85a0571c4e584ad2f/missing_official_evidence_visibility.ndjson |
+| 518764926 | 6b5304336b0de29beb3b21dd02446b7a03d3633e | audits/legfix5/partial_review_queue/snapshots/60afbbb5fc9621569ab35ed212b23a119a21969f074f75f85a0571c4e584ad2f/staged_review_queue.ndjson |
+| 139022990 | 01799f2423c0fb35c4bf72ebc45b3d1ed0e6d4af | audits/legfix5/partial_review_queue/snapshots/a4413a606be02a66cd05b4d9fc0711329030223dcbe61c4e7b9fb904e4e6977a/missing_official_evidence_visibility.ndjson |
+| 518764926 | 6b5304336b0de29beb3b21dd02446b7a03d3633e | audits/legfix5/partial_review_queue/snapshots/a4413a606be02a66cd05b4d9fc0711329030223dcbe61c4e7b9fb904e4e6977a/staged_review_queue.ndjson |
+| 159052081 | d46335346b6fe4ed053439358d87c3ea94f118b6 | audits/legfix5/partial_review_queue/snapshots/aee54e2f887b5fdd15c677c3f6110108d0645c1b7f58f26aa6af252e098d3a71/missing_official_evidence_visibility.ndjson |
+| 574266823 | 4b1f001397977c57829d6592cd1487129730bbbb | audits/legfix5/partial_review_queue/snapshots/aee54e2f887b5fdd15c677c3f6110108d0645c1b7f58f26aa6af252e098d3a71/staged_review_queue.ndjson |
+| 94222794 | d1e90cc274d100ac8debac280b0fb85b4476e448 | audits/legfix5/partial_review_structured_augmentation/snapshots/105844a14aaa3f0089e34bd055fdbdb59f08816b4f723c50a2f9309d41d80955/membership_evidence_additions.ndjson |
+| 94222794 | d1e90cc274d100ac8debac280b0fb85b4476e448 | audits/legfix5/partial_review_structured_augmentation/snapshots/3e4748571ff18779d840ba8914d2c8e903f26e23d1ccf0e31912f7b4bba010c9/membership_evidence_additions.ndjson |
+| 94222794 | d1e90cc274d100ac8debac280b0fb85b4476e448 | audits/legfix5/partial_review_structured_augmentation/snapshots/441acd45ad4ad2a30293ff9a4ecdf31a00d5040fbeff6852f2e84663290f6e00/membership_evidence_additions.ndjson |
+| 94222794 | d1e90cc274d100ac8debac280b0fb85b4476e448 | audits/legfix5/partial_review_structured_augmentation/snapshots/8357be8c17c51dc6f6ccb5cb0574dacfb6ce0910b55931a446c81f88f73eb1f9/membership_evidence_additions.ndjson |
+| 94222794 | d1e90cc274d100ac8debac280b0fb85b4476e448 | audits/legfix5/partial_review_structured_augmentation/snapshots/b1ac1f875474333853199bcc86c3f4d4a83aa1c29f2dfd3b4427939c8e320ce5/membership_evidence_additions.ndjson |
+| 94222418 | 8e419507c918777566f1da1d64965a915a122e36 | audits/legfix5/partial_review_structured_augmentation/snapshots/c483acd99ea6bfa9f667821e90d3278fda664292b4809e07759cc159582dd47e/membership_evidence_additions.ndjson |
+| 94222794 | d1e90cc274d100ac8debac280b0fb85b4476e448 | audits/legfix5/partial_review_structured_augmentation/snapshots/f4bcf401791fa93d129c681944086f6f303ec5256b5c32d74e5e5a1865ae90ed/membership_evidence_additions.ndjson |
+| 94222794 | d1e90cc274d100ac8debac280b0fb85b4476e448 | audits/legfix5/partial_review_structured_augmentation/snapshots/f9f0e0fbcb7e12562f1178c47b8a169ffbbe8ff2a9b4f8ab53bc785a5523f159/membership_evidence_additions.ndjson |
+| 59214275 | 2f4fa37e51ffd6235c7ceb2f0d3c2a51b6692dd7 | audits/legfix5/spreadsheet_engine_verification/accepted_workbook_producer_smoke/smoke_archive_workbook.xlsx.inspect.ndjson |
+| 211449056 | c3052ba325999cbdd049f1d9a63e08c4cf453537 | audits/legfix5/spreadsheet_engine_verification/accepted_workbook_producer_smoke/smoke_output_workbook.xlsx.inspect.ndjson |
+| 59214275 | 66e0e675be9e19973c6e4646837fd3668a8fe66a | audits/legfix5/spreadsheet_engine_verification/accepted_workbook_producer_smoke_v2/smoke_archive_workbook.xlsx.inspect.ndjson |
+| 211449056 | f62728495798d4f36c3160126733cb2f13eeeb3d | audits/legfix5/spreadsheet_engine_verification/accepted_workbook_producer_smoke_v2/smoke_output_workbook.xlsx.inspect.ndjson |
+| 99860335 | 672ed9cba6c7ab40575337e225e8949fc730a217 | outputs/019f61b6-8906-7eb1-b5f2-517f522e4afe/Moneyball_Bill_Stance_Audit_Workbench.xlsx.inspect.ndjson |
+| 54209676 | 7e56d93873c209044e3c73ad202c91518f7e51f7 | outputs/019f62b6-407f-7031-a77d-862b2cf45ace/Moneyball Audit Workbook.xlsx.inspect.ndjson |
+| 281080575 | 78135c48e407c6b75d8a443abe9469d6a359777a | outputs/019fa10d-45f7-7371-9222-bcbea7d6bc00/Moneyball Main Version - Blended.repaired.xlsx.inspect.ndjson |

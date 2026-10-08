@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S691 IS: Medicare Extra Rx Higher Eligibility Limits in Part D Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-03-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 691</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190307">March 7, 2019</action-date>
+			<action-desc><sponsor name-id="S309">Mr. Casey</sponsor> (for himself, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, <cosponsor name-id="S331">Mrs. Gillibrand</cosponsor>, and <cosponsor name-id="S354">Ms. Baldwin</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend title XVIII of the Social Security Act to enhance prescription drug affordability by
+			 expanding access to assistance with out-of-pocket costs under Medicare
+			 part D for low-income seniors and individuals with disabilities.</official-title>
+	</form>
+	<legis-body>
+ <section commented="no" display-inline="no-display-inline" id="id16475D91BB52409FAF82479F03744236" section-type="section-one"><enum>1.</enum><header display-inline="yes-display-inline">Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Medicare Extra Rx Higher Eligibility Limits in Part D Act of 2019</short-title></quote> or the <quote><short-title>Medicare Extra Rx HELP Act of 2019</short-title></quote>.</text>
+		</section><section id="id819BB012E4CD4282A99F3BF82CBD8C96"><enum>2.</enum><header>Enhancing prescription drug affordability by expanding access to assistance with out-of-pocket
+			 costs under Medicare part D for low-income seniors and individuals with
+			 disabilities</header>
+ <subsection id="id8509BCB05EFE428BBED00383F957205C"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 1860D–14 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395w-114">42 U.S.C. 1395w–114</external-xref>) is amended—</text> <paragraph id="id3660FA37B0ED4098951AD3D26854D5E4"><enum>(1)</enum><text>in subsection (a)—</text>
+ <subparagraph id="id95AD29CADCEE48CA801006D3003E967D"><enum>(A)</enum><text>in the heading, by striking <quote><header-in-text level="subsection" style="OLC">150 percent</header-in-text></quote> and inserting <quote><header-in-text level="subsection" style="OLC">200 percent</header-in-text></quote>;</text> </subparagraph><subparagraph id="idCDE38518C719439AB32727E1B790EA56"><enum>(B)</enum><text>in paragraph (1)—</text>
+ <clause id="idF13C33792EB84D6F811E5A2A21F0980A"><enum>(i)</enum><text>in the heading, by striking <quote><header-in-text level="paragraph" style="OLC">135 percent</header-in-text></quote> and inserting <quote><header-in-text level="paragraph" style="OLC">200 percent</header-in-text></quote>; and</text> </clause><clause id="idDB0A7787CF58423B9EE536DCD26F373D"><enum>(ii)</enum><text>in the matter preceding subparagraph (A)—</text>
+ <subclause id="idF0652CCD360242639B9361893BB50961"><enum>(I)</enum><text>by striking <quote>135 percent</quote> and inserting <quote>200 percent</quote>; and</text> </subclause><subclause id="idFEB135315AA24470B64291D9C737ED3E"><enum>(II)</enum><text>by striking <quote>and who meets the resources requirement described in paragraph (3)(D) or who is covered under this paragraph under paragraph (3)(B)(i)</quote> and inserting <quote>or who is covered under this paragraph under paragraph (3)(B)(v)</quote>;</text>
+ </subclause></clause></subparagraph><subparagraph id="idD079E515E8D24C21AFE62C8C25A1B0AE"><enum>(C)</enum><text>by striking paragraph (2);</text> </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id89FA03CEC3024FFCBE2880A2A863B0EA"><enum>(D)</enum><text>in paragraph (3)—</text>
+ <clause commented="no" display-inline="no-display-inline" id="idFC99450B87FD47189C2890A64BE96E10"><enum>(i)</enum><text>in subparagraph (A)—</text> <subclause commented="no" display-inline="no-display-inline" id="id81C3A4E977E54187B657F55E47620D77"><enum>(I)</enum><text>in clause (i), by adding <quote>and</quote> at the end;</text>
+ </subclause><subclause commented="no" display-inline="no-display-inline" id="idEEA130E157FA45B994739DB8F4C289E5"><enum>(II)</enum><text>in clause (ii)—</text> <item commented="no" display-inline="no-display-inline" id="idDC31F347B1AC4AC29516AD37D79358F8"><enum>(aa)</enum><text>by striking <quote>150 percent</quote> and inserting <quote>200 percent</quote>; and</text>
+ </item><item commented="no" display-inline="no-display-inline" id="id0CCCC627D43B4D90BA384F2379A0EC28"><enum>(bb)</enum><text>by striking <quote>; and</quote> at the end and inserting a period; and</text> </item></subclause><subclause commented="no" display-inline="no-display-inline" id="id5354466888664BF1BD0F1D05E74CCD2B"><enum>(III)</enum><text>by striking clause (iii); and</text>
+ </subclause></clause><clause commented="no" display-inline="no-display-inline" id="id6D12577CC6BB43F7AB8930202C3D6ECC"><enum>(ii)</enum><text>by striking subparagraphs (D), (E), and (G); and</text> </clause></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD05182F783E64B88AE8F3107289DF889"><enum>(E)</enum><text>in paragraph (4), by striking subparagraph (B); and</text>
+ </subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id68900EA73C0646F1ADE5EF9E025D9A2E"><enum>(2)</enum><text>in subsection (c)(1), in the second sentence, by striking <quote>subsections (a)(1)(D) and (a)(2)(E)</quote> and inserting <quote>subsection (a)(1)(D)</quote>.</text> </paragraph></subsection><subsection id="idF3D95F7D95BA496ABA16AC8000174741"><enum>(b)</enum><header>Conforming amendment</header><text>Section 1905(p)(1) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1396d">42 U.S.C. 1396d(p)(1)</external-xref>) is amended by adding at the end the following flush matter:</text>
+				<quoted-block display-inline="no-display-inline" id="id53C5ACA5B3934BD4A694662582DDDE84" style="OLC">
+					<quoted-block-continuation-text commented="no" quoted-block-continuation-text-level="subsection">The Secretary shall apply subparagraph (C) as if the amendments made by section 2(a) of the <short-title>Medicare Extra Rx Higher Eligibility Limits in Part D Act of 2019</short-title> had not been enacted and shall continue to calculate the maximum resource level applied
+			 for a year under section 1860D–14(a)(3)(D) (as in effect on the day before
+			 the date of enactment of such Act) without regard to such amendments.</quoted-block-continuation-text><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="id96C6BD1C6E064F14BF15A3582842C156"><enum>(c)</enum><header>Effective date</header><text>The amendments made by subsection (a) shall apply to plan year 2020 and subsequent plan years.</text></subsection></section></legis-body> </bill> 
+

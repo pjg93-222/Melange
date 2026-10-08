@@ -71,10 +71,11 @@ def receipts(m):
     return max(rr,RFLOOR) if rr>0 else _RMED
 def pmult(m):                                       # QME 2026-10-01: money_response.shift_lean multiplies by pressure_mult; parity=0 -> 1.0 (old)
     return max(MBC.rc(m,'pressure_mult'),1e-9) if MONEY_PARITY else 1.0
+CMX={m:MBC.cmult(m) for m in members}              # COMPET_MULT (Paul 2026-10-05): c scales EFFECTIVE dollars; dial OFF -> exactly 1.0, no file read. Mirrored in the dashboard JS (EG.cmult).
 def money_units(m,dollars):                         # net_lean shift -> pro-influence units (MAXSHIFT pts == 1 unit) = shift_lean/MAXSHIFT
-    r=dollars/receipts(m); return (MAXSHIFT*(r/(r+HALF))*pmult(m))/MAXSHIFT
+    r=CMX[m]*dollars/receipts(m); return (MAXSHIFT*(r/(r+HALF))*pmult(m))/MAXSHIFT   # c*dollars = effective dollars (real $ stay the price)
 def dollars_for_units(m,u):                         # invert: $ needed for u units of pro-influence (diminishing); u/pm = saturating fraction
-    u=min(u/pmult(m),0.98); return HALF*receipts(m)*u/(1-u)
+    u=min(u/pmult(m),0.98); return HALF*receipts(m)*u/(1-u)/CMX[m]   # /c: REAL dollars for u units (c==1.0 -> exactly the old value)
 proset={m for m in members if MAT.get(m,{}).get(cat) in PRO}
 # ---- stance-integrity gates (user-ratified 2026-07-04; 'Lean Skeptic' explicitly carved out of every one) ----
 # Root cause (the Warren sighting, July-1 artifact): single-cell myopia admitted a system-level Skeptic

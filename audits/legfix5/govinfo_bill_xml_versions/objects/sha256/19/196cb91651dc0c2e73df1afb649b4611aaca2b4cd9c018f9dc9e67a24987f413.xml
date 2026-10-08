@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H4CAACA257D4F44598A934289FFB12C71" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8223 IH: Recovering Expended Costs from Operationally Unwarranted Policing Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-09</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8223</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260409">April 9, 2026</action-date><action-desc><sponsor name-id="M001241">Mr. Min</sponsor> (for himself, <cosponsor name-id="I000058">Mr. Ivey</cosponsor>, <cosponsor name-id="G000599">Mr. Goldman of New York</cosponsor>, and <cosponsor name-id="M001143">Ms. McCollum</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name>, and in addition to the Committees on <committee-name committee-id="HHM00">Homeland Security</committee-name>, and <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To direct the Secretary of Homeland Security to reimburse each State and local first responder agency for the cost of responding to U.S. Immigration and Customs Enforcement or U.S. Customs and Border Protection, and for other purposes.</official-title></form><legis-body id="HFBAD3C727E1D4DA7A16ABCF1E8DB1457" style="OLC"> 
+<section id="H67084D873F9149908436388204B4DD0B" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Recovering Expended Costs from Operationally Unwarranted Policing Act of 2026</short-title></quote> or <quote><short-title>RECOUP Act of 2026</short-title></quote>.</text></section> 
+<section id="H2DAC4A01A9DA4A0282A57C5A1EA90846"><enum>2.</enum><header>Reimbursement for first responder response to immigration enforcement activities</header> 
+<subsection id="HCAEEF9580037411B9DFCBC4D2CF033D8">
+                <enum>(a)</enum>
+                <header>In general</header>
+ <text display-inline="yes-display-inline">The Secretary of Homeland Security shall reimburse each State and local first responder agency that responds to a request for assistance related to enforcing the immigration laws (as such term is defined in section 101 of the Immigration and Nationality Act (<external-xref legal-doc="usc" parsable-cite="usc/8/1101">8 U.S.C. 1101</external-xref>)) made by U.S. Immigration and Customs Enforcement or U.S. Customs and Border Protection for the cost of such response.</text>
+            </subsection> 
+<subsection id="H2A6ED684B6634DC9B8959464AF8223C3"><enum>(b)</enum><header>Process</header> 
+<paragraph id="HC7EB9538210B40E29F33AA9F9AE51AC2"><enum>(1)</enum><header>Collection of information</header><text display-inline="yes-display-inline">To the extent practicable, the Secretary of Homeland Security, acting through the officer of U.S. Immigration and Customs Enforcement or U.S. Customs and Border Protection who made the request described in subsection (a), shall collect from each State and local first responder that responds, the first responder’s name, badge number, agency name, and agency contact information.</text></paragraph> <paragraph id="H051FEFC8409E448C9E1D45AF5E73DDF8"><enum>(2)</enum><header>No request from State or local law enforcement required</header><text>If the Secretary collects the information described in paragraph (1), the Secretary shall—</text> 
+<subparagraph id="H223F71763E484CAD8A275D39D06CE72A"><enum>(A)</enum><text>not later than 30 days after a response described in subsection (a), request from the head of the agency that so responded the information described in paragraph (3)(A)(iii); and</text></subparagraph> <subparagraph id="H77B06A37D8F942829CC5CF79F9CA76B4"><enum>(B)</enum><text>not later than 30 days after receiving the information requested under subparagraph (A), reimburse the appropriate agency.</text></subparagraph></paragraph> 
+<paragraph id="H2C14EA8CBD6C49F8B67A1B2A5D8078C3"><enum>(3)</enum><header>Request from State or local law enforcement required</header> 
+<subparagraph id="H0BAAED8D12E64384A7D7480379F0F22A"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">If the Secretary does not collect the information described in paragraph (1), the head of the agency that responded to the request described in subsection (a) made by U.S. Immigration and Customs Enforcement or U.S. Customs and Border Protection may submit a request to the Secretary for reimbursement, which request shall include—</text> <clause id="H3AF2D7FD142844BA9D8A53B3CE3786D0"><enum>(i)</enum><text>the date on which such response was provided;</text></clause> 
+<clause id="HB5FBF19224034F7B9EEEACF54797E7AD"><enum>(ii)</enum><text>the location at which such response was provided; and</text></clause> <clause id="H3A88BE213D684A878934BC93217765F8"> <enum>(iii)</enum> <text>a detailed estimate of the amount to be reimbursed, including for the first responders who responded, the duration of such response, and their rates of pay.</text>
+                        </clause></subparagraph> 
+<subparagraph id="HE13F3C4F9E7E475DAD1189346B900722">
+                        <enum>(B)</enum>
+                        <header>Payment</header>
+ <text>Not later than 30 days after receiving a request under subparagraph (A), the Secretary shall reimburse the agency unless the Secretary finds that no response was provided by such agency.</text>
+                    </subparagraph></paragraph></subsection>
+<subsection id="H0BDB2E7B4040476FA40773A8CBECB6F8"><enum>(c)</enum><header>Limitation on release of information</header><text display-inline="yes-display-inline">The Secretary of Homeland Security may not release the personally identifiable information of any first responder collected under this section, except in accordance with a court order.</text></subsection> <subsection id="HB35B1AAA642D4DC4A7F67E7895C0B970"><enum>(d)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">The Secretary of Homeland Security shall carry out this Act using unobligated amounts appropriated to the Secretary for U.S. Immigration and Customs Enforcement or U.S. Customs and Border Protection, as applicable, under <external-xref legal-doc="public-law" parsable-cite="pl/119/21">Public Law 119–21</external-xref> (commonly referred to as the <quote>One Big Beautiful Bill Act</quote>) to remain available until January 20, 2029.</text></subsection></section> 
+</legis-body></bill>
+

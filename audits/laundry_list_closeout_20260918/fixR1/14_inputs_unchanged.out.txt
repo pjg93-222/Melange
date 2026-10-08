@@ -1,0 +1,15 @@
+laneB/refs.jsonl (53,011 mentions) written : 2026-09-18 23:40:48
+input                                                  mtime                 verdict
+social_media.db                                        2026-09-14 02:06:46   older, unchanged   [speeches pass (CREC / INTERVIEW / CHRG) + the twitter handle map]
+Quorum Processed.xlsx                                  2026-09-14 00:41:34   older, unchanged   [X mention pass]
+cu_press_stance_tone.csv                               2026-06-30 18:50:17   older, unchanged   [PRESS pass, historical tone rows]
+data\stance\press_refresh_tone.csv                     2026-09-16 23:44:44   older, unchanged   [PRESS pass, refresh tone rows]
+data\press\official_mentions.jsonl                     2026-09-16 23:44:45   older, unchanged   [PRESS_OFFICIAL_MENTION pass]
+data\engine\congestion.json                            2026-09-16 23:33:28   older, unchanged   [roster + chamber pools + the roster surname pool]
+data\members\member_reference_cache_fable.jsonl        2026-09-14 01:15:04   older, unchanged   [label cache (drives n_scored)]
+data\members\member_reference_cache_baseline_v2.json   2026-09-08 19:24:46   older, unchanged   [legacy label bindings]
+member_references.json                                 2026-09-17 01:25:27   older, unchanged   [the shipped artifact the parity check compares against]
+
+inputs newer than refs.jsonl : 0   missing: 0
+VERDICT: refs.jsonl is CURRENT for every input the extraction reads
+DONE 14

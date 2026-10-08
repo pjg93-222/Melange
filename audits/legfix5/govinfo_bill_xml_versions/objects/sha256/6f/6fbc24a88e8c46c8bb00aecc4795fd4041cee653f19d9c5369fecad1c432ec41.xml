@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Enrolled-Bill" dms-id="HA3741533E7334750B37A22458E16AAFD" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title> HR 1651 ENR: COVID–19 Bankruptcy Relief Extension Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">One Hundred Seventeenth Congress of the United States of America</congress><session display="yes">At the First Session</session><enrolled-dateline>Begun and held at the City of Washington on Sunday, the third day of January, two thousand and twenty-one</enrolled-dateline> 
+<legis-num display="yes">H. R. 1651</legis-num> 
+<current-chamber display="no"></current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend the CARES Act to extend the sunset for the definition of a small business debtor, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H88B538DBBFCA41669201B95758A61480" style="OLC"> 
+<section id="H2D48D37A6D854B9B9D08E6B46EE69214" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>COVID–19 Bankruptcy Relief Extension Act of 2021</short-title></quote>.</text></section> <section id="H7D705A02F5604538A968FEAE4147A896" section-type="subsequent-section"><enum>2.</enum><header>Extensions</header> <subsection id="HA6E4DD10A6FA4898B96127D18AC79AA1"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 1113 of the CARES Act (<external-xref legal-doc="public-law" parsable-cite="pl/116/136">Public Law 116–136</external-xref>) is amended—</text> 
+<paragraph id="HBDB6353F8FEB41659A27BCDFF2E13992"><enum>(1)</enum><text display-inline="yes-display-inline">in subsection (a)(5) (<external-xref legal-doc="usc" parsable-cite="usc/11/1182">11 U.S.C. 1182</external-xref> note), by striking <quote>1 year</quote> and inserting <quote>2 years</quote>; and</text></paragraph> <paragraph id="H944C00434E43495F8415C990D42C11B6"><enum>(2)</enum><text display-inline="yes-display-inline">in subsection (b)(2)(B) (<external-xref legal-doc="usc" parsable-cite="usc/11/101">11 U.S.C. 101</external-xref> note), by striking <quote>1 year</quote> and inserting <quote>2 years</quote>.</text></paragraph></subsection> 
+<subsection display-inline="no-display-inline" commented="no" id="HCCF3D0C4D7354C47AAC70020D49A21F1"><enum>(b)</enum><header>Modification of plan after confirmation</header> 
+<paragraph display-inline="no-display-inline" commented="no" id="H48E499D4EB354E1EB4310FB722946170"><enum>(1)</enum><text>Section 1329(d)(1) of title 11, United States Code, is amended, in the matter preceding subparagraph (A), by striking <quote>this subsection</quote> and inserting <quote>the <short-title>COVID–19 Bankruptcy Relief Extension Act of 2021</short-title></quote>.</text></paragraph> <paragraph display-inline="no-display-inline" commented="no" id="H141AB874F1DF401D9C3E518C62002DCB"><enum>(2)</enum><text>Section 1113(b)(1)(D)(ii) of the CARES Act (<external-xref legal-doc="usc" parsable-cite="usc/11/1329">11 U.S.C. 1329</external-xref> note) is amended by striking <quote>this Act</quote> and inserting <quote>the <short-title>COVID–19 Bankruptcy Relief Extension Act of 2021</short-title></quote>. </text></paragraph></subsection> </section> 
+<section id="H78E220DD48CA43918F90DCAFDAAA79AD"><enum>3.</enum><header>Determination of budgetary effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</text></section> </legis-body> <attestation><attestation-group><role>Speaker of the House of Representatives.</role></attestation-group><attestation-group><role>Vice President of the United States and President of the Senate.</role></attestation-group></attestation> </bill> 
+

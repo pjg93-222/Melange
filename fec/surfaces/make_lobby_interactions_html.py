@@ -57,7 +57,8 @@ YEARS = industry.YEARS
 # 616->1,095 and the ledger 32,561->44,559 rows; this page's contract is a
 # COMPLETE render of every sectored ledger row with receipts, so the budget
 # moves rather than inventing a per-org cap that would break that contract.
-MAX_DOCUMENT_BYTES = 8 * 1024 * 1024
+# 2026-10-07: 16MB (was 8MB). Telecom joined the sectored ledger (orgs 259->430, acts 29,122->50,977); same complete-render contract, so the budget moves again.
+MAX_DOCUMENT_BYTES = 16 * 1024 * 1024
 
 POSITION_NOT_DISCLOSED_LABEL = "Not disclosed"
 

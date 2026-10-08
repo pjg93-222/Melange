@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-type="senate-resolution" star-print="no-star-print" public-private="public" resolution-stage="Introduced-in-Senate" slc-id="S1-LIP23604-DS8-1W-2YM">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 SRES 274 IS: Expressing the sense of the Senate to reduce traffic fatalities to zero by 2050.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2023-06-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">III</distribution-code>
+<congress display="yes">118th CONGRESS</congress>
+<session display="yes">1st Session</session>
+<legis-num>S. RES. 274</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action display="yes">
+<action-date date="20230622">June 22, 2023</action-date>
+<action-desc><sponsor name-id="S341">Mr. Blumenthal</sponsor> (for himself, <cosponsor name-id="S369">Mr. Markey</cosponsor>, <cosponsor name-id="S363">Mr. King</cosponsor>, <cosponsor name-id="S390">Mr. Van Hollen</cosponsor>, <cosponsor name-id="S409">Mr. Luján</cosponsor>, <cosponsor name-id="S322">Mr. Merkley</cosponsor>, <cosponsor name-id="S313">Mr. Sanders</cosponsor>, <cosponsor name-id="S418">Mr. Fetterman</cosponsor>, and <cosponsor name-id="S394">Ms. Smith</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc>
+</action>
+<legis-type>RESOLUTION</legis-type>
+<official-title display="yes">Expressing the sense of the Senate to reduce traffic fatalities to zero by 2050.</official-title>
+</form>
+<preamble>
+<whereas><text>Whereas roadway fatalities kill tens of thousands of people in the United States each year;</text></whereas> <whereas><text>Whereas, according to the National Highway Traffic Safety Administration (referred to in this preamble as <quote>NHTSA</quote>), 42,939 lives were lost in motor vehicle crashes in 2021 and all of the deaths were preventable;</text></whereas>
+<whereas><text>Whereas, according to the Centers for Disease Control and Prevention, traffic crashes are a leading cause of death for people ages 1 to 54 and kill more than 100 people every day;</text></whereas> <whereas><text>Whereas, according to NHTSA, alcohol-impaired driving crashes are a leading killer on the roadways of the United States, with 13,384 lives lost to alcohol-impaired driving in 2021;</text></whereas>
+<whereas><text>Whereas, according to NHTSA, 3,522 people died in motor vehicle crashes involving distracted drivers in 2021;</text></whereas> <whereas><text>Whereas, according to NHTSA, 7,388 pedestrians were killed in traffic crashes in the United States in 2021, representing a 22 percent increase in the last 5 years;</text></whereas>
+<whereas><text>Whereas, according to NHTSA, the number of pedestrian fatalities increased by 53 percent from 2012 to 2021;</text></whereas> <whereas><text>Whereas, according to the National Complete Streets Coalition at Smart Growth America, the pedestrian fatality rate compared to that of White, non-Hispanic people in the United States is—</text>
+<paragraph id="id81588035c9a44f65a6b7b9d2acf0411d"><enum>(1)</enum><text>220 percent higher for American Indian and Alaska Native people;</text></paragraph> <paragraph commented="no" display-inline="no-display-inline" id="id193bdca1ab234094bad0c5a0a243cb53"><enum>(2)</enum><text display-inline="yes-display-inline">100 percent higher for Black people; and</text></paragraph>
+<paragraph commented="no" display-inline="no-display-inline" id="id9dd469014ac249028dbeb46283104a7e"><enum>(3)</enum><text>20 percent higher for Hispanic and Latinx people;</text></paragraph></whereas> <whereas><text>Whereas, according to NHTSA, a total of 961 bicyclists were killed in crashes with motor vehicles in 2021, representing a 32 percent increase in the last 10 years;</text></whereas>
+<whereas><text>Whereas independent research in 2015 found that motor vehicle crash death rates were as much as 4.3 times greater for those at the bottom of the education spectrum than those at the top;</text></whereas> <whereas><text>Whereas, according to NHTSA, motorcycles represented only 3 percent of all registered vehicles, but accounted for 14 percent of all traffic fatalities and 17 percent of all occupant fatalities in 2021;</text></whereas>
+<whereas><text>Whereas, according to NHTSA, in 2021, 40 percent of motor vehicle traffic fatalities occurred on rural roads, despite only 32 percent of miles traveled occurring on rural roads;</text></whereas> <whereas><text>Whereas, according to NHTSA, seatbelts prevented 14,653 fatalities and 450,000 serious injuries in 2019, saving $93,000,000,000 in medical care, lost productivity, and other injury-related costs;</text></whereas>
+<whereas><text>Whereas, according to NHTSA, in 2021, 50 percent of passenger vehicle occupants who died in a motor vehicle crash were unrestrained, while 85 percent of occupants who survived a motor vehicle crash were restrained;</text></whereas> <whereas commented="no"><text>Whereas the National Academies of Sciences, Engineering, and Medicine cite that approximately 40 percent of crash fatalities initially survived the impact but later died, highlighting the importance of improving post-crash care;</text></whereas>
+<whereas><text>Whereas, according to the Insurance Institute for Highway Safety, increasing speed limits over the last 25 years have led to approximately 37,000 deaths;</text></whereas> <whereas><text>Whereas, according to NHTSA, speeding accounted for 29 percent of all traffic fatalities in 2021;</text></whereas>
+<whereas><text>Whereas, according to Consumer Reports, existing safety technologies could cut road fatalities in half if such technologies were made standard on all vehicles, saving approximately 20,000 lives annually;</text></whereas> <whereas><text>Whereas roadway fatalities and injuries rose during the COVID–19 pandemic and remain a persistent cause of death in the United States;</text></whereas>
+<whereas><text>Whereas a deep history of inequalities in the United States continues to impact transportation systems, with low-income neighborhoods experiencing more than twice as many pedestrian fatalities as neighborhoods with the highest incomes, according to the National Complete Streets Coalition at Smart Growth America;</text></whereas> <whereas commented="no"><text>Whereas roadway fatalities disproportionately affect people of color and underserved communities and there must be an effort to collect better data to understand these impacts;</text></whereas>
+<whereas><text>Whereas too many families in the United States have been personally affected by preventable crashes; and</text></whereas> <whereas><text>Whereas a data-driven safe systems approach is proven to be effective at reducing traffic fatalities and injuries, including through taking into account all aspects of the transportation environment and not requiring a single actor to be responsible for traffic safety: Now, therefore, be it</text></whereas></preamble>
+<resolution-body id="H03F8BFA3D71D44DD96F4BEB98F7BEADA">
+<section display-inline="yes-display-inline" section-type="undesignated-section" id="S1"><text>That the Senate—</text> <paragraph id="id75136bbf23cb41aeaf97de8c24b659a4"><enum>(1)</enum><text>commits to advancing policies that will end roadway fatalities by 2050;</text></paragraph>
+<paragraph id="id4b8c8d6f056b468ea5e4ca43a7f40246"><enum>(2)</enum><text>calls on Congress and the Department of Transportation to commit to working together to achieve zero roadway fatalities by the year 2050;</text></paragraph> <paragraph id="id3ad33f7e226c45bb93d304b65cfea98c"><enum>(3)</enum><text>supports efforts to address disparities and other equity-related issues related to transportation safety;</text></paragraph>
+<paragraph id="id178a8d7d88194150b95d223a089de8a2"><enum>(4)</enum><text>calls on the Department of Transportation, and the agencies within the Department of Transportation, to improve data gathering and tracking of traffic crashes and other issues related to transportation safety;</text></paragraph> <paragraph id="id03632dac976a4a8cbee68b03a646af9b"><enum>(5)</enum><text>calls on the Department of Transportation, and the agencies within the Department of Transportation, to commit to the implementation of proven countermeasures and interventions to prioritize transportation safety;</text></paragraph>
+<paragraph id="idcd93d6c63c07408c86e0313142891a1e"><enum>(6)</enum><text>recognizes the need for a safe system approach to transportation in the United States to improve access, safety, and mobility; and</text></paragraph> <paragraph id="id25a70e9c76bf4213a3aa89fe2f18a91e"><enum>(7)</enum><text>supports the use of the term <term>crash</term>, instead of <term>accident</term>, when describing traffic incidents and encourages all agencies of the Federal Government to use this term. </text></paragraph></section>
+</resolution-body>
+</resolution> 
+
+

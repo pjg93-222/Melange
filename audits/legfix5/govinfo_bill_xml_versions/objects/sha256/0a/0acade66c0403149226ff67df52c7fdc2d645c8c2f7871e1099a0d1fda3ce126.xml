@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S819 IS: Federal Communications Commission Reporting Modernization Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-03-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 819</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190314">March 14, 2019</action-date>
+			<action-desc><sponsor name-id="S347">Mr. Moran</sponsor> (for himself and <cosponsor name-id="S353">Mr. Schatz</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To modernize the reporting requirement under the Telephone Consumer Protection Act of 1991.</official-title>
+	</form>
+	<legis-body>
+ <section id="id18C8F78FAA5F4F458F3FE77A672FF577" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Federal Communications Commission Reporting Modernization Act of 2019</short-title></quote>.</text> </section><section id="S1" section-type="subsequent-section"><enum>2.</enum><header>TCPA enforcement report</header> <text display-inline="no-display-inline">Section 227(h) of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/227">47 U.S.C. 227(h)</external-xref>) is amended to read as follows:</text>
+			<quoted-block display-inline="no-display-inline" id="idB46BA0B5B866417A93FCB7F054927279" style="OLC">
+ <subsection id="id824cc418fe124aa6b13ce8c7625df574"><enum>(h)</enum><header>TCPA enforcement report</header><text>The Commission shall submit an annual report to Congress regarding the enforcement during the preceding year of laws, regulations, and policies relating to robocalls and spoofed calls, which report shall include—</text>
+ <paragraph id="idd2df7a1fc0ee4edfb5479bed6327a1f7"><enum>(1)</enum><text>the number of complaints received by the Commission during the year alleging that a consumer received a robocall or spoofed call;</text>
+ </paragraph><paragraph id="idf746ac6541b04ee2bbada4bbbe354cd3"><enum>(2)</enum><text>the number of citations issued by the Commission pursuant to section 503 during the year to enforce any law, regulation, or policy relating to a robocall or spoofed call;</text>
+ </paragraph><paragraph id="id8fa0047b2aa14811b074ea40ee70679f"><enum>(3)</enum><text>the number of notices of apparent liability issued by the Commission pursuant to section 503 during the year to enforce any law, regulation, or policy relating to a robocall or spoofed call; and</text>
+ </paragraph><paragraph id="id791e2fc4dbe94c19b57a61d78a2489bf"><enum>(4)</enum><text>for each notice referred to in paragraph (3)—</text> <subparagraph id="idb078f871f9904f85a2ddb4d248b1aed7"><enum>(A)</enum><text>the amount of the proposed forfeiture penalty involved;</text>
+ </subparagraph><subparagraph id="id0f3223cdd235489aa462e010cd39a1b3"><enum>(B)</enum><text>the person to whom the notice was issued; and</text> </subparagraph><subparagraph id="id11f7f7c262114dcb85bde7f5472275ab"><enum>(C)</enum><text>the status of the proceeding.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body>
+</bill>
+
+

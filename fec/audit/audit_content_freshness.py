@@ -420,7 +420,7 @@ def audit():
                 True, deployed.count('class=industry-card') >= 4,
                 'class=industry-card count: %d' % deployed.count('class=industry-card'),
             )
-            for sector in ('bank', 'credit_union', 'crypto', 'fintech'):
+            for sector in ('bank', 'credit_union', 'crypto', 'fintech', 'telecom'):
                 marker = 'data-sector="%s"' % sector
                 _add_check(
                     checks, findings, surface, 'deployed sector: %s' % sector,

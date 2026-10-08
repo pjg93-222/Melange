@@ -1,0 +1,78 @@
+============================================================================================================
+F3 r6  CAPS and WEIGHTS acting on media inside the stance producer   run 2026-09-19T00:18:56
+============================================================================================================
+
+(1) WEIGHT the media term carries inside a cell
+    LIVE fec/engine/pillar_policy.py:22-25  LABEL_EVIDENCE_WEIGHTS
+       standard : legislation 0.55 | media 0.10 | vote 0.10
+       defensive: legislation 0.55 | media 0.10 | vote 0.20
+    LIVE fec/stance/per_category_stance.py:36  DEFENSIVE = ['CU Tax Status', 'Credit Card Mandates', 'Interchange']
+    LIVE fec/stance/stance_rules.py:26  MEDIA_SCALE = 1.0
+    LIVE fec/stance/per_category_stance.py:61  pn=clip(prraw[m]/SR.MEDIA_SCALE)
+       -> the normalised media value enters DIRECTLY on [-1,1], no further scaling
+    LIVE fec/stance/stance_rules.py:59-62  combine_evidence = weighted mean over PRESENT
+       sources only; an absent source is NOT in the denominator.  So in a cell where media
+       is the ONLY present source, its effective weight is 1.0, not 0.10.
+
+    evidence-presence census over 9594 cells  (press, legislation, vote):
+       press=False leg=False vote=False    4804  
+       press=False leg=True  vote=False    1831  
+       press=True  leg=False vote=False     749  MEDIA IS THE ONLY SOURCE -> effective media weight 1.0
+       press=False leg=True  vote=True      688  
+       press=True  leg=True  vote=False     650  
+       press=False leg=False vote=True      570  
+       press=True  leg=True  vote=True      226  
+       press=True  leg=False vote=True       76  
+    media-only cells: 749 of 1701 cells that carry media (44.0%)
+    rebuilt signal (press OR leg OR vote): 4790   artifact 'signal' True: 4790   MATCH: True
+    cells where the rebuild disagrees with the artifact: 0
+
+(2) THE ANTI-STANCE PRIOR -- a media-driven DOWN-weight
+    LIVE fec/stance/per_category_stance.py:47-51, 67
+       opl[m]=sum(press[(m,lab)]*w535[cat])            <- built ENTIRELY from media
+       anti0[m]=clip(-opl[m]/ascale)                   <- ascale = |8th-percentile negative|
+       PRIOR=0.70
+       :67  if c>0 and prraw[m]<=0.02 and anti[m]>0: c*=(1-PRIOR*anti[m])
+    -> a member whose OVERALL media tone is anti-CU has every positive cell with weak media
+       (<=0.02) shrunk by up to 70%.  This is the one place media in category X changes the
+       score in category Y.  It uses the row-535 press-pillar weights as the cross-category
+       mixer, INCLUDING none for col 18 (col 18 is absent from cats[], so its 0.03 weight
+       never enters opl either).
+    members with anti0 > 0 (media-tone-negative)            : 132 of 533
+    ascale (|8th pct of negative opl|)                      : 0.092625966
+    (member,cat) cells eligible for the <=0.02 shrink        : 2312
+    max shrink factor applied                              : 0.30 (1 - 0.70*1.0)
+
+(3) THE SAY-DO CORROBORATION GATE -- a cap, and it consumes NO media
+    LIVE fec/moneyball_core.py:723-739  cap_uncorroborated(member, cm)
+       Path A = bill_corroboration()  (moneyball_core.py:625-697, workbook bill role rows)
+       Path V = vote_corroboration()  (moneyball_core.py:699-722, vote_category_lean.json)
+       :733-738  a Champion/Defender cell with neither A nor V is LOWERED to 'Ally'
+    NEITHER path reads media.  The gate therefore never ADDS media evidence; it only removes
+    top-tier labels that media evidence helped produce.
+    cells capped Champion/Defender -> Ally : 75 across 61 members
+    ... of those, cells that CARRY media evidence            : 11
+    ... of those, cells where media is the ONLY evidence     : 8
+    corroborated cells by path: {'A': 1170, 'V': 183}
+    overall crowns capped by the aggregate rule (gate.overall_capped): 7
+    proven badges (authored bill advanced past introduction) : 181 members
+
+(4) THE LABEL CURVE -- applies to media-bearing cells in declared domains only
+    LIVE fec/stance/per_category_stance.py:78-79  SR.curve_label_scores(scores,signal,CURVED_CATEGORIES)
+    curved categories (stance_rules.py:28-): ['Charter Modernization', 'Member Business Lending', 'Mortgage & Housing', 'Technology & Emerging']
+    method: sign-preserving empirical CDF of adjusted scores; positive and negative evidence curved separate
+    empty_domains_inherit: False   raw_and_adjusted_scores_unchanged: True
+
+(5) DECAY applied to media BEFORE it reaches the sheet (all in build_media_blend.py)
+    press      0.5**(age_years/2.0)   blend.py:394   (2.0 yr half-life)
+    press w/o parseable date -> recency_weight column, default 0.5   blend.py:396-397
+    social     0.5**(age_years/0.5)   blend.py:120   (0.5 yr half-life, SOCIAL_HL_YEARS)
+    speech     0.5**(age_years/2.0)   blend.py:168
+    hearing    0.5**(age_years/2.0)   blend.py:211
+    interview  0.5**(age_years/2.0)   blend.py:253
+    intensity caps: press min(3.0,|press_value|) blend.py:389 (no floor); social max(0.25,min(1.5,margin)) blend.py:117
+    retweets:  inten *= RT_W=0.5      blend.py:36/119
+    channel weights onto the press side: speech 1.0 / hearing 0.85 / interview 1.0 (blend.py:461-465)
+    press attribution weight: own .gov domain 1.0, third-party PRESS_THIRD_W=1.0 (blend.py:347/401-402)
+
+DONE F3 r6

@@ -1,0 +1,16 @@
+============================================================================================================
+M7  bluesky footprint: the desk's second reader of the cross-post key
+============================================================================================================
+`seen` keys: legacy 6052 | full 6397
+  bluesky_post_rows              29780
+  unverified_handle_excluded     21732
+  unknown_member_excluded        0
+  empty_text_excluded            74
+  routed_to_social_legacy        24
+  routed_to_social_full          24
+  changed                        0
+
+  bluesky_scored_rows_routed_to_social: 24 -> 24   (footprint rows shown: +0)
+  every changed row is DISPLAY-ONLY (scored=False, 'no CU relevance detected -- footprint only'), so no score, tier, rank or allocation can move.
+
+DONE M7

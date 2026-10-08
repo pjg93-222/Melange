@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ROS19D56-2NT-DP-JG5">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2597 IS: Learning Excellence and Good Examples from New Developers Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-10-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2597</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20191015">October 15, 2019</action-date>
+			<action-desc><sponsor name-id="S303">Mr. Thune</sponsor> (for himself and <cosponsor name-id="S353">Mr. Schatz</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To require the National Oceanic and Atmospheric Administration to make certain operational models
+			 available to the public, and for other purposes.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Learning Excellence and Good Examples from New Developers Act of 2019</short-title></quote> or the <quote><short-title>LEGEND Act of 2019</short-title></quote>.</text>
+ </section><section id="ida7af2bc04e8d43c7bb21b3fac6943ef7"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text> <paragraph id="idbc70ddd4b320447cb01da059e776fdf1"><enum>(1)</enum><header>Administration</header><text>The term <term>Administration</term> means the National Oceanic and Atmospheric Administration.</text>
+ </paragraph><paragraph id="idA9B73419625C422699B9449CEAB4D16F"><enum>(2)</enum><header>Administrator</header><text>The term <term>Administrator</term> means the Under Secretary of Commerce for Oceans and Atmosphere and Administrator of the National Oceanic and Atmospheric Administration.</text>
+ </paragraph><paragraph id="id93e9caf2529d4ddfa8e9fe2147c4ac91"><enum>(3)</enum><header>Model</header><text>The term <term>model</term> means any numerical model of the Earth's system or its components produced by scientists employed by the Administration.</text>
+ </paragraph><paragraph id="ida93864a022d34ca891c6a6281de949d4"><enum>(4)</enum><header>Operational model</header><text>The term <term>operational model</term> means any model that has an output used by the Administration for operational or public service functions.</text>
+ </paragraph><paragraph commented="no" display-inline="no-display-inline" id="id3547C89CC6AF47168D204B228136CDFA"><enum>(5)</enum><header>Open source code</header><text>The term <term>open source code</term> means computer code or programming language that is available for public use or modification.</text> </paragraph></section><section id="ide67ea2664bef41f9ab9f6addc88c8fdb"><enum>3.</enum><header>Purposes</header><text display-inline="no-display-inline">The purposes of this Act are—</text>
+ <paragraph id="id60f2278ac8854ebbb3a8b3be3f1b6ace"><enum>(1)</enum><text>to support innovation in modeling by allowing interested stakeholders to have easy and complete access to the models used by the Administration; and</text>
+ </paragraph><paragraph id="id0bff25a62e3d482bab872edab426fbc0"><enum>(2)</enum><text>to use vetted innovations arising from access provided under paragraph (1) to improve modeling by the Administration.</text>
+			</paragraph></section><section id="ide149c5ad577f44979b28e663b5312541"><enum>4.</enum><header>Requirement to make certain operational models available to the public</header>
+ <subsection id="idbfbe1ed5881c4d24bba6569387bb50f9"><enum>(a)</enum><header>In general</header><text>The Administrator shall make available to the public the following:</text> <paragraph id="id60BB8E4402EB40A6BB2ABB5F7FF7753D"><enum>(1)</enum><text>Current and future operational models developed by the Administration, in the form of open source code for a period consistent with applicable records retention requirements.</text>
+ </paragraph><paragraph id="idF18A2BE27A7E49DD89AB9E28EB665041"><enum>(2)</enum><text>All Government-owned data, subject to redistribution rights, associated with such models and used in operational forecasting by the Administration, including—</text>
+ <subparagraph id="id88A29EE35E914E53BDA4910DF5FE77EB"><enum>(A)</enum><text>relevant metadata;</text> </subparagraph><subparagraph id="id678FE7DEF99542728D96F110741D3134"><enum>(B)</enum><text>data used for current operational forecasts; and</text>
+ </subparagraph><subparagraph id="idCCFB35F620BE472582F2CFAFCD69DC51"><enum>(C)</enum><text>a description of intended model outputs.</text> </subparagraph></paragraph></subsection><subsection id="idB34D194AD9DC4EE697C2C26F945F39AA"><enum>(b)</enum><header>Discretion To make experimental or development models available</header><text>The Administrator may make experimental or developmental models associated with development projects funded by the Administration available to the public as open source code.</text>
+ </subsection><subsection id="idfddabfacb6a44d268d59be85ee76153b"><enum>(c)</enum><header>Platform</header><text>In carrying out subsections (a) and (b), the Administrator may use government servers, contracts or agreements with a private vendor, or any other platform consistent with the purpose of this Act.</text>
+ </subsection><subsection id="id4B310C8C5BA34BF7B69E8F8DA75A7D16"><enum>(d)</enum><header>Technical correction</header><text>Section 102(b) of the Weather Research Forecasting and Innovation Act of 2017 (<external-xref legal-doc="usc" parsable-cite="usc/15/8512">15 U.S.C. 8512(b)</external-xref>) is amended by redesignating the second paragraph (4) (as added by section 4(a) of the National Integrated Drought Information System Reauthorization Act of 2018 (<external-xref legal-doc="public-law" parsable-cite="pl/115/423">Public Law 115–423</external-xref>)) as paragraph (5).</text>
+			</subsection><subsection id="id19c9ba05290a4ebfa1402928811bc9db"><enum>(e)</enum><header>Phased implementation</header>
+ <paragraph id="idac2c0349e9f14a9c8c6895e46034f469"><enum>(1)</enum><header>Immediate effect for certain models</header><text>For operational models that, as of the date of the enactment of this Act, meet the requirements described in paragraph (5)(E)(ii) of section 102(b) of the Weather Research Forecasting and Innovation Act of 2017 (<external-xref legal-doc="usc" parsable-cite="usc/15/8512">15 U.S.C. 8512(b)</external-xref>), as redesignated by subsection (d), the Administrator shall implement the requirements of subsection (a) as soon as practicable after such date of enactment.</text>
+ </paragraph><paragraph id="id546c769878e34175a54257cf2c516e06"><enum>(2)</enum><header>New models</header><text>For operational models that meet the requirements described in paragraph (1) and are created or substantially updated after the date of the enactment of this Act, the Administrator shall implement the requirements of subsection (a) not later than 1 year after such date of enactment.</text>
+ </paragraph></subsection></section><section id="id1a4f175822b24232884d1d40c217bf08"><enum>5.</enum><header>Requirement to review models and leverage innovations</header><text display-inline="no-display-inline">The Administrator shall—</text> <paragraph id="idA22CC225B91A4A6A95EFFD24F2F2DB79"><enum>(1)</enum><text>consistent with the mission of the Earth Prediction Innovation Center, periodically review innovations and improvements made by persons outside the Administration to the operational models made available to the public under section 4 in order to improve the accuracy and timeliness of forecasts of the Administration; and</text>
+ </paragraph><paragraph id="id4949579AB6594FF8B6805170FA6678C0"><enum>(2)</enum><text>if the Administrator identifies an innovation for such a model the Administrator considers suitable, develop and implement a plan to use the innovation to improve the model.</text>
+			</paragraph></section><section id="idDCD380873BC34FC487E771F8440951BB"><enum>6.</enum><header>Report on implementation</header>
+ <subsection id="id3650c5cb2342437794ad79dba6c582dc"><enum>(a)</enum><header>In general</header><text>Not later than 1 year after the date of the enactment of this Act, the Administrator shall submit to the appropriate congressional committees a report on the implementation of this Act that includes a description of—</text>
+ <paragraph id="id1a8bf1655f4640faa64ffba4e9472d80"><enum>(1)</enum><text>how operational models have been made publicly available as required by section 4(a); and</text>
+ </paragraph><paragraph id="id81574140c32b40e08d85ba8c834ebf28"><enum>(2)</enum><text>the process of the Administration under section 5—</text> <subparagraph id="idF32F5D353FC843E8B3C12B8E425EA9F0"><enum>(A)</enum><text>for engaging with interested stakeholders to learn what innovations those stakeholders have found;</text>
+ </subparagraph><subparagraph id="idcd7f47ede71540af95645164621dc4c4"><enum>(B)</enum><text>for reviewing those innovations; and</text> </subparagraph><subparagraph id="id3648EB0FE1884979BBCB3607384FD283"><enum>(C)</enum><text>for operationalizing innovations the Administrator considers suitable.</text>
+ </subparagraph></paragraph></subsection><subsection id="id4723ABFD06834DD6938515FE7807678E"><enum>(b)</enum><header>Appropriate congressional committees defined</header><text>In this section, the term <term>appropriate congressional committees</term> means—</text> <paragraph id="id0E3372A8C2A745EFA2676C943F707DDA"><enum>(1)</enum><text>the Committee on Commerce, Science, and Transportation and the Committee on Appropriations of the Senate; and</text>
+ </paragraph><paragraph id="idC12638A93F5B4EC3B4CC9CF050E5840D"><enum>(2)</enum><text>the Committee on Science, Space, and Technology and the Committee on Appropriations of the House of Representatives.</text>
+				</paragraph></subsection></section><section id="id8f107656d4934f058851171b348c4e81"><enum>7.</enum><header>Protection of national security interests</header>
+ <subsection commented="no" display-inline="no-display-inline" id="id8619123ECDCC465C9507DE39FDB1C80F"><enum>(a)</enum><header display-inline="yes-display-inline">In general</header><text display-inline="yes-display-inline">Notwithstanding any other provision of this Act, the Administrator may withhold models or data used in operational weather forecasting if the Administrator determines doing so to be necessary to protect the national security interests of the United States.</text>
+ </subsection><subsection commented="no" id="id9f19b9e5befd4718b622fe430ff32c1c"><enum>(b)</enum><header>Rule of construction</header><text>Nothing in this Act shall be construed to supersede any other provision of law governing the protection of the national security interests of the United States.</text>
+ </subsection></section><section id="id5F4DF73247CD43F78CB2E8C603F6B20B"><enum>8.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">There are authorized to be appropriated to the Administration for each of fiscal years 2021 through 2026 such sums as may be necessary to carry out this Act.</text></section></legis-body></bill>
+
+

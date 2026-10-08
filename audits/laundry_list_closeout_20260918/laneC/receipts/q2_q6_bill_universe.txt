@@ -1,0 +1,539 @@
+LOADED: archive(selected) 10181  archive(prior) 10986  sentinel 18887 (verified-eligible 268)  manual 371  bill_directions 126  bill_overrides 8  routing rows 10820  archive_leg members 523
+routing audit 'source' field: 'congress_bills_archive_20260825_115305.xlsx + Sentinel Bill Ledger' ; source_rows=10820
+reconstruction check: archive 10181 + sentinel_verified 268 + manual 371 = 10820  (== source_rows? True)
+
+====================================================================================================
+Q2  BILL-UNIVERSE FORK -- Tim Scott, Member Business Lending, sponsor rows
+====================================================================================================
+
+Archive SELECTION code, live producer fec/legislation/build_archive_legislative.py:50
+  A=pd.read_excel(sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1],sheet_name='All Bills')
+  -> congress_bills_archive_20260825_115305.xlsx
+
+(a) WORKBOOK ROLE SHEETS  (Moneyball Main Version - Blended.xlsx)
+
+  workbook['Sponsor Interactions'] : Tim Scott x MBL rows=5  (sponsor-role rows=5)
+     S.2486         C=119  role=sponsor            dw=1                    w= 3.000  action=Introduced             title=Protecting Access to Credit for Small Busine
+     S.3382         C=117  role=sponsor            dw=0.6400000000000001   w= 1.920  action=Introduced             title=Protecting Access to Credit for Small Busine
+     S.3992         C=118  role=sponsor            dw=0.8                  w= 2.400  action=Introduced             title=Protecting Access to Credit for Small Busine
+     S.762          C=117  role=sponsor            dw=0.6400000000000001   w= 1.920  action=Introduced             title=Expanding Access to Lending Options Act
+     S.J.Res.18     C=119  role=sponsor            dw=1                    w= 3.000  action=Became Law             title=A joint resolution disapproving the rule sub
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 12.24
+
+  workbook['Original Co-Sponsor Interaction'] : Tim Scott x MBL rows=5  (sponsor-role rows=0)
+     S.293          C=118  role=original-cosponsor dw=0.8                  w= 1.600  action=Introduced             title=Fair Access to Banking Act
+     S.389          C=117  role=original-cosponsor dw=0.6400000000000001   w= 1.280  action=Introduced             title=Next Generation Entrepreneurship Corps Act
+     S.401          C=119  role=original-cosponsor dw=1                    w= 2.000  action=Introduced             title=Fair Access to Banking Act
+     S.563          C=117  role=original-cosponsor dw=0.6400000000000001   w= 1.280  action=Introduced             title=Fair Access to Banking Act
+     S.J.Res.32     C=118  role=original-cosponsor dw=0.8                  w= 1.600  action=Failed to pass over ve title=A joint resolution providing for congression
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 0.00
+
+  workbook['Co-Sponsor Interactions'] : Tim Scott x MBL rows=5  (sponsor-role rows=0)
+     S.293          C=118  role=cosponsor          dw=0.8                  w= 0.800  action=Introduced             title=Fair Access to Banking Act
+     S.389          C=117  role=cosponsor          dw=0.6400000000000001   w= 0.640  action=Introduced             title=Next Generation Entrepreneurship Corps Act
+     S.401          C=119  role=cosponsor          dw=1                    w= 1.000  action=Introduced             title=Fair Access to Banking Act
+     S.563          C=117  role=cosponsor          dw=0.6400000000000001   w= 0.640  action=Introduced             title=Fair Access to Banking Act
+     S.J.Res.32     C=118  role=cosponsor          dw=0.8                  w= 0.800  action=Failed to pass over ve title=A joint resolution providing for congression
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 0.00
+
+  workbook['Success Sponsor'] : Tim Scott x MBL rows=1  (sponsor-role rows=1)
+     S.J.Res.18     C=119  role=sponsor            dw=1                    w= 3.000  action=Became Law             title=A joint resolution disapproving the rule sub
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 3.00
+
+  workbook['Success Original Co-Sponsor'] : Tim Scott x MBL rows=1  (sponsor-role rows=0)
+     S.J.Res.32     C=118  role=original-cosponsor dw=0.8                  w= 1.600  action=Failed to pass over ve title=A joint resolution providing for congression
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 0.00
+
+(b) SELECTED ARCHIVE  (congress_bills_archive_20260825_115305.xlsx, sheet 'All Bills')
+
+  archive SELECTED : Tim Scott x MBL rows=11  (sponsor-role rows=2)
+     S.2486         C=119  role=sponsor            dw=1                    w= 3.000  action=Read twice and referre title=Protecting Access to Credit for Small Busine
+     S.293          C=118  role=original-cosponsor dw=0.8                  w= 1.600  action=Introduced             title=Fair Access to Banking Act
+     S.293          C=118  role=cosponsor          dw=0.8                  w= 0.800  action=Introduced             title=Fair Access to Banking Act
+     S.389          C=117  role=original-cosponsor dw=0.6400000000000001   w= 1.280  action=Introduced             title=Next Generation Entrepreneurship Corps Act
+     S.389          C=117  role=cosponsor          dw=0.6400000000000001   w= 0.640  action=Introduced             title=Next Generation Entrepreneurship Corps Act
+     S.401          C=119  role=original-cosponsor dw=1                    w= 2.000  action=Read twice and referre title=Fair Access to Banking Act
+     S.563          C=117  role=original-cosponsor dw=0.6400000000000001   w= 1.280  action=Introduced             title=Fair Access to Banking Act
+     S.563          C=117  role=cosponsor          dw=0.6400000000000001   w= 0.640  action=Introduced             title=Fair Access to Banking Act
+     S.J.Res.18     C=119  role=sponsor            dw=1                    w= 3.000  action=Became Public Law No:  title=A joint resolution disapproving the rule sub
+     S.J.Res.32     C=118  role=original-cosponsor dw=0.8                  w= 1.600  action=Failed to pass over ve title=A joint resolution providing for congression
+     S.J.Res.32     C=118  role=cosponsor          dw=0.8                  w= 0.800  action=Failed to pass over ve title=A joint resolution providing for congression
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 6.00
+
+(b') PRIOR ARCHIVE  (congress_bills_archive_20260624_115822.xlsx, sheet 'All Bills') -- context only
+
+  archive PRIOR : Tim Scott x MBL rows=10  (sponsor-role rows=0)
+     S.293          C=118  role=original-cosponsor dw=0.8                  w= 1.600  action=Introduced             title=Fair Access to Banking Act
+     S.293          C=118  role=cosponsor          dw=0.8                  w= 0.800  action=Introduced             title=Fair Access to Banking Act
+     S.389          C=117  role=original-cosponsor dw=0.6400000000000001   w= 1.280  action=Introduced             title=Next Generation Entrepreneurship Corps Act
+     S.389          C=117  role=cosponsor          dw=0.6400000000000001   w= 0.640  action=Introduced             title=Next Generation Entrepreneurship Corps Act
+     S.401          C=119  role=original-cosponsor dw=1                    w= 2.000  action=Introduced             title=Fair Access to Banking Act
+     S.401          C=119  role=cosponsor          dw=1                    w= 1.000  action=Introduced             title=Fair Access to Banking Act
+     S.563          C=117  role=original-cosponsor dw=0.6400000000000001   w= 1.280  action=Introduced             title=Fair Access to Banking Act
+     S.563          C=117  role=cosponsor          dw=0.6400000000000001   w= 0.640  action=Introduced             title=Fair Access to Banking Act
+     S.J.Res.32     C=118  role=original-cosponsor dw=0.8                  w= 1.600  action=Failed to pass over ve title=A joint resolution providing for congression
+     S.J.Res.32     C=118  role=cosponsor          dw=0.8                  w= 0.800  action=Failed to pass over ve title=A joint resolution providing for congression
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 0.00
+
+(b'') SENTINEL BILL LEDGER verified+eligible rows
+
+  sentinel verified : Tim Scott x MBL rows=0  (sponsor-role rows=0)
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 0.00
+
+(b''') manual_bill_evidence.csv
+
+  manual csv : Tim Scott x MBL rows=0  (sponsor-role rows=0)
+     -> signed sponsor-role weight (sign=+1 assumed for MBL section default) = 0.00
+
+(c) archive_leg.json + legislation_routing_audit.json for Tim Scott
+    archive_leg.json['Tim Scott'] =
+       CFPB                           +13.6800
+       Examination & Supervision      +11.0000
+       Member Business Lending        +10.7600
+       Technology & Emerging          +6.0000
+       Credit Card Mandates           +4.8000
+       Mortgage & Housing             +2.5600
+       CDFI Fund                      +2.0000
+       Charter Modernization          +1.9200
+       Fraud Prevention               +1.2800
+    routing-audit rows for Tim Scott: total=37 ; MBL-related=11
+    MBL rows by disposition: {'selected': 6, 'official-membership-withdrawn-or-role-superseded': 4, 'duplicate-same-role': 1}
+    MBL SELECTED rows:
+       S.2486         C=119  role=sponsor            sign=+1 dw=1.0    contrib= +3.000 mech=registry-exact
+       S.293          C=118  role=original-cosponsor sign=+1 dw=0.8    contrib= +1.600 mech=section-default
+       S.389          C=117  role=original-cosponsor sign=+1 dw=0.6400000000000001 contrib= +1.280 mech=section-default
+       S.401          C=119  role=original-cosponsor sign=+1 dw=1.0    contrib= +2.000 mech=section-default
+       S.563          C=117  role=original-cosponsor sign=+1 dw=0.6400000000000001 contrib= +1.280 mech=section-default
+       S.J.Res.32     C=118  role=original-cosponsor sign=+1 dw=0.8    contrib= +1.600 mech=registry-exact
+    MBL NON-selected rows:
+       S.293          C=118  src_role=cosponsor          disp=official-membership-withdrawn-or-role-superseded     reason=
+       S.389          C=117  src_role=cosponsor          disp=official-membership-withdrawn-or-role-superseded     reason=
+       S.563          C=117  src_role=cosponsor          disp=official-membership-withdrawn-or-role-superseded     reason=
+       S.J.Res.18     C=119  src_role=sponsor            disp=duplicate-same-role                                  reason=audit Tier-2 #4, Paul gate opened 2026-07-25
+       S.J.Res.32     C=118  src_role=cosponsor          disp=official-membership-withdrawn-or-role-superseded     reason=
+
+(d) manual_bill_evidence.csv PATH IN CODE (live build_archive_legislative.py:91):
+      _manual_path=MB_ROOT+r'\manual_bill_evidence.csv'
+    exists at that path? True   rows=371
+    other manual_bill_evidence.csv copies under the live root (non-recursive + data/legislation):
+       <ROOT>\manual_bill_evidence.csv                                          PRESENT
+       <ROOT>\data\legislation\manual_bill_evidence.csv                         absent
+       <ROOT>\data\manual_bill_evidence.csv                                     absent
+       <ROOT>\backups\manual_bill_evidence.csv                                  absent
+    manual rows by Category:
+       CDFI Fund                          251
+       CU Tax Status                      35
+       CFPB                               18
+       Credit Card Mandates               12
+       Interchange                        8
+       Fraud Prevention                   7
+       Technology & Emerging              7
+       NCUA Budget & Insurance            6
+       Mortgage & Housing                 5
+       Examination & Supervision          5
+       Payments                           4
+       Field of Membership                4
+       Data Privacy & Cyber               3
+       Defense CU Issues                  3
+       Member Business Lending            2
+       Charter Modernization              1
+    manual rows by Role: {'original-cosponsor': 285, 'sponsor': 86}
+    LTR- rows=296  distinct letters=7  distinct members=251   (gate floor 296/7/251, live code:285)
+    non-LTR manual rows (75):
+       H.R.1181       C=119  Data Privacy & Cyber       role=original-cosponsor dir=+1   member=Andy Barr
+       H.Amdt.247     C=116  CFPB                       role=sponsor            dir=-1   member=Nydia Velázquez
+       H.Amdt.247     C=116  Mortgage & Housing         role=sponsor            dir=-1   member=Nydia Velázquez
+       H.Amdt.248     C=116  CFPB                       role=sponsor            dir=+1   member=Bryan Steil
+       H.Amdt.253     C=116  CFPB                       role=sponsor            dir=+1   member=Michael C. Burgess
+       H.Amdt.260     C=116  CFPB                       role=sponsor            dir=+1   member=Haley Stevens
+       H.Amdt.263     C=116  CFPB                       role=sponsor            dir=-1   member=Al Green
+       S.Amdt.1049    C=116  Fraud Prevention           role=sponsor            dir=+1   member=Amy Klobuchar
+       S.Amdt.1580    C=116  CDFI Fund                  role=sponsor            dir=+1   member=Mitch McConnell
+       S.Amdt.1580    C=116  Member Business Lending    role=sponsor            dir=+1   member=Mitch McConnell
+       S.Amdt.2170    C=116  Defense CU Issues          role=sponsor            dir=+1   member=Patty Murray
+       S.Amdt.2542    C=116  NCUA Budget & Insurance    role=sponsor            dir=+1   member=Mike Crapo
+       S.Amdt.2713    C=116  Fraud Prevention           role=sponsor            dir=+1   member=Roger Wicker
+       H.Amdt.97      C=117  Charter Modernization      role=sponsor            dir=+1   member=Ed Perlmutter
+       H.Amdt.97      C=117  Examination & Supervision  role=sponsor            dir=+1   member=Ed Perlmutter
+       S.Amdt.3989    C=117  Defense CU Issues          role=sponsor            dir=+1   member=Patty Murray
+       S.Amdt.4704    C=117  CFPB                       role=sponsor            dir=+1   member=Bill Hagerty
+       S.Amdt.4811    C=117  Data Privacy & Cyber       role=sponsor            dir=+1   member=Tommy Tuberville
+       S.Amdt.4811    C=117  Examination & Supervision  role=sponsor            dir=+1   member=Tommy Tuberville
+       S.Amdt.6201    C=117  Interchange                role=sponsor            dir=-1   member=Richard Durbin
+       S.Amdt.6312    C=117  CDFI Fund                  role=sponsor            dir=+1   member=Tina Smith
+       H.Amdt.658     C=118  CDFI Fund                  role=sponsor            dir=-1   member=Glenn Grothman
+       H.Amdt.662     C=118  Technology & Emerging      role=sponsor            dir=+1   member=Warren Davidson
+       H.Amdt.696     C=118  Technology & Emerging      role=sponsor            dir=+1   member=Alexander X. Mooney
+       S.Amdt.1695    C=118  Interchange                role=sponsor            dir=-1   member=Roger Marshall
+       S.Amdt.1776    C=118  CFPB                       role=sponsor            dir=+1   member=Mike Lee
+       S.Amdt.1776    C=118  Examination & Supervision  role=sponsor            dir=+1   member=Mike Lee
+       S.Amdt.1936    C=118  Interchange                role=sponsor            dir=-1   member=Roger Marshall
+       S.Amdt.206     C=118  Defense CU Issues          role=sponsor            dir=+1   member=Patty Murray
+       S.Amdt.2907    C=118  CDFI Fund                  role=sponsor            dir=+1   member=Tina Smith
+       S.Amdt.2910    C=118  Mortgage & Housing         role=sponsor            dir=+1   member=Jack Reed
+       S.Amdt.3048    C=118  Mortgage & Housing         role=sponsor            dir=+1   member=Marco Rubio
+       S.Amdt.3339    C=118  Data Privacy & Cyber       role=sponsor            dir=+1   member=Jack Reed
+       S.Amdt.3339    C=118  Mortgage & Housing         role=sponsor            dir=+1   member=Jack Reed
+       S.Amdt.479     C=118  CDFI Fund                  role=sponsor            dir=+1   member=Tina Smith
+       S.Amdt.862     C=118  Interchange                role=sponsor            dir=-1   member=Roger Marshall
+       S.Amdt.1071    C=119  Credit Card Mandates       role=sponsor            dir=-1   member=Elizabeth Warren
+       S.Amdt.1159    C=119  CFPB                       role=sponsor            dir=-1   member=Cory Booker
+       S.Amdt.1159    C=119  Credit Card Mandates       role=sponsor            dir=-1   member=Cory Booker
+       S.Amdt.1637    C=119  CU Tax Status              role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.2229    C=119  Interchange                role=sponsor            dir=-1   member=Roger Marshall
+       S.Amdt.2230    C=119  Interchange                role=sponsor            dir=-1   member=Roger Marshall
+       S.Amdt.2239    C=119  Credit Card Mandates       role=sponsor            dir=-1   member=Josh Hawley
+       S.Amdt.2247    C=119  Examination & Supervision  role=sponsor            dir=+1   member=Mike Lee
+       S.Amdt.2272    C=119  Technology & Emerging      role=sponsor            dir=+1   member=Ted Cruz
+       S.Amdt.2280    C=119  CFPB                       role=sponsor            dir=+1   member=John Kennedy
+       S.Amdt.2299    C=119  Payments                   role=sponsor            dir=+1   member=John Hickenlooper
+       S.Amdt.2305    C=119  Payments                   role=sponsor            dir=+1   member=John Hickenlooper
+       S.Amdt.2315    C=119  Payments                   role=sponsor            dir=+1   member=Elizabeth Warren
+       S.Amdt.2329    C=119  Payments                   role=sponsor            dir=+1   member=Elizabeth Warren
+       S.Amdt.2345    C=119  Interchange                role=sponsor            dir=-1   member=Roger Marshall
+       S.Amdt.3257    C=119  Fraud Prevention           role=sponsor            dir=+1   member=Mike Crapo
+       S.Amdt.3326    C=119  CDFI Fund                  role=sponsor            dir=+1   member=Tina Smith
+       S.Amdt.3673    C=119  Fraud Prevention           role=sponsor            dir=+1   member=Katie Britt
+       S.Amdt.3722    C=119  Field of Membership        role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.3722    C=119  NCUA Budget & Insurance    role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.3776    C=119  Member Business Lending    role=sponsor            dir=+1   member=Dan Sullivan
+       S.Amdt.3776    C=119  NCUA Budget & Insurance    role=sponsor            dir=+1   member=Dan Sullivan
+       S.Amdt.3834    C=119  Field of Membership        role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.3834    C=119  NCUA Budget & Insurance    role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.4167    C=119  Fraud Prevention           role=sponsor            dir=+1   member=Marsha Blackburn
+       S.Amdt.4249    C=119  Technology & Emerging      role=sponsor            dir=+1   member=Ted Cruz
+       S.Amdt.4305    C=119  Interchange                role=sponsor            dir=-1   member=Roger Marshall
+       S.Amdt.4320    C=119  Mortgage & Housing         role=sponsor            dir=+1   member=Ashley Moody
+       S.Amdt.4348    C=119  Fraud Prevention           role=sponsor            dir=+1   member=Richard Durbin
+       S.Amdt.4348    C=119  Technology & Emerging      role=sponsor            dir=+1   member=Richard Durbin
+       S.Amdt.4391    C=119  Technology & Emerging      role=sponsor            dir=+1   member=Bill Hagerty
+       S.Amdt.4736    C=119  Fraud Prevention           role=sponsor            dir=+1   member=Richard Durbin
+       S.Amdt.4736    C=119  Technology & Emerging      role=sponsor            dir=+1   member=Richard Durbin
+       S.Amdt.5882    C=119  Field of Membership        role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.5882    C=119  NCUA Budget & Insurance    role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.6101    C=119  CDFI Fund                  role=sponsor            dir=+1   member=Mike Crapo
+       S.Amdt.6180    C=119  Field of Membership        role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.6180    C=119  NCUA Budget & Insurance    role=sponsor            dir=+1   member=Alex Padilla
+       S.Amdt.6241    C=119  Examination & Supervision  role=sponsor            dir=+1   member=John Kennedy
+
+====================================================================================================
+Q3  PLACEMENT FACTS
+====================================================================================================
+
+---- S.869 (118th) ----
+   bill_key=('S', 869)   bill_type_key=('S', 'R', 869)
+   archive SELECTED   rows=17    sections={'Member Business Lending': 17} roles={'sponsor': 1, 'original-cosponsor': 7, 'cosponsor': 9}
+        title='CDFI Bond Guarantee Program Improvement Act of 2023'  latest_action='Introduced'
+   archive PRIOR      rows=17    sections={'Member Business Lending': 17} roles={'sponsor': 1, 'original-cosponsor': 7, 'cosponsor': 9}
+        title='CDFI Bond Guarantee Program Improvement Act of 2023'  latest_action='Introduced'
+   sentinel verified  rows=0     sections={} roles={}
+   manual csv         rows=0     sections={} roles={}
+   workbook[Sponsor Interactions            ] rows=1     sections={'Member Business Lending': 1} roles={'sponsor': 1}
+   workbook[Original Co-Sponsor Interaction ] rows=7     sections={'Member Business Lending': 7} roles={'original-cosponsor': 7}
+   workbook[Co-Sponsor Interactions         ] rows=9     sections={'Member Business Lending': 9} roles={'cosponsor': 9}
+   bill_directions.csv rows: NONE
+   bill_overrides.csv rows : NONE
+   routing-audit rows=17
+      dispositions      : {'selected': 10, 'official-membership-withdrawn-or-role-superseded': 6, 'duplicate-lower-role': 1}
+      effective_category: {'CDFI Fund': 11, 'None': 6}
+      category_mechanism: {'bill-override': 11, 'source-section': 6}
+      direction sign    : {'1': 11, 'None': 6}
+      direction_mech    : {'section-default': 11, 'None': 6}
+      source_section    : {'Member Business Lending': 17}
+      SELECTED rows=10  signed contribution total=+15.200  distinct members=10
+
+---- H.R.7733 (117th) ----
+   bill_key=('H', 7733)   bill_type_key=('H', 'R', 7733)
+   archive SELECTED   rows=1     sections={'Member Business Lending': 1} roles={'sponsor': 1}
+        title='CDFI Bond Guarantee Program Improvement Act of 2022'  latest_action='Passed House'
+   archive PRIOR      rows=1     sections={'Member Business Lending': 1} roles={'sponsor': 1}
+        title='CDFI Bond Guarantee Program Improvement Act of 2022'  latest_action='Passed House'
+   sentinel verified  rows=0     sections={} roles={}
+   manual csv         rows=0     sections={} roles={}
+   workbook[Sponsor Interactions            ] rows=1     sections={'Member Business Lending': 1} roles={'sponsor': 1}
+   workbook[Success Sponsor                 ] rows=1     sections={'Member Business Lending': 1} roles={'sponsor': 1}
+   bill_directions.csv rows: [{'Bill': 'H.R.7733', 'Congress': '117', 'Category': '', 'Direction': '1', 'Note': 'queue-FILLED 2026-07-25'}]
+   bill_overrides.csv rows : NONE
+   routing-audit rows=1
+      dispositions      : {'selected': 1}
+      effective_category: {'CDFI Fund': 1}
+      category_mechanism: {'bill-override': 1}
+      direction sign    : {'1': 1}
+      direction_mech    : {'registry-exact': 1}
+      source_section    : {'Member Business Lending': 1}
+      SELECTED rows=1  signed contribution total=+1.920  distinct members=1
+
+---- H.J.Res.59 (119th) ----
+   bill_key=('H', 59)   bill_type_key=('H', 'JRES', 59)
+   archive SELECTED   rows=36    sections={'Credit Union Capital Requirements': 18, 'Member Business Lending': 18} roles={'sponsor': 2, 'original-cosponsor': 28, 'cosponsor': 6}
+        title='Disapproving the rule submitted by the Bureau of Consumer Financial Pr'  latest_action='Placed on the Union Calendar, Calendar No. 16.'
+   archive PRIOR      rows=64    sections={'Credit Union Capital Requirements': 32, 'Member Business Lending': 32} roles={'sponsor': 2, 'original-cosponsor': 28, 'cosponsor': 34}
+        title='Disapproving the rule submitted by the Bureau of Consumer Financial Pr'  latest_action='Introduced'
+   sentinel verified  rows=0     sections={} roles={}
+   manual csv         rows=0     sections={} roles={}
+   workbook[Sponsor Interactions            ] rows=2     sections={'Credit Union Capital Requirements': 1, 'Member Business Lending': 1} roles={'sponsor': 2}
+   workbook[Original Co-Sponsor Interaction ] rows=28    sections={'Credit Union Capital Requirements': 14, 'Member Business Lending': 14} roles={'original-cosponsor': 28}
+   workbook[Co-Sponsor Interactions         ] rows=34    sections={'Credit Union Capital Requirements': 17, 'Member Business Lending': 17} roles={'cosponsor': 34}
+   bill_directions.csv rows: [{'Bill': 'H.J.Res.59', 'Congress': '119', 'Category': 'CFPB:Reduce', 'Direction': '1', 'Note': 'migrated from cfpb_bill_directions.csv'}]
+   bill_overrides.csv rows : [{'Bill': 'H.J.Res.59', 'Congress': '119', 'Category': 'CFPB', 'Direction': '', 'Include': 'include', 'Note': 'audit Tier-2 #4, Paul gate opened 2026-07-25'}]
+   routing-audit rows=36
+      dispositions      : {'selected': 18, 'duplicate-same-role': 18}
+      effective_category: {'CFPB': 36}
+      category_mechanism: {'bill-override': 36}
+      direction sign    : {'1': 36}
+      direction_mech    : {'registry-exact': 36}
+      source_section    : {'Credit Union Capital Requirements': 18, 'Member Business Lending': 18}
+      SELECTED rows=18  signed contribution total=+34.000  distinct members=18
+
+---- S.J.Res.18 (119th) ----
+   bill_key=('S', 18)   bill_type_key=('S', 'JRES', 18)
+   archive SELECTED   rows=34    sections={'Credit Union Capital Requirements': 17, 'Member Business Lending': 17} roles={'sponsor': 2, 'original-cosponsor': 26, 'cosponsor': 6}
+        title='A joint resolution disapproving the rule submitted by the Bureau of Co'  latest_action='Became Public Law No: 119-10.'
+   archive PRIOR      rows=59    sections={'Credit Union Capital Requirements': 30, 'Member Business Lending': 29} roles={'sponsor': 1, 'original-cosponsor': 26, 'cosponsor': 32}
+        title='A joint resolution disapproving the rule submitted by the Bureau of Co'  latest_action='Became Law'
+   sentinel verified  rows=0     sections={} roles={}
+   manual csv         rows=0     sections={} roles={}
+   workbook[Sponsor Interactions            ] rows=2     sections={'Credit Union Capital Requirements': 1, 'Member Business Lending': 1} roles={'sponsor': 2}
+   workbook[Original Co-Sponsor Interaction ] rows=26    sections={'Credit Union Capital Requirements': 13, 'Member Business Lending': 13} roles={'original-cosponsor': 26}
+   workbook[Co-Sponsor Interactions         ] rows=32    sections={'Credit Union Capital Requirements': 16, 'Member Business Lending': 16} roles={'cosponsor': 32}
+   workbook[Success Sponsor                 ] rows=2     sections={'Credit Union Capital Requirements': 1, 'Member Business Lending': 1} roles={'sponsor': 2}
+   workbook[Success Original Co-Sponsor     ] rows=26    sections={'Credit Union Capital Requirements': 13, 'Member Business Lending': 13} roles={'original-cosponsor': 26}
+   bill_directions.csv rows: [{'Bill': 'S.J.Res.18', 'Congress': '119', 'Category': 'CFPB:Reduce', 'Direction': '1', 'Note': 'migrated from cfpb_bill_directions.csv'}]
+   bill_overrides.csv rows : [{'Bill': 'S.J.Res.18', 'Congress': '119', 'Category': 'CFPB', 'Direction': '', 'Include': 'include', 'Note': 'audit Tier-2 #4, Paul gate opened 2026-07-25'}]
+   routing-audit rows=34
+      dispositions      : {'selected': 17, 'duplicate-same-role': 17}
+      effective_category: {'CFPB': 34}
+      category_mechanism: {'bill-override': 34}
+      direction sign    : {'1': 34}
+      direction_mech    : {'registry-exact': 34}
+      source_section    : {'Credit Union Capital Requirements': 17, 'Member Business Lending': 17}
+      SELECTED rows=17  signed contribution total=+32.000  distinct members=17
+
+---- H.R.3009 (117th) ----
+   bill_key=('H', 3009)   bill_type_key=('H', 'R', 3009)
+   archive SELECTED   rows=4     sections={'Member Business Lending': 2, 'Mortgage Lending & Housing': 2} roles={'sponsor': 2, 'cosponsor': 2}
+        title='Improving Language Access in Mortgage Servicing Act of 2021'  latest_action='Introduced'
+   archive PRIOR      rows=4     sections={'Member Business Lending': 2, 'Mortgage Lending & Housing': 2} roles={'sponsor': 2, 'cosponsor': 2}
+        title='Improving Language Access in Mortgage Servicing Act of 2021'  latest_action='Introduced'
+   sentinel verified  rows=0     sections={} roles={}
+   manual csv         rows=0     sections={} roles={}
+   workbook[Sponsor Interactions            ] rows=2     sections={'Member Business Lending': 1, 'Mortgage Lending & Housing': 1} roles={'sponsor': 2}
+   workbook[Co-Sponsor Interactions         ] rows=2     sections={'Member Business Lending': 1, 'Mortgage Lending & Housing': 1} roles={'cosponsor': 2}
+   bill_directions.csv rows: NONE
+   bill_overrides.csv rows : NONE
+   routing-audit rows=4
+      dispositions      : {'selected': 4}
+      effective_category: {'Member Business Lending': 2, 'Mortgage & Housing': 2}
+      category_mechanism: {'source-section': 4}
+      direction sign    : {'1': 4}
+      direction_mech    : {'section-default': 4}
+      source_section    : {'Member Business Lending': 2, 'Mortgage Lending & Housing': 2}
+      SELECTED rows=4  signed contribution total=+5.120  distinct members=2
+
+---- 'CDFI Fund' legislative evidence today ----
+   routing-audit SELECTED rows with effective_category='CDFI Fund': 265
+   distinct members: 239   distinct bills/measures: 15
+   signed contribution total: +506.69
+   archive_leg.json members carrying a 'CDFI Fund' entry: 239 ; signed sum +506.69
+   CDFI evidence by measure identifier (top 20 by row count):
+      LTR-119-CDFI-WATERS            rows=121   LTR? True
+      LTR-119-CDFI-KIMCRAPO          rows=104   LTR? True
+      LTR-117-CDFI-BLUNTROCHESTER    rows=15    LTR? True
+      S.869                          rows=10    LTR? False
+      S.3940                         rows=3     LTR? False
+      LTR-117-CDFI-BARR              rows=2     LTR? True
+      LTR-118-CDFI-WARNER            rows=2     LTR? True
+      H.R.7733                       rows=1     LTR? False
+      S.AMDT.1580                    rows=1     LTR? False
+      S.AMDT.6312                    rows=1     LTR? False
+      H.AMDT.658                     rows=1     LTR? False
+      S.AMDT.2907                    rows=1     LTR? False
+      S.AMDT.479                     rows=1     LTR? False
+      S.AMDT.3326                    rows=1     LTR? False
+      S.AMDT.6101                    rows=1     LTR? False
+   CDFI rows whose identifier is a LTR- letter: 244 ; formal bills: 21
+   CDFI rows by category_mechanism: {'bill-override': 11, 'source-section': 254}
+   'CDFI Fund' sheet row count in PRIOR archive workbook (July baseline): see q0_schema_probe.txt
+
+====================================================================================================
+Q4  bill_key() TYPE-BLINDNESS -- collision census
+====================================================================================================
+
+-- scope: archive(selected) + bill_directions.csv
+   identifiers considered = 10307 ; distinct bill_key groups = 479
+
+   [WITHIN the same Congress] collision groups = 0
+   groups containing >=1 bill that HAS a bill_directions.csv row = 0
+   full listing (within-Congress groups):
+
+   [ACROSS Congresses (Congress ignored)] collision groups = 0
+   groups containing >=1 bill that HAS a bill_directions.csv row = 0
+   groups (across-Congress) whose members carry a directions/overrides/builtin/excluded key:
+
+-- scope: archive + sentinel + manual + bill_directions + bill_overrides  (full producer frame)
+   identifiers considered = 10954 ; distinct bill_key groups = 489
+
+   [WITHIN the same Congress] collision groups = 0
+   groups containing >=1 bill that HAS a bill_directions.csv row = 0
+   full listing (within-Congress groups):
+
+   [ACROSS Congresses (Congress ignored)] collision groups = 0
+   groups containing >=1 bill that HAS a bill_directions.csv row = 0
+   groups (across-Congress) whose members carry a directions/overrides/builtin/excluded key:
+
+-- does bill_directions.csv ITSELF hold type-colliding rows? --
+   within-Congress collisions inside bill_directions.csv: 0 
+   across-Congress collisions inside bill_directions.csv: 0 
+
+-- does bill_overrides.csv / BUILTIN / EXCLUDED collide with a real archive bill? --
+   bill_overrides.csv -- 8 keys
+      key=(('H', 1030), '117')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 4895), '117')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 5502), '117')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 5746), '117')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 59), '119')     matches 1 archive identifiers, types=['JRES']  -> single type
+      key=(('H', 6955), '119')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 8395), '119')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('S', 18), '119')     matches 1 archive identifiers, types=['JRES']  -> single type
+   BUILTIN_OVERRIDES -- 5 keys
+      key=(('H', 7022), '117')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 7036), '118')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 7733), '117')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('S', 4698), '117')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('S', 869), '118')    matches 1 archive identifiers, types=['R']  -> single type
+   EXCLUDED_BILL_CONGRESSES -- 2 keys
+      key=(('H', 1707), '118')   matches 1 archive identifiers, types=['R']  -> single type
+      key=(('H', 3664), '117')   matches 1 archive identifiers, types=['R']  -> single type
+
+====================================================================================================
+Q5  REGISTRY-DIRECTION PARSE
+====================================================================================================
+source: data\legislation\bill_directions.csv , column 'Direction'
+  loaded by live build_archive_legislative.py:118-124 ->
+     direction=(row.get('Direction') or '').strip()
+  consumed at live build_archive_legislative.py:233 ->
+     sign={'1':1,'-1':-1}.get(registry_direction,0)
+
+  literal Direction values present (n=126 rows):
+     '1'      rows=107   -> sign=+1 
+     '-1'     rows=12    -> sign=-1 
+     '0'      rows=7     -> sign=+0   <-- NOT '1'/'-1' : silently neutralised
+
+  rows whose literal is NOT '1'/'-1' (would be forced to sign=0): 7
+     {'Bill': 'H.R.1215', 'Congress': '117', 'Category': 'CFPB:Neutral', 'Direction': '0', 'Note': 'migrated from cfpb_bill_directions.csv'}
+     {'Bill': 'S.3529', 'Congress': '117', 'Category': 'CFPB:Neutral', 'Direction': '0', 'Note': 'migrated from cfpb_bill_directions.csv'}
+     {'Bill': 'H.R.5914', 'Congress': '117', 'Category': 'CFPB:Neutral', 'Direction': '0', 'Note': 'migrated from cfpb_bill_directions.csv'}
+     {'Bill': 'H.R.982', 'Congress': '117', 'Category': 'CFPB:Neutral', 'Direction': '0', 'Note': 'migrated from cfpb_bill_directions.csv'}
+     {'Bill': 'S.349', 'Congress': '117', 'Category': 'CFPB:Neutral', 'Direction': '0', 'Note': 'migrated from cfpb_bill_directions.csv'}
+     {'Bill': 'H.R.1711', 'Congress': '117', 'Category': 'CFPB:Neutral', 'Direction': '0', 'Note': 'migrated from cfpb_bill_directions.csv'}
+     {'Bill': 'H.R.1', 'Congress': '', 'Category': '', 'Direction': '0', 'Note': 'queue-FILLED 2026-07-25'}
+  rows carrying literal '+1': 0
+
+  ALSO: which of these registry rows actually reach a live row? (routing audit mechanism counts)
+     direction_mechanism over all 10820 routing rows: {'section-default': 4888, 'None': 2499, 'registry-exact': 2958, 'override-direction': 16, 'credit-card-default': 54, 'automated-official-evidence-policy': 35, 'registry-blank': 4, 'manual-direction': 366}
+     rows disposed 'neutral-registry': 33
+     their bills: [('H.R.1215', '117'), ('H.R.1711', '117'), ('H.R.5914', '117'), ('H.R.982', '117'), ('S.349', '117'), ('S.3529', '117')]
+
+  CROSS-CHECK: manual_bill_evidence.csv 'Direction' literals (a DIFFERENT parser, parse_direction float()):
+     '+1'     rows=355   -> parse_direction=+1
+     '-1'     rows=16    -> parse_direction=-1
+  CROSS-CHECK: bill_overrides.csv 'Direction' literals (parse_direction too):
+     '0'      rows=4
+     ''       rows=3
+     '+1'     rows=1
+
+====================================================================================================
+Q6  ORIGINAL-COSPONSOR TWINS
+====================================================================================================
+selected rows = 8123 ; routing-audit selected_events = 8123
+dedup key in producer (live build_archive_legislative.py:251):
+   event_key=(mm,str(r.get('Name') or '').strip().lower(),BR._congress(r.get('Congress')),cat)
+
+(member, bill, Congress) combinations contributing MORE THAN ONCE : 1418
+   total extra contributions from them: 2346
+(member, bill, Congress, effective_category) combinations contributing more than once : 0
+   (this is the producer's own event key -- >0 would mean the collapse FAILED)
+
+role mix inside multi-category (member,bill,Congress) groups (first 25):
+   distinct such groups = 1418
+   category sets involved:
+      ('Charter Modernization', 'NCUA Budget & Insurance')                   groups=268
+      ('CU Capital Requirements', 'Fraud Prevention', 'Member Business Lending', 'Mortgage & Housing') groups=146
+      ('Member Business Lending', 'NCUA Budget & Insurance')                 groups=130
+      ('CFPB', 'Member Business Lending')                                    groups=128
+      ('CU Capital Requirements', 'Fraud Prevention', 'Member Business Lending', 'NCUA Budget & Insurance') groups=118
+      ('Charter Modernization', 'Member Business Lending')                   groups=95
+      ('Data Privacy & Cyber', 'Member Business Lending', 'Mortgage & Housing') groups=89
+      ('Fraud Prevention', 'Member Business Lending')                        groups=69
+      ('Examination & Supervision', 'Technology & Emerging')                 groups=68
+      ('CU Capital Requirements', 'Charter Modernization', 'Member Business Lending') groups=41
+      ('CU Capital Requirements', 'Fraud Prevention', 'Member Business Lending') groups=37
+      ('CU Capital Requirements', 'Examination & Supervision', 'Fraud Prevention', 'Member Business Lending', 'Mortgage & Housing') groups=34
+      ('Charter Modernization', 'Member Business Lending', 'Mortgage & Housing') groups=22
+      ('Charter Modernization', 'Field of Membership', 'Fraud Prevention', 'NCUA Budget & Insurance') groups=21
+      ('CFPB', 'Examination & Supervision')                                  groups=17
+      ('Charter Modernization', 'Examination & Supervision')                 groups=15
+      ('Member Business Lending', 'Mortgage & Housing')                      groups=12
+      ('Charter Modernization', 'Field of Membership', 'Member Business Lending', 'NCUA Budget & Insurance') groups=10
+      ('CFPB', 'Credit Card Mandates')                                       groups=10
+      ('Charter Modernization', 'Fraud Prevention')                          groups=9
+      ('Defense CU Issues', 'Member Business Lending')                       groups=8
+      ('Charter Modernization', 'Member Business Lending', 'NCUA Budget & Insurance') groups=7
+      ('Examination & Supervision', 'NCUA Budget & Insurance')               groups=6
+      ('CU Capital Requirements', 'Fraud Prevention', 'Member Business Lending', 'Payments') groups=6
+      ('Charter Modernization', 'Examination & Supervision', 'Member Business Lending') groups=5
+      ('Field of Membership', 'NCUA Budget & Insurance')                     groups=5
+      ('Data Privacy & Cyber', 'Defense CU Issues')                          groups=5
+      ('Charter Modernization', 'Examination & Supervision', 'Fraud Prevention', 'Member Business Lending') groups=4
+      ('Examination & Supervision', 'Fraud Prevention')                      groups=4
+      ('CU Capital Requirements', 'Field of Membership', 'NCUA Budget & Insurance') groups=3
+      ('Fraud Prevention', 'NCUA Budget & Insurance')                        groups=3
+      ('CU Capital Requirements', 'Examination & Supervision', 'Mortgage & Housing') groups=2
+      ('Charter Modernization', 'Examination & Supervision', 'Fraud Prevention') groups=2
+      ('Field of Membership', 'Member Business Lending', 'NCUA Budget & Insurance') groups=2
+      ('Charter Modernization', 'Mortgage & Housing')                        groups=2
+      ('CU Capital Requirements', 'Examination & Supervision')               groups=2
+      ('Fraud Prevention', 'Technology & Emerging')                          groups=2
+      ('CU Capital Requirements', 'Charter Modernization', 'Examination & Supervision', 'Fraud Prevention', 'Technology & Emerging') groups=1
+      ('Charter Modernization', 'Examination & Supervision', 'Technology & Emerging') groups=1
+      ('Examination & Supervision', 'Member Business Lending')               groups=1
+      ('CU Capital Requirements', 'NCUA Budget & Insurance')                 groups=1
+      ('Charter Modernization', 'Field of Membership', 'Member Business Lending', 'Mortgage & Housing') groups=1
+      ('Data Privacy & Cyber', 'Technology & Emerging')                      groups=1
+      ('CFPB', 'Fraud Prevention')                                           groups=1
+      ('CFPB', 'Mortgage & Housing')                                         groups=1
+      ('CDFI Fund', 'Member Business Lending')                               groups=1
+      ('Data Privacy & Cyber', 'Examination & Supervision')                  groups=1
+      ('Data Privacy & Cyber', 'Mortgage & Housing')                         groups=1
+   role sets involved: {('sponsor',): 108, ('original-cosponsor',): 445, ('cosponsor',): 865}
+      Andy Barr                  H.R.8264       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('NCUA Budget & Insurance', 'sponsor', 2.4000000000000004)]
+      Andy Barr                  H.R.6398       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('CU Capital Requirements', 'sponsor', 2.4000000000000004), ('Mortgage & Housing', 'sponsor', 2.4000000000000004)]
+      Andy Barr                  H.R.3556       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('Charter Modernization', 'sponsor', 2.4000000000000004), ('Member Business Lending', 'sponsor', 2.4000000000000004)]
+      Barry Loudermilk           H.R.4823       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('Fraud Prevention', 'sponsor', 2.4000000000000004), ('Charter Modernization', 'sponsor', 2.4000000000000004), ('Member Business Lending', 'sponsor', 2.4000000000000004)]
+      Donald Beyer               H.R.5745       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('CU Capital Requirements', 'sponsor', 2.4000000000000004), ('Technology & Emerging', 'sponsor', 2.4000000000000004), ('Fraud Prevention', 'sponsor', 2.4000000000000004), ('Charter Modernization', 'sponsor', 2.4000000000000004)]
+      Donald Beyer               H.R.4741       C=117  -> [('Examination & Supervision', 'sponsor', 1.9200000000000004), ('Technology & Emerging', 'sponsor', 1.9200000000000004), ('Charter Modernization', 'sponsor', 1.9200000000000004)]
+      Erin Houchin               H.R.7437       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('Fraud Prevention', 'sponsor', 2.4000000000000004)]
+      French Hill                H.R.8071       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('CFPB', 'sponsor', 2.4000000000000004)]
+      Glenn Thompson             H.R.4763       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('Technology & Emerging', 'sponsor', 2.4000000000000004)]
+      Jeff Merkley               S.2860         C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('CU Capital Requirements', 'sponsor', 2.4000000000000004), ('Fraud Prevention', 'sponsor', 2.4000000000000004), ('Member Business Lending', 'sponsor', 2.4000000000000004), ('Mortgage & Housing', 'sponsor', 2.4000000000000004)]
+      Jerry Moran                S.3541         C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('CFPB', 'sponsor', 2.4000000000000004)]
+      Jerry Moran                S.2642         C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('CFPB', 'sponsor', 2.4000000000000004)]
+      Jerry Moran                S.5049         C=117  -> [('Examination & Supervision', 'sponsor', 1.9200000000000004), ('CFPB', 'sponsor', 1.9200000000000004)]
+      Mark Warner                S.3554         C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('Fraud Prevention', 'sponsor', 2.4000000000000004), ('Charter Modernization', 'sponsor', 2.4000000000000004)]
+      Monica De La Cruz          H.R.3555       C=118  -> [('Examination & Supervision', 'sponsor', 2.4000000000000004), ('Charter Modernization', 'sponsor', 2.4000000000000004)]
+      Nydia Velázquez            H.R.7351       C=117  -> [('Examination & Supervision', 'sponsor', -1.9200000000000004), ('Member Business Lending', 'sponsor', -1.9200000000000004)]
+      Sean Casten                H.R.1549       C=117  -> [('Examination & Supervision', 'sponsor', 1.9200000000000004), ('Charter Modernization', 'sponsor', 1.9200000000000004)]
+      Alex Padilla               S.588          C=117  -> [('Examination & Supervision', 'original-cosponsor', 1.2800000000000002), ('Charter Modernization', 'original-cosponsor', 1.2800000000000002)]
+      Andrew Ogles               H.R.4823       C=118  -> [('Examination & Supervision', 'original-cosponsor', 1.6), ('Fraud Prevention', 'original-cosponsor', 1.6), ('Charter Modernization', 'original-cosponsor', 1.6), ('Member Business Lending', 'original-cosponsor', 1.6)]
+      Andy Barr                  H.R.4823       C=118  -> [('Examination & Supervision', 'original-cosponsor', 1.6), ('Fraud Prevention', 'original-cosponsor', 1.6), ('Charter Modernization', 'original-cosponsor', 1.6), ('Member Business Lending', 'original-cosponsor', 1.6)]
+      Andy Barr                  H.R.3555       C=118  -> [('Examination & Supervision', 'original-cosponsor', 1.6), ('Charter Modernization', 'original-cosponsor', 1.6)]
+      Angus King                 S.2860         C=118  -> [('Examination & Supervision', 'original-cosponsor', 1.6), ('CU Capital Requirements', 'original-cosponsor', 1.6), ('Fraud Prevention', 'original-cosponsor', 1.6), ('Member Business Lending', 'original-cosponsor', 1.6), ('Mortgage & Housing', 'original-cosponsor', 1.6)]
+      Barry Loudermilk           H.R.3556       C=118  -> [('Examination & Supervision', 'original-cosponsor', 1.6), ('Charter Modernization', 'original-cosponsor', 1.6), ('Member Business Lending', 'original-cosponsor', 1.6)]
+      Bill Foster                H.R.7437       C=118  -> [('Examination & Supervision', 'original-cosponsor', 1.6), ('Fraud Prevention', 'original-cosponsor', 1.6)]
+      Bill Hagerty               S.3541         C=118  -> [('Examination & Supervision', 'original-cosponsor', 1.6), ('CFPB', 'original-cosponsor', 1.6)]
+
+duplicate dispositions recorded by the producer: {'duplicate-lower-role': 19, 'duplicate-same-role': 133}
+   rows suppressed as duplicates: 152 ; their source roles: {'cosponsor': 81, 'sponsor': 10, 'original-cosponsor': 61}
+
+CONSISTENCY CHECK: sum(selected contributions) per (member,category) == archive_leg.json?
+   rebuilt cells=3395 ; archive_leg cells=3395 ; mismatches=0

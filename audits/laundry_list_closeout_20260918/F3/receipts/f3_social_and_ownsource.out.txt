@@ -1,0 +1,166 @@
+============================================================================================================
+F3 r3  SOCIAL + OWN-SOURCE channels -> stance cells    run 2026-09-19T00:13:28
+============================================================================================================
+hash-verified helper copies: media_rules 0ab22dccd6327dae / member_identity 29b7e5fa0d7e4e50
+NOTE  build_media_blend.py uses datetime.date.today() for decay (blend.py:48); this replay
+      runs on 2026-09-19.  Decay affects MAGNITUDE only, never which bucket a row falls in.
+roster: 533 members
+
+------------------------------------------------------------------------------------------------------------
+SOCIAL  -- LIVE fec/stance/build_media_blend.py:63-125
+------------------------------------------------------------------------------------------------------------
+    RULE blend.py:64  corp=corp[(corp['stance'].fillna('')!='')&(corp['verified_handle'].astype(str)=='1')]
+    Corpus rows 9541 -> after the verified/stance filter: 9502  (dropped 39)
+    stance-stack keys loaded (blend.py:79-88 majority collapse): 7938
+
+    per-row disposition of the 9502 filtered rows:
+       A zero-sign (blend.py:102 `if sg==0.0: continue`)                                2994
+       C link-only, empty normalised text (blend.py:111 `elif not _event[1]: nlinkonly+=1; continue`)     19
+       E no routable category (blend.py:122 `if not hits: continue`)                     780
+       Z SCORED                                                                         5709
+       stack_override                                                                   9468
+       zero-sign label breakdown                                                      {'unrelated': 966, 'neutral': 2028}
+    CLOSES? 9502 filtered rows == 9502 bucketed -> True
+    exact cross-post duplicates seen (ndupe, RETAINED at CROSSPOST_DEDUP=0, blend.py:47/107): 1018
+
+    stance reach:
+    items scored by the channel                        : 5709
+    ... reaching >=1 STANCE cell                        : 5258
+        of which also split into a non-stance column    : 420
+    ... reaching NO stance cell (sheet-only)            : 451
+    unaccounted                                        : 0
+    item-weight reaching stance columns (1/n split)     : 5065.92 of 5709.00 = 88.7%
+    non-stance destinations: {'CU-Bank Competitive Dynamics': 508, 'General Credit Union': 363}
+
+    RULE blend.py:449-450  nz=#members with nonzero social in the category; f=min(1.0,nz/15.0)
+    RULE blend.py:466      nv=(1.0-0.5*f)*press_side + 0.5*f*social_side
+    raw category                             nz     f        social share of the cell
+    Examination & Supervision                30     1.0000   0.5000
+    Credit Union Capital Requirements        3      0.2000   0.1000  <- THIN (social discounted)
+    NCUA Budget & Share Insurance Fund       0      0.0000   0.0000  <- THIN (social discounted)
+    Interchange                              36     1.0000   0.5000
+    Payments                                 165    1.0000   0.5000
+    Technology & Emerging Issues             138    1.0000   0.5000
+    Fraud Prevention                         180    1.0000   0.5000
+    Data Privacy & Cybersecurity             57     1.0000   0.5000
+    Charter Modernization & Governance       13     0.8667   0.4333  <- THIN (social discounted)
+    Defense Credit Union Issues              17     1.0000   0.5000
+    Field of Membership                      16     1.0000   0.5000
+    Credit Union Tax Status                  14     0.9333   0.4667  <- THIN (social discounted)
+    CDFI Fund                                48     1.0000   0.5000
+    CFPB Issues & Structural Reform          271    1.0000   0.5000
+    Credit Card & Consumer-Fee Mandates      80     1.0000   0.5000
+    Telephone Consumer Protection Act        60     1.0000   0.5000
+    Member Business Lending                  56     1.0000   0.5000
+    Mortgage Lending & Housing               102    1.0000   0.5000
+    CU-Bank Competitive Dynamics             142    1.0000   0.5000
+    General Credit Union                     150    1.0000   0.5000
+
+    DUPLICATES reaching the SAME (member, stance category) cell:
+       (member, stance-category, normalised text) keys scoring >1x: 1008   surplus contributions: 1073
+       RULE blend.py:47  DEDUP=os.environ.get('CROSSPOST_DEDUP','0')=='1'  -> default 0: the
+            duplicate is COUNTED, not dropped (ratified D-034 / Q11)
+       top repeats:
+          Roger Marshall         Interchange                x8  todayamericanswillspend58226000onswipefeesat
+          Mark Harris            Payments                   x7  nationalsecurityandconstitutionallibertyaren
+          Daniel Meuser          Fraud Prevention           x5  ihadagreattimeaddressingleadersofindependent
+          Ritchie Torres         Mortgage & Housing         x5  todayrepgregorymeeksandiannouncedthatthefede
+          Bernard Sanders        Credit Card Mandates       x4  whenbigbankscharge24or30interestoncreditcard
+          Elise Stefanik         Payments                   x4  todayivotedforkeylegislationtomaketheusthecr
+          Elise Stefanik         Technology & Emerging      x4  todayivotedforkeylegislationtomaketheusthecr
+          Sylvia Garcia          CFPB                       x4  imaginethinkingthatsupportthetroopsmeanslett
+
+------------------------------------------------------------------------------------------------------------
+SPEECH  -- LIVE fec/stance/build_media_blend.py:145-174   own-source weight 1.00
+------------------------------------------------------------------------------------------------------------
+    RULE blend.py:135-142 _cu_stale(): channel SKIPPED if stance_final is OLDER than its inputs
+    stale inputs newer than speech_stance_final.csv: none -> channel ACTIVE
+    rows in file: 311
+    tier policy: gold 1.0 / unanimous 0.9 / majority 0.6 / review 0.35 (media_rules.py:90-97)
+    per-row disposition:
+       A zero-sign neutral/unrelated (`if _sg==0.0: continue`)                       139
+       Z SCORED                                                                      172
+    CLOSES? 311 rows == 311 bucketed -> True
+    RULE blend.py per-event normalisation: each row weighted 1/n over (member,date) so one EVENT contributes one unit
+
+    stance reach:
+    items scored by the channel                        : 172
+    ... reaching >=1 STANCE cell                        : 166
+        of which also split into a non-stance column    : 41
+    ... reaching NO stance cell (sheet-only)            : 6
+    unaccounted                                        : 0
+    item-weight reaching stance columns (1/n split)     : 152.79 of 172.00 = 88.8%
+    non-stance destinations: {'CU-Bank Competitive Dynamics': 41, 'General Credit Union': 6}
+    category tokens NOT a Raw-sheet header (would silently score nothing at blend.py:452-457 lookup): none
+    (member, stance-category, date) keys with >1 scored row: 32  surplus: 42 -- collapsed to one unit by the 1/n event divisor
+
+------------------------------------------------------------------------------------------------------------
+HEARING  -- LIVE fec/stance/build_media_blend.py:188-219   own-source weight 0.85
+------------------------------------------------------------------------------------------------------------
+    RULE blend.py:135-142 _cu_stale(): channel SKIPPED if stance_final is OLDER than its inputs
+    stale inputs newer than hearing_stance_final.csv: none -> channel ACTIVE
+    rows in file: 790
+    tier policy: GOLD ONLY; every other tier = 0.0 (media_rules.py:81-87)
+    per-row disposition:
+       A zero-sign neutral/unrelated (`if _sg==0.0: continue`)                        74
+       A0 non-gold excluded (blend.py:197-198 `_eligible=[... hearing_tier_weight>0]`)    529
+       Z SCORED                                                                      187
+    CLOSES? 790 rows == 790 bucketed -> True
+    RULE blend.py per-event normalisation: each row weighted 1/n over (member,date) so one EVENT contributes one unit
+
+    stance reach:
+    items scored by the channel                        : 187
+    ... reaching >=1 STANCE cell                        : 166
+        of which also split into a non-stance column    : 8
+    ... reaching NO stance cell (sheet-only)            : 21
+    unaccounted                                        : 0
+    item-weight reaching stance columns (1/n split)     : 162.17 of 187.00 = 86.7%
+    non-stance destinations: {'General Credit Union': 11, 'CU-Bank Competitive Dynamics': 18}
+    category tokens NOT a Raw-sheet header (would silently score nothing at blend.py:452-457 lookup): none
+    (member, stance-category, date) keys with >1 scored row: 39  surplus: 49 -- collapsed to one unit by the 1/n event divisor
+
+------------------------------------------------------------------------------------------------------------
+INTERVIEW  -- LIVE fec/stance/build_media_blend.py:231-259   own-source weight 1.00
+------------------------------------------------------------------------------------------------------------
+    RULE blend.py:135-142 _cu_stale(): channel SKIPPED if stance_final is OLDER than its inputs
+    stale inputs newer than interview_stance_final.csv: none -> channel ACTIVE
+    rows in file: 37
+    tier policy: gold 1.0 / unanimous 0.9 / majority 0.6 / review 0.35 (media_rules.py:90-97)
+    per-row disposition:
+       A zero-sign neutral/unrelated (`if _sg==0.0: continue`)                        12
+       Z SCORED                                                                       25
+    CLOSES? 37 rows == 37 bucketed -> True
+    RULE blend.py per-event normalisation: each row weighted 1/n over (member,date) so one EVENT contributes one unit
+
+    stance reach:
+    items scored by the channel                        : 25
+    ... reaching >=1 STANCE cell                        : 19
+        of which also split into a non-stance column    : 0
+    ... reaching NO stance cell (sheet-only)            : 6
+    unaccounted                                        : 0
+    item-weight reaching stance columns (1/n split)     : 19.00 of 25.00 = 76.0%
+    non-stance destinations: {'CU-Bank Competitive Dynamics': 2, 'General Credit Union': 4}
+    category tokens NOT a Raw-sheet header (would silently score nothing at blend.py:452-457 lookup): none
+    (member, stance-category, date) keys with >1 scored row: 2  surplus: 3 -- collapsed to one unit by the 1/n event divisor
+
+------------------------------------------------------------------------------------------------------------
+BLUESKY  -- LIVE fec/stance/build_media_blend.py:262-278
+------------------------------------------------------------------------------------------------------------
+    CHANNEL DELIBERATELY NOT WIRED.  blend.py:274  blc=... # intentionally EMPTY -- never injected
+    blend.py:272  BLUESKY_ON=os.environ.get('CU_BLUESKY_CHANNEL','0')=='1'  -> default OFF
+    even at 1, blend.py:276-278 logs a refusal and adds nothing.  Items reaching a stance cell from this channel: 0
+    Bluesky posts DO reach stance via the SOCIAL corpus instead (76 Corpus rows, platform='bluesky')
+
+============================================================================================================
+RECONCILIATION vs the producer's own ledger (press_component_meta.json 'own_source_channels')
+============================================================================================================
+    channel      meta signed rows this replay      match
+    speech       172              172              YES
+    hearing      187              187              YES
+    interview    25               25               YES
+    hearing non-gold excluded 529              529              YES
+    SOCIAL: the producer writes NO on-disk ledger for the social channel -- press_component_meta
+            records press + the three own-source channels only.  Social counts are therefore
+            reproduced, not reconciled; lane A r4 independently got the same closure.
+
+DONE F3 r3

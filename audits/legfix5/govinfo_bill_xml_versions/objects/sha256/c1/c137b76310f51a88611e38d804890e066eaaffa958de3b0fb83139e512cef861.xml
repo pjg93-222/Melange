@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" bill-type="olc" dms-id="HC98AD721E88D4386AD6E6F9BB6BAE9FF" key="H" public-private="public" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1921 EH: Ocean Acidification Innovation Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 1921</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To authorize Federal agencies to establish prize competitions for innovation or adaptation management development relating to ocean acidification.</official-title> 
+</form> 
+<legis-body id="H5057D44DEFC248BBB2073FFFE4D5CF68" style="OLC"> 
+<section id="H664F914A29884ABE80860FF6B29F07EA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Ocean Acidification Innovation Act of 2019</short-title></quote>.</text></section> <section id="H0B07CA384ADF49049BAC0B3999AB018A"><enum>2.</enum><header>Prize competitions</header><text display-inline="no-display-inline">Section 12404 of the Federal Ocean Acidification Research And Monitoring Act of 2009 (<external-xref legal-doc="usc" parsable-cite="usc/33/3703">33 U.S.C. 3703</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block id="H046658AC43304970A35AB08D47DC8841" style="OLC"> 
+<subsection id="HEE4291C47E2A4AC4B1F9A33CE6E975FF"><enum>(d)</enum><header>Prize competitions</header> 
+<paragraph id="HD0FAD23EDBB244499FBF0B811EF61438"><enum>(1)</enum><header>In General</header><text>Any Federal agency with a representative serving on the interagency working group established under this section may, either individually or in cooperation with one or more agencies, carry out a program to award prizes competitively under section 24 of the Stevenson-Wydler Technology Innovation Act of 1980 (<external-xref legal-doc="usc" parsable-cite="usc/15/3719">15 U.S.C. 3719</external-xref>). An agency seeking to carry out such a program shall carry out such program in coordination with the chair of such interagency working group. </text></paragraph> <paragraph id="HB4D36D9BAF3C4B12A82AF0EDE0757F83"><enum>(2)</enum><header>Purposes</header><text>Any prize competition carried out under this subsection shall be for the purpose of stimulating innovation to advance our Nation’s ability to understand, research, or monitor ocean acidification or its impacts, or to develop management or adaptation options for responding to ocean acidification.</text></paragraph> 
+<paragraph id="H8CD87B0C5F574B948E835091FCAF73F5"><enum>(3)</enum><header>Priority programs</header><text>Priority shall be given to establishing programs under this section that address communities, environments, or industries that are in distress due to the impacts of ocean acidification, including—</text> <subparagraph id="H7AF18C15511A41C982E4F9FCDBC8E220"><enum>(A)</enum><text>the development of monitoring or management options for communities or industries that are experiencing significant financial hardship;</text></subparagraph> 
+<subparagraph id="H55C823EFE2684ACC9CF0C5F3A6D1DC92"><enum>(B)</enum><text>the development of adaptation options to alleviate economic harm and job loss caused by ocean acidification;</text></subparagraph> <subparagraph id="H18602E0EE4904CDE97034D3533FFCEA7"><enum>(C)</enum><text>the development of measures to help vulnerable communities or industries, with an emphasis on rural communities and businesses; and</text></subparagraph> 
+<subparagraph commented="no" id="H1A3AEE3B17F3456BB714EA4EB76EB7C6"><enum>(D)</enum><text>the development of adaptation and management options for impacted shellfish industries.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> <section id="HF7F9F4BBB5A54EC0A5BCB901BE9D4EC8"><enum>3.</enum><header>Determination of Budgetary Effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</text></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20190605" chamber="House">Passed the House of Representatives June 5, 2019.</attestation-date><attestor display="no">Karen L. Haas,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

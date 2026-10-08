@@ -1,0 +1,35 @@
+manifest: C:\Users\pgoff\OneDrive\Desktop\Melange Systems\data\system\system_manifest.json
+  exists True | mtime 2026-09-18 13:35:12
+  schema 'melange-system-manifest-v1' | generated_utc '2026-09-18T17:35:12.600760+00:00' | root 'C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems'
+  store rows: 80
+  mirror.melange path='C:\\Users\\pgoff\\GitMirrors\\melange-systems.git' class='SNAPSHOT' integrity_policy='sentinel_files'
+  mirror.melange recorded file_count=None bytes=None size_class=None
+  sentinels recorded: 3
+    rel=objects/pack/pack-607d10e94fcd089c8a619b3c967531b885c6e1df.pack
+      manifest bytes=3154699436 sha256= content_stable=True
+      DISK bytes=3154699436 mtime=2026-09-06 22:25:55
+    rel=objects/pack/pack-9b083bbd2d8969998b964c529280f2f294b3136f.pack
+      manifest bytes=30602415 sha256= content_stable=True
+      DISK: not a file at C:\Users\pgoff\GitMirrors\melange-systems.git\objects\pack\pack-9b083bbd2d8969998b964c529280f2f294b3136f.pack
+    rel=objects/pack/pack-607d10e94fcd089c8a619b3c967531b885c6e1df.idx
+      manifest bytes=1881848 sha256=69bc4a74677714fd content_stable=True
+      DISK bytes=1881848 mtime=2026-08-10 22:35:41
+      disk sha256=69bc4a74677714fd  MATCH
+  DISK walk: file_count=316 bytes=3243562124
+
+== Pete Sessions in this run ==
+  Pete Sessions rank 39 -> 40 | score 0.534329156 -> 0.534329156 | pcts.leg 0.98684 -> 0.98684
+  live tier-1 crowns (name, bioguide, current rank):
+    Tim Scott                  S001184  rank=1  (rank before=1)
+    Maxine Waters              W000187  rank=6  (rank before=6)
+    Juan Vargas                V000130  rank=19  (rank before=19)
+    William Timmons            T000480  rank=21  (rank before=21)
+    Scott Fitzgerald           F000471  rank=24  (rank before=24)
+    Young Kim                  K000397  rank=35  (rank before=33)
+    Bill Huizenga              H001058  rank=36  (rank before=36)
+    Pete Sessions              S000250  rank=40  (rank before=39)
+    Brian Fitzpatrick          F000466  rank=42  (rank before=42)
+    Brad Sherman               S000344  rank=54  (rank before=54)
+    Vicente Gonzalez           G000581  rank=55  (rank before=55)
+    Alex Padilla               P000145  rank=72  (rank before=74)
+    Dan Sullivan               S001198  rank=146  (rank before=146)

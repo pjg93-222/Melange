@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Considered-and-Passed-Senate" dms-id="A1" public-private="public" slc-id="S1-DUN21995-H3P-NS-G89"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3437 : COVID-19 Bankruptcy Relief Extension Consolidation Act of 2021</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-12-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>1st Session</session><legis-num>S. 3437</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20211218" legis-day="20211217">December 18 (legislative day, December 17), 2021</action-date><action-desc><sponsor name-id="S253">Mr. Durbin</sponsor> (for himself and <cosponsor name-id="S153">Mr. Grassley</cosponsor>) introduced the following bill; which was read twice, considered, read the third time, and passed</action-desc></action><legis-type>A BILL</legis-type><official-title>To extend certain COVID–19 bankruptcy relief provisions through March 27, 2022.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>COVID-19 Bankruptcy Relief Extension Consolidation Act of 2021</short-title></quote>.</text></section><section id="id5CA84B876B0E4B10B6B77770C2552FB4"><enum>2.</enum><header>Extensions</header><text display-inline="no-display-inline">Section 1001 of division FF of the Consolidated Appropriations Act, 2021 (<external-xref legal-doc="public-law" parsable-cite="pl/116/260">Public Law 116–260</external-xref>; 124 Stat. 3216) is amended by striking <quote>the date that is 1 year after the date of enactment of this Act</quote> each place the term appears and inserting <quote>March 27, 2022</quote>.</text></section></legis-body></bill> 
+

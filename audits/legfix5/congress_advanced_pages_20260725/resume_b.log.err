@@ -1,0 +1,5 @@
+Warning: Caught simpleError. Canceling all iterations ...
+Error in write_immutable_json(receipt_path, receipt) : 
+  Immutable receipt collision: C:/Users/pgoff/OneDrive/Desktop/Melange Systems/audits/legfix5/congress_advanced_pages_20260725/text_relevance_httr_full_20260727z/receipts/116/hr/4966/receipt.json
+Calls: future_lapply ... tryCatchList -> tryCatchOne -> <Anonymous> -> onError
+Execution halted

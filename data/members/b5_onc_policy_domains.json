@@ -1,0 +1,20 @@
+{
+  "agriculture": ["agriculture", "farm", "farmer", "crop", "livestock", "rural", "food", "nutrition"],
+  "civil_rights": ["civil rights", "voting rights", "discrimination", "equality", "equal protection", "religious liberty", "free speech", "privacy"],
+  "defense": ["defense", "military", "army", "navy", "air force", "marine corps", "veteran", "weapon"],
+  "democracy": ["election", "ballot", "campaign finance", "constitution", "democracy", "filibuster", "quorum", "ethics"],
+  "economy": ["economy", "economic", "job", "wage", "employment", "business", "industry", "inflation"],
+  "education": ["education", "school", "student", "teacher", "college", "university", "tuition", "learning"],
+  "energy": ["energy", "oil", "natural gas", "electricity", "nuclear", "renewable", "solar", "wind"],
+  "environment": ["climate", "environment", "pollution", "conservation", "emission", "wildlife", "forest", "clean water"],
+  "foreign_policy": ["foreign policy", "diplomacy", "alliance", "treaty", "international", "ukraine", "china", "russia"],
+  "government_finance": ["federal budget", "tax", "spending", "deficit", "debt", "appropriation", "revenue", "fiscal"],
+  "health": ["health", "medical", "medicare", "medicaid", "hospital", "patient", "prescription drug", "disease"],
+  "housing": ["housing", "mortgage", "rent", "homeless", "landlord", "tenant", "affordable home", "homeowner"],
+  "immigration": ["immigration", "immigrant", "border", "asylum", "visa", "refugee", "citizenship", "deportation"],
+  "infrastructure": ["infrastructure", "road", "bridge", "transit", "rail", "airport", "broadband", "construction"],
+  "justice": ["court", "judge", "crime", "police", "prison", "criminal justice", "prosecution", "sentencing"],
+  "labor": ["labor", "union", "worker", "workplace", "collective bargaining", "pension", "minimum wage", "overtime"],
+  "social_policy": ["social security", "poverty", "child care", "family leave", "disability", "retirement", "benefit", "safety net"],
+  "technology": ["technology", "cyber", "artificial intelligence", "internet", "digital", "data privacy", "innovation", "research" ]
+}

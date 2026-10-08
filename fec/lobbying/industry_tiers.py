@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Publish one canonical CU primacy board and three industry evidence boards.
+"""Publish one canonical CU primacy board and four industry evidence boards.
 
 2026-09-08 user decision: CU uses the full desk primacy authority everywhere,
 including adjudicated credits, evidence floor and conduct adjustments.
@@ -26,12 +26,13 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
 SCHEMA = "industry-tiers-v1"
-INDUSTRIES = ("credit_union", "bank", "crypto", "fintech")
+INDUSTRIES = ("credit_union", "bank", "crypto", "fintech", "telecom")
 PRIMARY_CLASS = {
     "credit_union": "cu_primary",
     "bank": "bank_primary",
     "crypto": "crypto_primary",
     "fintech": "fintech",
+    "telecom": "telecom_primary",
 }
 
 BUNDLE_PATH = "member_desk_bundle.json"
@@ -46,7 +47,7 @@ VALENCE_PATH = os.path.join(
     "data", "lobbying", "industry_valence_adjudication.ndjson"
 )
 AXES_PATH = os.path.join("data", "lobbying", "industry_axes.ndjson")
-VALENCE_INDUSTRIES = ("bank", "crypto", "fintech")
+VALENCE_INDUSTRIES = ("bank", "crypto", "fintech", "telecom")
 VALENCE_VALUES = ("pro", "anti", "neutral")
 
 
@@ -758,7 +759,7 @@ def _build_industry(
         generalized_members, baseline = _compute_generalized(
             bundle, compute_tags, act_weights, acu_relevance=False,
             include_adjudicated=False,
-            # The ratified diagnostic changes the CU board. Bank/crypto/fintech
+            # The ratified diagnostic changes the CU board. Bank/crypto/fintech/telecom
             # retain their prior factor-only method and its .25 uncertainty dock.
             uncertainty_k=0.25,
         )

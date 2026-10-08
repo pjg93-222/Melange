@@ -1,0 +1,719 @@
+
+====================================================================================================
+S5-1  TEXT SEARCH  (files read as text only; nothing under fec/ imported or executed)
+====================================================================================================
+
+--- LIVE  C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec
+
+  [sheet name 'Sponsor Interactions']  40 hit(s)
+     moneyball_core.py:626  sheets ('Sponsor Interactions' + 'Original Co-Sponsor Interaction'; plain cosponsorship does NOT
+     moneyball_core.py:653  missing=[s for s in ('Sponsor Interactions','Original Co-Sponsor Interaction') if s not in wb.sheetnames]
+     moneyball_core.py:656  for sheet in ('Sponsor Interactions','Original Co-Sponsor Interaction'):
+     moneyball_core.py:675  if sheet=='Sponsor Interactions':
+     sync_sentinel_bill_ledger_artifact.cjs:58  const interactionSheets = ["Original Co-Sponsor Interaction", "Co-Sponsor Interactions"];
+     sync_sentinel_bill_ledger_artifact.cjs:59  if (grouped.has("Sponsor Interactions")) interactionSheets.push("Sponsor Interactions");
+     attic\audit_stance.py:35  for sh in ['Sponsor Interactions', 'Original Co-Sponsor Interaction', 'Co-Sponsor Interactions']:
+     attic\compute_fp_clean.py:20  for sh,role in [('Sponsor Interactions','sponsor'),('Original Co-Sponsor Interaction','original-cosponsor'),('Co-Sponsor Interactions','cosponsor')]:
+     legislation\build_accepted_legislation_workbook.py:183  "Sponsor Interactions",
+     legislation\build_accepted_legislation_workbook.py:185  "Co-Sponsor Interactions",
+     legislation\build_accepted_legislation_workbook.py:1182  "sponsor": "Sponsor Interactions",
+     legislation\build_accepted_legislation_workbook.py:1184  "cosponsor": "Co-Sponsor Interactions",
+     legislation\extract_legislation_workbook_audited_layout.py:241  "Co-Sponsor Interactions",
+     legislation\extract_legislation_workbook_audited_layout.py:243  "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:277  "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:279  "Co-Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:3279  "sponsor": "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:3281  "cosponsor": "Co-Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:4348  "Success Sponsor": "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:4721  "Sponsor Interactions": "sponsor",
+     legislation\leg_evidence_recompute.py:4723  "Co-Sponsor Interactions": "cosponsor",
+     legislation\run_greenlit_legislation_rank_shadow.py:611  sheet = workbook.Worksheets("Sponsor Interactions")
+     legislation\sync_sentinel_bill_ledger.py:706  "Co-Sponsor Interactions": metrics["role_interactions"]["cosponsor"],
+     legislation\sync_sentinel_bill_ledger.py:709  expected_tabs["Sponsor Interactions"] = metrics["role_interactions"]["sponsor"]
+     legislation\sync_sentinel_bill_ledger.py:1072  else "Sponsor Interactions" if role == "sponsor" else "Co-Sponsor Interactions"),
+     surfaces\make_member_desk.py:2092  ROLEMAP = {'Sponsor Interactions': 'sponsor', 'Original Co-Sponsor Interaction': 'original',
+     surfaces\make_member_desk.py:2093  'Co-Sponsor Interactions': 'cosponsor'}
+     tests\engine\test_moneyball_manual_corroboration_roles.py:27  "Sponsor Interactions",
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:371  "Sponsor Interactions",
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:373  "Co-Sponsor Interactions",
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:377  "Sponsor Interactions": 1,
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:379  "Co-Sponsor Interactions": 1,
+     tests\legislation\test_automatic_sentinel_measurement.py:93  assert any(r['sheet']=='Sponsor Interactions' for r in plan['accepted_interactions'])
+     tests\legislation\test_build_accepted_legislation_workbook.py:251  len(result["model_sheets"]["Sponsor Interactions"]), 2
+     tests\legislation\test_build_accepted_legislation_workbook.py:266  len(result["model_sheets"]["Co-Sponsor Interactions"]), 2
+     tests\legislation\test_build_accepted_legislation_workbook.py:309  len(result["model_sheets"]["Sponsor Interactions"]), 2
+     tests\legislation\test_sentinel_bill_workbook_sync.py:507  "Co-Sponsor Interactions": 1,
+     tests\legislation\test_sentinel_bill_workbook_sync.py:541  report_document["appended"]["Co-Sponsor Interactions"] = 2
+     _quarantine_prereorg_strays_20260810\make_member_desk.py:1403  ROLEMAP = {'Sponsor Interactions': 'sponsor', 'Original Co-Sponsor Interaction': 'original',
+     _quarantine_prereorg_strays_20260810\make_member_desk.py:1404  'Co-Sponsor Interactions': 'cosponsor'}
+
+  [names the blended workbook]  137 hit(s)
+     paths.py:16  WORKBOOK=os.path.join(ROOT,'Moneyball Main Version - Blended.xlsx')
+     attic\apply_formats.py:8  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     attic\apply_formats.py:9  bk = B + r'\backups\Moneyball Main Version - Blended.PRE-FORMATS-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+     attic\apply_legstance_undo.py:8  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\apply_press_redup.py:9  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\apply_weight_swap.py:7  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\audit_stance.py:8  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\category_audit.py:5  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\compute_fp_clean.py:3  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\data_confidence.py:4  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\durbin_sanity.py:3  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\final.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_congestion.py:33  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_table.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\full_congestion.py:32  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate.py:8  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate2.py:14  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\inspect_durbin_cells.py:4  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\makeup.py:26  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\makeup2.py:25  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\map_to_model.py:8  bm=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)['Blended Model']
+     attic\per_category_deep_audit.py:3  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\recheck.py:36  cen=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx', data_only=True)['Centrality']
+     attic\reconcile.py:3  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\repair_sublayer_categories.py:31  WB=B+r'\Moneyball Main Version - Blended.xlsx'
+     attic\repair_sublayer_categories.py:95  bk=os.path.join(B,'backups','Moneyball Main Version - Blended.PRE-SUBLAYER-CU-%s.xlsx'%ts)
+     attic\sheet_sync.py:8  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\sync_stance.py:8  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_category_stance.py:3  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_congestion_sheet.py:4  src=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_congestion_sheet.py:5  bak=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.PRE-CONGESTION-20260626.xlsx'
+     attic\write_fp_clean.py:4  src=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_fp_clean.py:5  bak=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.PRE-FPCLEAN-20260626.xlsx'
+     attic\_diff_bm.py:3  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\_diff_bm.py:4  bak = max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.PRE-STANCESYNC-*.xlsx'), key=os.path.getmtime)
+     attic\_verify_clean.py:4  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     attic\_verify_clean.py:5  PRIS = max(glob.glob(B + r'\Moneyball Main Version - Blended.PRE-STANCEGUARD-*.xlsx'), key=os.path.getmtime)
+     audit\audit_formula_cache_freshness.py:33  DEFAULT_SOURCE = ROOT / "Moneyball Main Version - Blended.xlsx"
+     audit\audit_full.py:334  _wb=_px.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     audit\audit_greenlit_legislation_shadow_readiness.py:174  / "Moneyball Main Version - Blended.xlsx"
+     audit\audit_legislation_downstream_readiness.py:316  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     audit\audit_legislation_downstream_readiness.py:1165  "workbook": root / "Moneyball Main Version - Blended.xlsx",
+     audit\audit_measurement_layers.py:204  workbook_path=root/'Moneyball Main Version - Blended.xlsx'
+     audit\audit_postrefresh_downstream_drift.py:73  "Moneyball Main Version - Blended.xlsx": (
+     audit\audit_postrefresh_rank_drift.py:24  DEFAULT_BASELINE_WORKBOOK = BASELINE_ROOT / "Moneyball Main Version - Blended.xlsx"
+     audit\audit_postrefresh_rank_drift.py:25  DEFAULT_LIVE_WORKBOOK = ROOT / "Moneyball Main Version - Blended.xlsx"
+     audit\build_system_manifest.py:355  _s('repo.workbook', 'live_tree', 'Moneyball Main Version - Blended.xlsx', 'DERIVED',
+     audit\dashboard_integrity.py:604  'Moneyball Main Version - Blended.xlsx','Social Master.xlsx','data/stance/tweet_stance_final.csv',
+     audit\drift_closure.py:5  "Moneyball Main Version - Blended.xlsx",
+     audit\verify_greenlit_primacy_integration.py:589  ROOT / 'Moneyball Main Version - Blended.xlsx',
+     engine\add_judiciary_seats.py:32  WB = B + r"\Moneyball Main Version - Blended.xlsx"
+     engine\apply_alloc_cap.py:12  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     engine\apply_alloc_cap.py:42  bk = B + r'\backups\Moneyball Main Version - Blended.PRE-ALLOCCAP-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+     engine\apply_committee_fix.py:11  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     engine\apply_committee_fix.py:12  bk = B + r'\backups\Moneyball Main Version - Blended.PRE-CMTEFIX-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+     engine\apply_committee_reweight.py:14  WB = B + r"\Moneyball Main Version - Blended.xlsx"
+     engine\apply_raw_max_norm.py:16  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     engine\apply_weights.py:10  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     engine\assemble_viz.py:11  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\budget_frontier.py:20  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\build_electoral_plays.py:16  ra=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)['Rank & Allocation']
+     engine\compute_pillars.py:43  wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)   # NOT read_only (random-access pathology; empty reads on openp
+     engine\effectiveness_integration.py:189  and (ancestor / 'Moneyball Main Version - Blended.xlsx').exists()):
+     engine\flip_model.py:44  wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\method_audit.py:10  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\per_topic_coalition.py:10  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\per_topic_flip.py:15  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\sna_layout.py:8  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     legislation\add_cutax_block.py:21  WB=B+r'\Moneyball Main Version - Blended.xlsx'
+     legislation\add_cutax_block.py:107  bk=B+r'\backups\Moneyball Main Version - Blended.PRE-CUTAX-BLOCK-%s.xlsx'%ts
+     legislation\apply_leg_stance.py:17  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     legislation\build_accepted_legislation_workbook.py:510  model_name = "Moneyball Main Version - Blended.xlsx"
+     legislation\build_accepted_legislation_workbook.py:1392  temp_dir / "Moneyball Main Version - Blended.xlsx"
+     legislation\build_accepted_legislation_workbook.py:1410  "model": run_dir / "Moneyball Main Version - Blended.xlsx",
+     legislation\build_accepted_legislation_workbook.py:1494  "Moneyball Main Version - Blended.xlsx": file_receipt(
+     legislation\build_greenlit_legislation_primacy_merge.py:279  production_workbook = Path(ROOT) / "Moneyball Main Version - Blended.xlsx"
+     legislation\build_legislation_base_network.py:104  "moneyball main version - blended.xlsx",
+     legislation\build_legislation_shadow_consumer_plan.py:99  BASELINE_WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\build_legislation_shadow_consumer_plan.py:160  ("Moneyball Main Version - Blended.xlsx", "blended_workbook"),
+     legislation\build_legislation_workbook_numeric_plan.py:570  == "Moneyball Main Version - Blended.xlsx"
+     legislation\build_legislation_workbook_numeric_plan.py:582  "basename": "Moneyball Main Version - Blended.xlsx",
+     legislation\compute_legislation_policy_scenarios.py:65  "moneyball main version - blended.xlsx",
+     legislation\extract_legislation_workbook_audited_layout.py:37  WORKBOOK_BASENAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\freeze_legislation_production_baseline.py:29  "Moneyball Main Version - Blended.xlsx",
+     legislation\leg_evidence_recompute.py:64  "Moneyball Main Version - Blended.xlsx",
+     legislation\leg_evidence_recompute.py:1020  paths["Moneyball Main Version - Blended.xlsx"],
+     legislation\promote_greenlit_primacy_integration.py:45  'Moneyball Main Version - Blended.xlsx': (
+     legislation\promote_greenlit_primacy_integration.py:46  TREATMENT / 'Moneyball Main Version - Blended.xlsx'
+     legislation\recompute_legislative_workbook.py:48  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\refresh_congress_pipeline.py:62  "Sentinel Bill Ledger.xlsx", "Moneyball Main Version - Blended.xlsx",
+     legislation\refresh_congress_pipeline.py:240  for relative in ("Sentinel Bill Ledger.xlsx", "Moneyball Main Version - Blended.xlsx",
+     legislation\repair_legislative_normalized.py:47  WB = B + r"\Moneyball Main Version - Blended.xlsx"
+     legislation\repair_sublayer_references.py:28  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     legislation\run_greenlit_legislation_rank_shadow.py:62  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\run_legislation_dashboard_member_desk.py:80  "Moneyball Main Version - Blended.xlsx",
+     legislation\run_legislation_network_dependents.py:57  "Moneyball Main Version - Blended.xlsx", True, "legislative_workbook"
+     legislation\run_legislation_pillars_and_ranks.py:50  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\run_legislation_second_pass_dependents.py:100  "Moneyball Main Version - Blended.xlsx": (
+     legislation\run_legislation_shadow_recompute.py:105  "moneyball main version - blended.xlsx": "blended_workbook",
+     legislation\run_legislation_shadow_recompute.py:1802  run_dir, "Moneyball Main Version - Blended.xlsx"
+     legislation\run_legislation_shadow_recompute.py:1880  "Moneyball Main Version - Blended.xlsx": (
+     network\build_sector_diagnostic.py:81  'moneyball main version - blended.xlsx', 'bipartisan.json', 'behavior_panel.json',
+     network\corrected_signals.py:11  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     stance\apply_press_dedup.py:11  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     stance\apply_press_overrides.py:35  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     stance\apply_stance_guard.py:12  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     stance\build_media_blend.py:26  WBP=M+r'\Moneyball Main Version - Blended.xlsx'
+     stance\build_media_blend.py:281  bak=M+r'\backups\Moneyball Main Version - Blended.BACKUP-%s.xlsx'%datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+     stance\honors_workbook.py:726  print(json.dumps(operation(args.workbook or Path(args.root) / 'Moneyball Main Version - Blended.xlsx', args.root)))
+     stance\per_category_stance.py:4  M=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     stance\rebuild_press_cache.py:13  python rebuild_press_cache.py --from "backups/Moneyball Main Version - Blended.PRE-<...>.xlsx"
+     stance\rebuild_press_cache.py:23  return sorted(glob.glob(M+r'\backups\Moneyball Main Version - Blended.*.xlsx'))
+     stance\sync_stance_clean.py:13  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     stance\sync_stance_clean.py:14  PRISTINE = max(glob.glob(B + r'\Moneyball Main Version - Blended.PRE-STANCEGUARD-*.xlsx'), key=os.path.getmtime)
+     stance\sync_stance_g.py:20  WB=B+r'\Moneyball Main Version - Blended.xlsx'
+     surfaces\build_dashboard_bundle.py:46  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     surfaces\make_member_desk.py:45  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     surfaces\write_im_sheet.py:5  src=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     surfaces\write_im_sheet.py:6  bak=MB_ROOT+r'\Moneyball Main Version - Blended.PRE-IM-20260626.xlsx'
+     tests\engine\test_committee_scores.py:28  WORKBOOK = ROOT / 'Moneyball Main Version - Blended.xlsx'
+     tests\engine\test_effectiveness_integration.py:128  (source/'Moneyball Main Version - Blended.xlsx').touch()
+     tests\infra\test_audit_postrefresh_downstream_drift.py:282  / "Moneyball Main Version - Blended.xlsx"
+     tests\infra\test_policy_repairs_20260718.py:71  path = data_root() / "Moneyball Main Version - Blended.xlsx"
+     tests\legislation\test_build_legislation_workbook_numeric_plan.py:189  "copy": "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_legislation_shadow_input_closure.py:365  run_dir / "Moneyball Main Version - Blended.xlsx"
+     tests\legislation\test_legislation_shadow_input_closure.py:404  "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_legislation_shadow_recompute.py:340  " workbook=root/'Moneyball Main Version - Blended.xlsx'",
+     tests\legislation\test_legislation_shadow_recompute.py:411  "blended_workbook": "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_legislation_shadow_recompute.py:547  "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_refresh_congress_pipeline.py:32  "Moneyball Main Version - Blended.xlsx", "archive_leg.json",
+     tests\legislation\test_refresh_congress_pipeline.py:122  @pytest.mark.parametrize("relative", ["ranks_python.json", "dashboard_data.json", "Moneyball Main Version - Blended.xlsx"])
+     _quarantine_prereorg_strays_20260810\audit_legislation_downstream_readiness.py:317  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     _quarantine_prereorg_strays_20260810\audit_legislation_downstream_readiness.py:1166  "workbook": root / "Moneyball Main Version - Blended.xlsx",
+     _quarantine_prereorg_strays_20260810\make_member_desk.py:35  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     _quarantine_prereorg_strays_20260810\run_legislation_shadow_recompute.py:103  "moneyball main version - blended.xlsx": "blended_workbook",
+     _quarantine_prereorg_strays_20260810\run_legislation_shadow_recompute.py:1792  run_dir, "Moneyball Main Version - Blended.xlsx"
+     _quarantine_prereorg_strays_20260810\run_legislation_shadow_recompute.py:1866  "Moneyball Main Version - Blended.xlsx": (
+
+  [openpyxl write-mode load (no read_only)]  95 hit(s)
+     moneyball_core.py:91  wb=openpyxl.load_workbook(WORKBOOK,data_only=True)   # NOT read_only: streamed sheets make random .cell() O(sheet) per call (640s pathology) and misre
+     moneyball_core.py:345  ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+     moneyball_core.py:397  ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+     attic\category_audit.py:6  wb=openpyxl.load_workbook(M,data_only=True)
+     attic\compute_fp_clean.py:4  wb=openpyxl.load_workbook(M,data_only=True)
+     attic\data_confidence.py:4  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\durbin_sanity.py:4  wb=openpyxl.load_workbook(M,data_only=True)
+     attic\final.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_congestion.py:33  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_table.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\full_congestion.py:32  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate.py:8  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate2.py:14  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate2.py:25  ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+     ... 81 more
+
+  [workbook .save(]  54 hit(s)
+     build_accepted_legislation_workbook.cjs:133  await exported.save(outputPath);
+     build_audit_workbook.mjs:89  const xlsx=await SpreadsheetFile.exportXlsx(workbook); await xlsx.save(output);
+     moneyball_core.py:228  workbook.save(tmp)
+     recompute_legislative_workbook_artifact.cjs:397  await output.save(outputPath);
+     sync_sentinel_bill_ledger_artifact.cjs:106  await output.save(path.resolve(plan.output_workbook));
+     desktop\build_melange_icon.py:30  image.resize((512, 512), Image.Resampling.LANCZOS).save(preview)
+     desktop\build_melange_icon.py:31  image.save(icon, sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+     engine\add_judiciary_seats.py:105  wb.save(WB); wb.close()
+     legislation\build_legislation_base_network.py:912  workbook.save(path)
+     members\b5_audio_linear_pilot.py:217  np.save(cache_path, vector, allow_pickle=False)
+     network\build_holistic_base.py:240  wb.save(out)
+     network\build_holistic_normalized.py:222  wb.save(out)
+     network\build_multilayer_network.py:206  wb.save(out)
+     network\build_sector_diagnostic.py:449  wb.save(path)
+     ... 40 more
+
+  [artifact-tool helper invocation]  199 hit(s)
+     build_accepted_legislation_workbook.cjs:6  * and export all go through @oai/artifact-tool.
+     build_accepted_legislation_workbook.cjs:13  const REPORT_SCHEMA = "accepted-legislation-artifact-tool-report-v1";
+     build_accepted_legislation_workbook.cjs:22  const modules = process.env.ARTIFACT_TOOL_NODE_MODULES;
+     build_accepted_legislation_workbook.cjs:24  fail("ARTIFACT_TOOL_NODE_MODULES is required");
+     build_accepted_legislation_workbook.cjs:27  const entry = loader.resolve("@oai/artifact-tool");
+     build_accepted_legislation_workbook.cjs:234  engine: "@oai/artifact-tool",
+     build_audit_workbook.mjs:6  const {SpreadsheetFile,Workbook}=require("@oai/artifact-tool");
+     extract_legislation_workbook_audited_layout_artifact.cjs:4  * Read-only @oai/artifact-tool helper for the frozen legislative workbook.
+     extract_legislation_workbook_audited_layout_artifact.cjs:14  const { FileBlob, SpreadsheetFile } = require("@oai/artifact-tool");
+     extract_legislation_workbook_audited_layout_artifact.cjs:560  engine: "@oai/artifact-tool",
+     moneyball_core.py:658  # Artifact-tool writes a standards-valid sparse row when the
+     recompute_legislative_workbook_artifact.cjs:8  * @oai/artifact-tool.
+     recompute_legislative_workbook_artifact.cjs:14  const { FileBlob, SpreadsheetFile } = require("@oai/artifact-tool");
+     recompute_legislative_workbook_artifact.cjs:329  snapshot.source = "artifact-tool evaluated staged workbook";
+     ... 185 more
+
+--- WORKTREE  C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec
+
+  [sheet name 'Sponsor Interactions']  40 hit(s)
+     moneyball_core.py:626  sheets ('Sponsor Interactions' + 'Original Co-Sponsor Interaction'; plain cosponsorship does NOT
+     moneyball_core.py:653  missing=[s for s in ('Sponsor Interactions','Original Co-Sponsor Interaction') if s not in wb.sheetnames]
+     moneyball_core.py:656  for sheet in ('Sponsor Interactions','Original Co-Sponsor Interaction'):
+     moneyball_core.py:675  if sheet=='Sponsor Interactions':
+     sync_sentinel_bill_ledger_artifact.cjs:58  for (const sheetName of ["Original Co-Sponsor Interaction", "Co-Sponsor Interactions"]) {
+     sync_sentinel_bill_ledger_artifact.cjs:83  for (const [sheetName, range] of [[plan.ledger_sheet, ledgerRange],["Original Co-Sponsor Interaction", `A1:M${1 + appended["Original Co-Sponsor Intera
+     sync_sentinel_bill_ledger_artifact.cjs:97  for (const [sheetName, range, fileName] of [[plan.ledger_sheet,`A1:N${Math.min(plan.ledger_rows.length, 24)}`,"sentinel_bill_ledger.png"],["Original C
+     attic\audit_stance.py:35  for sh in ['Sponsor Interactions', 'Original Co-Sponsor Interaction', 'Co-Sponsor Interactions']:
+     attic\compute_fp_clean.py:20  for sh,role in [('Sponsor Interactions','sponsor'),('Original Co-Sponsor Interaction','original-cosponsor'),('Co-Sponsor Interactions','cosponsor')]:
+     legislation\build_accepted_legislation_workbook.py:183  "Sponsor Interactions",
+     legislation\build_accepted_legislation_workbook.py:185  "Co-Sponsor Interactions",
+     legislation\build_accepted_legislation_workbook.py:1182  "sponsor": "Sponsor Interactions",
+     legislation\build_accepted_legislation_workbook.py:1184  "cosponsor": "Co-Sponsor Interactions",
+     legislation\extract_legislation_workbook_audited_layout.py:241  "Co-Sponsor Interactions",
+     legislation\extract_legislation_workbook_audited_layout.py:243  "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:277  "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:279  "Co-Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:3279  "sponsor": "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:3281  "cosponsor": "Co-Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:4348  "Success Sponsor": "Sponsor Interactions",
+     legislation\leg_evidence_recompute.py:4721  "Sponsor Interactions": "sponsor",
+     legislation\leg_evidence_recompute.py:4723  "Co-Sponsor Interactions": "cosponsor",
+     legislation\run_greenlit_legislation_rank_shadow.py:611  sheet = workbook.Worksheets("Sponsor Interactions")
+     legislation\sync_sentinel_bill_ledger.py:635  "Co-Sponsor Interactions": metrics["role_interactions"]["cosponsor"],
+     legislation\sync_sentinel_bill_ledger.py:990  else "Co-Sponsor Interactions"),
+     surfaces\make_member_desk.py:2092  ROLEMAP = {'Sponsor Interactions': 'sponsor', 'Original Co-Sponsor Interaction': 'original',
+     surfaces\make_member_desk.py:2093  'Co-Sponsor Interactions': 'cosponsor'}
+     tests\engine\test_moneyball_manual_corroboration_roles.py:27  "Sponsor Interactions",
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:371  "Sponsor Interactions",
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:373  "Co-Sponsor Interactions",
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:377  "Sponsor Interactions": 1,
+     tests\legislation\test_accepted_legislation_cross_producer_contract.py:379  "Co-Sponsor Interactions": 1,
+     tests\legislation\test_automatic_sentinel_measurement.py:93  assert any(r['sheet']=='Sponsor Interactions' for r in plan['accepted_interactions'])
+     tests\legislation\test_build_accepted_legislation_workbook.py:251  len(result["model_sheets"]["Sponsor Interactions"]), 2
+     tests\legislation\test_build_accepted_legislation_workbook.py:266  len(result["model_sheets"]["Co-Sponsor Interactions"]), 2
+     tests\legislation\test_build_accepted_legislation_workbook.py:309  len(result["model_sheets"]["Sponsor Interactions"]), 2
+     tests\legislation\test_sentinel_bill_workbook_sync.py:507  "Co-Sponsor Interactions": 1,
+     tests\legislation\test_sentinel_bill_workbook_sync.py:541  report_document["appended"]["Co-Sponsor Interactions"] = 2
+     _quarantine_prereorg_strays_20260810\make_member_desk.py:1403  ROLEMAP = {'Sponsor Interactions': 'sponsor', 'Original Co-Sponsor Interaction': 'original',
+     _quarantine_prereorg_strays_20260810\make_member_desk.py:1404  'Co-Sponsor Interactions': 'cosponsor'}
+
+  [names the blended workbook]  135 hit(s)
+     paths.py:16  WORKBOOK=os.path.join(ROOT,'Moneyball Main Version - Blended.xlsx')
+     attic\apply_formats.py:8  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     attic\apply_formats.py:9  bk = B + r'\backups\Moneyball Main Version - Blended.PRE-FORMATS-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+     attic\apply_legstance_undo.py:8  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\apply_press_redup.py:9  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\apply_weight_swap.py:7  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\audit_stance.py:8  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\category_audit.py:5  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\compute_fp_clean.py:3  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\data_confidence.py:4  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\durbin_sanity.py:3  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\final.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_congestion.py:33  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_table.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\full_congestion.py:32  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate.py:8  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate2.py:14  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\inspect_durbin_cells.py:4  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\makeup.py:26  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\makeup2.py:25  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\map_to_model.py:8  bm=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)['Blended Model']
+     attic\per_category_deep_audit.py:3  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\recheck.py:36  cen=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx', data_only=True)['Centrality']
+     attic\reconcile.py:3  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\repair_sublayer_categories.py:31  WB=B+r'\Moneyball Main Version - Blended.xlsx'
+     attic\repair_sublayer_categories.py:95  bk=os.path.join(B,'backups','Moneyball Main Version - Blended.PRE-SUBLAYER-CU-%s.xlsx'%ts)
+     attic\sheet_sync.py:8  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\sync_stance.py:8  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_category_stance.py:3  M=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_congestion_sheet.py:4  src=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_congestion_sheet.py:5  bak=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.PRE-CONGESTION-20260626.xlsx'
+     attic\write_fp_clean.py:4  src=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\write_fp_clean.py:5  bak=r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.PRE-FPCLEAN-20260626.xlsx'
+     attic\_diff_bm.py:3  WB = r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx'
+     attic\_diff_bm.py:4  bak = max(glob.glob(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.PRE-STANCESYNC-*.xlsx'), key=os.path.getmtime)
+     attic\_verify_clean.py:4  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     attic\_verify_clean.py:5  PRIS = max(glob.glob(B + r'\Moneyball Main Version - Blended.PRE-STANCEGUARD-*.xlsx'), key=os.path.getmtime)
+     audit\audit_formula_cache_freshness.py:33  DEFAULT_SOURCE = ROOT / "Moneyball Main Version - Blended.xlsx"
+     audit\audit_full.py:318  _wb=_px.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     audit\audit_greenlit_legislation_shadow_readiness.py:174  / "Moneyball Main Version - Blended.xlsx"
+     audit\audit_legislation_downstream_readiness.py:316  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     audit\audit_legislation_downstream_readiness.py:1165  "workbook": root / "Moneyball Main Version - Blended.xlsx",
+     audit\audit_measurement_layers.py:204  workbook_path=root/'Moneyball Main Version - Blended.xlsx'
+     audit\audit_postrefresh_downstream_drift.py:73  "Moneyball Main Version - Blended.xlsx": (
+     audit\audit_postrefresh_rank_drift.py:24  DEFAULT_BASELINE_WORKBOOK = BASELINE_ROOT / "Moneyball Main Version - Blended.xlsx"
+     audit\audit_postrefresh_rank_drift.py:25  DEFAULT_LIVE_WORKBOOK = ROOT / "Moneyball Main Version - Blended.xlsx"
+     audit\build_system_manifest.py:341  _s('repo.workbook', 'live_tree', 'Moneyball Main Version - Blended.xlsx', 'DERIVED',
+     audit\dashboard_integrity.py:604  'Moneyball Main Version - Blended.xlsx','Social Master.xlsx','data/stance/tweet_stance_final.csv',
+     audit\drift_closure.py:5  "Moneyball Main Version - Blended.xlsx",
+     audit\verify_greenlit_primacy_integration.py:589  ROOT / 'Moneyball Main Version - Blended.xlsx',
+     engine\add_judiciary_seats.py:32  WB = B + r"\Moneyball Main Version - Blended.xlsx"
+     engine\apply_alloc_cap.py:12  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     engine\apply_alloc_cap.py:42  bk = B + r'\backups\Moneyball Main Version - Blended.PRE-ALLOCCAP-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+     engine\apply_committee_fix.py:11  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     engine\apply_committee_fix.py:12  bk = B + r'\backups\Moneyball Main Version - Blended.PRE-CMTEFIX-%s.xlsx' % datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+     engine\apply_committee_reweight.py:14  WB = B + r"\Moneyball Main Version - Blended.xlsx"
+     engine\apply_raw_max_norm.py:16  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     engine\apply_weights.py:10  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     engine\assemble_viz.py:11  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\budget_frontier.py:20  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\build_electoral_plays.py:16  ra=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)['Rank & Allocation']
+     engine\compute_pillars.py:43  wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)   # NOT read_only (random-access pathology; empty reads on openp
+     engine\effectiveness_integration.py:189  and (ancestor / 'Moneyball Main Version - Blended.xlsx').exists()):
+     engine\flip_model.py:47  wb=openpyxl.load_workbook(B+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\method_audit.py:10  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\per_topic_coalition.py:10  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\per_topic_flip.py:15  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     engine\sna_layout.py:8  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     legislation\add_cutax_block.py:21  WB=B+r'\Moneyball Main Version - Blended.xlsx'
+     legislation\add_cutax_block.py:107  bk=B+r'\backups\Moneyball Main Version - Blended.PRE-CUTAX-BLOCK-%s.xlsx'%ts
+     legislation\apply_leg_stance.py:17  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     legislation\build_accepted_legislation_workbook.py:510  model_name = "Moneyball Main Version - Blended.xlsx"
+     legislation\build_accepted_legislation_workbook.py:1392  temp_dir / "Moneyball Main Version - Blended.xlsx"
+     legislation\build_accepted_legislation_workbook.py:1410  "model": run_dir / "Moneyball Main Version - Blended.xlsx",
+     legislation\build_accepted_legislation_workbook.py:1494  "Moneyball Main Version - Blended.xlsx": file_receipt(
+     legislation\build_greenlit_legislation_primacy_merge.py:279  production_workbook = Path(ROOT) / "Moneyball Main Version - Blended.xlsx"
+     legislation\build_legislation_base_network.py:104  "moneyball main version - blended.xlsx",
+     legislation\build_legislation_shadow_consumer_plan.py:99  BASELINE_WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\build_legislation_shadow_consumer_plan.py:160  ("Moneyball Main Version - Blended.xlsx", "blended_workbook"),
+     legislation\build_legislation_workbook_numeric_plan.py:570  == "Moneyball Main Version - Blended.xlsx"
+     legislation\build_legislation_workbook_numeric_plan.py:582  "basename": "Moneyball Main Version - Blended.xlsx",
+     legislation\compute_legislation_policy_scenarios.py:65  "moneyball main version - blended.xlsx",
+     legislation\extract_legislation_workbook_audited_layout.py:37  WORKBOOK_BASENAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\freeze_legislation_production_baseline.py:29  "Moneyball Main Version - Blended.xlsx",
+     legislation\leg_evidence_recompute.py:64  "Moneyball Main Version - Blended.xlsx",
+     legislation\leg_evidence_recompute.py:1020  paths["Moneyball Main Version - Blended.xlsx"],
+     legislation\promote_greenlit_primacy_integration.py:45  'Moneyball Main Version - Blended.xlsx': (
+     legislation\promote_greenlit_primacy_integration.py:46  TREATMENT / 'Moneyball Main Version - Blended.xlsx'
+     legislation\recompute_legislative_workbook.py:48  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\repair_legislative_normalized.py:47  WB = B + r"\Moneyball Main Version - Blended.xlsx"
+     legislation\repair_sublayer_references.py:28  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     legislation\run_greenlit_legislation_rank_shadow.py:62  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\run_legislation_dashboard_member_desk.py:80  "Moneyball Main Version - Blended.xlsx",
+     legislation\run_legislation_network_dependents.py:57  "Moneyball Main Version - Blended.xlsx", True, "legislative_workbook"
+     legislation\run_legislation_pillars_and_ranks.py:50  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     legislation\run_legislation_second_pass_dependents.py:100  "Moneyball Main Version - Blended.xlsx": (
+     legislation\run_legislation_shadow_recompute.py:105  "moneyball main version - blended.xlsx": "blended_workbook",
+     legislation\run_legislation_shadow_recompute.py:1802  run_dir, "Moneyball Main Version - Blended.xlsx"
+     legislation\run_legislation_shadow_recompute.py:1880  "Moneyball Main Version - Blended.xlsx": (
+     network\build_sector_diagnostic.py:81  'moneyball main version - blended.xlsx', 'bipartisan.json', 'behavior_panel.json',
+     network\corrected_signals.py:11  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     stance\apply_press_dedup.py:11  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     stance\apply_press_overrides.py:35  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     stance\apply_stance_guard.py:12  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     stance\build_media_blend.py:26  WBP=M+r'\Moneyball Main Version - Blended.xlsx'
+     stance\build_media_blend.py:276  bak=M+r'\backups\Moneyball Main Version - Blended.BACKUP-%s.xlsx'%datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+     stance\honors_workbook.py:726  print(json.dumps(operation(args.workbook or Path(args.root) / 'Moneyball Main Version - Blended.xlsx', args.root)))
+     stance\per_category_stance.py:4  M=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     stance\rebuild_press_cache.py:13  python rebuild_press_cache.py --from "backups/Moneyball Main Version - Blended.PRE-<...>.xlsx"
+     stance\rebuild_press_cache.py:23  return sorted(glob.glob(M+r'\backups\Moneyball Main Version - Blended.*.xlsx'))
+     stance\sync_stance_clean.py:13  WB = B + r'\Moneyball Main Version - Blended.xlsx'
+     stance\sync_stance_clean.py:14  PRISTINE = max(glob.glob(B + r'\Moneyball Main Version - Blended.PRE-STANCEGUARD-*.xlsx'), key=os.path.getmtime)
+     stance\sync_stance_g.py:20  WB=B+r'\Moneyball Main Version - Blended.xlsx'
+     surfaces\build_dashboard_bundle.py:46  wb=openpyxl.load_workbook(MB_ROOT+r'\Moneyball Main Version - Blended.xlsx',data_only=True)
+     surfaces\make_member_desk.py:45  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     surfaces\write_im_sheet.py:5  src=MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     surfaces\write_im_sheet.py:6  bak=MB_ROOT+r'\Moneyball Main Version - Blended.PRE-IM-20260626.xlsx'
+     tests\engine\test_committee_scores.py:28  WORKBOOK = ROOT / 'Moneyball Main Version - Blended.xlsx'
+     tests\engine\test_effectiveness_integration.py:128  (source/'Moneyball Main Version - Blended.xlsx').touch()
+     tests\infra\test_audit_postrefresh_downstream_drift.py:282  / "Moneyball Main Version - Blended.xlsx"
+     tests\infra\test_policy_repairs_20260718.py:71  path = data_root() / "Moneyball Main Version - Blended.xlsx"
+     tests\legislation\test_build_legislation_workbook_numeric_plan.py:189  "copy": "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_legislation_shadow_input_closure.py:365  run_dir / "Moneyball Main Version - Blended.xlsx"
+     tests\legislation\test_legislation_shadow_input_closure.py:404  "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_legislation_shadow_recompute.py:340  " workbook=root/'Moneyball Main Version - Blended.xlsx'",
+     tests\legislation\test_legislation_shadow_recompute.py:411  "blended_workbook": "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_legislation_shadow_recompute.py:547  "Moneyball Main Version - Blended.xlsx",
+     tests\legislation\test_refresh_congress_pipeline.py:32  "Moneyball Main Version - Blended.xlsx", "archive_leg.json",
+     tests\legislation\test_refresh_congress_pipeline.py:122  @pytest.mark.parametrize("relative", ["ranks_python.json", "dashboard_data.json", "Moneyball Main Version - Blended.xlsx"])
+     _quarantine_prereorg_strays_20260810\audit_legislation_downstream_readiness.py:317  WORKBOOK_NAME = "Moneyball Main Version - Blended.xlsx"
+     _quarantine_prereorg_strays_20260810\audit_legislation_downstream_readiness.py:1166  "workbook": root / "Moneyball Main Version - Blended.xlsx",
+     _quarantine_prereorg_strays_20260810\make_member_desk.py:35  WB = MB_ROOT+r'\Moneyball Main Version - Blended.xlsx'
+     _quarantine_prereorg_strays_20260810\run_legislation_shadow_recompute.py:103  "moneyball main version - blended.xlsx": "blended_workbook",
+     _quarantine_prereorg_strays_20260810\run_legislation_shadow_recompute.py:1792  run_dir, "Moneyball Main Version - Blended.xlsx"
+     _quarantine_prereorg_strays_20260810\run_legislation_shadow_recompute.py:1866  "Moneyball Main Version - Blended.xlsx": (
+
+  [openpyxl write-mode load (no read_only)]  95 hit(s)
+     moneyball_core.py:91  wb=openpyxl.load_workbook(WORKBOOK,data_only=True)   # NOT read_only: streamed sheets make random .cell() O(sheet) per call (640s pathology) and misre
+     moneyball_core.py:345  ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+     moneyball_core.py:397  ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+     attic\category_audit.py:6  wb=openpyxl.load_workbook(M,data_only=True)
+     attic\compute_fp_clean.py:4  wb=openpyxl.load_workbook(M,data_only=True)
+     attic\data_confidence.py:4  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\durbin_sanity.py:4  wb=openpyxl.load_workbook(M,data_only=True)
+     attic\final.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_congestion.py:33  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\final_table.py:28  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\full_congestion.py:32  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate.py:8  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate2.py:14  wb=openpyxl.load_workbook(r'C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Main Version - Blended.xlsx',data_only=True)
+     attic\im_allocate2.py:25  ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+     ... 81 more
+
+  [workbook .save(]  36 hit(s)
+     build_accepted_legislation_workbook.cjs:133  await exported.save(outputPath);
+     build_audit_workbook.mjs:89  const xlsx=await SpreadsheetFile.exportXlsx(workbook); await xlsx.save(output);
+     moneyball_core.py:228  workbook.save(tmp)
+     recompute_legislative_workbook_artifact.cjs:397  await output.save(outputPath);
+     sync_sentinel_bill_ledger_artifact.cjs:104  await output.save(path.resolve(plan.output_workbook));
+     engine\add_judiciary_seats.py:105  wb.save(WB); wb.close()
+     legislation\build_legislation_base_network.py:912  workbook.save(path)
+     members\b5_audio_linear_pilot.py:217  np.save(cache_path, vector, allow_pickle=False)
+     network\build_holistic_base.py:240  wb.save(out)
+     network\build_holistic_normalized.py:222  wb.save(out)
+     network\build_multilayer_network.py:206  wb.save(out)
+     network\build_sector_diagnostic.py:449  wb.save(path)
+     network\build_social_master.py:84  wb.save(M+r'\Social Master.xlsx')
+     network\process_quorum.py:165  wb.save(M+r'\Quorum Processed.xlsx')
+     ... 22 more
+
+  [artifact-tool helper invocation]  196 hit(s)
+     build_accepted_legislation_workbook.cjs:6  * and export all go through @oai/artifact-tool.
+     build_accepted_legislation_workbook.cjs:13  const REPORT_SCHEMA = "accepted-legislation-artifact-tool-report-v1";
+     build_accepted_legislation_workbook.cjs:22  const modules = process.env.ARTIFACT_TOOL_NODE_MODULES;
+     build_accepted_legislation_workbook.cjs:24  fail("ARTIFACT_TOOL_NODE_MODULES is required");
+     build_accepted_legislation_workbook.cjs:27  const entry = loader.resolve("@oai/artifact-tool");
+     build_accepted_legislation_workbook.cjs:234  engine: "@oai/artifact-tool",
+     build_audit_workbook.mjs:6  const {SpreadsheetFile,Workbook}=require("@oai/artifact-tool");
+     extract_legislation_workbook_audited_layout_artifact.cjs:4  * Read-only @oai/artifact-tool helper for the frozen legislative workbook.
+     extract_legislation_workbook_audited_layout_artifact.cjs:14  const { FileBlob, SpreadsheetFile } = require("@oai/artifact-tool");
+     extract_legislation_workbook_audited_layout_artifact.cjs:560  engine: "@oai/artifact-tool",
+     moneyball_core.py:658  # Artifact-tool writes a standards-valid sparse row when the
+     recompute_legislative_workbook_artifact.cjs:8  * @oai/artifact-tool.
+     recompute_legislative_workbook_artifact.cjs:14  const { FileBlob, SpreadsheetFile } = require("@oai/artifact-tool");
+     recompute_legislative_workbook_artifact.cjs:329  snapshot.source = "artifact-tool evaluated staged workbook";
+     ... 182 more
+
+====================================================================================================
+S5-2  CANDIDATE ADJUDICATION : for every file that names the sheet, what is it allowed to write?
+====================================================================================================
+
+--- LIVE fec\legislation\build_accepted_legislation_workbook.py
+      182 | TARGET_MODEL_SHEETS = (
+      404 |     if os.environ.get("LEGISLATION_SHADOW_MODE") != "1":
+      405 |         raise WorkbookBuildError("LEGISLATION_SHADOW_MODE=1 is required")
+      423 |     allowed_root = SHADOW_ROOT
+      431 |         allowed_root = candidate
+      432 |     if not _is_relative_to(root, allowed_root) or root == allowed_root:
+      434 |             f"run directory must be a child of {allowed_root}: {root}"
+      447 |         raise WorkbookBuildError("input root must be a child of the shadow run")
+      762 |         and manifest.get("production_artifacts_written") is False
+      954 |         and value.get("production_written") is False
+     1047 |         sheet: [INTERACTION_HEADERS] for sheet in TARGET_MODEL_SHEETS
+     1216 |         "production_written": False,
+     1335 |         and report.get("production_written") is False
+     1385 |             "production_written": False,
+     1444 |             "production_written": False,
+     1562 |             and report.get("production_written") is False
+     1579 |             "production_written": False,
+     1595 |                 for sheet in TARGET_MODEL_SHEETS
+     1605 |         "production_written": False,
+
+--- LIVE fec\legislation\sync_sentinel_bill_ledger.py
+       35 | LEDGER_BASENAME = "Sentinel Bill Ledger.xlsx"
+       36 | WORKBOOK = ROOT / LEDGER_BASENAME
+     1219 |     # silently overwrite an unrelated workbook, so refuse anything but the ledger.
+     1220 |     if args.workbook.name != LEDGER_BASENAME:
+     1221 |         parser.error("--workbook must name %r, got %r" % (LEDGER_BASENAME, args.workbook.name))
+     1241 |         return skip_runtime_absent(args.workbook, history_receipt)
+     1262 |                       input_path=args.workbook, output_path=output)
+     1308 |         if args.workbook.is_file():
+     1309 |             shutil.copy2(args.workbook, backup)
+     1312 |         handle, candidate = tempfile.mkstemp(prefix=args.workbook.name + ".", suffix=".candidate", dir=args.workbook.parent)
+     1316 |             os.replace(candidate, args.workbook)
+     1338 |         "live_ledger_workbook": (live_ledger_block(args.workbook) if not args.no_install else None),
+
+--- LIVE fec\legislation\run_greenlit_legislation_rank_shadow.py
+       58 |     / "shadow_recompute"
+      288 |     allowed = (AUDIT_ROOT / "shadow_recompute").resolve()
+      297 |             "output must be a child of audits/legfix5/shadow_recompute"
+      611 |     sheet = workbook.Worksheets("Sponsor Interactions")
+
+--- LIVE fec\legislation\extract_legislation_workbook_audited_layout.py
+       37 | WORKBOOK_BASENAME = "Moneyball Main Version - Blended.xlsx"
+      321 |         and Path(str(row.get("copy") or "")).name == WORKBOOK_BASENAME
+      410 |         and capability.get("production_written") is False
+      445 |         and payload.get("production_written") is False
+      502 |         and report.get("production_written") is False
+     1320 |         "production_written": False,
+     1510 |         and payload.get("production_written") is False
+     1705 |         "production_written": False,
+     1708 |         "source_workbook_basename": WORKBOOK_BASENAME,
+     1822 |         "production_written": False,
+
+--- LIVE fec\legislation\leg_evidence_recompute.py
+       12 | No network access, package installation, workbook save, or production-artifact
+       43 | APPROVED_OUT = (WORKTREE_ROOT / "audits" / "legfix2").resolve()
+      276 | INTERACTION_SHEETS = (
+      300 |     if out != APPROVED_OUT:
+      301 |         raise EvidenceError("output must be exactly %s; got %s" % (APPROVED_OUT, out))
+     3259 |     for sheet_name in INTERACTION_SHEETS + SUCCESS_SHEETS:
+     4423 |             for name in INTERACTION_SHEETS + SUCCESS_SHEETS
+     4575 |     for name in INTERACTION_SHEETS + SUCCESS_SHEETS:
+
+--- LIVE fec\sync_sentinel_bill_ledger_artifact.cjs
+        3 | /* Exclusive XLSX author for sync_sentinel_bill_ledger.py. */
+       38 |   if (plan.schema !== "sentinel-bill-workbook-plan-v1" || !Array.isArray(plan.ledger_rows)) throw new Error("invalid plan");
+       40 |   const workbook = Workbook.create();
+       42 |   const ledger = workbook.worksheets.add(plan.ledger_sheet);
+       43 |   const ledgerRange = `A1:${colName(plan.ledger_rows[0].length)}${plan.ledger_rows.length}`;
+       44 |   ledger.getRange(ledgerRange).values = plan.ledger_rows;
+       45 |   ledger.showGridLines = false;
+       46 |   ledger.freezePanes.freezeRows(1);
+       47 |   ledger.getRange(`A1:${colName(plan.ledger_rows[0].length)}1`).format = {fill:"#17365D",font:{bold:true,color:"#FFFFFF"},wrapText:true,bord
+       48 |   ledger.getRange(ledgerRange).format.autofitColumns();
+       49 |   for (const column of ["A","B","D","I","J","N","O","T","U","V","W","X","Z","AA"]) ledger.getRange(`${column}1:${column}${plan.ledger_rows.l
+       50 |   ledger.getRange(`X2:X${plan.ledger_rows.length}`).format.wrapText = true;
+       58 |   const interactionSheets = ["Original Co-Sponsor Interaction", "Co-Sponsor Interactions"];
+       59 |   if (grouped.has("Sponsor Interactions")) interactionSheets.push("Sponsor Interactions");
+       61 |     const sheet = workbook.worksheets.add(sheetName);
+       85 |   for (const [sheetName, range] of [[plan.ledger_sheet, ledgerRange], ...interactionSheets.map(name => [name, `A1:M${1 + appended[name]}`])]
+       86 |     const table = await workbook.inspect({kind:"table",sheetId:sheetName,range,include:"values,formulas",tableMaxRows:16,tableMaxCols:27,max
+       91 |     const errors = await workbook.inspect({kind:"match",sheetId:item.sheet,range:item.range,searchTerm:ERROR_PATTERN,options:{useRegex:true,
+       96 |   const previewDir = path.join(path.dirname(path.resolve(plan.output_workbook)), "previews");
+       99 |   for (const [sheetName, range, fileName] of [[plan.ledger_sheet,`A1:N${Math.min(plan.ledger_rows.length, 24)}`,"sentinel_bill_ledger.png"],
+      100 |     const render = await workbook.render({sheetName,range,scale:0.7,format:"png"});
+      105 |   const output = await SpreadsheetFile.exportXlsx(workbook);
+      106 |   await output.save(path.resolve(plan.output_workbook));
+      107 |   const outputSha256 = crypto.createHash("sha256").update(await fs.readFile(path.resolve(plan.output_workbook))).digest("hex");
+      108 |   const report = {schema:"sentinel-bill-workbook-artifact-report-v1",status:"PASS",engine:"@oai/artifact-tool",input_plan_sha256:inputPlanSh
+      110 |   console.log(JSON.stringify({status:"PASS",ledger_rows:plan.ledger_rows.length-1,appended}));
+      111 |   // The Windows V8 teardown path can crash while freeing this workbook even
+
+--- LIVE fec\moneyball_core.py
+       91 |         wb=openpyxl.load_workbook(WORKBOOK,data_only=True)   # NOT read_only: streamed sheets make random .cell() O(sheet) per call (640s pa
+      345 |         ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+      397 |         ne=openpyxl.load_workbook(net,data_only=True)['Edges']
+      624 | def bill_corroboration():
+      652 |         wb=openpyxl.load_workbook(WORKBOOK,read_only=True,data_only=True)
+
+--- LIVE fec\surfaces\make_member_desk.py
+     2092 |     ROLEMAP = {'Sponsor Interactions': 'sponsor', 'Original Co-Sponsor Interaction': 'original',
+     2096 |     for sheet, role in ROLEMAP.items():
+
+====================================================================================================
+S5-2b  LIVE vs WORKTREE drift among the files that name the sheet
+====================================================================================================
+files naming the sheet: LIVE=16  WORKTREE=16  shared=16
+LIVE only ....... []
+WORKTREE only ... []
+
+====================================================================================================
+S5-2c  READING OF THE ABOVE
+====================================================================================================
+Reading the hits above:
+
+  fec\legislation\build_accepted_legislation_workbook.py  builds all five role sheets
+      (TARGET_MODEL_SHEETS, line 182-188) and routes every XLSX mutation through
+      @oai/artifact-tool.  It is SHADOW-ONLY and fail-closed: validate_shadow_context()
+      requires LEGISLATION_SHADOW_MODE=1, requires LEGISLATION_SHADOW_RUN_DIR and
+      MONEYBALL_ROOT to equal the run directory, and requires that directory to be a
+      CHILD of audits\legfix5\shadow_recompute.  Its outputs land in the run dir, and
+      its receipt asserts production_written=False.  It cannot write the root workbook.
+
+  fec\legislation\sync_sentinel_bill_ledger.py  DOES append a 'Sponsor Interactions' tab
+      (line 1072) and DOES replace a workbook on disk (line 1316) -- but WORKBOOK is
+      ROOT / LEDGER_BASENAME (line 36) and line 1219 records that it refuses any target
+      but the ledger.  It writes 'Sentinel Bill Ledger.xlsx' (14 rows), not the blended
+      workbook.  fec\sync_sentinel_bill_ledger_artifact.cjs is its artifact-tool helper.
+
+  fec\legislation\run_greenlit_legislation_rank_shadow.py  names the blended workbook and
+      opens Worksheets('Sponsor Interactions') via Excel COM (line 611), but its output must
+      be a child of audits\legfix5\shadow_recompute (lines 288-297) and it READS the sheet
+      to compare ranks.
+
+  fec\legislation\extract_legislation_workbook_audited_layout.py  and
+  fec\legislation\leg_evidence_recompute.py  are verifiers: the first asserts
+      production_written=False throughout, the second states in its module docstring that
+      no workbook save or production-artifact write is performed.  Both READ the sheet.
+
+  fec\moneyball_core.py bill_corroboration() and fec\surfaces\make_member_desk.py
+      READ 'Sponsor Interactions'.  Neither writes it.
+
+So no shipped production producer writes 'Sponsor Interactions' in
+'Moneyball Main Version - Blended.xlsx'.  The census below tests that claim against the
+sheet's contents rather than resting on the search.
+
+====================================================================================================
+S5-3  CONTENT CENSUS : what the sheet holds vs every local sponsor-bearing source
+====================================================================================================
+workbook 'Sponsor Interactions' rows ......................... 638  (distinct keys 638)
+selected archive sponsor-role rows .......................... 561  (distinct keys 561)
+older archive 20260624 sponsor-role rows .................... 559  (distinct keys 559)
+Sentinel VERIFIED scoring sponsor rows ...................... 14
+manual_bill_evidence.csv sponsor rows ....................... 86
+
+workbook vs the SELECTED archive:
+   in both ................................................. 561
+   workbook only ........................................... 77
+   selected archive only ................................... 0
+workbook vs the OLDER archive (20260624):
+   in both ................................................. 559
+   workbook only ........................................... 79
+workbook vs the FULL scored frame (archive + sentinel + manual):
+   in both ................................................. 635
+   workbook only (no row anywhere in the scored frame) ..... 3
+   frame only (never reached the workbook sheet) ........... 26
+
+the workbook-only keys, by Congress:
+   C=117   2
+   C=118   1
+the workbook-only keys, by member (top 15):
+   Tim Scott                3
+
+sample workbook-only keys:
+   Tim Scott              s.3382           C=117   Member Business Lending
+   Tim Scott              s.3992           C=118   Member Business Lending
+   Tim Scott              s.762            C=117   Member Business Lending
+
+file mtimes (a sheet older than the archive cannot have been derived from it):
+   Moneyball Main Version - Blended.xlsx          2026-09-18 02:09:29.560623
+   congress_bills_archive_20260825_115305.xlsx    2026-08-25 11:54:47.773826
+   congress_bills_archive_20260624_115822.xlsx    2026-07-01 17:28:33.736742
+   Sentinel Bill Ledger.xlsx                      2026-09-17 00:42:55.863631
+   archive_leg.json                               2026-09-17 00:45:22.091915
+   legislation_routing_audit.json                 2026-09-17 00:45:23.994653
+   manual_bill_evidence.csv                       2026-07-29 00:40:26.963551
+
+====================================================================================================
+S5-4  the three Tim Scott Member-Business-Lending bills, through every local source
+====================================================================================================
+
+-- S.3382 (117th)
+   selected archive rows for this bill ...... 37 ; roles = ['cosponsor', 'original-cosponsor']
+   selected archive Sponsor column .......... ['Scott, Tim [Sen.-R-SC]']
+   selected archive Tim Scott rows .......... []
+   workbook 'Sponsor Interactions' rows ..... [('Tim Scott', 'Member Business Lending')]
+   older archive sponsor rows ............... []
+   Sentinel ledger rows (ANY status) ........ 1
+      record types / statuses ............... [('bill', 'tracked', 'False')]
+      rows naming Tim Scott ................. []
+      sponsor-role rows ..................... []
+   manual_bill_evidence rows ................ []
+
+-- S.3992 (118th)
+   selected archive rows for this bill ...... 28 ; roles = ['cosponsor', 'original-cosponsor']
+   selected archive Sponsor column .......... ['Scott, Tim [Sen.-R-SC]']
+   selected archive Tim Scott rows .......... []
+   workbook 'Sponsor Interactions' rows ..... [('Tim Scott', 'Member Business Lending')]
+   older archive sponsor rows ............... []
+   Sentinel ledger rows (ANY status) ........ 1
+      record types / statuses ............... [('bill', 'tracked', 'False')]
+      rows naming Tim Scott ................. []
+      sponsor-role rows ..................... []
+   manual_bill_evidence rows ................ []
+
+-- S.762 (117th)
+   selected archive rows for this bill ...... 14 ; roles = ['cosponsor', 'original-cosponsor', 'sponsor']
+   selected archive Sponsor column .......... ['Scott, Tim [Sen.-R-SC]', 'Sen. Scott, Tim [R-SC]']
+   selected archive Tim Scott rows .......... [('Charter Modernization & Governance', 'sponsor'), ('Mortgage Lending & Housing', 'sponsor')]
+   workbook 'Sponsor Interactions' rows ..... [('Tim Scott', 'Charter Modernization & Governance'), ('Tim Scott', 'Member Business Lending'), ('Tim Scott', 'Mortgage Lending & Housing')]
+   older archive sponsor rows ............... [('Tim Scott', 'Charter Modernization & Governance'), ('Tim Scott', 'Mortgage Lending & Housing')]
+   Sentinel ledger rows (ANY status) ........ 1
+      record types / statuses ............... [('bill', 'tracked', 'False')]
+      rows naming Tim Scott ................. []
+      sponsor-role rows ..................... []
+   manual_bill_evidence rows ................ []
+
+====================================================================================================
+S5-5  contrast: the two Anna Luna bills the same census flagged, which DID get repaired
+====================================================================================================
+
+-- H.R.4686 (118th)
+   selected archive roles ................... ['cosponsor', 'original-cosponsor']
+   Sentinel VERIFIED scoring rows for it .... [('Anna Luna', 'sponsor', 'Mortgage & Housing')]
+   manual_bill_evidence rows ................ []
+
+-- H.R.6410 (118th)
+   selected archive roles ................... ['cosponsor', 'original-cosponsor']
+   Sentinel VERIFIED scoring rows for it .... [('Anna Luna', 'sponsor', 'Data Privacy & Cyber')]
+   manual_bill_evidence rows ................ []
+
+(these two are why the DEFECT population is 5 cells but the missing weight is only 3 cells:
+ the sentinel/manual lane already supplies Anna Luna's sponsor rows at frame source_row
+ 10190 and 10192, so her credit is complete in archive_leg.json.)

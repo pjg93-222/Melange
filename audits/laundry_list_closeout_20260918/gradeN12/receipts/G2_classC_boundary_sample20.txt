@@ -1,0 +1,123 @@
+pool = 139 flagged rows whose kept text does not end on a sentence boundary
+seeded sample of 20 (seed 20260919), rowids: [67803, 68892, 68899, 69540, 71003, 73623, 81318, 82245, 197221, 214283, 217970, 219514, 220358, 221208, 223703, 224383, 226758, 244518, 305576, 308345]
+
+========================================================================================================
+C01 rowid=67803   member=Lauren Boebert           show=ws               kept_nw=11
+    KEPT tail   ...I'm tired of this separation of church and state junk. [23:20:01]
+    CUT here -> class=C_unanchored_paren       tag="O'SULLIVAN (voice-over)" disp=ledger_only_unresolved
+    REMOVED     O'SULLIVAN (voice-over): It has a name. It's called Christian nationalism.
+
+========================================================================================================
+C02 rowid=68892   member=Marc Veasey              show=cnr              kept_nw=71
+    KEPT tail   ...colleagues particularly for members on the front line is that I think they need to do whatever it is they need to do in order to come back and be reelected. And so, if they need to, you know, distance themselves and then that's what they need to do. [02:20:09]
+    CUT here -> class=C_unanchored_paren       tag='RAJU (voice-over)' disp=ledger_only_unresolved
+    REMOVED     RAJU (voice-over): Yet some like Congressman Jerry Nadler now say they are on board with Biden, despite privately calling for a change on Sunday.
+
+========================================================================================================
+C03 rowid=68899   member=Marc Veasey              show=cnr              kept_nw=68
+    KEPT tail   ...y colleagues, particularly for members on the front line, is that I think they need to do whatever it is they need to do in order to come back and be reelected. And so if they need to, you know, distance themselves, then that's what they need to do. [03:05:07]
+    CUT here -> class=C_unanchored_paren       tag='RAJU (voice-over)' disp=ledger_only_unresolved
+    REMOVED     RAJU (voice-over): Yet some, like Congressman Jerry Nadler, now say they are on board with Biden, despite privately calling for a change on Sunday.
+
+========================================================================================================
+C04 rowid=69540   member=James Comer              show=cnr              kept_nw=5
+    KEPT tail   ...The face of incompetence. [08:25:00]
+    CUT here -> class=C_unanchored_paren       tag='WILD (voice-over)' disp=ledger_only_unresolved
+    REMOVED     WILD (voice-over): And Ranking Member Jamie Raskin says she must leave as a first step to allowing new leadership to swiftly address this crisis and rebuild the trust.
+
+========================================================================================================
+C05 rowid=71003   member=Bernard Sanders          show=cnc              kept_nw=6
+    KEPT tail   ...We've got to win Wisconsin. [08:45:01]
+    CUT here -> class=C_unanchored_paren       tag='ZELENY (voice over)' disp=ledger_only_unresolved
+    REMOVED     ZELENY (voice over): Warning against third-party candidates like Jill Stein.
+
+========================================================================================================
+C06 rowid=73623   member=Thom Tillis              show=cnr              kept_nw=16
+    KEPT tail   ...I just can't agree. It was surprising to me that it was a blanket pardon. [04:05:00]
+    CUT here -> class=C_unanchored_paren       tag='REID (voice-over)' disp=ledger_only_unresolved
+    REMOVED     REID (voice-over): But perhaps the strongest rebuke came from former officer Michael Fanone who was attacked during the riot.
+
+========================================================================================================
+C07 rowid=81318   member=Jake Auchincloss         show=this-week        kept_nw=34
+    KEPT tail   ...Republicans in Congress are because what they're trying to do is at the federal level, nothing, and at the state level, prevent any state legislators from doing any regulation of A.I. bots whatsoever. O’
+    CUT here -> class=C_unanchored_paren       tag='BRIEN (voice-over)' disp=ledger_only_unresolved
+    REMOVED     BRIEN (voice-over): A.I. companies stress while risks for the technology exist, they say the potential benefits are nearly limitless and that they're constantly improving their algorithms to improve interactions, all while some industry leaders have gone from publicly encouraging regulation --
+
+========================================================================================================
+C08 rowid=82245   member=Alexandria Ocasio-Cortez show=this-week        kept_nw=22
+    KEPT tail   ...I think there is a deep sense of outrage and betrayal. I think it is a huge slap in the face. O’
+    CUT here -> class=C_unanchored_paren       tag='BRIEN (voice over)' disp=ledger_only_unresolved
+    REMOVED     BRIEN (voice over): Speaker Mike Johnson holding House Republicans together to pass a six-month funding extension that increases defense and border funds while cutting non-defense spending. Senate Democrats then left with few options and little time before a looming shutdown. On Wednesday, Senate Mi
+
+========================================================================================================
+C09 rowid=197221  member=Elizabeth Warren         show=ebo              kept_nw=20
+    KEPT tail   ...I don't want to be the America of 10 years back, of 20 years back or 30 years back. [19:29:28]
+    CUT here -> class=C_unanchored_paren       tag='DEAN(voice-over)' disp=ledger_only_unresolved
+    REMOVED     DEAN(voice-over): A new CNN Des Moines Register poll of likely in-person Democratic Iowa caucus-goers showed just 1 percent called being over age 70 an advantage against President Trump, but that same poll showed 52 percent believe a candidate with years of experience in Washington would have an adv
+
+========================================================================================================
+C10 rowid=214283  member=Alex Padilla             show=cnnt             kept_nw=28
+    KEPT tail   ...This is wrong no matter who is doing it. It's not just the security of the ballot that's in question here. It is the transparency, voter confidence. [23:55:01]
+    CUT here -> class=C_unanchored_paren       tag='BROWN (voice-over)' disp=ledger_only_unresolved
+    REMOVED     BROWN (voice-over): The state Republican Party spokesman telling CNN he believes the boxes are similar to giving the ballot to a family member to drop off, which is legal in California. While in New York, the city's police commissioner informed all uniformed service members to be prepared for deploy
+
+========================================================================================================
+C11 rowid=217970  member=Alexandria Ocasio-Cortez show=cnr              kept_nw=21
+    KEPT tail   ...If these investigations fair out, it really starts to, I think, call into question the leadership that we currently have. [11:45:06]
+    CUT here -> class=C_unanchored_paren       tag='JONES (on camera)' disp=ledger_only_unresolved
+    REMOVED     JONES (on camera): Now, CNN has reached out to Bennett for comment on this latest accusation but has not received a response. CNN has not been able to corroborate the allegations. And when asked for further comment, Boylan, who is running for Manhattan borough president, said she wants her post on m
+
+========================================================================================================
+C12 rowid=219514  member=Alexandria Ocasio-Cortez show=cnr              kept_nw=8
+    KEPT tail   ...I'm concerned about her perceptions of reality. [14:25:00]
+    CUT here -> class=C_unanchored_paren       tag='NOBLES (on camera)' disp=ledger_only_unresolved
+    REMOVED     NOBLES (on camera): And despite all this ongoing tension between Republicans and Democrats, the House Speaker, Nancy Pelosi, is prepared to move forward with plans to form this bipartisan commission to look into the events of January 6th. She says she will bring a bill to the House floor as soon as 
+
+========================================================================================================
+C13 rowid=220358  member=Charles Schumer          show=cnnt             kept_nw=30
+    KEPT tail   ...Once again, Senate Republicans have signed their names in the ledger of history along Donald -- alongside Donald Trump the big lie and voter suppression to their enduring disgrace. [22:20:00]
+    CUT here -> class=C_unanchored_paren       tag='LEMON (on camera)' disp=ledger_only_unresolved
+    REMOVED     LEMON (on camera): Every single Republican senator blocking debate tonight on Democrats sweeping voting rights bill. It comes as sources tells CNN that the House Speaker Nancy Pelosi will appoint a select committee to investigate January 6th after Republicans also blocked a bipartisan commission. So
+
+========================================================================================================
+C14 rowid=221208  member=Elizabeth Warren         show=cnr              kept_nw=8
+    KEPT tail   ...Vote no to protect California and our democracy
+    CUT here -> class=C_unanchored_paren       tag='LAH (voice-over)' disp=ledger_only_unresolved
+    REMOVED     LAH (voice-over): Republicans do have challenges of their own.
+
+========================================================================================================
+C15 rowid=223703  member=Mike Johnson             show=cnr              kept_nw=2
+    KEPT tail   ...Yes. [04:45:00]
+    CUT here -> class=C_unanchored_paren       tag='CAMPBELL (voice-over)' disp=ledger_only_unresolved
+    REMOVED     CAMPBELL (voice-over): Of course, the encounter turned deadly for Wright, instead. When Potter fired her handgun instead of her Taser.
+
+========================================================================================================
+C16 rowid=224383  member=James Clyburn            show=cnnt             kept_nw=23
+    KEPT tail   ...I want to make sure that it's a woman that will get universal support. When I say universal, I mean bipartisan support. [22:20:00]
+    CUT here -> class=C_unanchored_paren       tag='LEMON (on camera)' disp=ledger_only_unresolved
+    REMOVED     LEMON (on camera): Justice Stephen Breyer's decision to retire is the big news tonight. After months of battling over voting rights and build back better Democrats now have a chance to come together, help the president deliver on a key campaign promise, nominating the first Black woman to the Suprem
+
+========================================================================================================
+C17 rowid=226758  member=Ruben Gallego            show=cnr              kept_nw=43
+    KEPT tail   ...The senator from my state, the senator from West Virginia, senators from everywhere, if you say that you're for women then do not use an old law that was not even, again, in the country's United States to stop protection for them. [05:05:00]
+    CUT here -> class=C_unanchored_paren       tag='RAJU (voice-over)' disp=ledger_only_unresolved
+    REMOVED     RAJU (voice-over): But two Democratic senators stand in the way of changing the filibuster rules fearing future GOP majority would enact an even more conservative agenda. At the White House, President Biden called for electing more Democrats to Congress.
+
+========================================================================================================
+C18 rowid=244518  member=Ron Johnson              show=cnr              kept_nw=54
+    KEPT tail   ...al threat. It would be grossly unfair to expect the PGA Tour to bear the full burden of holding Saudi Arabia accountable. After all, anyone who drives a car or uses oil-based products has helped fills the coffers of the Saudi public investment fund. [00:40:15]
+    CUT here -> class=C_unanchored_paren       tag='SCHOLES (voice-over)' disp=ledger_only_unresolved
+    REMOVED     SCHOLES (voice-over): And the framework agreement between the Saudis and the PGA Tour must still be approved by PGA Tour's 10-member policy board, which includes star Rory McIlroy and four other PGA Tour players. But when and if it does go through, it will be tough to heal the wounds of the last yea
+
+========================================================================================================
+C19 rowid=305576  member=Susan Collins            show=this-week        kept_nw=8
+    KEPT tail   ...I never take any race for granted. O’
+    CUT here -> class=C_unanchored_paren       tag='BRIEN (voice over)' disp=ledger_only_unresolved
+    REMOVED     BRIEN (voice over): As some Platner supporters tell us they’re grieving his campaign.
+
+========================================================================================================
+C20 rowid=308345  member=Brian Fitzpatrick        show=this-week        kept_nw=28
+    KEPT tail   ...I don’t even know how that’s allowable to happen. That sounds like a question our colleagues across the street are going to have to resolve pretty quickly. O’
+    CUT here -> class=C_unanchored_paren       tag='BRIEN (voice over)' disp=ledger_only_unresolved
+    REMOVED     BRIEN (voice over): The possible settlement is likely to face legal challenges. And it comes as the judge overseeing the case began to raise serious questions about the lawsuit moving forward last month. Judge Kathleen Williams writing, Trump’s “named adversaries are entities whose decisions are sub
+

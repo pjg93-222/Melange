@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H910877E31A7541E886BE436190F81799" public-private="public" key="H" bill-type="olc"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5137 IH: Supporting Transition And Recovery Through Housing Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-08-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code> 
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 5137</legis-num> 
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<action display="yes"> 
+<action-date date="20230804">August 4, 2023</action-date> 
+<action-desc><sponsor name-id="B001278">Ms. Bonamici</sponsor> (for herself and <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc> 
+</action> 
+<legis-type>A BILL</legis-type> 
+<official-title display="yes">To reauthorize and expand the pilot program to help individuals in recovery from a substance use disorder become stably housed, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H6F73FBA2E1314028A12791BAA2D1A928" style="OLC"> 
+<section id="H61D7E1CD60584717913DAD07E7DAC591" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Supporting Transition And Recovery Through Housing Act of 2023</short-title></quote> or the <quote><short-title>START Housing Act of 2023</short-title></quote>.</text></section> <section id="HCBCC4BB50AD64D0B861005A0F0F73D72"><enum>2.</enum><header>Reauthorization of Recovery Housing Program</header><text display-inline="no-display-inline">Section 8071 of the SUPPORT for Patients and Communities Act (<external-xref legal-doc="usc" parsable-cite="usc/42/5301">42 U.S.C. 5301</external-xref> note) is amended—</text> 
+<paragraph id="H935A5CD24DC444AEA05C5C26BA2E6915"><enum>(1)</enum><text>in subsection (a)—</text> <subparagraph id="H76E8C7C25BB744A59035F0F9472C3AD9"><enum>(A)</enum><text>by striking <quote>2019 through 2023</quote> and inserting <quote>2024 through 2029</quote>;</text></subparagraph> 
+<subparagraph id="HB45055EB03F14B4CA865B0C03B061802"><enum>(B)</enum><text> by striking <quote>for a period of not more than 2 years or</quote>; and</text></subparagraph> <subparagraph id="H42D4F2571D1644F4818BA7D23279A029"><enum>(C)</enum><text display-inline="yes-display-inline">by striking <quote>, whichever is earlier</quote>;</text></subparagraph></paragraph> 
+<paragraph id="H1C433A13CB224727A316C383588BBD19"><enum>(2)</enum><text>in subsection (b)—</text> <subparagraph id="H833A62465E374493813EEB7D8006AB55"><enum>(A)</enum><text>in paragraph (1), by inserting <quote>, acting through the Office of Community Planning and Development in consultation with the Office of Special Needs Assistance,</quote> before <quote>not later than</quote>; and </text></subparagraph> 
+<subparagraph id="HAD2C10E9D3E24E0493FB26B879E36FF2"><enum>(B)</enum><text>in paragraph (2)—</text> <clause id="H144F7F1242724F24B478681ED566CB31"><enum>(i)</enum><text display-inline="yes-display-inline">in subparagraph (A), by striking <quote>allocated to</quote> and inserting <quote>prioritized for</quote>; and</text></clause>
+<clause id="H05EB167E918F42C2BED24C1F5223A8E9"><enum>(ii)</enum><text>by striking subparagraph (B) and inserting the following new subparagraph:</text> <quoted-block style="OLC" id="HEB198B8AE1C54E39A32F8AB132AAD3C7" display-inline="no-display-inline"> <subparagraph id="HCA2DB75F4D4E4EAE8EECB3ABCA44F6E6"><enum>(B)</enum><header>Priority</header><text display-inline="yes-display-inline">Among the States, priority shall be given to States with the greatest need, as such need is determined by the Secretary based on the following factors:</text> 
+<clause id="H17C1086BA5714AF396181CADC6CCF501"><enum>(i)</enum><text display-inline="yes-display-inline">The highest average rates of unemployment based on data provided by the Bureau of Labor Statistics for calendar years 2019 through 2023.</text></clause> <clause id="HB448394F6DA04F8F90FEA077C2003B58"><enum>(ii)</enum><text> The lowest average labor force participation rates based on data provided by the Bureau of Labor Statistics for calendar years 2019 through 2023.</text></clause> 
+<clause id="H7E8B7CAE5B094BC28FC0EB3507153B6C"><enum>(iii)</enum><text>The highest age-adjusted rates of drug overdose deaths based on data from the Centers for Disease Control and Prevention.</text></clause> <clause id="H5E3DCB0BF48544A7AFE025047E995042"><enum>(iv)</enum><text display-inline="yes-display-inline">The highest rates of unsheltered homelessness as determined by the most recent annual point-in-time count of persons experiencing homelessness required by the Secretary of Housing and Urban Development under title IV of the McKinney-Vento Homeless Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/42/11360">42 U.S.C. 11360 et seq.</external-xref>).</text></clause></subparagraph><after-quoted-block>;</after-quoted-block></quoted-block></clause></subparagraph> </paragraph> 
+<paragraph id="H399477E8A03C4D5DBCF4444D69093CD5"><enum>(3)</enum><text>in subsection (c)—</text> <subparagraph id="HBDD26F0ED07B4F23A128BCC3D7FF7EDA"><enum>(A)</enum><text display-inline="yes-display-inline">in paragraph (2)—</text> 
+<clause id="HD75784FD0D9E492F9F5ABC875CE38154"><enum>(i)</enum><text>by inserting <quote>, low-barrier</quote> after <quote>effective</quote>; and</text></clause> <clause id="HE2372A93D9874F9596202ADE87C33934"><enum>(ii)</enum><text display-inline="yes-display-inline">by inserting before the period at the end the following: <quote>with an expectation that persons participating in the program have access to stable housing upon exiting the program</quote>; and</text></clause></subparagraph> 
+<subparagraph id="H655A8C22B7CB4B04A9F7D88E91C71DEB"><enum>(B)</enum><text>by adding at the end the following new paragraphs:</text> <quoted-block style="OLC" id="H42E735996C834F46AFB6F26AE81AE525" display-inline="no-display-inline"> <paragraph id="H0EC4FCB0B0AB4A85B0A7C7C0E964DA0E"><enum>(4)</enum><header>Supplement not supplant</header><text display-inline="yes-display-inline">As a condition of receiving funds under this section, a State shall use such funds received under this section only to supplement the level of State or local funds that would, in the absence of the receipt of funds under this section, be made available for related housing and recovery services.</text></paragraph> 
+<paragraph id="HBB47CE2B12D247D6BCA87BC4BDB83E86"><enum>(5)</enum><header>Consultation</header><text display-inline="yes-display-inline">Each State that receives amounts pursuant to this section shall consult with continuums of care and public housing agencies to assess needs for implementing funds and developing a plan to support individuals receiving stable housing in connection with funding under this section with transfer to other housing at the end of the individuals’ eligibility.</text></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block></subparagraph></paragraph> <paragraph id="H1D553A58CF0849418A3B056D66894C71"><enum>(4)</enum><text>by striking subsection (f) and inserting the following new subsection:</text> 
+<quoted-block style="OLC" id="HF329D22C2978454688562BB1A938D317" display-inline="no-display-inline"> 
+<subsection id="H22E46E2765B04ADFA367BAB908A017D6"><enum>(f)</enum><header>Technical assistance</header><text display-inline="yes-display-inline">The Secretary may use not more than 2 percent of the funds made available under this section for technical assistance, to publish best practices, and to conduct outreach to grantees or potentially eligible participants.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> </legis-body> </bill> 
+

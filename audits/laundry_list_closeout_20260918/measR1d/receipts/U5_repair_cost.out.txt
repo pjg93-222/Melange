@@ -1,0 +1,36 @@
+U2 flagged rows with a measured split offset : 4537
+all U2-affected rows (incl. R1-R5 residual)   : 5835
+
+INTERVIEW mentions in lane B refs.jsonl: 11365
+
+outcome after the repair                    windows of which    dyads
+                                                      SCORED         
+SAME (row not flagged)                        10194        0        0
+VANISH                                          908      283      486
+SAME (flagged row, window before split)         105        5        0
+REASSIGN                                         91       62       64
+TRUNC                                            67       11       46
+
+windows whose TEXT/SPEAKER changes -> cache MISS : 1066
+   of those currently inside n_scored (paid label now wasted): 356
+new windows needing a paid label to keep signed support       : 158 (REASSIGN+TRUNC only; VANISH windows disappear and need nothing)
+est --score cost at $0.006/context (member_reference_layer.py:205,:270): $0.95
+
+examples:
+  VANISH (segment speaker off-roster)                  sid=66651   Andrew Clyde -> Mike Rogers
+      let the swamp take out the chairman of our Freedom Caucus. RAJU (voice over): Good has also clashed over Pentagon spending with defense hawks, like Ho
+  VANISH (segment speaker off-roster)                  sid=66808   Thom Tillis -> Mitch McConnell
+      inaction's unacceptable. RAJU (voice-over): Two months ago, the Senate passed a $95 billion foreign aid package, with 22 Republicans voting for it, in
+  VANISH (segment speaker off-roster)                  sid=66987   Thomas Massie -> Mike Johnson
+      CONGRESSIONAL CORRESPONDENT (voice-over): Republican Congressman Thomas Massie announcing today he would support Congressman Marjorie Taylor Greene's 
+  VANISH (segment speaker off-roster)                  sid=66994   Thomas Massie -> Mike Johnson
+      CONGRESSIONAL CORRESPONDENT (voice-over): Republican Congressman Thomas Massey announcing today he would support Congressman Marjorie Taylor Greene's 
+  VANISH (segment speaker off-roster)                  sid=67006   Thomas Massie -> Mike Johnson
+      ONGRESSIONAL CORRESPONDENT (voice-over): Republican Congressman Thomas Massie announcing today, he would support Congressman Marjorie Taylor Greene's 
+  VANISH (segment speaker off-roster)                  sid=67104   Dan Crenshaw -> Mike Johnson
+      t they want to oust the Speaker over it, I think they want to be in the minority to -- everything. RAJU (on camera): Now, Democrats are not united on 
+  VANISH (segment speaker off-roster)                  sid=67104   Dan Crenshaw -> Pramila Jayapal
+      er it, I think they want to be in the minority to -- everything. RAJU (on camera): Now, Democrats are not united on the idea of saving Mike Johnson as
+  VANISH (segment speaker off-roster)                  sid=67115   Dan Crenshaw -> Mike Johnson
+      o win so badly that they wanted to oust the speaker over it. They didn't want to be minority, too. RAJU (on camera): Now, Democrats are not united on 
+DONE U5

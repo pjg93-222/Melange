@@ -1,0 +1,39 @@
+test_dial_one_reproduces_the_retired_rule_exactly (__main__.DeskRule.test_dial_one_reproduces_the_retired_rule_exactly) ... ok
+test_first_post_of_a_key_carries_no_note (__main__.DeskRule.test_first_post_of_a_key_carries_no_note) ... ok
+test_link_only_post_is_never_scored (__main__.DeskRule.test_link_only_post_is_never_scored) ... ok
+test_note_survives_a_missing_platform_or_date (__main__.DeskRule.test_note_survives_a_missing_platform_or_date) ... ok
+test_shipped_default_is_score_every_post (__main__.DeskRule.test_shipped_default_is_score_every_post) ... ok
+test_signed_duplicate_is_scored_and_carries_the_note (__main__.DeskRule.test_signed_duplicate_is_scored_and_carries_the_note) ... ok
+test_the_retired_label_is_gone_under_the_default (__main__.DeskRule.test_the_retired_label_is_gone_under_the_default) ... ok
+test_the_template_renders_the_note (__main__.DeskRule.test_the_template_renders_the_note) ... ok
+test_default_retains_repeats_and_still_counts_them (__main__.EngineRule.test_default_retains_repeats_and_still_counts_them) ... ok
+test_default_skips_link_only_rows (__main__.EngineRule.test_default_skips_link_only_rows) ... ok
+test_dial_is_off_by_default_in_the_producer (__main__.EngineRule.test_dial_is_off_by_default_in_the_producer) ... ok
+test_dial_one_drops_every_repeat (__main__.EngineRule.test_dial_one_drops_every_repeat) ... ok
+test_dial_one_keeps_the_first_link_only_row (__main__.EngineRule.test_dial_one_keeps_the_first_link_only_row)
+The revert switch restores the accident it replaced, exactly. ... ok
+test_davis_gains_evidence_from_the_shipped_dial (__main__.LiveBundle.test_davis_gains_evidence_from_the_shipped_dial)
+Davis's published scored set IS the shipped rule on his own rows, and ... skipped 'member_desk_bundle.json is not in this tree'
+test_dial_one_excludes_exactly_the_recomputed_repeats (__main__.LiveBundle.test_dial_one_excludes_exactly_the_recomputed_repeats)
+The revert switch's exclusion set, re-derived from today's rows. ... skipped 'member_desk_bundle.json is not in this tree'
+test_every_repeat_keeps_its_own_sign (__main__.LiveBundle.test_every_repeat_keeps_its_own_sign)
+No sign is borrowed from a twin: pol is the row's own, unchanged. ... skipped 'member_desk_bundle.json is not in this tree'
+test_link_only_census_is_nineteen_posts_across_seven_members (__main__.LiveBundle.test_link_only_census_is_nineteen_posts_across_seven_members) ... skipped 'member_desk_bundle.json is not in this tree'
+test_link_only_posts_stay_unscored_under_the_default (__main__.LiveBundle.test_link_only_posts_stay_unscored_under_the_default) ... skipped 'member_desk_bundle.json is not in this tree'
+test_the_also_note_marks_cross_posts_and_never_the_first_post (__main__.LiveBundle.test_the_also_note_marks_cross_posts_and_never_the_first_post)
+The display note is the only trace D4 leaves on a repeat. ... skipped 'member_desk_bundle.json is not in this tree'
+test_the_dial_moves_evidence_both_ways_by_its_own_census (__main__.LiveBundle.test_the_dial_moves_evidence_both_ways_by_its_own_census)
+Flipping to CROSSPOST_DEDUP=1 removes exactly the signed, texted ... skipped 'member_desk_bundle.json is not in this tree'
+test_the_published_bundle_is_the_shipped_rule_on_its_own_rows (__main__.LiveBundle.test_the_published_bundle_is_the_shipped_rule_on_its_own_rows)
+Every social row reproduces social_scoring(..., dedup=False) exactly. ... skipped 'member_desk_bundle.json is not in this tree'
+test_the_repeats_decompose_exactly (__main__.LiveBundle.test_the_repeats_decompose_exactly)
+Every repeat is accounted for: scored, neutral, or link-only -- and ... skipped 'member_desk_bundle.json is not in this tree'
+test_the_retired_label_is_absent_from_the_published_bundle (__main__.LiveBundle.test_the_retired_label_is_absent_from_the_published_bundle)
+CROSSPOST_DEDUP=0 ships, so no row may still carry DUPE_LABEL. ... skipped 'member_desk_bundle.json is not in this tree'
+test_apply_press_dedup_has_no_caller_in_the_tree (__main__.PressSheetProducer.test_apply_press_dedup_has_no_caller_in_the_tree) ... ok
+test_the_chain_runs_build_media_blend_and_not_apply_press_dedup (__main__.PressSheetProducer.test_the_chain_runs_build_media_blend_and_not_apply_press_dedup) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.100s
+
+OK (skipped=10)

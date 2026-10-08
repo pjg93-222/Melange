@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-TAM23563-KXD-DL-T2W">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 S1373 IS: Naloxone Affordability Act of 2023</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2023-04-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>118th CONGRESS</congress><session>1st Session</session>
+<legis-num>S. 1373</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20230427">April 27, 2023</action-date>
+<action-desc><sponsor name-id="S369">Mr. Markey</sponsor> (for himself, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S411">Mr. Marshall</cosponsor>, and <cosponsor name-id="S397">Mr. Braun</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To increase access to medication for opioid overdose reversal, and for other purposes.</official-title>
+</form>
+<legis-body id="HAAE859C7550C4B94B1866117B7B99057">
+<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Naloxone Affordability Act of 2023</short-title></quote>.</text></section> <section commented="no" display-inline="no-display-inline" section-type="subsequent-section" id="idda8d14b172ed4b15a4421213a8be8fc9"><enum>2.</enum><header>GAO study on naloxone access</header> <subsection id="ide7f6090be6cf4e5b87e8e891759e1dba"><enum>(a)</enum><header>In general</header><text>Not later than 1 year after the date of the enactment of this Act, the Comptroller General of the United States shall conduct a study on actions that may be taken to protect access to naloxone for individuals seeking to purchase naloxone. Such study shall address—</text>
+<paragraph id="id444b8dcf6f4a43aaa3258f32c530397f"><enum>(1)</enum><text>coverage of naloxone (in any available form) as an over-the-counter product—</text> <subparagraph id="idb145f9621eb8486db1f8b8b2206590ef"><enum>(A)</enum><text>under a group health plan or group or individual health insurance coverage (as such terms are defined in section 2791 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/300gg-91">42 U.S.C. 300gg–91</external-xref>)); and</text></subparagraph>
+<subparagraph id="ida3fb763c7f0f4572896e222ccdc222a9"><enum>(B)</enum><text>for individuals entitled to benefits under part A or enrolled under part B of title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395">42 U.S.C. 1395 et seq.</external-xref>) or receiving medical assistance under a State plan under title XIX of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1396">42 U.S.C. 1396 et seq.</external-xref>) (or a waiver of such plan); and</text></subparagraph></paragraph> <paragraph id="idc726f21224534fb89516ce5346c58f22"><enum>(2)</enum><text>the out-of-pocket cost to consumers purchasing naloxone under any such plan or coverage.</text></paragraph></subsection>
+<subsection id="id793fe45419294d818cb2d7f3151dbf44"><enum>(b)</enum><header>Report</header><text>Not later than 1 year after the date of the enactment of this Act, the Comptroller General of the United States shall submit to Congress a report that contains the findings of the study conducted under subsection (a).</text></subsection></section> </legis-body> </bill> 
+

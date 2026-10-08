@@ -272,7 +272,10 @@ def _engine_const():
             'SRCPRO': 1.7, 'SRCANTI': 0.5}
 
 
-def _desk_inputs(scale=1.0):
+CMULT = [1.0, 1.83, 1.45, 1.12, 2.0, 1.31]      # COMPET_MULT fixture: the per-member competitiveness multiplier c (dial ON)
+
+
+def _desk_inputs(scale=1.0, cmult=None):
     """The dashboard bundle's shapes: issue rows plus the appended Overall row the ROI loop skips.
     `scale` multiplies every edge weight; SUB_ONE puts every camp maximum strictly between 0 and 1."""
     overall = [MC.overall_tier(MATRIX[n]) for n in NAMES]
@@ -281,6 +284,8 @@ def _desk_inputs(scale=1.0):
     eng = {'const': _engine_const(), 'pers': dict(MC.PERS), 'cu': CU, 'ind': IND, 'rcp': RECEIPTS,
            'tierp': [0.5] * len(NAMES), 'bpf': BPF, 'eng': ENGAGEMENT + [mean],
            'priority': PRIORITY + [PRIORITY[0]], 'pmult': PMULT, 'dmult': DMULT}
+    if cmult is not None:
+        eng['cmult'] = list(cmult)
     idx = {n: i for i, n in enumerate(NAMES)}
     adj = {}
     for a, b, w in EDGES:
@@ -292,7 +297,7 @@ def _desk_inputs(scale=1.0):
 SUB_ONE = 0.1
 
 
-def _engine_roi(anti=None, scale=1.0, floor_at_one=False, edges=None):
+def _engine_roi(anti=None, scale=1.0, floor_at_one=False, edges=None, cmult=None):
     """flip_model's OWN topic_setup + pflip (lifted), summed like optimize.marg_at for one $10k chunk.
     Returns the ROI and each issue's (mAt, mBt). floor_at_one replays the desk/browser rule before
     2026-10-01, max(1, camp maximum), on the engine's own arithmetic: the negative control."""
@@ -324,7 +329,7 @@ def _engine_roi(anti=None, scale=1.0, floor_at_one=False, edges=None):
         maxima.append((mAt, mBt))
         for n in NAMES:
             i = idx[n]
-            args = (IND[i], RECEIPTS[i], nA[n], nB[n], mAt, mBt, PMULT[i])
+            args = (IND[i], RECEIPTS[i], nA[n], nB[n], mAt, mBt, PMULT[i]) + (() if cmult is None else (cmult[i],))
             roi[i] += tgt[n] * (fm['pflip'](CU[i] + 10000.0, *args) - fm['pflip'](CU[i], *args))
     return roi, maxima
 
@@ -405,7 +410,7 @@ def _browser_roi(eng, stance, adj, party, rows=None):
     n = len(stance)
     fixture = {'DATA': {'stance': stance},
                'EG': {'pers': eng['pers'], 'theta': {}, 'eng': eng['eng'], 'priority': eng.get('priority'),
-                      'tierp': eng['tierp'], 'rcp': eng['rcp']},
+                      'tierp': eng['tierp'], 'rcp': eng['rcp'], 'cmult': eng.get('cmult')},
                'K': eng['const'], 'PM': eng.get('pmult'), 'DM': eng.get('dmult'), 'BPF': eng['bpf'],
                'ADJ': [{str(v): w for v, w in adj.get(u, [])} for u in range(n)], 'PTY': list(party),
                'cu': eng['cu'], 'ind': eng['ind']}
@@ -548,6 +553,120 @@ def test_template_camp_and_align_treat_empty_and_undefined_as_neutral():
     out = json.loads(result.stdout)
     assert out['camp'] == ['pro', 'pro', 'pro', 'anti', 'anti', 'anti', 'neu', 'neu', 'neu', 'neu', 'neu', 'neu']
     assert out['align'] == [1.7, 0.5, 0.5, 1, 1, 1, 1, 1]
+
+
+# ---------------------------------------------------------------- COMPET_MULT: c on the desk, the engine and the browser
+def test_compet_desk_equals_lifted_flip_model_equals_browser_within_1e12():
+    for scale in (1.0, SUB_ONE):
+        eng, stance, adj, party = _desk_inputs(scale, cmult=CMULT)
+        desk = DESK_ROI(eng, stance, TIERNAME, adj, party)
+        engine, _maxima = _engine_roi(scale=scale, cmult=CMULT)
+        browser, _peaks = _browser_roi(eng, stance, adj, party)
+        assert all(abs(d - e) <= 1e-12 for d, e in zip(desk, engine)), (scale, list(zip(desk, engine)))
+        assert all(abs(d - b) <= 1e-12 for d, b in zip(desk, browser)), (scale, list(zip(desk, browser)))
+        eng0, stance0, adj0, party0 = _desk_inputs(scale)
+        off = DESK_ROI(eng0, stance0, TIERNAME, adj0, party0)
+        assert max(abs(a - b) for a, b in zip(desk, off)) > 1e-4         # c moves the ROI: the parity above is not vacuous
+
+
+def test_compet_negative_control_a_desk_that_ignores_c_fails_parity():
+    eng_c, stance, adj, party = _desk_inputs(cmult=CMULT)
+    eng_blind = {k: v for k, v in eng_c.items() if k != 'cmult'}          # the desk before COMPET_MULT: no c
+    blind = DESK_ROI(eng_blind, stance, TIERNAME, adj, party)
+    engine, _maxima = _engine_roi(cmult=CMULT)
+    assert max(abs(b - e) for b, e in zip(blind, engine)) > 1e-4
+    browser, _peaks = _browser_roi(eng_c, stance, adj, party)
+    assert max(abs(b - w) for b, w in zip(blind, browser)) > 1e-4
+
+
+def test_compet_all_ones_cmult_is_bitwise_the_no_cmult_desk():
+    eng, stance, adj, party = _desk_inputs()
+    ones = dict(eng, cmult=[1.0] * len(NAMES))
+    assert DESK_ROI(ones, stance, TIERNAME, adj, party) == DESK_ROI(eng, stance, TIERNAME, adj, party)    # ==, not within a tolerance
+    assert DESK_ROI(dict(eng, cmult=[]), stance, TIERNAME, adj, party) == DESK_ROI(eng, stance, TIERNAME, adj, party)   # empty = absent
+    base, _m = _engine_roi()                                   # and the engine (no cm argument) still agrees within 1e-12
+    assert all(abs(a - b) <= 1e-12 for a, b in zip(DESK_ROI(ones, stance, TIERNAME, adj, party), base))
+
+
+def test_compet_browser_shift_lean_dollars_for_units_and_break_even_carry_c():
+    if not NODE:
+        pytest.skip(NODE_SKIP)
+    source = _source(DASH_TPL)
+    engine = source[source.index('const SCN='):source.index('// stance-integrity gates')]
+    pick = lambda prefix: next(line for line in engine.splitlines() if line.startswith(prefix))
+    need_line = next(line for line in source.splitlines() if 'const need=Math.max(0' in line)
+    start = need_line.index('const need=')
+    need_stmt = need_line[start:need_line.index(';', start) + 1].replace('EG.cu[sel]', 'F.cu[sel]')
+    fixture = {'EG': {'rcp': RECEIPTS, 'cmult': CMULT},
+               'K': {'MAXSHIFT': 18, 'HALF': 0.10, 'HALFF': 0.10, 'LTPAR': 1, 'LTHALF': 0.10},
+               'PM': PMULT, 'cu': CU}
+    script = chr(10).join([
+        'const F=%s;const EG=F.EG,K=F.K,PM=F.PM;' % json.dumps(fixture),
+        pick('function shiftLean'), pick('function ltPM'), pick('function dollarsForUnits'),
+        'const ids=[0,1,2,3,4,5];',
+        'const need=sel=>{const q=0.4,cmS=EG.cmult[sel];%s return need;};' % need_stmt,
+        'console.log(JSON.stringify({shift:ids.map(u=>shiftLean(u,25000)),dfu:ids.map(u=>dollarsForUnits(u,0.4)),need:[1,2,4].map(need)}));'])
+    result = subprocess.run([NODE, '-e', script], capture_output=True, text=True, encoding='utf-8')
+    assert result.returncode == 0, result.stderr
+    out = json.loads(result.stdout)
+    for u in range(len(NAMES)):
+        r = CMULT[u] * 25000 / RECEIPTS[u]
+        assert abs(out['shift'][u] - 18 * (r / (r + 0.10)) * PMULT[u]) <= 1e-12            # shift_lean: r = c*amount/receipts
+        units = min(0.4 / max(PMULT[u], 1e-9), 0.98)
+        assert abs(out['dfu'][u] - 0.10 * RECEIPTS[u] * units / (1 - units) / CMULT[u]) <= 1e-9   # real $ = effective $ / c
+    for sel, dollars in zip((1, 2, 4), out['need']):                                        # break-even: the CU $ whose c-scaled pull equals q
+        assert dollars > 0
+        eff = CMULT[sel] * (CU[sel] + dollars)
+        assert abs((eff + 1) / (eff + 1 + 0.10 * RECEIPTS[sel]) - 0.4) <= 1e-5, (sel, dollars)
+
+
+def _template_pflip_terms(source):
+    """The template's OWN pflipOf and its head-to-head A / Bv lines (runScenario), sliced from `source` and run under node on a fixture
+    with a non-1 CMULT. Returns (pflipOf results per (member, camp, money) case, head-to-head CU share per case)."""
+    engine = source[source.index('const SCN='):source.index('// stance-integrity gates')]
+    pick = lambda text, prefix: next(line.strip() for line in text.splitlines() if line.strip().startswith(prefix))
+    c_line = pick(source, 'const c=baseCache[issue],pm=PM?PM[sel]:1')
+    a_line, b_line = pick(source, 'const A=K.WM*pm*'), pick(source, 'const Bv=K.WM*pm*')
+    cases = [(u, nA, nB, cu, ind, d_cu, d_co) for u in (1, 2, 4, 5) for nA, nB in ((0.8, 0.4), (0.3, 1.1))
+             for cu, ind in ((0, 0), (5000, 60000)) for d_cu, d_co in ((0, 0), (10000, 0), (0, 25000))]
+    fixture = {'EG': {'rcp': RECEIPTS, 'cmult': CMULT, 'cu': CU, 'ind': IND},
+               'K': {'WM': 0.35, 'WP': 0.65, 'HALFF': 0.10}, 'PM': PMULT, 'cases': cases}
+    script = chr(10).join([
+        'const F=%s;const EG=F.EG,K=F.K,PM=F.PM;' % json.dumps(fixture),
+        pick(engine, 'function pflipOf'),
+        'const out={p:[],h:[]};',
+        'for(const [u,nA,nB,cu0,ind0,cu,co] of F.cases){out.p.push(pflipOf(u,nA,nB,2.0,1.5,cu0,ind0));',
+        '  const sel=u,issue=0,baseCache=[{nAsel:nA,nBsel:nB,mA:2.0,mB:1.5}];',
+        c_line, a_line, b_line, '  out.h.push(A/(A+Bv));}',
+        'console.log(JSON.stringify(out));'])
+    result = subprocess.run([NODE, '-e', script], capture_output=True, text=True, encoding='utf-8')
+    assert result.returncode == 0, result.stderr
+    return cases, json.loads(result.stdout)
+
+
+def _template_vs_lifted_pflip_gap(source):
+    flip = _lift(FLIP_MODEL, functions=('pflip',), assigns=('WM', 'WP', 'HALFF'), namespace={'os': os})['pflip']
+    cases, out = _template_pflip_terms(source)
+    worst = 0.0
+    for (u, nA, nB, cu, ind, dcu, dco), p, h in zip(cases, out['p'], out['h']):
+        want_p = flip(cu, ind, RECEIPTS[u], nA, nB, 2.0, 1.5, PMULT[u], CMULT[u])
+        want_h = flip(CU[u] + dcu, IND[u] + dco, RECEIPTS[u], nA, nB, 2.0, 1.5, PMULT[u], CMULT[u])
+        worst = max(worst, abs(p - want_p), abs(h - want_h))
+    return worst
+
+
+def test_compet_template_pflip_of_and_head_to_head_match_lifted_pflip_and_fail_without_cm():
+    if not NODE:
+        pytest.skip(NODE_SKIP)
+    source = _source(DASH_TPL)
+    assert _template_vs_lifted_pflip_gap(source) <= 1e-12                      # pflipOf and the A/Bv head-to-head carry c on both legs
+    # negative controls: the same slices with cm removed (in-memory mutations of the template text) must FAIL the parity
+    no_cm_pflip = source.replace('cm=EG.cmult?EG.cmult[u]:1;const a=K.WM*pm*(cm*cu+1)', 'cm=1;const a=K.WM*pm*(cm*cu+1)')
+    assert no_cm_pflip != source and _template_vs_lifted_pflip_gap(no_cm_pflip) > 1e-6
+    no_cm_ind = source.replace('(cm*ind+1)/((cm*ind+1)', '(ind+1)/((ind+1)')
+    assert no_cm_ind != source and _template_vs_lifted_pflip_gap(no_cm_ind) > 1e-6
+    no_cm_h2h = source.replace('cmS=EG.cmult?EG.cmult[sel]:1;', 'cmS=1;')
+    assert no_cm_h2h != source and _template_vs_lifted_pflip_gap(no_cm_h2h) > 1e-6
 
 
 # ---------------------------------------------------------------- flip / coal thousands

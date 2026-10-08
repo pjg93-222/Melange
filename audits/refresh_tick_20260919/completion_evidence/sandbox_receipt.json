@@ -1,0 +1,16 @@
+{
+  "backward_clock_cross_tick": {
+    "collected": "COLLECTED_NOT_PUBLISHED",
+    "resumed": "PUBLISHED"
+  },
+  "stale_lease": {
+    "outcome": "FATAL_PRESTEP",
+    "exit": 1,
+    "wall": 0.23
+  },
+  "exclusive_manifest": {
+    "while_locked": "COLLECTED_NOT_PUBLISHED",
+    "after_release": "NOTHING_DUE",
+    "durable_state_preserved": true
+  }
+}

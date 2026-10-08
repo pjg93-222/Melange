@@ -1,0 +1,17 @@
+{
+    "materialized_utc":  "2026-08-18T00:52:02Z",
+    "source_live_head":  "1f1730950",
+    "entries":  [
+                    "OK    data\\engine\\congestion.json  sha DDC9D746600D",
+                    "OK    congress_cosponsor_network_20260625_205554.xlsx  sha 1FEAE7E161D1",
+                    "OK    congress_cosponsor_network_AUG20260802.xlsx  sha 55C11019C761",
+                    "OK    category_stance.json  sha 412F14017CFA",
+                    "OK    bipartisan.json  sha 429BF5DEAA17",
+                    "OK    member_receptivity.json  sha FF2A29ABF83A",
+                    "OK    optimize_result.json  sha 7C0CCFB809BC",
+                    "OK    data\\stance\\press_engagement.json  sha 076BDA18BA2C",
+                    "OK    data\\stance\\press_hcoi.json  sha 96453304B264",
+                    "OK    data\\lobbying\\social_interactions.json  sha 9AA288D25326",
+                    "OK    data\\network\\co_appearance.json  sha FBC4BFA485EE"
+                ]
+}

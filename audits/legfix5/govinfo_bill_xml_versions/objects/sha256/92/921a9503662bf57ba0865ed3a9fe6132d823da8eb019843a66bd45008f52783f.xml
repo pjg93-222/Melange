@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S630 IS: Arbitration Fairness for Consumers Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-02-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 630</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190228">February 28, 2019</action-date>
+			<action-desc><sponsor name-id="S307">Mr. Brown</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Consumer Financial Protection Act of 2010 with respect to arbitration.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Arbitration Fairness for Consumers Act</short-title></quote>.</text>
+ </section><section id="id9A4A12A57F0346CE84EABEA0FED6DEA5" section-type="subsequent-section"><enum>2.</enum><header>Purposes</header><text display-inline="no-display-inline">The purposes of this Act are to—</text> <paragraph id="id9e6f3a32f75045cf96e1a6e10cd16c06"><enum>(1)</enum><text>prohibit predispute arbitration agreements that force arbitration of future consumer financial product or service dispute; and</text>
+ </paragraph><paragraph id="id1148a734dc7b434384c02eda05b61206"><enum>(2)</enum><text>prohibit agreements and practices that interfere with the right of individuals and small businesses to participate in a joint, class, or collective action related to a consumer financial product or service dispute.</text>
+			</paragraph></section><section id="ideba04cb7321f47da977a8ccf5dc9a8ae"><enum>3.</enum><header>No validity or enforceability of predispute arbitration agreements or joint-action waivers</header>
+ <subsection id="idD668C9145BC043D3A4508B43B8C1178E"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subtitle C of the Consumer Financial Protection Act of 2010 (<external-xref legal-doc="usc" parsable-cite="usc/12/5531">12 U.S.C. 5531</external-xref> et seq.) is amended by inserting after section 1036 (<external-xref legal-doc="usc" parsable-cite="usc/15/5536">15 U.S.C. 5536</external-xref>) the following:</text>
+				<quoted-block display-inline="no-display-inline" id="idA5650A8101A549CA95278D6D25996F72" style="OLC">
+					<section id="id9BBFA7AA77FE460997B94F2868465534"><enum>1036A.</enum><header>No validity or enforceability of predispute arbitration agreements or joint-action waivers</header>
+ <subsection id="id9CB06EAB16FB40C7823E471E541AB569"><enum>(a)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="id63a40a8e6ecf469e923f140814a33271"><enum>(1)</enum><header>Class action</header><text>The term <term>class action</term> means a lawsuit in which 1 or more parties seek or obtain class treatment pursuant to rule 23 of the Federal Rules of Civil Procedure or comparable rule or provision of State law.</text>
+ </paragraph><paragraph id="idd726b4bb7b1d4a3aacb43c37dfad77cc"><enum>(2)</enum><header>Consumer dispute</header><text>The term <term>consumer dispute</term> means a dispute between—</text> <subparagraph id="idB37AAA7C5B6C43879236A6D1A99AD353"><enum>(A)</enum><text>an individual, including an individual who seeks certification as a class under rule 23 of the Federal Rules of Civil Procedure or a comparable rule or provision of State law, who for personal, family, or household purposes, seeks or acquires—</text>
+ <clause id="id0688E769409E4341A2379DF03A867F57"><enum>(i)</enum><text>real or personal property;</text> </clause><clause id="idA9041050CEA54C04A0AB80027F36A25F"><enum>(ii)</enum><text>services, including services related to digital technology;</text>
+ </clause><clause id="idB16D99E3A2A742D39C346073CAE57337"><enum>(iii)</enum><text>securities or other investments;</text> </clause><clause id="id0DD140DDCFBD46C5AA1F7AC2966421CC"><enum>(iv)</enum><text>money; or</text>
+ </clause><clause id="id5FA1E9B2EAC34A84BCA93D1FEA5564A1"><enum>(v)</enum><text>credit; and</text> </clause></subparagraph><subparagraph id="id5a3a0fd61c8f4dd98ef3c45be2c1370f"><enum>(B)</enum><text>the seller or provider of such property, services, securities or other investments, money, or credit, including a third party involved in the selling, providing of, payment for, receipt or use of information about, or other relationship to any such property, services, securities or other investments, money, or credit.</text>
+ </subparagraph></paragraph><paragraph id="idc959e18c07274852a037889ec054f547"><enum>(3)</enum><header>Predispute arbitration agreement</header><text>The term <term>predispute arbitration agreement</term> means an agreement to arbitrate a dispute that has not yet arisen at the time of the making of the agreement.</text>
+ </paragraph><paragraph id="id498b3eafbf1b48bf971d340419611ebf"><enum>(4)</enum><header>Pre-dispute joint-action waiver</header><text>The term <term>pre-dispute joint-action waiver</term> means an agreement, whether or not part of a predispute arbitration agreement, that would prohibit, or waive the right of, one of the parties to the agreement to participate in a joint, class, or collective action in a judicial, arbitral, administrative, or other forum, concerning a dispute that has not yet arisen at the time of the making of the agreement.</text>
+							</paragraph></subsection><subsection id="id46b4fd953b6f49e6830fbbb93021e6d2"><enum>(b)</enum><header>No validity or enforceability of predispute arbitration agreements or joint-Action waivers</header>
+ <paragraph id="id6e5621e2e1d54413acc2058365d94704"><enum>(1)</enum><header>In general</header><text>Notwithstanding any other provision of law, no predispute arbitration agreement or predispute joint-action waiver shall be valid or enforceable with respect to a consumer dispute between a covered person and a consumer that relates to a consumer financial product or service.</text>
+ </paragraph><paragraph id="id87b26b627068425aa758f5b5b4ae514e"><enum>(2)</enum><header>Applicability</header><text>An issue as to whether this section applies with respect to a dispute shall be determined under Federal law. The applicability of this chapter to an agreement to arbitrate and the validity and enforceability of an agreement to which this section applies shall be determined by a court, rather than an arbitrator, irrespective of whether the party resisting arbitration challenges the arbitration agreement specifically or in conjunction with other terms of the contract containing the agreement, and irrespective of whether the agreement purports to delegate such determinations to an arbitrator.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="id3a0f54073705450cacd40d6c261cb4fa"><enum>(b)</enum><header>Technical and conforming amendments</header><text>The table of contents for the Dodd-Frank Wall Street Reform and Consumer Protection Act is amended by inserting after the item relating to section 1036 the following:</text>
+				<quoted-block id="idc87bfda8-7d09-4daf-b518-1c82f2279cd0" style="OLC"><toc><toc-entry idref="id9BBFA7AA77FE460997B94F2868465534" level="section">1036A. No validity or enforceability of predispute arbitration agreements or joint-action waivers.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection></section><section id="idb887c20a72be40e6bc4663897ddcd096"><enum>4.</enum><header>Applicability</header><text display-inline="no-display-inline">This Act, and the amendments made by this Act, shall apply with respect to any dispute or claim that arises or accrues on or after the date of enactment of this Act.</text>
+		</section></legis-body>
+</bill>
+
+

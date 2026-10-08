@@ -1,0 +1,89 @@
+# The gc and rebuild evidence (scripts/evidence.sh): clean exports of 79ef9f1b7 (before) and the v4.1 tip (after), one process at a time under memrun.py with a 1000 MB cap.
+
+============================================================ BEFORE: 79ef9f1b7 (v4)
+## publish_memory.py 20000 people: exit=0 wall=8.2s peak_rss=304MB cap_killed=False
+{"label": "base_v4", "people": 20000, "episodes_per_person": 3.0, "offices": 400, "has_release": true, "prewarm1": {"status": "done", "gc_ms": 105.95, "total_ms": 1267.52}, "rss_start_mb": 73, "rss_r1_i1_mb": 263, "blocks_r1_i1_m": 2.16, "rss_r2_built_mb": 312, "blocks_r2_built_m": 3.01, "rss_swapped_mb": 291, "blocks_swapped_m": 2.39, "phase2_seconds": 2.0, "rss_end_mb": 291, "blocks_end_m": 2.16, "peak_phase1_mb": 311, "peak_phase2_mb": 299, "peak_blocks_phase2_m": 2.97, "peak_wset_mb": 312, "prewarm2": {"status": "done", "total_ms": 1966.06, "gc_ms": 361.99}, "indexes_on_current_router": 1}
+
+## publish_memory.py 40000 people: exit=0 wall=13.5s peak_rss=521MB cap_killed=False
+{"label": "base_v4", "people": 40000, "episodes_per_person": 3.0, "offices": 600, "has_release": true, "prewarm1": {"status": "done", "gc_ms": 180.07, "total_ms": 2742.06}, "rss_start_mb": 73, "rss_r1_i1_mb": 422, "blocks_r1_i1_m": 3.65, "rss_r2_built_mb": 522, "blocks_r2_built_m": 5.37, "rss_swapped_mb": 476, "blocks_swapped_m": 4.13, "phase2_seconds": 3.8, "rss_end_mb": 460, "blocks_end_m": 3.65, "peak_phase1_mb": 521, "peak_phase2_mb": 498, "peak_blocks_phase2_m": 5.29, "peak_wset_mb": 522, "prewarm2": {"status": "done", "total_ms": 3809.33, "gc_ms": 976.22}, "indexes_on_current_router": 1}
+
+## gc_measure.py 20000: exit=0 wall=7.2s peak_rss=469MB cap_killed=False
+people 20000: rss 279 MB, tracked objects 0.42 M, allocated blocks 2.27 M
+  startup case (nothing to free): [105, 107, 105] ms  -> 252 ns per tracked object, 0.38 ms per MB rss
+  publish case (one replaced router to free): 257 ms, 180419 objects freed, rss 430 -> 347 MB
+
+## stress_release.py: exit=0 wall=25.3s peak_rss=238MB cap_killed=False
+part 1: 36 requests {'single': 8, 'distinct': 7, 'independent': 7, 'ranked': 7, 'avoid': 7}; statuses {'found': 36}; baseline builds {'twin': 1}
+part 1: requests 102 {'ranked': 21, 'single': 28, 'avoid': 23, 'distinct': 17, 'independent': 13}; releases {'release': 275, 'forget': 83}; index builds on the stressed router 32; errors 0; mismatches 0
+part 1: requests that used more than one index object (a rebuild between their own route() calls): {'independent': 10, 'distinct': 13, 'avoid': 18}
+part 2: one release inside the first pass of the request (after its search ran), for each strategy
+  distinct    released=True  index fetches=3  distinct index objects=2  builds during the request=1  same answer=True  routes_returned=3
+  independent released=True  index fetches=2  distinct index objects=2  builds during the request=1  same answer=True  routes_returned=1
+  ranked      released=True  index fetches=1  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=3
+  single      released=True  index fetches=1  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=None
+part 3: service, in-flight prewarm build on the old router, a waiting request, a publish, and the collection
+  a: table empty right after the release=True; old router alive after everything=True, its in-flight build re-inserted into the released table=True; builds=2; request on the old router same answer=True; new prewarm done gc_ms=107.26; alive after one more collect=True
+  b: table empty right after the release=True; old router alive after everything=True, its in-flight build re-inserted into the released table=True; builds=2; request on the old router same answer=True; new prewarm done gc_ms=100.71; alive after one more collect=False
+  c: table empty right after the release=True; old router alive after everything=False, its in-flight build re-inserted into the released table=False; builds=2; request on the old router same answer=True; new prewarm done gc_ms=113.53; alive after one more collect=False
+
+## rebuild_between_passes.py (part 2 on a fresh warm router per strategy): exit=0 wall=8.0s peak_rss=97MB cap_killed=False
+part 2 (fresh router per strategy): one release inside the request, after its first search ran
+  distinct    released=True  index fetches=3  distinct index objects=2  builds during the request=1  same answer=True  routes_returned=3
+  independent released=True  index fetches=3  distinct index objects=2  builds during the request=1  same answer=True  routes_returned=2
+  ranked      released=True  index fetches=1  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=3
+  single      released=True  index fetches=1  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=None
+
+## directory_mode.py
+payroll_and_directory  status=found      uncovered=[] target=p1 basis=(absent) | page line: (no line)
+directory              status=found      uncovered=['p1'] target=d1 basis=(absent) | page line: 1 of this office's current staff lacks the payroll or staffer-roster coverage this model requires and was left out.
+p1 has payroll rows in the data: True
+
+============================================================ AFTER: the v4.1 tip
+## publish_memory.py 20000 people: exit=0 wall=9.0s peak_rss=311MB cap_killed=False
+{"label": "tip_v41", "people": 20000, "episodes_per_person": 3.0, "offices": 400, "has_release": true, "prewarm1": {"status": "done", "total_ms": 1580.16}, "rss_start_mb": 73, "rss_r1_i1_mb": 263, "blocks_r1_i1_m": 2.16, "rss_r2_built_mb": 312, "blocks_r2_built_m": 3.01, "rss_swapped_mb": 292, "blocks_swapped_m": 2.39, "phase2_seconds": 2.4, "rss_end_mb": 291, "blocks_end_m": 2.16, "peak_phase1_mb": 310, "peak_phase2_mb": 299, "peak_blocks_phase2_m": 2.97, "peak_wset_mb": 312, "prewarm2": {"status": "done", "total_ms": 2426.8, "gc_ms": 533.7}, "indexes_on_current_router": 1}
+
+## publish_memory.py 40000 people: exit=0 wall=18.0s peak_rss=512MB cap_killed=False
+{"label": "tip_v41", "people": 40000, "episodes_per_person": 3.0, "offices": 600, "has_release": true, "prewarm1": {"status": "done", "total_ms": 3768.87}, "rss_start_mb": 73, "rss_r1_i1_mb": 423, "blocks_r1_i1_m": 3.65, "rss_r2_built_mb": 522, "blocks_r2_built_m": 5.37, "rss_swapped_mb": 475, "blocks_swapped_m": 4.13, "phase2_seconds": 6.1, "rss_end_mb": 461, "blocks_end_m": 3.65, "peak_phase1_mb": 521, "peak_phase2_mb": 499, "peak_blocks_phase2_m": 5.3, "peak_wset_mb": 522, "prewarm2": {"status": "done", "total_ms": 6137.75, "gc_ms": 919.68}, "indexes_on_current_router": 1}
+
+## gc_measure.py 20000: exit=0 wall=10.4s peak_rss=467MB cap_killed=False
+people 20000: rss 279 MB, tracked objects 0.42 M, allocated blocks 2.27 M
+  startup case (nothing to free): [160, 181, 153] ms  -> 365 ns per tracked object, 0.55 ms per MB rss
+  publish case (one replaced router to free): 499 ms, 180419 objects freed, rss 430 -> 350 MB
+
+## stress_release.py: exit=0 wall=51.2s peak_rss=240MB cap_killed=False
+(on v4.1 the router stress_release.py runs this part on has been released for good by its part 1, so a request on it builds one index of its own, which is what the "builds during the request=1" column says there; the next section runs the same scenario on a router that has not been released)
+part 1: 36 requests {'single': 8, 'distinct': 7, 'independent': 7, 'ranked': 7, 'avoid': 7}; statuses {'found': 36}; baseline builds {'twin': 1}
+part 1: requests 184 {'single': 47, 'ranked': 37, 'avoid': 39, 'distinct': 36, 'independent': 25}; releases {'release': 583, 'forget': 187}; index builds on the stressed router 60; errors 0; mismatches 0
+part 1: requests that used more than one index object (a rebuild between their own route() calls): {}
+part 2: one release inside the first pass of the request (after its search ran), for each strategy
+  distinct    released=True  index fetches=3  distinct index objects=1  builds during the request=1  same answer=True  routes_returned=3
+  independent released=True  index fetches=2  distinct index objects=1  builds during the request=1  same answer=True  routes_returned=1
+  ranked      released=True  index fetches=1  distinct index objects=1  builds during the request=1  same answer=True  routes_returned=3
+  single      released=True  index fetches=1  distinct index objects=1  builds during the request=1  same answer=True  routes_returned=None
+part 3: service, in-flight prewarm build on the old router, a waiting request, a publish, and the collection
+  a: table empty right after the release=True; old router alive after everything=True, its in-flight build re-inserted into the released table=False; builds=2; request on the old router same answer=True; new prewarm done gc_ms=97.72; alive after one more collect=True
+  b: table empty right after the release=True; old router alive after everything=True, its in-flight build re-inserted into the released table=False; builds=2; request on the old router same answer=True; new prewarm done gc_ms=98.18; alive after one more collect=False
+  c: table empty right after the release=True; old router alive after everything=False, its in-flight build re-inserted into the released table=False; builds=2; request on the old router same answer=True; new prewarm done gc_ms=101.46; alive after one more collect=False
+
+## rebuild_between_passes.py (part 2 on a fresh warm router per strategy): exit=0 wall=5.7s peak_rss=94MB cap_killed=False
+part 2 (fresh router per strategy): one release inside the request, after its first search ran
+  distinct    released=True  index fetches=3  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=3
+  independent released=True  index fetches=3  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=2
+  ranked      released=True  index fetches=1  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=3
+  single      released=True  index fetches=1  distinct index objects=1  builds during the request=0  same answer=True  routes_returned=None
+
+## directory_mode.py
+payroll_and_directory  status=found      uncovered=[] target=p1 basis=payroll_or_roster | page line: (no line)
+directory              status=found      uncovered=['p1'] target=d1 basis=roster | page line: 1 of this office's current staff lacks the staffer-roster coverage this model requires and was left out.
+p1 has payroll rows in the data: True
+
+============================================================ gc_measure.py repeated, alternating the trees
+# gc_measure.py 20000 repeated, alternating the two trees, nothing else running (06:2x on 2026-10-04): the collection with nothing to free (the start-up case), three timings per run, in ms
+base_v4 run 1: [146, 147, 160]  -> 348 ns per tracked object, 0.52 ms per MB rss
+tip_v41 run 1: [153, 156, 153]  -> 366 ns per tracked object, 0.55 ms per MB rss
+base_v4 run 2: [148, 153, 154]  -> 354 ns per tracked object, 0.53 ms per MB rss
+tip_v41 run 2: [151, 155, 157]  -> 360 ns per tracked object, 0.54 ms per MB rss
+base_v4 run 3: [155, 160, 172]  -> 370 ns per tracked object, 0.56 ms per MB rss
+tip_v41 run 3: [159, 162, 145]  -> 346 ns per tracked object, 0.52 ms per MB rss
+# The cost of one collection with nothing to free is the same on both trees (about 145 to 170 ms for 0.42 million tracked objects): this round did not change what a collection costs, it removed the one that ran at a start.
+# The first evidence run (evidence.sh) read 105 ms on the v4 tree and 153 to 181 ms on the v4.1 tree; that spread is run-to-run variation on this host.

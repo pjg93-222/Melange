@@ -1,0 +1,23 @@
+﻿plus7 dry run planned 5477 truncations; --apply reported rows_truncated=5477 rows_skipped=807 rows_inserted=0 rows_deleted=0
+opened live + backup read-only (query_only=1)
+
+C01   PASS   speeches row count unchanged  |  live=270489 backup=270489 expected=270489
+C02   PASS   rowid set identical  |  live-only=0 backup-only=0
+C03   PASS   rows whose text differs == ledger rows == planned truncations  |  text_differs=5477 ledger=5477 ledger_unrestored=5477 planned=5477
+C04   PASS   changed set == ledger set == planned set (same members, not just counts)  |  changed\ledger=0 ledger\changed=0 changed\planned=0 planned\changed=0
+C05   PASS   every changed row is a strict prefix of its old text  |  not_a_prefix=0 (of which explained by leading whitespace: 0) not_shorter=0 []
+C06   PASS   nwords == len(text.split()) on changed rows and on every INTERVIEW row  |  changed_violations=0 [] ; INTERVIEW rows scanned=153576 violations=0
+C07   PASS   no other column changed anywhere; nwords moved only where text moved  |  rows_with_other_column_change=0 rows_with_nwords_change_but_same_text=0
+C08   PASS   every other table identical in row count; the ledger is the only new table  |  new=['speeches_turn_split_ledger'] lost=[] count_mismatches=[]
+C09   PASS   probe rowid 245771 byte-identical to the backup  |  nwords live=33 backup=33  text sha256 live=6389954091b9975f backup=6389954091b9975f
+C10   PASS   no protected rowid was touched (all 2105 compared)  |  protected rows in the changed set: []
+C11   PASS   ledger reconstructs every original byte for byte (sha + full row json agree)  |  joined=5477 recon_fail=[] sha_fail=[] row_json_fail=[]
+C12   PASS   live text of every changed row == the kept_text the dry run planned  |  mismatches=0 []
+C13   PASS   nothing grew; the measured word delta reconciles with --apply exactly  |  rows_that_grew=0  measured_word_delta=346496 + mid_token_cuts=4 == apply_reported=346500 ; measured_char_delta=2099811 vs apply_reported=2094338, difference 5473 = the trailing whitespace kept_text.strip() also drops (a06b_word_delta_explain.py itemises all 4 mid-token cuts; the ledger still reconstructs every original byte for byte)
+
+planned skips by binding reason: {'kept_text_under_min_turn_words': 674, 'label_or_gold_record_points_here': 114, 'credit_union_stance_channel_row': 19}
+ledger rows with restored_at NOT NULL: 0
+ledger tool_version values: ['interview-turn-bleed-v2-truncate-only']
+
+13 checks, 13 PASS, 0 FAIL
+VERDICT: ALL CHECKS PASS

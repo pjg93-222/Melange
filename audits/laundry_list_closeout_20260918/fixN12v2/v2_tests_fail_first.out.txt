@@ -1,0 +1,81 @@
+[the dial: two positions, nothing else]
+  OK   default is the repaired rule
+  OK   the dial name is IV_TURN_TAGS
+  OK   only "1" selects legacy; a typo falls back to the default, never to a third behaviour
+[legacy collector patterns are byte-identical to fetch_interviews.py at 35521f9aa]
+  OK   LABEL legacy pattern is byte-identical
+  OK   INLINE_LABEL legacy pattern is byte-identical
+  OK   MIXED_LABEL legacy pattern is byte-identical
+  OK   the repaired patterns are not the legacy ones
+[the collector compiles the grammar from the module, and reads the dial once]
+  OK   fetch_interviews.py imports the grammar module
+  OK   the dial is read once, at top level, with the repaired default
+  OK   LABEL, INLINE_LABEL and MIXED_LABEL all come from the module
+  OK   no raw ALL-CAPS label literal is left behind in the collector
+  OK   the collector still drops micro-interjections at the same floor, at all four sites
+  OK   scrub() keeps its acronym guard
+  OK   the two other collectors are untouched by this change
+[collector: a page that carries only legacy shapes parses identically under both dials]
+  OK   LABEL: identical boundaries on a legacy-only page
+  OK   INLINE_LABEL: identical truncation markers on a legacy-only page
+[collector: the repaired patterns see the three shapes the legacy ones cannot]
+  OK   LABEL repaired sees the backtick form, legacy does not
+  OK   LABEL repaired sees the lower-case parenthetical form, legacy does not
+  OK   LABEL repaired sees the bracketed timestamp form, legacy does not
+  OK   INLINE_LABEL repaired truncates at the backtick tag, legacy does not
+  OK   INLINE_LABEL repaired truncates at a parenthetical tag, legacy does not
+  OK   MIXED_LABEL repaired sees the PBS title tail, legacy does not
+  OK   MIXED_LABEL repaired still matches the party tail it always matched
+  OK   a label parenthetical can never hide a colon (parse_turns cuts on sp.index(":"))
+[stored text: every graded shape splits]
+  OK   splits: backtick host tag (U2 tagfreq #1, 1,434 occurrences)
+  OK   splits: lower-case parenthetical (U2 tagfreq #2)
+  OK   splits: on-camera parenthetical (U2 tagfreq #3)
+  OK   splits: R1 STOP-name tag with a broadcast parenthetical
+  OK   splits: R2 correspondent surname the lexicon never saw
+  OK   splits: R3 tag after a bracketed timestamp (anchor fails)
+  OK   splits: R3 tag after a comma (anchor fails)
+  OK   splits: full correspondent tag with a role tail
+  OK   splits: the contaminated in-use gold row, verbatim (measR1d U3U4 #15, speeches row 245771)
+  OK   splits: R4 PBS "<Name>, U.S. <Title>:" label
+  OK   splits: R4 mixed-case honorific prefix
+  OK   splits: R5 colon-less honorific tag
+[stored text: every false marker the measurement proved must NOT split]
+  OK   does not split: an acronym-colon construction in real speech
+  OK   does not split: an ALL-CAPS document heading
+  OK   does not split: a bare agency tag with no parenthetical
+  OK   does not split: a mid-sentence attribution verb
+  OK   does not split: a network name with no parenthetical
+  OK   does not split: a truncated honorific residue with no name
+  OK   does not split: an all-caps Washington Journal row (unmeasured, must be left alone)
+  OK   does not split: a mixed-case sentence start in a NON-mixed-case leg
+  OK   does not split: a mixed-case editorial heading in a mixed-case leg
+  OK   FMR. HUD on its own is not a speaker (no name follows the honorific)
+[stored text: the guards N12 added to the colon-less class, each measured]
+  OK   a deepfake stage direction is not a turn, possessive and all (rows 225771 / 242500)
+  OK   a possessive INSIDE a real colon-less tag still splits (row 191195 is a real bleed)
+  OK   the run crosses a bracketed timestamp and an ALL-CAPS parenthetical (row 70117)
+  OK   a colon-less tag inside an unclosed parenthesis is a stage direction (row 225128)
+  OK   the colon-less start is extended back over the whole ALL-CAPS run (row 69954 shape)
+  OK   the extension never crosses a sentence terminator, so a closing acronym stays with the member
+  OK   a mid-sentence colon-less mention is not a turn boundary
+  OK   an abbreviation does not open a false sentence for the mixed-case rule (row 260197)
+  OK   a heading whose every token is a STOP word never qualifies
+[V2 grade counter-example: the no-space colon MTP writes (G1 MECHANISM 1, 38 corpus rows)]
+  FAIL CHUCK TODD:It  -- a colon with no space after it is still a turn boundary (row 104285)  :: ('a’s chemical weapons than you have been.', [])
+  OK   the no-space form still needs a qualifying name: a time of day is not a tag
+  OK   the no-space form does not fire on an acronym or a heading word
+[V2 grade counter-example: UNIDENTIFIED / quoted / dated role tails (G1 MECHANISM 2)]
+  FAIL UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017:  splits (row 102837, 75 corpus rows)  :: ('Senate both among Republicans.', [])
+  FAIL UNIDENTIFIED MALE #1: splits too (the hash-number form, rows 70228 / 70229)
+  FAIL BRET BAIER, HOST OF "SPECIAL REPORT":  splits (row 242833, 215 of 262 words were his)  :: ('o come to the floor this week.', [])
+  OK   a quoted, slashed and dated role tail splits (row 102837 head)
+[V2 grade counter-example: non-ASCII and curly-apostrophe names (G2a / G2e)]
+  FAIL Laura Barrón-López: splits (row 258713; MIXED name tokens were ASCII-only)  :: (' Russian forces attacked Kyiv.', [])
+  FAIL Fred de Sam Lazaro: splits -- a lower-case name particle (row 257343)  :: (' a minimum number of officers.', [])
+  FAIL O’BRIEN (voice over): splits -- U+2019 joins the name class (row 80974, 183 corpus rows)  :: ('l Hill are nowhere to be found. O’', ['BRIEN (voice over)'])
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\members\test_interview_turn_tags.py", line 389, in <module>
+    and TT.own_lenient('O�ALPHER', "Ada O'Alpher"))
+        ^^^^^^^^^^^^^^
+AttributeError: module 'members.turn_tags' has no attribute 'own_lenient'

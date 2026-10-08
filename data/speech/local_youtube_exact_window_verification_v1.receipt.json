@@ -1,0 +1,98 @@
+{
+  "contract": {
+    "approved_first_name_alias_may_satisfy_first_name": true,
+    "complete_profile_required_for_canonical_append": true,
+    "ecapa_is_positive_cold_identity_authority": false,
+    "existing_verified_windows_count_toward_profile_floor": true,
+    "explicit_pass_override_is_revalidation_only": true,
+    "half_consistency_reject_floor": 0.35,
+    "in_band_identity_signal_required": true,
+    "locked_other_speaker_floor": 0.595722615,
+    "maximum_internal_silence_seconds": 1.2,
+    "minimum_voiced_ratio": 0.8,
+    "seed_coherence_floor": 0.595722615,
+    "surname_still_required_with_approved_first_name_alias": true,
+    "turn_inset_seconds": 2.0,
+    "window_frames": 128000,
+    "window_seconds": 8.0
+  },
+  "coverage": {
+    "canonical_rows_appended": 5,
+    "canonical_rows_planned": 31,
+    "canonical_rows_rebound_existing": 26,
+    "complete_profile_members": [
+      "Christian Menefee",
+      "Gabe Evans",
+      "Gregory Murphy",
+      "James Gallagher",
+      "James Justice",
+      "Julie Johnson",
+      "Laura Friedman",
+      "Randy Feenstra",
+      "Timothy Kennedy"
+    ],
+    "excluded_video_ids": [],
+    "explicit_pass_overrides": {
+      "Christian Menefee": 3,
+      "Gabe Evans": 2,
+      "Gregory Murphy": 3,
+      "James Gallagher": 3,
+      "James Justice": 2,
+      "Julie Johnson": 5,
+      "Laura Friedman": 3,
+      "Timothy Kennedy": 5
+    },
+    "members_with_complete_profiles": 9,
+    "passed_exact_windows": 31,
+    "refused_exact_windows": 41,
+    "residual_passes_required_by_member": {
+      "Christian Menefee": 3,
+      "Gabe Evans": 2,
+      "Gregory Murphy": 3,
+      "James Gallagher": 3,
+      "James Justice": 2,
+      "Julie Johnson": 5,
+      "Laura Friedman": 3,
+      "Randy Feenstra": 5,
+      "Timothy Kennedy": 5
+    },
+    "source_candidates": 10,
+    "verification_rows": 72
+  },
+  "generated_at": "2026-08-31T16:08:40.847197+00:00",
+  "inputs": {
+    "anchor_receipt": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\speaker_anchor_vault_all_verified_v3.receipt.json",
+      "sha256": "f4538da4c7cc66d480243029f1e493d996ce98a32284f3e81a48db0cb09e84a8"
+    },
+    "anchor_vectors": {
+      "path": "C:\\melange-data\\speaker_anchor_vault_expanded_v2\\ecapa_anchor_vectors_v2.npz",
+      "sha256": "d95f5eece35cb538f65ac35dee691b412bd10643700403826bd30e74954ff06c"
+    },
+    "candidates": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\local_youtube_turn_candidates_v1.jsonl",
+      "sha256": "e724d093c5e7cd3e4d7a7e4680cec400d18998b5675e1087f3f9a696b883b8da"
+    },
+    "census": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\congress_audio_profile_census_full_v1.jsonl",
+      "sha256": "03d4c4d3ebdf14abd04713cae95145f6fcf0dae72a39b9ad37c464a9cc2cb58d"
+    },
+    "model_manifest": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\ecapa_model_manifest_v2.json",
+      "sha256": "dce28433d1ad56a720ace72e8d6b7db0cd3e29665d7d1cf3cef2b544b9d07ff3"
+    }
+  },
+  "mode": "write",
+  "output": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\local_youtube_exact_window_verification_v1.jsonl",
+    "sha256": "a62c8936c7cc2245c9b648dc50c8715166ee307a14efb10e49614235666d8046"
+  },
+  "refusal_reasons": {
+    "half_voice_inconsistent": 1,
+    "question_mark_inside_window": 4,
+    "target_seed_voice_inconsistent": 11,
+    "voiced_ratio_below_floor": 38
+  },
+  "schema": "local-youtube-exact-window-verification-receipt-v1",
+  "status": "PASS"
+}

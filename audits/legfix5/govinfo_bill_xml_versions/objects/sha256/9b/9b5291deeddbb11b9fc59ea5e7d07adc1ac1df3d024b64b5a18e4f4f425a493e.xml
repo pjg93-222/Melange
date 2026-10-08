@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H3B8B2E0D394E4AC6BDC272CA51744505" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1060 IH: Building Up Independent Lives and Dreams Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1060</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190207">February 7, 2019</action-date><action-desc><sponsor name-id="L000583">Mr. Loudermilk</sponsor> (for himself and <cosponsor name-id="S000344">Mr. Sherman</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To provide regulatory relief to charitable organizations that provide housing assistance, and for
+			 other purposes.</official-title></form>
+	<legis-body id="H3259D8A656AD4650BD4E3AA6A7B7A981" style="OLC">
+ <section id="H14C6A0E549784E1580C2FA58FC0791BC" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Building Up Independent Lives and Dreams Act</short-title></quote> or the <quote><short-title>BUILD Act</short-title></quote>.</text> </section><section id="H4914319FCED847BAA54B0F6BD0FF12FD"><enum>2.</enum><header>Mortgage loan transaction disclosure requirements</header> <subsection id="H5FDD382ACA1C46049CFD51ED49069D8E"><enum>(a)</enum><header>TILA Amendment</header><text display-inline="yes-display-inline">Section 105 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1604">15 U.S.C. 1604</external-xref>) is amended by inserting after subsection (d) the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H94D51F803B6C49B89F5C88117048E46E" style="OLC">
+ <subsection id="HF741C74804CB4F4DB8877ECB224BB6D2"><enum>(e)</enum><header>Disclosure for charitable mortgage loan transactions</header><text display-inline="yes-display-inline">With respect to a mortgage loan transaction involving a residential mortgage loan offered at 0 percent interest primarily for charitable purposes by an organization described in <external-xref legal-doc="usc" parsable-cite="usc/26/501">section 501(c)(3)</external-xref> of the Internal Revenue Code of 1986 and exempt from taxation under section 501(a) of such Code, forms HUD–1 and GFE (as defined under section 1024.2(b) of title 12, Code of Federal Regulations) together with a disclosure substantially in the form of the Loan Model Form H–2 (as depicted in Appendix H to part 1026 of title 12, Code of Federal Regulations) shall, collectively, be an appropriate model form for purposes of subsection (b) of this section.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H4AEF7C7A6FA04AB4A7DD0E7CA42D4DF7"><enum>(b)</enum><header>RESPA amendment</header><text display-inline="yes-display-inline">Section 4 of the Real Estate Settlement Procedures Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/12/2603">12 U.S.C. 2603</external-xref>) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H889E4D8F3DE04116914C5B084CF02CA1" style="traditional">
+ <subsection id="HB443316DB81E416782FC26ACC3A79076"><enum>(d)</enum><header>Disclosure for charitable mortgage loan transactions</header><text display-inline="yes-display-inline">With respect to a mortgage loan transaction involving a residential mortgage loan offered at 0 percent interest primarily for charitable purposes, an organization described in <external-xref legal-doc="usc" parsable-cite="usc/26/501">section 501(c)(3)</external-xref> of the Internal Revenue Code of 1986 and exempt from taxation under section 501(a) of such Code may use forms HUD–1 and GFE (as defined under section 1024.2(b) of title 12, Code of Federal Regulations) together with a disclosure substantially in the form of the Loan Model Form H–2 (as depicted in Appendix H to part 1026 of title 12, Code of Federal Regulations), collectively, in lieu of the disclosure published under subsection (a) of this section.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="H3E5A617F011D4766A86E969590D2CA73"><enum>(c)</enum><header>Regulations</header><text display-inline="yes-display-inline">Not later than 180 days after the date of the enactment of this Act, the Director of the Bureau of Consumer Financial Protection shall issue such regulations as may be necessary to implement the amendments made by subsections (a) and (b).</text>
+ </subsection><subsection id="H1534FD6601A44A7EAFDC1238FF3A4713"><enum>(d)</enum><header>Effective date</header><text>The amendments made by subsections (a) and (b) shall take effect on the date of the enactment of this Act.</text>
+			</subsection></section></legis-body></bill>
+
+

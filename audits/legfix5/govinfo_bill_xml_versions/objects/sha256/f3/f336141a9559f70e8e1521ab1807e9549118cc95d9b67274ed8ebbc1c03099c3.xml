@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1190 IS: Rural Access to Hospice Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-04-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 1190</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190411">April 11, 2019</action-date><action-desc><sponsor name-id="S372">Mrs. Capito</sponsor> (for herself and <cosponsor name-id="S324">Mrs. Shaheen</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend title XVIII of the Social Security Act to provide for payments for certain rural health
+			 clinic and Federally qualified health center services furnished to hospice
+			 patients under the Medicare program.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Rural Access to Hospice Act of 2019</short-title></quote>.</text>
+		</section><section id="idb1ae43e025464cf5a691622ecb932240"><enum>2.</enum><header>Medicare payment for certain Federally qualified health center and rural health clinic services
+ furnished to hospice patients</header><text display-inline="no-display-inline">Section 1834 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395m">42 U.S.C. 1395m</external-xref>) is amended—</text> <paragraph id="idf4c730a8f8464d14bf3710f9338a36c6"><enum>(1)</enum><text>in subsection (o), by adding at the end the following new paragraph:</text>
+				<quoted-block display-inline="no-display-inline" id="idbd935bc545e14f89a4c7e3d596780fe5" style="OLC">
+					<paragraph id="id8116047cc8d34264968b8ed0794774b4"><enum>(4)</enum><header>Payment for attending physician services furnished by Federally qualified health centers to hospice
+ patients</header><text>In the case of services described in section 1812(d)(2)(A)(ii) furnished on or after January 1, 2020, by an attending physician (as defined in section 1861(dd)(3)(B), other than a physician or practitioner who is employed by a hospice program) who is employed by or working under contract with a Federally qualified health center, a Federally qualified health center shall be paid for such services under the prospective payment system under this subsection.</text></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="id868b52d50b5d4d588b4cfa4a4fd8a12a"><enum>(2)</enum><text>by adding at the end the following new subsection:</text> <quoted-block display-inline="no-display-inline" id="id288ea4d032d1459b9385fd49aa75ffd9" style="OLC"> <subsection id="id08ee0d753a254d1f8342215ffdbfbd27"><enum>(x)</enum><header>Payment for attending physician services furnished by rural health clinics to hospice patients</header><text>In the case of services described in section 1812(d)(2)(A)(ii) furnished on or after January 1, 2020, by an attending physician (as defined in section 1861(dd)(3)(B), other than a physician or practitioner who is employed by a hospice program) who is employed by or working under contract with a rural health clinic, a rural health clinic shall be paid for such services under the methodology for all-inclusive rates (established by the Secretary) under section 1833(a)(3), subject to the limits described in section 1833(f).</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section></legis-body></bill>
+
+

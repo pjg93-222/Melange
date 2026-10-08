@@ -1,0 +1,68 @@
+﻿=== speeches schema ===
+CREATE TABLE speeches(member TEXT,date TEXT,source TEXT,chamber TEXT,
+                 package TEXT,nwords INTEGER,text TEXT)
+
+=== columns ===
+['member', 'date', 'source', 'chamber', 'package', 'nwords', 'text']
+
+=== source value counts ===
+  'INTERVIEW'                    153576
+  'CREC'                         106605
+  'CHRG'                          10308
+
+=== total rows ===
+270489
+
+=== C-SPAN identifiability: rows whose any text column mentions c-span/cspan ===
+  col package          7116 rows
+  col text              224 rows
+
+=== INTERVIEW sample: first 3 texts, 1200 chars each (speaker-tag format) ===
+----------------------------------------------------------------------
+member='Bernard Sanders' date='2024-03-01' source='INTERVIEW'
+'What he needs to do is say it make it very clear, he is going to stand with the working class of this country around that agenda that works for everybody not just the people --'
+----------------------------------------------------------------------
+member='Chip Roy' date='2024-03-01' source='INTERVIEW'
+"It's not where we need to be to actually fundamentally change the town. We have a trillion dollars of interest in 2026, guys. I mean, I don't know what to tell you. Something's got to stop. Something's got to change."
+----------------------------------------------------------------------
+member='Christopher Murphy' date='2024-03-01' source='INTERVIEW'
+"Well, Vladimir Putin is a killer. He is also deeply fearful of his own people and so he is going to do everything possible to squash information getting out about the number of people who are on the streets today. And frankly, all of those individuals are now putting their lives at risk because of the way that Vladimir Putin crushes dissent inside of Russia. Listen, the students of history know that Russian regimes tend to fall during periods of time where Russia overextends its military abroad. These ultimately -- the people -- get fed up that instead of money going to help them, to feed them, to support their kids, it's being used for military adventurism with no real point other than conquest overseas or outside of Russia's territory. So, Putin is worried that as conditions inside Russia worsen and as he spends more money in Ukraine that the people are going to turn on him. And I think that these scenes today show you that Putin's hold on power is not complete and it's something we should all continue to watch."
+
+=== CHRG sample: 2 texts, 900 chars ===
+----------------------------------------------------------------------
+member='Gregory Meeks' date='2019-02-13'
+'Thank you. I ask now, without objection, to enter into the record 22 statements from various associations, credit unions, banking associations, State attorneys general, and banking alliances. Without objection, it is so ordered. And I now recognize myself for 5 minutes for the purpose of asking questions. Let me start out with Ms. Pross and Mr. Deckard. What do you see as the most immediate impact for your respective organizations if and when passage of the SAFE Act or its equivalent is passed?'
+----------------------------------------------------------------------
+member='Gregory Meeks' date='2019-02-13'
+"Thank you. And, Mr. Barnette, as a minority business owner, what has been your experience with respect to the industry's diversity and inclusion and access to startup and working capital and the ease of doing business, especially small businesses?"
+
+=== CREC sample: 2 texts, 600 chars ===
+----------------------------------------------------------------------
+member='Virginia Foxx' date='2025-07-02'
+"Mr. Speaker, by direction of the Committee on Rules, I call up House Resolution 566 and ask for its immediate consideration.  The Clerk read the resolution, as follows: H. Res. 566 Resolved, That upon adoption of this resolution it shall be in order to take from the Speaker's table the bill (H.R. 1) to provide for reconciliation pursuant to title II of H. Con. Res. 14, with the Senate amendment thereto, and to consider in the House, without intervention of any point of order, a motion offered by the chair of the Committee on the Budget or his designee that the House concur in the Senate amendm"
+----------------------------------------------------------------------
+member='James McGovern' date='2025-07-02'
+"Mr. Speaker, pursuant to section 426(a) of the Congressional Budget and Impoundment Control Act of 1974, I make a point of order against consideration of the rule, House Resolution 566. Section 426(a) of the Budget Act specifically states that the Rules Committee may not waive the point of order prescribed by section 425 of that same act. House Resolution 566 states that it is in order to consider a motion that the House concur in the Senate amendment to H.R. 1: ``Without intervention of any point of order.'' Therefore, I make a point of order pursuant to section 426(a) that this rule may not "
+
+=== speaker-tag pattern frequency inside INTERVIEW texts (sampled 400 rows) ===
+rows sampled 400 | mean len 404
+  ALLCAPS_NAME_COLON   in    0/400 rows   eg []
+  ANGLE_ANGLE          in    0/400 rows   eg []
+  PAREN_CROSSTALK      in    0/400 rows   eg []
+  SEN_REP_TAG          in    0/400 rows   eg []
+  NEWLINE              in    0/400 rows   eg []
+
+=== same for CHRG (sampled 200) ===
+  ALLCAPS_NAME_COLON   in    0/200 rows   eg []
+  ANGLE_ANGLE          in    0/200 rows   eg []
+  PAREN_CROSSTALK      in    0/200 rows   eg []
+  SEN_REP_TAG          in    0/200 rows   eg []
+  NEWLINE              in    0/200 rows   eg []
+
+=== same for CREC (sampled 200) ===
+  ALLCAPS_NAME_COLON   in    0/200 rows
+  ANGLE_ANGLE          in    0/200 rows
+  PAREN_CROSSTALK      in    0/200 rows
+  SEN_REP_TAG          in    0/200 rows
+  NEWLINE              in    0/200 rows
+DONE 02a

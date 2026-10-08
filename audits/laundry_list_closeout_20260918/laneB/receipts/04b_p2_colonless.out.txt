@@ -1,0 +1,67 @@
+﻿FULL-CORPUS colon-less residual-tag rows:
+  INTERVIEW      321 of  153576 rows  (0.209%)
+  CHRG            22 of   10308 rows  (0.213%)
+  CREC            26 of  106605 rows  (0.024%)
+
+mention-producing rows with >=1 marker (UNION detector): 220 of 22892 (0.961%)
+marker kinds: {'NOCOLON': 162, 'COLON': 169}
+
+==============================================================================
+P2 UNION RESULTS (D-P2 colon  OR  D-P2' colon-less)
+==============================================================================
+P2-A  mentions downstream of a turn boundary : 249   by source {'CREC': 19, 'INTERVIEW': 207, 'CHRG': 23}
+        by marker kind: {'NOCOLON': 129, 'COLON': 120}
+P2-B  nearest marker NAMES the target        : 120
+P2-C  matched name IS inside a marker        : 114
+
+P2-A : windows 249 | dyads 164 | SHIPPED edges 126 | windows in n_scored 146
+      shipped edges with >=1 SCORED contaminated window : 96
+      of those SIGNED (pos+neg>0)                       : 69
+      of those drawn (n_scored>=2)                      : 75
+      SIGNED and drawn                                  : 64
+
+P2-B : windows 120 | dyads 96 | SHIPPED edges 69 | windows in n_scored 75
+      shipped edges with >=1 SCORED contaminated window : 49
+      of those SIGNED (pos+neg>0)                       : 41
+      of those drawn (n_scored>=2)                      : 39
+      SIGNED and drawn                                  : 38
+
+=== 15 examples (speaker -> target | source id | 160-char excerpt) ===
+ 1. Adam Schiff             -> Rick Scott              | sid=111738  INTE | marker='GOVERNOR RICK SCOTT' [COLON] scored=True shipped=True
+      omething that Governor Scott said on Thursday night when it was clear that we were headed into some form of a recount down in Florida. Here it is. [BEGIN TAPE] 
+ 2. Adam Schiff             -> Adam Smith              | sid=188603  INTE | marker='REP. ADAM SMITH' [NOCOLON] scored=True shipped=False
+      eel industry during wartime, this president doesn't have the power to declare an emergency and build a multibillion-dollar wall on the border. So that's a non- 
+ 3. Adam Schiff             -> Mark Warner             | sid=192076  INTE | marker='SEN. MARK WARNER' [NOCOLON] scored=True shipped=True
+      up the meeting at the Trump Tower and apparently lies the president participated in, that, to me, is direct evidence. But there's also abundant circumstantial e
+ 4. Adam Schiff             -> Zoe Lofgren             | sid=233406  INTE | marker='REP. ZOE LOFGREN (D)' [NOCOLON] scored=True shipped=True
+      int. The House Select Committee investigating the January 6 attack on the U.S. Capitol convening privately today to weight its final moves and discuss its final
+ 5. Alexandria Ocasio-Corte -> Rashida Tlaib           | sid=198822  INTE | marker='REP. RASHIDA TLAIB (D-MI)' [NOCOLON] scored=True shipped=True
+      f this is a distraction. It's a distraction from what's most important and from our core values as American citizens. And with that, I'll hand it over to Rashid
+ 6. Amy Klobuchar           -> Michael Bennet          | sid=203736  INTE | marker='SEN. MICHAEL BENNET (D-CO)' [NOCOLON] scored=True shipped=True
+      I'm surprised that we haven't seen it yet. Because, you know, I think if she had a good answer, we would have seen it by now. SEN. MICHAEL BENNET (D-CO), 2020
+ 7. Amy Klobuchar           -> Michael Bennet          | sid=203737  INTE | marker='SEN. MICHAEL BENNET (D-CO)' [NOCOLON] scored=True shipped=True
+      I'm surprised that we haven't seen it yet. Because, you know, I think if she had a good answer, we would have seen it by now. [04:40:06] SEN. MICHAEL BENNET (D-
+ 8. Amy Klobuchar           -> Elizabeth Warren        | sid=211443  INTE | marker='SEN. ELIZABETH WARREN (D-MA)' [NOCOLON] scored=True shipped=True
+      many issues and I admire both of them. I don't agree with their bill on Medicare for all. I think it's better to build on the affordable care act with a public 
+ 9. Andrew Clyde            -> Ralph Norman            | sid=219462  INTE | marker='REP. RALPH NORMAN (R-SC)' [NOCOLON] scored=True shipped=True
+      ropes, taking videos and pictures. You know, if you didn't know the TV footage was a video from January the 6th, you would actually think it was a normal touris
+10. Ashley Hinson           -> Raja Krishnamoorthi     | sid=82049   INTE | marker='REP. RAJA KRISHNAMOORTHI' [NOCOLON] scored=True shipped=True
+      Our allies agreed to take part in economic activities with us as a precursor to this conversation. REP. RAJA KRISHNAMOORTHI, (D-IL) RANKING MEMBER, CHAIR,
+11. Ayanna Pressley         -> Bennie Thompson         | sid=68832   INTE | marker='REP. BENNIE THOMPSON (D-MS 2ND' [COLON] scored=True shipped=False
+      Joe Biden is the nominee. REP. BENNIE THOMPSON (D-MS 2ND DISTRICT): He's a good man. He has good policies. There's no reason to change. REP. MIKE QUIGLEY (D-IL 
+12. Ayanna Pressley         -> Mike Quigley            | sid=68832   INTE | marker='REP. MIKE QUIGLEY (D-IL 5TH DI' [COLON] scored=True shipped=False
+      Joe Biden is the nominee. REP. BENNIE THOMPSON (D-MS 2ND DISTRICT): He's a good man. He has good policies. There's no reason to change. REP. MIKE QUIGLEY (D-IL 
+13. Ayanna Pressley         -> James Comer             | sid=75054   INTE | marker='REP. JAMES COMER (R-KY)' [NOCOLON] scored=True shipped=False
+      Mr. Chairman, I have several articles. I need to enter them. Let me just go ahead with the what the articles are. REP. JAMES COMER (R-KY), CHAIR,
+14. Bernard Sanders         -> Alexandria Ocasio-Corte | sid=75643   INTE | marker='REP. ALEXANDRIA OCASIO-CORTEZ ' [COLON] scored=True shipped=True
+      We got 20,000 people here in Tucson, and we got hundreds of millions of people all across this country. REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT): Are 
+15. Bryan Steil             -> Amy Klobuchar           | sid=73089   INTE | marker='SEN. AMY KLOBUCHAR (D-MN)' [NOCOLON] scored=True shipped=False
+      from that Kamala D. Harris of the state of California received three votes for president and Tim Walz of the state of Minnesota received three votes for vice pr
+
+=== Raskin -> Blumenthal now caught? ===
+caught: True
+  sid=196861 marker='SEN. RICHARD BLUMENTHAL, D-CONN.T' kind=NOCOLON names_target=True scored=True
+  window: This putting our national security at risk by trying to use other governments against American citizens. SEN. RICHARD BLUMENTHAL, D-CONN.There's a grave national security issue here.
+
+wrote receipts/04b_p2_union_examples.json (249 rows)
+DONE 04b

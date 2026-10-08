@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H741C7CBE59C9474DA95D159265AB782C" key="H" public-private="public">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3939 IH: To require the Board of Governors of the Federal Reserve System to carry out a quantitative impact study of any proposed real-time payment system under the Faster Payments Initiative before implementing such system.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 3939</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20190724">July 24, 2019</action-date>
+<action-desc><sponsor name-id="B001305">Mr. Budd</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To require the Board of Governors of the Federal Reserve System to carry out a quantitative impact study of any proposed real-time payment system under the Faster Payments Initiative before implementing such system.</official-title>
+</form> 
+<legis-body id="HAFE46D2CBFB945339D6A9905C8901D1F" style="OLC"> 
+<section id="HE59D256667B7491DB95EAB0B2C0AD313" section-type="section-one"><enum>1.</enum><header>Quantitative impact study requirement</header> 
+<subsection id="HE70FCE560F36438DA20F92B64692B24E"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Board of Governors of the Federal Reserve System may not take any steps to develop, build, or otherwise implement any proposed real-time payment system or any component thereof (including a settlement service, liquidity management service, or auxiliary services) under the Faster Payments Initiative until after the end of the 1-year period beginning on the date that the Board of Governors issues a detailed report to the Congress on a comprehensive study of the proposed real-time payment system that includes a quantitative impact component.</text> </subsection> <subsection id="H0397968BA527415C8A6DF90BF8B4B88A"><enum>(b)</enum><header>Contents of study</header><text>The study described under subsection (a) shall include the following:</text> 
+<paragraph id="H3A9E3C7F212A46FF8BB034D198FE7C92"><enum>(1)</enum><text display-inline="yes-display-inline">Any cybersecurity, privacy concerns, or other risks associated with the Federal government receiving and managing new transaction-level information regarding millions of American citizens, including a threat assessment.</text> </paragraph> <paragraph id="H928F0DD05C55451C90F276AF319D6F6B"><enum>(2)</enum><text>Whether the Board of Governors would be subject to privacy and security laws and regulations such as the Fair Credit Reporting Act and the Gramm-Leach-Bliley Act, like other payment processors.</text> </paragraph>
+<paragraph id="H17DEC37A2319482BBAEFFB92D1B88E00"><enum>(3)</enum><text>Where customer information would be stored.</text> </paragraph> <paragraph id="HABEFBF6498F242EB81780BD2A5983B1D"><enum>(4)</enum><text>Who would oversee such information.</text> </paragraph>
+<paragraph id="H1ED32D80B59D4092B7F07244DC41A984"><enum>(5)</enum><text>Whether the Board of Governors would create a database to view customer transactions.</text> </paragraph> <paragraph id="HDFE093E34900460BA59AB42D989B3D60"><enum>(6)</enum><text display-inline="yes-display-inline">An analysis of whether the private sector can provide the system or achieve the objectives of the system with reasonable effectiveness, scope, and equity.</text> </paragraph>
+<paragraph id="HCE23E5AC34184D06A57834D679E3D1C8"><enum>(7)</enum><text display-inline="yes-display-inline">Whether the Board of Governors has concluded that the private sector cannot achieve the objectives that the Board of Governors seeks to achieve with the system.</text> </paragraph> <paragraph id="H7F1987737D6D41AAAC95626050999240"><enum>(8)</enum><text display-inline="yes-display-inline">The potential adverse consequences to the private sector in the short term and the long if the Board of Governors offers the system.</text> </paragraph>
+<paragraph id="H93AAAEBB95874B868937F371178D1E0D"><enum>(9)</enum><text display-inline="yes-display-inline">Whether the Board of Governors could achieve the Board’s objectives without offering the system, but rather by making changes to its current infrastructure, for example by expanding the operating hours of the National Settlement Service or enhancing the Automated Clearing House’s same-day payment capabilities or modernizing the Automated Clearing House to serve as a backup to the existing operating network.</text> </paragraph> <paragraph id="H7FA5E1F1F2204C3C80A4848441904312"><enum>(10)</enum><text display-inline="yes-display-inline">How the Board of Governors would collaborate with the private sector to ensure interoperability.</text> </paragraph>
+<paragraph id="H5056E7550E5948D0A1FB7D6745520FCD"><enum>(11)</enum><text display-inline="yes-display-inline">As a regulator of depository institutions and their holding companies, how the Board of Governors would ensure that the Board does not exert undue influence over such institutions and holding companies to use the system.</text> </paragraph> <paragraph id="H5A2D22A728ED416BAEC678A5284A741F"><enum>(12)</enum><text display-inline="yes-display-inline">How the Board of Governors would ensure that the system would be available to all depository institutions, including community banks, and credit unions, in a manner that is not cost prohibitive.</text> </paragraph>
+<paragraph id="H9B6BDC8D500B43E3ABBEB9C9A1BD14B9"><enum>(13)</enum><text display-inline="yes-display-inline">The estimate of the Board of Governors for—</text> <subparagraph id="H409E59B1B2E0425C8905989E1D60932C"><enum>(A)</enum><text>how long it would take to build the infrastructure and begin operation of the system;</text> </subparagraph>
+<subparagraph id="H47D71BD143994C8B8AB42975E69B02C0"><enum>(B)</enum><text>how much the system would cost;</text> </subparagraph> <subparagraph id="H91E2C84BA57741F6900E768840C6826F"><enum>(C)</enum><text>the annual operating cost of the system; and</text> </subparagraph>
+<subparagraph id="H2A1614FAC3E04B1EB9C19982944DD7D1"><enum>(D)</enum><text>how long it would take for the Board to recover the costs of building the system.</text> </subparagraph></paragraph> <paragraph id="HB3722AE90E094CDE80679BAC0B93166B"><enum>(14)</enum><text display-inline="yes-display-inline">A study of the quantitative impact of each of the factors in paragraphs (1) through (13), as applicable.</text> </paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

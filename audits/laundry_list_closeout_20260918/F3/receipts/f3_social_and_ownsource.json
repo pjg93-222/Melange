@@ -1,0 +1,185 @@
+{
+ "hearing": {
+  "buckets": {
+   "A zero-sign neutral/unrelated (`if _sg==0.0: continue`)": 74,
+   "A0 non-gold excluded (blend.py:197-198 `_eligible=[... hearing_tier_weight>0]`)": 529,
+   "Z SCORED": 187
+  },
+  "dest": {
+   "CU-Bank Competitive Dynamics": 18,
+   "General Credit Union": 11
+  },
+  "mixed": 8,
+  "reach_stance": 166,
+  "same_cell_keys": 39,
+  "same_cell_surplus": 49,
+  "scored": 187,
+  "sheet_only": 21,
+  "unknown_tokens": {},
+  "weight_stance": 162.16666666666666,
+  "weight_total": 187.0
+ },
+ "interview": {
+  "buckets": {
+   "A zero-sign neutral/unrelated (`if _sg==0.0: continue`)": 12,
+   "Z SCORED": 25
+  },
+  "dest": {
+   "CU-Bank Competitive Dynamics": 2,
+   "General Credit Union": 4
+  },
+  "mixed": 0,
+  "reach_stance": 19,
+  "same_cell_keys": 2,
+  "same_cell_surplus": 3,
+  "scored": 25,
+  "sheet_only": 6,
+  "unknown_tokens": {},
+  "weight_stance": 19.0,
+  "weight_total": 25.0
+ },
+ "social": {
+  "buckets": {
+   "(retweets down-weighted RT_W=0.5, blend.py:119)": 1066,
+   "A zero-sign (blend.py:102 `if sg==0.0: continue`)": 2994,
+   "C link-only, empty normalised text (blend.py:111 `elif not _event[1]: nlinkonly+=1; continue`)": 19,
+   "E no routable category (blend.py:122 `if not hits: continue`)": 780,
+   "Z SCORED": 5709,
+   "stack_override": 9468
+  },
+  "dest": {
+   "CU-Bank Competitive Dynamics": 508,
+   "General Credit Union": 363
+  },
+  "mixed": 420,
+  "ndupe": 1018,
+  "reach_stance": 5258,
+  "same_cell_repeat_keys": 1008,
+  "same_cell_surplus": 1073,
+  "scored": 5709,
+  "sheet_only": 451,
+  "shrink": {
+   "CDFI Fund": {
+    "f": 1.0,
+    "nz": 48,
+    "social_share": 0.5
+   },
+   "CFPB Issues & Structural Reform": {
+    "f": 1.0,
+    "nz": 271,
+    "social_share": 0.5
+   },
+   "CU-Bank Competitive Dynamics": {
+    "f": 1.0,
+    "nz": 142,
+    "social_share": 0.5
+   },
+   "Charter Modernization & Governance": {
+    "f": 0.8666666666666667,
+    "nz": 13,
+    "social_share": 0.43333333333333335
+   },
+   "Credit Card & Consumer-Fee Mandates": {
+    "f": 1.0,
+    "nz": 80,
+    "social_share": 0.5
+   },
+   "Credit Union Capital Requirements": {
+    "f": 0.2,
+    "nz": 3,
+    "social_share": 0.1
+   },
+   "Credit Union Tax Status": {
+    "f": 0.9333333333333333,
+    "nz": 14,
+    "social_share": 0.4666666666666667
+   },
+   "Data Privacy & Cybersecurity": {
+    "f": 1.0,
+    "nz": 57,
+    "social_share": 0.5
+   },
+   "Defense Credit Union Issues": {
+    "f": 1.0,
+    "nz": 17,
+    "social_share": 0.5
+   },
+   "Examination & Supervision": {
+    "f": 1.0,
+    "nz": 30,
+    "social_share": 0.5
+   },
+   "Field of Membership": {
+    "f": 1.0,
+    "nz": 16,
+    "social_share": 0.5
+   },
+   "Fraud Prevention": {
+    "f": 1.0,
+    "nz": 180,
+    "social_share": 0.5
+   },
+   "General Credit Union": {
+    "f": 1.0,
+    "nz": 150,
+    "social_share": 0.5
+   },
+   "Interchange": {
+    "f": 1.0,
+    "nz": 36,
+    "social_share": 0.5
+   },
+   "Member Business Lending": {
+    "f": 1.0,
+    "nz": 56,
+    "social_share": 0.5
+   },
+   "Mortgage Lending & Housing": {
+    "f": 1.0,
+    "nz": 102,
+    "social_share": 0.5
+   },
+   "NCUA Budget & Share Insurance Fund": {
+    "f": 0.0,
+    "nz": 0,
+    "social_share": 0.0
+   },
+   "Payments": {
+    "f": 1.0,
+    "nz": 165,
+    "social_share": 0.5
+   },
+   "Technology & Emerging Issues": {
+    "f": 1.0,
+    "nz": 138,
+    "social_share": 0.5
+   },
+   "Telephone Consumer Protection Act": {
+    "f": 1.0,
+    "nz": 60,
+    "social_share": 0.5
+   }
+  },
+  "weight_stance": 5065.916666666662,
+  "weight_total": 5709.0
+ },
+ "speech": {
+  "buckets": {
+   "A zero-sign neutral/unrelated (`if _sg==0.0: continue`)": 139,
+   "Z SCORED": 172
+  },
+  "dest": {
+   "CU-Bank Competitive Dynamics": 41,
+   "General Credit Union": 6
+  },
+  "mixed": 41,
+  "reach_stance": 166,
+  "same_cell_keys": 32,
+  "same_cell_surplus": 42,
+  "scored": 172,
+  "sheet_only": 6,
+  "unknown_tokens": {},
+  "weight_stance": 152.79407259407262,
+  "weight_total": 172.0
+ }
+}

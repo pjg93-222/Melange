@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Referred-in-Senate" bill-type="olc" dms-id="HB18C0A296529412D908A7FDAE661A99F" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 502 : Fight Illicit Networks and Detect Trafficking Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IIB</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 502</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date>January 29, 2019</action-date><action-desc>Received; read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To require the Comptroller General of the United States to carry out a study on how virtual
+			 currencies and online marketplaces are used to buy, sell, or facilitate
+			 the financing of goods or services associated with sex trafficking or drug
+			 trafficking, and for other purposes.</official-title>
+	</form>
+	<legis-body id="H860EAEFAD6744456B0E3CFBE301830E8" style="OLC">
+ <section id="HAF5FDEFD00654943B664151FE491FE79" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fight Illicit Networks and Detect Trafficking Act</short-title></quote> or the <quote><short-title>FIND Trafficking Act</short-title></quote>.</text> </section><section id="HFCAE341CC29B4333A59E42389B09A076"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">The Congress finds the following:</text>
+ <paragraph id="HDD40541A18194639B7205E8B16DFFF58"><enum>(1)</enum><text>According to the Drug Enforcement Administration (DEA) 2017 National Drug Threat Assessment, transnational criminal organizations are increasingly using virtual currencies.</text>
+ </paragraph><paragraph id="HA0B559AE0FAD42E783F824026570527C"><enum>(2)</enum><text display-inline="yes-display-inline">In its 2015 National Money Laundering Risk Assessment, the Department of the Treasury concluded: <quote>The development of virtual currencies is an attempt to meet a legitimate market demand. According to a Federal Reserve Bank of Chicago economist, United States consumers want payment options that are versatile and that provide immediate finality. No United States payment method meets that description, although cash may come closest. Virtual currencies can mimic cash’s immediate finality and anonymity and are more versatile than cash for online and cross-border transactions, making virtual currencies vulnerable for illicit transactions.</quote>.</text>
+ </paragraph><paragraph id="HFACCFE3FC03C40C3B396EE44DE248D15"><enum>(3)</enum><text display-inline="yes-display-inline">Virtual currencies have become a prominent method to pay for goods and services associated with illegal sex trafficking and drug trafficking, which are two of the most detrimental and troubling illegal activities facilitated by online marketplaces.</text>
+ </paragraph><paragraph id="H4937C66C9ECC40E9BF4E78C443B5AD82"><enum>(4)</enum><text>Online marketplaces, including the dark web, have become a prominent platform to buy, sell, and advertise for illicit goods and services associated with sex trafficking and drug trafficking.</text>
+ </paragraph><paragraph id="H237F416A8756447DAF68CD9B8DACB273"><enum>(5)</enum><text>According to the International Labour Organization, in 2016, 4.8 million people in the world were victims of forced sexual exploitation, and in 2014, the global profit from commercial sexual exploitation was $99 billion.</text>
+ </paragraph><paragraph id="H9EF5A6FA6ED846A8A77059690DB9BFFF"><enum>(6)</enum><text>In 2016, within the United States, the Center for Disease Control estimated that there were 64,000 deaths related to drug overdose, and the most severe increase in drug overdoses were those associated with fentanyl and fentanyl analogs (synthetic opioids), which amounted to over 20,000 overdose deaths.</text>
+ </paragraph><paragraph id="HF8C4270A6AC94AFBAABE5C71DC52B0EC"><enum>(7)</enum><text>According to the United States Department of the Treasury 2015 National Money Laundering Risk Assessment, an estimated $64 billion is generated annually from United States drug trafficking sales.</text>
+ </paragraph><paragraph id="HF00B9D99CFEF4BEAA14C0971DE740A6A"><enum>(8)</enum><text>Illegal fentanyl in the United States originates primarily from China, and it is readily available to purchase through online marketplaces.</text>
+			</paragraph></section><section id="H59AFD81DC69E4B01A72D1A6D28B0065F"><enum>3.</enum><header>GAO Study</header>
+ <subsection id="H176E4DE1574244CFB69FF479D1E77139"><enum>(a)</enum><header>Study required</header><text display-inline="yes-display-inline">The Comptroller General of the United States shall conduct a study on how virtual currencies and online marketplaces are used to facilitate sex and drug trafficking. The study shall consider—</text>
+ <paragraph id="HF1F35F3A2E6D4A19B5CA4B041AB21929"><enum>(1)</enum><text display-inline="yes-display-inline">how online marketplaces, including the dark web, are being used as platforms to buy, sell, or facilitate the financing of goods or services associated with sex trafficking or drug trafficking (specifically, opioids and synthetic opioids, including fentanyl, fentanyl analogs, and any precursor chemicals associated with manufacturing fentanyl or fentanyl analogs) destined for, originating from, or within the United States;</text>
+ </paragraph><paragraph id="H169FA616DFF94732B120C8464E30A42C"><enum>(2)</enum><text>how financial payment methods, including virtual currencies and peer-to-peer mobile payment services, are being utilized by online marketplaces to facilitate the buying, selling, or financing of goods and services associated with sex or drug trafficking destined for, originating from, or within the United States;</text>
+ </paragraph><paragraph id="HEEC1974FBCE746EDB9944F9BDA69A8EC"><enum>(3)</enum><text>how virtual currencies are being used to facilitate the buying, selling, or financing of goods and services associated with sex or drug trafficking, destined for, originating from, or within the United States, when an online platform is not otherwise involved;</text>
+ </paragraph><paragraph id="HDCD0930CDD134A52BB4FFCB13719EFD0"><enum>(4)</enum><text>how illicit funds that have been transmitted online and through virtual currencies are repatriated into the formal banking system of the United States through money laundering or other means;</text>
+ </paragraph><paragraph id="HC6514A8DBF434C3C814AD4CC940DB4B3"><enum>(5)</enum><text display-inline="yes-display-inline">the participants (state and non-state actors) throughout the entire supply chain that participate in the buying, selling, or financing of goods and services associated with sex or drug trafficking (through online marketplaces or virtual currencies) destined for, originating from, or within the United States;</text>
+ </paragraph><paragraph id="H5792F7E1862F4733BC6E3B43590F09DC"><enum>(6)</enum><text display-inline="yes-display-inline">Federal and State agency efforts to impede the buying, selling, or financing of goods and services associated with sex or drug trafficking through online marketplaces or virtual currencies that are destined for, originating from, or within the United States, including efforts to prevent the proceeds from sex or drug trafficking from entering the United States banking system through online marketplaces or virtual currencies; and</text>
+ </paragraph><paragraph id="HBC2C35F26DDE49B3A9678D39512B5B8C"><enum>(7)</enum><text display-inline="yes-display-inline">to what extent can the immutable and traceable nature of virtual currencies contribute to the tracking and prosecution of illicit funding.</text>
+ </paragraph></subsection><subsection id="H9FD1E057132A407EAC710EBC80FC2E85"><enum>(b)</enum><header>Scope</header><text display-inline="yes-display-inline">For the purposes of the study required under subsection (a), the term <quote>sex trafficking</quote> means the recruitment, harboring, transportation, provision, obtaining, patronizing, or soliciting of a person for the purpose of a commercial sex act that is induced by force, fraud, or coercion, or in which the person induced to perform such act has not attained 18 years of age.</text>
+ </subsection><subsection id="HB6B2D4423A8846A4BAA8D993232FC40B"><enum>(c)</enum><header>Report to Congress</header><text display-inline="yes-display-inline">Not later than 1 year after the date of enactment of this Act, the Comptroller General of the United States shall submit to the Committee on Banking, Housing, and Urban Affairs of the Senate and the Committee on Financial Services of the House of Representatives a report summarizing the results of the study required under subsection (a), together with any recommendations for legislative or regulatory action that would improve the efforts of Federal agencies to impede the use of virtual currencies and online marketplaces in facilitating sex and drug trafficking.</text>
+			</subsection></section></legis-body><attestation><attestation-group><attestation-date chamber="House" date="20190128">Passed the House of Representatives January 28, 2019.</attestation-date><attestor display="yes">Karen L. Haas,</attestor><role>Clerk.</role></attestation-group></attestation>
+</bill>
+
+

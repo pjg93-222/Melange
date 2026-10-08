@@ -1,0 +1,36 @@
+﻿====================================================================================================
+R9  engine-only press urls: source attribution   run 2026-09-18T23:47:32
+====================================================================================================
+desk sheet rows: 3701   displayed distinct canonical urls: 2389
+engine distinct canonical urls: 2679
+engine-only urls: 293
+
+engine-only urls by TONE SOURCE FILE:
+   refresh                 291
+   base                      2
+
+all engine urls by tone source file:
+   base                   2388
+   refresh                 291
+
+engine rows with disposition "used": 1387   of those ABSENT from the desk sheet: 221
+   those 221 by tone source file: {'refresh': 221}
+
+   sample of scored-but-not-displayed press items:
+      [refresh] Alma S. Adams            https://adams.house.gov/media-center/press-releases/rep-adams-speaks-bipartisan-housing-bill
+      [refresh] Adam Smith               https://adamsmith.house.gov/news/press-releases/reps-smith-khanna-sanchez-and-williams-introduce-protecting-
+      [refresh] Al Green                 https://algreen.house.gov/media/press-releases/bipartisan-21st-century-road-housing-act-including-congressma
+      [refresh] Diana DeGette            https://americascreditunions.org/news-media/news/7-credit-union-supporters-win-colorado-primaries#D000197
+      [refresh] Mike Johnson             https://americascreditunions.org/news-media/news/advocacy-win-credit-union-board-modernization-act-becomes-l
+      [refresh] Tim Scott                https://americascreditunions.org/news-media/news/advocacy-win-credit-union-board-modernization-act-becomes-l
+      [refresh] Maxine Waters            https://americascreditunions.org/news-media/news/advocacy-win-credit-union-board-modernization-act-becomes-l
+      [refresh] Elizabeth Warren         https://americascreditunions.org/news-media/news/advocacy-win-credit-union-board-modernization-act-becomes-l
+      [refresh] Angela D. Alsobrooks     https://americascreditunions.org/news-media/news/advocating-credit-unions-prior-senate-ndaa-consideration#A0
+      [refresh] Mike Crapo               https://americascreditunions.org/news-media/news/advocating-credit-unions-prior-senate-ndaa-consideration#C0
+      [refresh] Kevin Cramer             https://americascreditunions.org/news-media/news/advocating-credit-unions-prior-senate-ndaa-consideration#C0
+      [refresh] Steve Daines             https://americascreditunions.org/news-media/news/advocating-credit-unions-prior-senate-ndaa-consideration#D0
+
+   the 291 "refresh" urls are supplemental rows added to the engine feed on 2026-09-16 (data/stance/press_refresh_tone.csv, mtime 2026-09-16 23:44).
+   base-file urls absent from the desk sheet: 2 -- these are NOT explained by the refresh
+
+DONE R9

@@ -18,9 +18,6 @@ param(
   [ValidateSet('','2021-2022','2023-2024','2025-2026')]
   [string]$CycleLabel = '',
   [switch]$NoCache,
-  [ValidateRange(0,10000)]
-  [int]$CrossReferenceMaxRequests = 100,
-  [switch]$CrossReferenceOffline,
   [switch]$RenderPreviews
 )
 
@@ -41,11 +38,9 @@ if ($NodePath) { $arguments.NodePath = $NodePath }
 if ($NodeModulesPath) { $arguments.NodeModulesPath = $NodeModulesPath }
 $arguments.NodeHeapMb = $NodeHeapMb
 $arguments.PerformanceBudgetMinutes = $PerformanceBudgetMinutes
-$arguments.CrossReferenceMaxRequests = $CrossReferenceMaxRequests
 if ($WorkbookLockPath) { $arguments.WorkbookLockPath = $WorkbookLockPath }
 if ($CycleLabel) { $arguments.CycleLabel = $CycleLabel }
 if ($NoCache) { $arguments.NoCache = $true }
-if ($CrossReferenceOffline) { $arguments.CrossReferenceOffline = $true }
 if ($RenderPreviews) { $arguments.RenderPreviews = $true }
 
 & $generator @arguments

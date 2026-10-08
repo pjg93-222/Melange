@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL23986-YYW-8R-TLJ"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 S2760 IS: Capping Credit Card Interest Rates Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2023-09-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>118th CONGRESS</congress><session>1st Session</session><legis-num>S. 2760</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20230911">September 11, 2023</action-date><action-desc><sponsor name-id="S399">Mr. Hawley</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Truth in Lending Act to cap credit card interest rates.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Capping Credit Card Interest Rates Act</short-title></quote>.</text></section><section commented="no" display-inline="no-display-inline" id="id91d28c6f7fe64874984493bf77f0001a"><enum>2.</enum><header>Cap on credit card interest rates</header><text display-inline="no-display-inline">Section 107 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1606">15 U.S.C. 1606</external-xref>) is amended by adding at the end the following: </text><quoted-block style="OLC" display-inline="no-display-inline" id="idA4FCFF12358644B692FD839D78CD2361"><subsection id="id9c930cca1585429ab7fc7fde0583a129"><enum>(f)</enum><paragraph commented="no" display-inline="yes-display-inline" id="idb6e7be0e976c47f1a4d57a6f5e976619"><enum>(1)</enum><text>The annual percentage rate applicable to an extension of credit obtained by use of a credit card may not exceed 18 percentage points, inclusive of all finance charges.</text></paragraph><paragraph indent="up1" commented="no" display-inline="no-display-inline" id="ide32e0742fa5641b79905d408cb8861ff"><enum>(2)</enum><text>Any fees that are not considered finance charges under section 106(a) may not be used to evade the limitations of this paragraph, and the total sum of such fees may not exceed the total amount of finance charges assessed.</text></paragraph><paragraph indent="up1" commented="no" display-inline="no-display-inline" id="id8836d9883e604a0ebfb4e82d66b96fe3"><enum>(3)</enum><text>Any creditor who violates this subsection shall be subject to the provisions of section 130.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill> 
+

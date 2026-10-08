@@ -1,0 +1,36 @@
+--- orig/fec/legislation/build_archive_legislative.py	2026-09-03 20:54:24.801910300 -0400
++++ patched/fec/legislation/build_archive_legislative.py	2026-09-04 02:07:40.573225800 -0400
+@@ -16,6 +16,21 @@
+     try: number=float(text)
+     except (TypeError,ValueError): return 0
+     return int(number) if number in (-1.0,0.0,1.0) else 0
++def decay_weight_for(congress,stored=None):
++    """Fill a ledger row's DecayWeight the way legacy archive rows already carry it.
++
++    congress_bills_archive_*.xlsx stores DecayWeight=congress_decay(Congress) (119 -> 1.0,
++    118 -> 0.8, 117 -> 0.64) -- the frozen production schedule. Ledgers written before that
++    column existed leave the cell blank, and a blank previously fell through to a fabricated
++    1.0, scoring an old Congress at FULL strength. A stored value always wins; only a
++    missing/blank one is computed. Pure function: no pandas, no workbook read.
++    """
++    text='' if stored is None else str(stored).strip()
++    if text and text.lower() not in ('nan','none'):
++        try: return float(text)
++        except (TypeError,ValueError): pass
++    try: return BR.congress_decay(congress)
++    except (TypeError,ValueError): return 1.0
+ A=pd.read_excel(sorted(glob.glob(MB_ROOT+r'\congress_bills_archive_*.xlsx'))[-1],sheet_name='All Bills')
+ # The verified sentinel is persisted to the canonical workbook before this
+ # producer runs.  Consume that worksheet, not the transient collector JSONL,
+@@ -50,6 +65,11 @@
+             )
+             for _col in A.columns:
+                 if _col not in _verified.columns: _verified[_col]=''
++            # Old ledgers predate the DecayWeight column; compute it from Congress rather
++            # than letting a blank cell score a 117th/118th row at full weight.
++            if 'DecayWeight' in A.columns:
++                _verified['DecayWeight']=[decay_weight_for(_c,_d) for _c,_d in
++                                          zip(_verified['Congress'],_verified['DecayWeight'])]
+             A=pd.concat([A,_verified[A.columns]],ignore_index=True)
+ _manual_path=MB_ROOT+r'\manual_bill_evidence.csv'
+ _manual_n=0

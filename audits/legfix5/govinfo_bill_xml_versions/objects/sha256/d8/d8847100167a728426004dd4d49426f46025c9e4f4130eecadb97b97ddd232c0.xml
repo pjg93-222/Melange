@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H6546B1C973DB46B788E4C9578CCF6A26" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7149 IH: Veteran Housing Promise Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-01-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7149</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260120">January 20, 2026</action-date><action-desc><sponsor name-id="R000622">Mr. Riley of New York</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to eliminate the maximum authorizations of appropriations for certain benefits for homeless veterans administered by the Secretary of Veterans Affairs and to make permanent the authority of the Secretary to carry out certain programs for homeless veterans.</official-title></form><legis-body id="H50EE41AD84A94F0BA096AD44FEFC4EE0" style="OLC"><section id="HC09C5B735D674BDEAABB37F2A05140EE" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Veteran Housing Promise Act</short-title></quote>.</text></section><section id="H41B0EF096C1B4CC2A6ED653D72AA8F03" section-type="subsequent-section"><enum>2.</enum><header>Elimination of maximum authorizations of appropriations for certain benefits for homeless veterans</header><subsection id="HC8F2895C6D364B1D96D46D3D2D43383A"><enum>(a)</enum><header>Comprehensive service programs</header><text display-inline="yes-display-inline">Section 2016 of title 38, United States Code, is amended to read as follows:</text><quoted-block style="USC" id="H71712AE2E7B842708339A5A5DA1A96AA" display-inline="no-display-inline"><section id="H790FFAB6F5E14672896B54A21350ACF9"><enum>2016.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">There is authorized to be appropriated such sums as may be necessary to carry out this subchapter.</text></section><after-quoted-block>.</after-quoted-block></quoted-block></subsection><subsection id="HCED70AA9A8874A8994552ADE027578E9"><enum>(b)</enum><header>Homeless veterans reintegration programs</header><text>Section 2021(i)(1) of title 38, United States Code, is amended—</text><paragraph id="H4172D6F51801416B8E934C4C50185D71"><enum>(1)</enum><text>in subparagraph (G), by striking <quote>fiscal year 2024 and each fiscal year thereafter</quote> and inserting <quote>each of fiscal years 2024 through 2026</quote>; and</text></paragraph><paragraph id="H9C79D192209349C397725F80C1904DB2"><enum>(2)</enum><text>by adding at the end the following new subparagraph:</text><quoted-block style="USC" id="H6353F1ADCC6D48CB8AB2C8802A3B07D4" display-inline="no-display-inline"><subparagraph id="HD7D061B7307040728DAFBFAB96D68FE4" display-inline="no-display-inline" indent="up1"><enum>(H)</enum><text display-inline="yes-display-inline">For fiscal year 2027 and each subsequent fiscal year, such sums as may be necessary.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection><subsection id="H5A06F5AC446342DDAFE7D46CB6DA381E"><enum>(c)</enum><header>Homeless women veterans and homeless veterans with children reintegration grant program</header><text>Section 2021A(f) is amended—</text><paragraph id="HAAE9731A4FF0489188F961F2C65BB5F4"><enum>(1)</enum><text>by striking <quote>section $1,000,000 for each of fiscal years 2011 through 2025</quote> and inserting <quote>section—</quote>; and</text></paragraph><paragraph id="H446D552FAC764480A74642510B3FA793"><enum>(2)</enum><text>by adding at the end the following new paragraphs:</text><quoted-block style="USC" id="H4B7DAF90C3C14018AAFE0C6485B8D943" display-inline="no-display-inline"><paragraph id="H709EB10C9E3142BFA11B78D0870BE906"><enum>(1)</enum><text display-inline="yes-display-inline">$1,000,000 for each of fiscal years 2011 through 2025; and</text></paragraph><paragraph id="H80C719A6A6B8400EBA5B5BF682860CCB"><enum>(2)</enum><text>for fiscal year 2026 and each subsequent fiscal year, such sums as may be necessary.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection><subsection id="H01243C2212A84AFF9515DEF335E95252"> <enum>(d)</enum> <header>Financial assistance for supportive services for very low-Income veteran families in permanent housing</header> <text>Section 2044(e) of title 38, United States Code, is amended to read as follows:</text>
+                <quoted-block style="USC" id="H62FB24B239894B79AE1965EEBFBAE1DF"
+                    display-inline="no-display-inline">
+                    <subsection id="H46CD67589A4044829BD9B3122E9660D9">
+                        <enum>(e)</enum>
+                        <header>Funding</header>
+ <text display-inline="yes-display-inline">From amounts appropriated to the Department for Medical Services, there shall be available such sums as may be necessary to carry out subsections (a), (b), and (c).</text>
+                    </subsection>
+                    <after-quoted-block>.</after-quoted-block>
+                </quoted-block>
+            </subsection><subsection id="H65340B7E74E64970BBD5B10181045B05">
+                <enum>(e)</enum>
+                <header>Grant program for homeless veterans with special needs</header>
+ <text>Section 2061(d) of title 38, United States Code, is amended—</text> <paragraph id="H3F6D54252A0E47FFBC266BCFCBA76FDF"> <enum>(1)</enum> <text>by striking <quote>for each of fiscal years 2007 through 2025, $5,000,000 shall be available for each such fiscal year for the purposes of the program under this section.</quote> and inserting <quote>amounts shall be available for the purposes of the program under this section as follows:</quote>; and</text>
+                </paragraph>
+                <paragraph id="HA2DF9D3443AB49039168339B7EE2F7E1">
+                    <enum>(2)</enum>
+ <text>by adding at the end the following new paragraphs:</text> <quoted-block style="USC" id="HA39EDEE558C142B6B19464DFC23CE01C" display-inline="no-display-inline"> <paragraph id="H3B6F58BF844F494D8A67DB8AB44A3AB9"> <enum>(1)</enum> <text display-inline="yes-display-inline">For each of fiscal years 2007 through 2025, $5,000,000.</text>
+                        </paragraph>
+                        <paragraph id="H46E3704C7FFD4EAFB68C21F00195E5D7">
+                            <enum>(2)</enum>
+ <text>For fiscal year 2026 and each subsequent fiscal year, such sums as may be necessary.</text>
+                        </paragraph>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+            </subsection><subsection id="HE18139377E0542E9A81D6706DE8EDAA3">
+                <enum>(f)</enum>
+                <header>Technical assistance grants for nonprofit community-Based groups</header>
+ <text>Section 2064(b) of title 38, United States Code, is amended—</text> <paragraph id="HE4A4737C051D4C7390B6908DEB7B97D8"> <enum>(1)</enum> <text>by striking <quote> to carry out the program under this section.</quote> and inserting <quote>to carry out the program under this section—</quote>; and</text>
+                </paragraph>
+                <paragraph id="H959B78C4C91D4AE6835481CE6414B5BD">
+                    <enum>(2)</enum>
+ <text>by adding at the end the following new paragraphs:</text> <quoted-block style="USC" id="H4FB77FB841E0432F880578A3C7C09AD4" display-inline="no-display-inline"> <paragraph id="H9B91FE3DFF614086BC003223A0ECA9DD"> <enum>(1)</enum> <text display-inline="yes-display-inline">$1,000,000 for each of fiscal years 2007 through 2012; and</text>
+                        </paragraph>
+                        <paragraph id="H5A840F6387244329A48FF2BA4CF4A4BB">
+                            <enum>(2)</enum>
+ <text>for fiscal year 2026 and each subsequent fiscal year, such sums as may be necessary.</text>
+                        </paragraph>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+ </subsection></section><section id="H808612F7B2BB432F85056864E1DD988E"><enum>3.</enum><header>Permanent authority for certain programs for homeless veterans</header><subsection id="H7081B2D9BD474225AAD10340136B4DD3"><enum>(a)</enum><header>General treatment for seriously mentally ill and homeless veterans</header><text>Section 2031 of title 38, United States Code, is amended—</text><paragraph id="HD1183D68C7E244CDB89AD3F383A6AE87"><enum>(1)</enum><text>by striking <quote>(a)</quote>; and</text></paragraph><paragraph id="H4D598F4F70E540BF98D28918A9C7A220"><enum>(2)</enum><text>by striking subsection (b).</text></paragraph></subsection><subsection id="HEC6020D7C1764B4489A9F5FC8D126FCA"><enum>(b)</enum><header>Additional services for seriously ill mentally ill and homeless veterans at certain locations</header><text display-inline="yes-display-inline">Section 2033 of title 38, United States Code, is amended by striking subsection (d).</text></subsection><subsection id="HAB92C3E92088494ABCAAFA8BE532B472"><enum>(c)</enum><header>Housing assistance for homeless veterans</header><text>Section 2041 of title 38, United States Code, is amended by striking subsection (c).</text></subsection><subsection id="H6E675AE3B3694FD1BC4BFAB083458B29"> <enum>(d)</enum> <header>Advisory Committee on Homeless Veterans</header> <text>Section 2066 of title 38, United States Code, is amended by striking subsection (d).</text>
+            </subsection><subsection id="H393C172C66F44A158833244BF5D104A5">
+                <enum>(e)</enum>
+                <header>Transfer of real property</header>
+ <text>Section 8118(a) of title 38, United States Code, is amended by striking paragraph (5).</text>
+            </subsection></section></legis-body></bill>
+

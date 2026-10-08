@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H84B4A57D6487490E85D371A444F30791" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1473 IH: Focusing State Efforts to Expand Opportunity Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1473</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190228">February 28, 2019</action-date><action-desc><sponsor name-id="S001172">Mr. Smith of Nebraska</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title IV of the Social Security Act to target funds to truly needy families.</official-title></form>
+	<legis-body id="H6F0BFD54209648AFBB9D1A0A0438D3A8" style="OLC">
+ <section id="HC29D168AE0034738AFC37C60FC86AF69" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Focusing State Efforts to Expand Opportunity Act</short-title></quote>.</text> </section><section id="H258A7FD05C014173B6883F4C987600CD"><enum>2.</enum><header>Targeting funds to truly needy families</header><text display-inline="no-display-inline">Section 404(k) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/604">42 U.S.C. 604(k)</external-xref>) is amended to read as follows:</text>
+			<quoted-block id="H8C56FE6C2E5A4E22B43349BBCF8AB152" style="OLC">
+ <subsection id="H318B106502C444E1BF1FF8990D3915C4"><enum>(k)</enum><header>Prohibitions</header><text>A State to which a grant is made under this part shall not use the grant to provide any assistance or services to a family whose monthly income exceeds twice the poverty line (as defined by the Office of Management and Budget, and revised annually in accordance with section 673(2) of the Omnibus Budget Reconciliation Act of 1981 (<external-xref legal-doc="usc" parsable-cite="usc/42/9902">42 U.S.C. 9902(2)</external-xref>)).</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

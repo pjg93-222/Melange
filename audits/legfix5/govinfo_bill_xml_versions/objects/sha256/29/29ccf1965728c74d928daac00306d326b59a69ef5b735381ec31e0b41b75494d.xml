@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE amendment-doc PUBLIC "-//US Congress//DTDs/amend.dtd//EN" "amend.dtd">
+<amendment-doc amend-stage="proposed" amend-type="engrossed-amendment" amend-degree="first" key="H"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S2938 EAH: </dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2022-05-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<engrossed-amendment-form>
+<distribution-code display="no"><?xm-replace_text {distribution code}?></distribution-code> 
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session> 
+<current-chamber display="yes">In the House of Representatives, U. S.,</current-chamber> 
+<action> 
+<action-date date="20220518">May 18, 2022</action-date> 
+</action> 
+<legis-type display="yes">AMENDMENT:</legis-type></engrossed-amendment-form> 
+<engrossed-amendment-body> 
+<section section-type="resolved" id="H483024832"> <text>That the bill from the Senate (S. 2938) entitled <quote>An Act to designate the United States Courthouse and Federal Building located at 111 North Adams Street in Tallahassee, Florida, as the <quote>Joseph Woodrow Hatchett United States Courthouse and Federal Building</quote>, and for other purposes.</quote>, do pass with the following</text></section><amendment> <amendment-instruction line-numbers="off"><text>Strike out all after the enacting clause and insert:</text></amendment-instruction> </amendment><amendment> 
+<amendment-instruction line-numbers="off"><text></text></amendment-instruction> <amendment-block style="OLC" id="H9E9B7EDA94F647C18D10FD118BB2B624" reported-display-style="italic" changed="added"> <section id="H58B7B50E8F92415A9937A6156F400CDF" section-type="section-one" commented="no" display-inline="no-display-inline"><enum>1.</enum><header display-inline="yes-display-inline">Joseph Woodrow Hatchett United States Courthouse and Federal Building</header> <subsection id="HC5C91EEFA5174AD49191521AD2171638" commented="no" display-inline="no-display-inline"><enum>(a)</enum><header display-inline="yes-display-inline">Designation</header><text display-inline="yes-display-inline">The United States Courthouse and Federal Building located at 111 North Adams Street in Tallahassee, Florida, shall be known and designated as the <quote>Joseph Woodrow Hatchett United States Courthouse and Federal Building</quote>.</text></subsection> 
+<subsection id="H974047AB22A44708BEF8FFD859C51CB0" commented="no" display-inline="no-display-inline"><enum>(b)</enum><header display-inline="yes-display-inline">References</header><text display-inline="yes-display-inline">Any reference in a law, map, regulation, document, paper, or other record of the United States to the United States Courthouse and Federal Building referred to in subsection (a) shall be deemed to be a reference to the <quote>Joseph Woodrow Hatchett United States Courthouse and Federal Building</quote>.</text></subsection></section> <section id="H4A1E425DE11E458793B22600A9DF0B1A" section-type="subsequent-section"><enum>2.</enum><header>Lynn C. Woolsey Post Office Building</header> <subsection id="H2890314EE17640F9A9CF3F5C943DB915"><enum>(a)</enum><header>Designation</header><text display-inline="yes-display-inline">The facility of the United States Postal Service located at 120 4th Street in Petaluma, California, shall be known and designated as the <quote>Lynn C. Woolsey Post Office Building</quote>.</text></subsection> 
+<subsection id="H9677020D79014CC2A321877D40EC0A5D"><enum>(b)</enum><header>References</header><text display-inline="yes-display-inline">Any reference in a law, map, regulation, document, paper, or other record of the United States to the facility referred to in subsection (a) shall be deemed to be a reference to the <quote>Lynn C. Woolsey Post Office Building</quote>.</text></subsection></section> </amendment-block></amendment></engrossed-amendment-body><attestation><attestation-group><attestor display="no">Lorraine Miller</attestor><role>Clerk.</role></attestation-group></attestation><endorsement></endorsement></amendment-doc> 
+

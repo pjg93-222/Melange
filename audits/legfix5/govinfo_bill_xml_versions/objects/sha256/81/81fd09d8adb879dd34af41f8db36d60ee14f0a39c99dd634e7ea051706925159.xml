@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" dms-id="HA38FFB34FAA246A7B5A2D0C36129BA0D" public-private="public" resolution-type="house-resolution" star-print="no-star-print" key="H">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HRES 578 IH: Expressing support for the designation of July 30, 2021, as “National Whistleblower Appreciation Day”.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-07-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code>
+<congress display="yes">117th CONGRESS</congress>
+<session display="yes">1st Session</session>
+<legis-num display="yes">H. RES. 578</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210730">July 30, 2021</action-date>
+<action-desc><sponsor name-id="S001175">Ms. Speier</sponsor> (for herself, <cosponsor name-id="M000087">Mrs. Carolyn B. Maloney of New York</cosponsor>, <cosponsor name-id="R000602">Miss Rice of New York</cosponsor>, <cosponsor name-id="C001055">Mr. Case</cosponsor>, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="L000562">Mr. Lynch</cosponsor>, and <cosponsor name-id="C001072">Mr. Carson</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Reform</committee-name></action-desc>
+</action>
+<legis-type>RESOLUTION</legis-type>
+<official-title display="yes">Expressing support for the designation of July 30, 2021, as <quote>National Whistleblower Appreciation Day</quote>.</official-title>
+</form>
+<preamble>
+<whereas><text>Whereas, in 1777, before the passage of the Bill of Rights, 10 sailors and marines blew the whistle on misconduct that was harmful to the United States;</text></whereas> <whereas><text>Whereas the Continental Congress unanimously supported the whistleblowers in words and deeds, including by releasing Government records and authorizing payment for legal expenses incurred by the whistleblowers incurred in defending against a retaliatory criminal libel lawsuit brought against them;</text></whereas>
+<whereas><text>Whereas, on July 30, 1778, in demonstration of their full support for whistleblowers, the Members of the Continental Congress unanimously enacted the first whistleblower legislation in the United States that read: <quote>Resolved, That it is the duty of all persons in the service of the United States, as well as all other inhabitants thereof, to give the earliest information to Congress or other proper authority of any misconduct, frauds or misdemeanors committed by any officers or persons in the service of these states, which may come to their knowledge</quote>;</text></whereas> <whereas><text>Whereas whistleblowers risk their careers, jobs, and reputations by reporting waste, fraud, and abuse to the proper authorities;</text></whereas>
+<whereas><text>Whereas, in providing the proper authorities with lawful disclosures, whistleblowers save the taxpayers of the United States billions of dollars each year and serve the public interest by ensuring that the United States remains an ethical and safe place; and</text></whereas> <whereas><text>Whereas it is the public policy of the United States to encourage, in accordance with Federal law (including the Constitution of the United States, rules, and regulations) and consistent with the protection of classified information (including sources and methods of detection of classified information), honest and good faith reporting of misconduct, fraud, misdemeanors, and other crimes to the appropriate authority at the earliest time possible: Now, therefore, be it</text></whereas></preamble>
+<resolution-body style="traditional" id="H29FAFDEAB4A54E92B5838178BA627852">
+<section display-inline="yes-display-inline" section-type="undesignated-section" id="HC3CD5E9A9CDA452AB92A28ABDB0D7B9B"><enum/><text>That the House of Representatives—</text> <paragraph id="H559CEC49D3FF460C8CF4328998DDBF62"><enum>(1)</enum><text>supports the designation of <quote>National Whistleblower Appreciation Day</quote>; and</text></paragraph>
+<paragraph id="H9110EE974FC2422BB6F0B69C14211908"><enum>(2)</enum><text>ensures that the Federal Government implements the intent of the Founding Fathers, as reflected in the legislation enacted on July 30, 1778, by encouraging each executive agency to recognize National Whistleblower Appreciation Day by—</text> <subparagraph id="HBCF0756444854473B4A163980EEAAFD0"><enum>(A)</enum><text>informing employees, contractors working on behalf of United States taxpayers, and members of the public about the legal right of a United States citizen to <quote>blow the whistle</quote> to the appropriate authority by honest and good faith reporting of misconduct, fraud, misdemeanors, or other crimes; and</text></subparagraph>
+<subparagraph id="H466AFD1668A24A6E89F5F68B8471A9F2"><enum>(B)</enum><text>acknowledging the contributions of whistleblowers to combating waste, fraud, abuse, and violations of laws and regulations of the United States.</text></subparagraph></paragraph></section> </resolution-body> </resolution> 
+

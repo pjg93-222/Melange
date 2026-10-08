@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HBFFC91C196F64D6AB165DF5B19C462F1" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8172 IH: Federal Benefits Repatriation Verification Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-02</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8172</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260402">April 2, 2026</action-date><action-desc><sponsor name-id="F000470">Mrs. Fischbach</sponsor> (for herself and <cosponsor name-id="S001212">Mr. Stauber</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the Committee on <committee-name committee-id="HGO00">Oversight and Government Reform</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To restrict the repatriation of funds by noncitizens receiving Federal benefits, to require verification and certification of compliance, and to establish a centralized database within the Department of the Treasury for monitoring, enforcement, and reporting.</official-title></form><legis-body id="H4559B8482FE34D4FA606143D56FA51F7" style="OLC"> 
+<section id="HC64A0093554B492091C6DC7B5EDF7C05" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Federal Benefits Repatriation Verification Act of 2026</short-title></quote>.</text> </section> <section id="HEDEB4B96A9B34FFD8B7E3849CA6C5462"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text> 
+<paragraph id="H97960E50DE9744C3926EB5F8DE19E301">
+                <enum>(1)</enum>
+                <header>Covered individual</header>
+ <text display-inline="yes-display-inline">The term <term>covered individual</term> means a noncitizen who is a recipient of Federal benefits.</text>
+            </paragraph> 
+<paragraph id="H9D6F797EEDD64F7BA4EFB06BE00FAA81"><enum>(2)</enum><header>Federal benefits</header><text display-inline="yes-display-inline">The term <term>Federal benefits</term> means any monetary or in-kind assistance provided by a Federal agency, including benefits under the Social Security Act, SNAP, TANF, Medicaid, Federal housing assistance, unemployment insurance, and any comparable program.</text></paragraph> <paragraph id="H5B793EA7394F4049BC1B03BE20AC9C01"> <enum>(3)</enum> <header>Noncitizen</header> <text>The term <term>noncitizen</term> means any individual who is not a citizen or national of the United States.</text>
+            </paragraph> 
+<paragraph id="H6D4E7491ED854E49BE2CDFEA63A16DB4">
+                <enum>(4)</enum>
+                <header>Repatriation of funds</header>
+ <text display-inline="yes-display-inline">The term <term>repatriation of funds</term> means the transfer, remittance, or transmission of monetary assets from within the United States to any foreign individual, institution, or account outside of the territorial United States, whether conducted through electronic transfer, wire services, mobile applications, cryptocurrency exchanges, banks, or informal value transfer systems. </text>
+            </paragraph> 
+<paragraph id="H8A24B3E47CB7488FB1181AE785463317"><enum>(5)</enum><header>Treasury Repatriation Verification Database</header><text display-inline="yes-display-inline">The term <term>Treasury Repatriation Verification Database</term> means the secure system established under section 5.</text></paragraph></section> <section id="H28B9DAED04914136A5F4C5F70BF3C148"><enum>3.</enum><header>Restriction on repatriation of funds by covered individuals</header> <subsection id="HD8C7C444813644B5AAD3595E1A607703"> <enum>(a)</enum> <header>Repatriation limit</header> <text>A noncitizen may not transfer any monetary asset from within the United States to any other noncitizen, entity, or account outside of the United States in an amount that exceeds $1,000 during any 12-month period during which the noncitizen is a recipient of a Federal public benefit.</text>
+            </subsection> 
+<subsection id="H4C84E7562F4146CFA5EC34913E2EBBCE">
+                <enum>(b)</enum>
+                <header>Condition of benefit eligibility</header>
+ <text>Compliance with subsection (a) shall be a condition of continued eligibility for any Federal benefit program. A noncitizen who violates subsection (a) shall be ineligible to receive any Federal public benefit.</text>
+            </subsection> 
+<subsection id="HC49EFA9334EC432CA2EC05DD0F4B6EAC">
+                <enum>(c)</enum>
+                <header>Certification requirement</header>
+ <text>Covered individuals shall annually certify compliance with the repatriation limit as part of their continued benefits eligibility review. On an annual basis, a noncitizen who is a recipient of a Federal public benefit shall certify to the relevant agency, as part of verification of their eligibility, that the individual has not violated subsection (a). A noncitizen who fails to submit such a certification shall be ineligible to receive the Federal public benefit.</text>
+            </subsection> 
+<subsection id="HCD02E2E7F8524C9D8DE25A5DC3A3B635">
+                <enum>(d)</enum>
+                <header>Verification requirement</header>
+ <text>Federal agencies administering benefits shall coordinate with the Department of the Treasury to verify that covered individuals are in compliance with subsection (a). The Secretary of the Treasury shall coordinate with the head of each Federal agency that administers a Federal public benefit in carrying out this section.</text>
+            </subsection></section> 
+<section id="HAB009BA5B0EA42358F2412E87619487C"><enum>4.</enum><header>Duties of financial and remittance institutions</header> 
+<subsection id="HCD623D4F92FC428BAD42CBAD1EBF08FD"><enum>(a)</enum><header>Mandatory reporting</header><text>Any financial institution, money service business, remittance provider, or cryptocurrency exchange operating in the United States shall report all repatriation transactions made by covered individuals to the Department of the Treasury.</text></subsection> <subsection id="HAB346F78D8804CD0B718154A21CCE9C7"> <enum>(b)</enum> <header>Real-Time verification</header> <text>Institutions described in subsection (a) shall query the Treasury Repatriation Verification Database to determine whether a proposed transfer would cause a covered individual to exceed the repatriation limit before processing the transaction.</text>
+            </subsection> 
+<subsection id="HA5AB75A2276C4460B837AD2745463225"><enum>(c)</enum><header>Transaction denial</header><text>If the Treasury Repatriation Verification Database indicates that the repatriation limit has been or would be exceeded, the institution must deny the transaction and report the attempted transfer.</text></subsection> <subsection id="H6DAE9440956B4875BAF588EFDC97A8AE"><enum>(d)</enum><header>Compliance requirements</header><text>The Secretary of the Treasury shall issue regulations specifying the format, frequency, and method of reporting and verification.</text></subsection></section> 
+<section id="HB28E3F7903674CC8B25402A687A2F660"><enum>5.</enum><header>Establishment of the Treasury Repatriation Verification Database</header> 
+<subsection id="H990E2CC8E046469A809018CC3870437E"><enum>(a)</enum><header>Creation</header><text>The Secretary of the Treasury shall establish and maintain a secure, centralized database to be known as the <quote>Treasury Repatriation Verification Database</quote>.</text></subsection> <subsection id="H0965E78F21C64C00B6BF72E1475A23E5"><enum>(b)</enum><header>Contents</header><text>The Treasury Repatriation Verification Database shall include—</text> 
+<paragraph id="HA9BFE99A1DFF49F1B1D22FD0F5D31B20"><enum>(1)</enum><text>identification data for all covered individuals;</text></paragraph> <paragraph id="H1D0F7F455E1643FAAFEA5317BA5F1F10"><enum>(2)</enum><text>records of all repatriation transactions and attempted transactions by covered individuals;</text></paragraph> 
+<paragraph id="HFAD4FE070BE845B4AF67F97ABE5D7AB6"><enum>(3)</enum><text>real-time calculation of repatriation totals; and</text></paragraph> <paragraph id="H6C4ABBA1A4BF4AA686308FB73E8A1CB9"><enum>(4)</enum><text>compliance flags and eligibility indicators accessible to authorized Federal and State agencies.</text></paragraph></subsection> 
+<subsection id="HBF35A530F35845BD8598673BA54DD9D7"><enum>(c)</enum><header>Data sharing</header><text>The Secretary of the Treasury shall provide appropriate, privacy-compliant access to the Treasury Repatriation Verification Database to—</text> <paragraph id="H8197DCCBE91D49559B2FA1CB1F9BA898"><enum>(1)</enum><text>Federal benefit-administering agencies;</text></paragraph> 
+<paragraph id="H04EFA9DA67254A75A470BD3A16393229"><enum>(2)</enum><text>State agencies administering federally funded aid; and</text></paragraph> <paragraph id="H1E28CB7D621A4D97ABE6BA5F3D7EADBA"><enum>(3)</enum><text>financial and remittance institutions subject to section 4.</text></paragraph></subsection> 
+<subsection id="H2512D1D3F53A4E438EA0C74B6CA829C3"><enum>(d)</enum><header>Privacy and security</header><text>All data collection and sharing must comply with applicable Federal privacy laws and cybersecurity standards. The Secretary shall implement encryption, access controls, and audit trails.</text></subsection></section> <section id="H2A371B3F37AA44DCBA58D4654BAE1D06"><enum>6.</enum><header>Enforcement and penalties</header> <subsection id="H0D3B9488A064426EB6740F3632C60E91"><enum>(a)</enum><header>Benefit suspension</header><text>An individual who violates section 3 shall have their Federal benefits suspended until compliance is reestablished.</text></subsection> 
+<subsection id="H96B64FA2661F4A2AA8AA1C584C89D8B5"><enum>(b)</enum><header>Recoupment</header><text>Federal agencies may recover improper payments made during any period of noncompliance.</text></subsection> <subsection id="HC33D850CA8F447A08D1BC692E51DFCC1"><enum>(c)</enum><header>Institutional penalties</header><text>Any institution failing to comply with section 4 may be subject to—</text> 
+<paragraph id="H6DEB2D9DDF8442D8BC62E44580C76638"><enum>(1)</enum><text>civil penalties not to exceed $25,000 per violation; and</text></paragraph> <paragraph id="HB429B68AF393429ABA4381ABCD5F1EE5"><enum>(2)</enum><text>additional penalties for willful or repeated violations as determined by the Secretary of the Treasury.</text></paragraph></subsection></section> 
+<section id="H46F24157075F493EA97B3CFF83F2DFCA"><enum>7.</enum><header>Rulemaking</header><text display-inline="no-display-inline">Not later than 12 months after the date of enactment of this Act, the Secretary of the Treasury, in consultation with Federal benefit-administering agencies, shall issue regulations necessary to carry out this Act.</text></section> <section id="HC63A7A95CC9D4BE6ADD848A02B71FC69"><enum>8.</enum><header>Effective date</header><text display-inline="no-display-inline">This Act shall take effect two years after the date of enactment of this Act, except that the Secretary of the Treasury may begin regulatory and database development activities immediately.</text></section> 
+</legis-body></bill>
+

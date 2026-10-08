@@ -1,0 +1,42 @@
+INTERVIEW rows 153576 | non-all-caps 146459 | D-U2 flagged 4537 | unflagged 141922
+
+R1  rows=  142  (0.100% of unflagged)   STOP-name tag WITH a broadcast parenthetical (e.g. "FOX (voice-over):")
+           81  FOX (voice-over)
+           49  FOX (voice over)
+           10  FOX (on camera)
+            2  FOX(voice-over)
+R2  rows=  702  (0.495% of unflagged)   single-token tag not in SPEAKER_LEX, WITH a parenthetical
+           35  MCKEND (voice-over)
+           21  CHURCH (on camera)
+           17  TAUSCHE (voice-over)
+           16  UNKNOWN (voice-over)
+           13  MUNTEAN (voice-over)
+           13  HUBBARD (voice-over)
+           12  CAIFA (voice-over)
+           11  MOOS (voice-over)
+R3  rows=  180  (0.127% of unflagged)   qualifying tag + parenthetical whose SENTENCE ANCHOR failed (mid-sentence)
+           17  LEMON (on camera)
+           12  RAJU (voice-over)
+            8  BRIEN (voice over)
+            5  LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)
+            5  ACOSTA (voice-over)
+            4  COLLINS (voice-over)
+            4  MURRAY (voice-over)
+            4  LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice over)
+R4  rows=   12  (0.008% of unflagged)   MIXED-CASE label at a sentence start, in PBS/CSIS/AEI/Aspen rows
+            3  Attorney General Vanita Gupta
+            2  Homeland Security Secretary
+            2  Treasury Secretary
+            1  Treasury Secretary Nominee
+            1  Trade Representative
+            1  Attorney General
+            1  Capitol Police Chief
+            1  Deputy Attorney General
+
+UNION of R1-R4 (distinct rows): 1036  (0.730% of unflagged)
+D-U2 flagged + R1-R4 union     : 5573  (3.629% of 153576 INTERVIEW rows)
+wrote U2b_R1_sample_UNGRADED.csv (20 of 142)
+wrote U2b_R2_sample_UNGRADED.csv (20 of 702)
+wrote U2b_R3_sample_UNGRADED.csv (20 of 180)
+wrote U2b_R4_sample_UNGRADED.csv (12 of 12)
+DONE U2b

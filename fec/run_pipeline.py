@@ -80,6 +80,10 @@ CHAIN=[
     ]),
     ('coop_v2_candidate.py',[]),
     ('build_electoral.py',[]),
+    # COMPET_MULT (Paul 2026-10-05, default ON 2026-10-06): the Cook-PVI competitiveness multiplier c. Writes data/money/competitiveness_c.json (deterministic,
+    # no timestamps), which every flip-family engine below reads through moneyball_core.cmult unless COMPET_MULT=0. A build failure is FATAL by default
+    # (the engines would refuse a missing artifact anyway) and non-fatal only with COMPET_MULT=0. Rank-neutral: RA_SCORE ranks do not move.
+    ('build_competitiveness.py',[]),
     ('build_district_industry.py',[]),
     ('receptivity_layer.py',[]),
     # Same-cycle bill transaction: verify the official repository, persist

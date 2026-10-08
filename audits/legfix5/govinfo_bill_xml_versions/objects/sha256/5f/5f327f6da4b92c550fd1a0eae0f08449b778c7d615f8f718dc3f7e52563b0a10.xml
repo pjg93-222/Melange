@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MIR25B19-G65-T1-09F">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3067 IS: Innovation Fund Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-10-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3067</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251028">October 28, 2025</action-date>
+            <action-desc><sponsor name-id="S366">Ms. Warren</sponsor> (for herself and <cosponsor name-id="S415">Mr. Warnock</cosponsor>) introduced the following bill; which was
+                read twice and referred to the <committee-name committee-id="SSBK00">Committee on
+                    Banking, Housing, and Urban Affairs</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To establish a grant program to increase the local housing supply, and for
+            other purposes.</official-title>
+    </form>
+    <legis-body>
+        <section id="id72218011c1504440be60fa3cd28fa2a4" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+            <subsection commented="no" display-inline="no-display-inline" id="id45d95e3792c246ee807479972e11a7ef">
+                <enum/>
+ <text>This Act may be cited as the <quote><short-title>Innovation Fund Act</short-title></quote>.</text>
+            </subsection>
+        </section>
+        <section commented="no" display-inline="no-display-inline" section-type="subsequent-section" id="id4b9788e99ca54b1c9873d7c0912e5cab">
+            <enum>2.</enum>
+            <header>Innovation Fund</header>
+            <subsection id="id948fece5af264ba8b316033672fa57da">
+                <enum>(a)</enum>
+                <header>Definitions</header>
+ <text display-inline="yes-display-inline">In this section:</text> <paragraph id="id7fce436f097647c6a439c672a4874809"> <enum>(1)</enum> <header>Attainable housing</header> <text>The term <term>attainable housing</term> means housing that—</text>
+                    <subparagraph id="id96b1c0cc3bd842008e7c4974efb08d90">
+                        <enum>(A)</enum>
+ <text>serves—</text> <clause commented="no" display-inline="no-display-inline" id="idc57b39d9e77747969527637d130eb84e"> <enum>(i)</enum> <text display-inline="yes-display-inline">a majority of households with income not greater than 80 percent of area median income; and</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id1c2694f7b9c0439381f9c05046d6d5cf">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">households with income not greater than 100 percent of area median income; or</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="id12d650acd197457cb696022d1e2a523d">
+                        <enum>(B)</enum>
+ <text>serves—</text> <clause commented="no" display-inline="no-display-inline" id="idfd7f7328d5ca4b609e9d08e873cfa08f"> <enum>(i)</enum> <text display-inline="yes-display-inline">a majority of households with income not greater than 60 percent of area median income; and</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id32d999784a8f44679810e41c9dfc84d8">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">households with income not greater than 120 percent of area median income.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id6f0f564adc3c4ce18ca8f46c46b19615">
+                    <enum>(2)</enum>
+                    <header>Eligible entity</header>
+ <text>The term <term>eligible entity</term> means—</text> <subparagraph id="idf1508c038036424c8d5695cb75a34ea2"> <enum>(A)</enum> <text>a metropolitan city or urban county, as those terms are defined in section 102 of the Housing and Community Development Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/42/5302">42 U.S.C. 5302</external-xref>), that has demonstrated an objective improvement in housing supply growth, as determined by the Secretary, whose methodology for determining such growth is published in the Federal Register to allow for public comment not less than 90 days before date on which the notice of funding opportunity is made available; or</text>
+                    </subparagraph>
+                    <subparagraph id="id9afe6ccffb814915a2791eeb6468a5f0">
+                        <enum>(B)</enum>
+ <text>a unit of general local government or Indian tribe, as those terms are defined in section 102 of the Housing and Community Development Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/42/5302">42 U.S.C. 5302</external-xref>), that has demonstrated an objective improvement in housing supply growth, as determined by the Secretary, whose methodology for determining such improvement is published in the Federal Register to allow for public comment not less than 90 days before the date on which the notice of funding opportunity is made available.</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="idab80ba3cc3d5478aa832b59abc8d1a1f">
+                    <enum>(3)</enum>
+                    <header>Secretary</header>
+ <text>The term <term>Secretary</term> means the Secretary of Housing and Urban Development.</text>
+                </paragraph>
+            </subsection>
+            <subsection id="idef049c832c3446a096284920a8680518">
+                <enum>(b)</enum>
+                <header>Establishment of a grant program</header>
+                <paragraph id="idc749e8dd03fc410aac086236c2e7ae6b">
+                    <enum>(1)</enum>
+                    <header>Establishment</header>
+ <text>Not later than 1 year after the date of enactment of this Act, the Secretary shall establish a program to award grants on a competitive basis to eligible entities that have increased their local housing supply.</text>
+                </paragraph>
+                <paragraph id="id3d3a1fae215645ccabbf47cbe8b337a2">
+                    <enum>(2)</enum>
+                    <header>List of eligible entities</header>
+ <text>The Secretary shall make a list of eligible entities publicly available on the website of the Department of Housing and Urban Development.</text>
+                </paragraph>
+                <paragraph id="id95638073e4fc428ea1ebac0a1fe87b83">
+                    <enum>(3)</enum>
+                    <header>Eligible purposes</header>
+ <text>An eligible entity receiving a grant under this section may use funds to—</text>
+                    <subparagraph id="idda008aa8072d4840ba07fb65372e485b">
+                        <enum>(A)</enum>
+ <text>carry out any of the activities described in section 105 of the Housing and Community Development Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/42/5305">42 U.S.C. 5305</external-xref>);</text>
+                    </subparagraph>
+                    <subparagraph id="id562f5c992a684ae08d26073f656a7a7d">
+                        <enum>(B)</enum>
+ <text>carry out any of the activities permitted under the Local and Regional Project Assistance Program established under section 6702 of title 49, United States Code;</text>
+                    </subparagraph>
+                    <subparagraph id="id024e7244e34d445bb8b6ad14ef37d028">
+                        <enum>(C)</enum>
+ <text>serve as matching funds under a State revolving fund program related to a clean water or drinking water program administered by the Environmental Protection Agency in which the eligible entity is the grantee under that program, unless otherwise determined by the Secretary; and</text>
+                    </subparagraph>
+                    <subparagraph id="id390d2a4b6ed846e0936fc81db2fb3f4d">
+                        <enum>(D)</enum>
+ <text>carry out initiatives of the eligible entity that facilitate the expansion of the supply of attainable housing and that supplement initiatives the eligible entity has carried out, or is in the process of carrying out, as specified in the application submitted under paragraph (4).</text>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="id492e5f7e8c7f4530af37a303f9f9c3b5">
+                    <enum>(4)</enum>
+                    <header>Application</header>
+                    <subparagraph id="id02da2ec2946344f0871952e2d8646ecd">
+                        <enum>(A)</enum>
+                        <header>In general</header>
+ <text>An eligible entity seeking a grant under this section shall submit to the Secretary an application that provides—</text>
+                        <clause id="id5e821e44ded44bddac4375806364458d">
+                            <enum>(i)</enum>
+ <text>a description of each purpose for which the eligible entity will use the grant, and an attestation that the grant will be used only for 1 or more eligible purposes described in paragraph (3);</text>
+                        </clause>
+                        <clause id="idcc71d9b7ea964046b3f59742d8faeb8e">
+                            <enum>(ii)</enum>
+ <text>data on characteristics of increased housing supply during the 3-year period ending on the date on which the application is submitted, which may include whether such housing—</text>
+                            <subclause id="idc33b072206ec4ebd97997b3484242035">
+                                <enum>(I)</enum>
+ <text>serves households at a range of income levels; and</text> </subclause> <subclause id="idd3b4259f58d143ceab7d41e4c9f9a145"> <enum>(II)</enum> <text>has improved the quality and affordability of housing in the jurisdiction of the eligible entity;</text>
+                            </subclause>
+                        </clause>
+                        <clause id="idf014851f9c3b427cbcbc742a9db15426">
+                            <enum>(iii)</enum>
+ <text>a description of how each eligible purpose described in clause (i) may address a community need or advance an objective, or an aspect of an objective, included in the comprehensive housing affordability strategy and community development plan of the eligible entity under part 91 of title 24, Code of Federal Regulations, or any successor regulation (commonly referred to as a <quote>consolidated plan</quote>); and</text>
+                        </clause>
+                        <clause id="id646d358ad5234791bfb3315427757b3d">
+                            <enum>(iv)</enum>
+ <text>a description of how the eligible entity has carried out, or is in the process of carrying out, initiatives that facilitate the expansion of the supply of housing.</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="id109899ea1fef45a09b250a520c17de3a">
+                        <enum>(B)</enum>
+                        <header>Initiatives</header>
+ <text>Initiatives that meet the criteria described in paragraph (3)(D) include—</text>
+                        <clause id="id5960ce815ff64fd894632be90889f9f9">
+                            <enum>(i)</enum>
+ <text>increasing by-right uses, including duplex, triplex, quadplex, and multifamily buildings, in areas of opportunity;</text>
+                        </clause>
+                        <clause id="id08f7e5e3e8214e0889a6651ff1d72efc">
+                            <enum>(ii)</enum>
+ <text>revising or eliminating off-street parking requirements to reduce the cost of housing production;</text>
+                        </clause>
+                        <clause id="idf4fe9975305e408e839d136e994f131a">
+                            <enum>(iii)</enum>
+ <text>revising minimum lot size requirements, floor area ratio requirements, set-back requirements, building heights, and bans or limits on construction to allow for denser and more affordable development;</text>
+                        </clause>
+                        <clause id="idc0458e98a482456a8f3403dcef70021c">
+                            <enum>(iv)</enum>
+ <text>instituting incentives to promote dense development;</text> </clause> <clause id="ida0899e412a9e4c208cb5120ad911f77a"> <enum>(v)</enum> <text>passing zoning overlays or other ordinances that enable the development of mixed-income housing;</text>
+                        </clause>
+                        <clause id="ide848774910c84a949d5364be8cf79000">
+                            <enum>(vi)</enum>
+ <text>streamlining regulatory requirements and shortening processes, increasing code enforcement and permitting capacity, reforming zoning codes, or other initiatives that reduce barriers to increasing housing supply and affordability;</text>
+                        </clause>
+                        <clause id="id4c2f091f269e445ebfc6efcf4f69546b">
+                            <enum>(vii)</enum>
+ <text>eliminating restrictions against accessory dwelling units and expanding their by-right use;</text>
+                        </clause>
+                        <clause id="idf69c7657e3214babb061aecd7db4fddf">
+                            <enum>(viii)</enum>
+ <text>using local tax incentives or public financing to promote development of attainable housing;</text>
+                        </clause>
+                        <clause id="idf5f58b1506c44a83a9eb6538ec00eb14">
+                            <enum>(ix)</enum>
+ <text>streamlining environmental regulations;</text> </clause> <clause id="ide65ea4a4c014485583237e771b81b82c"> <enum>(x)</enum> <text>eliminating unnecessary manufactured-housing regulations and restrictions;</text>
+                        </clause>
+                        <clause id="id0eff51b6ff244e29ad9608214351c7eb">
+                            <enum>(xi)</enum>
+ <text>minimizing the impact of overburdensome energy and water efficiency standards on housing costs; and</text>
+                        </clause>
+                        <clause id="id7f641fd8a1bd4103bf3bfbe5cdbe97a6">
+                            <enum>(xii)</enum>
+ <text>other activities that reduce cost of construction, as determined by the Secretary.</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph>
+                <paragraph id="idd7fb724066d14b0aa356b98b9571373f">
+                    <enum>(5)</enum>
+                    <header>Grants</header>
+                    <subparagraph id="id9662d6cf215542e9b256333d1c246c72">
+                        <enum>(A)</enum>
+                        <header>In general</header>
+ <text>The Secretary shall make not fewer than 25 grants on an annual basis (unless amounts appropriated to provide grant amounts consistent with subsection (b) are insufficient, in which case fewer grants may be awarded), with strong consideration of different geographical areas and a relatively even spread of rural, suburban, and urban communities.</text>
+                    </subparagraph>
+                    <subparagraph id="ide75039ee3d154f4998149bbe371056c6">
+                        <enum>(B)</enum>
+                        <header>Limitations on awards</header>
+ <text>No grant awarded under this paragraph may be—</text> <clause commented="no" display-inline="no-display-inline" id="idb7d8ff9c2dec45fbb5bbb54a17cc10ba"> <enum>(i)</enum> <text display-inline="yes-display-inline">more than $10,000,000; or</text>
+                        </clause>
+                        <clause commented="no" display-inline="no-display-inline" id="id13bbc634790f45f6bb43e170308e520a">
+                            <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">less than $250,000.</text> </clause> </subparagraph> <subparagraph id="id9ee85f8f0aaa4f62901a70b0e3fe66cb"> <enum>(C)</enum> <header>Priority</header> <text>When awarding grants under this paragraph, the Secretary shall give priority to an eligible entity that has—</text>
+                        <clause id="id7f4dc0b8a86c4461822d5c4f3a381eac">
+                            <enum>(i)</enum>
+ <text>demonstrated the use of innovative policies, interventions, or programs for increasing housing supply, including adoption of any of the frameworks developed under section 203; and</text>
+                        </clause>
+                        <clause id="idd3f42ce760b34b76abffc102aac515c0">
+                            <enum>(ii)</enum>
+ <text>demonstrated a marked improvement in housing supply growth.</text> </clause> </subparagraph> <subparagraph commented="no" display-inline="no-display-inline" id="id92fc18e9b0754f0899d84c77c4f3aa70"> <enum>(D)</enum> <header>Grant administration and terms</header> <text>Projects assisted under this section for activities described in sector 23 of the North American Industry Classification System shall be treated as projects assisted under the Community Development Block Grant program under title I of the Housing and Community Development Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/42/5301">42 U.S.C. 5301 et seq.</external-xref>).</text>
+                    </subparagraph>
+                </paragraph>
+            </subsection>
+            <subsection id="idafef22ac0be44ef891f34e2503aed16a">
+                <enum>(c)</enum>
+                <header>Rules of construction</header>
+ <text display-inline="yes-display-inline">Nothing in this section shall be construed—</text>
+                <paragraph commented="no" display-inline="no-display-inline" id="id09f41e73f26f4877b82afb047f6166fb">
+                    <enum>(1)</enum>
+ <text display-inline="yes-display-inline">to authorize the Secretary to mandate, supersede, or preempt any local zoning or land use policy; or</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="idc476d2dfca52470c853cdd07c37a4670">
+                    <enum>(2)</enum>
+ <text>to affect the requirements of section 105(c)(1) of the Cranston-Gonzalez National Affordable Housing Act (<external-xref legal-doc="usc" parsable-cite="usc/42/12705">42 U.S.C. 12705(c)(1)</external-xref>).</text>
+                </paragraph>
+            </subsection>
+            <subsection id="id847af61e806b41348ea09dbcbb05a68c">
+                <enum>(d)</enum>
+                <header>Authorization of appropriations</header>
+                <paragraph commented="no" display-inline="no-display-inline" id="id5829a3c798584688910db40ab2132664">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">There is authorized to be appropriated to carry out this section $200,000,000 for each of fiscal years 2027 through 2031.</text>
+                </paragraph>
+                <paragraph commented="no" display-inline="no-display-inline" id="idb4c2d04655d84798bb8c968acd8f5f27">
+                    <enum>(2)</enum>
+                    <header>Adjustment</header>
+ <text>The amount authorized to be appropriated under paragraph (1) shall be adjusted for inflation based on the Consumer Price Index.</text>
+                </paragraph>
+            </subsection>
+        </section>
+    </legis-body>
+</bill>
+

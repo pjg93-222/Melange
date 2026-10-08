@@ -1,0 +1,75 @@
+﻿roster members (congestion.json): 533
+
+=== press refresh receipt gate (press_stream.validate_refresh_receipt) ===
+   receipt VALID -> load_tone_rows() proceeds
+
+=== extract() re-derivation ===
+   speeches pass: 41190
+   PRESS pass: 42
+   PRESS_OFFICIAL_MENTION pass: 11184
+   X pass: 595
+TOTAL re-derived mentions: 53011
+cache distinct keys loaded: 19395
+baseline bindings applied: 18623   legacy_ambiguous (live): 384
+cache keys after binding  : 38018
+
+==============================================================================
+STEP 2 : TARGET CONTEXTS
+==============================================================================
+target contexts (newest 4 per a->b x source)   : 36148
+  scored (cache hit incl. legacy binding)       : 16530
+  UNSCORED                                      : 19618
+  pending (uncached OR legacy-ambiguous)        : 19924  [drives receipt deferred_contexts]
+todo_all (newest 4 CACHED per dyad/source)      : 18225   == artifact sum n_scored?
+
+BY SOURCE  (target contexts)
+  source                     target   scored unscored  pct_un
+  CREC                        18555    11351     7204   38.8%
+  PRESS_OFFICIAL_MENTION       9100      104     8996   98.9%
+  INTERVIEW                    6980     4088     2892   41.4%
+  CHRG                          889      372      517   58.2%
+  X                             582      580        2    0.3%
+  PRESS                          42       35        7   16.7%
+
+BY SOURCE  (ALL raw mentions, and how many are counted into n_scored)
+  source                        raw in_n_scored
+  CREC                        28720    12663
+  INTERVIEW                   11365     4443
+  PRESS_OFFICIAL_MENTION      11184      104
+  CHRG                         1105      400
+  X                             595      580
+  PRESS                          42       35
+
+==============================================================================
+C-SPAN WINDOWS (INTERVIEW rows whose package is a c-span.org URL)
+==============================================================================
+c-span raw mentions          : 621
+c-span target contexts       : 507
+  of those, SCORED (cached)  : 5
+  of those, UNSCORED         : 502
+c-span mentions counted into n_scored : 5
+distinct c-span programs contributing : 252
+c-span edges (a,b pairs)              : 364
+
+==============================================================================
+PROOF OF RE-DERIVATION vs shipped member_references.json
+==============================================================================
+artifact edges                   : 8017
+my dyads with >=1 mention        : 17504
+my dyads that are artifact edges : 8017
+artifact edges I did NOT produce : 0
+my dyads absent from artifact     : 9487  (expected: formality-only dyads, line 342)
+
+n_raw EXACT MATCH            : 8017 / 8017  = 100.000%
+per-source counter EXACT MATCH: 8017 / 8017  = 100.000%
+n_scored EXACT MATCH          : 8017 / 8017  = 100.000%
+sum n_raw    mine 53011  vs artifact 36335   (delta +16676)
+sum n_scored mine 18225  vs artifact 15892   (delta +2333)
+my per-source totals  : {'CREC': 28720, 'INTERVIEW': 11365, 'PRESS_OFFICIAL_MENTION': 11184, 'CHRG': 1105, 'X': 595, 'PRESS': 42}
+artifact per-source   : {'CREC': 22795, 'INTERVIEW': 9792, 'PRESS_OFFICIAL_MENTION': 2538, 'CHRG': 633, 'X': 545, 'PRESS': 32}
+per-source totals identical: False
+
+first 12 n_raw mismatches (mine vs artifact):
+
+wrote C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\laneB\refs.jsonl (53011 rows)
+DONE 02c

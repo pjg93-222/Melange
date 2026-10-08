@@ -1,0 +1,88 @@
+============================================================================================================
+M4  CROSSPOST_KEY_CHARS measured on the LIVE social corpus
+============================================================================================================
+desk rule lifted from : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\surfaces\make_member_desk.py
+engine rule lifted from: C:\Users\pgoff\OneDrive\Desktop\Melange Systems\fec\stance\build_media_blend.py
+shipped dial default   : CROSSPOST_KEY_CHARS='0'  (CROSSPOST_DEDUP=False)
+
+corpus rows 9541 -> desk-displayed social rows 6579  (offtopic=1891, unrelated=1032, unverified_handle=39)
+
+------------------------------------------------------------------------------------------------------------
+A.  DUPLICATE GROUPS AND ROWS
+------------------------------------------------------------------------------------------------------------
+  legacy key (120 chars)     groups>1 =   956   repeat rows =  1025   notes =   895
+  full key (whole text)      groups>1 =   662   repeat rows =   703   notes =   606
+  false collisions dissolved: 294 groups, 322 rows
+  rows longer than 120 normalised chars: 6054 of 6579
+  legacy groups whose members do NOT share the full key: 311 of 956
+
+  A2. the SAME census at receipt r6's scope (stance non-empty AND verified_handle==1,
+      which is the 9,502-row population FINDINGS.md A3 counted 1,434/445/490 over):
+      legacy key (120 chars)     rows  9502   groups>1 =  1434   surplus rows =  1544
+      full key (whole text)      rows  9502   groups>1 =  1015   surplus rows =  1084
+      legacy groups whose members do NOT share the full key (FALSE collisions): 445
+
+------------------------------------------------------------------------------------------------------------
+B.  DESK NOTES THAT CHANGE  ('also posted on <platform> <date>')
+------------------------------------------------------------------------------------------------------------
+  notes unchanged 6281 | changed 298  (of which 289 removed, 0 added, 9 re-pointed)
+    Young Kim              legacy='also posted on facebook 2026-07-01' full=''
+       Check fraud can happen to anyone at any time.  My STOP Payments Fraud Act protects Americans by giving banks e
+    Cindy Hyde-Smith       legacy='also posted on x 2026-06-30'      full=''
+       After months of pushing OMB to release CDFI federal grant and loan funding information, I’m glad to see it’s f
+    Addison McDowell       legacy='also posted on facebook 2026-06-29' full=''
+       Tune in! I'll soon be speaking before the Rules Committee on two of my NDAA amendments.  One to crack down on 
+    French Hill            legacy='also posted on x 2026-06-24'      full=''
+       After years of work and months of negotiations with the Senate, the first major housing bill in decades heads 
+    French Hill            legacy='also posted on x 2026-06-23'      full=''
+       After years of work and months of negotiations with the Senate, tonight the House passed the first major housi
+    French Hill            legacy='also posted on x 2026-06-23'      full=''
+       After years of work and months of negotiations with the Senate, tonight the House passed the first major housi
+    Tom Emmer              legacy='also posted on facebook 2026-05-18' full=''
+       The Chinese Communist Party uses a central bank digital currency (CBDC) to surveil and control its people.  If
+    Keith Self             legacy='also posted on facebook 2026-05-18' full=''
+       Central Bank Digital Currency (CBDC) would be the ultimate surveillance tool.  Congress must ban CBDC NOW. PER
+    Chip Roy               legacy='also posted on facebook 2026-04-29' full=''
+       More tomorrow, but tonight in the House:  1. I voted NO on FISA despite modest reforms & a CBDC (Central Bank 
+    Mark Harris            legacy='also posted on x 2026-04-29'      full=''
+       National security and constitutional liberty are not competing priorities. Congress has a responsibility to pr
+    Mark Harris            legacy='also posted on x 2026-04-29'      full=''
+       National security and constitutional liberty are not competing priorities. Congress has a responsibility to pr
+    Mark Harris            legacy='also posted on x 2026-04-29'      full=''
+       National security and constitutional liberty are not competing priorities. Congress has a responsibility to pr
+
+------------------------------------------------------------------------------------------------------------
+C.  SCORED ROWS -- must be IDENTICAL at CROSSPOST_DEDUP=0
+------------------------------------------------------------------------------------------------------------
+  legacy key   dial 0:  5722 scored | dial 1:  4834 scored | exclusions {'neutral': 838, '': 5722, 'link-only post: no scorable text': 19}
+  full key     dial 0:  5722 scored | dial 1:  5123 scored | exclusions {'neutral': 838, '': 5722, 'link-only post: no scorable text': 19}
+  every row's (scored, exclusion) identical at dial 0 under both keys: True
+  rows whose dial-1 fate changes (would have been WRONGLY dropped on rollback): 289
+
+------------------------------------------------------------------------------------------------------------
+D.  test_crosspost_scoring.py LiveBundle invariants, re-checked under the new key
+------------------------------------------------------------------------------------------------------------
+  'no key has every row annotated' over legacy-key groups: violations = 0
+  'the first post of a key never carries a note': violations = 0
+  'a noted row is scored, signed, texted and unexcluded': violations = 0
+  repeats decompose exactly: 703 = 606 scored + 85 neutral + 12 link-only  -> True
+
+------------------------------------------------------------------------------------------------------------
+E.  ENGINE SITE (build_media_blend.py's own dedup, LIVE bytes)
+------------------------------------------------------------------------------------------------------------
+  lifted block:
+      for _row_pass in (0,):
+          _dupe=_event in _seen
+          if _dupe: ndupe+=1
+          _seen.add(_event)                      # a no-op when already present: same set either way
+          if DEDUP:
+              if _dupe: continue
+          elif not _event[1]: nlinkonly+=1; continue
+          _kept=True
+
+  legacy key  CROSSPOST_DEDUP=0 -> retained  5722 | ndupe   907 | nlinkonly   19
+  legacy key  CROSSPOST_DEDUP=1 -> retained  4834 | ndupe   907 | nlinkonly    0
+  full key    CROSSPOST_DEDUP=0 -> retained  5722 | ndupe   618 | nlinkonly   19
+  full key    CROSSPOST_DEDUP=1 -> retained  5123 | ndupe   618 | nlinkonly    0
+
+DONE M4

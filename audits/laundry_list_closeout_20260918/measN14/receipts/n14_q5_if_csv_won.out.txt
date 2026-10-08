@@ -1,0 +1,57 @@
+====================================================================================================
+N14 Q5  WHAT WOULD CHANGE IF THE CSV WON THE OVERLAP   run 2026-09-19T13:04:53
+====================================================================================================
+lifted the desk press loop from make_member_desk.py lines 1669-1704
+press_date_overrides rows 232 | press_stance_overrides corrections 23 (production position)
+roster 533 members (shipped bundle)
+
+shared release keys: 2376
+   [SHEET                     ] rows walked 2376 -> displayed 2374, unknown member   2, billstatus   0, members 383
+   [CSV (engine_date applied) ] rows walked 2376 -> displayed 2374, unknown member   2, billstatus   0, members 383
+   [CSV (raw M/D/YYYY)        ] rows walked 2376 -> displayed 2374, unknown member   2, billstatus   0, members 383
+
+keys built on BOTH sides (a key whose member the roster does not carry is dropped by
+the desk on both sides identically): 2374 of 2376
+
+----------------------------------------------------------------------------------------------------
+-- WHAT THE DESK WOULD DISPLAY DIFFERENTLY (CSV with engine_date, as the helper hands it) --
+field          rows   members   example  sheet -> csv
+ssrc            491       157   Adam Smith             'debate' -> 'human_label'
+label            67        39   Roger Marshall         'Weakly negative' -> 'Weakly positive'
+pol              56        36   Roger Marshall         '-1' -> '1'
+stance           56        36   Roger Marshall         'oppose' -> 'support'
+title            37        26   Morgan Griffith        'Credit unions deliver thousands of â€œDonâ' -> 'Credit unions deliver thousands of “Don’t '
+
+-- DATES WITHOUT desk_press_source.engine_date (the raw base-CSV 'M/D/YYYY') --
+   displayed dates that would CHANGE : 2136 rows across 371 members
+   of those, would render BLANK      : 2136
+   with engine_date applied          : 0 rows
+   -> the 2,138-key date figure in fec/surfaces/desk_press_source.py's docstring is the
+      RAW-shape count; engine_date is exactly what collapses it.
+
+----------------------------------------------------------------------------------------------------
+-- HEADLINE --
+   displayed STANCE labels that change : 56 rows across 36 members
+   displayed DIRECTION (pol) changes   : 56 rows across 36 members
+   displayed GRADED labels that change : 67 rows across 39 members
+   displayed DATES that change         : 0 rows (engine_date) / 2136 rows (raw)
+   displayed stance_src that changes   : 491 rows across 157 members
+   ANY displayed field changes         : 529 rows across 162 members
+
+-- GRADED-LABEL MOVEMENT (top 14 shapes of 18) --
+   Neutral -> Weakly positive                                   17
+   Weakly negative -> Weakly positive                            7
+   Neutral -> Weakly negative                                    6
+   Very strongly positive -> Very weakly positive                5
+   Weakly positive -> Neutral                                    5
+   Neutral -> Very weakly positive                               4
+   Positive -> Very weakly positive                              3
+   Weakly positive -> Very weakly positive                       3
+   Neutral -> Positive                                           3
+   Weakly negative -> Neutral                                    3
+   Positive -> Neutral                                           2
+   Neutral -> Very weakly negative                               2
+   Very weakly positive -> Neutral                               2
+   Neutral -> Very strongly positive                             1
+wrote n14_q5_if_csv_won.json
+DONE N14 Q5

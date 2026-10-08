@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HCEE461B39DB14395AADC1C62703DCFF6" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3579 IH: Keep Mail Safe Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3579</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190627">June 27, 2019</action-date><action-desc><sponsor name-id="M001188">Ms. Meng</sponsor> (for herself, <cosponsor name-id="R000613">Mr. Rose of New York</cosponsor>, <cosponsor name-id="E000297">Mr. Espaillat</cosponsor>, <cosponsor name-id="M001185">Mr. Sean Patrick Maloney of New York</cosponsor>, <cosponsor name-id="P000604">Mr. Payne</cosponsor>, and <cosponsor name-id="R000602">Miss Rice of New York</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Reform</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To direct the Postmaster General to conduct a study on retrofitting mail collection boxes with
+			 narrow mail slots to prevent theft of mail, and for other purposes.</official-title></form>
+	<legis-body id="H71039BBB6DDE48A78E2CA7B0C1F0F7CB" style="OLC">
+ <section id="H575F5BF0D7ED482296DAF764449B1A3B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Keep Mail Safe Act</short-title></quote>.</text> </section><section id="H843714A7C53F48098457ED2C5FCE8FE2"><enum>2.</enum><header>USPS report on retrofitting mail collection boxes with narrow mail slots</header><text display-inline="no-display-inline">Not later than 90 days after the date of the enactment of this Act, the Postmaster General shall submit a report on retrofitting mail collection boxes to the Committees on Appropriations and Oversight and Reform of the House of Representatives and the Committees on Appropriations and Homeland Security and Governmental Affairs of the Senate. Such report shall include the following:</text>
+ <paragraph id="HB89D05E03E934D43B228BD9C7A52211B"><enum>(1)</enum><text>A strategic plan, to be used by the United States Postal Service, to retrofit all mail collection boxes with narrow mail slots to prevent theft of the mail.</text>
+ </paragraph><paragraph id="HD90E7C418A5F4DB7A0F26913158CEC04"><enum>(2)</enum><text>The total estimated cost of carrying out such plan, the estimated length of time necessary to carry out such plan, and any other resources necessary to carry out such plan.</text>
+ </paragraph><paragraph id="H255D882DD6EF4A3D9A4C487BD1517C32"><enum>(3)</enum><text>With respect to any mail collection boxes that have been retrofitted on the date of the enactment of this Act, information on the location of such boxes, the security enhancements made to such boxes, and the reasons for retrofitting such boxes.</text>
+			</paragraph></section></legis-body></bill>
+
+

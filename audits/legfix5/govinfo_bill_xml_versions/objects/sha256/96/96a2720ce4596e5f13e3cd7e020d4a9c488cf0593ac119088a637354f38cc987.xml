@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H86647D1EB04E483EA8B85892AD564503" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 8315 IH: Safe Indoor Spaces Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-09-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8315</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20200918">September 18, 2020</action-date>
+<action-desc><sponsor name-id="H001090">Mr. Harder of California</sponsor> (for himself, <cosponsor name-id="M001202">Mrs. Murphy of Florida</cosponsor>, <cosponsor name-id="S001207">Ms. Sherrill</cosponsor>, <cosponsor name-id="T000483">Mr. Trone</cosponsor>, <cosponsor name-id="H001085">Ms. Houlahan</cosponsor>, <cosponsor name-id="O000171">Mr. O'Halleran</cosponsor>, <cosponsor name-id="C001072">Mr. Carson of Indiana</cosponsor>, and <cosponsor name-id="S001209">Ms. Spanberger</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To direct the Secretary of Health and Human Services to establish a program to award a financial prize to persons who successfully develop a system or device that makes enclosed sections of a building safer during the COVID–19 public health emergency, and for other purposes.</official-title>
+</form>
+<legis-body id="H63937A11C98A40C19DDFE8B44162FC97" style="OLC">
+<section id="HB18AEBA04CD142099DF87E2A43D45451" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Safe Indoor Spaces Act</short-title></quote>.</text></section> <section id="HBE51B741A2494667B1C686E164CFA12F"><enum>2.</enum><header>COVID–19 technology prize</header> <subsection id="H84BDBE2EB4104882BBB46D5F85DE167D"><enum>(a)</enum><header>Establishment</header><text display-inline="yes-display-inline">The Secretary of Health and Human Services (in this Act referred to as the <quote>Secretary</quote>) shall establish a program to award a financial prize to persons who successfully develop a system or device for use during the COVID–19 public health emergency that meets the criteria under subsection (b).</text></subsection>
+<subsection id="HD698D7AE4E1D4522855240E19D24389C"><enum>(b)</enum><header>Criteria</header><text display-inline="yes-display-inline">To be eligible to receive a prize under this section, a person must develop a system or device that meets the following:</text> <paragraph id="H14693147857240C3B8A42740B58AF02D"><enum>(1)</enum><text display-inline="yes-display-inline">Inactivates or eliminates all traces of airborne SARS–CoV–2 from the air of an enclosed section of a building.</text></paragraph>
+<paragraph id="H1AB0AC37BD0E407CB604A30E00007265"><enum>(2)</enum><text display-inline="yes-display-inline">Decreases the rate of transmission of SARS–CoV–2 in an enclosed section of a building to a rate of transmission of SARS–CoV–2 that is comparable to an outdoor setting.</text></paragraph> <paragraph id="H7E3C35606FA54801B62D8D4CEC7765BD"><enum>(3)</enum><text display-inline="yes-display-inline">Able to be installed in or service an enclosed section of a building or the ventilation systems of a building, including—</text>
+<subparagraph id="H949A15356152444E9D1BDB0E2756B13F"><enum>(A)</enum><text>schools;</text></subparagraph> <subparagraph id="HB315E81A8B0E40C9B74017789655EC94"><enum>(B)</enum><text>public buildings; and</text></subparagraph>
+<subparagraph id="HB849DA93A3DB41FCBE66B2437E49B5CF"><enum>(C)</enum><text>most types of buildings used as places of work.</text></subparagraph></paragraph> <paragraph id="H4EF95D662AA34A299D95398C942A4F84"><enum>(4)</enum><text>With respect to public buildings, able to be installed in or service not fewer than 150,000 buildings in not less than 6 months.</text></paragraph>
+<paragraph id="HDA31AB2837BC4C6DA8B41597DDF695A6"><enum>(5)</enum><text display-inline="yes-display-inline">Maintains or increases the cost of controlling the environment of a building by not more than 10 percent.</text></paragraph></subsection> <subsection id="HEDCC65E61EE44A808E0760FD1BD204BA"><enum>(c)</enum><header>Establishment of board</header> <paragraph id="HA8D3569FD1114AFDB6EC1450EF8229CA"><enum>(1)</enum><header>In general</header><text>The Secretary shall establish a board to advise the Secretary with respect to the program established under subsection (a).</text></paragraph>
+<paragraph id="HD1F863B7866644C88FDDA453A2D0AF94"><enum>(2)</enum><header>Membership</header><text>The board shall be composed of 5 members appointed by the Secretary, including—</text> <subparagraph id="H67EE55816603414E85F601C0CB4D772C"><enum>(A)</enum><text>a public health expert;</text></subparagraph>
+<subparagraph id="HAEE841C09F3D4BBFA471B12D2786CDEA"><enum>(B)</enum><text>an individual with experience in education;</text></subparagraph> <subparagraph id="HAC63200BB7494789BC1FB4704EA59628"><enum>(C)</enum><text display-inline="yes-display-inline">an individual who represents small businesses; and</text></subparagraph>
+<subparagraph id="H1E75E8B2F799447B85ED98987165D158"><enum>(D)</enum><text>an engineer with expertise in public health.</text></subparagraph></paragraph></subsection> <subsection id="H550DEFDB47924D7B93900CCCF74B5BD8"><enum>(d)</enum><header>Financial award</header><text display-inline="yes-display-inline">Based on the advice of the board established under subsection (c), the Secretary shall make each award under the program established under subsection (a) in an amount equal to or less than $5,000,000.</text></subsection>
+<subsection id="H28500FC6B77A47D3A2F5C1CB0CDFDB2A"><enum>(e)</enum><header>Intellectual property</header><text display-inline="yes-display-inline">The Federal Government may not acquire an intellectual property right in any product or idea by virtue of the submission of such product or idea in the prize competition under this section.</text></subsection> <subsection id="H1A31F6B9A0E34275A5E4FB3947014331"><enum>(f)</enum><header>COVID–19 public health emergency</header><text display-inline="yes-display-inline">In this section, the term <quote>COVID–19 public health emergency</quote> means a public health emergency for which a declaration is in effect under section 319 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/247d">42 U.S.C. 247d</external-xref>), with respect to COVID–19.</text></subsection>
+<subsection id="H09AF852CF9A449E299E90652E784B2F1"><enum>(g)</enum><header>Authorization of appropriations</header>
+<paragraph id="H2EA3D53705B6450384D3AD2945D9E2FD"><enum>(1)</enum><header>In general</header><text>There is authorized to be appropriated to carry out this Act $5,250,000 for fiscal year 2021.</text></paragraph> <paragraph id="H73FC2C7E291F4F238AB3D308CADE17D1"><enum>(2)</enum><header>Administrative expenses</header><text display-inline="yes-display-inline">Not more than $250,000 of the amount appropriated under paragraph (1) for a fiscal year may be used for administrative expenses incurred in carrying out this section.</text></paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

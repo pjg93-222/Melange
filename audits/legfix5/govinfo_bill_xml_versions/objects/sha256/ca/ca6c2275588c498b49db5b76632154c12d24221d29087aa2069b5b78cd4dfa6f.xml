@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB11E139BF4904F2092E3CB8C3B15A005" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 9459 IH: Home Affordability Through Mortgage Simplification Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-06-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 9459</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260625">June 25, 2026</action-date><action-desc><sponsor name-id="F000471">Mr. Fitzgerald</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Truth in Lending Act to modernize disclosure requirements, establish materiality standards and safe harbors for mortgage disclosures, simplify waiting period requirements, expand tolerances for annual percentage rate accuracy, and for other purposes.</official-title></form><legis-body id="H2E2DBD7D96EE4536848205CB19BA9B9C" style="OLC"> 
+<section id="HAF102C09EF54407E97DA04F74B103242" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Home Affordability Through Mortgage Simplification Act</short-title></quote>.</text></section> <section id="HB3CDCF5F00714604A9E9B28A2EDED341"><enum>2.</enum><header>Regulatory requirements related to certain mortgage transactions</header><text display-inline="no-display-inline">Section 128 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1638">15 U.S.C. 1638</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block id="HD6ED8BBE0D9948BD91CA6D1EA88DB6A0" style="OLC"> 
+<subsection id="HB77C98F4204F4DC69180EF0895C0257C"><enum>(g)</enum><header>Regulatory requirements related to certain mortgage transactions</header> 
+<paragraph id="H22A549EED80A4649878E76EE6DFE7773"><enum>(1)</enum><header>Aggregate variance standard for estimated closing costs</header> 
+<subparagraph id="H4A2059AF16954EA697A259E05022FBA6">
+              <enum>(A)</enum>
+              <header>In general</header>
+ <text>For the purposes of meeting the good faith loan estimate described in section 1026.19 of title 12, Code of Federal Regulations (or any successor regulation), a creditor shall be deemed to have provided a good faith loan estimate of closing costs if the aggregate amount of closing costs the borrower must pay at consummation does not exceed the aggregate amount disclosed under subsection (a)(17) by more than the greater of—</text>
+              <clause id="H2E9F77CF57A3438181A6D9307234DBF1">
+                <enum>(i)</enum>
+ <text>$500; or</text> </clause> <clause id="H7CA4F10A771E4254B7C8F81BDC3DFFB0"> <enum>(ii)</enum> <text>5 percent of all third-party fees and charges, excluding origination charges.</text>
+              </clause>
+            </subparagraph> 
+<subparagraph id="HD692DBA69A334395AF871A55FEF1828A"><enum>(B)</enum><header>Individual fee variance</header><text>No violation shall be found based solely on an individual fee variance that does not cause the aggregate variance described in paragraph (1) to be exceeded.</text></subparagraph> <subparagraph id="H1DFDF5B40C4149BB8D19BDF4CA085EF4"><enum>(C)</enum><header>Origination charges</header> <clause id="H33993A50AA0F4D788B86741A49D198AC"> <enum>(i)</enum> <header>In general</header> <text>Origination charges shall not be included in calculating the aggregate variance under this subsection and remain subject to zero-tolerance limitations applicable under regulations issued pursuant to this Act.</text>
+              </clause> 
+<clause id="H9D39D7FE472E4FDE9BDB416ABE57B008"><enum>(ii)</enum><header>De minimis exception</header><text>The zero-tolerance limitations described in clause (i) shall not apply to bona fide, non-intentional clerical or typographical errors that—</text> <subclause id="H3754BA2828E1497B8D112302359FA04F"><enum>(I)</enum><text>are not more than $25;</text></subclause> 
+<subclause id="HB4417111D8A64402B36886DBB115B8B6"><enum>(II)</enum><text>the creditor documents such error; and</text></subclause> <subclause id="H13FEE7479E1B405C8D1878B2A3789C9F"><enum>(III)</enum><text>expressly preserves the consumer’s right to restitution for any resulting financial harm.</text></subclause></clause></subparagraph></paragraph> 
+<paragraph id="H018D019839FE4FFAAD322F451EF049AA" display-inline="no-display-inline">
+            <enum>(2)</enum>
+            <header>Waiting period reset</header>
+ <text>The waiting period for corrected disclosures as described in section 1026.19(a)(2) of title 12, Code of Federal Regulations (or any successor regulation), shall be reset only if—</text>
+            <subparagraph id="H21190CE3600F4B9C90FAD70277F91B86">
+              <enum>(A)</enum>
+ <text>the interest rate increases by more than 0.125 percentage points;</text> </subparagraph> <subparagraph id="H9C1F9469425A48F7B3113D699B625DA6"> <enum>(B)</enum> <text>the loan product changes; or</text>
+            </subparagraph>
+            <subparagraph id="HA1B0E1D25A01427182620874ED6FB32E">
+              <enum>(C)</enum>
+ <text>a prepayment penalty is added.</text> </subparagraph> </paragraph> <paragraph id="H312A69F7F1584B6BBA1473959A7811CF"><enum>(3)</enum><header>Consumer waiver of disclosure period</header><text>A consumer may waive the 3-day closing disclosure waiting period for a corrected disclosure as described in section 1026.19(f)(2)(iI) of title 12, Code of Federal Regulations (or any successor regulation).</text></paragraph> 
+<paragraph id="HC49006FDBCF04B089B39D11945AB8FAD"><enum>(4)</enum><header>Safe harbor for revised mortgage loan estimates</header> 
+<subparagraph id="HDDE26B9285F242A4AF00C4654367FF15"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">A creditor may issue not more than 2 revised loan estimates for non-material changes that do not increase the interest rate, change the loan product type, or increase any origination charge, without demonstrating a changed circumstance under section 1026.19(e)(3)(iv) of title 12, Code of Federal Regulations (or any successor regulation).</text> </subparagraph> <subparagraph id="HD2B03A8016C0458D95E808274FD44E78"><enum>(B)</enum><header>Delivery period</header><text display-inline="yes-display-inline">Any revised loan estimate as described in subparagraph (A) shall be delivered not later than 7 days prior to consummation.</text></subparagraph> 
+<subparagraph id="HFCA0BD2882DF42469A3825145C1CE8E8">
+              <enum>(C)</enum>
+              <header>Tolerance reset</header>
+ <text>Any revised loan estimate as described in subparagraph (A) shall reset tolerances only for fees affected by the specific non-material change prompting the revision.</text>
+            </subparagraph></paragraph> 
+<paragraph id="H6A19EB3A869543009137208BA3040508"><enum>(5)</enum><header>Reliance on settlement agents</header> 
+<subparagraph id="HD269FCB5B7DD4DDC8774B4418F7BF4CC">
+              <enum>(A)</enum>
+              <header>In general</header>
+ <text>A creditor shall not be liable for inaccuracies in a closing disclosure described in section 1026.19 of title 12, Code of Federal Regulations (or any successor regulation), attributable solely to a settlement agent if the creditor—</text>
+              <clause id="HAFC117158E27441EAED535944A743DB2">
+                <enum>(i)</enum>
+ <text>exercised reasonable diligence in selecting the agent; and</text> </clause> <clause id="HC1CDBA4429AE4B4DBAEF88CAD22DD75E"> <enum>(ii)</enum> <text>maintained reasonable oversight procedures.</text>
+              </clause>
+            </subparagraph> 
+<subparagraph id="H581F070A65634D5CA6E4D58F8ACF95BB"><enum>(B)</enum><header>No limitation on right to restitution</header><text>Nothing in this subsection shall limit a consumer’s right to restitution for actual financial harm with respect to inaccuracies in a closing disclosure.</text></subparagraph> <subparagraph id="H1A85C92D57E142D9AAD29E7F1E4CE0D0"><enum>(C)</enum><header>Rules related to terms</header><text>Not later than 180 days after the date of the enactment of this paragraph, the Bureau shall issue rules to define <quote>reasonable diligence</quote> and <quote>reasonable oversight procedures</quote> as such terms are used in subparagraph (A), including standards for vendor management, monitoring, and error detection systems.</text></subparagraph></paragraph> 
+<paragraph id="H5455B7B45B77464686E2A1A3AA398D4A"><enum>(6)</enum><header>Rulemaking</header><text>Not later than 180 days after the date of the enactment of this subsection, the Bureau shall issue a rule to revise section 1026.19 of title 12, Code of Federal Regulations, to ensure consistency between such section and this subsection.</text></paragraph></subsection> <after-quoted-block>.</after-quoted-block></quoted-block></section> <section id="H269AE0987DFF406196D5279938AFD0C8"><enum>3.</enum><header>APR tolerance expansion and cure</header><text display-inline="no-display-inline">Section 107(c) of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1606">15 U.S.C. 1606(c)</external-xref>) is amended to read as follows:</text> 
+<quoted-block id="H4851A8040D164DDFAC9247E9248953D4" style="OLC"> 
+<subsection id="H0FDC6082E8B14FB680ACACFD186C009B"><enum>(c)</enum><header>Accuracy of annual percentage rate</header> 
+<paragraph id="HA9E677D7D38440E5BB8088CBF2A557FC"><enum>(1)</enum><header>In general</header><text>The annual percentage rate is accurate for the purposes of this title if it does not vary from the actual rate by more than 0.125 percentage points.</text></paragraph> <paragraph id="H640F199C32C0419FAFCF35AD42962E7A"><enum>(2)</enum><header>Curing inaccuracy</header><text>A creditor may cure an inaccurate annual percentage rate through post-consummation adjustment and restitution that ensures the consumer pays no more over the life of the loan than would have been paid at the disclosed rate.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+<section id="H72CFE6526CB74A0ABF63FFA879AB20A5"><enum>4.</enum><header>Reliance on guidance issued by the Bureau of Consumer Financial Protection</header><text display-inline="no-display-inline">Section 130 of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1640">15 U.S.C. 1640</external-xref>) is amended by adding at the end the following:</text> <quoted-block id="H5C970D67B18E4F79B62E5791526B2AA9" style="OLC"> <subsection id="H2274D868FA3B4F0F97E944A3DDE99037"><enum>(m)</enum><header>Reliance on bureau guidance</header><text display-inline="yes-display-inline">No creditor shall be liable for a violation arising from an act done or omitted in good-faith reliance on guidance issued by the Bureau.</text> </subsection> 
+<subsection id="H4A36E6D72F9E49E5A40FB786C58FFB47">
+          <enum>(n)</enum>
+          <header>Notice and opportunity To cure</header>
+          <paragraph id="HF9CC777E45A74DCD96C08158432F664A">
+            <enum>(1)</enum>
+            <header>First time violation</header>
+ <text>No civil penalty may be imposed for a first time violation under this title unless the creditor fails to cure such violation within 60 days after receiving written notice from a Federal or State regulator.</text>
+          </paragraph>
+          <paragraph id="H4EDB4A8D814143BDA3465E958E337A32">
+            <enum>(2)</enum>
+            <header>Restitution and private remedies for consumer</header>
+ <text>Nothing in this subsection affects a consumer’s right to restitution or private remedies.</text>
+          </paragraph>
+          <paragraph id="HD19D4889B42B4BBE8D400FDFEBAC90C0">
+            <enum>(3)</enum>
+            <header>First time violation defined</header>
+ <text>In this subsection, the term <quote>first time violation</quote> means the first written notice from a Federal or State regulator that identifies a specific violation under this title, for which—</text>
+            <subparagraph id="H543E4CDC0EA54EC4BB284F7907509266">
+              <enum>(A)</enum>
+ <text>no prior notice of the same violation issued within the preceding 36-month period; and</text>
+            </subparagraph>
+            <subparagraph id="HC17A558CA3AF420FA50F22E1D843EA38">
+              <enum>(B)</enum>
+ <text display-inline="yes-display-inline">a single pattern or practice affecting multiple loans constitutes one violation for purposes of this subsection if arising from the same underlying error.</text>
+            </subparagraph>
+          </paragraph>
+        </subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+</legis-body></bill>
+

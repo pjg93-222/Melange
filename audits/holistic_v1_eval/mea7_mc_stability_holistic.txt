@@ -1,0 +1,14 @@
+MC=20  SEED=7 (production)       45 seeds | final spread 365.8 | knee $150,000
+MC=100 SEED=7 (5x MC budget)     45 seeds | final spread 364.2 | knee $200,000
+MC=20  SEED=1 (different RNG)    44 seeds | final spread 365.1 | knee $150,000
+MC=20  SEED=13 (different RNG)   44 seeds | final spread 368.2 | knee $150,000
+
+Agreement vs production (MC=20 SEED=7, 45 seeds):
+  MC=100 SEED=7 (5x MC budget)     set-overlap 100% (Jaccard) | first-2 picks identical | spread delta -1.6
+  MC=20  SEED=1 (different RNG)    set-overlap 98% (Jaccard) | first-4 picks identical | spread delta -0.7
+  MC=20  SEED=13 (different RNG)   set-overlap 98% (Jaccard) | first-6 picks identical | spread delta +2.4
+
+Interpretation: high set-overlap at MC=100 (same seed) and across RNG seeds => the MC=20+CRN
+frontier is NOT overfit to its particular draws; low overlap => raise the frontier MC budget.
+
+[exited with code 0]

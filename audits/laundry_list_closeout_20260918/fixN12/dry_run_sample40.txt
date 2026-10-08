@@ -1,0 +1,200 @@
+ 1. rowid=66652   2024-03-31  Ryan Zinke                 tag='RAJU (voice over)' [A_anchored_caps]
+    KEEP  ...Mr. Good went against President Trump early. We can do a lot better than Good. We can do great.
+    CUT   RAJU (voice over): Now, his backing of DeSantis turned into an attack ad from a new GOP outside group....
+    ->    ledger_only_unresolved (16 words)
+
+ 2. rowid=66696   2024-04-02  Chris Van Hollen           tag='TODD (voice-over)' [A_anchored_caps]
+    KEEP  ...Even as they try to clear this one passageway, they're at the same time doing all the engineering analysis to open the deeper channel.
+    CUT   TODD (voice-over): Maryland Senator Chris Van Hollen and Acting Secretary of Labor Julie Hsu met with port workers on Monday....
+    ->    ledger_only_unresolved (18 words)
+
+ 3. rowid=68593   2024-07-03  Mike Quigley               tag='LEE (voice-over)' [A_anchored_caps]
+    KEEP  ...decision. I just want him to appreciate at this time just how much it impacts not just his race, but all the other races coming in November.
+    CUT   LEE (voice-over): As Republicans are ready to pounce on Biden's debate showing to attack their democratic opponents....
+    ->    ledger_only_unresolved (15 words)
+
+ 4. rowid=68606   2024-07-03  Nancy Pelosi               tag='LEE (voice-over)' [C_unanchored_paren]
+    KEEP  ...nd the rest. He has a bad night. Now, again, I think it's a legitimate question to say is this an episode or is this a condition? [04:05:00]
+    CUT   LEE (voice-over): New CNN polling showing no immediate damage from Biden's halting debate performance. The president trailing Donald Trump by six points, 43 percent to 49 percent. The same numbers as April. But Biden's a...
+    ->    ledger_only_unresolved (76 words)
+
+ 5. rowid=70017   2024-08-15  Mike Johnson               tag='FOREMAN (voice-over)' [A_anchored_caps]
+    KEEP  ...ese states rules for a handful of people to go in a back room and switch it out because they're -- they don't like the candidate any longer.
+    CUT   FOREMAN (voice-over): But CNN contacted all 50 states, and they overwhelmingly said there is no impediment to swapping Harris for Biden on the ballot. And if the GOP files a complaint in court --...
+    ->    ledger_only_unresolved (32 words)
+
+ 6. rowid=73678   2025-01-23  James Comer                tag='MARSH (voice-over)' [A_anchored_caps]
+    KEEP  ...I think the protections are there.
+    CUT   MARSH (voice-over): Right now agencies are not required to track DEI expenditures, so it's unclear how much the government has spent overall. CNN analyzed the proposed budgets of 20 federal agencies. HHS, for example, re...
+    ->    ledger_only_unresolved (97 words)
+
+ 7. rowid=75643   2025-03-24  Bernard Sanders            tag='REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT)' [A_anchored_caps]
+    KEEP  ...We got 20,000 people here in Tucson, and we got hundreds of millions of people all across this country.
+    CUT   REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT): Are we ready to fight? Are we ready to win and we will never, ever, ever give up....
+    ->    reattributed (18 words)
+
+ 8. rowid=82199   2026-06-07  Ro Khanna                  tag='WANG (voice over)' [B_unknown_surname_paren]
+    KEEP  ...The Democratic Party, from Schumer to Sanders, is united with a single goal. We will defeat Susan Collins in November.
+    CUT   WANG (voice over): This is more than just a test for Platner, but for Democrats who have long talked about listening to accusers....
+    ->    ledger_only_unresolved (20 words)
+
+ 9. rowid=84421   2025-11-11  Jamie Raskin               tag='LEE (voiceover)' [A_anchored_caps]
+    KEEP  ...She's basically being treated like an honored guest at a Trump hotel rather than a federal prisoner.
+    CUT   LEE (voiceover): Congressman Jamie Raskin, the House Judiciary Committee's top Democrat, says the whistleblower also claims that Maxwell is receiving preferential treatment at the prison camp in Bryan, Texas where she's ...
+    ->    ledger_only_unresolved (86 words)
+
+10. rowid=86850   2026-01-22  Pramila Jayapal            tag='LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)' [A_anchored_caps]
+    KEEP  ...I will never forget the pounding on the doors and the insurrectionists threatening to kill us.
+    CUT   LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over): A big focus of today's questioning, whether Special Counsel Jack Smith and his team pursued their investigations into January 6th and Trump's handling of classifi...
+    ->    ledger_only_unresolved (29 words)
+
+11. rowid=87127   2026-01-28  Ilhan Omar                 tag='SIDNER (on camera)' [B_unknown_surname_paren]
+    KEEP  ...rvived war and I'm definitely going to survive intimidation and whatever these people think they can throw at me because I'm built that way.
+    CUT   SIDNER (on camera): Now you heard her say, I think I'm OK. And she's saying that because none of us still know what that substance was that did have a pungent smell to it. No one knows exactly what it is. And of course t...
+    ->    ledger_only_unresolved (398 words)
+
+12. rowid=87776   2026-02-11  Scott Fitzgerald           tag='REID (voice-over)' [A_anchored_caps]
+    KEEP  ...Overwhelmingly elected President Trump, securing our border and enforcing our immigration laws.
+    CUT   REID (voice-over): Bondi was also pressed on how she has used the traditionally independent agency to pursue the president's political adversaries....
+    ->    ledger_only_unresolved (19 words)
+
+13. rowid=115313  2015-04-05  Ted Cruz                   tag='CHUCK TODD (V/O)' [A_anchored_caps]
+    KEEP  ...It's a whole lot of Republican politicians are terrified in this issue.
+    CUT   CHUCK TODD (V/O): 2016, GOP hopeful, Louisiana's Bobby Jindal will weigh in. And opening day is here. New baseball commissioner Rob Manfred, and how our national pastime is trying to rename part of our national future. A...
+    ->    ledger_only_unresolved (92 words)
+
+14. rowid=188373  2019-01-04  Nancy Pelosi               tag='BASH (voice-over)' [A_anchored_caps]
+    KEEP  ...mportant -- count your votes to win the election. Count your votes to win a vote on the floor. But the other is, listen to the constituents.
+    CUT   BASH (voice-over): The D'Alesandro home was at the center of this Italian community. A vivid childhood memory helping new immigrants who knew where her father, the mayor and his family lived and would regularly knock on ...
+    ->    ledger_only_unresolved (39 words)
+
+15. rowid=196297  2019-05-24  Ralph Norman               tag='WATT (voice-over)' [A_anchored_caps]
+    KEEP  ...They've got him in with rapists. They've got him in with pedophiles.
+    CUT   WATT (voice-over): Shortly after that comment, the President tweeted, Eddie Gallagher will soon be moved to less restrictive confinement, tagging "Fox and Friends." Gallagher was moved hours later. Now, Trump's consideri...
+    ->    ledger_only_unresolved (31 words)
+
+16. rowid=212284  2020-05-13  Rand Paul                  tag='DR. ANTHONY FAUCI' [E_colonless_honorific]
+    KEEP  ...appen is the poor and underprivileged kids who don't have a parent that's able to teach them at home are not going to learn for a full year.
+    CUT   DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE...
+    ->    ledger_only_unresolved (4 words)
+
+17. rowid=216114  2021-01-14  Nancy Pelosi               tag='CHURCH (on camera)' [B_unknown_surname_paren]
+    KEEP  ...The ayes are 232. The nays are 197. The resolution is adopted. Without objection, the motion to reconsider is laid upon the table.
+    CUT   CHURCH (on camera): Unlike the last impeachment, this one was a bipartisan vote. Ten Republicans joined the Democrats. The most ever to impeach a president from their own party....
+    ->    ledger_only_unresolved (26 words)
+
+18. rowid=216884  2021-02-06  Josh Hawley                tag='BROWN (voice over)' [A_anchored_caps]
+    KEEP  ...That depends on what happens on Wednesday.
+    CUT   BROWN (voice over): Around the same time, Trump's attention focused increasingly on his Vice President Mike Pence. CNN has learned after this Lincoln Project ad -- ...
+    ->    ledger_only_unresolved (23 words)
+
+19. rowid=219810  2021-05-27  John Barrasso              tag='COLLINS (voice-over)' [A_anchored_caps]
+    KEEP  ...I would say to President Biden, this is something that will work, it will help the country, it will help us move forward.
+    CUT   COLLINS (voice-over): Press Secretary Jen Psaki quickly dismissing that....
+    ->    ledger_only_unresolved (7 words)
+
+20. rowid=220325  2021-06-21  Charles Schumer            tag='LEMON (on camera)' [A_anchored_caps]
+    KEEP  ...se an election, you're not supposed to stop people from voting even if they didn't vote for you, that's not democracy my Republican friends.
+    CUT   LEMON (on camera): While Mitch McConnell who let's remember, said he's one under percent focused on stopping President Joe Biden's agenda, doubling down today vowing to guess what, kill the bill....
+    ->    ledger_only_unresolved (28 words)
+
+21. rowid=221604  2021-09-14  Michael McCaul             tag='JESSICA DEAN, CNN CONGRESSIONAL CORRESPONDENT (voice-over)' [A_anchored_caps]
+    KEEP  ...was an unmitigated disaster of epic proportions. I never thought in my lifetime, that I would see an unconditional surrender to the Taliban.
+    CUT   JESSICA DEAN, CNN CONGRESSIONAL CORRESPONDENT (voice-over): The House Foreign Affairs Committee questioning Secretary of State Antony Blinken for the first time since the United States pulled out of Afghanistan and 13 Am...
+    ->    ledger_only_unresolved (35 words)
+
+22. rowid=222618  2021-10-20  Pramila Jayapal            tag='COLLINS (on camera)' [A_anchored_caps]
+    KEEP  ...best about is the progressive caucus had five priorities that we laid out five months ago and all of those five priorities are in this bill.
+    CUT   COLLINS (on camera): And, Jake, the president is now on his way here to Scranton to sell this bill, even though it still remains unfinished at this point. One other sticking point is trying to close a deal here is that S...
+    ->    ledger_only_unresolved (86 words)
+
+23. rowid=225040  2022-03-21  Mitch McConnell            tag='REID (voice-over)' [A_anchored_caps]
+    KEEP  ...She's clearly a sharp lawyer with an impressive resume, but when it comes to the Supreme Court, a core qualification is judicial philosophy.
+    CUT   REID (voice-over): Republican Josh Hawley, who sits on the Judiciary Committee, has attacked Jackson as not being tough enough on sex offenders. And President Biden's campaign pledge to nominate a Black woman to the cour...
+    ->    ledger_only_unresolved (59 words)
+
+24. rowid=226697  2022-06-24  Eric Schmitt               tag='FIELD (voice-over)' [B_unknown_surname_paren]
+    KEEP  ...I am humbled to be a part of this and the first attorney general in the country to effectively end abortion.
+    CUT   FIELD (voice-over): While a Democratic congresswoman from St. Louis brought to tears. The state's last remaining abortion clinic can't perform abortions anymore....
+    ->    ledger_only_unresolved (20 words)
+
+25. rowid=232727  2022-11-11  Ted Cruz                   tag='VALENCIA (voice-over)' [B_unknown_surname_paren]
+    KEEP  ...rump, who's supporting him. He said he would welcome the support of Ron DeSantis. He would welcome the support of anyone coming to campaign.
+    CUT   VALENCIA (voice-over): Meanwhile Democratic incumbent Senator Raphael Warnock also kicked off his run-off campaigning just a couple blocks away from Ebenezer Baptist Church. Standing in front of a mural of the famed civi...
+    ->    ledger_only_unresolved (53 words)
+
+26. rowid=242733  2023-05-23  Tim Scott                  tag='JEFF ZELENY, CNN CHIEF U.S. NATIONAL AFFAIRS CORRESPONDENT (voiceover)' [A_anchored_caps]
+    KEEP  ...My family went from cotton to Congress in his lifetime.
+    CUT   JEFF ZELENY, CNN CHIEF U.S. NATIONAL AFFAIRS CORRESPONDENT (voiceover): From cotton to Congress, those weighty words form the arc of Senator Tim Scott's rise and frame the argument for his presidential aspirations....
+    ->    ledger_only_unresolved (23 words)
+
+27. rowid=247814  2007-06-07  Nancy Pelosi               tag='CATHERINE HERRIDGE, FOX NEWS NATIONAL CORRESPONDENT (voice-over)' [A_anchored_caps]
+    KEEP  ...On this vote the yeahs are 247. The nays are 176. The bill is passed.
+    CUT   CATHERINE HERRIDGE, FOX NEWS NATIONAL CORRESPONDENT (voice-over): The vote in favor of expanding federal funding for embryonic stem-cell research came after two hours of heated debate on the House floor. ...
+    ->    ledger_only_unresolved (23 words)
+
+28. rowid=260996  2016-04-25  Ted Cruz                   tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...he next president, then I ask you to join us because this is the only campaign that can and will beat Donald Trump and then Hillary Clinton.
+    CUT   O`DONNELL: Joining us now, NBC News reporter Hallie Jackson who`s in Indianapolis covering the Ted Cruz campaign. Hallie, what`s their assessment at the end of day one of the new alliance?...
+    ->    ledger_only_unresolved (30 words)
+
+29. rowid=261219  2016-06-21  Susan Collins              tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...ly, the terrorist attacks in San Bernardino and in Orlando, that took so many lives are a call for compromise, a plea for bipartisan action.
+    CUT   O`DONNELL: Four republicans are working with four democrats on a bill that would stop people on the “No Fly” and on the “Selectee List” from buying guns. The compromise would center on remedies available to people who be...
+    ->    ledger_only_unresolved (144 words)
+
+30. rowid=261318  2016-08-15  Ron Wyden                  tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...Thank you.
+    CUT   O`DONNELL: Senator — as I said, it`s a tradition that the candidates release their returns and you have an idea to make it requirement, tell us how you would do that....
+    ->    ledger_only_unresolved (30 words)
+
+31. rowid=263251  2017-06-29  Susan Collins              tag='REP. NANCY PELOSI (D-CA)' [E_colonless_honorific]
+    KEEP  ...The president`s tweet was completely inappropriate.
+    CUT   REP. NANCY PELOSI (D-CA), MINORITY LEADER,...
+    ->    ledger_only_short_turn (3 words)
+
+32. rowid=264196  2017-12-19  Chris Van Hollen           tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...ses, middle class families in this country are going to see tax increases, their senators should tell them what`s in this tax bill for them.
+    CUT   O`DONNELL: And, Senator, as a former member of the House, and I know you`ve been in Conference Committee, I don`t want to get into too much detail for the audience on this. But when a senator says this provision was put ...
+    ->    ledger_only_unresolved (109 words)
+
+33. rowid=267858  2019-04-17  Ted Lieu                   tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...e. Bill Barr should cancel tomorrow`s presser and he needs to really be the public instead of serving Donald Trump in this contemptible way.
+    CUT   O`DONNELL: Congressman Deutch, the reason we have three judiciary members here tonight is that we know that all the focus tomorrow, most of the focus tomorrow is going to be on the obstruction of justice passages. “The W...
+    ->    ledger_only_unresolved (132 words)
+
+34. rowid=270421  2019-12-16  Hakeem Jeffries            tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...ormer boss, to go in a different direction and & they made a selfless decision at a very difficult moment for our country and our democracy.
+    CUT   O`DONNELL: Congressman, another tough decision we`re seeing made are these freshmen Democrats who took Republican districts, who were stepping forward, telling their former Republican districts that they are voting to im...
+    ->    ledger_only_unresolved (68 words)
+
+35. rowid=271544  2020-06-26  Lloyd Doggett              tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...as severely restricted local officials from being able to protect our health and as a result Texas cities are tonight very dangerous places.
+    CUT   O`DONNELL: Dr. Roy, the governor of Texas said tonight that if he could go back and re-do anything, it would probably be to slow down the opening of bars. He now regrets and is publically saying that he regrets opening u...
+    ->    ledger_only_unresolved (59 words)
+
+36. rowid=273449  2021-05-24  Adam Schiff                tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...t he knew, and Giuliani. But my guess is he just wants to get paid, and he`s looking for a settlement where he can get some money out of it.
+    CUT   O`DONNELL: The Pompeo angle here exposes him to being subpoenaed to testify in a deposition under oath. That would mean Mike Pompeo under oath for the first time, being forced to answer questions about any of this....
+    ->    ledger_only_unresolved (36 words)
+
+37. rowid=273666  2021-06-25  Daniel Goldman             tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...ns right now. And that could lead ultimately to bankruptcy. So, this is incredibly serious discussion about charging the Trump Organization.
+    CUT   O`DONNELL: David Cay Johnston, if this is about these fringe benefits that Allen Weisselberg gets for free or his kids get for free, a free apartment in New York City could easily be a quarter of a million dollars a year...
+    ->    ledger_only_unresolved (129 words)
+
+38. rowid=274612  2021-11-15  Christopher Murphy         tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...omote a political agenda. It`s sick. At least today I`m glad several families from Sandy Hook had their day in court and reach some justice.
+    CUT   O`DONNELL: Let`s listen to a bit of a PBS front line documentary about how Alex Jones did this. How he did this kind of work. Here they are interviewing one of the editors working for Alex Jones....
+    ->    ledger_only_unresolved (36 words)
+
+39. rowid=275288  2022-03-03  Adam Schiff                tag='O`DONNELL' [A_anchored_caps]
+    KEEP  ...ave to imagine that this is more incompetence, as well as a willingness to just attack civilian targets, even without knowing what they are.
+    CUT   O`DONNELL: Yes, we have seen, we have to remember this tonight, I think especially in this coverage. We have seen a great deal of military incompetence on the Russian side, including inoperable trucks because their tires...
+    ->    ledger_only_unresolved (69 words)
+
+40. rowid=305131  2026-07-13  Lindsey Graham             tag='ZELENY (voice-over)' [A_anchored_caps]
+    KEEP  ...You know how you make America great again? Tell Donald Trump to go to hell.
+    CUT   ZELENY (voice-over): -- to a loyal ally....
+    ->    ledger_only_unresolved (5 words)
+

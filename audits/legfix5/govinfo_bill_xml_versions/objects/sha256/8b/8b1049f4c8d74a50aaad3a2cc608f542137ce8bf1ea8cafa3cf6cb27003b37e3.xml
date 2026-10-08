@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H565D7F16D91940709639FF25B448D6CE" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7504 IH: Housing for America’s Middle Class Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-02-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7504</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260211">February 11, 2026</action-date><action-desc><sponsor name-id="L000599">Mr. Lawler</sponsor> (for himself and <cosponsor name-id="G000583">Mr. Gottheimer</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require the Government Accountability Office to study and recommend a definition for workforce housing.</official-title></form><legis-body id="H156146CF008843378D2421C6E5802C21" style="OLC"> 
+<section id="H996238C37EEE4DBFB934398AC4B8CE55" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Housing for America’s Middle Class Act of 2026</short-title></quote>.</text></section>
+<section id="HF424B0E3503B4FCDAB872964F1A30F0E"><enum>2.</enum><header>Congressional findings</header><text display-inline="no-display-inline">The Congress finds that—</text> <paragraph id="H057528E58C1F4E64BEBB75412A69C74D"><enum>(1)</enum><text>the lack of affordable housing in the United States is an issue impacting millions of middle-class, working American families;</text></paragraph>
+<paragraph id="H00C1C5A0DF5F415D9944D3E6FEAB05C6"><enum>(2)</enum><text>many of these families earn more annually than the income limits for certain Federal housing financing and benefits; and</text></paragraph> <paragraph id="H0EA8112E157F4D1795E40CB4D57A4D57"><enum>(3)</enum><text>these families are often excluded from living in neighborhoods near their places of work, schools, shopping, and healthcare due to a lack of affordability.</text></paragraph></section>
+<section id="H33C16FEE6A2C4E678A1646500113E47E"><enum>3.</enum><header>Report to Congress</header><text display-inline="no-display-inline">Not later than 180 days after the date of the enactment of this Act, the Comptroller General of the United States shall submit to the Congress a report that—</text> <paragraph id="H92E5A5B2A44446F6B4732798BDC51848"><enum>(1)</enum><text>identifies issues with housing affordability for America’s middle-income homeowners and renters, including identifying geographically where housing is the most unaffordable for these populations;</text></paragraph>
+<paragraph id="HFF48FEA6031148BB9DE51289F0B37FED"><enum>(2)</enum><text>identifies Federal housing programs, including Federal tax credits, grants, credit programs, and other programs that currently benefit lower-income households, which are not available to middle-income households;</text></paragraph> <paragraph id="HB978950B1EC74D75A29D79ED0346ECB6"><enum>(3)</enum><text>identifies any gaps in the inclusion of middle-income households in Federal housing programs designed to promote affordability;</text></paragraph>
+<paragraph id="HD56A3F5B9C4D46E8B2DE539112C2978A"><enum>(4)</enum><text display-inline="yes-display-inline">sets forth recommendations for a definition of <quote>workforce housing</quote> based on income parameters in order to assist Federal agencies in including middle-income households under existing Federal programs; and</text></paragraph> <paragraph id="H3688BB35DEB048BA878370729992A250"><enum>(5)</enum><text>analyzes how such a definition could relate to incentives for workforce housing development through Federal programs, policies, and other initiatives.</text></paragraph></section> 
+</legis-body></bill>
+
+

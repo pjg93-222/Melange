@@ -1,0 +1,95 @@
+{
+  "status": "PASS",
+  "verified_at": "2026-09-08T08:16:20.799739+00:00",
+  "scope": "Identity and route evidence consumers; no claim of calibrated familiarity or globally clean repository",
+  "identity": {
+    "withdrawals": 12,
+    "additions": 0,
+    "disposition": "unresolved; source profiles retained",
+    "live_matches_fixed_input_delta": true
+  },
+  "pinned_inputs_unchanged": {
+    "fec\\surfaces\\staffer_payroll_identity.json": "29d991205622db08b1ba7b9e8517ec54525793552460bd25bd95db349750f02c",
+    "audits\\staffer_network\\hill_personnel_spine_20260908_v8_primary\\hill_personnel_spine_receipt.json": "83891a3764d3747af1efc1b8a34e1ddf4cdcb0482ad7d057c444e5818290c3aa",
+    "audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_network_receipt.json": "9c5384786f9b260edeca643297ab575c59324969077627ca6680788499d54723"
+  },
+  "source_reconciliation_holds": true,
+  "intern_exclusions_unchanged": 52107,
+  "live_ready": true,
+  "live_errors": [],
+  "runtime": {
+    "pid": 34020,
+    "port": 8841,
+    "source_root": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems",
+    "dashboard_file": "Moneyball_Redesign.html",
+    "started_at": "2026-09-08T08:11:20.3381962Z"
+  },
+  "tests": {
+    "integrated_targeted": "199 passed",
+    "independent_review": "95 passed",
+    "committed_variant_boundary": "32 passed",
+    "javascript": "node --check passed on live and committed variants"
+  },
+  "route_probes": [
+    {
+      "origin": "Gordon Holzberg",
+      "target": "Stephanie Belk",
+      "steps": 1,
+      "cost": 1.0,
+      "evidence_classes": [
+        "dated_work_overlap"
+      ],
+      "path_and_cost_unchanged": true
+    },
+    {
+      "origin": "Gordon Holzberg",
+      "target": "Gregory Mesack",
+      "steps": 1,
+      "cost": 1.0,
+      "evidence_classes": [
+        "dated_work_overlap"
+      ],
+      "path_and_cost_unchanged": true
+    },
+    {
+      "origin": "Gordon Holzberg",
+      "target": "Grace Ryan",
+      "steps": 2,
+      "cost": 7.695239,
+      "evidence_classes": [
+        "dated_work_overlap",
+        "shared_background_only"
+      ],
+      "path_and_cost_unchanged": true
+    }
+  ],
+  "separate_profiles_checked": 24,
+  "working_source_hashes": {
+    "fec/surfaces/staffer_identity_auto.py": "62fb5594c84ec5fd8356cfd81cbbb1f37fdf85431af2a3751e657335d82bb1b9",
+    "fec/surfaces/staffer_payroll_identity.py": "6cefc9d00a97d87317d9317679f484ad05e5e7522a1355927acdf829fc9df957",
+    "fec/surfaces/staffer_overlap_routes.py": "f102e065053dc84394f7823d41e8b18bab718611f24855595e8cbd348cf838a9",
+    "fec/surfaces/staffer_routing.py": "113240455d28a1b30b08afd230f07632eb60d5cdcb07aed33759e4d7971216ef",
+    "fec/surfaces/staffer_live_service.py": "041934493daec6ef7d7accf26850c97d4b676e78ecc33765d0dcc17a683dc0c4",
+    "fec/surfaces/staffer_live/staffer-route.js": "7b136f0caa659c6673a4555d48677469888294b365f7b01e5f8c0f6f2a5d6fcc"
+  },
+  "staged_source_hashes": {
+    "fec/surfaces/staffer_identity_auto.py": "62fb5594c84ec5fd8356cfd81cbbb1f37fdf85431af2a3751e657335d82bb1b9",
+    "fec/surfaces/staffer_payroll_identity.py": "6cefc9d00a97d87317d9317679f484ad05e5e7522a1355927acdf829fc9df957",
+    "fec/surfaces/staffer_overlap_routes.py": "f102e065053dc84394f7823d41e8b18bab718611f24855595e8cbd348cf838a9",
+    "fec/surfaces/staffer_routing.py": "d942b4029f08f8896682983530f1b0ee23b3360a953233a861352c409fed0a8f",
+    "fec/surfaces/staffer_live_service.py": "6e1709e072abc8ade853a34bbe62d715bd533b220ebccfad6d8cc9f04736b6c8",
+    "fec/surfaces/staffer_live/staffer-route.js": "48b9c7a2cee787ea9c8e6fee9182d1dbbdfbc941891de5f3b918014a98fe29ab"
+  },
+  "bindings": {
+    "identity_delta.json": "6ce4f6b63571588ce904bd8beebfbe2823a671a2953fd427ddfdf0dde3b7d0ab",
+    "independent_review.json": "47cf8730c8b97aab44fe2e83b28856e5f3bcd9c70229b6ddce3162685108662a",
+    "ADJUDICATION.md": "36491f7007d839551fb2e22ccc7fb91a550eb3a565f4cbb8cec64987096dbb1f",
+    "before/receipt.json": "866210ea2f101a6ea37c96534c856ef660aadb3002a35f1036aee09bc9cc43e4",
+    "after/receipt.json": "102379bc9f3297e59e21764a19d11c5dceab3031b72dfab553ca11886fd9112c",
+    "before/route_probes.json": "0d50613f06cce74dd892714a845ba76f37507fb02a93673aeb667bacd8cb2818",
+    "after/route_probes.json": "50a19c8bd2018c02893dd8ebbbc63bf57c2528b0b957725a164a59b94a5f7814",
+    "live_dependencies.patch": "9979783d0c9d7ffb092148108947d896c1c7ee09c34a574a44f1cd234f9a91e0",
+    "integration_test_delta.patch": "9eea7293b173466e8494cba3166114cd4475c4571ca23f435573e06c9ff19c97"
+  },
+  "unrelated_global_failures": "Previous audit 554 passed / 15 classified failures; not rerun or claimed closed here"
+}

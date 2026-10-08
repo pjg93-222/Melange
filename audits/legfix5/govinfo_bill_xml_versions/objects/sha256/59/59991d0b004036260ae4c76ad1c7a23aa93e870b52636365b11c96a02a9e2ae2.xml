@@ -1,0 +1,310 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MUR26146-CTD-PW-G0N"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S4982 IS: Good Jobs for Good Airports Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-07-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 4982</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260714">July 14, 2026</action-date><action-desc><sponsor name-id="S369">Mr. Markey</sponsor> (for himself, <cosponsor name-id="S270">Mr. Schumer</cosponsor>, <cosponsor name-id="S354">Ms. Baldwin</cosponsor>, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S386">Ms. Duckworth</cosponsor>, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, <cosponsor name-id="S432">Mr. Gallego</cosponsor>, <cosponsor name-id="S331">Mrs. Gillibrand</cosponsor>, <cosponsor name-id="S322">Mr. Merkley</cosponsor>, <cosponsor name-id="S364">Mr. Murphy</cosponsor>, <cosponsor name-id="S413">Mr. Padilla</cosponsor>, <cosponsor name-id="S313">Mr. Sanders</cosponsor>, <cosponsor name-id="S394">Ms. Smith</cosponsor>, <cosponsor name-id="S390">Mr. Van Hollen</cosponsor>, <cosponsor name-id="S415">Mr. Warnock</cosponsor>, and <cosponsor name-id="S366">Ms. Warren</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require employers of airport service workers at small, medium, and large hub airports to ensure that airport service workers are paid the prevailing wage and provided fringe benefits, and for other purposes.</official-title></form><legis-body display-enacting-clause="yes-display-enacting-clause"><section section-type="section-one" id="S1"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Good Jobs for Good Airports Act</short-title></quote>.</text></section><section id="id81e6e4bf82b546209c6d78078a06df87"><enum>2.</enum><header>Good jobs for good airports</header><subsection id="id108f444d84f44f37909752dc91b6cfbc"><enum>(a)</enum><header>Findings; purposes</header><paragraph id="idf905661654ce4934aafd6a6782b7bf14"><enum>(1)</enum><header>Findings</header><text>Congress finds the following:</text><subparagraph id="id0cdd5c09841c469283d350a0ea292c53"><enum>(A)</enum><text>Safe and effective airport operations are essential to national commerce and the general welfare.</text></subparagraph><subparagraph id="idba217328beb046bcb59c38c74d8550a4"><enum>(B)</enum><text>A well-trained, stable workforce at our Nation’s airports is critical to ensuring public safety and security, as well as the health and safety of the public and protection from infectious diseases.</text></subparagraph><subparagraph id="idd6b8f512c29445af957df52252a47af5"><enum>(C)</enum><text>The Federal Government has invested billions of dollars in creating and maintaining our Nation’s aviation infrastructure, reflecting the national interest in maintaining airports across the country.</text></subparagraph><subparagraph id="id4fe9177df65b42508d58524897776344"><enum>(D)</enum><text>Airport services are most effective when the workforce providing those services is able to earn a living wage and able to secure adequate health benefit coverage. In fact, meeting the growing challenges of operating airports securely and efficiently requires the recruitment and retention of excellent staff in all of the classifications of employees who work in airport services and operations.</text></subparagraph><subparagraph id="id15b29fdb18ae4af2b0b20ba9f817c861"><enum>(E)</enum><text>Effective management of airports and effective airport security requires that workforce turnover be reduced and that the workforce be highly trained and highly motivated.</text></subparagraph><subparagraph id="idd10a90911e1e47b8991bd31d352e213b"><enum>(F)</enum><text>In connection with setting wage and benefits standards for those engaged in airport services, there is a need to establish an orderly system that reconciles competing interests without undue disruption.</text></subparagraph></paragraph><paragraph id="id6776756a92064ce0b6a1c9a1967c1fc1"><enum>(2)</enum><header>Purposes</header><text>The purposes of this Act are—</text><subparagraph id="idf958988bbd6048c0928a26f3bad11157"><enum>(A)</enum><text>to provide a mechanism for ensuring minimum wage and benefits standards for individuals who work in airports; and</text></subparagraph><subparagraph id="id9fa839466667483e8a9b185fac51a65d"><enum>(B)</enum><text>to serve the best interests of the people of the United States by stabilizing the workplace conditions of the labor pool that supports our Nation’s airport operations.</text></subparagraph></paragraph></subsection><subsection id="idb6c9261648c54d1ba8f03e839f671efb"> <enum>(b)</enum> <header>Amendments to title 49 of the United States Code To ensure minimum wage and benefits for covered service workers</header> <paragraph id="id6f0c230867984797afa11468f8c9945b"> <enum>(1)</enum> <header>Covered service worker definition</header> <text>Section 40102(a) of title 49, United States Code, is amended by adding at the end the following:</text>
+          <quoted-block style="OLC" display-inline="no-display-inline"
+            id="id1970ba8c763048328ff4d2063f2be0de">
+            <paragraph id="id231d48745cdf4c49a642237b5884e769">
+              <enum>(48)</enum>
+ <text><quote>covered service worker</quote>—</text> <subparagraph id="idf235f01d47f847f39cd79e0a5b76a9df"> <enum>(A)</enum> <text>means an individual who furnishes services for, or on the property or premises of, a small hub airport, medium hub airport, or large hub airport, performing—</text>
+                <clause id="id31c286156878401082eb0ac9f01f26e2">
+                  <enum>(i)</enum>
+ <text>functions that are related to the air transportation of persons, property, or mail, including—</text>
+                  <subclause id="iddad4fe535ecd424697bd2902c84bedcd">
+                    <enum>(I)</enum>
+ <text>the loading or unloading of property on aircraft or a building or facility on the airport property;</text>
+                  </subclause>
+                  <subclause id="id5ddb961817d34465b08d0d5a599a6613">
+                    <enum>(II)</enum>
+ <text>assistance to passengers, including assistance under part 382 of title 14, Code of Federal Regulations;</text>
+                  </subclause>
+                  <subclause id="id17bb360b03894e5bbe6ac744098ab78d">
+                    <enum>(III)</enum>
+ <text>security;</text> </subclause> <subclause id="id3fcd70caa1e04a05bb531e77733837e6"> <enum>(IV)</enum> <text>airport ticketing or check-in functions;</text>
+                  </subclause>
+                  <subclause id="idf913bc410c69478c93767ac5c30ffff2">
+                    <enum>(V)</enum>
+ <text>ground-handling of aircraft or related equipment (but not including mechanical services, machinery maintenance, car service maintenance, services at maintenance-related stores, fueling, de-icing, or other mechanic-related functions);</text>
+                  </subclause>
+                  <subclause id="id840be956d4784db680724be7361f7b75">
+                    <enum>(VI)</enum>
+ <text>aircraft cleaning and sanitization functions or waste removal;</text> </subclause> <subclause id="idd99923f49b5f4744ab3dc405e01800ae"> <enum>(VII)</enum> <text>cleaning within an airport terminal or other building or facility on the airport property;</text>
+                  </subclause>
+                  <subclause id="idcf9acd15163e461e925f6d8722ba19b8">
+                    <enum>(VIII)</enum>
+ <text>transportation of employees or individuals within the airport property; or</text>
+                  </subclause>
+                  <subclause id="idd9654a507d204da482fb967aa9dc621f">
+                    <enum>(IX)</enum>
+ <text>ramp agent functions;</text> </subclause> </clause> <clause id="idd04c8397b5ba4ff795eeefcca70d496f"> <enum>(ii)</enum> <text>concessions services on the property of an airport, including—</text>
+                  <subclause id="id7a31150ad3e240cba6c67f6ebd7174e9">
+                    <enum>(I)</enum>
+ <text>food service, including food and beverage service, wait service, busing, cooks, or cashiers;</text>
+                  </subclause>
+                  <subclause id="idb3ad115c3aad4733942ec24a260d91cb">
+                    <enum>(II)</enum>
+ <text>retail service, including retail related to news or gifts or duty-free retail services;</text>
+                  </subclause>
+                  <subclause id="id7576122db5564e1fa5ee6a81b9c9849f">
+                    <enum>(III)</enum>
+ <text>cleaning for concession services;</text> </subclause> <subclause id="idda20c78885974cf8af9c664d9d65b9d1"> <enum>(IV)</enum> <text>security for concession services; or</text>
+                  </subclause>
+                  <subclause id="id5b44ba64c9584c68a3e0a0c6c6d40327">
+                    <enum>(V)</enum>
+ <text>airport lounge services, including food, retail, cleaning, or security services for or at an airport lounge;</text>
+                  </subclause>
+                </clause>
+                <clause id="id7f360cba4c9d4009a0f7f7bed99b7298">
+                  <enum>(iii)</enum>
+ <text>airline catering services (such as the preparation or assembly of food, beverages, provisions, or related supplies on the airport property or premises or offsite for delivery, and the delivery of such items, directly to aircraft or to a location on or near airport property for subsequent delivery to aircraft at the airport); or</text>
+                </clause>
+                <clause id="ida15775acf92d4c6db1dc34039ea9c2d5">
+                  <enum>(iv)</enum>
+ <text>food or beverage service, housekeeping, or hotel service at a hotel located on airport property;</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="ida4c2280e108d4385aff14cf37209de65">
+                <enum>(B)</enum>
+ <text>includes an individual without regard to any contractual relationship alleged to exist between the individual and a contractor or subcontractor;</text>
+              </subparagraph>
+              <subparagraph id="idb256223b072f4e4da07acf78c50d89c8">
+                <enum>(C)</enum>
+ <text>shall not include an employee to whom the exemption under section 13(a)(1) of the Fair Labor Standards Act of 1938 (<external-xref legal-doc="usc" parsable-cite="usc/29/213">29 U.S.C. 213(a)(1)</external-xref>) applies; and</text>
+              </subparagraph>
+              <subparagraph id="id60c29af17add4c3aa7d06a8d01dc19f2">
+                <enum>(D)</enum>
+ <text>shall not include an employee of—</text> <clause commented="no" display-inline="no-display-inline" id="id3713a439182146bf921210922aab5029"> <enum>(i)</enum> <text display-inline="yes-display-inline">a State, municipality, or other political subdivision of a State or an authority created by an agreement between 2 or more States; or</text>
+                </clause>
+                <clause commented="no" display-inline="no-display-inline"
+                  id="idd04fff01fc8a4584acbb490eb1310754">
+                  <enum>(ii)</enum>
+ <text>the Transportation Security Administration or a qualified private screening company performing security screening of passengers pursuant to a contract entered into with the Transportation Security Administration.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph commented="no" display-inline="no-display-inline"
+              id="idfb55d121f6e04e60bc1e3dec98c21dba">
+              <enum>(49)</enum>
+ <text display-inline="yes-display-inline"><quote>covered employer</quote> means any person engaged in commerce, or in any industry or activity affecting commerce, who employs 1 or more covered service workers.</text>
+            </paragraph>
+            <after-quoted-block>.</after-quoted-block>
+          </quoted-block>
+        </paragraph>
+        <paragraph id="ide25225b814e14f86914fdbac59b9cb26">
+          <enum>(2)</enum>
+          <header>Air commerce and safety</header>
+          <subparagraph commented="no" display-inline="no-display-inline"
+            id="idb9b0e122f2e643d490b73b08fc2aca70">
+            <enum>(A)</enum>
+            <header>In general</header>
+ <text display-inline="yes-display-inline"><external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/49/401">Chapter 401</external-xref> of title 49, United States Code, is amended by adding at the end the following new section:</text>
+            <quoted-block style="USC" display-inline="no-display-inline"
+              id="ide097c96c3fb44d76892101f64c0f62a8">
+              <section id="id74594defa1ad493dbf781bdadcab7a88">
+                <enum>40133.</enum>
+                <header>Labor standards for certain airport service jobs</header>
+                <subsection id="id21331ebab1aa4620a426c1621df55228">
+                  <enum>(a)</enum>
+                  <header>Requirement</header>
+ <text>Any covered employer providing services at or for a small, medium, or large hub airport shall ensure that all covered service workers, including those subject to a collective bargaining agreement, employed by the covered employer are paid a wage and fringe benefits that are—</text>
+                  <paragraph id="idd1cd570bf5434c13b6294ebe552a3d4a">
+                    <enum>(1)</enum>
+ <text>with respect to such wage, not less than the higher of—</text> <subparagraph id="id5cd0ab0a79724d8193f833dcc3e10adf"> <enum>(A)</enum> <text>the minimum hourly wage for the appropriate locality and classification as determined in accordance with <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/41/67">chapter 67</external-xref> of title 41, United States Code (commonly known as the <quote>Service Contract Act</quote>), by the Secretary of Labor under subsection (c)(1)(A), adjusted annually to reflect any changes made by such Secretary in such determinations; or</text>
+                    </subparagraph>
+                    <subparagraph id="idecf99a36c6b646e8aab0a9dd2c5cb0f1">
+                      <enum>(B)</enum>
+ <text>the minimum hourly wage required under an applicable State or local minimum wage law (including a regulation) or policy, including the policy of a political subdivision of a State or an authority created by a compact between 2 or more States or 1 or more States and the District of Columbia, that applies to covered service workers; and</text>
+                    </subparagraph>
+                  </paragraph>
+                  <paragraph id="id3f3028524e444b3d9e101415db58e7bf">
+                    <enum>(2)</enum>
+ <text>with respect to such fringe benefits, not less than the greater of—</text> <subparagraph id="id77abcae9aad643368a1fe2acb70fec67"> <enum>(A)</enum> <text>the minimum fringe benefits for the appropriate locality and classification as determined in accordance with <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/41/67">chapter 67</external-xref> of title 41, United States Code (commonly known as the <quote>Service Contract Act</quote>), by the Secretary of Labor under subsection (c)(1)(A), adjusted annually to reflect any changes made by such Secretary in such determinations; or</text>
+                    </subparagraph>
+                    <subparagraph id="idc535cefac6054db997ef4495f3627900">
+                      <enum>(B)</enum>
+ <text>the minimum fringe benefits required under an applicable State or local law (including a regulation) or policy, including the policy of a political subdivision of a State or an authority created by a compact between 2 or more States or 1 or more States and the District of Columbia, that applies to covered service workers.</text>
+                    </subparagraph>
+                  </paragraph>
+                </subsection>
+                <subsection commented="no" id="id2a5d9f5b073f47a88c41fdaba63a94cc">
+                  <enum>(b)</enum>
+                  <header>Certification requirement for covered employers</header>
+                  <paragraph commented="no" display-inline="no-display-inline"
+                    id="ida239c95c25f74d179c3701b18a6c31c7">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">A covered employer shall certify, under penalty of perjury, in a manner determined by the Secretary of Transportation, on a monthly basis that all covered service workers, including those subject to a collective bargaining agreement, employed by the covered employer are provided wage and fringe benefits that comply with the requirements described in paragraphs (1) and (2) of subsection (a).</text>
+                  </paragraph>
+                  <paragraph commented="no" display-inline="no-display-inline"
+                    id="id3cfebe393bc54570a6da79883cea58dc">
+                    <enum>(2)</enum>
+                    <header>Failure to submit certification</header>
+ <text>The failure to submit a certification under paragraph (1) shall constitute a violation of this section.</text>
+                  </paragraph>
+                  <paragraph commented="no" display-inline="no-display-inline"
+                    id="idba7151007253483db36a105a32660a72">
+                    <enum>(3)</enum>
+                    <header>False certification</header>
+ <text>The submission of a false certification under paragraph (1) shall constitute a violation of this section.</text>
+                  </paragraph>
+                </subsection>
+                <subsection id="id2555f6826d7342bdadf9a0f567cf9e25">
+                  <enum>(c)</enum>
+                  <header>Classifications and wage determinations</header>
+                  <paragraph id="id3cc4901d99f74c89a8c3dc5222fbb3e4">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text>The Secretary of Labor shall—</text> <subparagraph id="id6343c4f65b35407298ebb9bbbd89210e"> <enum>(A)</enum> <text>not later than 120 days after the date of enactment of this section and in accordance with paragraph (2), issue a wage determination with minimum hourly wage and fringe benefits in accordance with the methodology used by the Secretary of Labor under <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/41/67">chapter 67</external-xref> of title 41, United States Code (commonly known as the <quote>Service Contract Act</quote>), appropriate for each class of covered service worker for purposes of paragraphs (1)(A) and (2)(A) of subsection (a); and</text>
+                    </subparagraph>
+                    <subparagraph id="idcd887dd0ed804d02b1c49b6aef3105d3">
+                      <enum>(B)</enum>
+ <text>not later than 120 days after the date of enactment of this section and annually thereafter, provide to the Secretary of Transportation the applicable minimum hourly wage and fringe benefits required for purposes of subsection (a) with respect to each such class of covered service worker.</text>
+                    </subparagraph>
+                  </paragraph>
+                  <paragraph id="id3207e8a7d4dc4791a18308118ed333eb">
+                    <enum>(2)</enum>
+                    <header>New occupational categories</header>
+ <text>In issuing the wage determinations under paragraph (1)(A), the Secretary of Labor—</text>
+                    <subparagraph id="id020cedd33cd04ae5b1e032f2323c0dd9">
+                      <enum>(A)</enum>
+ <text>shall ensure that each class of covered service worker is classified appropriately in a category of occupation of a type covered under <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/41/67">chapter 67</external-xref> of title 41, United States Code; and</text>
+                    </subparagraph>
+                    <subparagraph id="ida67ac3b0b19d4d3fa8d84fc23661535f">
+                      <enum>(B)</enum>
+ <text>to the extent needed to carry out subparagraph (A), may establish 1 or more new categories of occupation of a type covered under <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/41/67">chapter 67</external-xref> of title 41, United States Code, to ensure that all classes of covered service workers have an appropriate determination of minimum hourly wage and fringe benefits.</text>
+                    </subparagraph>
+                  </paragraph>
+                </subsection>
+                <subsection commented="no" display-inline="no-display-inline"
+                  id="id9858cc8aadca48099f64bf86d099e1f8">
+                  <enum>(d)</enum>
+                  <header>Rulemaking authority</header>
+ <text>The Secretary of Labor and the Secretary of Transportation may prescribe regulations to implement this section, provided that such regulations prescribed by the Secretary of Transportation shall be consistent with such regulations prescribed by the Secretary of Labor.</text>
+                </subsection>
+                <subsection id="id8c006cf55e3945e994e6726c5119404f">
+                  <enum>(e)</enum>
+                  <header>Enforcement</header>
+                  <paragraph commented="no" display-inline="no-display-inline"
+                    id="idc1ee8214a5b4440b8a36ff5e84313978">
+                    <enum>(1)</enum>
+                    <header>Wage and benefit enforcement</header>
+ <text display-inline="yes-display-inline">The Secretary of Labor shall have the authority to enforce the wage and fringe benefit requirements for covered service workers described in paragraphs (1) and (2) of subsection (a), including the authority to issue orders, conduct investigations, examine the records of covered employers, hold hearings, make decisions based on findings of fact, and take other appropriate action pursuant to the authority of the Secretary of Labor under the Fair Labor Standards Act of 1938 (<external-xref legal-doc="usc" parsable-cite="usc/29/201">29 U.S.C. 201 et seq.</external-xref>).</text>
+                  </paragraph>
+                  <paragraph commented="no" id="id138c59158cf14c3692a02061fa95faec">
+                    <enum>(2)</enum>
+                    <header>Certification enforcement</header>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                      id="idae50c49c0ae4412290012ab0e35ee82a">
+                      <enum>(A)</enum>
+                      <header>In general</header>
+ <text display-inline="yes-display-inline">The Secretary of Transportation shall have the authority to enforce the certification requirement described in subsection (b), including the authority to issue orders, conduct investigations, examine the records of covered employers, hold hearings, make decisions based on findings of fact, and take other appropriate action pursuant to the Secretary of Transportation’s authority.</text>
+                    </subparagraph>
+                    <subparagraph commented="no" display-inline="no-display-inline"
+                      id="iddf29882f8143405f818d116047288e83">
+                      <enum>(B)</enum>
+                      <header>Considerations</header>
+ <text>In determining whether a covered employer submitted a false certification under subsection (b), the Secretary of Transportation shall consider as evidence any findings of fact made by the Secretary of Labor regarding a covered employer's failure to comply with the wage and fringe benefit requirements described in paragraphs (1) and (2) of subsection (a).</text>
+                    </subparagraph>
+                  </paragraph>
+                </subsection>
+                <subsection id="idbcb9ddbbc6cf4304b5077d2b7f47230c">
+                  <enum>(f)</enum>
+                  <header>Non-Preemption of state or local laws</header>
+ <text>Nothing in this section shall preempt any State or local law (including a regulation) or policy that requires a higher minimum wage or otherwise requires greater benefits or protections for covered service workers than the requirements of this section.</text>
+                </subsection>
+                <subsection commented="no" display-inline="no-display-inline"
+                  id="id57DB0F1A609D4DD19B3B97FAD2931B14">
+                  <enum>(g)</enum>
+                  <header display-inline="yes-display-inline">Report to Congress</header>
+ <text display-inline="yes-display-inline">Not later than 1 year after the date of enactment of the <short-title>Good Jobs for Good Airports Act</short-title>, and annually thereafter, the Secretary of Transportation shall submit to the Committee on Commerce, Science, and Transportation of the Senate and the Committee on Transportation and Infrastructure of the House of Representatives a report on their efforts to implement such Act, as well as an assessment of the efforts of covered employers to come into compliance with the requirements of such Act.</text>
+                </subsection>
+                <subsection commented="no" display-inline="no-display-inline"
+                  id="id2de6ebf49a674840a8db39982dd91daa">
+                  <enum>(h)</enum>
+                  <header>Publication of data</header>
+ <text>The Secretary of Transportation shall publish complaint data relating to covered service workers in a manner comparable to other aviation consumer complaint data.</text>
+                </subsection>
+              </section>
+              <after-quoted-block>.</after-quoted-block>
+            </quoted-block>
+          </subparagraph>
+          <subparagraph id="id07FE38AF634E4226BA2BE88AE4A6412C">
+            <enum>(B)</enum>
+            <header>Clerical amendment</header>
+ <text>The analysis for <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/49/401">chapter 401</external-xref> of title 49, United States Code, is amended by inserting after the item relating to <external-xref legal-doc="usc" parsable-cite="usc/49/40132">section 40132</external-xref> the following:</text>
+            <quoted-block style="OLC" display-inline="no-display-inline"
+              id="id67707D25FE8B407B90A526FB356C098A">
+              <toc>
+                <toc-entry bold="off" level="section">40133. Labor standards for certain airport
+                  service jobs.</toc-entry>
+              </toc>
+              <after-quoted-block>.</after-quoted-block>
+            </quoted-block>
+          </subparagraph>
+        </paragraph>
+        <paragraph id="idb4534029d6a94a6faac2a274923fd118">
+          <enum>(3)</enum>
+          <header>Penalties</header>
+ <text>Section 46301 of title 49, United States Code, is amended—</text> <subparagraph commented="no" display-inline="no-display-inline" id="id5f7ae530325f4056b19dff7da69dc1c7"> <enum>(A)</enum> <text display-inline="yes-display-inline">in subsection (a), by adding at the end the following new paragraph:</text>
+            <quoted-block style="OLC" display-inline="no-display-inline"
+              id="idFCC09C082CAA449D9812D3906BE7F8D3">
+              <paragraph commented="no" id="id68414d64af904a49adeb8314c185770c">
+                <enum>(9)</enum>
+                <header>Penalties relating to labor standards for certain airport service
+                  jobs</header>
+ <text>Notwithstanding paragraph (1), the maximum civil penalty for a violation of section 40133 shall be an amount not to exceed 3 times the amount of a civil penalty as described in paragraph (1).</text>
+              </paragraph>
+              <after-quoted-block>; and</after-quoted-block>
+            </quoted-block>
+          </subparagraph>
+          <subparagraph id="id8c4e9097efed44cfb59e29e50ad6d99c">
+            <enum>(B)</enum>
+ <text>in subsection (c)(1)(A), by striking <quote>or section 44909 of this title</quote> and inserting <quote>section 44909, or section 40133 of this title.</quote>.</text>
+          </subparagraph>
+        </paragraph>
+        <paragraph id="id879a9f3410ee4692937387214f36c244">
+          <enum>(4)</enum>
+          <header>Investigations and proceedings</header>
+          <subparagraph commented="no" display-inline="no-display-inline"
+            id="id8f91b733edc34cec972abdcb0e87e2fa">
+            <enum>(A)</enum>
+            <header>In general</header>
+ <text display-inline="yes-display-inline"><external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/49/461">Chapter 461</external-xref> of title 49, United States Code, is amended by adding at the end the following new section:</text>
+            <quoted-block style="USC" display-inline="no-display-inline"
+              id="id8A9082DECF9A430FB541D2940DE48573">
+              <section id="id4952ac423a8f49fabc2623a6a1cb7f44">
+                <enum>46112.</enum>
+                <header>Enforcement of labor standards for certain airport service jobs by
+                  interested persons</header>
+ <text display-inline="no-display-inline">An interested person may bring a civil action in a district court of the United States against a person to enforce section 40133. The action may be brought in the judicial district in which the defendant does business or the violation occurred.</text>
+              </section>
+              <after-quoted-block>.</after-quoted-block>
+            </quoted-block>
+          </subparagraph>
+          <subparagraph id="id065D314258D444CDB0EB19062CE1E4FE">
+            <enum>(B)</enum>
+            <header>Clerical amendment</header>
+ <text>The analysis for <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/49/461">chapter 461</external-xref> of title 49, United States Code, is amended by inserting after the item relating to <external-xref legal-doc="usc" parsable-cite="usc/49/46111">section 46111</external-xref> the following:</text>
+            <quoted-block style="OLC" display-inline="no-display-inline"
+              id="id9CC7C5102E704DC59C594150D52FD343">
+              <toc>
+                <toc-entry bold="off" level="section">46112. Enforcement of labor standards for
+                  certain airport service jobs by interested persons.</toc-entry>
+              </toc>
+              <after-quoted-block>.</after-quoted-block>
+            </quoted-block>
+          </subparagraph>
+        </paragraph>
+ </subsection><subsection id="idb47ea8558d844ba1bad49d7f6106b234"><enum>(c)</enum><header>Minimum wage and fringe benefits for covered service workers under the Fair Labor Standards Act of 1938</header><text display-inline="yes-display-inline">Section 6 of the Fair Labor Standards Act of 1938 (<external-xref legal-doc="usc" parsable-cite="usc/29/206">29 U.S.C. 206</external-xref>) is amended by adding at the end the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="id16391740383D4FDD9CFB97567C50F28A"><subsection id="id73d9e54f94dc4fb6ae573f7c2479f9fe"><enum>(h)</enum><header>Covered service workers performing services for small, medium, and large hub airports</header><paragraph commented="no" display-inline="no-display-inline" id="id9c4acba862564b58b0ad61c7a9878810"><enum>(1)</enum><header display-inline="yes-display-inline">In general</header><text>In lieu of the rate prescribed by subsection (a)(1), an employer shall pay each employee employed as a covered service worker (as defined in section 40102(a) of title 49, United States Code), providing services at or for a small hub airport, medium hub airport, or large hub airport (as those terms are defined in such section), who in any workweek is engaged in commerce or in the production of goods for commerce, or is employed in an enterprise engaged in commerce or in the production of goods for commerce, a minimum wage and fringe benefits as provided under section 40133(a) of title 49, United States Code.</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idf4f32d50af9944e398f43c437c4afe1d"><enum>(2)</enum><header>Administration and enforcement of fringe benefits</header><text>For purposes of administration and enforcement of any unpaid fringe benefits required under paragraph (1), the fair market value amount of any such fringe benefits shall be deemed unpaid minimum wages under this Act.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section></legis-body></bill>
+

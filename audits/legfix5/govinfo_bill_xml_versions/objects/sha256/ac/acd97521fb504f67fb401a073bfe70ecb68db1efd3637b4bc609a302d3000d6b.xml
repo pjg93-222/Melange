@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MIR20383-P3N-88-WSF"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3524 IS: Coronavirus Credit Expansion Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-03-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>2d Session</session><legis-num>S. 3524</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20200318">March 18, 2020</action-date><action-desc><sponsor name-id="S374">Mr. Cotton</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSSB00">Committee on Small Business and Entrepreneurship</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To modify terms related to the economic injury disaster loan program of the Small Business Administration for applicants affected by COVID–19, and for other purposes.</official-title></form><legis-body><section id="id28117947D305492098FBF2A7BE31C6CC" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Coronavirus Credit Expansion Act</short-title></quote>.</text></section><section section-type="subsequent-section" id="idE916134F22504C94B890AAD8DBA6D3AD"><enum>2.</enum><header>Small business economic injury disaster loans</header><subsection id="id16D9018A44B14E8DA7B518DD73C4212F"><enum>(a)</enum><header>In general</header><text>With respect to loans made under section 7(b)(2) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/636">15 U.S.C. 636(b)(2)</external-xref>) related to COVID–19—</text><paragraph id="idC0FE532498E74D26905CE8B328281048"><enum>(1)</enum><text>the Small Business Administration shall expedite the loan approval process for those loans such that the loans are made as soon as is practicable; and</text></paragraph><paragraph id="id250455C577A14C1590E20AA037D9CDBB"><enum>(2)</enum><text>the maximum loan amount shall be $20,000,000.</text></paragraph></subsection><subsection id="id7B96EE20FFA8424C9408A3724D412432" commented="no" display-inline="no-display-inline"><enum>(b)</enum><header>Fraud</header><text>The fine imposed for any conviction under sections 3729 through 3733 of title 31, United States Code (commonly known as the <quote>False Claims Act</quote>), relating to the use of funds provided under section 7(b)(2) of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/636">15 U.S.C. 636(b)(2)</external-xref>) related to COVID–19 shall be equal to 3 times the amount of the loan. </text></subsection></section></legis-body></bill> 
+

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H97634C8E219649569A857AE031D90558" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3224 IH: To amend title 38, United States Code, to provide for increased access to Department of Veterans Affairs medical care for women veterans.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3224</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190612">June 12, 2019</action-date><action-desc><sponsor name-id="B001285">Ms. Brownley of California</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 38, United States Code, to provide for increased access to Department of Veterans Affairs medical care for women veterans.</official-title></form><legis-body id="HBB91189EC58E4097A46C19C2A4B3BFE2" style="OLC"> 
+<section id="HD10072D10F904DA79508BD17D9F497FC" section-type="section-one"><enum>1.</enum><header>Improved access to Department of Veterans Affairs medical care for women veterans</header> 
+<subsection id="HF398D09A14254D109A66DDE3A1E828ED"><enum>(a)</enum><header>In general</header><text>Subchapter II of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/38/17">chapter 17</external-xref> of title 38, United States Code, is amended by adding at the end the following new section:</text> <quoted-block id="HA948A3D79E734D64868632BBD573466F" style="USC"> <section id="H35A9E8D9A988418AB1C8049919481F53"><enum>1720J.</enum><header>Medical services for women veterans</header> <subsection id="HDB39E894340846AB854E8887F53534B4"><enum>(a)</enum><header>Access to care</header><text>The Secretary shall ensure that gender specific services are continuously available at every medical center and community based outpatient clinic of the Department.</text></subsection> 
+<subsection id="H003F8664BBBF4A4E808AEF95CF178F14"><enum>(b)</enum><header>Study on extended hours of care</header><text>The Secretary shall conduct a study to assess—</text> <paragraph id="HC9119C8717994A5CA309B4881144419E"><enum>(1)</enum><text>the use of extended hours as a means of reducing barriers to care;</text></paragraph> 
+<paragraph id="HF0B986D7085A453298FAFB36613B1560"><enum>(2)</enum><text>the need for extended hours based on interviews with women veterans and employees; and</text></paragraph> <paragraph id="H6057E627F95F4241B5A20A526445754C"><enum>(3)</enum><text>the best practices and resources required to implement use of extended hours.</text></paragraph></subsection> 
+<subsection id="HC14A2627749443D79FCBE10AC0EE89A1"><enum>(c)</enum><header>Annual report to Congress</header><text display-inline="yes-display-inline">Not later than September 30 of each year, the Secretary shall submit to the Committee on Veterans’ Affairs of the Senate and the Committee on Veterans’ Affairs of the House of Representatives a report on compliance with subsection (a).</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="H8C8D990EBD254C588B31E422379E76E9"><enum>(b)</enum><header>Clerical amendment</header><text>The table of sections at the beginning of such chapter is amended by inserting after the item relating to section 1720I the following new item:</text> 
+<quoted-block id="HA52C50DD8A5A4E279C8B981693B1AA4B" style="USC"> 
+<toc regeneration="no-regeneration"> 
+<toc-entry level="section">1720J. Medical services for women veterans.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section> 
+</legis-body></bill>
+
+

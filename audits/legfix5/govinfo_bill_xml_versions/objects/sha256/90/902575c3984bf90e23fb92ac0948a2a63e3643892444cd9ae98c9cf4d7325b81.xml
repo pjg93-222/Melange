@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" dms-id="HCC327CD67D2B44039F833429572CE4C9" public-private="public" resolution-type="house-resolution" star-print="no-star-print" key="H">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HRES 1217 IH: Addressing the national crisis of suicide among minority adolescents.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-07-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code>
+<congress display="yes">117th CONGRESS</congress>
+<session display="yes">2d Session</session>
+<legis-num display="yes">H. RES. 1217</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20220705">July 5, 2022</action-date>
+<action-desc><sponsor name-id="E000297">Mr. Espaillat</sponsor> (for himself, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="H001081">Mrs. Hayes</cosponsor>, <cosponsor name-id="M000087">Mrs. Carolyn B. Maloney of New York</cosponsor>, <cosponsor name-id="T000483">Mr. Trone</cosponsor>, <cosponsor name-id="B001270">Ms. Bass</cosponsor>, <cosponsor name-id="K000391">Mr. Krishnamoorthi</cosponsor>, <cosponsor name-id="B001313">Ms. Brown of Ohio</cosponsor>, <cosponsor name-id="S001193">Mr. Swalwell</cosponsor>, <cosponsor name-id="W000822">Mrs. Watson Coleman</cosponsor>, <cosponsor name-id="L000581">Mrs. Lawrence</cosponsor>, <cosponsor name-id="S001165">Mr. Sires</cosponsor>, and <cosponsor name-id="T000486">Mr. Torres of New York</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HED00">Education and Labor</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>RESOLUTION</legis-type>
+<official-title display="yes">Addressing the national crisis of suicide among minority adolescents.</official-title>
+</form>
+<preamble> 
+<whereas><text>Whereas suicide is a mental health issue that affects individuals and families around the Nation regardless of race, religion, gender identity, sexual orientation, nation of birth, economic background, disability, or age;</text></whereas> <whereas><text>Whereas the World Health Organization defines <quote>adolescents</quote> as children between the ages of 10 to 19;</text></whereas> 
+<whereas><text>Whereas, over the last two decades, self-reported suicide attempts rose nearly 80 percent among Black adolescents, by far the biggest increase of all races and ethnicities;</text></whereas> <whereas><text>Whereas Black children under 13 are dying by suicide at nearly twice the rate of White children the same age;</text></whereas> 
+<whereas><text>Whereas the COVID–19 public health emergency has disproportionately affected the mental health of Black and Indigenous people of color (BIPOC) youth due to—</text> <paragraph id="H147D74FF0E6A40D38F8032BEE984DB81"><enum>(1)</enum><text>Black and Latinx adolescents seeing more COVID–19 related infection and death in their communities than their White counterparts; and</text></paragraph> 
+<paragraph id="H2C90483509E148AFB739A42729D3D6BA"><enum>(2)</enum><text>Black and Latinx families suffering from disproportionate economic setback which leads to financial stress and instability;</text></paragraph></whereas> <whereas><text>Whereas the suicide rate for adolescent Native and Indigenous females is five times higher than for their White counterparts;</text></whereas> 
+<whereas><text>Whereas the American Indian and Alaska Native youth suicide rate is 2.5 times that of the overall national average;</text></whereas> <whereas><text>Whereas suicide is the leading cause of death for Asian American and Pacific Islander (AAPI) youth aged 12 to 19 years old;</text></whereas> 
+<whereas><text>Whereas 19.7 percent of AAPI students in grades 9–12 seriously considered attempting suicide in the year before the survey was taken;</text></whereas> <whereas><text>Whereas youth of color were witness to the renewed national attention and protests against racialized police violence when an unarmed Black man named George Floyd was killed during the summer of 2020;</text></whereas> 
+<whereas><text>Whereas racism against the AAPI community has been exacerbated due to xenophobic, harmful rhetoric to describe the origins of the coronavirus pandemic;</text></whereas> <whereas><text>Whereas repeated experiences of racialized violence and prejudice may lead to racial trauma which can manifest as depression and anxiety;</text></whereas> 
+<whereas><text>Whereas racial inequities in mental health are a result of historical oppression and discriminatory practices that have deliberately and unjustly targeted marginalized communities;</text></whereas> <whereas><text>Whereas BIPOC adolescents are significantly less likely than White youth to receive treatment for their depression overall because of negative perceptions of services and health care providers;</text></whereas> 
+<whereas><text>Whereas structural racism has resulted in limited access to health care for BIPOC adolescents;</text></whereas> <whereas><text>Whereas the lack of cultural understanding and competency by health care providers can cause individuals to delay or forgo care and may contribute to underdiagnosis of mental illness in people from racially and ethnically diverse populations; and</text></whereas> 
+<whereas><text>Whereas the lack of school resource funding results in a lack of school-based mental health services, especially in schools whose populations are predominately made up of students of color: Now, therefore, be it</text></whereas></preamble> <resolution-body style="traditional" id="HB9D78D289AC24A3FACA9E0B4F88BCEBF"> <section id="H24A7725F85D24C0F9D8299629DD7752C" section-type="undesignated-section" display-inline="yes-display-inline"><text display-inline="yes-display-inline">That it is the sense of the House of Representatives that—</text> 
+<paragraph id="H3C6593D25AA04AB48B33944F4AF51A8A"><enum>(1)</enum><text>adolescents experiencing mental health concerns, including depression, anxiety and, among some groups, increased risk for suicide, should have readily available resources to effectively understand and ensure their needs are addressed;</text></paragraph> <paragraph id="H205464246F524BEBB5BE0E0BB028A829"><enum>(2)</enum><text>no adolescent or student, regardless of their race, religion, gender, sexual orientation, nation of birth, economic background, disability, or age should face mental health issues alone;</text></paragraph> 
+<paragraph id="HF750491B120847A7A065C02A04E6F03B"><enum>(3)</enum><text>socioeconomic disparities, stigma, and unequitable access to health care resources are all barriers that prevent youth from receiving the help they need; </text></paragraph> <paragraph id="H33C446590CE540F1AD3D7D836065F2B9"><enum>(4)</enum><text>public officials should utilize their respective platforms to increase awareness and culturally competent resources in support of social, emotional, and mental health needs of adolescents, especially in support of students of color and groups more susceptible to risk; </text></paragraph> 
+<paragraph id="H6F18AEE8C90244F3AB30C588EA88C0C2"><enum>(5)</enum><text>ensuring that students of color have school-based mental health services is an essential part in mitigating increased suicide rates; and</text></paragraph> <paragraph id="H09EB30BEADDF4DA9B29C6CD7674B5824"><enum>(6)</enum><text>Congress should commit to adequately fund existing programs and organizations that are working to close the racial and socioeconomic disparities in mental health.</text></paragraph></section> 
+</resolution-body>
+</resolution> 
+
+

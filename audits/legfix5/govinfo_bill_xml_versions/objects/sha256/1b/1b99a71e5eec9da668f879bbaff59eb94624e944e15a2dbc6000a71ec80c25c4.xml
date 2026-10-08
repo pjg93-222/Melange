@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H953E94E607B74A2687334AE49249842E" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 8089 IH: Medicare and Medicaid Fraud Prevention Act of 2024</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-04-19</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8089</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20240419">April 19, 2024</action-date>
+<action-desc><sponsor name-id="G000061">Mr. Mike Garcia of California</sponsor> (for himself and <cosponsor name-id="P000608">Mr. Peters</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend title XIX of the Social Security Act to require certain additional provider screening under the Medicaid program.</official-title>
+</form>
+<legis-body id="HA6495496EF1B47D1BDBC0311A67B00CE" style="OLC"> 
+<section id="H922CBA4FEB374B258D681D294E72C58A" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Medicare and Medicaid Fraud Prevention Act of 2024</short-title></quote>. </text></section> <section id="H6B6958FBE4B246B38B0CEEA12419C5D6" section-type="subsequent-section"><enum>2.</enum><header>Medicaid provider screening requirements</header><text display-inline="no-display-inline">Section 1902(kk)(1) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1396a">42 U.S.C. 1396a(kk)(1)</external-xref>) is amended—</text> 
+<paragraph id="H4EF6BAB0C4714484990BC79D7BF0C6F7"><enum>(1)</enum><text>by striking <quote>The State</quote> and inserting: </text> <quoted-block style="OLC" id="HF1B0A55D8C5949709E5C5871E3E7A45B" display-inline="no-display-inline"> <subparagraph id="H5D85D7975CC5406E9DDE69C837B3FB66"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">The State</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block></paragraph> 
+<paragraph id="HFB47910A87F34DA1A0F0CF4454CDE97C"><enum>(2)</enum><text>by adding at the end the following new subparagraph:</text> <quoted-block style="OLC" id="H9CA129E039704DEE971984F39123DDDE" display-inline="no-display-inline"> <subparagraph id="H9B720EC1BD644A4D8F060497AD7B89BF"><enum>(B)</enum><header>Additional provider screening</header><text display-inline="yes-display-inline">Beginning January 1, 2025, as part of the enrollment (or revalidation of enrollment) of a provider or supplier under this title, and not less frequently than quarterly during the period that such provider or supplier is so enrolled, the State conducts a check of the Death Master File (as such term is defined in section 203(d) of the Bipartisan Budget Act of 2013) to determine whether such provider or supplier is deceased.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> 
+</legis-body>
+</bill> 
+
+

@@ -1,0 +1,8 @@
+Make the explanation of an unreachable answer that has a reason the same text as its message
+
+Finding A4 of the re-check (cosmetic). An unreachable Staffer answer says why in message, but its explanation was still the generic "No supported path exists in the currently indexed evidence under these filters", and with the page's default three distinct routes the sentence about how alternatives are found was added after it. LiveService._route_response now sets explanation to the answer's message when the answer is unreachable and carries both an unreachable_reason and a message, and adds nothing after it (such an answer has no routes, so a sentence about how alternatives are found would describe none). An unreachable answer without a reason (Ecosystem's) keeps the generic sentence and the note about alternatives; found, unknown_person and insufficient_work_coverage answers are worded exactly as before; and a payload that has a reason but no message keeps the generic sentence, the condition the page uses for its own line. The staffer_live README says it.
+
+Tests (test_staffer_unreachable_hint.py, 26 tests). For each of the nine reasons, through the service with the page's three distinct routes, with one route, independent and ranked, explanation equals message equals the contract's sentence, and so over HTTP. The generic sentence and the note after it stay for an Ecosystem answer, the other statuses are unchanged, a reason without a message keeps the generic sentence, and a negative control that puts the generic sentence back fails all thirty-six answers.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

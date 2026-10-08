@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HC2EEC0BA99A04DF7B8E030C4DF1032E3" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 4918 IH: Rural Telehealth Expansion Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-08-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4918</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20210803">August 3, 2021</action-date><action-desc><sponsor name-id="R000103">Mr. Rosendale</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title XVIII of the Social Security Act to include store-and-forward technologies as telecommunications systems through which telehealth services may be furnished for payment under the Medicare program.</official-title></form><legis-body id="H20E84693C17A4109921D75F9A03B7710" style="OLC"><section id="H583F425FE5174DB895E6C1A81F0948B4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Rural Telehealth Expansion Act</short-title></quote>.</text></section><section id="H0E9E4200870345AC8CB9CAD22CEA70AA"><enum>2.</enum><header>Medicare payment for store-and-forward technologies used to furnish telehealth services</header><text display-inline="no-display-inline">Section 1834(m)(1) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395m">42 U.S.C. 1395m(m)(1)</external-xref>) is amended by striking <quote>in the case of any Federal telemedicine demonstration program conducted in Alaska or Hawaii,</quote>.</text></section></legis-body></bill> 
+

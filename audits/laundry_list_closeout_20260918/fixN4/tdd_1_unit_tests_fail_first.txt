@@ -1,0 +1,105 @@
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 127, in test_congressgov_party_state_brackets_and_honorifics_are_stripped
+    assert len(extra) == 1, (cell, extra)
+           ^^^^^^^^^^^^^^^
+AssertionError: ('Scott, Tim [Sen.-R-SC]', [])
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 65, in test_named_sponsor_with_no_row_in_the_cell_gets_exactly_one_row
+    assert len(extra) == 1, extra
+           ^^^^^^^^^^^^^^^
+AssertionError: []
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 72, in test_one_row_per_cell_no_matter_how_many_member_rows_ride_on_it
+    assert len(synthesise(rows)) == 1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 101, in test_sections_that_share_one_canonical_category_are_one_cell
+    assert len(synthesise(rows)) == 1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 93, in test_sponsor_present_only_under_another_section_gets_the_missing_section_only
+    assert len(extra) == 1, extra
+           ^^^^^^^^^^^^^^^
+AssertionError: []
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 162, in test_the_dial_defaults_to_the_fix_and_only_0_reverts_it
+    assert SC.enabled({SC.DIAL: '0'}) is False
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 171, in test_the_dial_off_synthesises_nothing
+    assert len(synthesise(rows, environ={})) == 1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 197, in test_the_same_bill_in_two_congresses_is_two_cells
+    assert len(extra) == 1 and BR._congress(extra[0]['Congress']) == '117', extra
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: []
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 141, in test_the_synthesised_row_carries_the_provenance_marker
+    assert extra[0][SC.SOURCE_COLUMN] == SC.SOURCE, extra[0]
+           ~~~~~^^^
+IndexError: list index out of range
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 148, in test_the_synthesised_row_copies_the_cells_bill_level_fields
+    assert len(extra) == 1
+           ^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 189, in test_two_cells_of_two_bills_each_get_their_own_row
+    assert {(item['Name'], BR._congress(item['Congress'])) for item in extra} == {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: []
+Traceback (most recent call last):
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 229, in main
+    fn()
+  File "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py", line 220, in test_unresolvable_member_rows_cannot_stand_in_for_the_sponsor
+    assert len(synthesise(rows)) == 1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+PASS test_ambiguous_sponsor_names_resolve_to_nothing
+PASS test_bill_identity_matches_the_producers_event_key_grain
+PASS test_congress_is_normalised_the_way_the_producers_event_key_is
+FAIL test_congressgov_party_state_brackets_and_honorifics_are_stripped
+PASS test_empty_sponsor_cells_synthesise_nothing
+FAIL test_named_sponsor_with_no_row_in_the_cell_gets_exactly_one_row
+FAIL test_one_row_per_cell_no_matter_how_many_member_rows_ride_on_it
+PASS test_rows_whose_section_maps_to_no_category_are_skipped
+FAIL test_sections_that_share_one_canonical_category_are_one_cell
+PASS test_sponsor_already_in_the_cell_synthesises_nothing
+FAIL test_sponsor_present_only_under_another_section_gets_the_missing_section_only
+PASS test_sponsors_outside_the_roster_resolve_to_nothing
+FAIL test_the_dial_defaults_to_the_fix_and_only_0_reverts_it
+FAIL test_the_dial_off_synthesises_nothing
+PASS test_the_helper_never_mutates_the_rows_it_is_given
+FAIL test_the_same_bill_in_two_congresses_is_two_cells
+FAIL test_the_synthesised_row_carries_the_provenance_marker
+FAIL test_the_synthesised_row_copies_the_cells_bill_level_fields
+FAIL test_two_cells_of_two_bills_each_get_their_own_row
+FAIL test_unresolvable_member_rows_cannot_stand_in_for_the_sponsor
+test_sponsor_column: 8 passed, 12 failed

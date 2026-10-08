@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE amendment-doc PUBLIC "-//US Congress//DTDs/amend.dtd//EN" "amend.dtd">
+<amendment-doc amend-stage="proposed" amend-type="engrossed-amendment" amend-degree="first" key="H"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7147 EAH: Further Additional Continuing Appropriations Act, 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-03-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<engrossed-amendment-form>
+<distribution-code display="no"><?xm-replace_text {distribution code}?></distribution-code> 
+<congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session> 
+<current-chamber display="yes">In the House of Representatives, U. S.,</current-chamber> 
+<action> 
+<action-date date="20260327">March 27, 2026</action-date> 
+</action> 
+<legis-type display="yes">HOUSE AMENDMENT TO SENATE AMENDMENT:</legis-type></engrossed-amendment-form> 
+<engrossed-amendment-body> 
+<section section-type="resolved" id="H483024832"> <text>That the House agree to the amendment of the Senate to the bill (H.R. 7147) entitled <quote>An Act making further consolidated appropriations for the fiscal year ending September 30, 2026, and for other purposes.</quote>, with the following</text></section><amendment> <amendment-instruction line-numbers="off"><text>In lieu of the matter proposed to be inserted by the amendment of the Senate, insert the following:</text></amendment-instruction> </amendment><amendment> 
+<amendment-instruction line-numbers="on"><text></text></amendment-instruction> <amendment-block style="appropriations" id="HC753A433F86E456F99AB77916018784F" reported-display-style="italic" changed="added"> <section id="H3FBCFB0D81454765A91874C2321F7B12" section-type="section-one"><enum>1.</enum><text display-inline="yes-display-inline">This Act may be cited as the <quote><short-title>Further Additional Continuing Appropriations Act, 2026</short-title></quote>.</text></section> 
+<section id="HE38FF57E83594CFEA35AE347AF779807"><enum>2.</enum><text display-inline="yes-display-inline">The Continuing Appropriations Act, 2026 (division A of <external-xref legal-doc="public-law" parsable-cite="pl/119/37">Public Law 119–37</external-xref>) is amended by striking the date specified in section 106(3) and inserting <quote>May 22, 2026</quote>.</text></section> <section id="H4D8A2EAAD6B740CF99F5406016C0E095"><enum>3.</enum><text display-inline="yes-display-inline">For the purposes of the Continuing Appropriations Act, 2026 (division A of <external-xref legal-doc="public-law" parsable-cite="pl/119/37">Public Law 119–37</external-xref>), the time covered by such division shall be considered to include the period which began on or about February 14, 2026, during which there occurred a lapse in appropriations.</text></section> 
+<section id="H3EE8C31EE9A147A3BED944EC5236B3D5"><enum>4.</enum><text display-inline="yes-display-inline">Amounts made available in the Continuing Appropriations Act, 2026 (division A of <external-xref legal-doc="public-law" parsable-cite="pl/119/37">Public Law 119–37</external-xref>) and in division H of the Consolidated Appropriations Act, 2026 (<external-xref legal-doc="public-law" parsable-cite="pl/119/75">Public Law 119–75</external-xref>) for personnel pay, allowances, and benefits in each department and agency shall be available for payments pursuant to subsection (c) of section 1341 of title 31, United States Code and such payments shall be made.</text></section> <section id="H7EA1BF0DA5E24740A44196B728A9787B"><enum>5.</enum><text display-inline="yes-display-inline">All obligations incurred and in anticipation of the appropriations made and authority granted by the Continuing Appropriations Act, 2026 (division A of <external-xref legal-doc="public-law" parsable-cite="pl/119/37">Public Law 119–37</external-xref>) and by division H of the Consolidated Appropriations Act, 2026 (<external-xref legal-doc="public-law" parsable-cite="pl/119/75">Public Law 119–75</external-xref>) for the purposes of maintaining the essential level of activity to protect life and property and bringing about orderly termination of Government function, and for purposes as otherwise authorized by law, are hereby ratified and approved if otherwise in accord with the provisions of such Act.</text></section> 
+</amendment-block></amendment></engrossed-amendment-body><attestation><attestation-group><attestor display="no">Kevin F. McCumber</attestor><role>Clerk.</role></attestation-group></attestation><endorsement></endorsement></amendment-doc> 
+
+

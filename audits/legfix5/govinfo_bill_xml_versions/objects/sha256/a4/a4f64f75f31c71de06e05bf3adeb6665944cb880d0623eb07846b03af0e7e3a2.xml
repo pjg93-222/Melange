@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution public-private="public" resolution-stage="Agreed-to-Senate" resolution-type="senate-resolution" star-print="no-star-print">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 SRES 168 ATS: Designating April 2019 as “Financial Literacy Month”.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-04-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">III</distribution-code>
+		<congress display="yes">116th CONGRESS</congress>
+		<session display="yes">1st Session</session>
+		<legis-num>S. RES. 168</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action display="yes">
+			<action-date date="20190411">April 11, 2019</action-date>
+			<action-desc><sponsor name-id="S259">Mr. Reed</sponsor> (for himself, <cosponsor name-id="S365">Mr. Scott of South Carolina</cosponsor>, <cosponsor name-id="S393">Mr. Jones</cosponsor>, <cosponsor name-id="S317">Mr. Barrasso</cosponsor>, <cosponsor name-id="S370">Mr. Booker</cosponsor>, <cosponsor name-id="S343">Mr. Boozman</cosponsor>, <cosponsor name-id="S397">Mr. Braun</cosponsor>, <cosponsor name-id="S275">Ms. Cantwell</cosponsor>, <cosponsor name-id="S372">Mrs. Capito</cosponsor>, <cosponsor name-id="S308">Mr. Cardin</cosponsor>, <cosponsor name-id="S277">Mr. Carper</cosponsor>, <cosponsor name-id="S373">Mr. Cassidy</cosponsor>, <cosponsor name-id="S337">Mr. Coons</cosponsor>, <cosponsor name-id="S398">Mr. Cramer</cosponsor>, <cosponsor name-id="S266">Mr. Crapo</cosponsor>, <cosponsor name-id="S253">Mr. Durbin</cosponsor>, <cosponsor name-id="S254">Mr. Enzi</cosponsor>, <cosponsor name-id="S376">Ms. Ernst</cosponsor>, <cosponsor name-id="S221">Mrs. Feinstein</cosponsor>, <cosponsor name-id="S388">Ms. Hassan</cosponsor>, <cosponsor name-id="S395">Mrs. Hyde-Smith</cosponsor>, <cosponsor name-id="S338">Mr. Manchin</cosponsor>, <cosponsor name-id="S306">Mr. Menendez</cosponsor>, <cosponsor name-id="S229">Mrs. Murray</cosponsor>, <cosponsor name-id="S380">Mr. Peters</cosponsor>, <cosponsor name-id="S260">Mr. Roberts</cosponsor>, <cosponsor name-id="S402">Ms. Rosen</cosponsor>, <cosponsor name-id="S314">Mr. Tester</cosponsor>, <cosponsor name-id="S384">Mr. Tillis</cosponsor>, <cosponsor name-id="S316">Mr. Whitehouse</cosponsor>, <cosponsor name-id="S318">Mr. Wicker</cosponsor>, <cosponsor name-id="S391">Mr. Young</cosponsor>, and <cosponsor name-id="S379">Mr. Perdue</cosponsor>) submitted the following resolution; which was considered and agreed to</action-desc>
+		</action>
+		<legis-type>RESOLUTION</legis-type>
+		<official-title display="yes">Designating April 2019 as <quote>Financial Literacy Month</quote>.</official-title>
+	</form>
+	<preamble>
+ <whereas><text>Whereas, according to the report entitled <quote>Economic Well-Being of U.S. Households</quote> by the Board of Governors of the Federal Reserve System, 40 percent of adults in the United States cannot cover an unexpected expense of $400;</text>
+ </whereas><whereas><text>Whereas, according to the report entitled <quote>2017 National Survey of Unbanked and Underbanked Households</quote> by the Federal Deposit Insurance Corporation, approximately 25 percent of households in the United States are unbanked or underbanked and therefore have limited or no access to savings, lending, and other basic financial services;</text>
+ </whereas><whereas><text>Whereas, according to the 2018 Consumer Financial Literacy Survey final report of the National Foundation for Credit Counseling—</text>
+ <paragraph id="idb9e903360ae44e47a93d04454cb02946"><enum>(1)</enum><text>a majority (61 percent) of adults in the United States had credit card debt during the 1-year period ending on the date of publication of the report;</text>
+ </paragraph><paragraph id="id4CDECBC030C04E1EBE210B0ECDF060B7"><enum>(2)</enum><text>nearly <fraction>2/5</fraction> (38 percent) of adults in the United States carry credit card debt from month to month; and</text> </paragraph><paragraph id="id3c9187dfabc548d6b37a8ae116d20a0f"><enum>(3)</enum><text>approximately 41 percent of adults in the United States maintain a budget;</text>
+ </paragraph></whereas><whereas><text>Whereas, according to the statistical release of the Board of Governors of the Federal Reserve System for the fourth quarter of 2018 entitled <quote>Household Debt and Credit</quote>—</text>
+ <paragraph id="id2263AB02A6824CC3B873B116C44814EF"><enum>(1)</enum><text>outstanding household debt in the United States was $869,000,000,000 higher than the previous peak of $12,680,000,000,000 in the third quarter of 2008; and</text>
+ </paragraph><paragraph id="idCFCAF64290F747A4AD91F1F893C78D93"><enum>(2)</enum><text>outstanding student loan balances have more than doubled in the last decade to approximately $1,500,000,000,000;</text>
+ </paragraph></whereas><whereas><text>Whereas, according to the 2018 report entitled <quote>Survey of the States: Economic and Personal Finance Education in Our Nation’s Schools</quote>, the most recent biennial report of that name by the Council for Economic Education—</text> <paragraph id="idfee0541fc1744bbea4f402090fa5d8ec"><enum>(1)</enum><text>only 22 States require students to take an economics course as a high school graduation requirement; and</text>
+ </paragraph><paragraph id="id24fc367d9bc94c82838acb1ace0e7f03"><enum>(2)</enum><text>only 17 States require students to take a personal finance course as a high school graduation requirement, either independently or as part of an economics course;</text>
+ </paragraph></whereas><whereas><text>Whereas, according to the Gallup-HOPE Index, only 57 percent of students in the United States have money in a bank or credit union account;</text>
+ </whereas><whereas><text>Whereas expanding access to the safe, mainstream financial system will provide individuals with less expensive and more secure options for managing finances and building wealth;</text>
+ </whereas><whereas><text>Whereas quality personal financial education is essential to ensure that individuals are prepared—</text> <paragraph id="ide6583b1a0a514c2d8fddf8d2f76e63fe"><enum>(1)</enum><text>to manage money, credit, and debt; and</text>
+ </paragraph><paragraph id="iddda1a21bb29d4b2c9bbb02e45a3cc8ab"><enum>(2)</enum><text>to become responsible workers, heads of household, investors, entrepreneurs, business leaders, and citizens;</text>
+ </paragraph></whereas><whereas><text>Whereas increased financial literacy—</text> <paragraph id="id7E020ED53F344BC08074B58A8286D28B"><enum>(1)</enum><text>empowers individuals to make wise financial decisions; and</text>
+ </paragraph><paragraph id="idE4EDF3FE0BC04716A104B0EAB287724E"><enum>(2)</enum><text>reduces the confusion caused by an increasingly complex economy;</text> </paragraph></whereas><whereas><text>Whereas a greater understanding of, and familiarity with, financial markets and institutions will lead to increased economic activity and growth; and</text>
+ </whereas><whereas><text>Whereas, in 2003, Congress—</text> <paragraph id="ida9ec300d94fa4ddf82d8da0d3433f52c"><enum>(1)</enum><text>determined that coordinating Federal financial literacy efforts and formulating a national strategy is important; and</text>
+ </paragraph><paragraph id="idacc5dd13c7fb4e0995a4843b5fcd7dc9"><enum>(2)</enum><text>in light of that determination, passed the Financial Literacy and Education Improvement Act (<external-xref legal-doc="usc" parsable-cite="usc/20/9701">20 U.S.C. 9701</external-xref> et seq.), establishing the Financial Literacy and Education Commission: Now, therefore, be it</text>
+			</paragraph></whereas></preamble>
+	<resolution-body>
+ <section display-inline="yes-display-inline" id="S1" section-type="undesignated-section"><enum></enum><text>That the Senate—</text> <paragraph id="id49434BF6980144FEB2D1B1DF49CCAE7C"><enum>(1)</enum><text>designates April 2019 as <quote>Financial Literacy Month</quote> to raise public awareness about—</text>
+ <subparagraph id="id4B029085FC9E4B29BC68D042AF8FC4ED"><enum>(A)</enum><text>the importance of personal financial education in the United States; and</text> </subparagraph><subparagraph id="id6654cb3dcf4d49e49c959e79edda000d"><enum>(B)</enum><text>the serious consequences that may result from a lack of understanding about personal finances; and</text>
+ </subparagraph></paragraph><paragraph id="id0683dc5716074d87abcd0cf13d234616"><enum>(2)</enum><text>calls on the Federal Government, States, localities, schools, nonprofit organizations, businesses, and the people of the United States to observe Financial Literacy Month with appropriate programs and activities.</text></paragraph></section></resolution-body>
+</resolution>
+
+

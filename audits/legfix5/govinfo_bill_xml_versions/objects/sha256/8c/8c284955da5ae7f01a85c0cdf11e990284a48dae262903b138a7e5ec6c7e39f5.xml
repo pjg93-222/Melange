@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ROS20959-DGR-L3-LTY"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>112 S4784 IS: To extend the Generalized System of Preferences, and for other purposes.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-10-01</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>2d Session</session><legis-num>S. 4784</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20201001">October 1, 2020</action-date><action-desc><sponsor name-id="S153">Mr. Grassley</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To extend the Generalized System of Preferences, and for other purposes.</official-title></form><legis-body><section id="idE5E7FDF1F6EC4A13BD3BAD03182E9076" section-type="section-one"><enum>1.</enum><header>Extension of Generalized System of Preferences</header><text display-inline="no-display-inline">Section 505 of the Trade Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/19/2465">19 U.S.C. 2465</external-xref>) is amended by striking <quote>December 31, 2020</quote> and inserting <quote>April 30, 2022</quote>. </text></section><section id="id93c5a1b4886c43f4866ba996fe651ef0"><enum>2.</enum><header>Customs user fees</header><subsection id="idcaf5b0ce42234b1b9cec5d0ca605c025"><enum>(a)</enum><header>In general</header><text>Section 13031(j)(3) of the Consolidated Omnibus Budget Reconciliation Act of 1985 (<external-xref legal-doc="usc" parsable-cite="usc/19/58c">19 U.S.C. 58c(j)(3)</external-xref>) is amended—</text><paragraph id="id1efbb992e90e4104876f31584b266be4"><enum>(1)</enum><text>in subparagraph (A), by striking <quote>October 21, 2029</quote> and inserting <quote>November 25, 2029</quote>; and</text></paragraph><paragraph id="idf8ac83b03bdc4f448a27e55a27b75731"><enum>(2)</enum><text>in subparagraph (B)(i), by striking <quote>October 21, 2029</quote> and inserting <quote>November 25, 2029</quote>.</text></paragraph></subsection><subsection id="idf59a95da71db4ad38604ca5639fa3e8f"><enum>(b)</enum><header>Rate for merchandise processing fees</header><text>Section 503 of the United States–Korea Free Trade Agreement Implementation Act (<external-xref legal-doc="public-law" parsable-cite="pl/112/41">Public Law 112–41</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/19/3805">19 U.S.C. 3805</external-xref> note) is amended by striking <quote>October 21, 2029</quote> and inserting <quote>November 25, 2029</quote>. </text></subsection></section></legis-body></bill> 
+

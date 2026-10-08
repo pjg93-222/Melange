@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H45529417D2524C26A5AE4609B8125FB0" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2589 IH: Unifying DHS Intelligence Enterprise Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 2589</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20190508">May 8, 2019</action-date>
+<action-desc><sponsor name-id="G000590">Mr. Green of Tennessee</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HHM00">Committee on Homeland Security</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Homeland Security Act of 2002 to establish a homeland intelligence doctrine for the Department of Homeland Security, and for other purposes.</official-title>
+</form>
+<legis-body id="H9A9E43F9C48C427D98255D3316052447" style="OLC"> 
+<section id="H4A6CF103BAC74BDB80DE6B029B318790" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Unifying DHS Intelligence Enterprise Act</short-title></quote>.</text></section> <section id="H24ED40846C444B6F988948F09BAB1A2D"><enum>2.</enum><header>Homeland intelligence doctrine</header> <subsection id="HF0E926E29AE043D6B9ED7027BDDDB266"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subtitle A of title II of the Homeland Security Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/121">6 U.S.C. 121</external-xref> et seq.) is amended by adding at the end the following new section:</text> 
+<quoted-block display-inline="no-display-inline" id="HF536F97C723B486DA2401316247E376D" style="OLC"> 
+<section id="H47E87C7C3837410AA2BDCBFEBF49BF23"><enum>210H.</enum><header>Homeland intelligence doctrine</header> 
+<subsection id="H6F24C4E7806344819941B63BB10E8335"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Not later than 180 days after the date of the enactment of this section, the Secretary, acting through the Chief Intelligence Officer of the Department, in coordination with intelligence components of the Department, the Office of the General Counsel, the Privacy Office, and the Office for Civil Rights and Civil Liberties, shall develop and disseminate written Department-wide guidance for the processing, analysis, production, and dissemination of homeland security information (as such term is defined in section 892) and terrorism information (as such term is defined in section 1016 of the Intelligence Reform and Terrorism Prevention Act of 2004 (<external-xref legal-doc="usc" parsable-cite="usc/6/485">6 U.S.C. 485</external-xref>)).</text></subsection> <subsection id="H2975DB2352F544789A96E7153DE10DAE"><enum>(b)</enum><header>Contents</header><text>The guidance required under subsection (a) shall, at a minimum, include the following:</text> 
+<paragraph id="HD5BE6AB19DDA4EB5A0BFAAC405E8D6FB"><enum>(1)</enum><text display-inline="yes-display-inline">A description of guiding principles and purposes of the Department’s intelligence enterprise.</text></paragraph> <paragraph id="HAB50323D647748B5B06592F658D3929B"><enum>(2)</enum><text display-inline="yes-display-inline">A summary of the roles, responsibilities, and programs of each intelligence component of the Department in the processing, analysis, production, or dissemination of homeland security information and terrorism information, including relevant authorities and restrictions applicable to each such intelligence component.</text></paragraph> 
+<paragraph commented="no" id="H575C05F6371E49829EE3A4F418D41DEF"><enum>(3)</enum><text>Guidance for the processing, analysis, and production of such information.</text></paragraph> <paragraph id="H9C499A88644A476389FA50763F875C54"><enum>(4)</enum><text>Guidance for the dissemination of such information, including within the Department, among and between Federal departments and agencies, among and between State, local, Tribal, and territorial governments, including law enforcement, and with foreign partners and the private sector.</text></paragraph> 
+<paragraph id="H1FB681B4588C402698AAA77C6B2D57D3"><enum>(5)</enum><text display-inline="yes-display-inline">An assessment and description of how the dissemination to the intelligence community (as such term is defined in section 3(4) of the National Security Act of 1947 (<external-xref legal-doc="usc" parsable-cite="usc/50/3003">50 U.S.C. 3003(4)</external-xref>)) and Federal law enforcement of such information assists such entities in carrying out their respective missions.</text></paragraph></subsection> <subsection id="HA076435DFE7A4545990A2387426AA104"><enum>(c)</enum><header>Form</header><text display-inline="yes-display-inline">The guidance required under subsection (a) shall be submitted in unclassified form, but may include a classified annex.</text></subsection> 
+<subsection id="H69545EE0DB064DA5861BCDD74704E187"><enum>(d)</enum><header>Annual review</header><text display-inline="yes-display-inline">For each of the five fiscal years beginning with the first fiscal year that begins after the date of the enactment of this section, the Secretary shall conduct a review of the guidance required under subsection (a) and, as appropriate, revise such guidance.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="H64AC8400A35F471AA0ED8FD929A6CC82"><enum>(b)</enum><header>Clerical amendment</header><text>The table of contents in section 1(b) of the Homeland Security Act of 2002 is amended by inserting after the item relating to section 210G the following new item:</text> 
+<quoted-block display-inline="no-display-inline" id="H75AF9C0E0CF449679B3307B8F5D8C747" style="OLC"> 
+<toc regeneration="no-regeneration"> 
+<toc-entry level="section">Sec. 210H. Homeland intelligence doctrine.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section> 
+<section id="H229F91532C4640488BDDCC192B56EC7D"><enum>3.</enum><header>Analysts for the Chief Intelligence Officer</header><text display-inline="no-display-inline">Paragraph (1) of section 201(e) of the Homeland Security Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/6/121">6 U.S.C. 121(e)</external-xref>) is amended by adding at the end the following new sentence: <quote>The Secretary shall also provide the Chief Intelligence Officer with a staff having appropriate expertise and experience to assist the Chief Intelligence Officer.</quote>.</text></section> </legis-body> </bill> 
+

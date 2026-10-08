@@ -1,0 +1,55 @@
+﻿{
+    "schema":  "legfix5-damage-quarantine-v1",
+    "date":  "2026-08-17",
+    "reason":  "B0 AMEND-2 veto: 1330-byte binary receipts, bodies also corrupt (one write window); quarantined before authorized httr cookie-replay re-fetch (Paul: execute the items queued)",
+    "entries":  [
+                    {
+                        "key":  "119:hr:2393",
+                        "kind":  "receipts",
+                        "original_path":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\receipts\\119\\hr\\2393\\receipt.json",
+                        "quarantined_as":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\quarantine\\damaged_receipts_20260817_repair\\119_hr_2393_receipt.json",
+                        "sha256":  "110BB5637BA5C495D276EC50DEF6F2A533D1E5A36BBBD7F448B37D69ACF6D7CA",
+                        "bytes":  1330
+                    },
+                    {
+                        "key":  "119:hr:2393",
+                        "kind":  "accepted_html",
+                        "original_path":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\accepted_html\\119\\hr\\2393\\page.html.gz",
+                        "quarantined_as":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\quarantine\\damaged_receipts_20260817_repair\\119_hr_2393_page.html.gz",
+                        "sha256":  "CD3012F2FCB05A4025954E0573A44A487434AF56FE8DF88E3506E6DC8637293B",
+                        "bytes":  64232
+                    },
+                    {
+                        "key":  "119:hr:2397",
+                        "kind":  "receipts",
+                        "original_path":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\receipts\\119\\hr\\2397\\receipt.json",
+                        "quarantined_as":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\quarantine\\damaged_receipts_20260817_repair\\119_hr_2397_receipt.json",
+                        "sha256":  "1B7781E9F3EDEEA2CD505805EFE06A42FBBC79CB29232B74F66A74325A9217F6",
+                        "bytes":  1330
+                    },
+                    {
+                        "key":  "119:hr:2397",
+                        "kind":  "accepted_html",
+                        "original_path":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\accepted_html\\119\\hr\\2397\\page.html.gz",
+                        "quarantined_as":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\quarantine\\damaged_receipts_20260817_repair\\119_hr_2397_page.html.gz",
+                        "sha256":  "D5A9DD60BE04EFF7B03FC7097B4FAB0D75A9518B92DF0AE265E5870CA2A0470D",
+                        "bytes":  60925
+                    },
+                    {
+                        "key":  "119:hr:2401",
+                        "kind":  "receipts",
+                        "original_path":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\receipts\\119\\hr\\2401\\receipt.json",
+                        "quarantined_as":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\quarantine\\damaged_receipts_20260817_repair\\119_hr_2401_receipt.json",
+                        "sha256":  "4661B879ADB97AF7ECE93DE5C38179675A5909618F34972DC5CCDC6683773848",
+                        "bytes":  1330
+                    },
+                    {
+                        "key":  "119:hr:2401",
+                        "kind":  "accepted_html",
+                        "original_path":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\accepted_html\\119\\hr\\2401\\page.html.gz",
+                        "quarantined_as":  "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\legfix5\\congress_advanced_pages_20260725\\text_relevance_httr_full_20260727z\\quarantine\\damaged_receipts_20260817_repair\\119_hr_2401_page.html.gz",
+                        "sha256":  "BDC62DE3459BEEB8D310497ECFDA08F474AE95C009352E9044BD5434A26DBAC2",
+                        "bytes":  66894
+                    }
+                ]
+}

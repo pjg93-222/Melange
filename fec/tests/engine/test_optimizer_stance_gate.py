@@ -128,6 +128,7 @@ def _flip_model(pflip=PFLIP):
     return types.SimpleNamespace(
         CS0=MATRIX, _CS_DOC={'matrix': MATRIX, 'gate': {'overall_capped': {}}},
         cu0=dict(CU0), ind0=dict(IND0), R=dict(RECEIPTS), rc=lambda m, key, d=1.0: 1.0,
+        CM={m: 1.0 for m in MEMBERS},      # COMPET_MULT off: every competitiveness multiplier exactly 1.0 (optimize.py: CM=fm.CM)
         topic_setup=topic_setup, pflip=pflip, flip_value=flip_value, _cache={})
 
 
@@ -135,16 +136,16 @@ def _money_response(reachable=()):
     """No modeled conversion fires; `reachable` members could convert at PMAX (conversion_reachable)."""
     return types.SimpleNamespace(
         OV={m: 'Persuadable' for m in MEMBERS}, COMMITTED={'Champion', 'Opponent'}, DTHRESH=11.25,
-        shift_lean=lambda m, source, amount: 20.0 if m in reachable else 0.5,
+        shift_lean=lambda m, source, amount, cm=1.0: 20.0 if m in reachable else 0.5,
         defection=lambda m, dlean: None)
 
 
 def _convex_for(mark):
     """flip_model's pflip, except rising chunk returns for the member whose receipts equal `mark`."""
-    def pflip(cu_n, ind_n, R_n, nA_n, nB_n, mAt, mBt, pm=1.0):
+    def pflip(cu_n, ind_n, R_n, nA_n, nB_n, mAt, mBt, pm=1.0, cm=1.0):
         if R_n == mark:
             return min(0.99, (cu_n / 20000.0) ** 2)
-        return PFLIP(cu_n, ind_n, R_n, nA_n, nB_n, mAt, mBt, pm)
+        return PFLIP(cu_n, ind_n, R_n, nA_n, nB_n, mAt, mBt, pm, cm)
     return pflip
 
 

@@ -466,7 +466,6 @@ memberships, `--batch-size N`, `--limit N`, `--evidence-receipt <path>`.
 Tests:
 
 ```powershell
-& 'C:\Users\pgoff\AppData\Local\Programs\Python\Python312\python.exe' `
-  fec\tests\run_focused_tests.py `
-  fec\tests\test_build_legislation_category_review_queue.py
+& 'C:\Users\pgoff\AppData\Local\Programs\Python\Python312\python.exe' -m pytest `
+  fec\tests\legislation\test_build_legislation_category_review_queue.py -q
 ```

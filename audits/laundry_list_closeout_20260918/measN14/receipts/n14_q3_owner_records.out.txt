@@ -1,0 +1,83 @@
+====================================================================================================
+N14 Q3  THE OWNER RECORD   run 2026-09-19T12:58:32
+====================================================================================================
+the 57 read back from n14_q1_disagreement_sets.json: 57 rows
+
+-- A. cu_stance_label_set.csv (Draft, mtime 2026-06-30T18:56:09) --
+   rows 552   columns ['row', 'split', 'member', 'date', 'legacy_score', 'base_stance', 'base_conf', 'stance_src', 'n_words', 'categories', 'pre_label', 'human_label', 'title', 'text_snippet', 'url', 'legacy_ref']
+   human_label census : {'support': 244, 'neutral': 195, 'oppose': 113}
+   pre_label census   : {'neutral': 256, 'support': 213, 'oppose': 83}
+   split census       : {'train': 456, 'test': 87, 'exclude': 9}
+   rows where human_label != pre_label: 165
+   distinct release keys in the label set: 550
+
+-- B. press_stance_overrides.json -- 23 corrections (production position: LIVE code root)
+   worktree-overlay position: 23 corrections (Q2b proved the two are label-identical)
+   press_overrides_from_dashboard.json: 4 rows
+
+-- C. cfpb_stance_review_queue_2026-07-16.csv --
+   rows 94 | PAUL_GOLD filled 0 | queue_reason census {'A meta-overrules-registry+API': 64, 'B gold-label-consistency (training gold; re-adjudicate under attack=pro-CU frame)': 23, 'C press-sibling row (same articles Paul relabeled on Scott desk)': 7}
+   id shape sample: ['579571867', '567461609', '565731872', '565677034']
+   ids that look like a press URL: 7
+   press-URL-keyed queue rows: 7
+
+-- D. THE R PIPELINE'S OWN PRESENTATION WORKBOOKS (case-insensitive headers) --
+   Draft CU_Press_Stance_Tone.xlsx        [Releases              ] keyed  2375 | col stance      | of 57 found  0 -> SHEET  0  CSV  0  neither  0
+   LIVE  CU_Press_Stance_Tone.xlsx        [Releases              ] keyed  2315 | col stance      | of 57 found  0 -> SHEET  0  CSV  0  neither  0
+   Draft cu_stance_label_set.xlsx         [To Rework             ] keyed   148 | col human_label | of 57 found  0 -> SHEET  0  CSV  0  neither  0
+   Draft cu_stance_label_set.xlsx         [Done (locked)         ] keyed   348 | col human_label | of 57 found  0 -> SHEET  0  CSV  0  neither  0
+   LIVE  cu_stance_label_set.xlsx         [To Rework             ] keyed   148 | col human_label | of 57 found  0 -> SHEET  0  CSV  0  neither  0
+   LIVE  cu_stance_label_set.xlsx         [Done (locked)         ] keyed   348 | col human_label | of 57 found  0 -> SHEET  0  CSV  0  neither  0
+
+----------------------------------------------------------------------------------------------------
+-- E. FOR EACH OF THE 57: WHICH SIDE EQUALS THE OWNER'S OWN RECORD? --
+
+verdict                             count
+CSV matches the owner record           54
+owner record ambiguous                  3
+
+owner record came from                        count
+cu_stance_label_set.csv:human_label              56
+press_stance_overrides.json                       1
+
+the rows whose owner record does NOT come from the label set:
+   Tim Scott                Credit union board modernization part of updated housing b owner=support  src=press_stance_overrides.json -> CSV matches the owner record
+
+the rows with NO owner record at all:
+   (0 rows)
+
+----------------------------------------------------------------------------------------------------
+-- F. stance_src: THE human_label -> debate FLATTENING --
+   sheet press rows by stance_src        : {'debate': 2391, 'billstatus(bill)': 1310}
+   BASE tone CSV rows by stance_src      : {'debate': 1891, 'human_label': 497}
+   REFRESH tone CSV rows by stance_src   : {'press_refresh_rules_v1': 291}
+   sheet rows carrying 'human_label'     : 0
+   overlap keys where sheet=debate and csv=human_label: 493 keys / 494 engine rows
+   base CSV human_label rows NOT reached by the overlap: 4
+   of the 493 human_label keys in the overlap, 57 also disagree on the STANCE VALUE
+   -> 436 carry the owner-adjudicated label AND the same value as the model
+
+----------------------------------------------------------------------------------------------------
+-- G. WHAT score_graded IS IN EACH SOURCE, AND WHAT THE ENGINE READS --
+   'score_graded' occurrences in fec/stance/build_media_blend.py: 0
+   'press_value'  occurrences in fec/stance/build_media_blend.py: 3
+   every non-attic repo file naming score_graded:
+      ./collect/build_press_engine_feed.py                     4
+      ./network/corrected_signals.py                           1
+      ./surfaces/desk_press_source.py                          2
+      ./surfaces/make_member_desk.py                           1
+      ./tests/infra/test_collection_stream_wiring.py           4
+      ./tests/surfaces/test_desk_press_source.py               9
+
+   -> build_media_blend.py (the ranking engine's press component) NEVER reads
+      score_graded.  It signs a release from press_stance_final.csv stack_label, falls
+      back to the CSV stance column, then applies press_stance_overrides; INTENSITY is
+      abs(press_value) (line 401), decayed by date (line 406).  So score_graded is a
+      DISPLAY column only -- make_member_desk line 1684 (mag) and 1701 (graded_label).
+
+   score_graded disagreement on the BASE-CSV overlap (2376 keys), by the CSV's stance_src: {'csv stance_src=debate': 983, 'csv stance_src=human_label': 224}
+   csv side exactly 0: 907 | sheet side exactly 0: 192
+   BASE CSV score_graded: {'nonzero': 1262, 'zero': 1126}
+   SHEET    score_graded: {'nonzero': 1978, 'zero': 413}
+wrote n14_q3_owner_records.json
+DONE N14 Q3

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" bill-type="olc" dms-id="H627FF76746A8465CA2276287DC942046" key="H" public-private="public" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2398 EH: Veteran Housing Opportunities and Unemployment Support Extension Act of 2020</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 2398</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend the United States Housing Act of 1937 and title 38, United States Code, to expand eligibility for the HUD–VASH program, to direct the Secretary of Veterans Affairs to submit annual reports to the Committees on Veterans’ Affairs of the Senate and House of Representatives regarding homeless veterans, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H338EAFD23BA74D40922965BDE8CFA53D" style="OLC"> 
+<section id="H01EC463093714934ABF252588D431955" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Veteran Housing Opportunities and Unemployment Support Extension Act of 2020</short-title></quote> or the <quote><short-title>Veteran HOUSE Act of 2020</short-title></quote>.</text></section> <section id="HE2879D0F443F4CA6863C48EC477C3EC1"><enum>2.</enum><header>Expansion of eligibility for HUD–VASH</header> <subsection id="H4F87EC16DBCE42CAB09594749E5BF1F5"><enum>(a)</enum><header>HUD provisions</header><text display-inline="yes-display-inline">Section 8(o)(19) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(o)(19)</external-xref>) is amended by adding at the end the following new subparagraph:</text> 
+<quoted-block display-inline="no-display-inline" id="H39934F1C46AE4EC79EB8FE7CBC581F61" style="OLC"> 
+<subparagraph id="HC328D249C8CE436F82D6F928BCB80E21"><enum>(D)</enum><header>Veteran defined</header><text display-inline="yes-display-inline">In this paragraph, the term <quote>veteran</quote> has the meaning given that term in section 2002(b) of title 38, United States Code.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block> </subsection> <subsection id="H42C40CB73688473595B1D30A561E709B"><enum>(b)</enum><header>VHA case managers</header><text>Subsection (b) of section 2003 of title 38, United States Code, is amended by adding at the end the following: <quote>In the case of vouchers provided under the HUD–VASH program under section 8(o)(19) of such Act, for purposes of the preceding sentence, the term <quote>veteran</quote> shall have the meaning given such term in section 2002(b) of this title.</quote>.</text> </subsection></section> 
+<section id="HEC734E4935344FD599C69CCF0E034B1C"><enum>3.</enum><header>Annual reports</header> 
+<subsection id="HCFE89340829540EC8CA162E867B63E97"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Not less frequently than once each year, the Secretary of Veterans Affairs shall submit to the Committee on Veterans’ Affairs of the Senate and the Committee on Veterans’ Affairs of the House of Representatives a report on the homelessness services provided under programs of the Department of Veterans Affairs, including services under HUD–VASH program under section 8(o)(1) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(o)(19)</external-xref>).</text> </subsection> <subsection id="H5FF513310CB04FA2906B98C2577EFCE4"><enum>(b)</enum><header>Included information</header><text>Each such annual report shall include, with respect to the year preceding the submittal of the report, a statement of the number of eligible individuals who were furnished such homelessness services and the number of individuals furnished such services under each such program, disaggregated by the number of men who received such services and the number of women who received such services, and such other information as the Secretary considers appropriate.</text> </subsection></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20200013" chamber="House">Passed the House of Representatives January 13, 2020.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

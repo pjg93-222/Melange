@@ -1,0 +1,12 @@
+{
+  "method": "Synthetic DOM events (mousemove, mousedown, mouseup, click, touchstart, touchend) dispatched on the canvas of the PUBLISHED page; page state read back from its own variables (sel, hi, cam, route, panel display). The browser pane was hidden (document.visibilityState='hidden'), so requestAnimationFrame does not fire: this verifies handler LOGIC only. Appearance, animation and real pointer input are NOT verified. The zoomed camera was emulated by scaling cam directly because flyTo is rAF-driven.",
+  "canvas": {"w": 357, "h": 809},
+  "camFit": {"s": 0.3424, "tx": 7.1, "ty": 233.3},
+  "T1_select_then_blank_click": {"afterSelect": {"sel": 247, "mpanel": "block", "tpanel": "none", "cam": {"s": 5.76, "tx": -872.8, "ty": -481.9}}, "blankPoint": [6,6], "hoverAtBlank": -1, "after": {"sel": -1, "mpanel": "none", "tpanel": "block", "search": "", "camBackToFit": true, "route": null}},
+  "T2_reclick_selected_node": {"nodeScreen": [178,405], "hoverAtNode": 247, "hoverName": "John Kennedy", "selAfter": 247, "toggledOff": false},
+  "T3_coalition_view_then_blank_click": {"afterLoadCoalition": {"sel": -1, "route": {"coalition": true, "nodes": 3}}, "after": {"sel": -1, "route": null, "camBackToFit": true}},
+  "T4_targets_button": {"exists": true, "after": {"sel": -1, "mpanel": "none", "tpanel": "block", "camBackToFit": true}},
+  "T5_max_route_then_blank_click": {"afterMaxRoute": {"sel": 247, "route": {"maxcasc": true, "nodes": 7}}, "after": {"sel": -1, "route": null, "pathoutLength": 0}},
+  "T6_touch_tap_on_blank": {"after": {"sel": -1, "mpanel": "none", "tpanel": "block"}},
+  "consoleErrorsOnLoad": 0
+}

@@ -1,0 +1,990 @@
+====================================================================================================
+#01  rowid=69687  class=A_anchored_caps  member='Mark Kelly'  date=2024-07-26  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2024-07-26/segment/20
+    CUT_TAG='ZELENY (voice-over)'   cut_at=71   orig_nwords=19  kept=14  removed=5
+    ALL_TAGS=[{"tag": "ZELENY (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 71}]
+    --- KEPT HEAD  : Again, this is not about me, this is about the future of this country. ZELENY (voice-over): Buttigieg? Less so.
+    --- KEPT TAIL  : ...Again, this is not about me, this is about the future of this country. 
+    >>> CUT HERE <<<
+    --- REMOVED    : ZELENY (voice-over): Buttigieg? Less so.
+    --- REM TAIL   : ...ZELENY (voice-over): Buttigieg? Less so.
+    --- SEGMENT TAGS: [["ZELENY (voice-over)", "A_anchored_caps", 3]]
+
+====================================================================================================
+#02  rowid=204546  class=A_anchored_caps  member='Christopher Murphy'  date=2019-11-03  show=se  pkg=https://transcripts.cnn.com/show/se/date/2019-11-03/segment/01
+    CUT_TAG='MATTINGLY (voice over)'   cut_at=256   orig_nwords=73  kept=49  removed=24
+    ALL_TAGS=[{"tag": "MATTINGLY (voice over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 256}]
+    --- KEPT HEAD  : Senator Johnson didn't hide the fact that he disagreed deeply with the President's decision to suspend aid. He had said that publicly, and he went to Ukraine with me to tell them that he was willing t
+    --- KEPT TAIL  : ...Senator Johnson didn't hide the fact that he disagreed deeply with the President's decision to suspend aid. He had said that publicly, and he went to Ukraine with me to tell them that he was willing to work with them to try to get that aid turned back on. 
+    >>> CUT HERE <<<
+    --- REMOVED    : MATTINGLY (voice over): And when Johnson returned to the U.S., he went further working with Democratic Senate colleagues to ensure the aid went through.
+    --- REM TAIL   : ...MATTINGLY (voice over): And when Johnson returned to the U.S., he went further working with Democratic Senate colleagues to ensure the aid went through.
+    --- SEGMENT TAGS: [["MATTINGLY (voice over)", "A_anchored_caps", 21]]
+
+====================================================================================================
+#03  rowid=205035  class=A_anchored_caps  member='Elizabeth Warren'  date=2019-11-11  show=nday  pkg=https://transcripts.cnn.com/show/nday/date/2019-11-11/segment/04
+    CUT_TAG='BASH (on camera)'   cut_at=107   orig_nwords=30  kept=21  removed=9
+    ALL_TAGS=[{"tag": "BASH (on camera)", "class": "A_anchored_caps", "ownership": "foreign", "at": 107}]
+    --- KEPT HEAD  : We are the richest country in the history of the world. And yes, we can afford health care for our people. BASH (on camera): What is elitist about structural change?
+    --- KEPT TAIL  : ...We are the richest country in the history of the world. And yes, we can afford health care for our people. 
+    >>> CUT HERE <<<
+    --- REMOVED    : BASH (on camera): What is elitist about structural change?
+    --- REM TAIL   : ...BASH (on camera): What is elitist about structural change?
+    --- SEGMENT TAGS: [["BASH (on camera)", "A_anchored_caps", 6]]
+
+====================================================================================================
+#04  rowid=205473  class=A_anchored_caps  member='Nancy Pelosi'  date=2019-11-18  show=sitroom  pkg=https://transcripts.cnn.com/show/sitroom/date/2019-11-18/segment/01
+    CUT_TAG='ACOSTA (voice-over)'   cut_at=115   orig_nwords=42  kept=24  removed=18
+    ALL_TAGS=[{"tag": "ACOSTA (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 115}]
+    --- KEPT HEAD  : If he wants to take the oath of office or he could do it in writing. He has every opportunity to present his case. ACOSTA (voice-over): But here is the problem. The president has dangled this possibil
+    --- KEPT TAIL  : ...If he wants to take the oath of office or he could do it in writing. He has every opportunity to present his case. 
+    >>> CUT HERE <<<
+    --- REMOVED    : ACOSTA (voice-over): But here is the problem. The president has dangled this possibility before during the Russia investigation.
+    --- REM TAIL   : ...ACOSTA (voice-over): But here is the problem. The president has dangled this possibility before during the Russia investigation.
+    --- SEGMENT TAGS: [["ACOSTA (voice-over)", "A_anchored_caps", 16]]
+
+====================================================================================================
+#05  rowid=222883  class=A_anchored_caps  member='Alexandria Ocasio-Cortez'  date=2021-10-29  show=cg  pkg=https://transcripts.cnn.com/show/cg/date/2021-10-29/segment/02
+    CUT_TAG='RAJU (voice-over)'   cut_at=166   orig_nwords=149  kept=30  removed=119
+    ALL_TAGS=[{"tag": "RAJU (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 166}]
+    --- KEPT HEAD  : It's really important that we pass both of these things together to make sure the United States is not a net emitter on fossil fuels and making climate change worse. RAJU (voice-over): The larger bill
+    --- KEPT TAIL  : ...It's really important that we pass both of these things together to make sure the United States is not a net emitter on fossil fuels and making climate change worse. 
+    >>> CUT HERE <<<
+    --- REMOVED    : RAJU (voice-over): The larger bill, the product of months of painstaking negotiations where progressives were forced to compromise slashing their $3.5 trillion plan in half, leading up priorities like paid leave and a broader expansion of Medicare to appease Manchin. And dropping tuition free community college and corporate tax rate hikes to win over Sinema. But the bill still sweeping in nature, standing at $1.75 trillion with preschool for all three and four year olds, more than $500 billion to fight climate change, a Medicare expansion to include hearing coverage and a fusion of cash for affordable housing, and a year-long extension of the Child Tax Credit. In a boon for Biden, progressiv
+    --- REM TAIL   : ...ol for all three and four year olds, more than $500 billion to fight climate change, a Medicare expansion to include hearing coverage and a fusion of cash for affordable housing, and a year-long extension of the Child Tax Credit. In a boon for Biden, progressives are endorsing the slimmed down plan.
+    --- SEGMENT TAGS: [["RAJU (voice-over)", "A_anchored_caps", 117]]
+
+====================================================================================================
+#06  rowid=226823  class=A_anchored_caps  member='Ron Johnson'  date=2022-06-29  show=cg  pkg=https://transcripts.cnn.com/show/cg/date/2022-06-29/segment/02
+    CUT_TAG='RAJU (voice-over)'   cut_at=62   orig_nwords=43  kept=13  removed=30
+    ALL_TAGS=[{"tag": "RAJU (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 62}]
+    --- KEPT HEAD  : Aren't you just tired of all the anger and vision? God, I am. RAJU (voice-over): And with abortion is now banned in Wisconsin, Democrats hope their voters take their fury to the polls, but they first 
+    --- KEPT TAIL  : ...Aren't you just tired of all the anger and vision? God, I am. 
+    >>> CUT HERE <<<
+    --- REMOVED    : RAJU (voice-over): And with abortion is now banned in Wisconsin, Democrats hope their voters take their fury to the polls, but they first have to work out a family feud.
+    --- REM TAIL   : ...RAJU (voice-over): And with abortion is now banned in Wisconsin, Democrats hope their voters take their fury to the polls, but they first have to work out a family feud.
+    --- SEGMENT TAGS: [["RAJU (voice-over)", "A_anchored_caps", 28]]
+
+====================================================================================================
+#07  rowid=231693  class=A_anchored_caps  member='Nancy Pelosi'  date=2022-10-14  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2022-10-14/segment/18
+    CUT_TAG='SCHNEIDER (voice-over)'   cut_at=87   orig_nwords=35  kept=17  removed=18
+    ALL_TAGS=[{"tag": "SCHNEIDER (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 87}]
+    --- KEPT HEAD  : We have got to get -- finish the proceeding or else they will have a complete victory. SCHNEIDER (voice-over): In the hours that followed, anger and disbelief from Pelosi and Senate Majority Leader Ch
+    --- KEPT TAIL  : ...We have got to get -- finish the proceeding or else they will have a complete victory. 
+    >>> CUT HERE <<<
+    --- REMOVED    : SCHNEIDER (voice-over): In the hours that followed, anger and disbelief from Pelosi and Senate Majority Leader Chuck Schumer.
+    --- REM TAIL   : ...SCHNEIDER (voice-over): In the hours that followed, anger and disbelief from Pelosi and Senate Majority Leader Chuck Schumer.
+    --- SEGMENT TAGS: [["SCHNEIDER (voice-over)", "A_anchored_caps", 16]]
+
+====================================================================================================
+#08  rowid=251272  class=A_anchored_caps  member='Mike Johnson'  date=2024-01-04  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2024-01-04/segment/20
+    CUT_TAG='LAVANDERA (voice-over)'   cut_at=95   orig_nwords=70  kept=15  removed=55
+    ALL_TAGS=[{"tag": "LAVANDERA (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 95}]
+    --- KEPT HEAD  : It's estimated that nearly 170 countries have people coming in and flowing across this border. LAVANDERA (voice-over): Meanwhile in Washington D.C., Senate leaders are working toward a possible deal t
+    --- KEPT TAIL  : ...It's estimated that nearly 170 countries have people coming in and flowing across this border. 
+    >>> CUT HERE <<<
+    --- REMOVED    : LAVANDERA (voice-over): Meanwhile in Washington D.C., Senate leaders are working toward a possible deal to change current immigration law including the possibility of expedited removals of migrants who cross illegally and tightening rules on granting asylum. The House Speaker tells CNN's Jake Tapper the problem cannot be solved by allocating more money to the border.
+    --- REM TAIL   : ...are working toward a possible deal to change current immigration law including the possibility of expedited removals of migrants who cross illegally and tightening rules on granting asylum. The House Speaker tells CNN's Jake Tapper the problem cannot be solved by allocating more money to the border.
+    --- SEGMENT TAGS: [["LAVANDERA (voice-over)", "A_anchored_caps", 53]]
+
+====================================================================================================
+#09  rowid=251319  class=A_anchored_caps  member='Jamie Raskin'  date=2024-01-06  show=se  pkg=https://transcripts.cnn.com/show/se/date/2024-01-06/segment/01
+    CUT_TAG='TAPPER (voice-over)'   cut_at=217   orig_nwords=67  kept=38  removed=29
+    ALL_TAGS=[{"tag": "TAPPER (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 217}]
+    --- KEPT HEAD  : Women for America First, a pro Trump organizing group, had previously applied for a rally permit for January 22nd and 23rd in Washington, D.C. But in the hours after the tweet, they moved their permit
+    --- KEPT TAIL  : ...Women for America First, a pro Trump organizing group, had previously applied for a rally permit for January 22nd and 23rd in Washington, D.C. But in the hours after the tweet, they moved their permit to January 6th. 
+    >>> CUT HERE <<<
+    --- REMOVED    : TAPPER (voice-over): The next day, Ali Alexander, a Trump supporter and leader of the group Stop the Steal, created a website to share and promote logistics about the rally.
+    --- REM TAIL   : ...TAPPER (voice-over): The next day, Ali Alexander, a Trump supporter and leader of the group Stop the Steal, created a website to share and promote logistics about the rally.
+    --- SEGMENT TAGS: [["TAPPER (voice-over)", "A_anchored_caps", 27]]
+
+====================================================================================================
+#10  rowid=265316  class=A_anchored_caps  member='Jerrold Nadler'  date=2018-07-12  show=msnow  pkg=https://www.ms.now/transcript/2018-07-12-msna1123091
+    CUT_TAG='O`DONNELL'   cut_at=463   orig_nwords=414  kept=77  removed=337
+    ALL_TAGS=[{"tag": "O`DONNELL", "class": "A_anchored_caps", "ownership": "foreign", "at": 463}]
+    --- KEPT HEAD  : Mr. Chairman, I must say before I begin my formal statement that this country has a number of emergencies right now under the jurisdiction of this committee which we are not spending any time or atten
+    --- KEPT TAIL  : ...formal statement that this country has a number of emergencies right now under the jurisdiction of this committee which we are not spending any time or attention to. The leading one obviously being the fact that 3,000 children were improperly taken away from their families. And the administration seems either unwilling or out of totally incompetence unable to return the kids to their families even under court order. 
+    >>> CUT HERE <<<
+    --- REMOVED    : O`DONNELL: The committee then spent nine hours and 41 minutes failing to find a single thig that FBI agent Peter Strzok did that was politically motivated in his investigator work involving both the Trump campaign and Hillary Clinton`s email. The committee has not had one hearing about the children that President Trump has separated from their parents at the southern border. The Trump had administration did not meet the Tuesday deadline this week to reunite all the children age four and under with their parents. Today the Trump administration claimed that 57 of the 103 migrant children age four or under have been reunified with their parents as of this morning. The administration claimed 46 
+    --- REM TAIL   : ...e child is still in custody might actually be a United States citizen. We know all of this, thanks to lawsuits that have been brought in various federal courts, including one by the ACLU. The ACLU`s lead attorney on this case will be back in court tomorrow and he will join us next with more details.
+    --- SEGMENT TAGS: [["O`DONNELL", "A_anchored_caps", 336]]
+
+====================================================================================================
+#11  rowid=267483  class=A_anchored_caps  member='Susan Collins'  date=2019-03-14  show=msnow  pkg=https://www.ms.now/transcript/2019-03-14-msna1205266
+    CUT_TAG='O`DONNELL'   cut_at=306   orig_nwords=245  kept=52  removed=193
+    ALL_TAGS=[{"tag": "O`DONNELL", "class": "A_anchored_caps", "ownership": "foreign", "at": 306}]
+    --- KEPT HEAD  : A spending request is designated as an emergency only, only if the need for spending met five — a five-part test. It had to be necessary, sudden, urgent, unforeseen and not permanent. His decision to 
+    --- KEPT TAIL  : ...A spending request is designated as an emergency only, only if the need for spending met five — a five-part test. It had to be necessary, sudden, urgent, unforeseen and not permanent. His decision to fund a border wall through a national emergency declaration, would never pass all of this five-part test. 
+    >>> CUT HERE <<<
+    --- REMOVED    : O`DONNELL: After the vote, the president tweeted that he looked forward to vetoing the resolution. House Speaker Nancy Pelosi said this is not an emergency and the Congress declared in a strong bipartisan voice that the president`s fear-mongering doesn`t make it one. It was the second time in two days that the Senate Republicans voted against the president yesterday, seven Republican senators voted with the Democrats to end U.S. military support for Saudi Arabia`s war in Yemen. And the House of Representatives saw the kind of vote today it hasn`t seen in a long time on a matter involving President Trump. Four Republicans voted present today, just present, but no Republicans voted against a r
+    --- REM TAIL   : ...h four Republicans voting present. Today, Senate Democratic leader Chuck Schumer tried to bring up that same resolution in the Senate for a vote and Republican Senator Lindsey Graham objected and blocked a vote on that resolution. Today, the president was asked if his immigration policies are cruel.
+    --- SEGMENT TAGS: [["O`DONNELL", "A_anchored_caps", 192]]
+
+====================================================================================================
+#12  rowid=270268  class=A_anchored_caps  member='Peter Welch'  date=2019-12-05  show=msnow  pkg=https://www.ms.now/transcript/2019-12-05-msna1311571
+    CUT_TAG='O`DONNELL'   cut_at=864   orig_nwords=250  kept=157  removed=93
+    ALL_TAGS=[{"tag": "O`DONNELL", "class": "A_anchored_caps", "ownership": "foreign", "at": 864}]
+    --- KEPT HEAD  : Right. You know, I found what she did and how she did it both moving and reassuring. In her announcement, she really laid out what the question is. It`s the debate we`re going to have about the preser
+    --- KEPT TAIL  : ... used the term hate, it was stunning to me. Nancy Pelosi has an immense amount of energy, but I`ve never seen her have energy — waste an ounce of energy on hating anyone. And actually that`s what makes her I think so intimidating to some of the folks who are her adversaries. She is totally focused straight ahead and this is a debate on the preservation of the constitutional principle that no person is above the law. 
+    >>> CUT HERE <<<
+    --- REMOVED    : O`DONNELL: Wendy Sherman, I`m so glad you`re with us tonight because on historic nights like this, to have people who think — we get to think we`ve seen it all in Washington, and then days like this happen and realize, well, we haven`t seen it all. And that`s partially because Nancy Pelosi hasn`t done it yet. This was one of those days. Your feelings about what you saw today both in her announcement for what`s to happen in the impeachment proceeding and, again, how she handled that challenge. AMBASSADOR WENDY SHERMAN. FORMER UNDERSECRETARY
+    --- REM TAIL   : ...ll. And that`s partially because Nancy Pelosi hasn`t done it yet. This was one of those days. Your feelings about what you saw today both in her announcement for what`s to happen in the impeachment proceeding and, again, how she handled that challenge. AMBASSADOR WENDY SHERMAN. FORMER UNDERSECRETARY
+    --- SEGMENT TAGS: [["O`DONNELL", "A_anchored_caps", 92]]
+
+====================================================================================================
+#13  rowid=271406  class=A_anchored_caps  member='Nancy Pelosi'  date=2020-05-20  show=msnow  pkg=https://www.ms.now/transcript/2020-05-20-msna1360511
+    CUT_TAG='O`DONNELL'   cut_at=694   orig_nwords=312  kept=129  removed=183
+    ALL_TAGS=[{"tag": "O`DONNELL", "class": "A_anchored_caps", "ownership": "foreign", "at": 694}]
+    --- KEPT HEAD  : You are asking me about the appropriateness of the actions of this president of the United States, so completely inappropriate in so many ways that it`s almost a given. It`s like a child that comes in
+    --- KEPT TAIL  : ...de playing. That`s what it is. He comes in with doggie doo on his shoes and everybody who works with him has that on their shoes too for a very long time to come. So I don`t know, I hear doctors talk to me about saying, you know, what`s the matter with him? The things he says are so inappropriate for a president of the United States. The comments he makes about women. Comments he makes about women, so inappropriate. 
+    >>> CUT HERE <<<
+    --- REMOVED    : O`DONNELL: And joining us now, the representative of California`s 12th congressional district who is the 52nd speaker of the House of Representatives and in that constitutionally established office, Nancy Pelosi is second in the line of succession for the presidency. Thank you very much for joining us, Speaker Pelosi. And the reason I mention tonight the line of succession for the presidency is that Mike Pence was in Florida today, very proudly, having a hamburger with the governor of Florida wearing no mask, not taking the recommended precautions. Donald Trump obviously doesn`t wear a mask. He`s going to go to a Ford factory tomorrow where he surely will not be wearing a mask, not be taking
+    --- REM TAIL   : ... beat away from the presidency but it seems tonight, you are two sneezes away from the presidency with the fact that the president and vice president are not taking the necessary precautions. Are you concerned about that situation with the president and the vice president, their lack of precautions?
+    --- SEGMENT TAGS: [["O`DONNELL", "A_anchored_caps", 182]]
+
+====================================================================================================
+#14  rowid=272540  class=A_anchored_caps  member='Daniel Goldman'  date=2021-02-08  show=msnow  pkg=https://www.ms.now/transcript/transcript-last-word-lawrence-o-donnell-2-8-2021-n1259854
+    CUT_TAG='O`DONNELL'   cut_at=884   orig_nwords=206  kept=160  removed=46
+    ALL_TAGS=[{"tag": "O`DONNELL", "class": "A_anchored_caps", "ownership": "foreign", "at": 884}]
+    --- KEPT HEAD  : Well, there are a lot of problems with that argument. I think that argument helps the House managers, because it indicates that — it concedes that there was a plan for violent protests prior to Donald
+    --- KEPT TAIL  : ...of a violent insurrection in order to be charged with inciting an insurrection. Someone can already have the plan to do it and then you incite them to do it, as well. It`s a completely fallacious defense because it loses on the facts and it loses on the law. So, I was surprised they actually included that and I think that only helps the House managers because it shows premeditation and foreknowledge by Donald Trump. 
+    >>> CUT HERE <<<
+    --- REMOVED    : O`DONNELL: OK. This is — I didn`t understand this distinction. This is worth zooming in on it. So, incitement does not necessarily mean that you gave me the idea. I could have had the idea. Incitement, as you describe it, sounds like something closer to encouragement.
+    --- REM TAIL   : ...O`DONNELL: OK. This is — I didn`t understand this distinction. This is worth zooming in on it. So, incitement does not necessarily mean that you gave me the idea. I could have had the idea. Incitement, as you describe it, sounds like something closer to encouragement.
+    --- SEGMENT TAGS: [["O`DONNELL", "A_anchored_caps", 45]]
+
+====================================================================================================
+#15  rowid=275041  class=A_anchored_caps  member='Charles Schumer'  date=2022-01-18  show=msnow  pkg=https://www.ms.now/transcript/transcript-last-word-lawrence-o-donnell-1-18-22-n1287705
+    CUT_TAG='O`DONNELL'   cut_at=318   orig_nwords=76  kept=55  removed=21
+    ALL_TAGS=[{"tag": "O`DONNELL", "class": "A_anchored_caps", "ownership": "foreign", "at": 318}]
+    --- KEPT HEAD  : If the Senate cannot protect the right to vote, which is the cornerstone of our democracy, then the Senate rules must be reformed, must be reformed. If the Republicans block cloture on the legislation
+    --- KEPT TAIL  : ...If the Senate cannot protect the right to vote, which is the cornerstone of our democracy, then the Senate rules must be reformed, must be reformed. If the Republicans block cloture on the legislation before us, I will put forward a proposal to change the rules, to allow for a talking filibuster on this legislation. 
+    >>> CUT HERE <<<
+    --- REMOVED    : O`DONNELL: And here is what Senator Elizabeth Warren said an hour ago in the Senate floor about the current Senate rule.
+    --- REM TAIL   : ...O`DONNELL: And here is what Senator Elizabeth Warren said an hour ago in the Senate floor about the current Senate rule.
+    --- SEGMENT TAGS: [["O`DONNELL", "A_anchored_caps", 20]]
+
+====================================================================================================
+#16  rowid=89836  class=B_stop_name_paren  member='Mike Johnson'  date=2026-04-15  show=ebo  pkg=https://transcripts.cnn.com/show/ebo/date/2026-04-15/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=160   orig_nwords=64  kept=26  removed=38
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 160}]
+    --- KEPT HEAD  : What I'm supportive of is due process. There's a due process investigation that is going on for that individual member. It's about halfway through the process. FOX (voice-over): And the prospects of f
+    --- KEPT TAIL  : ...What I'm supportive of is due process. There's a due process investigation that is going on for that individual member. It's about halfway through the process. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): And the prospects of further expulsions could impact Johnson's already narrow majority, a reality that members say no one can deny, especially as the speaker stares down several must- pass bills just months before the election.
+    --- REM TAIL   : ...FOX (voice-over): And the prospects of further expulsions could impact Johnson's already narrow majority, a reality that members say no one can deny, especially as the speaker stares down several must- pass bills just months before the election.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 36]]
+
+====================================================================================================
+#17  rowid=216537  class=B_stop_name_paren  member='Jamie Raskin'  date=2021-01-26  show=ctw  pkg=https://transcripts.cnn.com/show/ctw/date/2021-01-26/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=98   orig_nwords=53  kept=15  removed=38
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 98}]
+    --- KEPT HEAD  : Donald John Trump, President of the United States, is impeached for high crimes and misdemeanors. FOX (voice-over): Ten House Republicans joined House Democrats last week to charge Trump with inciteme
+    --- KEPT TAIL  : ...Donald John Trump, President of the United States, is impeached for high crimes and misdemeanors. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): Ten House Republicans joined House Democrats last week to charge Trump with incitement of insurrection, saying he encouraged a violent mob to storm the U.S. Capitol January 6th in an effort to overturn the election results.
+    --- REM TAIL   : ...FOX (voice-over): Ten House Republicans joined House Democrats last week to charge Trump with incitement of insurrection, saying he encouraged a violent mob to storm the U.S. Capitol January 6th in an effort to overturn the election results.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 36]]
+
+====================================================================================================
+#18  rowid=216538  class=B_stop_name_paren  member='Madeleine Dean'  date=2021-01-26  show=ctw  pkg=https://transcripts.cnn.com/show/ctw/date/2021-01-26/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=121   orig_nwords=44  kept=24  removed=20
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 121}]
+    --- KEPT HEAD  : I believe we will put forward a very strong case that, of course, is already in the public view of what took place here. FOX (voice-over): Even with the bipartisan passing of the article in the House,
+    --- KEPT TAIL  : ...I believe we will put forward a very strong case that, of course, is already in the public view of what took place here. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): Even with the bipartisan passing of the article in the House, many Republicans oppose the trial against Trump.
+    --- REM TAIL   : ...FOX (voice-over): Even with the bipartisan passing of the article in the House, many Republicans oppose the trial against Trump.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 18]]
+
+====================================================================================================
+#19  rowid=217016  class=B_stop_name_paren  member='Tom Cotton'  date=2021-02-09  show=ctw  pkg=https://transcripts.cnn.com/show/ctw/date/2021-02-09/segment/02
+    CUT_TAG='FOX (voice over)'   cut_at=189   orig_nwords=70  kept=32  removed=38
+    ALL_TAGS=[{"tag": "FOX (voice over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 189}]
+    --- KEPT HEAD  : I think it's beyond the Senate's constitutional authority to have an impeachment proceeding, the point of which is to convict and removed from office a man who left office three weeks ago. FOX (voice 
+    --- KEPT TAIL  : ...I think it's beyond the Senate's constitutional authority to have an impeachment proceeding, the point of which is to convict and removed from office a man who left office three weeks ago. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice over): Trump's lawyers also saying he did not direct anyone to commit lawless actions, and arguing these words on the day of the insurrection were meant in a figurative sense and protected by the First Amendment.
+    --- REM TAIL   : ...FOX (voice over): Trump's lawyers also saying he did not direct anyone to commit lawless actions, and arguing these words on the day of the insurrection were meant in a figurative sense and protected by the First Amendment.
+    --- SEGMENT TAGS: [["FOX (voice over)", "B_stop_name_paren", 35]]
+
+====================================================================================================
+#20  rowid=217089  class=B_stop_name_paren  member='Jamie Raskin'  date=2021-02-10  show=fmjc  pkg=https://transcripts.cnn.com/show/fmjc/date/2021-02-10/segment/01
+    CUT_TAG='FOX (voice over)'   cut_at=65   orig_nwords=45  kept=14  removed=31
+    ALL_TAGS=[{"tag": "FOX (voice over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 65}]
+    --- KEPT HEAD  : Our case is based on cold hard facts. It is all about the facts. FOX (voice over): House Managers immediately presenting a chilling preview of their strategy on the first day of the trial, playing a v
+    --- KEPT TAIL  : ...Our case is based on cold hard facts. It is all about the facts. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice over): House Managers immediately presenting a chilling preview of their strategy on the first day of the trial, playing a video highlighting some of Trump's words from January 6th.
+    --- REM TAIL   : ...FOX (voice over): House Managers immediately presenting a chilling preview of their strategy on the first day of the trial, playing a video highlighting some of Trump's words from January 6th.
+    --- SEGMENT TAGS: [["FOX (voice over)", "B_stop_name_paren", 28]]
+
+====================================================================================================
+#21  rowid=217176  class=B_stop_name_paren  member='Joe Neguse'  date=2021-02-11  show=fmjc  pkg=https://transcripts.cnn.com/show/fmjc/date/2021-02-11/segment/01
+    CUT_TAG='FOX (voice over)'   cut_at=129   orig_nwords=37  kept=22  removed=15
+    ALL_TAGS=[{"tag": "FOX (voice over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 129}]
+    --- KEPT HEAD  : These false claims about election fraud, that was the drum beat being used to inspire, instigate and ignite them, to anger them. FOX (voice over): Many Republicans saying that while the rioters commit
+    --- KEPT TAIL  : ...These false claims about election fraud, that was the drum beat being used to inspire, instigate and ignite them, to anger them. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice over): Many Republicans saying that while the rioters committed crimes, Trump did not.
+    --- REM TAIL   : ...FOX (voice over): Many Republicans saying that while the rioters committed crimes, Trump did not.
+    --- SEGMENT TAGS: [["FOX (voice over)", "B_stop_name_paren", 12]]
+
+====================================================================================================
+#22  rowid=234890  class=B_stop_name_paren  member='Alexandria Ocasio-Cortez'  date=2023-01-04  show=ctmo  pkg=https://transcripts.cnn.com/show/ctmo/date/2023-01-04/segment/01
+    CUT_TAG='FOX (on camera)'   cut_at=207   orig_nwords=129  kept=36  removed=93
+    ALL_TAGS=[{"tag": "FOX (on camera)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 207}]
+    --- KEPT HEAD  : It is unlikely, but it is -- there's always a possibility. I do believe that, in some of those conversations, there are things that are happening on the floor. These machinations are happening on the 
+    --- KEPT TAIL  : ...It is unlikely, but it is -- there's always a possibility. I do believe that, in some of those conversations, there are things that are happening on the floor. These machinations are happening on the floor. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (on camera): And this is what Democrats have been arguing all along, that this is really showing disunity among Republicans. That this is showing that they aren't ready to govern. The more likely scenario is that moderate Republicans at some point get to the place where they say McCarthy is not going to have votes. We may need to have some conversations with Democrats about whether there's some kind of consensus moderate Republican candidate. I don't think Democrats are going to leave the floor to give Kevin McCarthy the upper hand, Kaitlan.
+    --- REM TAIL   : ... get to the place where they say McCarthy is not going to have votes. We may need to have some conversations with Democrats about whether there's some kind of consensus moderate Republican candidate. I don't think Democrats are going to leave the floor to give Kevin McCarthy the upper hand, Kaitlan.
+    --- SEGMENT TAGS: [["FOX (on camera)", "B_stop_name_paren", 90]]
+
+====================================================================================================
+#23  rowid=235130  class=B_stop_name_paren  member='Chip Roy'  date=2023-01-05  show=ctw  pkg=https://transcripts.cnn.com/show/ctw/date/2023-01-05/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=120   orig_nwords=42  kept=21  removed=21
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 120}]
+    --- KEPT HEAD  : For the first time in history, there have been two Black Americans placed into the nomination for Speaker of the House. FOX (voice-over): Sources tell CNN McCarthy is continuing negotiations with the 
+    --- KEPT TAIL  : ...For the first time in history, there have been two Black Americans placed into the nomination for Speaker of the House. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): Sources tell CNN McCarthy is continuing negotiations with the group of opposing lawmakers and met separately with freshman holdouts.
+    --- REM TAIL   : ...FOX (voice-over): Sources tell CNN McCarthy is continuing negotiations with the group of opposing lawmakers and met separately with freshman holdouts.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 19]]
+
+====================================================================================================
+#24  rowid=243011  class=B_stop_name_paren  member='Elise Stefanik'  date=2023-05-31  show=ctmo  pkg=https://transcripts.cnn.com/show/ctmo/date/2023-05-31/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=171   orig_nwords=43  kept=25  removed=18
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 171}]
+    --- KEPT HEAD  : Members from all across the conference shared their support for this important bill, and they shared their support for Speaker McCarthy's strong and effective leadership. FOX (voice-over): The bill na
+    --- KEPT TAIL  : ...Members from all across the conference shared their support for this important bill, and they shared their support for Speaker McCarthy's strong and effective leadership. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): The bill narrowly made it out of the Rules Committee Tuesday night, with a 7-6 vote.
+    --- REM TAIL   : ...FOX (voice-over): The bill narrowly made it out of the Rules Committee Tuesday night, with a 7-6 vote.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 16]]
+
+====================================================================================================
+#25  rowid=246376  class=B_stop_name_paren  member='Byron Donalds'  date=2023-09-21  show=ctmo  pkg=https://transcripts.cnn.com/show/ctmo/date/2023-09-21/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=168   orig_nwords=115  kept=33  removed=82
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 168}]
+    --- KEPT HEAD  : The first thing I'll tell you is, there's no money in the House right now for Ukraine. It's not a good time for him to be here, quite frankly. That's just the reality. FOX (voice-over): While there is
+    --- KEPT TAIL  : ...The first thing I'll tell you is, there's no money in the House right now for Ukraine. It's not a good time for him to be here, quite frankly. That's just the reality. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): While there is still broad bipartisan support to fund that war effort in Ukraine, Republicans in the House are bitterly divided as they debate a path forward to avert a government shutdown. Cracks in the conference have been building for months. In July, 70 House Republicans voted to strip Ukraine of all U.S. military aid as part of the debate on the defense bill. While Senate GOP leader Mitch McConnell has been a dogged supporter of funding the war --
+    --- REM TAIL   : ...d to avert a government shutdown. Cracks in the conference have been building for months. In July, 70 House Republicans voted to strip Ukraine of all U.S. military aid as part of the debate on the defense bill. While Senate GOP leader Mitch McConnell has been a dogged supporter of funding the war --
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 80]]
+
+====================================================================================================
+#26  rowid=247110  class=B_stop_name_paren  member='Kevin Hern'  date=2023-10-04  show=acd  pkg=https://transcripts.cnn.com/show/acd/date/2023-10-04/segment/01
+    CUT_TAG='FOX (voice over)'   cut_at=113   orig_nwords=29  kept=21  removed=8
+    ALL_TAGS=[{"tag": "FOX (voice over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 113}]
+    --- KEPT HEAD  : I'm not afraid of that. That's something that would be part of my platform. If the members want it, that's fine. FOX (voice over): Lauren Fox, CNN, Capitol Hill.
+    --- KEPT TAIL  : ...I'm not afraid of that. That's something that would be part of my platform. If the members want it, that's fine. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice over): Lauren Fox, CNN, Capitol Hill.
+    --- REM TAIL   : ...FOX (voice over): Lauren Fox, CNN, Capitol Hill.
+    --- SEGMENT TAGS: [["FOX (voice over)", "B_stop_name_paren", 5]]
+
+====================================================================================================
+#27  rowid=247235  class=B_stop_name_paren  member='Dusty Johnson'  date=2023-10-05  show=ctmo  pkg=https://transcripts.cnn.com/show/ctmo/date/2023-10-05/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=96   orig_nwords=33  kept=16  removed=17
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 96}]
+    --- KEPT HEAD  : I'm not surprised. Tensions and tempers have been running pretty high for the last nine months. FOX (voice-over): Allies of McCarthy are seeking retribution from the eight Republican rebels who voted 
+    --- KEPT TAIL  : ...I'm not surprised. Tensions and tempers have been running pretty high for the last nine months. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): Allies of McCarthy are seeking retribution from the eight Republican rebels who voted against him.
+    --- REM TAIL   : ...FOX (voice-over): Allies of McCarthy are seeking retribution from the eight Republican rebels who voted against him.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 15]]
+
+====================================================================================================
+#28  rowid=247269  class=B_stop_name_paren  member='Chip Roy'  date=2023-10-05  show=ctw  pkg=https://transcripts.cnn.com/show/ctw/date/2023-10-05/segment/02
+    CUT_TAG='FOX (voice-over)'   cut_at=152   orig_nwords=52  kept=25  removed=27
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 152}]
+    --- KEPT HEAD  : Leader Scalise, he's a good friend. I've had great conversations with him, Jim, Kevin, other people. We're -- we're working hard. We're going to unite. FOX (voice-over): House Judiciary Committee Jim 
+    --- KEPT TAIL  : ...Leader Scalise, he's a good friend. I've had great conversations with him, Jim, Kevin, other people. We're -- we're working hard. We're going to unite. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): House Judiciary Committee Jim Jordan was one of the co- founders of the conservative Freedom Caucus and is a close ally of former President Trump.
+    --- REM TAIL   : ...FOX (voice-over): House Judiciary Committee Jim Jordan was one of the co- founders of the conservative Freedom Caucus and is a close ally of former President Trump.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 25]]
+
+====================================================================================================
+#29  rowid=249676  class=B_stop_name_paren  member='Michael Guest'  date=2023-11-17  show=ow  pkg=https://transcripts.cnn.com/show/ow/date/2023-11-17/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=147   orig_nwords=90  kept=28  removed=62
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 147}]
+    --- KEPT HEAD  : That will be enough for members to be able to make a decision as to whether or not they believe it would be proper to expel Representative Santos. FOX (voice-over): According to a panel, Santos refuse
+    --- KEPT TAIL  : ...That will be enough for members to be able to make a decision as to whether or not they believe it would be proper to expel Representative Santos. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): According to a panel, Santos refused to participate in an interview or provide a written response, and the panel did not subpoena him. Santos posting on X criticizing the Committee's finding, calling it biased and a disgusting politicized smear that shows the depths of how low our federal government has sunk. Santos also saying he will not seek re- election.
+    --- REM TAIL   : ...terview or provide a written response, and the panel did not subpoena him. Santos posting on X criticizing the Committee's finding, calling it biased and a disgusting politicized smear that shows the depths of how low our federal government has sunk. Santos also saying he will not seek re- election.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 60]]
+
+====================================================================================================
+#30  rowid=307026  class=B_stop_name_paren  member='Rand Paul'  date=2026-07-29  show=ebo  pkg=https://transcripts.cnn.com/show/ebo/date/2026-07-29/segment/01
+    CUT_TAG='FOX (voice-over)'   cut_at=69   orig_nwords=28  kept=11  removed=17
+    ALL_TAGS=[{"tag": "FOX (voice-over)", "class": "B_stop_name_paren", "ownership": "foreign", "at": 69}]
+    --- KEPT HEAD  : All I can do is recommend prosecution. I can't initiate prosecution. FOX (voice-over): Paul also took the unusual step Wednesday of kicking Fauci's lawyer out of the hearing.
+    --- KEPT TAIL  : ...All I can do is recommend prosecution. I can't initiate prosecution. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOX (voice-over): Paul also took the unusual step Wednesday of kicking Fauci's lawyer out of the hearing.
+    --- REM TAIL   : ...FOX (voice-over): Paul also took the unusual step Wednesday of kicking Fauci's lawyer out of the hearing.
+    --- SEGMENT TAGS: [["FOX (voice-over)", "B_stop_name_paren", 15]]
+
+====================================================================================================
+#31  rowid=68991  class=B_unknown_surname_paren  member='Michael Bennet'  date=2024-07-11  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2024-07-11/segment/20
+    CUT_TAG='TAUSCHE (voice-over)'   cut_at=242   orig_nwords=153  kept=46  removed=107
+    ALL_TAGS=[{"tag": "TAUSCHE (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 242}]
+    --- KEPT HEAD  : Donald Trump is on track, I think, to win this election and maybe win it by a landslide. And the White House in the time since that disastrous debate, I think has done nothing to really demonstrate th
+    --- KEPT TAIL  : ...Donald Trump is on track, I think, to win this election and maybe win it by a landslide. And the White House in the time since that disastrous debate, I think has done nothing to really demonstrate that they have a plan to win this election. 
+    >>> CUT HERE <<<
+    --- REMOVED    : TAUSCHE (voice-over): An adviser to the president said few in Biden's inner circle are concerned enough to pierce Biden's firm position. Only family could do that and only if there's hard data. The adviser telling CNN of his wife and sister, Jill and Valerie, won't let him go down in flames. Since the debate, CNN's poll of polls shows Trump leading Biden by five points. The first time this year, the candidates are separated by a margin of more than three points. And some donors planning events in Chicago and Florida say they're now up in the air. But for Biden, it's full steam ahead for now.
+    --- REM TAIL   : ... the debate, CNN's poll of polls shows Trump leading Biden by five points. The first time this year, the candidates are separated by a margin of more than three points. And some donors planning events in Chicago and Florida say they're now up in the air. But for Biden, it's full steam ahead for now.
+    --- SEGMENT TAGS: [["TAUSCHE (voice-over)", "B_unknown_surname_paren", 105]]
+
+====================================================================================================
+#32  rowid=78553  class=B_unknown_surname_paren  member='Hakeem Jeffries'  date=2025-07-04  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2025-07-04/segment/18
+    CUT_TAG='YOSHIDA (voice-over)'   cut_at=136   orig_nwords=127  kept=25  removed=102
+    ALL_TAGS=[{"tag": "YOSHIDA (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 136}]
+    --- KEPT HEAD  : I'm going to take my time and ensure that the American people fully understand how damaging this bill will be to their quality of life. YOSHIDA (voice-over): The multi trillion dollar legislation woul
+    --- KEPT TAIL  : ...I'm going to take my time and ensure that the American people fully understand how damaging this bill will be to their quality of life. 
+    >>> CUT HERE <<<
+    --- REMOVED    : YOSHIDA (voice-over): The multi trillion dollar legislation would unlock tax cuts and funding boosts for national security, partly paid for by the largest cut to the federal safety net in decades. Tax breaks and changes to the tax code could benefit corporate America, manufacturers and high income Americans, while low income Americans could be worse off due to the bill's historic cuts to Medicaid and food stamps. A ripple effect could also hit the health care system, especially rural hospitals. And roughly $3.4 trillion is also projected to be added to the deficit over the next decade. In Washington, Michael Yoshida reporting.
+    --- REM TAIL   : ...ns could be worse off due to the bill's historic cuts to Medicaid and food stamps. A ripple effect could also hit the health care system, especially rural hospitals. And roughly $3.4 trillion is also projected to be added to the deficit over the next decade. In Washington, Michael Yoshida reporting.
+    --- SEGMENT TAGS: [["YOSHIDA (voice-over)", "B_unknown_surname_paren", 100]]
+
+====================================================================================================
+#33  rowid=90113  class=B_unknown_surname_paren  member='Christopher Murphy'  date=2026-04-24  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2026-04-24/segment/19
+    CUT_TAG='SCANNELL (voice-over)'   cut_at=56   orig_nwords=49  kept=8  removed=41
+    ALL_TAGS=[{"tag": "SCANNELL (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 56}]
+    --- KEPT HEAD  : This is corruption. This is just astounding corruption. SCANNELL (voice-over): These are not isolated incidents. Democratic Senator Chris Murphy called out $580 million bet placed 15 minutes before Tr
+    --- KEPT TAIL  : ...This is corruption. This is just astounding corruption. 
+    >>> CUT HERE <<<
+    --- REMOVED    : SCANNELL (voice-over): These are not isolated incidents. Democratic Senator Chris Murphy called out $580 million bet placed 15 minutes before Trump posted on Truth Social he would delay striking Iran's energy infrastructure. It was another winner. Oil futures plummeted 15 percent.
+    --- REM TAIL   : ...SCANNELL (voice-over): These are not isolated incidents. Democratic Senator Chris Murphy called out $580 million bet placed 15 minutes before Trump posted on Truth Social he would delay striking Iran's energy infrastructure. It was another winner. Oil futures plummeted 15 percent.
+    --- SEGMENT TAGS: [["SCANNELL (voice-over)", "B_unknown_surname_paren", 39]]
+
+====================================================================================================
+#34  rowid=184811  class=B_unknown_surname_paren  member='Mitch McConnell'  date=2024-03-17  show=fox-news-sunday  pkg=https://www.foxnews.com/transcript/fox-news-sunday-march-17-2024
+    CUT_TAG='BREAM (voice-over)'   cut_at=88   orig_nwords=70  kept=14  removed=56
+    ALL_TAGS=[{"tag": "BREAM (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 88}]
+    --- KEPT HEAD  : The Democratic Party doesn't have an anti- Bibi problem. It has an anti-Israel problem. BREAM (voice-over): As the U.S. prepares to build a temporary port to supply critical aid to Palestinian civilia
+    --- KEPT TAIL  : ...The Democratic Party doesn't have an anti- Bibi problem. It has an anti-Israel problem. 
+    >>> CUT HERE <<<
+    --- REMOVED    : BREAM (voice-over): As the U.S. prepares to build a temporary port to supply critical aid to Palestinian civilians in Gaza, Israel plans a significant offensive on the last major Hamas stronghold in Rafah. Plus, hundreds of Americans, maybe more, potentially trapped in Haiti as a violent rebellion rises, taking the country to the brink of collapse.
+    --- REM TAIL   : ...a temporary port to supply critical aid to Palestinian civilians in Gaza, Israel plans a significant offensive on the last major Hamas stronghold in Rafah. Plus, hundreds of Americans, maybe more, potentially trapped in Haiti as a violent rebellion rises, taking the country to the brink of collapse.
+    --- SEGMENT TAGS: [["BREAM (voice-over)", "B_unknown_surname_paren", 54]]
+
+====================================================================================================
+#35  rowid=185014  class=B_unknown_surname_paren  member='Bill Cassidy'  date=2021-10-03  show=fox-news-sunday-on  pkg=https://www.foxnews.com/transcript/fox-news-sunday-on-october-3-2021
+    CUT_TAG='SPUNT (on camera)'   cut_at=146   orig_nwords=59  kept=25  removed=34
+    ALL_TAGS=[{"tag": "SPUNT (on camera)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 146}]
+    --- KEPT HEAD  : That's what's wrong with Washington, D.C. We don't put the needs of the American people first. We put some other agenda and nothing ever happens. SPUNT (on camera): Negotiations, Chris, are ongoing un
+    --- KEPT TAIL  : ...That's what's wrong with Washington, D.C. We don't put the needs of the American people first. We put some other agenda and nothing ever happens. 
+    >>> CUT HERE <<<
+    --- REMOVED    : SPUNT (on camera): Negotiations, Chris, are ongoing until this comes to vote. Meanwhile, there's another clock ticking, raising the nation's debt ceiling until it hits its limit in just a few weeks -- Chris.
+    --- REM TAIL   : ...SPUNT (on camera): Negotiations, Chris, are ongoing until this comes to vote. Meanwhile, there's another clock ticking, raising the nation's debt ceiling until it hits its limit in just a few weeks -- Chris.
+    --- SEGMENT TAGS: [["SPUNT (on camera)", "B_unknown_surname_paren", 31]]
+
+====================================================================================================
+#36  rowid=190960  class=B_unknown_surname_paren  member='Mark Warner'  date=2019-02-10  show=csr  pkg=https://transcripts.cnn.com/show/csr/date/2019-02-10/segment/01
+    CUT_TAG='SEGALL (voice-over)'   cut_at=62   orig_nwords=19  kept=14  removed=5
+    ALL_TAGS=[{"tag": "SEGALL (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 62}]
+    --- KEPT HEAD  : The era of the Wild West in social media is coming to an end. SEGALL (voice-over): Sharing private data.
+    --- KEPT TAIL  : ...The era of the Wild West in social media is coming to an end. 
+    >>> CUT HERE <<<
+    --- REMOVED    : SEGALL (voice-over): Sharing private data.
+    --- REM TAIL   : ...SEGALL (voice-over): Sharing private data.
+    --- SEGMENT TAGS: [["SEGALL (voice-over)", "B_unknown_surname_paren", 3]]
+
+====================================================================================================
+#37  rowid=201038  class=B_unknown_surname_paren  member='Rashida Tlaib'  date=2021-05-30  show=mediabuzz-on-why-media-dismissed-wuhan-lab-theory-john-oliver-stinging-local-tv  pkg=https://www.foxnews.com/transcript/mediabuzz-on-why-media-dismissed-wuhan-lab-theory-john-oliver-stinging-local-tv
+    CUT_TAG='KURTZ (on camera)'   cut_at=103   orig_nwords=88  kept=15  removed=73
+    ALL_TAGS=[{"tag": "KURTZ (on camera)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 103}]
+    --- KEPT HEAD  : Palestinians aren't going anywhere no matter how much money you send to Israel's apartheid government. KURTZ (on camera): Joining us now to analyze the coverage, Gayle Trotter, host of the Right in D.
+    --- KEPT TAIL  : ...Palestinians aren't going anywhere no matter how much money you send to Israel's apartheid government. 
+    >>> CUT HERE <<<
+    --- REMOVED    : KURTZ (on camera): Joining us now to analyze the coverage, Gayle Trotter, host of the Right in D.C. podcast, and Richard Fowler, radio talk show host and Fox News contributor. Gayle, why are members of the squad not drawing much media scrutiny in stark contrast to Marjorie Taylor Greene for ripping Israel as terrorist state and apartheid state. Whether people agree with them or not, you'd think that would draw some serious coverage.
+    --- REM TAIL   : ...alk show host and Fox News contributor. Gayle, why are members of the squad not drawing much media scrutiny in stark contrast to Marjorie Taylor Greene for ripping Israel as terrorist state and apartheid state. Whether people agree with them or not, you'd think that would draw some serious coverage.
+    --- SEGMENT TAGS: [["KURTZ (on camera)", "B_unknown_surname_paren", 70]]
+
+====================================================================================================
+#38  rowid=203109  class=B_unknown_surname_paren  member='Lindsey Graham'  date=2019-10-09  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2019-10-09/segment/17
+    CUT_TAG='BOLDUAN (voice-over)'   cut_at=349   orig_nwords=108  kept=66  removed=42
+    ALL_TAGS=[{"tag": "BOLDUAN (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 349}]
+    --- KEPT HEAD  : To the people in Syria, we're not turning our back on you. I we wish we could do better. The administration needs to do more, quite frankly. We don't have a coherent strategy in Syria and I am committ
+    --- KEPT TAIL  : ...To the people in Syria, we're not turning our back on you. I we wish we could do better. The administration needs to do more, quite frankly. We don't have a coherent strategy in Syria and I am committed 100 percent to not letting Assad get away with it and standing behind people like Caesar. And I'm going to make my colleagues in the Senate vote. 
+    >>> CUT HERE <<<
+    --- REMOVED    : BOLDUAN (voice-over): Until then, the bill sits on Senator Mitch McConnell's desk and leaves Caesar right back where he began, putting his life on the line to try and convince the world to care and, once and for all, not look away.
+    --- REM TAIL   : ...BOLDUAN (voice-over): Until then, the bill sits on Senator Mitch McConnell's desk and leaves Caesar right back where he began, putting his life on the line to try and convince the world to care and, once and for all, not look away.
+    --- SEGMENT TAGS: [["BOLDUAN (voice-over)", "B_unknown_surname_paren", 40]]
+
+====================================================================================================
+#39  rowid=215557  class=B_unknown_surname_paren  member='Nancy Pelosi'  date=2021-01-04  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2021-01-04/segment/20
+    CUT_TAG='CURNOW (on camera)'   cut_at=374   orig_nwords=237  kept=59  removed=178
+    ALL_TAGS=[{"tag": "CURNOW (on camera)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 374}, {"tag": "CURNOW (on camera)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 801}]
+    --- KEPT HEAD  : We accept a responsibility that is daunting and demanding as any previous generations of leadership has ever faced. We begin this new Congress during a time of extraordinary difficulty. Each of our co
+    --- KEPT TAIL  : ...We accept a responsibility that is daunting and demanding as any previous generations of leadership has ever faced. We begin this new Congress during a time of extraordinary difficulty. Each of our communities has been drastically - drastically affected by the pandemic and its economic crisis, three hundred fifty thousand tragic deaths. We sadly carry them in our hearts. 
+    >>> CUT HERE <<<
+    --- REMOVED    : CURNOW (on camera): So, this new Congress is now the most diverse in history. There are a record number of women, black and Latino members, as well as lawmakers who identify as LGBTQ. So, we'll have more on that stunning Trump call coming up in just a few minutes' time. Also ahead, though, here on CNN, U.S. vaccination efforts are falling far, far behind targets. What extra says need to be done. That's next too. [03:20:00] CURNOW (on camera): So, the U.S. is racing to get ahead of the coronavirus pandemic in the halls of overburdened hospitals and in the push to up the pace of vaccinations across the country. But it's really not having much success on either front. The number of U.S. COVID p
+    --- REM TAIL   : ...mber on Sunday. And the coronavirus tracking project reports more than 125,000 people are in hospital with the virus. This of course, as the pace of vaccinations really lags behind, only about four million doses have been administered across the country so far below the Trump administration targets.
+    --- SEGMENT TAGS: [["CURNOW (on camera)", "B_unknown_surname_paren", 73], ["CURNOW (on camera)", "C_unanchored_paren", 99]]
+
+====================================================================================================
+#40  rowid=217682  class=B_unknown_surname_paren  member='Michael McCaul'  date=2021-02-21  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2021-02-21/segment/06
+    CUT_TAG='CHEN (on camera)'   cut_at=183   orig_nwords=108  kept=39  removed=69
+    ALL_TAGS=[{"tag": "CHEN (on camera)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 183}]
+    --- KEPT HEAD  : Look, when a crisis hits my side, I'm there. I'm not going to go on some vacation. I know Mr. Cruz called it a mistake, and he's owned up to that, but I think that was a big mistake. CHEN (on camera):
+    --- KEPT TAIL  : ...Look, when a crisis hits my side, I'm there. I'm not going to go on some vacation. I know Mr. Cruz called it a mistake, and he's owned up to that, but I think that was a big mistake. 
+    >>> CUT HERE <<<
+    --- REMOVED    : CHEN (on camera): State leaders are now turning their attention to address those skyrocketing energy bills. The Governor today said that the Public Utility Commission called an emergency meeting to issue a moratorium on disconnection of service due to nonpayment as well as to restrict electric providers from sending invoices at this time. Abbott said that would allow time for them to address those huge energy bills -- Pamela?
+    --- REM TAIL   : ...id that the Public Utility Commission called an emergency meeting to issue a moratorium on disconnection of service due to nonpayment as well as to restrict electric providers from sending invoices at this time. Abbott said that would allow time for them to address those huge energy bills -- Pamela?
+    --- SEGMENT TAGS: [["CHEN (on camera)", "B_unknown_surname_paren", 66]]
+
+====================================================================================================
+#41  rowid=221483  class=B_unknown_surname_paren  member='Amy Klobuchar'  date=2021-09-07  show=acd  pkg=https://transcripts.cnn.com/show/acd/date/2021-09-07/segment/01
+    CUT_TAG='KAFANOV (voice-over)'   cut_at=99   orig_nwords=35  kept=17  removed=18
+    ALL_TAGS=[{"tag": "KAFANOV (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 99}]
+    --- KEPT HEAD  : It is part of the same thing suppressing the vote, going into the Capitol, stopping our democracy. KAFANOV (voice-over): Newsom has sought to turn the race into a referendum and how to fight the pande
+    --- KEPT TAIL  : ...It is part of the same thing suppressing the vote, going into the Capitol, stopping our democracy. 
+    >>> CUT HERE <<<
+    --- REMOVED    : KAFANOV (voice-over): Newsom has sought to turn the race into a referendum and how to fight the pandemic.
+    --- REM TAIL   : ...KAFANOV (voice-over): Newsom has sought to turn the race into a referendum and how to fight the pandemic.
+    --- SEGMENT TAGS: [["KAFANOV (voice-over)", "B_unknown_surname_paren", 16]]
+
+====================================================================================================
+#42  rowid=223873  class=B_unknown_surname_paren  member='Ron Johnson'  date=2021-12-28  show=cnnt  pkg=https://transcripts.cnn.com/show/cnnt/date/2021-12-28/segment/01
+    CUT_TAG='COATES (on camera)'   cut_at=210   orig_nwords=77  kept=36  removed=41
+    ALL_TAGS=[{"tag": "COATES (on camera)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 210}]
+    --- KEPT HEAD  : We all hoped and prayed the vaccines would be 100 percent effective and 100 percent safe but they're not. We now know fully vaccinated individuals can catch COVID, they can transmit COVID, so what's t
+    --- KEPT TAIL  : ...We all hoped and prayed the vaccines would be 100 percent effective and 100 percent safe but they're not. We now know fully vaccinated individuals can catch COVID, they can transmit COVID, so what's the point? 
+    >>> CUT HERE <<<
+    --- REMOVED    : COATES (on camera): This was your earlier point, right, the idea of thinking about people being dismissive of what it actually was for or just getting it wrong as to what it was for. What do you make about that statement?
+    --- REM TAIL   : ...COATES (on camera): This was your earlier point, right, the idea of thinking about people being dismissive of what it actually was for or just getting it wrong as to what it was for. What do you make about that statement?
+    --- SEGMENT TAGS: [["COATES (on camera)", "B_unknown_surname_paren", 38]]
+
+====================================================================================================
+#43  rowid=231393  class=B_unknown_surname_paren  member='Tom Cotton'  date=2022-10-12  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2022-10-12/segment/22
+    CUT_TAG='MCKEND (voice-over)'   cut_at=81   orig_nwords=23  kept=14  removed=9
+    ALL_TAGS=[{"tag": "MCKEND (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 81}]
+    --- KEPT HEAD  : People get tired of television ads and the lies they tell about Herschel Walker. MCKEND (voice-over): CNN has not independently confirmed the allegations.
+    --- KEPT TAIL  : ...People get tired of television ads and the lies they tell about Herschel Walker. 
+    >>> CUT HERE <<<
+    --- REMOVED    : MCKEND (voice-over): CNN has not independently confirmed the allegations.
+    --- REM TAIL   : ...MCKEND (voice-over): CNN has not independently confirmed the allegations.
+    --- SEGMENT TAGS: [["MCKEND (voice-over)", "B_unknown_surname_paren", 7]]
+
+====================================================================================================
+#44  rowid=243009  class=B_unknown_surname_paren  member='Steve Cohen'  date=2023-05-31  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2023-05-31/segment/20
+    CUT_TAG='FREEMAN (voice-over)'   cut_at=261   orig_nwords=59  kept=52  removed=7
+    ALL_TAGS=[{"tag": "FREEMAN (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 261}]
+    --- KEPT HEAD  : It's like today is a beautiful day. There is not a cloud in the sky, it's sunny, it's warm. But there's a huge cloud that sits over our head. It's an ugly gray, rainy sleet filled crowd. And we want t
+    --- KEPT TAIL  : ...It's like today is a beautiful day. There is not a cloud in the sky, it's sunny, it's warm. But there's a huge cloud that sits over our head. It's an ugly gray, rainy sleet filled crowd. And we want that cloud to go away. This is the beginning of that process. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FREEMAN (voice-over): Danny Freeman, CNN, Pittsburgh. [03:45:06]
+    --- REM TAIL   : ...FREEMAN (voice-over): Danny Freeman, CNN, Pittsburgh. [03:45:06]
+    --- SEGMENT TAGS: [["FREEMAN (voice-over)", "B_unknown_surname_paren", 5]]
+
+====================================================================================================
+#45  rowid=244971  class=B_unknown_surname_paren  member='Elise Stefanik'  date=2023-07-21  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2023-07-21/segment/21
+    CUT_TAG='MCKEND (voice-over)'   cut_at=107   orig_nwords=29  kept=19  removed=10
+    ALL_TAGS=[{"tag": "MCKEND (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 107}]
+    --- KEPT HEAD  : This was illegal government censorship to protect, and prop up Joe Biden, on the eve of the 2020 election. MCKEND (voice-over): But Democrats argue, misinformation is the larger threat.
+    --- KEPT TAIL  : ...This was illegal government censorship to protect, and prop up Joe Biden, on the eve of the 2020 election. 
+    >>> CUT HERE <<<
+    --- REMOVED    : MCKEND (voice-over): But Democrats argue, misinformation is the larger threat.
+    --- REM TAIL   : ...MCKEND (voice-over): But Democrats argue, misinformation is the larger threat.
+    --- SEGMENT TAGS: [["MCKEND (voice-over)", "B_unknown_surname_paren", 8]]
+
+====================================================================================================
+#46  rowid=67803  class=C_unanchored_paren  member='Lauren Boebert'  date=2024-05-24  show=ws  pkg=https://transcripts.cnn.com/show/ws/date/2024-05-24/segment/01
+    CUT_TAG="O'SULLIVAN (voice-over)"   cut_at=66   orig_nwords=21  kept=11  removed=10
+    ALL_TAGS=[{"tag": "O'SULLIVAN (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 66}]
+    --- KEPT HEAD  : I'm tired of this separation of church and state junk. [23:20:01] O'SULLIVAN (voice-over): It has a name. It's called Christian nationalism.
+    --- KEPT TAIL  : ...I'm tired of this separation of church and state junk. [23:20:01] 
+    >>> CUT HERE <<<
+    --- REMOVED    : O'SULLIVAN (voice-over): It has a name. It's called Christian nationalism.
+    --- REM TAIL   : ...O'SULLIVAN (voice-over): It has a name. It's called Christian nationalism.
+    --- SEGMENT TAGS: [["O'SULLIVAN (voice-over)", "C_unanchored_paren", 8]]
+
+====================================================================================================
+#47  rowid=68560  class=C_unanchored_paren  member='James Clyburn'  date=2024-07-02  show=fmjc  pkg=https://transcripts.cnn.com/show/fmjc/date/2024-07-02/segment/01
+    CUT_TAG='LEE (voice-over)'   cut_at=56   orig_nwords=36  kept=11  removed=25
+    ALL_TAGS=[{"tag": "LEE (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 56}]
+    --- KEPT HEAD  : I will support her if he were to step aside. [18:05:00] LEE (voice-over): Some prominent Biden supporters also expressing support for Harris, but insisting for now that the president remains at the to
+    --- KEPT TAIL  : ...I will support her if he were to step aside. [18:05:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : LEE (voice-over): Some prominent Biden supporters also expressing support for Harris, but insisting for now that the president remains at the top of the ticket.
+    --- REM TAIL   : ...LEE (voice-over): Some prominent Biden supporters also expressing support for Harris, but insisting for now that the president remains at the top of the ticket.
+    --- SEGMENT TAGS: [["LEE (voice-over)", "C_unanchored_paren", 23]]
+
+====================================================================================================
+#48  rowid=69517  class=C_unanchored_paren  member='Melanie Stansbury'  date=2024-07-23  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2024-07-23/segment/18
+    CUT_TAG='PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)'   cut_at=126   orig_nwords=47  kept=19  removed=28
+    ALL_TAGS=[{"tag": "PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 126}]
+    --- KEPT HEAD  : Madam Director with all due respect. The answers that we've received here in this hearing today are completely unsatisfactory PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over): Republican
+    --- KEPT TAIL  : ...Madam Director with all due respect. The answers that we've received here in this hearing today are completely unsatisfactory 
+    >>> CUT HERE <<<
+    --- REMOVED    : PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over): Republican and Democratic members of Congress frustrated with the head of the Secret Service, many calling for her immediate resignation.
+    --- REM TAIL   : ...PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over): Republican and Democratic members of Congress frustrated with the head of the Secret Service, many calling for her immediate resignation.
+    --- SEGMENT TAGS: [["PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)", "C_unanchored_paren", 20]]
+
+====================================================================================================
+#49  rowid=69708  class=C_unanchored_paren  member='Ted Cruz'  date=2024-07-27  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2024-07-27/segment/20
+    CUT_TAG='FOREMAN (voice-over)'   cut_at=132   orig_nwords=56  kept=23  removed=33
+    ALL_TAGS=[{"tag": "FOREMAN (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 132}]
+    --- KEPT HEAD  : Kamala can't have my gun. She can't have my gasoline engine and she sure as hell can't have my steaks and cheeseburgers. [03:40:00] FOREMAN (voice-over): Suggestion that Harris wants to outright ban g
+    --- KEPT TAIL  : ...Kamala can't have my gun. She can't have my gasoline engine and she sure as hell can't have my steaks and cheeseburgers. [03:40:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : FOREMAN (voice-over): Suggestion that Harris wants to outright ban guns, gasoline cars and red meat, that she couldn't pass the bar exam and is totally against Jewish people. All of those are false.
+    --- REM TAIL   : ...FOREMAN (voice-over): Suggestion that Harris wants to outright ban guns, gasoline cars and red meat, that she couldn't pass the bar exam and is totally against Jewish people. All of those are false.
+    --- SEGMENT TAGS: [["FOREMAN (voice-over)", "C_unanchored_paren", 31]]
+
+====================================================================================================
+#50  rowid=195413  class=C_unanchored_paren  member='Steve Cohen'  date=2019-05-08  show=sitroom  pkg=https://transcripts.cnn.com/show/sitroom/date/2019-05-08/segment/01
+    CUT_TAG='MATTINGLY (voice-over)'   cut_at=114   orig_nwords=47  kept=19  removed=28
+    ALL_TAGS=[{"tag": "MATTINGLY (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 114}]
+    --- KEPT HEAD  : If it weren't for him being president, he would be in prison with Michael Cohen today as Individual-1. [17:05:00] MATTINGLY (voice-over): With this singular issue looming throughout the tense hours-lo
+    --- KEPT TAIL  : ...If it weren't for him being president, he would be in prison with Michael Cohen today as Individual-1. [17:05:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : MATTINGLY (voice-over): With this singular issue looming throughout the tense hours-long meeting, when and whether the committee will be able to hear from special counsel Robert Mueller himself.
+    --- REM TAIL   : ...MATTINGLY (voice-over): With this singular issue looming throughout the tense hours-long meeting, when and whether the committee will be able to hear from special counsel Robert Mueller himself.
+    --- SEGMENT TAGS: [["MATTINGLY (voice-over)", "C_unanchored_paren", 26]]
+
+====================================================================================================
+#51  rowid=200895  class=C_unanchored_paren  member='Bernard Sanders'  date=2019-08-21  show=nday  pkg=https://transcripts.cnn.com/show/nday/date/2019-08-21/segment/06
+    CUT_TAG='GRIFFIN (on camera)'   cut_at=231   orig_nwords=72  kept=39  removed=33
+    ALL_TAGS=[{"tag": "GRIFFIN (on camera)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 231}]
+    --- KEPT HEAD  : And I think all over the world people are looking at the United States and wondering, what is going on, what is the mental health situation in America where time after time after time we're seeing ind
+    --- KEPT TAIL  : ...And I think all over the world people are looking at the United States and wondering, what is going on, what is the mental health situation in America where time after time after time we're seeing indescribable horrors? [08:40:02] 
+    >>> CUT HERE <<<
+    --- REMOVED    : GRIFFIN (on camera): You wrote, shame on you. This is a gun issue. To use the gun lobby talking points on this only discredits you as a presidential option. What did you mean?
+    --- REM TAIL   : ...GRIFFIN (on camera): You wrote, shame on you. This is a gun issue. To use the gun lobby talking points on this only discredits you as a presidential option. What did you mean?
+    --- SEGMENT TAGS: [["GRIFFIN (on camera)", "C_unanchored_paren", 30]]
+
+====================================================================================================
+#52  rowid=216945  class=C_unanchored_paren  member='Charles Schumer'  date=2021-02-08  show=cnnt  pkg=https://transcripts.cnn.com/show/cnnt/date/2021-02-08/segment/01
+    CUT_TAG='LEMON (on camera)'   cut_at=169   orig_nwords=145  kept=28  removed=117
+    ALL_TAGS=[{"tag": "LEMON (on camera)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 169}]
+    --- KEPT HEAD  : Ultimately, senators will decide on the one true question at stake in this trial. Is Donald Trump guilty of inciting a violent mob against the United States? [22:20:00] LEMON (on camera): So, here's o
+    --- KEPT TAIL  : ...Ultimately, senators will decide on the one true question at stake in this trial. Is Donald Trump guilty of inciting a violent mob against the United States? [22:20:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : LEMON (on camera): So, here's our breaking news. With hours to go until the beginning of the second impeachment trial for the former President Donald Trump, tonight his lawyer David Schoen withdrawing his request to pause the trial during the Jewish Sabbath. Friday evening and all day Saturday. That as the Senate is laying out a set of rules giving each side both House impeachment managers and Trump's legal team up to 16 hours to present their case. Trump's lawyers already arguing that the trial is unconstitutional because he is no longer president. So, I want to bring in now Senator Bob Casey, he's a Democrat of Pennsylvania. Senator, good to see you. Thank you so much.
+    --- REM TAIL   : ...ment managers and Trump's legal team up to 16 hours to present their case. Trump's lawyers already arguing that the trial is unconstitutional because he is no longer president. So, I want to bring in now Senator Bob Casey, he's a Democrat of Pennsylvania. Senator, good to see you. Thank you so much.
+    --- SEGMENT TAGS: [["LEMON (on camera)", "C_unanchored_paren", 114]]
+
+====================================================================================================
+#53  rowid=217666  class=C_unanchored_paren  member='Alexandria Ocasio-Cortez'  date=2021-02-20  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2021-02-20/segment/10
+    CUT_TAG='JIMENEZ (voice over)'   cut_at=388   orig_nwords=103  kept=70  removed=33
+    ALL_TAGS=[{"tag": "JIMENEZ (voice over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 388}]
+    --- KEPT HEAD  : You know, when disaster strikes, this is not just an issue for Texans, this is an issue for our entire country. Disasters don't strike everyone equally. When you already have so many families in the s
+    --- KEPT TAIL  : ...You know, when disaster strikes, this is not just an issue for Texans, this is an issue for our entire country. Disasters don't strike everyone equally. When you already have so many families in the state and across the country that are on the brink, that can't even afford an emergency to begin with, when you have a disaster like this, it can just set people back for years. [19:20:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : JIMENEZ (voice over): And as residents wait for the water and power to come back, some still forced to use their cars for warmth. Others, if they're lucky, find shelter in a hotel.
+    --- REM TAIL   : ...JIMENEZ (voice over): And as residents wait for the water and power to come back, some still forced to use their cars for warmth. Others, if they're lucky, find shelter in a hotel.
+    --- SEGMENT TAGS: [["JIMENEZ (voice over)", "C_unanchored_paren", 30]]
+
+====================================================================================================
+#54  rowid=221509  class=C_unanchored_paren  member='James Clyburn'  date=2021-09-08  show=cnnt  pkg=https://transcripts.cnn.com/show/cnnt/date/2021-09-08/segment/01
+    CUT_TAG='LEMON (on camera)'   cut_at=237   orig_nwords=152  kept=45  removed=107
+    ALL_TAGS=[{"tag": "LEMON (on camera)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 237}]
+    --- KEPT HEAD  : How much will it cost if we don't do this? Just think about what it's going to cost down in New Orleans about those nursing homes down there that have allowed people to die. That's a big cost that thi
+    --- KEPT TAIL  : ...How much will it cost if we don't do this? Just think about what it's going to cost down in New Orleans about those nursing homes down there that have allowed people to die. That's a big cost that this country can do without. [22:15:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : LEMON (on camera): President Biden set to unveil his six-point plan tomorrow on how his administration will try to end the COVID pandemic. A source telling CNN the plan will include vaccine requirements, which sounds like mandates, further protection for vaccinated Americans with booster shots. A focus on keeping schools open, increasing testing and requiring mask masking, plus economic recovery and improving care for those with COVID-19. There's a lot to discuss tonight with CNN's senior political commentator, David Axelrod and Matthew Dowd, the former chief strategist for President George W. Bush, and the author of "Revelations on the River." Gentlemen, good evening to both of you.
+    --- REM TAIL   : ...covery and improving care for those with COVID-19. There's a lot to discuss tonight with CNN's senior political commentator, David Axelrod and Matthew Dowd, the former chief strategist for President George W. Bush, and the author of "Revelations on the River." Gentlemen, good evening to both of you.
+    --- SEGMENT TAGS: [["LEMON (on camera)", "C_unanchored_paren", 104]]
+
+====================================================================================================
+#55  rowid=222899  class=C_unanchored_paren  member='Pramila Jayapal'  date=2021-10-29  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2021-10-29/segment/20
+    CUT_TAG='BLITZER (on camera)'   cut_at=557   orig_nwords=508  kept=107  removed=401
+    ALL_TAGS=[{"tag": "BLITZER (on camera)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 557}, {"tag": "KEVIN LIPTAK, CNN WHITE HOUSE REPORTER (on camera)", "class": "A_anchored_caps", "ownership": "foreign", "at": 1732}]
+    --- KEPT HEAD  : I know that is something the speaker wanted. I have signaled for days that we simply did not have the votes for the bipartisan bill without the other bill, the Build Back Better Act, which has 85 perc
+    --- KEPT TAIL  : ...ut the other bill, the Build Back Better Act, which has 85 percent of the president's agenda that we really care deeply about. But our members have been saying for months that these two bills need to be -- need to go together and that we need to have the legislative text. We have the text, and I really think it's going to be -- it's going to be quick here for us to pass both these bills through the House. [03:30:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : BLITZER (on camera): In the U.S. Senate, the moderate Democrat Joe Manchin who has been behind other major delays released a statement about the so-called framework, saying this, "It's the product of months of negotiation," he said. "And as we work through the text of the legislation, I would hope all of us will continue to deal in good faith and do what is right for the future of the American people," end quote. That from Senator Manchin. The House passed a temporary extension of highway funding, which will keep 3,700 federal workers from being furloughed in the coming days. It was set, by the way, to expire this weekend. But when it comes to pushing through President Biden's much larger ov
+    --- REM TAIL   : ...at they support this package. On the other side, Manchin and Sinema have put out some very supportive statements but they haven't said explicitly that they will get behind this bill. And until that happens, it's very hard to see how these two sides come together and give the president what he wants.
+    --- SEGMENT TAGS: [["BLITZER (on camera)", "C_unanchored_paren", 194], ["KEVIN LIPTAK, CNN WHITE HOUSE REPORTER (on camera)", "A_anchored_caps", 196]]
+
+====================================================================================================
+#56  rowid=223081  class=C_unanchored_paren  member='Mitch McConnell'  date=2021-11-08  show=ebo  pkg=https://transcripts.cnn.com/show/ebo/date/2021-11-08/segment/01
+    CUT_TAG='ZELENY(voice over)'   cut_at=243   orig_nwords=94  kept=43  removed=51
+    ALL_TAGS=[{"tag": "ZELENY(voice over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 243}]
+    --- KEPT HEAD  : The key to '22 is to have a discussion with the American people about how they feel about the new administration and democratic congress and what they're doing. So I think the election would be about 
+    --- KEPT TAIL  : ...The key to '22 is to have a discussion with the American people about how they feel about the new administration and democratic congress and what they're doing. So I think the election would be about the future, not about the past. [19:30:02] 
+    >>> CUT HERE <<<
+    --- REMOVED    : ZELENY(voice over): Trump's role in midterm election races and whether he runs for president again is a central question hanging over the party. At a weekend GOP gathering in Las Vegas, that question was on the back burner as former Vice President Mike Pence and a parade of Republicans made appearances.
+    --- REM TAIL   : ...NY(voice over): Trump's role in midterm election races and whether he runs for president again is a central question hanging over the party. At a weekend GOP gathering in Las Vegas, that question was on the back burner as former Vice President Mike Pence and a parade of Republicans made appearances.
+    --- SEGMENT TAGS: [["ZELENY(voice over)", "C_unanchored_paren", 49]]
+
+====================================================================================================
+#57  rowid=235280  class=C_unanchored_paren  member='Jim Jordan'  date=2023-01-06  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2023-01-06/segment/20
+    CUT_TAG='SERFATY (voice-over)'   cut_at=59   orig_nwords=21  kept=12  removed=9
+    ALL_TAGS=[{"tag": "SERFATY (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 59}]
+    --- KEPT HEAD  : Do what we told the voters we were going to do. [03:39:59] SERFATY (voice-over): With founding members like Congressman Jim Jordan.
+    --- KEPT TAIL  : ...Do what we told the voters we were going to do. [03:39:59] 
+    >>> CUT HERE <<<
+    --- REMOVED    : SERFATY (voice-over): With founding members like Congressman Jim Jordan.
+    --- REM TAIL   : ...SERFATY (voice-over): With founding members like Congressman Jim Jordan.
+    --- SEGMENT TAGS: [["SERFATY (voice-over)", "C_unanchored_paren", 7]]
+
+====================================================================================================
+#58  rowid=238571  class=C_unanchored_paren  member='Michael Turner'  date=2023-02-06  show=ampr  pkg=https://transcripts.cnn.com/show/ampr/date/2023-02-06/segment/01
+    CUT_TAG='SUAREZ (voiceover)'   cut_at=547   orig_nwords=156  kept=94  removed=62
+    ALL_TAGS=[{"tag": "SUAREZ (voiceover)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 547}]
+    --- KEPT HEAD  : The key is, is the payload attached to it, which you've reported is, you know, the size of three buses. And that's obviously huge. And it was being commanded and controlled by Mainland China and deliv
+    --- KEPT TAIL  : ...ge. And it was being commanded and controlled by Mainland China and delivering embedded (ph) data information back to mainland China. Again, if you look at the path and you put X's where all of our sensitive missile defense and nuclear facilities are, I believe that they were trying to gain information on how to defeat the command and control of our nuclear weapons systems and our missile defense systems. [13:35:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : SUAREZ (voiceover): The Pentagon says at least four other Chinese surveillance balloons have been spotted in recent years. They also said they had briefed Congress on previous balloons that flew near Texas and Florida. Officials say, this balloon was unique from the others in the path it took and the length of time it spent loitering over sensitive missile sites in Montana.
+    --- REM TAIL   : ...ce balloons have been spotted in recent years. They also said they had briefed Congress on previous balloons that flew near Texas and Florida. Officials say, this balloon was unique from the others in the path it took and the length of time it spent loitering over sensitive missile sites in Montana.
+    --- SEGMENT TAGS: [["SUAREZ (voiceover)", "C_unanchored_paren", 60]]
+
+====================================================================================================
+#59  rowid=241389  class=C_unanchored_paren  member='James Comer'  date=2023-04-08  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2023-04-08/segment/03
+    CUT_TAG='HOLMES (voice over)'   cut_at=64   orig_nwords=75  kept=11  removed=64
+    ALL_TAGS=[{"tag": "HOLMES (voice over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 64}]
+    --- KEPT HEAD  : It's a political scam. I've said that for weeks now. [12:40:00] HOLMES (voice over): Trump ally and Head of the House Judiciary Committee Jim Jordan, firing off a subpoena to a former senior prosecuto
+    --- KEPT TAIL  : ...It's a political scam. I've said that for weeks now. [12:40:00] 
+    >>> CUT HERE <<<
+    --- REMOVED    : HOLMES (voice over): Trump ally and Head of the House Judiciary Committee Jim Jordan, firing off a subpoena to a former senior prosecutor on the Manhattan DA's team Mark Pomerantz the committee saying Pomerantz's public statements about the investigation strongly suggest that Bragg's prosecution of President Trump is politically motivated. Trump World also questioning the impartiality of the judge on the case, Juan Merchan.
+    --- REM TAIL   : ...prosecutor on the Manhattan DA's team Mark Pomerantz the committee saying Pomerantz's public statements about the investigation strongly suggest that Bragg's prosecution of President Trump is politically motivated. Trump World also questioning the impartiality of the judge on the case, Juan Merchan.
+    --- SEGMENT TAGS: [["HOLMES (voice over)", "C_unanchored_paren", 61]]
+
+====================================================================================================
+#60  rowid=252705  class=C_unanchored_paren  member='Thomas Suozzi'  date=2024-02-13  show=se  pkg=https://transcripts.cnn.com/show/se/date/2024-02-13/segment/01
+    CUT_TAG='BASH (voice over)'   cut_at=102   orig_nwords=58  kept=20  removed=38
+    ALL_TAGS=[{"tag": "BASH (voice over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 102}]
+    --- KEPT HEAD  : You plan to vote - oh, don't watch the debate then because I don't want to lose your vote. [20:10:04] BASH (voice over): Whoever wins this seat, vacant since Republican George Santos was expelled, wil
+    --- KEPT TAIL  : ...You plan to vote - oh, don't watch the debate then because I don't want to lose your vote. [20:10:04] 
+    >>> CUT HERE <<<
+    --- REMOVED    : BASH (voice over): Whoever wins this seat, vacant since Republican George Santos was expelled, will have a big impact on a House with a narrow GOP majority. Suozzi is a seasoned politician with deep roots in the district.
+    --- REM TAIL   : ...BASH (voice over): Whoever wins this seat, vacant since Republican George Santos was expelled, will have a big impact on a House with a narrow GOP majority. Suozzi is a seasoned politician with deep roots in the district.
+    --- SEGMENT TAGS: [["BASH (voice over)", "C_unanchored_paren", 35]]
+
+====================================================================================================
+#61  rowid=137948  class=D_mixed_case_label  member='Michael Lawler'  date=2024-10-22  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/democrats-concentrate-on-new-york-congressional-races-that-could-decide-house-majority
+    CUT_TAG='Tom Stein, Democratic Voter'   cut_at=98   orig_nwords=50  kept=20  removed=30
+    ALL_TAGS=[{"tag": "Tom Stein, Democratic Voter", "class": "D_mixed_case_label", "ownership": "foreign", "at": 98}]
+    --- KEPT HEAD  : I think I do. I will be voting for him. But the choice is between Donald Trump and Kamala Harris. Tom Stein, Democratic Voter: When it comes down to it, he's got to support Trump or he won't have his 
+    --- KEPT TAIL  : ...I think I do. I will be voting for him. But the choice is between Donald Trump and Kamala Harris. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Tom Stein, Democratic Voter: When it comes down to it, he's got to support Trump or he won't have his job. And I think that's -- I feel it's dangerous.
+    --- REM TAIL   : ...Tom Stein, Democratic Voter: When it comes down to it, he's got to support Trump or he won't have his job. And I think that's -- I feel it's dangerous.
+    --- SEGMENT TAGS: [["Tom Stein, Democratic Voter", "D_mixed_case_label", 26]]
+
+====================================================================================================
+#62  rowid=155292  class=D_mixed_case_label  member='Josh Hawley'  date=2025-05-20  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/spring-storms-spark-scrutiny-of-fema-as-trump-overhauls-and-slashes-the-agency
+    CUT_TAG='Kristi Noem, U.S. Homeland Security Secretary'   cut_at=67   orig_nwords=49  kept=13  removed=36
+    ALL_TAGS=[{"tag": "Kristi Noem, U.S. Homeland Security Secretary", "class": "D_mixed_case_label", "ownership": "foreign", "at": 67}]
+    --- KEPT HEAD  : We need it as quickly as possible. Will you help us expedite that? Kristi Noem, U.S. Homeland Security Secretary: Absolutely. I have spoken with your governor and did that day that this devastation ha
+    --- KEPT TAIL  : ...We need it as quickly as possible. Will you help us expedite that? 
+    >>> CUT HERE <<<
+    --- REMOVED    : Kristi Noem, U.S. Homeland Security Secretary: Absolutely. I have spoken with your governor and did that day that this devastation happened. And so we have promised and pledged to get that expedited as soon as possible.
+    --- REM TAIL   : ...Kristi Noem, U.S. Homeland Security Secretary: Absolutely. I have spoken with your governor and did that day that this devastation happened. And so we have promised and pledged to get that expedited as soon as possible.
+    --- SEGMENT TAGS: [["Kristi Noem, U.S. Homeland Security Secretary", "D_mixed_case_label", 30]]
+
+====================================================================================================
+#63  rowid=175681  class=D_mixed_case_label  member='Tammy Duckworth'  date=2026-01-19  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/as-trump-expands-presidential-power-congress-divided-over-how-much-authority-to-cede
+    CUT_TAG='Jamil N. Jaffer, George Mason University'   cut_at=188   orig_nwords=56  kept=32  removed=24
+    ALL_TAGS=[{"tag": "Jamil N. Jaffer, George Mason University", "class": "D_mixed_case_label", "ownership": "foreign", "at": 188}]
+    --- KEPT HEAD  : I strongly disagree with him. That is absolutely not what the Constitution says. But, in fact, it is where Republicans are. They have basically given their powers over to the White House. Jamil N. Jaf
+    --- KEPT TAIL  : ...I strongly disagree with him. That is absolutely not what the Constitution says. But, in fact, it is where Republicans are. They have basically given their powers over to the White House. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Jamil N. Jaffer, George Mason University: President Trump has been running the table on the legislative branch for two terms now in a row.
+    --- REM TAIL   : ...Jamil N. Jaffer, George Mason University: President Trump has been running the table on the legislative branch for two terms now in a row.
+    --- SEGMENT TAGS: [["Jamil N. Jaffer, George Mason University", "D_mixed_case_label", 18]]
+
+====================================================================================================
+#64  rowid=257011  class=D_mixed_case_label  member='Betty McCollum'  date=2021-05-19  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/how-colorism-haunts-dark-skinned-immigrant-communities
+    CUT_TAG='Fred de Sam Lazaro'   cut_at=258   orig_nwords=76  kept=44  removed=32
+    ALL_TAGS=[{"tag": "Fred de Sam Lazaro", "class": "D_mixed_case_label", "ownership": "foreign", "at": 258}]
+    --- KEPT HEAD  : These cosmetics are coming in basically unregulated. We had 2.9 million cosmetic products were imported in 20 -- this is 20 -- it's the 2016 number. One percent were examined, and 15 percent of that 1
+    --- KEPT TAIL  : ...These cosmetics are coming in basically unregulated. We had 2.9 million cosmetic products were imported in 20 -- this is 20 -- it's the 2016 number. One percent were examined, and 15 percent of that 1 percent had contamination or it had illegal ingredients. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Fred de Sam Lazaro: McCollum has pushed the federal Food and Drug Administration to step up its enforcement and also arranged federal grants of $1 million to help programs like Adawe's Beautywell.
+    --- REM TAIL   : ...Fred de Sam Lazaro: McCollum has pushed the federal Food and Drug Administration to step up its enforcement and also arranged federal grants of $1 million to help programs like Adawe's Beautywell.
+    --- SEGMENT TAGS: [["Fred de Sam Lazaro", "D_mixed_case_label", 28]]
+
+====================================================================================================
+#65  rowid=257862  class=D_mixed_case_label  member='Mitch McConnell'  date=2022-07-18  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/how-some-members-of-the-republican-party-have-normalized-the-use-of-violent-rhetoric
+    CUT_TAG='Laura Barrón-López'   cut_at=102   orig_nwords=207  kept=18  removed=189
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 102}]
+    --- KEPT HEAD  : Well, I think that's something that voters in the Missouri Republican primary need to take a look at. Laura Barrón-López: And, in the House, members of GOP leadership have themselves amplified the sam
+    --- KEPT TAIL  : ...Well, I think that's something that voters in the Missouri Republican primary need to take a look at. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: And, in the House, members of GOP leadership have themselves amplified the same racist conspiracies espoused by mass shooters. In May, a mass shooter killed 10 people in a Buffalo New York grocery store. His online posts showed he was inspired by the racist and antisemitic -- quote -- "Great Replacement conspiracy," writing that: "Mass immigration will disenfranchise us, subvert our nations and destroy our communities." Experts saw echoes of that ideology in a Facebook ad posted last year by the third-ranking Republican in the House, Representative Elise Stefanik of New York. The ad accused Democrats of planning a "permanent election insurrection" through a plan to grant 
+    --- REM TAIL   : ...he left. Republicans have sought to label Democrats as equal actors in encouraging violence by pointing to some Black Lives Matter protests that devolved into looting and damaged property. Republicans have also tried to censure a Democratic congresswoman for urging protesters to get confrontational.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 187]]
+
+====================================================================================================
+#66  rowid=257966  class=D_mixed_case_label  member='Lindsey Graham'  date=2022-09-02  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/biden-accuses-trump-and-his-supporters-of-undermining-the-nations-democratic-values
+    CUT_TAG='Laura Barrón-López'   cut_at=117   orig_nwords=52  kept=18  removed=34
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 117}]
+    --- KEPT HEAD  : If there's a prosecution of Donald Trump for mishandling classified information, there will be riots in the streets. Laura Barrón-López: Biden rebuked Republicans who have normalized talk of political
+    --- KEPT TAIL  : ...If there's a prosecution of Donald Trump for mishandling classified information, there will be riots in the streets. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: Biden rebuked Republicans who have normalized talk of political violence, identifying them as the commanding force of the party. And, today, he again tried to reach those he described as mainstream Republicans.
+    --- REM TAIL   : ...Laura Barrón-López: Biden rebuked Republicans who have normalized talk of political violence, identifying them as the commanding force of the party. And, today, he again tried to reach those he described as mainstream Republicans.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 32]]
+
+====================================================================================================
+#67  rowid=257967  class=D_mixed_case_label  member='Brian Schatz'  date=2022-09-02  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/biden-accuses-trump-and-his-supporters-of-undermining-the-nations-democratic-values
+    CUT_TAG='Laura Barrón-López'   cut_at=486   orig_nwords=97  kept=82  removed=15
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 486}]
+    --- KEPT HEAD  : Well, it took President Biden a long time to get to the speech that he gave last night. And I think it's because of his long-term reticence to characterize the Republican Party in these terms. Some pe
+    --- KEPT TAIL  : ...t he gave last night. And I think it's because of his long-term reticence to characterize the Republican Party in these terms. Some people dispute the use of the word fascist. Some people think authoritarian is more accurate. There may be a new word to describe this kind of right-wing, anti small-D democratic tendency, but the truth is that there's an international authoritarian movement with which Trump is aligned. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: Schatz said, ultimately, races across the country will come down to one question.
+    --- REM TAIL   : ...Laura Barrón-López: Schatz said, ultimately, races across the country will come down to one question.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 13]]
+
+====================================================================================================
+#68  rowid=258183  class=D_mixed_case_label  member='Adam Schiff'  date=2022-12-16  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/secret-service-under-scrutiny-ahead-january-6-committees-final-report
+    CUT_TAG='Laura Barrón-López'   cut_at=121   orig_nwords=204  kept=22  removed=182
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 121}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 669}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1027}]
+    --- KEPT HEAD  : In this report received on December 26, the Secret Service field office relayed a tip that had been received by the FBI. Laura Barrón-López: Former FBI Agent Tracy Walder said no public accounting wit
+    --- KEPT TAIL  : ...In this report received on December 26, the Secret Service field office relayed a tip that had been received by the FBI. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: Former FBI Agent Tracy Walder said no public accounting with senior officials was a mistake. Tracy Walder, Former FBI Agent: I think, in the final report. What I would really like to see is accountability. I think that's the bottom line, whether it's the Secret Service or the FBI or local police, for not taking some of these threats seriously. And they need -- either need to have new training in place, in terms of how to understand some of these threats, or we need to look at creating a federal domestic terrorism statute. Laura Barrón-López: Speaking before a Senate committee in 2021, FBI Director Christopher Wray defended the FBI's actions, but admitted the outcome was i
+    --- REM TAIL   : ...e result. And that's why we're looking so hard at figuring out, how can the process be improved? Laura Barrón-López: The committee's report, compiled after months of public and private testimony, is expected to heavily focus on former President Donald Trump's efforts to overturn the 2020 election...
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 94], ["Laura Barrón-López", "D_mixed_case_label", 55], ["Laura Barrón-López", "D_mixed_case_label", 27]]
+
+====================================================================================================
+#69  rowid=258251  class=D_mixed_case_label  member='James Comer'  date=2023-01-16  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/biden-faces-intensifying-scrutiny-over-classified-documents-found-at-his-home
+    CUT_TAG='Laura Barrón-López'   cut_at=438   orig_nwords=204  kept=73  removed=131
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 438}]
+    --- KEPT HEAD  : At the end of the day, my biggest concern isn't the declassified documents, to be honest with you. My concern is how there's such a discrepancy in how former President Trump was treated by raiding Mar
+    --- KEPT TAIL  : ...day, my biggest concern isn't the declassified documents, to be honest with you. My concern is how there's such a discrepancy in how former President Trump was treated by raiding Mar-a-Lago, by getting the security cameras, by taking pictures of documents on the floor, by going through Melania's closet, vs. Joe Biden. They're like OK, your personal lawyers who don't have security clearance, yes, they can go through. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: Congressman Comer said right there that this is about the difference in treatment. Well, there's a very real factual reasons why there -- President Trump was treated differently. He withheld these documents for more than a year. And so did his team. And DOJ, National Archives expended a lot of different steps to try to get these documents back. And it wasn't until a judge signed off on a search warrant because they had real concern that the former president was obstructing the ability to obtain these documents and was also potentially violating the Espionage Act. I think it's also important to note that, as Republicans widely are calling for more information on Biden, the
+    --- REM TAIL   : ... the ability to obtain these documents and was also potentially violating the Espionage Act. I think it's also important to note that, as Republicans widely are calling for more information on Biden, they have not said that they would investigate former President Trump's classified documents at all.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 129]]
+
+====================================================================================================
+#70  rowid=258252  class=D_mixed_case_label  member='Adam Schiff'  date=2023-01-16  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/biden-faces-intensifying-scrutiny-over-classified-documents-found-at-his-home
+    CUT_TAG='Laura Barrón-López'   cut_at=236   orig_nwords=80  kept=40  removed=40
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 236}]
+    --- KEPT HEAD  : I think Congress ought to handle both situations the same way. And that is, we have to get a briefing from the intelligence community about any potential risks to national security of where those docu
+    --- KEPT TAIL  : ...I think Congress ought to handle both situations the same way. And that is, we have to get a briefing from the intelligence community about any potential risks to national security of where those documents were and what they contained. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: So, just like they called for in the case of President Trump's classified documents, Democrats are again calling for a damage assessment, which is very common when classified documents are found where they're not supposed to be found.
+    --- REM TAIL   : ...Laura Barrón-López: So, just like they called for in the case of President Trump's classified documents, Democrats are again calling for a damage assessment, which is very common when classified documents are found where they're not supposed to be found.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 38]]
+
+====================================================================================================
+#71  rowid=258253  class=D_mixed_case_label  member='Adam Smith'  date=2023-01-16  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/how-climate-change-makes-intense-winter-weather-events-more-common
+    CUT_TAG='Laura Barrón-López'   cut_at=226   orig_nwords=157  kept=42  removed=115
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 226}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 804}]
+    --- KEPT HEAD  : And so, in 2021, February was the most costly winter storm cold wave on record, which we remember the Texas energy grid froze. Many other states experienced a lot of damage from just the cold. It was 
+    --- KEPT TAIL  : ...And so, in 2021, February was the most costly winter storm cold wave on record, which we remember the Texas energy grid froze. Many other states experienced a lot of damage from just the cold. It was a over $20 billion event. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: While it's increasingly clear that other severe types of weather, like the recent flooding in California, droughts and longer wildfire seasons, all can be linked to global warming, the fingerprints of manmade climate change on extreme winter weather is less obvious. That debate often centers around the Arctic, a region warming nearly four times faster than the rest of the world. Judah Cohen, Verisk Atmospheric and Environmental Research: The biggest changes we're seeing with climate change and are happening in the Arctic. I think there's a connection. Laura Barrón-López: Climate scientist Dr. Judah Cohen studies the links between Arctic warming and disruptions to the pola
+    --- REM TAIL   : ...l Research: The biggest changes we're seeing with climate change and are happening in the Arctic. I think there's a connection. Laura Barrón-López: Climate scientist Dr. Judah Cohen studies the links between Arctic warming and disruptions to the polar vortex, the swirling winds above the North Pole.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 87], ["Laura Barrón-López", "D_mixed_case_label", 24]]
+
+====================================================================================================
+#72  rowid=258611  class=D_mixed_case_label  member='Lindsey Graham'  date=2023-05-15  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/the-roadblocks-to-holding-putin-and-his-high-command-accountable-for-war-crimes-in-ukraine
+    CUT_TAG='Lisa Monaco, U.S. Deputy Attorney General'   cut_at=66   orig_nwords=35  kept=13  removed=22
+    ALL_TAGS=[{"tag": "Lisa Monaco, U.S. Deputy Attorney General", "class": "D_mixed_case_label", "ownership": "foreign", "at": 66}]
+    --- KEPT HEAD  : I want to ask you again, is the Department of Defense the holdup? Lisa Monaco, U.S. Deputy Attorney General: Senator, I know the Department of Defense has had longstanding concerns about our engagemen
+    --- KEPT TAIL  : ...I want to ask you again, is the Department of Defense the holdup? 
+    >>> CUT HERE <<<
+    --- REMOVED    : Lisa Monaco, U.S. Deputy Attorney General: Senator, I know the Department of Defense has had longstanding concerns about our engagement. The department...
+    --- REM TAIL   : ...Lisa Monaco, U.S. Deputy Attorney General: Senator, I know the Department of Defense has had longstanding concerns about our engagement. The department...
+    --- SEGMENT TAGS: [["Lisa Monaco, U.S. Deputy Attorney General", "D_mixed_case_label", 16]]
+
+====================================================================================================
+#73  rowid=258713  class=D_mixed_case_label  member='Jeanne Shaheen'  date=2023-07-11  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/nato-summit-starts-with-ukraine-seeking-path-to-join-alliance
+    CUT_TAG='Laura Barrón-López'   cut_at=64   orig_nwords=209  kept=11  removed=198
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 64}, {"tag": "Emmanuel Macron, French President (through translator)", "class": "D_mixed_case_label", "ownership": "foreign", "at": 584}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 795}]
+    --- KEPT HEAD  : We can see something move forward when we see the ratification. Laura Barrón-López: All the while, the war in Ukraine goes on. Overnight, Russian forces attacks Kyiv and Odessa in drone strikes, whe
+    --- KEPT TAIL  : ...We can see something move forward when we see the ratification. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: All the while, the war in Ukraine goes on. Overnight, Russian forces attacks Kyiv and Odessa in drone strikes, where Ukrainian forces struck down 26 of the 28 drones. But one month into the Ukrainian counteroffensive, efforts to regain territory from Russia move slower than expected, and artillery is running low. Back in Vilnius, Ukraine welcomed a commitment by 11 allied countries to provide fighter jet training, and France announced it would send long-range missiles to the Ukrainian forces. Emmanuel Macron, French President (through translator): We have decided to deliver new deep-strike missiles to Ukraine. They will therefore be deployed in accordance with the commi
+    --- REM TAIL   : ...ers tomorrow once again to press his case. Many at the summit are watching that meeting closely tomorrow between President Biden and President Zelenskyy, especially as President Biden has refused to back off his position that the conflict must be over before Ukraine can gain full membership to NATO.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 79], ["Emmanuel Macron, French President (through translator)", "D_mixed_case_label", 25], ["Laura Barrón-López", "D_mixed_case_label", 84]]
+
+====================================================================================================
+#74  rowid=258820  class=D_mixed_case_label  member='Charles Schumer'  date=2023-09-21  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/ukraines-zelenskyy-appeals-to-u-s-for-continued-aid-against-russias-invasion
+    CUT_TAG='Laura Barrón-López'   cut_at=187   orig_nwords=378  kept=31  removed=347
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 187}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 731}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1172}, {"tag": "Mateusz Morawiecki, Polish Prime Minister (through interpreter)", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1912}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 2091}]
+    --- KEPT HEAD  : Providing aid is not just a matter of Ukrainian security. It's a matter of American security, because a victorious Putin is an emboldened Putin, making the world less safe for democracy. Laura Barrón-
+    --- KEPT TAIL  : ...Providing aid is not just a matter of Ukrainian security. It's a matter of American security, because a victorious Putin is an emboldened Putin, making the world less safe for democracy. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: Among the key things Zelenskyy asked for during his Capitol Hill visit, more air defense and long-range rockets, called ATACMS, which President Biden has been reluctant to provide. Just before Zelenskyy arrived at the White House to meet with Biden, National Security Adviser Jake Sullivan said the president would not be sending ATACMS to Ukraine, for now. Jake Sullivan, U.S. National Security Adviser: To date, he has determined that he would not provide ATACMS, but he has also not taken it off the table in the future. Laura Barrón-López: Later, at the White House, President Biden welcomed Zelenskyy and announced a new military aid package to Ukraine based on funds previou
+    --- REM TAIL   : ...last week, Poland, Hungary and Slovakia announced a ban on Ukrainian grain imports, saying the move was to protect their farmers. Back in the U.S., as Republican infighting over more aid to Ukraine continues, President Biden seeks to project strong support for a fellow democracy under brutal attack.
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 87], ["Laura Barrón-López", "D_mixed_case_label", 65], ["Laura Barrón-López", "D_mixed_case_label", 112], ["Mateusz Morawiecki, Polish Prime Minister (through interpreter)", "D_mixed_case_label", 18], ["Laura Barrón-López", "D_mixed_case_label", 50]]
+
+====================================================================================================
+#75  rowid=259085  class=D_mixed_case_label  member='Henry Cuellar'  date=2024-01-15  show=pbs-newshour  pkg=https://www.pbs.org/newshour/show/rep-cuellar-on-border-dispute-between-texas-federal-officials-after-migrant-deaths
+    CUT_TAG='Laura Barrón-López'   cut_at=786   orig_nwords=229  kept=145  removed=84
+    ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 786}]
+    --- KEPT HEAD  : Look, if the state would have not taken the action that they did last week, and that is bar and kick out the Border Patrol agents and remove equipment, like the scope truck that they had. The scope tr
+    --- KEPT TAIL  : ...ole when they got this distress call. Now, because of the state's action, the governor's action, what's happening now? The state is now defending and deflecting on what happened. And if they would have just allowed them to do -- the Border Patrol to do its work, we would not be talking about this story, except maybe a mother and an 8-year-old girl and a 10-year-old boy would have drowned, as other ones have drowned. 
+    >>> CUT HERE <<<
+    --- REMOVED    : Laura Barrón-López: Homeland Security is now threatening legal action if they -- if Border Patrol is not granted access to this Shelby Park in Eagle Pass. But I wanted to get your reaction from -- on Governor Greg Abbott, his tweet last night. Texas Governor Greg Abbott pushed back on what you accounted as the incident. And he blamed President Biden for the drowning, specifically saying: "The fact is, the deaths are because of Biden's open border magnet." What's your response to Governor Abbott?
+    --- REM TAIL   : ...Governor Greg Abbott, his tweet last night. Texas Governor Greg Abbott pushed back on what you accounted as the incident. And he blamed President Biden for the drowning, specifically saying: "The fact is, the deaths are because of Biden's open border magnet." What's your response to Governor Abbott?
+    --- SEGMENT TAGS: [["Laura Barrón-López", "D_mixed_case_label", 82]]
+
+====================================================================================================
+#76  rowid=70290  class=E_colonless_honorific  member='Hakeem Jeffries'  date=2024-08-25  show=ip  pkg=https://transcripts.cnn.com/show/ip/date/2024-08-25/segment/02
+    CUT_TAG='KAMALA HARRIS, VICE PRESIDENT OF THE'   cut_at=88   orig_nwords=24  kept=18  removed=6
+    ALL_TAGS=[{"tag": "KAMALA HARRIS, VICE PRESIDENT OF THE", "class": "E_colonless_honorific", "ownership": "foreign", "at": 88}]
+    --- KEPT HEAD  : Donald Trump is like an old boyfriend who you broke up with, but he just won't go away. KAMALA HARRIS, VICE PRESIDENT OF THE
+    --- KEPT TAIL  : ...Donald Trump is like an old boyfriend who you broke up with, but he just won't go away. 
+    >>> CUT HERE <<<
+    --- REMOVED    : KAMALA HARRIS, VICE PRESIDENT OF THE
+    --- REM TAIL   : ...KAMALA HARRIS, VICE PRESIDENT OF THE
+    --- SEGMENT TAGS: [["KAMALA HARRIS, VICE PRESIDENT OF THE", "E_colonless_honorific", 0]]
+
+====================================================================================================
+#77  rowid=74343  class=E_colonless_honorific  member='Robert Garcia'  date=2025-02-12  show=cg  pkg=https://transcripts.cnn.com/show/cg/date/2025-02-12/segment/02
+    CUT_TAG='REP. JASMINE CROCKETT (D-TX)'   cut_at=269   orig_nwords=50  kept=46  removed=4
+    ALL_TAGS=[{"tag": "REP. JASMINE CROCKETT (D-TX)", "class": "E_colonless_honorific", "ownership": "foreign", "at": 269}]
+    --- KEPT HEAD  : Chairwoman Greene literally showed a dick pic in our oversight congressional hearing, so I thought I'd bring one as well. Now, this, of course, we know, is President Elon Musk. He's also the world's r
+    --- KEPT TAIL  : ...Chairwoman Greene literally showed a dick pic in our oversight congressional hearing, so I thought I'd bring one as well. Now, this, of course, we know, is President Elon Musk. He's also the world's richest man. He was the biggest political donor in the last election. 
+    >>> CUT HERE <<<
+    --- REMOVED    : REP. JASMINE CROCKETT (D-TX),
+    --- REM TAIL   : ...REP. JASMINE CROCKETT (D-TX),
+    --- SEGMENT TAGS: [["REP. JASMINE CROCKETT (D-TX)", "E_colonless_honorific", 1]]
+
+====================================================================================================
+#78  rowid=103939  class=E_colonless_honorific  member='Tim Scott'  date=2023-04-16  show=meet-the-press  pkg=https://www.nbcnews.com/meet-the-press/meet-press-april-16-2023-n1304351
+    CUT_TAG='FMR. GOV. NIKKI HALEY'   cut_at=57   orig_nwords=77  kept=13  removed=64
+    ALL_TAGS=[{"tag": "FMR. GOV. NIKKI HALEY", "class": "E_colonless_honorific", "ownership": "foreign", "at": 57}]
+    --- KEPT HEAD  : I'm not going to talk about six or five or seven or ten. FMR. GOV. NIKKI HALEY I don't want unelected justices deciding something this personal. … We're not going to let this be a political football. 
+    --- KEPT TAIL  : ...I'm not going to talk about six or five or seven or ten. 
+    >>> CUT HERE <<<
+    --- REMOVED    : FMR. GOV. NIKKI HALEY I don't want unelected justices deciding something this personal. … We're not going to let this be a political football. Let's let the states work this out. If Congress decides to do it -- but don't get in that game of them saying “how many weeks, how many weeks.” No. Let's first figure out what we agree on. [END TAPE]
+    --- REM TAIL   : ...ed justices deciding something this personal. … We're not going to let this be a political football. Let's let the states work this out. If Congress decides to do it -- but don't get in that game of them saying “how many weeks, how many weeks.” No. Let's first figure out what we agree on. [END TAPE]
+    --- SEGMENT TAGS: [["FMR. GOV. NIKKI HALEY", "E_colonless_honorific", 60]]
+
+====================================================================================================
+#79  rowid=104834  class=E_colonless_honorific  member='Joaquin Castro'  date=2023-12-17  show=meet-the-press  pkg=https://www.nbcnews.com/meet-the-press/meet-press-december-17-2023-n1308182
+    CUT_TAG='REP. PRAMILA JAYAPAL'   cut_at=218   orig_nwords=57  kept=39  removed=18
+    ALL_TAGS=[{"tag": "REP. PRAMILA JAYAPAL", "class": "E_colonless_honorific", "ownership": "foreign", "at": 218}]
+    --- KEPT HEAD  : I want to speak quickly to the Democrats in the Senate and others who are considering supporting this proposal. If you do so, you will be surrendering to right-wing racism. And more than that, you wil
+    --- KEPT TAIL  : ...I want to speak quickly to the Democrats in the Senate and others who are considering supporting this proposal. If you do so, you will be surrendering to right-wing racism. And more than that, you will be enabling it. 
+    >>> CUT HERE <<<
+    --- REMOVED    : REP. PRAMILA JAYAPAL Senate Democrats and the White House must not agree to these extreme demands [END TAPE]
+    --- REM TAIL   : ...REP. PRAMILA JAYAPAL Senate Democrats and the White House must not agree to these extreme demands [END TAPE]
+    --- SEGMENT TAGS: [["REP. PRAMILA JAYAPAL", "E_colonless_honorific", 15]]
+
+====================================================================================================
+#80  rowid=188285  class=E_colonless_honorific  member='Charles Schumer'  date=2019-01-03  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2019-01-03/segment/19
+    CUT_TAG='SEN. MITCH'   cut_at=221   orig_nwords=40  kept=38  removed=2
+    ALL_TAGS=[{"tag": "SEN. MITCH", "class": "E_colonless_honorific", "ownership": "foreign", "at": 221}]
+    --- KEPT HEAD  : We would urge them respectfully to reconsider and support these bills which are bipartisan one of which Mitch McConnell proposed, open up the government as we continue to debate what is the best way t
+    --- KEPT TAIL  : ...We would urge them respectfully to reconsider and support these bills which are bipartisan one of which Mitch McConnell proposed, open up the government as we continue to debate what is the best way to secure our border. 
+    >>> CUT HERE <<<
+    --- REMOVED    : SEN. MITCH
+    --- REM TAIL   : ...SEN. MITCH
+    --- SEGMENT TAGS: [["SEN. MITCH", "E_colonless_honorific", 0]]
+
+====================================================================================================
+#81  rowid=191195  class=E_colonless_honorific  member='Nancy Pelosi'  date=2019-02-14  show=CPT  pkg=https://transcripts.cnn.com/show/CPT/date/2019-02-14/segment/01
+    CUT_TAG="HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S"   cut_at=101   orig_nwords=26  kept=17  removed=9
+    ALL_TAGS=[{"tag": "HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S", "class": "E_colonless_honorific", "ownership": "foreign", "at": 101}]
+    --- KEPT HEAD  : Mr. Corey (ph), Ms. Lowey that they did (ph), And Chair of the Appropriations Committee, Nita Lowey. HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S 28TH
+    --- KEPT TAIL  : ...Mr. Corey (ph), Ms. Lowey that they did (ph), And Chair of the Appropriations Committee, Nita Lowey. 
+    >>> CUT HERE <<<
+    --- REMOVED    : HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S 28TH
+    --- REM TAIL   : ...HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S 28TH
+    --- SEGMENT TAGS: [["HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S", "E_colonless_honorific", 1]]
+
+====================================================================================================
+#82  rowid=192027  class=E_colonless_honorific  member='Lucy McBath'  date=2019-03-02  show=ndaysat  pkg=https://transcripts.cnn.com/show/ndaysat/date/2019-03-02/segment/01
+    CUT_TAG='REP. STEVE SCALISE'   cut_at=99   orig_nwords=29  kept=19  removed=10
+    ALL_TAGS=[{"tag": "REP. STEVE SCALISE", "class": "E_colonless_honorific", "ownership": "foreign", "at": 99}]
+    --- KEPT HEAD  : I urge my colleagues to vote yes on HR8; the bipartisan Background Checks Act of 2019. It is time. REP. STEVE SCALISE, (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+    --- KEPT TAIL  : ...I urge my colleagues to vote yes on HR8; the bipartisan Background Checks Act of 2019. It is time. 
+    >>> CUT HERE <<<
+    --- REMOVED    : REP. STEVE SCALISE, (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+    --- REM TAIL   : ...REP. STEVE SCALISE, (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+    --- SEGMENT TAGS: [["REP. STEVE SCALISE", "E_colonless_honorific", 8]]
+
+====================================================================================================
+#83  rowid=212286  class=E_colonless_honorific  member='Rand Paul'  date=2020-05-13  show=nday  pkg=https://transcripts.cnn.com/show/nday/date/2020-05-13/segment/01
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=102   orig_nwords=26  kept=20  removed=6
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 102}]
+    --- KEPT HEAD  : I don't think you're the end all. I don't think you're the one person that gets to make the decision. DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- KEPT TAIL  : ...I don't think you're the end all. I don't think you're the one person that gets to make the decision. 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 4]]
+
+====================================================================================================
+#84  rowid=213110  class=E_colonless_honorific  member='Steve Scalise'  date=2020-07-31  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2020-07-31/segment/03
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=256   orig_nwords=52  kept=46  removed=6
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 256}]
+    --- KEPT HEAD  : That you worked with President Trump on and the whole team did. [10:00:03] I know when you go back to the beginning of this, the China ban was very heavily discussed. Were you involved in working with
+    --- KEPT TAIL  : ...That you worked with President Trump on and the whole team did. [10:00:03] I know when you go back to the beginning of this, the China ban was very heavily discussed. Were you involved in working with President Trump on deciding to ban flights from China? 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 4]]
+
+====================================================================================================
+#85  rowid=213122  class=E_colonless_honorific  member='Andy Kim'  date=2020-07-31  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2020-07-31/segment/08
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=1226   orig_nwords=230  kept=224  removed=6
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 1226}]
+    --- KEPT HEAD  : What I've heard over and over again, is that - that it's about where the responsibility is. This is the responsibility of federal government or the responsibility of states or localities? [12:00:00] A
+    --- KEPT TAIL  : ... the capabilities that we were, I want to ask you, would you say that our response at the Federal level to this crisis - would this be considered in your mind, withdrawing all your expertise, is this the gold standard of responses that our Federal government can do? Is there nothing else that you can think of, from your expertise and experience that we could be doing or should be doing, that we're not already doing? 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 4]]
+
+====================================================================================================
+#86  rowid=213926  class=E_colonless_honorific  member='Rand Paul'  date=2020-09-23  show=cnr  pkg=https://transcripts.cnn.com/show/cnr/date/2020-09-23/segment/06
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=4220   orig_nwords=704  kept=698  removed=6
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 4220}]
+    --- KEPT HEAD  : Initially, government officials were honest enough to admit that the goal of mitigation efforts, AKA, lockdown, was to flatten the curve, but the area under the curve, the total deaths from the virus 
+    --- KEPT TAIL  : ...gation recommendations considering the evidence that despite all of the things we've done in the U.S., our death rate is essentially worse than Sweden, equivalent to the less-developed world that is unable to do any of the things that you've been promoting? Do you have any second thoughts? Are you willing to look at the data that countries that did very little actually have a lower death rate than the United States? 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 4]]
+
+====================================================================================================
+#87  rowid=220804  class=E_colonless_honorific  member='Rand Paul'  date=2021-07-21  show=sitroom  pkg=https://transcripts.cnn.com/show/sitroom/date/2021-07-21/segment/02
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=188   orig_nwords=42  kept=36  removed=6
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 188}]
+    --- KEPT HEAD  : Dr. Fauci, knowing that it is a crime to lie to Congress, do you wish to retract your statement of May 11th where you claimed that the NIH never funded gain of function research in Wuhan. DR. ANTHONY 
+    --- KEPT TAIL  : ...Dr. Fauci, knowing that it is a crime to lie to Congress, do you wish to retract your statement of May 11th where you claimed that the NIH never funded gain of function research in Wuhan. 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 4]]
+
+====================================================================================================
+#88  rowid=271136  class=E_colonless_honorific  member='Glenn Grothman'  date=2020-03-11  show=msnow  pkg=https://www.ms.now/transcript/2020-03-11-msna1338736
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=131   orig_nwords=33  kept=25  removed=8
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 131}]
+    --- KEPT HEAD  : Based upon the currents trajectory how many people do you think will get this new virus and how many people do you think will die? DR. ANTHONY FAUCI, DIRECTOR OF THE NATIONAL INSTITUTE
+    --- KEPT TAIL  : ...Based upon the currents trajectory how many people do you think will get this new virus and how many people do you think will die? 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, DIRECTOR OF THE NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, DIRECTOR OF THE NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 6]]
+
+====================================================================================================
+#89  rowid=307009  class=E_colonless_honorific  member='Rand Paul'  date=2026-07-29  show=cnc  pkg=https://transcripts.cnn.com/show/cnc/date/2026-07-29/segment/05
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=182   orig_nwords=35  kept=28  removed=7
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 182}]
+    --- KEPT HEAD  : Dr. Fauci, were you ever made aware of gain of function research on monkeypox being conducted at the National Biodefense Analysis and Countermeasures Center, NBACC, at Fort Detrick? DR. ANTHONY FAUCI,
+    --- KEPT TAIL  : ...Dr. Fauci, were you ever made aware of gain of function research on monkeypox being conducted at the National Biodefense Analysis and Countermeasures Center, NBACC, at Fort Detrick? 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 5]]
+
+====================================================================================================
+#90  rowid=307013  class=E_colonless_honorific  member='James Lankford'  date=2026-07-29  show=cnc  pkg=https://transcripts.cnn.com/show/cnc/date/2026-07-29/segment/06
+    CUT_TAG='DR. ANTHONY FAUCI'   cut_at=3209   orig_nwords=579  kept=572  removed=7
+    ALL_TAGS=[{"tag": "DR. ANTHONY FAUCI", "class": "E_colonless_honorific", "ownership": "foreign", "at": 3209}]
+    --- KEPT HEAD  : Mr. Chairman, thank you. Dr. Fauci, thanks for coming today. I know you're invoking your Fifth Amendment right, which you have the right to be able to do constitutionally. But thanks for coming to be 
+    --- KEPT TAIL  : ... would be far, far more excess deaths from measles among children than coronavirus deaths among children. [09:40:09] I need to bring this up to the TF," the task force. Did you ever have an opportunity to bring up the potential of measles deaths among children and an infection rate going around the world from measles based on the fact that so many children would not get their measles vaccine because of the shutdown? 
+    >>> CUT HERE <<<
+    --- REMOVED    : DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE
+    --- REM TAIL   : ...DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE
+    --- SEGMENT TAGS: [["DR. ANTHONY FAUCI", "E_colonless_honorific", 5]]
+

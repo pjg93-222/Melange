@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB372CDD8CB3342A18BCF8AF97A390B50" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 9466 IH: Foreign Medical Program Integrity and Improvement Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-06-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 9466</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260625">June 25, 2026</action-date><action-desc><sponsor name-id="H001101">Mr. Harrigan</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To improve the integrity and oversight of the Foreign Medical Program of the Department of Veterans Affairs, and for other purposes.</official-title></form><legis-body id="HD5CB122F526145BA8FA4D0D995A1BC7D" style="OLC"> 
+<section id="H4796B32F3F1541A6BED880C325117252" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Foreign Medical Program Integrity and Improvement Act</short-title></quote>.</text></section> <section id="H650D3499F64746568086EF581AE35496" section-type="subsequent-section"><enum>2.</enum><header>Foreign Medical Program of the Department of Veterans Affairs: rates of payment; oversight</header> <subsection id="HB04433E6694840978CF2E3C83ABEAFB9"><enum>(a)</enum><header>Rates of payment</header><text>Section 1724 of title 38, United States Code, is amended by adding at the end the following new subsection:</text>
+<quoted-block style="USC" id="H7EFE3A3C534543208DC1885379F659E7" display-inline="no-display-inline">
+<subsection id="H522BCD7BCCD04914A35295E1F3C18F13"><enum>(g)</enum>
+<paragraph id="HA5E94568B1634D6793A089F008F948D4" display-inline="yes-display-inline"><enum>(1)</enum><text display-inline="yes-display-inline">Subject to paragraph (2), the rate paid for hospital care or medical services under this section shall be the lesser of—</text> <subparagraph id="HC88A39A5AA084A58A5E2B5F867639B4C" indent="up1"><enum>(A)</enum><text display-inline="yes-display-inline">the amount billed for such hospital care or medical services; or</text></subparagraph>
+<subparagraph id="H127C6FABD2564C3FB60D1BF8BD3002B3" indent="up1"><enum>(B)</enum><text>the rate paid by the United States to a provider of services (as defined in section 1861(u) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395x">42 U.S.C. 1395x(u)</external-xref>)) or a supplier (as defined in section 1861(d) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395x">42 U.S.C. 1395x(d)</external-xref>)) under the Medicare program under title XVIII of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1301">42 U.S.C. 1301 et seq.</external-xref>), including section 1834 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395m">42 U.S.C. 1395m</external-xref>), for the same care or services.</text></subparagraph></paragraph> <paragraph id="H6B59521A7FBD491F83A8DA60BBF5EDDF" indent="up1"> <enum>(2)</enum> <text display-inline="yes-display-inline">The Secretary may make a payment in excess of the rate determined under paragraph (1) to ensure that a veteran has access to hospital care or medical services, including in an emergency.</text>
+                        </paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection>
+<subsection id="HDBA0F9395B9D4179A85AA89FA5008799"><enum>(b)</enum><header>In the case of a deceased veteran or provider</header><text display-inline="yes-display-inline">Section 1724 of title 38, United States Code, is amended by adding at the end the following new subsection:</text> <quoted-block style="USC" id="HD7526C9944594ED9A9DC3F75BF069E25" display-inline="no-display-inline"> <subsection id="H21D50018BCEB42BD93AB7321532785AA"><enum>(h)</enum> <paragraph id="H43961EE76A60426FB1467B9C4E3BE167" display-inline="yes-display-inline"><enum>(1)</enum><text display-inline="yes-display-inline">The Secretary may not use any Federal funds to pay for care or services furnished under this section—</text> 
+<subparagraph id="HBFA19A687B7641A3AA407A3093581FEC" indent="up1"><enum>(A)</enum> 
+<clause id="HB8CFC6AE1D9042D6B01BAD01F60286C8" display-inline="yes-display-inline"><enum>(i)</enum><text>to an individual who appears in the Death Master File; or</text></clause> <clause id="H5B91FC84DE424704942FB7A0A786F94F" indent="up1"><enum>(ii)</enum><text display-inline="yes-display-inline">by an individual who appears in the Death Master File; and</text></clause></subparagraph> 
+<subparagraph id="HAD3ACA3FCDD94B1BA76BBEB41857367E" indent="up1"><enum>(B)</enum><text>after the date of death of such individual.</text></subparagraph></paragraph> <paragraph id="H9C675377A0A64C5ABF7EA714FA23271A" indent="up1"><enum>(2)</enum><text display-inline="yes-display-inline">In this subsection, the term <quote>Death Master File</quote> has the meaning given such term in section 203 of the Bipartisan Budget Act of 2013 (<external-xref legal-doc="public-law" parsable-cite="pl/113/167">Public Law 113–167</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/42/1306c">42 U.S.C. 1306c</external-xref>).</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </subsection> 
+<subsection id="HDBC1BDD82E934623BAD9400276473B57"><enum>(c)</enum><header>In cases of fraud</header><text display-inline="yes-display-inline">Section 1724 of title 38, United States Code, is further amended by adding at the end the following new subsections:</text> <quoted-block style="USC" id="HD356165D06624A19BB9063722351E7EB" display-inline="no-display-inline"> <subsection id="H8A898A358C284EDDAC7985591DE9D5B6"><enum>(i)</enum><text display-inline="yes-display-inline">In the case of a claim for payment for care or services furnished under this section that the Secretary suspects constitutes fraud, waste or abuse, the Secretary—</text> 
+<paragraph id="HE0CB6777DF2643C3A4EAF7F2383EA323"><enum>(1)</enum><text>shall refer such claim to the Inspector General of the Department;</text></paragraph> <paragraph id="HFEBFD69EA12647DAA0F0CC1BD6F505F4"><enum>(2)</enum><text>may withhold such payment during the investigation of such claim;</text></paragraph> 
+<paragraph id="H62895C35FFD64DF29B726BF07B8EE53F"><enum>(3)</enum><text display-inline="yes-display-inline">shall approve the claim and release such payment as soon as practicable if the Inspector General determines that the claim is proper; and</text></paragraph> <paragraph id="H6B6509AF60814350A869985ECA53C37D"><enum>(4)</enum><text display-inline="yes-display-inline">shall, if the Inspector General determines that such claim constitutes fraud, waste or abuse—</text> 
+<subparagraph id="H9694D2091E1549B081B7E3DAE72EF341"><enum>(A)</enum><text display-inline="yes-display-inline">deny the claim; and</text></subparagraph> <subparagraph id="H9DCBB0EA1D194B7588C9238FBEA96BAE"><enum>(B)</enum><text display-inline="yes-display-inline">take action the Secretary determines appropriate to recover any Federal funds already paid in relation to such claim, claimant, or provider.</text></subparagraph></paragraph></subsection> 
+<subsection id="H6880486C98E94FBDABC10204DC0732FA"><enum>(j)</enum> 
+<paragraph id="H3F615CC6B183427D83AFC9EC2BD859C6" display-inline="yes-display-inline"><enum>(1)</enum><text>The Secretary shall maintain a list of providers of care or services furnished under this section who have submitted fraudulent claims for such care or services.</text></paragraph> <paragraph id="H571F0091E1A54122910900C3D081F020" indent="up1"><enum>(2)</enum><text display-inline="yes-display-inline">The Secretary may not use any Federal funds to pay for care or services furnished under this section by a provider whose name appears on the list.</text> </paragraph> 
+<paragraph id="H7049DAA9165D47559ED88A92CE2C79AA" indent="up1"><enum>(3)</enum><text display-inline="yes-display-inline">Each time the Secretary adds the name of a provider to the list, the Secretary shall distribute the list electronically to veterans registered in a program under this section.</text></paragraph></subsection> <subsection id="H2AD47CD980D04A8DA291DF57CFD30B02"><enum>(j)</enum><text>The Secretary shall designate a Fraud Detection and Prevention Coordinator to carry out subsections (h), (i), and (j) of this section.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="H31C8156FB91C4D93996A843BEAD9543D">
+                <enum>(d)</enum>
+                <header>Authority To contract</header>
+                <paragraph id="H6132B06442F645FA89F74B62473A0645">
+                    <enum>(1)</enum>
+                    <header>In general</header>
+ <text display-inline="yes-display-inline">Section 1724 of title 38, United States Code, is further amended by adding at the end the following new subsection:</text>
+                    <quoted-block style="USC" id="H95AC39F7D957436ABF44CC6B44EF5B87"
+                        display-inline="no-display-inline">
+                        <subsection id="H07938526031C446C8BB88A8839D5B240">
+                            <enum>(k)</enum>
+ <text display-inline="yes-display-inline">The Secretary may enter into an agreement with an entity pursuant to which such entity shall serve as a third-party administrator of claims for care or services furnished under this section.</text>
+                        </subsection>
+                        <after-quoted-block>.</after-quoted-block>
+                    </quoted-block>
+                </paragraph>
+                <paragraph id="H41B23D885B3D4778A2605731F55D7E6F">
+                    <enum>(2)</enum>
+                    <header>Temporary expansion</header>
+ <text display-inline="yes-display-inline">The Secretary of Veterans Affairs may enter into an agreement with an entity pursuant to which such entity shall provide to the Secretary access to an information technology system for the administration of claims for care or services furnished under such section. If the Secretary exercises such authority, the Secretary shall ensure that implementation of such system is complete not later than one year after the date of the enactment of this Act.</text>
+                </paragraph>
+            </subsection></section> 
+</legis-body></bill>
+

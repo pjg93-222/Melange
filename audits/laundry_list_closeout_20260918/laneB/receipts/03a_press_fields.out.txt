@@ -1,0 +1,114 @@
+﻿=== official_mentions.jsonl ===
+exists True  38182289 bytes
+lines: 21877
+field frequency: {'article_url': 21877, 'body_sha256': 21877, 'date': 21877, 'disposition': 21877, 'evidence': 21877, 'host_member': 21877, 'mentioned_bioguide': 21877, 'mentioned_member': 21877, 'relationship_url': 21877, 'schema': 21877, 'source_run': 21877, 'title': 21877}
+FIRST ROW:
+{
+  "article_url": "https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=144695EB-E5A4-414B-8634-A6D35BC6645D",
+  "body_sha256": "dffb58b1f8a29c021214d709c57fdd9e5d7bba6c25bae8207f262c5b826ecac4",
+  "date": "2026-08-13",
+  "disposition": "REFERENCE_DISCOVERY_ONLY_NOT_STANCE_OR_SPEECH",
+  "evidence": "Sens. Klobuchar, Schiff Introduce Comprehensive Cybersecurity Bill in Wake of Recent Cyberattacks on Water Infrastructure Sens. Klobuchar, Schiff Introduce Comprehensive Cybersecurity Bill in Wake of Recent Cyberattacks on Water Infrastructure Sens. Klobuchar, Schiff Introduce Comprehensive Cybersecurity Bill in Wake of Recent Cyberattacks on Water Infrastructure Bill would give EPA explicit oversight authority on state water systems August 13, 2026 WASHINGTON <U+2013> U.S. Senators Amy Klobuchar (D-MN) and Adam Schiff (D-CA) introduced the Water Cyber Shield Act to improve cybersecurity in America<U+2019>s water infrastructure in the wake of recent cyberattacks against water utilities. The legislation would strengthen federal oversight by the Environmental Protection Agency (EPA), provide critical funding for local utilities, and safeguard drinking water and wastewater systems from cyberattacks. <U+201C>Our legislation will direct the EPA to assess water infrastructure cybersecurity and identify vulnerabilities, and help municipal water systems defend against cyber threats. Protecting our critical infrastructure and the safety of Minnesotans is a top priority.<U+201D> <U+201C>Ever",
+  "host_member": "Amy Klobuchar",
+  "mentioned_bioguide": "S001150",
+  "mentioned_member": "Adam B. Schiff",
+  "relationship_url": "https://www.klobuchar.senate.gov/public/index.cfm/news-releases?ID=144695EB-E5A4-414B-8634-A6D35BC6645D#S001150",
+  "schema": "official-press-mention-v1",
+  "source_run": "press_refresh_20260828",
+  "title": "Sens. Klobuchar, Schiff Introduce Comprehensive Cybersecurity Bill in Wake of Recent Cyberattacks on Water Infrastructure"
+}
+
+=== candidate url/domain fields, sample values ===
+ url            present=0       []
+ host_url       present=0       []
+ source_url     present=0       []
+ link           present=0       []
+ domain         present=0       []
+ host_domain    present=0       []
+ outlet         present=0       []
+ source         present=0       []
+ article_url    present=21877   ['https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=144695EB-E5A4-414B-8634-A6D35BC6645D', 'https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=24870B36-1145-44A5-9652-8BF90921A11C', 'https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=24870B36-1145-44A5-9652-8BF90921A11C', 'https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=24870B36-1145-44A5-9652-8BF90921A11C', 'https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=34A3205B-E8EF-4DA3-B9F6-EDAADBC73011']
+
+=== domain histogram over every url-ish field present ===
+-- article_url : 443 distinct hosts
+     padilla.senate.gov                                      692
+     bennet.senate.gov                                       557
+     schiff.senate.gov                                       532
+     reed.senate.gov                                         523
+     warren.senate.gov                                       493
+     merkley.senate.gov                                      455
+     raskin.house.gov                                        436
+     heinrich.senate.gov                                     424
+     durbin.senate.gov                                       419
+     slotkin.senate.gov                                      412
+     murray.senate.gov                                       405
+     kelly.senate.gov                                        384
+     vanhollen.senate.gov                                    366
+     wyden.senate.gov                                        364
+     duckworth.senate.gov                                    348
+     jayapal.house.gov                                       348
+     booker.senate.gov                                       316
+     whitehouse.senate.gov                                   294
+     markey.senate.gov                                       282
+     panetta.house.gov                                       269
+     lujan.senate.gov                                        266
+     walkinshaw.house.gov                                    265
+     warner.senate.gov                                       251
+     chu.house.gov                                           250
+     gillibrand.senate.gov                                   225
+
+=== cu_press_stance_tone.csv ===
+exists True  1080244 bytes
+columns: ['member', 'bioguide', 'chamber', 'state', 'party', 'date', 'title', 'url', 'categories', 'relevance', 'score', 'score_graded', 'score_label', 'stance', 'stance_sign', 'p_support', 'p_oppose', 'p_neutral', 'stance_conf', 'n_words', 'lsd_pos', 'lsd_neg', 'lsd_net', 'lsd_net_norm', 'lsd_charge', 'stance_src', 'press_value', 'recency_weight']
+rows: 2388
+top 20 hosts:
+   www.americascreditunions.org                            816
+   www.marshall.senate.gov                                  49
+   www.hagerty.senate.gov                                   40
+   www.vanhollen.senate.gov                                 32
+   www.warnock.senate.gov                                   32
+   www.reed.senate.gov                                      24
+   www.kennedy.senate.gov                                   23
+   www.warren.senate.gov                                    22
+   www.britt.senate.gov                                     22
+   www.cortezmasto.senate.gov                               21
+   www.lummis.senate.gov                                    21
+   www.welch.senate.gov                                     20
+   www.crapo.senate.gov                                     19
+   www.blumenthal.senate.gov                                19
+   www.whitehouse.senate.gov                                19
+   www.thune.senate.gov                                     18
+   www.cramer.senate.gov                                    18
+   www.scott.senate.gov                                     18
+   www.boozman.senate.gov                                   17
+   www.ossoff.senate.gov                                    17
+own-domain rows (.house.gov/.senate.gov): 1569 of 2388
+
+=== press_refresh_tone.csv ===
+exists True  134925 bytes
+columns: ['member', 'bioguide', 'chamber', 'state', 'party', 'date', 'title', 'url', 'categories', 'relevance', 'score', 'score_graded', 'score_label', 'stance', 'stance_sign', 'p_support', 'p_oppose', 'p_neutral', 'stance_conf', 'n_words', 'lsd_pos', 'lsd_neg', 'lsd_net', 'lsd_net_norm', 'lsd_charge', 'stance_src', 'press_value', 'recency_weight', 'source_run', 'source']
+rows: 291
+top 20 hosts:
+   www.americascreditunions.org                             67
+   whitesides.house.gov                                      9
+   riley.house.gov                                           9
+   www.welch.senate.gov                                      7
+   www.warnock.senate.gov                                    6
+   www.reed.senate.gov                                       5
+   www.hickenlooper.senate.gov                               5
+   www.bluntrochester.senate.gov                             5
+   www.hassan.senate.gov                                     5
+   www.gallego.senate.gov                                    5
+   loudermilk.house.gov                                      4
+   www.rosen.senate.gov                                      4
+   www.shaheen.senate.gov                                    4
+   www.heinrich.senate.gov                                   4
+   www.durbin.senate.gov                                     4
+   horsford.house.gov                                        4
+   www.collins.senate.gov                                    4
+   timmoore.house.gov                                        4
+   salazar.house.gov                                         3
+   www.crapo.senate.gov                                      3
+own-domain rows (.house.gov/.senate.gov): 224 of 291
+
+DONE 03a

@@ -1,0 +1,84 @@
+{
+ "cat_hits": {
+  "CDFI Fund": 90,
+  "CFPB Issues & Structural Reform": 110,
+  "Charter Modernization & Governance": 12,
+  "Credit Card & Consumer-Fee Mandates": 48,
+  "Credit Union Capital Requirements": 6,
+  "Credit Union Tax Status": 60,
+  "Data Privacy & Cybersecurity": 21,
+  "Defense Credit Union Issues": 9,
+  "Examination & Supervision": 64,
+  "Field of Membership": 10,
+  "Fraud Prevention": 75,
+  "Interchange": 75,
+  "Member Business Lending": 34,
+  "Mortgage Lending & Housing": 345,
+  "NCUA Budget & Share Insurance Fund": 3,
+  "Payments": 58,
+  "Technology & Emerging Issues": 144,
+  "Telephone Consumer Protection Act": 1
+ },
+ "dispositions": {
+  "neutral-zeroed": 845,
+  "no-policy-domain": 60,
+  "unresolved-member": 3,
+  "used": 1387,
+  "zero-intensity": 384
+ },
+ "ingest": {
+  "cu_press_stance_tone.csv": {
+   "empty_url": 0,
+   "kept": 2388,
+   "official_mention": 0,
+   "read": 2388,
+   "turnkey_dup": 0
+  },
+  "press_refresh_tone.csv": {
+   "empty_url": 0,
+   "kept": 291,
+   "official_mention": 0,
+   "read": 291,
+   "turnkey_dup": 0
+  }
+ },
+ "nonstance_hits": {
+  "CU-Bank Competitive Dynamics": 18,
+  "General Credit Union": 398
+ },
+ "stance_weight": 977.75,
+ "tone_rows": 2679,
+ "total_weight": 1387.0,
+ "urlform_double_detail": {
+  "Cynthia Lummis|(unparsed)": [
+   "General Credit Union",
+   "General Credit Union"
+  ],
+  "Gabe Amo|(unparsed)": [
+   "General Credit Union",
+   "General Credit Union"
+  ],
+  "Mike Crapo|(unparsed)": [
+   "General Credit Union",
+   "General Credit Union"
+  ],
+  "Patty Murray|(unparsed)": [
+   "General Credit Union",
+   "General Credit Union"
+  ],
+  "Roger Marshall|2022-08-11": [
+   "Interchange",
+   "Interchange"
+  ],
+  "Seth Magaziner|(unparsed)": [
+   "General Credit Union",
+   "General Credit Union"
+  ]
+ },
+ "urlform_double_scoring": 6,
+ "urlform_groups": 12,
+ "used": 1387,
+ "used_mixed": 12,
+ "used_reaching_stance_cell": 983,
+ "used_sheet_only": 404
+}

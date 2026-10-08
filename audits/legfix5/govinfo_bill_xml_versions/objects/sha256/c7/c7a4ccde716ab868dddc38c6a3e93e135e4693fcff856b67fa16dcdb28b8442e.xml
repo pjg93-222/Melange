@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H2A591314D6B04BB0B064874C47ECF23F" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7528 IH: Growing America’s Pharmaceutical Supply Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-02-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7528</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260212">February 12, 2026</action-date><action-desc><sponsor name-id="C001103">Mr. Carter of Georgia</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend section 503B of the Federal Food, Drug, and Cosmetic Act to enhance the ability of outsourcing facilities to mitigate drug shortages by allowing a short-term period to continue supplying the market after a drug is in shortage.</official-title></form><legis-body id="H71E8F9C8D899492A993EAE261D474BA7" style="OLC"> 
+<section id="H49D8B8E8917F41F2B5EEDB0FB5B5EAD5" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Growing America’s Pharmaceutical Supply Act</short-title></quote> or the <quote><short-title>GAP Supply Act</short-title></quote>.</text></section> <section id="HD7F76CF4986549A08144EBE28A2F0670"><enum>2.</enum><header>Providing for a tail period for outsourcing facilities to compound and distribute drugs in shortage</header><text display-inline="no-display-inline">Section 503B of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/353b">21 U.S.C. 353b</external-xref>) is amended—</text> 
+<paragraph id="H1C71D32A60014EA4920B02C554892CDC"><enum>(1)</enum><text>in subsection (a)(2)(A)(ii), by striking <quote>at the time</quote> and inserting <quote>within 180 calendar days</quote>; and</text></paragraph> <paragraph id="HC51F53AE950549DC841A5081C71998F6"><enum>(2)</enum><text>in subsection (d)(2)(A), by striking <quote>at the time</quote> and inserting <quote>within 180 calendar days</quote>.</text></paragraph></section> 
+</legis-body></bill>
+

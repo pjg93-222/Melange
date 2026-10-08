@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 136 STAT. ?>
+<?I98 136 STAT. ?>
+<?I99 136 STAT. ?>
+<?I50 PUBLIC LAW 117–330—JAN. 5, 2023?>
+<?I51 PUBLIC LAW 117–330—JAN. 5, 2023?>
+<?I52 PUBLIC LAW 117–330—JAN. 5, 2023?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 117–330: To study the incidence of fatal and non-fatal assaults in TNC and for-hire vehicles in order to enhance safety and save lives.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>330</docNumber>
+<citableAs>Public Law 117–330</citableAs><citableAs>136 Stat. 6114</citableAs>
+<approvedDate>2023-01-05</approvedDate>
+<dc:date>2023-01-05</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>117</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 117–330—JAN. 5, 2023</centerRunningHead>
+<page identifier="/us/stat/136/6114">136 STAT. 6114</page>
+<dc:type>Public Law</dc:type><docNumber>117–330</docNumber>
+<congress value="117">117th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To study the incidence of fatal and non-fatal assaults in TNC and for-hire vehicles in order to enhance safety and save lives.<sidenote><p class="centered fontsize8" id="x0de7fdd7-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076"><approvedDate date="2023-01-05">Jan. 5, 2023</approvedDate></p><p class="centered fontsize8" id="x0de7fdd8-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076">[<ref href="/us/bill/117/hr/1082">H.R. 1082</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x0de7fdd9-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180">Sami’s Law.</p></sidenote>
+<section id="d50888e88" identifier="/us/pl/117/330/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x0de7fdda-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180"><ref href="/us/usc/t34/s10101">34 USC 10101 note</ref>.</p></sidenote><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Sami’s Law</shortTitle>”.</content></section>
+<section id="d50888e103" identifier="/us/pl/117/330/s2" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>GAO STUDY ON INCIDENCE OF FATAL AND NON-FATAL PHYSICAL AND SEXUAL ASSAULT OF PASSENGERS, TNC DRIVERS, AND DRIVERS OF OTHER FOR-HIRE VEHICLES.</heading><subsection class="firstIndent0 fontsize10" id="y0de84bfb-e815-11f0-a1e4-69761a48a15a" identifier="/us/pl/117/330/s2/a" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">(a) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x0de84bfc-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180"><ref href="/us/usc/t34/s41313">34 USC 41313</ref>.</p></sidenote><heading class="fontsize10"><inline class="smallCaps">GAO Report</inline>.—</heading><chapeau>Not later than 1 year after the date of enactment of this Act, and every 2 years thereafter, the Comptroller General of the United States shall submit to Congress a report that includes the results of a study regarding—</chapeau><paragraph class="fontsize10" id="y0de84bfd-e815-11f0-a1e4-69761a48a15a" identifier="/us/pl/117/330/s2/a/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x0de84bfe-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180">Time period.</p></sidenote><chapeau>the incidence of fatal and non-fatal physical assault and sexual assault perpetrated in the preceding 2 calendar years (starting with calendar years 2019 and 2020 for the first study)—</chapeau><subparagraph class="fontsize10" id="y0de84bff-e815-11f0-a1e4-69761a48a15a" identifier="/us/pl/117/330/s2/a/1/A" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="A">(A) </num><content>against TNC drivers and drivers of other for-hire vehicles (including taxicabs) by passengers and riders of for-hire vehicles; and</content></subparagraph>
+<subparagraph class="fontsize10" id="y0de84c00-e815-11f0-a1e4-69761a48a15a" identifier="/us/pl/117/330/s2/a/1/B" style="-uslm-lc:I658124"><num class="fontsize10" style="-uslm-lc:emspace2" value="B">(B) </num><content>against passengers and riders by other passengers and TNC drivers or drivers of other for-hire vehicles (including taxicabs), including the incidences that are committed by individuals who are not TNC drivers or drivers of other for-hire vehicles but who pose as TNC drivers or drivers of other for-hire vehicles;</content></subparagraph>
+</paragraph>
+<paragraph class="fontsize10" id="y0de84c01-e815-11f0-a1e4-69761a48a15a" identifier="/us/pl/117/330/s2/a/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>the nature and specifics of any background checks conducted on prospective TNC drivers and drivers of other for-hire vehicles (including taxicabs), including any State and local laws requiring those background checks; and</content></paragraph>
+<paragraph class="fontsize10" id="y0de84c02-e815-11f0-a1e4-69761a48a15a" identifier="/us/pl/117/330/s2/a/3" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="3">(3) </num><content>the safety steps taken by transportation network companies and other for-hire vehicle services (including taxicab companies) related to rider and driver safety.<page identifier="/us/stat/136/6115">136 STAT. 6115</page></content></paragraph>
+</subsection>
+<subsection class="firstIndent0 fontsize10" id="y0de84c03-e815-11f0-a1e4-69761a48a15a" identifier="/us/pl/117/330/s2/b" role="definitions" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">(b) </num><heading class="fontsize10"><inline class="smallCaps">Sexual Assault Defined</inline>.—</heading><content>In this section, the term “<term>sexual assault</term>” means the occurrence of an act that constitutes any nonconsensual sexual act proscribed by Federal, Tribal, or State law, including when the victim lacks capacity to consent.</content></subsection>
+</section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2023-01-05">January 5, 2023</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/117/hr/1082">H.R. 1082</ref>:</heading>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 168 (2022):</heading>
+<p class="indentUp4 firstIndent-1" id="x0de87314-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">Dec. 13, considered in House.</p><p class="indentUp4 firstIndent-1" id="x0de87315-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">Dec. 14, prior proceedings vacated; considered and passed House.</p><p class="indentUp4 firstIndent-1" id="x0de87316-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">Dec. 22, considered and passed Senate, amended.</p><p class="indentUp4 firstIndent-1" id="x0de87317-e815-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">Dec. 23, House concurred in Senate amendments pursuant to H. Res. 1531.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

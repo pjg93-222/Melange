@@ -1,0 +1,14 @@
+voteview party duplicate: congress=119 bioguide=K000401 icpsrs=['22336', '92336'] party_codes=['200', '328'] chosen_icpsr=92336 chosen_party_code=328 rule=largest numeric icpsr
+voteview party duplicate: congress=118 bioguide=M001183 icpsrs=['40915', '90915'] party_codes=['100', '328'] chosen_icpsr=90915 chosen_party_code=328 rule=largest numeric icpsr
+kernel spectral radius ~19.069 -> delta=0.0446 (KB series converges)
+
+Battaglini-Patacchini check — Spearman rho of Katz-Bonacich centrality vs:
+  optimizer alloc $ (all members, $0 for unallocated)  rho=+0.225 (n=533)
+  optimizer alloc $ (allocated members only)           rho=+0.142 (n=356)
+  observed CU money                                    rho=-0.014 (n=533)
+  observed industry money (banks+finserv)              rho=+0.004 (n=533)
+  legislative score                                    rho=+0.464 (n=533)
+
+top-decile KB centrality with $0 suggested (centrality the model declines to buy — stance/receptivity/capacity price it out):
+  Amy Klobuchar, Jeff Merkley, Elizabeth Warren, Sheldon Whitehouse, Ron Wyden, Marsha Blackburn, Adam Schiff, Kirsten Gillibrand, Tammy Baldwin, Ted Cruz, Jacky Rosen, Roger Marshall, Pramila Jayapal, Tim Scott, Michael Bennet
+wrote data/network/kb_benchmark.json (diagnostic; not consumed by the chain)

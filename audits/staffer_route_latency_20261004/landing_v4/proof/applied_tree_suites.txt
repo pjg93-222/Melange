@@ -1,0 +1,146 @@
+# Staffer suites on the tree as LIVE will hold it after landing_v4 is applied, against the clean export of the v4 tip.
+# Applied tree: clean export of fec/ at 3248a6a02 (autocrlf off), LIVE's CURRENT bytes for the 34 patched files (the 31 landing_v2 and landing_v3_ids touched, plus the 3 more v4 edits; scripts/build_applied_tree.py: read-only copies, each checked against
+# the post-image of the last landing that touched it, or the pre-image of v4), landing_v4 applied with its apply_landing.py --apply (scripts/applied_tree_run.sh), the 4 gitignored data files copied read-only from LIVE fec/surfaces
+# (deleted afterwards). Same runner, one process per file. The tree has no .git, so the tests that read a base commit from git are skipped, as in the clean tip export. The applied tree holds this patch's
+# post-images, which keep their mixed terminators; the baseline here is the tip's own pure-LF blobs, so the two runs differ in bytes (terminators) and must agree in every count.
+
+## applied tree: files 79, passed/failed/errors/skipped (1749, 2, 0, 63);  tip export: files 79, (1749, 1, 0, 63)
+
+## file for file
+tip export and applied tree: 79 files in tip export, 79 in applied tree; 78 files with identical counts and identical failures (passed, failed, errors, skipped), 1 differing, 0 only in tip export, 0 only in applied tree
+  DIFFERS: fec/tests/surfaces/test_staffer_identity_api.py (9, 0, 0, 0) -> (9, 1, 0, 0)
+
+## comparison, file by file (baseline = clean export of the v4 tip; only files whose counts changed, new files, missing files and failures are listed)
+file                                                                 baseline p/f/s   run p/f/s       
+fec/surfaces/test_repin_staffer_live.py                              20/1/0           20/1/0            (same failure as the baseline)
+fec/tests/surfaces/test_staffer_identity_api.py                      9/0/0            9/1/0             count changed
+
+baseline  files 79  passed/failed/skipped (1749, 1, 63)
+run       files 79  passed/failed/skipped (1749, 2, 63)
+new failures: none
+
+## the one file that differs: test_staffer_identity_api.py (9 passed in the tip run, 9 passed and 1 failed in the applied-tree run)
+The same intermittent failure as in the f23a40aee run of proof/test_results_f23a40aee_vs_tip.txt: the test's own HTTP client gets WinError 10053 while it reads the answer to a POST the handler rejects before reading the body. The handler
+(fec/surfaces/staffer_live_server.py) is not part of any patch set here. Run 20 times in each tree (scripts/flake_identity_api.sh, proof/flake_identity_api.txt) the file fails in some runs of every tree and passes in the rest; in the
+applied tree it passed in the two re-runs made right after the suite run and failed in the third (a different test of the same file). Every other file has identical counts and identical failures.
+
+## the apply log
+exported 3248a6a02 fec (1704 files)
+overlaid 34 files with LIVE's current bytes: the 31 the two earlier landings touched (each equal to its post-image) and 3 more that v4 edits and neither landing touched (each equal to v4's pre-image); the 12 v4 edits among the first group agree with v4's pre-images
+overlay rc=0
+ok      edit fec/staffer_network/closeness_math.py                              expected dc3a630ffaaf  actual dc3a630ffaaf
+ok      edit fec/surfaces/staffer_closeness_routes.py                           expected 02922dffd027  actual 02922dffd027
+ok      edit fec/surfaces/staffer_distinct_routes.py                            expected 41a0edb6e390  actual 41a0edb6e390
+ok      edit fec/surfaces/staffer_live/README.md                                expected 8efd198264c8  actual 8efd198264c8
+ok      edit fec/surfaces/staffer_live/staffer-inventory-worker.js              expected 4a420d5fdff8  actual 4a420d5fdff8
+ok      edit fec/surfaces/staffer_live/staffer-live.js                          expected 5c479e200b84  actual 5c479e200b84
+ok      edit fec/surfaces/staffer_live/staffer-route.js                         expected 77a7c19904f4  actual 77a7c19904f4
+ok      edit fec/surfaces/staffer_live_service.py                               expected f311203438a6  actual f311203438a6
+ok      edit fec/surfaces/staffer_routing.py                                    expected 05fa3f38b029  actual 05fa3f38b029
+ok      edit fec/surfaces/staffer_work_sources.py                               expected a454872caa50  actual a454872caa50
+ok      edit fec/surfaces/test_staffer_closeness_bidirectional.py               expected 85b3eb48eaa8  actual 85b3eb48eaa8
+ok      new  fec/tests/surfaces/staffer_unreachable_hint_contract.cjs           expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_contact_group.py                   expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs         expected 900e0523f0da  actual 900e0523f0da
+ok      new  fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_left_out_staff.cjs                 expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_live_query_committee_names.cjs     expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_live_query_ids.cjs                 expected ed319888f16b  actual ed319888f16b
+ok      new  fec/tests/surfaces/test_staffer_office_covered_staff.py            expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_payroll_people.py                  expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_prewarm.py                         expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_route_jobs.py                      expected 7fda7c29754f  actual 7fda7c29754f
+ok      edit fec/tests/surfaces/test_staffer_route_models.cjs                   expected 30f80af798a0  actual 30f80af798a0
+ok      new  fec/tests/surfaces/test_staffer_row_equality.py                    expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_unreachable_hint.cjs               expected (absent)  actual (absent)
+ok      new  fec/tests/surfaces/test_staffer_unreachable_hint.py                expected (absent)  actual (absent)
+apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+landing_v4 apply rc=0
+data files copied
+exit=0 wall=526.8s peak_tree_rss=501 MB  cmd=python C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems/4f30368b-c2d1-47f6-a368-3d68b2892c85/scratchpad/landing_v4/scripts/run_suites.py C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems/4f30368b-c2d1-47f6-a368-3d68b2892c85/scratchpad/v4fix_work/applied_tree C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems/4f30368b-c2d1-47f6-a368-3d68b2892c85/scratchpad/v4fix_work/applied_tree_run.json
+SUITES rc=0
+EXTRA rc=0
+data files deleted
+DONE
+
+## the suite run on the applied tree
+fec/surfaces/test_staffer_activity_index.py                              rc=0      3.1s  py     pass 5    fail 0   err 0  skip 0 
+fec/surfaces/test_staffer_closeness_bidirectional.py                     rc=0     36.7s  py     pass 58   fail 0   err 0  skip 0 
+fec/surfaces/test_staffer_graph_snapshot.py                              rc=0      2.1s  py     pass 4    fail 0   err 0  skip 4 
+fec/surfaces/test_staffer_live_service.py                                rc=0     16.5s  py     pass 34   fail 0   err 0  skip 0 
+fec/surfaces/test_staffer_people_graph.py                                rc=0      2.4s  py     pass 8    fail 0   err 0  skip 0 
+fec/surfaces/test_staffer_routing.py                                     rc=0      2.4s  py     pass 21   fail 0   err 0  skip 0 
+fec/surfaces/test_staffer_shortest_routes.py                             rc=0      7.3s  py     pass 5    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_assertions.py                            rc=0      2.3s  py     pass 9    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_automatic_service.py                     rc=0     15.5s  py     pass 15   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_connection_facts.py                      rc=0      2.1s  py     pass 14   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_contact_group.py                         rc=0      5.9s  py     pass 12   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_contacts.py                              rc=0      2.6s  py     pass 5    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_distinct_routes.py                       rc=0      2.7s  py     pass 13   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_ecosystem_routes.py                      rc=0      3.2s  py     pass 6    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_evidence_boundaries.py                   rc=0      4.5s  py     pass 32   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_governing_audit.py                       rc=0      3.6s  py     pass 7    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_groups_index.py                          rc=0      3.9s  script pass 64   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_groups_section.py                        rc=0     30.4s  script pass 301  fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_identity_api.py                          rc=1      2.3s  py     pass 9    fail 1   err 0  skip 0 
+fec/tests/surfaces/test_staffer_identity_auto.py                         rc=0      2.3s  py     pass 17   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_identity_records.py                      rc=0      2.3s  py     pass 7    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_identity_resolution.py                   rc=0      1.9s  py     pass 11   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_identity_status_count.py                 rc=0      3.1s  py     pass 9    fail 0   err 0  skip 1 
+fec/tests/surfaces/test_staffer_identity_web.py                          rc=0      6.9s  py     pass 61   fail 0   err 0  skip 1 
+fec/tests/surfaces/test_staffer_inventory_cache.py                       rc=0      2.8s  py     pass 3    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_lda_catalog.py                           rc=0      2.5s  py     pass 2    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_live_server.py                           rc=0      3.2s  py     pass 31   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_live_server_concurrency.py               rc=0      5.2s  py     pass 5    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_lock_free_view.py                        rc=0     12.4s  py     pass 16   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_network_explorer.py                      rc=0      2.4s  py     pass 10   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_network_scope.py                         rc=0      1.9s  py     pass 12   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_network_section.py                       rc=0     27.6s  script pass 210  fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_office_covered_staff.py                  rc=0      7.8s  py     pass 21   fail 0   err 0  skip 41
+fec/tests/surfaces/test_staffer_payroll_people.py                        rc=0      2.9s  py     pass 4    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_payroll_promotion.py                     rc=0      2.8s  py     pass 5    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_person_inventory.py                      rc=0      2.9s  py     pass 7    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_prewarm.py                               rc=0     26.4s  py     pass 31   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_rebuild_view.py                          rc=0      4.4s  py     pass 2    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_reconciled_evidence.py                   rc=0      2.8s  py     pass 11   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_refresh_memo.py                          rc=0     14.9s  py     pass 30   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_route_alternatives.py                    rc=0      4.6s  py     pass 14   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_route_jobs.py                            rc=0     26.1s  py     pass 73   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_route_latency.py                         rc=0      4.9s  py     pass 9    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_routing_evidence.py                      rc=0      2.7s  py     pass 4    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_row_equality.py                          rc=0     14.7s  py     pass 151  fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_search_differential.py                   rc=0     53.0s  py     pass 21   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_source_catalog.py                        rc=0      2.7s  py     pass 3    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_surface_import_modes.py                  rc=0     17.5s  script pass 10   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_http.py                        rc=0      6.9s  py     pass 3    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_typeahead_identifiers.py                 rc=0      5.3s  py     pass 17   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.py                      rc=0     12.8s  py     pass 15   fail 0   err 0  skip 6 
+fec/tests/surfaces/test_staffer_work_time_routes.py                      rc=0      2.8s  py     pass 2    fail 0   err 0  skip 0 
+fec/tests/staffer_network/test_closeness_math.py                         rc=0      2.5s  py     pass 14   fail 0   err 0  skip 0 
+fec/tests/staffer_network/test_relationship_uncertainty.py               rc=0      3.3s  py     pass 12   fail 0   err 0  skip 0 
+fec/surfaces/test_repin_staffer_live.py                                  rc=1      2.1s  py     pass 20   fail 1   err 0  skip 0 
+fec/tests/surfaces/test_approved_storage.cjs                             rc=0      0.2s  cjs    pass 4    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_clean_workspace.cjs                              rc=0      0.2s  cjs    pass 8    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_desk_overlays_r5.cjs                             rc=0      0.3s  cjs    pass 6    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_industry_frame_loading.cjs                       rc=0      0.4s  cjs    pass 5    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_melange_people_navigation.cjs                    rc=0      0.4s  cjs    pass 11   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_member_desk_honors.cjs                           rc=0      0.2s  cjs    pass 12   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_mlk_boot.cjs                                     rc=0      0.2s  cjs    pass 11   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_people_directory_names.cjs                       rc=0      0.3s  cjs    pass 5    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_groups_view.cjs                          rc=0      0.4s  cjs    pass 1    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker.cjs                     rc=0      0.2s  cjs    pass 1    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs               rc=0      1.7s  cjs    pass 18   fail 0   err 0  skip 2 
+fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs     rc=0      6.3s  cjs    pass 19   fail 0   err 0  skip 2 
+fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs                 rc=0      2.5s  cjs    pass 14   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_left_out_staff.cjs                       rc=0     30.1s  cjs    pass 27   fail 0   err 0  skip 1 
+fec/tests/surfaces/test_staffer_live_query_committee_names.cjs           rc=0      1.5s  cjs    pass 16   fail 0   err 0  skip 2 
+fec/tests/surfaces/test_staffer_live_query_ids.cjs                       rc=0      0.6s  cjs    pass 23   fail 0   err 0  skip 2 
+fec/tests/surfaces/test_staffer_map_scope.cjs                            rc=0      0.2s  cjs    pass 1    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_payroll_map.cjs                          rc=0      0.2s  cjs    pass 2    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_reconciled_display.cjs                   rc=0      0.2s  cjs    pass 3    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_route_jobs_client.cjs                    rc=0      3.6s  cjs    pass 17   fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_route_models.cjs                         rc=0      0.2s  cjs    pass 9    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_snapshot_recovery.cjs                    rc=0      0.2s  cjs    pass 2    fail 0   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.cjs                     rc=0     25.4s  cjs    pass 37   fail 0   err 0  skip 1 
+fec/tests/surfaces/test_staffer_zoom.cjs                                 rc=0      0.1s  cjs    pass 2    fail 0   err 0  skip 0 
+TOTAL {'passed': 1749, 'failed': 2, 'errors': 0, 'skipped': 63} files 79

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HCCBFA1637D7B4B94ADBDAD8C83B80105" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 2190 IH: Helping Homeless Veterans Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-03-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 2190</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210326">March 26, 2021</action-date>
+<action-desc><sponsor name-id="B001285">Ms. Brownley</sponsor> (for herself, <cosponsor name-id="B001292">Mr. Beyer</cosponsor>, <cosponsor name-id="L000579">Mr. Lowenthal</cosponsor>, <cosponsor name-id="P000613">Mr. Panetta</cosponsor>, <cosponsor name-id="H000324">Mr. Hastings</cosponsor>, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="K000389">Mr. Khanna</cosponsor>, <cosponsor name-id="C001080">Ms. Chu</cosponsor>, <cosponsor name-id="H001081">Mrs. Hayes</cosponsor>, and <cosponsor name-id="N000192">Ms. Newman</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HVR00">Committee on Veterans' Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend title 38, United States Code, to make permanent certain programs that assist homeless veterans and other veterans with special needs, and for other purposes.</official-title>
+</form>
+<legis-body id="HBE880EC4F88941B79C0C683D0A2AE595" style="OLC"> 
+<section id="H2DD2BF7DBE2145AEB2A087906F1AC6AA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Helping Homeless Veterans Act of 2021</short-title></quote>.</text></section> <section id="H07259DFD5B854B55B8295B1E505083B5" section-type="subsequent-section"><enum>2.</enum><header>Programs assisting homeless veterans and other veterans with special needs</header> <subsection id="HB43BF7915D534D3EB87586FECD9BF991"><enum>(a)</enum><header>Homeless veterans reintegration programs</header><text display-inline="yes-display-inline">Section 2021(e)(1) of title 38, United States Code, is amended by adding at the end the following:</text> 
+<quoted-block display-inline="no-display-inline" id="H3EA171D9AA7C48C18F06F0FF4C9C467E" style="OLC"> 
+<subparagraph id="H0C24D52682444C4A90F1A0FEB6FE11CF" indent="up1"><enum>(G)</enum><text display-inline="yes-display-inline">$50,000,000 for each fiscal year after 2022.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="HE824A7D079854D4F99C1E86A8DB7FB6B"><enum>(b)</enum><header>Referral and counseling services for veterans at risk of homelessness who are transitioning from certain institutions</header><text display-inline="yes-display-inline">Section 2023 of such title is amended—</text> 
+<paragraph id="HBD0B0D282A3F43D9B9329DFCBE78DB9C"><enum>(1)</enum><text>by striking subsection (d); and</text></paragraph> <paragraph id="H97AFE39B04834E2FB9800A686807A981"><enum>(2)</enum><text>by redesignating subsection (e) as subsection (d).</text></paragraph></subsection> 
+<subsection id="H1E5D78BE870B47DAA302CF86F9415DD8"><enum>(c)</enum><header>Treatment for seriously mentally ill and homeless veterans</header><text display-inline="yes-display-inline">Section 2031 of such title is amended—</text> <paragraph id="HAAE5C5AEBB264F22A10BF8CE361DDC92"><enum>(1)</enum><text>in subsection (a), by striking <quote>(a)</quote>; and</text></paragraph> 
+<paragraph id="HA318C30041A443A39181301A52A15D09"><enum>(2)</enum><text>by striking subsection (b).</text></paragraph></subsection> <subsection id="H5122235194584B3BB72C239B6C9C33A2"><enum>(d)</enum><header>Housing assistance for homeless veterans</header><text display-inline="yes-display-inline">Section 2041 of such title is amended by striking subsection (c).</text></subsection> 
+<subsection id="H379160BB42DF411E8E55D8160E565A32"><enum>(e)</enum><header>Financial assistance for supportive services for very low-Income veteran families in permanent housing</header><text>Section 2044(e)(1) of such title is amended by adding at the end the following new subparagraph:</text> <quoted-block display-inline="no-display-inline" id="H8868C64094594F6B8863971AB572E291" style="USC"> <subparagraph id="H774B334582C34BEF9B3B15F1FBCB7CD3" indent="up1"><enum>(I)</enum><text display-inline="yes-display-inline">$420,000,000 for each fiscal year after fiscal year 2022.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="HB980370E2E2D4BFE8B84B309B60E6ACC"><enum>(f)</enum><header>Grant program for homeless veterans with special needs</header><text display-inline="yes-display-inline">Section 2061(d)(1) of such title is amended—</text> <paragraph id="H33F198A2D9BA4C54A791B77849EA1990" commented="no"><enum>(1)</enum><text>by striking <quote>each of fiscal years 2007 through 2022</quote> and inserting <quote>each fiscal year</quote>; and</text></paragraph> 
+<paragraph id="HAD825C9C23FF4B87890D8ED891B0E627"><enum>(2)</enum><text>by striking <quote>such</quote>.</text></paragraph></subsection> <subsection id="H492F35AA07FF4FC6B3067341BA3FB632"><enum>(g)</enum><header>Advisory Committee on Homeless Veterans</header><text display-inline="yes-display-inline">Section 2066 of such title is amended by striking subsection (d).</text></subsection></section> 
+</legis-body>
+</bill> 
+
+

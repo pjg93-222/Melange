@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HE217DC365A5C4802B963332AD876B4B7" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 3807 IH: Restaurant Revitalization Fund Replenishment Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-06-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 3807</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210611">June 11, 2021</action-date>
+<action-desc><sponsor name-id="B000574">Mr. Blumenauer</sponsor> (for himself and <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HSM00">Committee on Small Business</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the American Rescue Plan Act of 2021 to increase appropriations to the Restaurant Revitalization Fund, and for other purposes.</official-title>
+</form>
+<legis-body id="HAFDE70A286564B11AAFD6E58537F30D9" style="OLC">
+<section id="HF29DF24394534F8B874ED77291393EE7" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Restaurant Revitalization Fund Replenishment Act of 2021</short-title></quote>.</text></section> <section id="HEF2A1E9F35504CC3A7C3F782F41513F2" section-type="subsequent-section"><enum>2.</enum><header>Appropriations for the Restaurant Revitalization Fund</header><text display-inline="no-display-inline">Section 5003(b)(2) of the American Rescue Plan Act of 2021 (<external-xref legal-doc="public-law" parsable-cite="pl/117/2">Public Law 117–2</external-xref>; 135 Stat. 85; <external-xref legal-doc="usc" parsable-cite="usc/15/9009c">15 U.S.C. 9009c(b)(2)</external-xref>) is amended—</text>
+<paragraph id="HE6E3EABE6BF142E5B3FD1098BFB8AF5E"><enum>(1)</enum><text>in subparagraph (A)—</text> <subparagraph id="H041D5CEBF5EF4E6BAE712492B140111E"><enum>(A)</enum><text>by striking <quote>$28,600,000,000</quote> and inserting <quote>$88,600,000,000</quote>; and</text></subparagraph>
+<subparagraph id="HBC0DEDB57F2B4CBA84894467C37B4080"><enum>(B)</enum><text>by inserting <quote>, of which $300,000,000 shall be for administrative expenses to carry out this section</quote> before the period at the end; and</text></subparagraph></paragraph> <paragraph id="H290BF4BC8CC844DFB580AE9C861185A9"><enum>(2)</enum><text display-inline="yes-display-inline">in subparagraph (B)(i)(II), by striking <quote>$23,600,000,000</quote> and inserting <quote>$83,300,000,000</quote>. </text></paragraph></section>
+</legis-body>
+</bill> 
+
+

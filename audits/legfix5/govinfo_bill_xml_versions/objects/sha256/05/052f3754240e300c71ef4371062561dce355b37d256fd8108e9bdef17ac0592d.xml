@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H1496BF9423AE4A1989668BA6AE9623C5" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 6736 IH: Protect Rural Renters Act of 2020</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-05-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 6736</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20200508">May 8, 2020</action-date>
+<action-desc><sponsor name-id="A000378">Mrs. Axne</sponsor> (for herself, <cosponsor name-id="W000187">Ms. Waters</cosponsor>, and <cosponsor name-id="G000583">Mr. Gottheimer</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To provide rental assistance to tenants in multifamily rural housing projects financed by the Department of Agriculture, and for other purposes.</official-title>
+</form>
+<legis-body id="H122B8E79DC08458C858807CA93C5AABA" style="OLC"> 
+<section id="H722678F12606417E90270DD6C333F4B8" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protect Rural Renters Act of 2020</short-title></quote>.</text></section> <section id="H679BAA66812B4648A37579E98AD73D77" section-type="subsequent-section"><enum>2.</enum><header>Rural rental assistance</header> <subsection id="HAFECA561B09D483CB6B73DA56E2C9304"><enum>(a)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">There is authorized to be appropriated for fiscal year 2020 $700,000,000 for rural rental assistance, which shall remain available until September 30, 2021, of which—</text> 
+<paragraph id="H671D823B526A4BB3A9738C373141CE88"><enum>(1)</enum><text display-inline="yes-display-inline">up to $25,000,000 million may be used for an additional amount for rural housing vouchers for any low-income households (including those not receiving rental assistance) residing in a property financed with a section 515 loan which has been prepaid after September 30, 2005, or has matured after September 30, 2019; and</text></paragraph> <paragraph id="H3EB8A27AA9EA4138A3F21CAEA36F66F0"><enum>(2)</enum><text display-inline="yes-display-inline">the remainder shall be used for an additional amount for rural rental assistance agreements entered into or renewed pursuant to section 521(a)(2) of the Housing Act of 1949 (<external-xref legal-doc="usc" parsable-cite="usc/42/1490a">42 U.S.C. 1490a(a)(2)</external-xref>) to—</text> 
+<subparagraph id="H282209284A4A40B793E92D6024F14598"><enum>(A)</enum><text>supplement the rental assistance of households on whose behalf assistance is being provided; and</text></subparagraph> <subparagraph id="HCDD44D9289464D22BE24150160262F11"><enum>(B)</enum><text>provide rental assistance on behalf of households who are not being assisted with such rental assistance but who qualify for such assistance.</text></subparagraph></paragraph></subsection> 
+<subsection id="H32AD9373B0544F1881BDE3DCA088FF7A"><enum>(b)</enum><header>Rural housing vouchers</header><text display-inline="yes-display-inline">The matter under the heading <quote>Multi-Family Housing Revitalization Program Account</quote> in title III of division B of the Further Consolidated Appropriations Act, 2020 (<external-xref legal-doc="public-law" parsable-cite="pl/116/94">Public Law 116–94</external-xref>) is amended by striking the second proviso (relating to the amount of a voucher). </text></subsection></section> </legis-body> </bill> 
+

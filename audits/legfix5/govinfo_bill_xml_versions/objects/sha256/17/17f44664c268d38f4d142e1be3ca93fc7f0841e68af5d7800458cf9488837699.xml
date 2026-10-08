@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HF645CFCDB0B64F0BA6C189E7E9C97688" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5931 EH: Improving FHA Support for Small Dollar Mortgages Act of 2020</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 5931</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To require a review of the effects of FHA mortgage insurance policies, practices, and products on small-dollar mortgage lending, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H1CAB3E7DF6F04349818E90BE56D9E014" style="OLC"> 
+<section id="HCD2FF455456949408A4EA7673FAE363C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Improving FHA Support for Small Dollar Mortgages Act of 2020</short-title></quote>.</text></section> <section id="HE02AD211A7364A62BB7729854124291D" section-type="subsequent-section"><enum>2.</enum><header>Review of FHA small-dollar mortgage practices</header> <subsection id="H5AD12B4BD6824D92897DADC0797531BF"><enum>(a)</enum><header>Congressional findings</header><text display-inline="yes-display-inline">The Congress finds that—</text> 
+<paragraph id="H5C1657D3AFC44E23A47DE596A8737EEC"><enum>(1)</enum><text display-inline="yes-display-inline">affordable homeownership opportunities are being hindered due to the lack of financing available for home purchases under $70,000;</text></paragraph> <paragraph id="H2AB023A629B248858C87E5C208D810F8"><enum>(2)</enum><text display-inline="yes-display-inline">according to the Urban Institute, small-dollar mortgage loan applications in 2017 were denied by lenders at double the rate of denial for large mortgage loans, and this difference in denial rates cannot be fully explained by differences in the applicants’ credit profiles;</text></paragraph> 
+<paragraph id="HB2EE8E4791D146EAA35F0698E36A782D"><enum>(3)</enum><text>according to data compiled by Attom Data solutions, small-dollar mortgage originations have decreased 38 percent since 2009, while there has been a 65 percent increase in origination of mortgages for more than $150,000;</text></paragraph> <paragraph id="H656ECAAF85C747079A239CFF8E996E16"><enum>(4)</enum><text display-inline="yes-display-inline">the FHA’s mission is to serve creditworthy borrowers who are underserved and, according to the Urban Institute, the FHA serves 24 percent of the overall market, but only 19 percent of the small-dollar mortgage market; and</text></paragraph> 
+<paragraph id="H60F905522861427C8315EDC0CD131941"><enum>(5)</enum><text display-inline="yes-display-inline">the causes behind these variations are not fully understood, but merit study that could assist in furthering the Department of Housing and Urban Development’s mission, including meeting the housing needs of borrowers the program is designed to serve and reducing barriers to homeownership, while protecting the solvency of the Mutual Mortgage Insurance Fund.</text></paragraph></subsection> <subsection id="HA820D863F405488589CE01B11068CE3F"><enum>(b)</enum><header>Review</header><text display-inline="yes-display-inline">The Secretary of Housing and Urban Development shall conduct a review of its FHA single-family mortgage insurance policies, practices, and products to identify any barriers or impediments to supporting, facilitating, and making available mortgage insurance for mortgages having an original principal obligation of $70,000 or less. Not later than the expiration of the 12-month period beginning on the date of the enactment of this Act, the Secretary shall submit a report to the Congress describing the findings of such review and the actions that the Secretary will take, without adversely affecting the solvency of the Mutual Mortgage Insurance Fund, to remove such barriers and impediments to providing mortgage insurance for such mortgages. </text></subsection></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20200302" chamber="House">Passed the House of Representatives March 2, 2020.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

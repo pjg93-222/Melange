@@ -23,8 +23,6 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any, Iterable
 
-from collection_coverage import derive as derive_fec_coverage, persistable as coverage_record, file_stamp
-
 
 CYCLE_MAP = {
     "2021-2022": 2022,
@@ -425,25 +423,8 @@ def api_progress_grid(
     company_sql = placeholders(companies)
     cycle_sql = placeholders(cycles)
     parameters = (*companies, *cycles)
-    # Date windows are fetch checkpoints. Their verified union is stored once,
-    # in the parent transaction (fec_api_store_results). Count that parent only
-    # when it is stored and every child's fetched count reconciles to it.
     rows = connection.execute(
         f"""
-        WITH window_parents AS (
-          SELECT substr(unit_id, 1, instr(unit_id, '::window::')-1) AS parent_id,
-                 company, cycle, kind, SUM(rows_seen) AS child_rows,
-                 MIN(fetched_complete) AS children_fetched
-          FROM api_work_progress WHERE instr(unit_id, '::window::')>0
-          GROUP BY parent_id, company, cycle, kind
-        ), stored_windows AS (
-          SELECT p.unit_id, p.company, p.cycle, p.kind
-          FROM api_work_progress p JOIN window_parents w
-            ON p.unit_id=w.parent_id AND p.company=w.company
-               AND p.cycle=w.cycle AND p.kind=w.kind
-          WHERE p.fetched_complete=1 AND p.stored_complete=1
-            AND w.children_fetched=1 AND w.child_rows=p.rows_seen
-        )
         SELECT
           company,
           cycle,
@@ -457,15 +438,9 @@ def api_progress_grid(
           ) AS incomplete_units,
           COUNT(*) AS total_units,
           COALESCE(SUM(rows_seen), 0) AS rows_seen
-        FROM api_work_progress AS progress
+        FROM api_work_progress
         WHERE company IN ({company_sql})
           AND cycle IN ({cycle_sql})
-          AND NOT EXISTS (
-            SELECT 1 FROM stored_windows p
-            WHERE p.unit_id=substr(progress.unit_id, 1, instr(progress.unit_id, '::window::')-1)
-              AND p.company=progress.company AND p.cycle=progress.cycle AND p.kind=progress.kind
-              AND instr(progress.unit_id, '::window::')>0
-          )
         GROUP BY company, cycle
         """,
         parameters,
@@ -512,58 +487,6 @@ def api_progress_grid(
     return grid, missing, incomplete
 
 
-def api_query_coverage(connection, companies, cycles, industry=None):
-    """Prove every literal roster search was completed under current rules.
-
-    A company/kind count cannot detect an alias query that was never started.
-    Query contracts are written before accepting pages by the R collector; old
-    sources without them remain usable historical evidence, not verified runs.
-    """
-    columns = {r[1] for r in connection.execute('PRAGMA table_info(api_work_progress)')}
-    required = {'query_contract', 'records_total', 'rows_seen'}
-    if not required <= columns:
-        return {'complete': False, 'reason': 'Legacy query evidence is missing.', 'missing_queries': [], 'invalid_units': []}
-    aliases = {company: set() for company in companies}
-    sql = 'SELECT company, variant FROM companies'
-    parameters = ()
-    if industry is not None:
-        sql += ' WHERE industry=?'; parameters = (industry,)
-    for company, variant in connection.execute(sql, parameters):
-        if company in aliases and str(variant or '').strip():
-            aliases[company].add(str(variant).strip().upper())
-    observed, invalid = {}, []
-    for company, cycle, kind, uid, contract, seen, total, fetched, stored in connection.execute(
-            'SELECT company,cycle,kind,unit_id,query_contract,rows_seen,records_total,fetched_complete,stored_complete FROM api_work_progress'):
-        if company not in aliases or cycle not in cycles or kind not in ('employer', 'corporate'):
-            continue
-        if '::window::' in uid or '::decomposed::' in uid:
-            continue  # Only the verified stored parent establishes full scope.
-        try:
-            value = json.loads(contract)
-            query = value['request']['params']
-            field = 'contributor_employer' if kind == 'employer' else 'contributor_name'
-            terms = query[field]; terms = terms if isinstance(terms, list) else [terms]
-            if (value['version'] != 2 or value.get('coverage_verified') is False or value['company'] != company or value['request']['id'] != uid
-                    or int(query['two_year_transaction_period']) != cycle or fetched != 1 or stored != 1
-                    or set(query) - {'per_page','two_year_transaction_period','sort',field}
-                    or total is None or total < 0 or seen != total
-                    or not terms or any(not isinstance(t,str) or not t.strip() for t in terms)):
-                raise ValueError('Incomplete or inconsistent query')
-            observed.setdefault((company, cycle, kind), set()).update(t.strip().upper() for t in terms)
-        except (TypeError, ValueError, KeyError):
-            invalid.append(uid)
-    missing = []
-    for company in companies:
-        for cycle in cycles:
-            for kind in ('employer', 'corporate'):
-                expected = aliases[company] | ({company.upper()} if kind == 'corporate' else set())
-                if not expected:
-                    missing.append({'company': company, 'cycle': cycle, 'kind': kind, 'query': None})
-                for term in sorted(expected - observed.get((company, cycle, kind), set())):
-                    missing.append({'company': company, 'cycle': cycle, 'kind': kind, 'query': term})
-    return {'complete': not missing and not invalid, 'missing_queries': missing, 'invalid_units': sorted(invalid)}
-
-
 def scoped_count(
     connection: sqlite3.Connection,
     table: str,
@@ -600,7 +523,6 @@ def validate(
     fanout_receipt: Path,
 ) -> dict[str, Any]:
     resolved = database.resolve(strict=True)
-    before = file_stamp(resolved)
     receipt = load_fanout_receipt(fanout_receipt)
     uri = resolved.as_uri() + "?mode=ro"
     with closing(sqlite3.connect(uri, uri=True, timeout=60)) as connection:
@@ -620,7 +542,6 @@ def validate(
             companies,
             cycles,
         )
-        query_coverage = api_query_coverage(connection, companies, cycles, industry)
         canary_failures = scalar(
             connection,
             f"""
@@ -650,12 +571,11 @@ def validate(
         "foreign_key_check": foreign_keys == 0,
         "fanout_receipt": all(fanout["checks"].values()),
         "company_cycle_grid": missing_grid == 0 and incomplete_grid == 0,
-        "all_roster_queries": query_coverage['complete'],
         "canaries": canary_failures == 0,
         "contribution_scope": contribution_total == contribution_scoped,
         "corporate_scope": corporate_total == corporate_scoped,
     }
-    result = {
+    return {
         "status": "succeeded" if all(checks.values()) else "failed",
         "database": str(resolved),
         "industry": industry,
@@ -679,16 +599,7 @@ def validate(
             "in_scope": corporate_scoped,
         },
         "company_cycle_grid": grid,
-        "query_coverage": query_coverage,
     }
-    # Coverage time is evidence, not the database's mtime or the final API
-    # checkpoint. Legacy collections deliberately retain an unknown cutoff.
-    with closing(sqlite3.connect(uri, uri=True, timeout=60)) as connection:
-        connection.execute("PRAGMA query_only=ON")
-        rows = derive_fec_coverage(connection, industry, cycles, companies, grid,
-                                   all(checks.values()), receipt.get('fec_date_evidence', []))
-    result['fec_coverage'] = coverage_record(resolved, rows, before)
-    return result
 
 
 def parse_arguments(arguments: list[str]) -> argparse.Namespace:

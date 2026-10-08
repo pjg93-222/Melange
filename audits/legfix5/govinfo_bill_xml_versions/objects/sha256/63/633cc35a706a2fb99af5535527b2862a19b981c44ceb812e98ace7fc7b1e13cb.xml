@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S453 IS: Consumer Financial Protection Bureau Accountability Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-02-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 453</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190212">February 12, 2019</action-date><action-desc><sponsor name-id="S379">Mr. Perdue</sponsor> (for himself, <cosponsor name-id="S317">Mr. Barrasso</cosponsor>, <cosponsor name-id="S396">Mrs. Blackburn</cosponsor>, <cosponsor name-id="S343">Mr. Boozman</cosponsor>, <cosponsor name-id="S355">Mr. Cruz</cosponsor>, <cosponsor name-id="S376">Ms. Ernst</cosponsor>, <cosponsor name-id="S153">Mr. Grassley</cosponsor>, <cosponsor name-id="S344">Mr. Hoeven</cosponsor>, <cosponsor name-id="S395">Mrs. Hyde-Smith</cosponsor>, <cosponsor name-id="S236">Mr. Inhofe</cosponsor>, <cosponsor name-id="S305">Mr. Isakson</cosponsor>, <cosponsor name-id="S389">Mr. Kennedy</cosponsor>, <cosponsor name-id="S378">Mr. Lankford</cosponsor>, <cosponsor name-id="S347">Mr. Moran</cosponsor>, <cosponsor name-id="S381">Mr. Rounds</cosponsor>, <cosponsor name-id="S350">Mr. Rubio</cosponsor>, <cosponsor name-id="S382">Mr. Sasse</cosponsor>, and <cosponsor name-id="S383">Mr. Sullivan</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Consumer Financial Protection Act of 2010 to subject the Bureau of Consumer Financial
+			 Protection to the regular appropriations process, and for other purposes.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC">
+ <section id="H61CF9B2038504CB2AD0C257936714B48" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Consumer Financial Protection Bureau Accountability Act of 2019</short-title></quote>.</text>
+		</section><section id="HA45BE4C9BA7D488DB56505E0C89B12FC"><enum>2.</enum><header>Subjecting the
+			 Bureau of Consumer Financial Protection to the regular appropriations
+			 process</header>
+ <subsection id="idFE70C182B82D42D184D925A733EA8B19"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 1017 of the Consumer Financial Protection Act of 2010 (<external-xref legal-doc="usc" parsable-cite="usc/12/5497">12 U.S.C. 5497</external-xref>) is amended—</text>
+ <paragraph id="HC237D5F7F01340AEA27BBD50D82629A0"><enum>(1)</enum><text>in subsection (a)—</text>
+ <subparagraph id="H573643BCB36240138227CBC88E20F052"><enum>(A)</enum><text>in the subsection heading, by striking “<header-in-text level="subsection" style="OLC">Transfer of Funds From Board Of Governors.—</header-in-text>” and inserting <quote><header-in-text level="subsection" style="OLC">Budget and Financial Management.—</header-in-text></quote>;</text> </subparagraph><subparagraph id="HF47CE774DDC649A6B7BDF4A3FC80190E"><enum>(B)</enum><text>by striking paragraphs (1) through (3);</text>
+ </subparagraph><subparagraph id="H8E81DED11C3F4C77AA6E650C3030F760"><enum>(C)</enum><text>by redesignating paragraphs (4) and (5) as paragraphs (1) and (2), respectively; and</text>
+ </subparagraph><subparagraph id="H78BC6878ED764721A46345CAB807973E"><enum>(D)</enum><text>in paragraph (1), as so redesignated—</text> <clause id="id3E21317179CD4E6C87D88225C8E4DB4E"><enum>(i)</enum><text>in the paragraph heading, by striking <quote><header-in-text level="paragraph" style="OLC">Budget and financial management.—</header-in-text></quote> and inserting <quote><header-in-text level="paragraph" style="OLC">In general.—</header-in-text></quote>;</text>
+ </clause><clause id="HBE1036C1276B4FF5929C664FD43D5769"><enum>(ii)</enum><text>by striking subparagraph (E); and</text>
+ </clause><clause id="H4848EDE54E184BEFBA1D28598F96C765"><enum>(iii)</enum><text>by redesignating subparagraph (F) as subparagraph (E);</text>
+ </clause></subparagraph></paragraph><paragraph id="H0B09CCC47068485CB0AEE9AF7DD68CB7"><enum>(2)</enum><text>by striking subsections (b) through (d);</text>
+ </paragraph><paragraph id="HB5FE84DBDC614430ABB2B43E21F2EEBE"><enum>(3)</enum><text>by redesignating subsection (e) as subsection (b); and</text>
+ </paragraph><paragraph id="H8FF82BA1D820495C84F9AA4724031091"><enum>(4)</enum><text>in subsection (b), as so redesignated—</text> <subparagraph id="H5C7508FB0209417AB7B90083E9A9CD16"><enum>(A)</enum><text>by striking paragraphs (1) through (3) and inserting the following:</text>
+						<quoted-block display-inline="no-display-inline" id="H516B92EDE53B45F69E190EF2C41C49C6" style="OLC">
+							<paragraph id="H568C377184D04C95A9771243C53AF6D9"><enum>(1)</enum><header>Authorization of
+ appropriations</header><text display-inline="yes-display-inline">There is authorized to be appropriated such funds as may be necessary to carry out this title for fiscal year 2021.</text></paragraph><after-quoted-block>;
+				and</after-quoted-block></quoted-block>
+ </subparagraph><subparagraph id="H34AD85B149084FE798DEAD68B5C8F67C"><enum>(B)</enum><text>by redesignating paragraph (4) as paragraph (2).</text>
+ </subparagraph></paragraph></subsection><subsection id="id91F16EEF102D453B8B5CB9E77209771C"><enum>(b)</enum><header>Effective date</header><text>The amendments made by this Act shall take effect on October 1, 2020.</text></subsection></section></legis-body></bill> 
+

@@ -124,16 +124,6 @@ foreach ($field in @(
   }
 }
 
-$workerToolsRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-Import-Module (Join-Path $workerToolsRoot 'report_directory.psm1') -Force
-$spec.output_directory = Resolve-MentatReportDirectory -ProjectRoot (Split-Path -Parent $workerToolsRoot) -OutputDirectory ([string]$spec.output_directory)
-$env:MENTAT_REPORT_DIRECTORY = [string]$spec.output_directory
-if (-not [string]::Equals(
-  [IO.Path]::GetFullPath((Split-Path -Parent ([string]$spec.expected_workbook_path))).TrimEnd('\','/'),
-  ([string]$spec.output_directory).TrimEnd('\','/'), [StringComparison]::OrdinalIgnoreCase)) {
-  throw 'Worker workbook path is outside the authoritative report directory.'
-}
-
 $lastGoodRoot = if (
   $null -ne $spec.PSObject.Properties['last_good_root'] -and
   -not [string]::IsNullOrWhiteSpace([string]$spec.last_good_root)
@@ -407,37 +397,6 @@ try {
     $generatorCommand.Parameters.ContainsKey('NoCache')
   ) {
     $generatorArguments.Add('-NoCache')
-  }
-  # Carried from the launcher spec exactly as database_path is, because the
-  # builder is where the FEC requests are made. An older spec omits both
-  # fields and the builder keeps its own defaults.
-  if (
-    $null -ne $spec.PSObject.Properties['cross_reference_max_requests'] -and
-    $generatorCommand.Parameters.ContainsKey('CrossReferenceMaxRequests')
-  ) {
-    $crossReferenceMaxRequests = 0
-    if (
-      -not [int]::TryParse(
-        [string]$spec.cross_reference_max_requests,
-        [ref]$crossReferenceMaxRequests
-      ) -or
-      $crossReferenceMaxRequests -lt 0 -or
-      $crossReferenceMaxRequests -gt 10000
-    ) {
-      throw (
-        'Worker specification has an invalid cross_reference_max_requests: ' +
-        [string]$spec.cross_reference_max_requests
-      )
-    }
-    $generatorArguments.Add('-CrossReferenceMaxRequests')
-    $generatorArguments.Add([string]$crossReferenceMaxRequests)
-  }
-  if (
-    $null -ne $spec.PSObject.Properties['cross_reference_offline'] -and
-    [bool]$spec.cross_reference_offline -and
-    $generatorCommand.Parameters.ContainsKey('CrossReferenceOffline')
-  ) {
-    $generatorArguments.Add('-CrossReferenceOffline')
   }
 
   $generatorSupportsMutex = $generatorCommand.Parameters.ContainsKey(

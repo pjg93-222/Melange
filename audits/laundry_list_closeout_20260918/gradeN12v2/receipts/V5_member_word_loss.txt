@@ -1,0 +1,164 @@
+====================================================================================================
+(a) EVERY TRUNCATED ROW WITH AN EXPLICIT OWN-MEMBER TAG AFTER THE CUT -- full text of the
+    member-tagged segments that would leave the live corpus.
+====================================================================================================
+rowid=105315  member='Susan Collins' 2017-12-03 show=meet-the-press pkg=https://www.nbcnews.com/meet-the-press/meet-press-december-3-2017-n826051
+   cut_tag='CHUCK TODD'  orig=94w kept=40w removed=54w  own-tagged words removed=3
+   KEPT (200 chars): And one that I've authored that will help offset the individual mandate repeal by lowering premiums. And I also got an ironclad commitment that we're not going to see cuts in the Medicaid/Medicare pro
+     OWN-TAG 'SEN. SUSAN COLLINS' (3w): Thank you, Chuck.
+
+rowid=106055  member='Amy Klobuchar' 2020-02-16 show=meet-the-press pkg=https://www.nbcnews.com/meet-the-press/meet-press-february-16-2020-n1137281
+   cut_tag='CHUCK TODD'  orig=206w kept=193w removed=13w  own-tagged words removed=6
+   KEPT (200 chars): I don't see it that way at all, Chuck. This is a primary and we're not going to go back in some back room, three or four people, and just say, "Okay, you got it. I don't." We're competing, and the vot
+     OWN-TAG 'SEN. AMY KLOBUCHAR' (6w): -- in nearly all of them.
+
+rowid=106388  member='Amy Klobuchar' 2018-02-25 show=meet-the-press pkg=https://www.nbcnews.com/meet-the-press/meet-press-february-25-2018-n851061
+   cut_tag='CHUCK TODD'  orig=194w kept=130w removed=64w  own-tagged words removed=13
+   KEPT (200 chars): --of how they do their operations, if something was reported to a call center and then didn’t go to the field office to be checked out, that’s a mistake. But again, 23 reports to local law enforcement
+     OWN-TAG 'SEN. AMY KLOBUCHAR' (1w): Okay.
+     OWN-TAG 'SEN. AMY KLOBUCHAR' (10w): Thanks. Go Olympics. We're proud of our Minnesota Olympics, Chuck.
+     OWN-TAG 'SEN. AMY KLOBUCHAR' (2w): Curling team.
+
+rowid=109799  member='Adam Schiff' 2019-03-10 show=meet-the-press pkg=https://www.nbcnews.com/meet-the-press/meet-press-march-10-2019-n981511
+   cut_tag='CHUCK TODD'  orig=1133w kept=85w removed=1048w  own-tagged words removed=623
+   KEPT (200 chars): -- that he still wants to build this tower. And while that may not be criminal, it is nonetheless corrupt and distorts our policy. So, you know, that is certainly the central question for us. In terms
+     OWN-TAG 'REP. ADAM SCHIFF' (122w): I don't think in terms of making the case to the public, and here we're not making the case to a jury, about what took place that we can rely solely on the testimony of Michael Cohen. We're going to need corroboration. You know, to me in looking at what Michael Cohen said in the open hearing and then what his lawyers said afterwards, it was very much like what Donald Trump did when he said that he
+     OWN-TAG 'REP. ADAM SCHIFF' (211w): Yes, I think it is a mistake. And I've said all along that I don't think Bob Mueller should rely on written answers. When you get written answers from a witness, it's really the lawyers' answers as much as the client's answer. And here you need to be able to ask follow-up questions in real time. But I think the constraint that Bob Mueller's operating under is he had an acting attorney general who 
+     OWN-TAG 'REP. ADAM SCHIFF' (156w): Well, he's certainly not telling the truth in that interview. There's nothing wrong with our transcript. There was nothing wrong with the reporter who transcribed his testimony. He did not disclose that meeting to our committee. And in fact, as you can see from the published transcript of his interview, he was asked what kind of role he played, if any, in the campaign, and he said he had no role a
+     OWN-TAG 'REP. ADAM SCHIFF' (13w): -- how forthcoming he was. And those questions have only been heightened now.
+     OWN-TAG 'REP. ADAM SCHIFF' (119w): Well, the concern is that, you know, this is another concealed meeting. This is another discussion that took place in the context of the meeting that he had in the Seychelles. There have been persistent questions about whether the U.A.E. was playing a backchannel role to the Russians during the campaign. And those were a lot of the questions that we were asking him about. So clearly this meeting a
+     OWN-TAG 'REP. ADAM SCHIFF' (2w): Thank you.
+
+rowid=110715  member='John Barrasso' 2019-03-31 show=meet-the-press pkg=https://www.nbcnews.com/meet-the-press/meet-press-march-31-2019-n989331
+   cut_tag='CHUCK TODD'  orig=274w kept=8w removed=266w  own-tagged words removed=113
+   KEPT (200 chars): -- of all the Democrats running for president.
+     OWN-TAG 'SEN. JOHN BARRASSO' (44w): Well, first of all, this lawsuit isn't imminent. There's not going to be any decision on this for a couple of years. But it shouldn't be a surprise to anybody that Republicans are opposed to Obamacare. We have been for a long time --
+     OWN-TAG 'SEN. JOHN BARRASSO' (69w): You know, the Obama healthcare law, I think Republicans and Democrats agree, it has failed to keep its promises. Prices are skyrocketing and continue -- I was in Wyoming, at my medical office on Friday, talking to patients, doctors. Bronze plan, cheapest bronze plan, in Wyoming, for a family of four, $1,900. The deductible, $12,000. That's not right. The president is right. This is on the American
+
+rowid=245558  member='Mike Johnson' 2023-08-17 show=qmb pkg=https://transcripts.cnn.com/show/qmb/date/2023-08-17/segment/01
+   cut_tag='LISA KING, EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)'  orig=612w kept=110w removed=502w  own-tagged words removed=392
+   KEPT (200 chars): You see there are these large flowers down there. There's some white ones, some pink ones; that's a native hibiscus. It's in the mallow family and the wetland ones they call them marsh mallows. Get it
+     OWN-TAG 'JOHNSON (voice-over)' (119w): The first choice we had to make is, do we allow it to restore on its own? Just kind of let it go? Or do we take a more active role in that process? And because this was a golf course, we decided it was necessary to take a more active role. We had to undo the golf course before we could restore the landscape. The next step was to establish a native cover of vegetation. And rather than plant trees, 
+     OWN-TAG 'JOHNSON (voice-over)' (54w): This is the Cuyahoga River and we are looking out over a vast restored flood plain. When we acquired the property, the banks of the river were steep. They had been channelized. The golf course, they wanted to keep the water out. We wanted to bring the water back into the landscape. (MUSIC PLAYING)
+     OWN-TAG 'JOHNSON (voice-over)' (136w): The Cuyahoga River is significant. This is the river that burned. It actually burned several times throughout history because it was so polluted from industrial dumping. There was a time in recent memory where this stretch of river that we have here in Valley View supported almost no fish or aquatic life. It was about as dead as a river could be. So this is a type of fish called a darter and darte
+     OWN-TAG 'JOHNSON (voice-over)' (83w): These parks and the wetlands and the streams filter pollutants from the water that we eventually drink. They clean the air, they provide habitat for wildlife, including a large array of endangered species we have here in Summit County. They're also important for people. These are places for people to come and relax, to destress. They are important for recreation and connecting with nature, for esp
+
+====================================================================================================
+(b) rowid 83061 -- the v1 grade's untagged member return, still present in v2
+====================================================================================================
+member='Maxine Dexter' 2025-10-07 show=acd  skip=None
+orig=102w kept=8w removed=94w
+KEPT: I need people to not take the bait.
+SEG 'PROKUPECZ (voice-over)' (71w): That's why Maxine Dexter wants all these protesters to leave the ICE facility. The Democratic congresswoman from Portland supports their message, but fears they're playing into President Trump's hands. The question is, are we being strategic? Are we being effective? And I would argue that being down there, taking a risk, that you become a player in this reality TV vision that Donald Trump has of Portland is a mistake. [20:40:11]
+SEG 'PROKUPECZ (voice-over)' (19w): It seems unlikely she'll get her wish. Protester Justin Allen doesn't think any of these people are going away.
+
+the member-voice tail begins at offset 226 of the removed text; it runs 63 words:
+   "The question is, are we being strategic? Are we being effective? And I would argue that being down there, taking a risk, that you become a player in this reality TV vision that Donald Trump has of Portland is a mistake. [20:40:11] PROKUPECZ (voice-over): It seems unlikely she'll get her wish. Protester Justin Allen doesn't think any of these people are going away."
+
+====================================================================================================
+(c) LOOSER UNTAGGED-RETURN SWEEP
+====================================================================================================
+stratum size: 67 of 5484 truncated rows (1.22%)
+83061 in this stratum: False
+sampled rowids: [66734, 66988, 197053, 200544, 210891, 214803, 216252, 216521, 217077, 217512, 217743, 218060, 218300, 218631, 219035, 219456, 220327, 221911, 224128, 225371, 225458, 238167, 252497, 274947, 287541]
+
+--- 01 rowid=66734 member='Michael McCaul' cut_tag='ATWOOD (voice-over)'  last seg 'ATWOOD (voice-over)' (133w)
+    KEPT ...The Biden administration's failure to plan for their withdrawal threatened the safety and security of U.S. personnel in country.
+    LASTSEG TAIL: ... we could be under the circumstances." Another saying he was never briefed on an established evacuation plan, because, quote, "We were already in the midst of executing an evacuation that substantially exceeded the scope and scale of what had been contemplated." The top U.S. military generals suggested that the damage could have been mitigated if the State Department had called for an earlier noncombatant evacuation.
+
+--- 02 rowid=66988 member='Mike Johnson' cut_tag='RAJU (voice-over)'  last seg 'RAJU (voice-over)' (51w)
+    KEPT ...I am not resigning. It has not helped the House Republicans advance our agenda.
+    LASTSEG TAIL: ...All in the aftermath of a series of deals Johnson with Democrats, including to keep the government open. We authorize a key surveillance law. And now brushing aside warnings from his right flank as he seeks to advance billions in aid to Ukraine. And now Congressman Greene is on the attack.
+
+--- 03 rowid=197053 member='Nancy Pelosi' cut_tag='BROWN (voice-over)'  last seg 'BROWN (voice-over)' (60w)
+    KEPT ...I don't talk about the president when we're out of the country. That's my principle.
+    LASTSEG TAIL: ...-- stunning remark to her Democratic colleagues. "I don't want to see him impeached. I want to see him in prison." That, according to multiple Democratic sources who spoke with "Politico." The statement coming amid questions on whether Pelosi and House Judiciary chairman Jerry Nadler are on the same page when it comes to launching an impeachment inquiry against Trump.
+
+--- 04 rowid=200544 member='Haley Stevens' cut_tag='RAJU (voice-over)'  last seg 'RAJU (voice-over)' (38w)
+    KEPT ...You know, I have mixed reviews on that from people in my district.
+    LASTSEG TAIL: ...Congresswoman Haley Stevens, a freshman Democrat is navigating a fine line in this bellwether district that's been dominated by the GOP for over a decade. She's projecting an image as a bipartisan pragmatist, accessible to our constituents. [14:40:01]
+
+--- 05 rowid=210891 member='Elizabeth Warren' cut_tag='SAENZ (voice-over)'  last seg 'SAENZ (voice-over)' (55w)
+    KEPT ...I'm Elizabeth Warren, I'm going -- the woman who is going to beat Donald Trump.
+    LASTSEG TAIL: ...Elizabeth Warren, losing her voice on the campaign trail but tweeting this, apparently comparing Bloomberg to Trump, writing, "at least now primary voters... can get a live demonstration of how we each take on an egomaniac billionaire." Joe Biden is hoping for a strong finish in Nevada, after disappointing showings in Iowa and New Hampshire.
+
+--- 06 rowid=214803 member='Lindsey Graham' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (538w)
+    KEPT .... That was my focus, is how do you verify the signatures. We got a new Senate race coming up. Is there anything we can do to make it better?
+    LASTSEG TAIL: ...Alex Marquardt both here. Kaitlan, every night you have to follow me after I go off on all this crazy stuff. So, thank you for being so professional. But it is just, I cannot believe the hypocrisy and it is -- jarring and flooring. Good evening to both of you by the way. The president firing the director of the agency that says that this election was the most secure in American history. First off, tell me about that.
+
+--- 07 rowid=216252 member='Lindsey Graham' cut_tag='LEMON (on camera)'  last seg 'JOHN DEAN, CNN CONTRIBUTOR, FORMER NIXON WHITE HOUSE COUNSEL (on camera)' (120w)
+    KEPT ...n of these people would be wrong. It would be -- I think it would destroy President Trump. And I hope we don't go down that road. [23:15:00]
+    LASTSEG TAIL: ...st him in a Senate trial. So, I think he'll stay away from that. Don, 100 pardons is not very many. George Bush 200, almost. Barack Obama almost 200 pardons. Lots more commutations by Obama, but still this is very few. And I think he's -- it looks like he's going to be cautious and a self-pardon, if there is no paperwork done for that, he could theoretically draw it up and put it in his pocket and not tell the world.
+
+--- 08 rowid=216521 member='Rand Paul' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (182w)
+    KEPT ... about to drag our great country down into the gutter of ranker and vitriol, the likes of which has never been seen in our nation's history.
+    LASTSEG TAIL: ...- the former president has on the GOP. What more do those Republicans need to hear? What more? I don't -- I don't get it -- I know you're having a hard time getting it. I don't either. Perhaps it is just straight up politics. Maybe -- who knows what's going on. I don't know. But what could possibly be worse than what we all saw and heard when rioters incited by the President of the United States attacked the capitol?
+
+--- 09 rowid=217077 member='Bill Cassidy' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (163w)
+    KEPT ...e, insurrectionists, who attempted to affect the peaceful transfer of power, and that should give anyone who loves our republic great pause.
+    LASTSEG TAIL: ...na, I'm going to start with you because a lot of folks have been wondering how can Republican -- any Republican senator ignore the mountain of evidence, how officer Goodman saved Senator Mitt Romney's life, how close the mob was to Pence, all the evidence showing how Trump incited a violent attack and did nothing to stop it. I don't expect otherwise. Maybe I'm a pessimist, but people are wondering how can they do it?
+
+--- 10 rowid=217512 member='Joe Neguse' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (85w)
+    KEPT ...ups who grow more emboldened every day. Senators, this cannot be the beginning. It can't be the new normal. It has to be the end. [22:14:57]
+    LASTSEG TAIL: ...ust two days after the Senate acquitted former-President Trump of inciting the violence over his big lie, that the election was stolen. Seven Republican senators voting with Democrats to convict the president. Not enough to meet the two-thirds threshold. Joining me now to discuss is Congressman from Colorado, and former House impeachment manager, Joe Neguse. Thank you, Congressman. I really appreciate you joining us.
+
+--- 11 rowid=217743 member='Ron Johnson' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (187w)
+    KEPT ...ocateurs, fake Trump protesters and then disciplined uniformed column of attackers. I think these are the people that probably planned this.
+    LASTSEG TAIL: ...y other group of leftists were part of this brutal attack. Same thing with the election fraud story. Goose eggs. Yet you still do it. To what end? To what end? And then there is Josh Hawley. The one -- there he is. He's going to say, no, I wasn't saluting protesters. And look what he's doing there, Josh Hawley who saluted protesters outside the capitol before the violence began. He is still defending them. [22:10:04]
+
+--- 12 rowid=218060 member='Josh Hawley' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (95w)
+    KEPT ...g cancelled, the last six weeks the radical left, their corporate allies, the liberal tried to cancel me, censor me, expel me, shut me down.
+    LASTSEG TAIL: ...ancel votes over a lie. After the insurrection, Simon and Schuster said that they wouldn't publish his book, saying it could not support Hawley after his role in what became a, quote, "dangerous threat to undermine democracy and freedom." That is called consequences. Ten days later a new publisher picked up the book. I'd say the cancel culture fanatics are making a mockery of themselves, but someone already did that.
+
+--- 13 rowid=218300 member='Lindsey Graham' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (49w)
+    KEPT ...ntaged. If you're African-American, some other minority. But if you're white person, if you're a white woman, no forgiveness as reparations.
+    LASTSEG TAIL: ...This is 2021. Please tell me we're not going to fall for this. Why are we allowing people to do this? And why are people doing this? Lindsey Graham, why are you doing this? It's not helpful to the country. Senior Democratic leader James Clyburn slamming Graham for that.
+
+--- 14 rowid=218631 member='Charles Schumer' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (91w)
+    KEPT ...raid of democracy? Why, instead of trying to win voters over that you lost in the last election, are you trying to prevent them from voting?
+    LASTSEG TAIL: ...g. They said it out loud. They know what they're doing. They're trying to restrict voting because they don't believe that they can win. By the way, Senator Schumer will be with me on the show in just a moment, so stay tuned. I know you want to hear what he has to say. But first let's talk about another senator, Josh Hawley. Doesn't want to do anything about guns. He thinks guns aren't the problem, that criminals are.
+
+--- 15 rowid=219035 member='Mazie Hirono' cut_tag='AMANPOUR (voice-over)'  last seg 'AMANPOUR (voice-over)' (51w)
+    KEPT ...We in the Senate are going to stand with our AAPI community and, indeed, any community that is discriminated against.
+    LASTSEG TAIL: ...As the Senate passes a bill to combat anti-Asian discrimination, I speak to its architect, Senator Mazie Hirono, about stopping the hate and her own incredible journey. Then: another tale of two worlds, artist Julie Mehretu on the huge social movements of our time that simmer beneath her abstract murals,. Plus:
+
+--- 16 rowid=219456 member='Elise Stefanik' cut_tag='NOBLES (voice-over)'  last seg 'NOBLES (voice-over)' (58w)
+    KEPT ...I fully support the audit in Arizona. We want transparency and answers for the American people.
+    LASTSEG TAIL: ...Stefanik, meanwhile, is hoping to move past this controversy and unite her fellow Republicans, with an eye toward winning the majority in 2022. In a letter to her colleagues, Stefanik writes, quote, today, I humbly asked to earn your vote for House Republican Conference chair to unify our message as a team and win the majority in 2022.
+
+--- 17 rowid=220327 member='Ron Johnson' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (117w)
+    KEPT ... you heal this nation, you come down here and you're trying to interact with people and you'd be nice to people, this is a very nice, is it?
+    LASTSEG TAIL: ...want to give federal workers another day off, like I said, we haven't made as much progress as you'd like to think. But we have made some, we really have and it's really something to celebrate especially during pride month. I want to say a big congratulations to Carl Nassib, a defensive lineman with the Las Vegas Raiders. The first active NFL player in the league history, in league history to announce that he is gay.
+
+--- 18 rowid=221911 member='Mitch McConnell' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (149w)
+    KEPT ...atements, conspiracy theories and reckless hyperbole, which the defeated president kept shouting into the largest megaphone on planet earth.
+    LASTSEG TAIL: ...reat is gathering again. If people who know the truth won't speak out, if they're silent in the face of all these lies, it could happen again. And as our democracy -- not it could happen again. It will happen again, if people are silent, if you don't pay attention. And as our democracy is under threat right now, the pandemic of the unvaccinated is raging. Mitch McConnell announcing that he got his booster shot today.
+
+--- 19 rowid=224128 member='Lisa Murkowski' cut_tag='LEMON (on camera)'  last seg 'LEMON (on camera)' (56w)
+    KEPT ... Congress rather than just a majority of Democrats. But we're learning more and more that this was a concerted effort to thwart an election.
+    LASTSEG TAIL: ...I think I know what your answer is going to be. By the way, Murkowski is one of the Republican senators who voted to impeach Trump after the insurrection. But the timing of this interview is curious. Okay, I'll phrase it in a different way. Are Republicans trying to build support to stop Trump or not?
+
+--- 20 rowid=225371 member='Chip Roy' cut_tag='NOBLES (on camera)'  last seg 'NOBLES (on camera)' (114w)
+    KEPT ...And the president should never have spun up certain Americans to believe something that simply cannot be.
+    LASTSEG TAIL: ..., Congressman Chip Roy responded to the story by saying, quote, "No apologies for my private text or public positions to those on the left or the right. I stand behind seeking truth, fighting nonsense, and then acting in defense of the Constitution." These texts, obviously, in the possession of the January 6th select committee, and they remain an important part of that investigation. Ryan nobles, CNN on Capitol Hill.
+
+--- 21 rowid=225458 member='Scott Perry' cut_tag='NOBLES (voiceover)'  last seg 'NOBLES (on camera)' (101w)
+    KEPT ...-- get away in Georgia. The President got away in North Carolina. It is all going to come down to the Keystone State.
+    LASTSEG TAIL: ...t conservative sect of Republican members of the House. And should the Republicans take the majority in the fall, their power would only increase. Now, Perry did not respond to multiple requests from CNN to respond to our report. I did catch up with him outside the Capital on Tuesday to ask if he had any explanation for his communication with Mark Meadows. He only responded, heck no. Ryan Nobles, CNN on Capitol Hill.
+
+--- 22 rowid=238167 member='Rand Paul' cut_tag='ROBERTS (voice-over)'  last seg 'ROBERTS (voice-over)' (73w)
+    KEPT ...And now you have two bills, boom, you get it done in five minutes. The president seems open and interested in the idea.
+    LASTSEG TAIL: ...s can do to repeal ObamaCare and get a replacement passed with Republican Senator Rand Paul and Democratic Senator Joe Manchin. Senators Paul and Manchin only on "Fox News Sunday." Plus, the president shifts focus off of the agenda, creating a media firestorm with several tweets attacking cable news hosts. We’ll ask our Sunday panel if the president's tweets are hurting his agenda. All right now on "Fox News Sunday."
+
+--- 23 rowid=252497 member='Mitch McConnell' cut_tag='RAJU (on camera)'  last seg 'RAJU (on camera)' (75w)
+    KEPT ...I followed the instructions of our conference who were insisting that we tackle this in October.
+    LASTSEG TAIL: ...ell sided with most Senate Republicans and voted to block that bipartisan border deal that he helped craft. Now, ultimately, only four Republicans voted to move ahead with that package. One of those four Senate Republicans is Lisa Murkowski of Alaska. I asked her about her level of frustration, Wolf. She said that she's going through the various stages of grief, but she says, today, quote, I am just pissed off. Wolf?
+
+--- 24 rowid=274947 member='Amy Klobuchar' cut_tag='CAPEHART (on camera)'  last seg 'CAPEHART (on camera)' (219w)
+    KEPT ...on-partisan boards and allowing partisan legislatures to count and sham audits. All of that is covered by our bill. And it is a big problem.
+    LASTSEG TAIL: ...go to Texas, go to North Carolina, go to these places where people think they have free reign to restrict access to the ballot, and I think that — and I think that will see an excited base.” Joining us now is the former Massachusetts governor, Deval Patrick. He is the former head of the Justice Department civil rights division and is currently chair of American Bridge 21st Century. Governor Patrick, great to see you.
+
+--- 25 rowid=287541 member='Sylvia Garcia' cut_tag='LAVANDERA (on camera)'  last seg 'LAVANDERA (on camera)' (93w)
+    KEPT ...We certainly now have conflicting testimony. I'm not prepared to say today that it's all lies, but it sure is looking that way.
+    LASTSEG TAIL: ...e being pressured to sign papers to self-deport. The Department of Homeland Security denies those allegations, calling them false. Congresswoman Garcia also says she spoke with the acting ICE director, and that he told her that the agents involved in the shooting have been taken out of Houston. We've reached out to DPS to find out if they've been placed on leave, but we have not heard back. Ed Lavandera, CNN, Dallas.
+

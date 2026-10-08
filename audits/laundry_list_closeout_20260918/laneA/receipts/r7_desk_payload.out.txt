@@ -1,0 +1,160 @@
+﻿====================================================================================================
+R7  PUBLISHED DESK PAYLOAD   run 2026-09-18T23:43:56
+====================================================================================================
+   member_desk_bundle.json              77552295 bytes  mtime 2026-09-18 02:35:43.404749
+   cu-member-desk.html                  18808024 bytes  mtime 2026-09-18 02:35:46.576979
+   cu-member-desk-profiles.js           59713412 bytes  mtime 2026-09-18 02:35:45.820207
+
+-- A. bundle["integrity"]["source_display"] == media_audit (the producer census) --
+   bill_collector_roster_detail                         {'collector_roster_lines': 237, 'collector_roster_merged': 204, 'collector_roster_appended': 209, 'collector_roster_skipped': 33, 'collector_roster_skipped_unknown_act': 21, 'collector_roster_skipped_unknown_member': 0, 'collector_roster_skipped_withdrawn': 0, 'collector_roster_skipped_role': 12, 'collector_roster_skipped_excluded': 0, 'collector_roster_skipped_malformed': 0}
+   bill_collector_roster_excluded                       33
+   bill_collector_roster_rows                           277
+   bill_duplicate_rows_collapsed                        2512
+   bill_manual_excluded                                 5
+   bill_manual_rows                                     371
+   bill_override_excluded                               53
+   bill_primacy_membership_rows                         330
+   bill_rules_excluded                                  578
+   bill_source_rows                                     11065
+   bill_unknown_member_excluded                         17
+   bill_withdrawal_rules                                0
+   bill_withdrawal_rules_already_absent                 0
+   bill_withdrawn_rows_removed                          2715
+   bills_displayed_unique                               6130
+   bluesky_beyond_display_cap                           0
+   bluesky_empty_text_excluded                          74
+   bluesky_footprint_displayed                          7952
+   bluesky_post_rows                                    29780
+   bluesky_scored_rows_routed_to_social                 22
+   bluesky_unknown_member_excluded                      0
+   bluesky_unverified_handle_posts_excluded             21732
+   footprint_display_cap                                0
+   footprint_enabled                                    1
+   hearing_appearance_rows                              0
+   hearing_appearances_displayed                        384
+   hearing_beyond_display_cap                           0
+   hearing_graded_keys                                  384
+   hearing_graded_keys_unplaced                         0
+   hearing_graded_rows_added                            384
+   hearing_passages_dropped_unaligned                   0
+   hearing_passages_dropped_ungraded                    0
+   hearing_passages_dropped_unpinned                    0
+   hearing_rows_snippet_matched                         384
+   hearing_rows_stance_matched                          384
+   hearing_unknown_member_excluded                      0
+   interview_appearances_displayed                      95078
+   interview_beyond_display_cap                         0
+   interview_episode_rows                               95078
+   interview_graded_keys                                35
+   interview_graded_keys_unplaced                       0
+   interview_passages_dropped_unaligned                 0
+   interview_passages_dropped_ungraded                  0
+   interview_passages_dropped_unpinned                  0
+   interview_rows_snippet_matched                       35
+   interview_rows_stance_matched                        35
+   interview_unknown_member_excluded                    0
+   media_stance_enabled                                 1
+   press_billstatus_rows_routed_to_legislation          1309
+   press_displayed                                      2389
+   press_source_rows                                    3701
+   press_unknown_member_excluded                        3
+   social_displayed                                     6579
+   social_duplicate_visible                             1025
+   social_offtopic_excluded                             1891
+   social_scored_unique                                 4834
+   social_source_rows                                   9541
+   social_unknown_member_excluded                       0
+   social_unrelated_excluded                            1032
+   social_unverified_handle_excluded                    39
+
+   exclusion_samples sizes: {'press_unknown_member': 3, 'social_unknown_member': 0, 'bill_unknown_member': 17, 'bill_manual_excluded': 5}
+   social_exclusions_by_member: 417 members;  unrelated total=1032  offtopic total=1891
+
+-- social accounting stated by the published bundle --
+   social_source_rows = 9541
+      social_unverified_handle_excluded            39
+      social_unknown_member_excluded                0
+      social_unrelated_excluded                  1032
+      social_offtopic_excluded                   1891
+      social_displayed                           6579
+   sum of the five = 9541   -> CLOSES
+
+-- press accounting stated by the published bundle --
+   press_source_rows = 3701   (sheet "Press Release Articles")
+      press_unknown_member_excluded                       3
+      press_billstatus_rows_routed_to_legislation      1309
+      press_displayed                                  2389
+   sum = 3701   -> CLOSES
+
+-- footprint accounting stated by the published bundle --
+   interview: interview_episode_rows = 95078 
+      interview_unknown_member_excluded                     0
+      interview_appearances_displayed                   95078
+      interview_beyond_display_cap                          0
+      sum = 95078 vs 95078 -> CLOSES
+   hearing: hearing_appearance_rows = 0 + hearing_graded_rows_added 384
+      hearing_unknown_member_excluded                       0
+      hearing_appearances_displayed                       384
+      hearing_beyond_display_cap                            0
+      sum = 384 vs 384 -> CLOSES
+   bluesky: bluesky_post_rows = 29780 
+      bluesky_unverified_handle_posts_excluded          21732
+      bluesky_unknown_member_excluded                       0
+      bluesky_empty_text_excluded                          74
+      bluesky_scored_rows_routed_to_social                 22
+      bluesky_footprint_displayed                        7952
+      bluesky_beyond_display_cap                            0
+      sum = 29780 vs 29780 -> CLOSES
+
+-- B. article rows in the FULL bundle (bundle["members"][*]["articles"]) --
+   total article rows: 112382 across 530 members
+   by source:
+      interview    displayed  95078   scored=True      0
+      bluesky      displayed   7952   scored=True      0
+      social       displayed   6579   scored=True   5722
+      press        displayed   2389   scored=True   2389
+      hearing      displayed    384   scored=True      0
+   exclusion reasons (source, reason) -> rows:
+      interview  appearance record                                 95078
+      bluesky    no CU relevance detected — footprint only          7952
+      social     neutral                                             838
+      hearing    appearance record                                   384
+      social     link-only post: no scorable text                     19
+
+   D-034 EVIDENCE: article rows carrying an "also posted on ..." note: 895
+      by named first platform: {'facebook': 586, 'x': 309}
+   categories present on displayed article rows (norm_cats output):
+      CFPB                                 3307
+      Payments                             1498
+      Technology & Emerging                1293
+      Fraud Prevention                     1073
+      CU-Bank Competitive Dynamics         1058
+      Mortgage & Housing                    865
+      General Credit Union                  801
+      Credit Card Mandates                  473
+      Interchange                           430
+      Examination & Supervision             429
+      CDFI Fund                             344
+      TCPA                                  267
+      Member Business Lending               263
+      Data Privacy & Cyber                  238
+      CU Tax Status                         209
+      Field of Membership                   164
+      Charter Modernization                 117
+      Defense CU Issues                      80
+      NCUA Budget & Insurance                43
+      CU Capital Requirements                26
+
+-- C. shipped bytes: literal "also posted on" occurrences --
+   cu-member-desk.html            "also posted on" x 0
+   cu-member-desk-profiles.js     "also posted on" x 895
+
+-- D. does the page expose the media census to a reader? --
+   social_unrelated_excluded    in cu-member-desk.html: 2
+   social_offtopic_excluded     in cu-member-desk.html: 2
+   source_display               in cu-member-desk.html: 2
+   media_exclusions             in cu-member-desk.html: 534
+   nothing hidden               in cu-member-desk.html: 0
+   exact cross-post             in cu-member-desk.html: 0
+
+DONE R7

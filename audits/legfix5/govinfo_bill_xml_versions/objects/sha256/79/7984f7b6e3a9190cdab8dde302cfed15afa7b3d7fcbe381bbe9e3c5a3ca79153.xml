@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 133 STAT. ?>
+<?I98 133 STAT. ?>
+<?I99 133 STAT. ?>
+<?I50 PUBLIC LAW 116–19—MAY 31, 2019?>
+<?I51 PUBLIC LAW 116–19—MAY 31, 2019?>
+<?I52 PUBLIC LAW 116–19—MAY 31, 2019?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 116–19: To reauthorize the National Flood Insurance Program.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>19</docNumber>
+<citableAs>Public Law 116–19</citableAs><citableAs>133 Stat. 870</citableAs>
+<approvedDate>2019-05-31</approvedDate>
+<dc:date>2019-05-31</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>116</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 116–19—MAY 31, 2019</centerRunningHead>
+<page identifier="/us/stat/133/870">133 STAT. 870</page>
+<dc:type>Public Law</dc:type><docNumber>116–19</docNumber>
+<congress value="116">116th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To reauthorize the National Flood Insurance Program.<sidenote><p class="centered fontsize8" id="x2afd7eb4-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076"><approvedDate date="2019-05-31">May 31, 2019</approvedDate></p><p class="centered fontsize8" id="x2afd7eb5-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658076">[<ref href="/us/bill/116/s/1693">S. 1693</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x2afd7eb6-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180">National Flood Insurance Program Extension Act</p><p class="leftAlign firstIndent0 fontsize8" id="x2afd7eb7-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180">of 2019.</p><p class="leftAlign firstIndent0 fontsize8" id="x2afd7eb8-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180"><ref href="/us/usc/t42/s4001">42 USC 4001 note</ref>.</p></sidenote>
+<section id="d110298e94" identifier="/us/pl/116/19/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">National Flood Insurance Program Extension Act of 2019</shortTitle>”.</content></section>
+<section id="d110298e104" identifier="/us/pl/116/19/s2" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>REAUTHORIZATION OF NATIONAL FLOOD INSURANCE PROGRAM.</heading><subsection class="firstIndent0 fontsize10" id="y2afda5c9-e827-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/19/s2/a" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">(a) </num><heading class="fontsize10"><inline class="smallCaps">Financing</inline>.—</heading><content>Section 1309(a) of the National Flood Insurance Act of 1968 (<ref href="/us/usc/t42/s4016/a">42 U.S.C. 4016(a)</ref>) <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="delete">striking</amendingAction> “<quotedText>May 31, 2019</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>June 14, 2019</quotedText>”.</content></subsection>
+<subsection class="firstIndent0 fontsize10" id="y2afda5ca-e827-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/19/s2/b" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">(b) </num><heading class="fontsize10"><inline class="smallCaps">Program Expiration</inline>.—</heading><content>Section 1319 of the National Flood Insurance Act of 1968 (<ref href="/us/usc/t42/s4026">42 U.S.C. 4026</ref>) <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="delete">striking</amendingAction> “<quotedText>May 31, 2019</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>June 14, 2019</quotedText>”.</content></subsection>
+<subsection class="firstIndent0 fontsize10" id="y2afda5cb-e827-11f0-a1e4-69761a48a15a" identifier="/us/pl/116/19/s2/c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="c">(c) </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="x2afda5cc-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658180"><ref href="/us/usc/t42/s4016">42 USC 4016 note</ref>.</p></sidenote><heading class="fontsize10"><inline class="smallCaps">Retroactive Effective Date</inline>.—</heading><content>If this Act is enacted after May 31, 2019, the amendments made by subsections (a) and (b) shall take effect as if enacted on May 31, 2019.</content></subsection>
+</section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2019-05-31">May 31, 2019</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/116/s/1693">S. 1693</ref>:</heading>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 165 (2019):</heading>
+<p class="indentUp4 firstIndent-1" id="x2afdccdd-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">May 23, considered and passed Senate.</p><p class="indentUp4 firstIndent-1" id="x2afdccde-e827-11f0-a1e4-69761a48a15a" style="-uslm-lc:I658035">May 30, considered and passed House.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

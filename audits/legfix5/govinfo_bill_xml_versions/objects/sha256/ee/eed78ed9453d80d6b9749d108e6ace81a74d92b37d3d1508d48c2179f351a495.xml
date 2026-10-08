@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 133 STAT. ?>
+<?I98 133 STAT. ?>
+<?I99 133 STAT. ?>
+<?I50 PUBLIC LAW 116–53—AUG. 23, 2019?>
+<?I51 PUBLIC LAW 116–53—AUG. 23, 2019?>
+<?I52 PUBLIC LAW 116–53—AUG. 23, 2019?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 116–53: To exempt for an additional 4-year period, from the application of the means-test presumption of abuse under chapter 7, qualifying members of reserve components of the Armed Forces and members of the National Guard who, after September 11, 2001, are called to active duty or to perform a homeland defense activity for not less than 90 days.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>53</docNumber>
+<citableAs>Public Law 116–53</citableAs><citableAs>133 Stat. 1078</citableAs>
+<approvedDate>2019-08-23</approvedDate>
+<dc:date>2019-08-23</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>116</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 116–53—AUG. 23, 2019</centerRunningHead>
+<page identifier="/us/stat/133/1078">133 STAT. 1078</page>
+<dc:type>Public Law</dc:type><docNumber>116–53</docNumber>
+<congress value="116">116th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To exempt for an additional 4-year period, from the application of the means-test presumption of abuse under chapter 7, qualifying members of reserve components of the Armed Forces and members of the National Guard who, after September 11, 2001, are called to active duty or to perform a homeland defense activity for not less than 90 days.<sidenote><p class="centered fontsize8" id="xcedf82cd-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076"><approvedDate date="2019-08-23">Aug. 23, 2019</approvedDate></p><p class="centered fontsize8" id="xcedf82ce-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076">[<ref href="/us/bill/116/hr/3304">H.R. 3304</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xcedf82cf-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">National Guard and Reservists Debt Relief Extension Act</p><p class="leftAlign firstIndent0 fontsize8" id="xcedf82d0-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">of 2019.</p><p class="leftAlign firstIndent0 fontsize8" id="xcedf82d1-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t11/s101">11 USC 101 note</ref>.</p></sidenote>
+<section id="d171940e94" identifier="/us/pl/116/53/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">National Guard and Reservists Debt Relief Extension Act of 2019</shortTitle>”.</content></section>
+<section id="d171940e104" identifier="/us/pl/116/53/s2" role="instruction" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xcedf82d2-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t11/s707">11 USC 707 note</ref>.</p></sidenote><heading>NATIONAL GUARD AND RESERVISTS DEBT RELIEF AMENDMENT.</heading><content style="-uslm-lc:I658120">  Section 4(b) of the National Guard and Reservists Debt Relief Act of 2008 (<ref href="/us/pl/110/438">Public Law 110–438</ref>; <ref href="/us/stat/122/5000">122 Stat. 5000</ref>) <amendingAction type="amend">is amended</amendingAction> by <amendingAction type="delete">striking</amendingAction> “<quotedText>11-year</quotedText>” and <amendingAction type="insert">inserting</amendingAction> “<quotedText>15-year</quotedText>”.</content></section>
+<section id="d171940e131" identifier="/us/pl/116/53/s3" style="-uslm-lc:I658141"><num class="fontsize12" value="3">SEC. 3. </num><heading>DETERMINATION OF BUDGETARY EFFECTS.</heading><content style="-uslm-lc:I658120">  The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled “Budgetary Effects of PAYGO Legislation” for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</content></section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2019-08-23">August 23, 2019</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/116/hr/3304">H.R. 3304</ref>:</heading>
+<note>
+<headingText style="-uslm-lc:I658032">HOUSE REPORTS:</headingText> ┐No. <ref href="/us/hrpt/116/170">116–170</ref> (<committee>Comm. on the Judiciary</committee>).
+</note>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 165 (2019):</heading>
+<p class="indentUp4 firstIndent-1" id="xcedfa9e3-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">July 23, considered and passed House.</p><p class="indentUp4 firstIndent-1" id="xcedfa9e4-e81f-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Aug. 1, considered and passed Senate.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

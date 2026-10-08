@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H533BA47989DA4485B22BE170679331E8" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2578 IH: National Flood Insurance Program Extension Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-08</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2578</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190508">May 8, 2019</action-date><action-desc><sponsor name-id="W000187">Ms. Waters</sponsor> (for herself and <cosponsor name-id="M001156">Mr. McHenry</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To reauthorize the National Flood Insurance Program, and for other purposes.</official-title></form>
+	<legis-body id="HD5BD42BE6A6440A381685303E030FB60" style="OLC">
+ <section commented="no" display-inline="no-display-inline" id="H7E27E78B153E4151B52A77B508DBC2EC" section-type="section-one"><enum>1.</enum><header display-inline="yes-display-inline">Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>National Flood Insurance Program Extension Act of 2019</short-title></quote>.</text> </section><section commented="no" display-inline="no-display-inline" id="H58E8CDB0E8824202A1DFDC8D6EC96DB8" section-type="subsequent-section"><enum>2.</enum><header display-inline="yes-display-inline">Reauthorization of National Flood Insurance Program</header> <subsection commented="no" display-inline="no-display-inline" id="H14E59DF32E344D6A9821456F1FDBED2F"><enum>(a)</enum><header display-inline="yes-display-inline">Financing</header><text display-inline="yes-display-inline">Section 1309(a) of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4016">42 U.S.C. 4016(a)</external-xref>) is amended by striking <quote>May 31, 2019</quote> and inserting <quote>September 30, 2019</quote>.</text>
+ </subsection><subsection commented="no" display-inline="no-display-inline" id="H533BC4F2E2FA467C9825EFC0E08795A5"><enum>(b)</enum><header display-inline="yes-display-inline">Program expiration</header><text display-inline="yes-display-inline">Section 1319 of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4026">42 U.S.C. 4026</external-xref>) is amended by striking <quote>May 31, 2019</quote> and inserting <quote>September 30, 2019</quote>.</text> </subsection><subsection commented="no" display-inline="no-display-inline" id="H94D5C6B439004128AC60747EE10E348B"><enum>(c)</enum><header display-inline="yes-display-inline">Retroactive effective date</header><text display-inline="yes-display-inline">If this Act is enacted after May 31, 2019, the amendments made by subsections (a) and (b) shall take effect as if enacted on May 31, 2019.</text>
+			</subsection></section></legis-body></bill>
+
+

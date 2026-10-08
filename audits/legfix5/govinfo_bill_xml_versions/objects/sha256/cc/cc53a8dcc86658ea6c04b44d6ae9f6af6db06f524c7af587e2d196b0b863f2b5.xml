@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-TAM19G35-3HT-NT-HPJ"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2785 IS: Fair Indexing for Health Care Affordability Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-11-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2785</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20191105">November 5, 2019</action-date><action-desc><sponsor name-id="S324">Mrs. Shaheen</sponsor> (for herself, <cosponsor name-id="S364">Mr. Murphy</cosponsor>, <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>, and <cosponsor name-id="S354">Ms. Baldwin</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To set forth a method of determining maximum out-of-pocket limits and annual updates to premium tax
+			 credit eligibility under the Patient Protection and Affordable Care Act.</official-title></form>
+	<legis-body>
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fair Indexing for Health Care Affordability Act</short-title></quote>.</text>
+ </section><section id="id2F0D1E316E08499FB55591D7BABC32A3"><enum>2.</enum><header>Premium adjustment percentage</header><text display-inline="no-display-inline">Section 1302(c)(4) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18022">42 U.S.C. 18022(c)(4)</external-xref>) is amended by striking <quote>calendar year)</quote> and inserting <quote>calendar year, based on estimates and projections of changes for the applicable year in the average per enrollee employer-sponsored insurance premiums provided by the National Health Expenditure Accounts)</quote>.</text></section></legis-body></bill>
+
+

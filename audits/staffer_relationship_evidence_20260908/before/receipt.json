@@ -1,0 +1,180 @@
+{
+  "time": "2026-09-08T08:01:50.391540+00:00",
+  "head": "07155928e04e51dc9f344f832acddb9dc44e8025",
+  "files": {
+    "fec/surfaces/staffer_identity_auto.py": "2ae563e5fa7ae7e0d8f2f65ff05e9bef94b23be94540553bd7f7fd38444505f4",
+    "fec/surfaces/staffer_payroll_identity.py": "bf0b6899c75454ccf9a950b3273ff6eead47afff7ec9f355d112cc857a126fa5",
+    "fec/surfaces/staffer_overlap_routes.py": "dffe2216c736d3de7496308caa81b32b8c423ad681a8908097907ef2f1ce7ca7",
+    "fec/surfaces/staffer_routing.py": "e64f110f3b915f32b13105e727379459b036ffd43861eba7f7322215aaa522d4",
+    "fec/surfaces/staffer_live_service.py": "89842831cd2b304fba03552fdedee03c51698a558321fd583e214c4e6c3b7445",
+    "fec/surfaces/staffer_live/staffer-route.js": "1f2062122ea28e328d4a396616f1427e6295ac170bce5e0e44001ef176b9f5b2"
+  },
+  "inputs": {
+    "fec\\surfaces\\staffer_payroll_identity.json": "29d991205622db08b1ba7b9e8517ec54525793552460bd25bd95db349750f02c",
+    "audits\\staffer_network\\hill_personnel_spine_20260908_v8_primary\\hill_personnel_spine_receipt.json": "83891a3764d3747af1efc1b8a34e1ddf4cdcb0482ad7d057c444e5818290c3aa",
+    "audits\\staffer_network\\staffer_social_network_20260908_v8_math_primary\\staffer_social_network_receipt.json": "9c5384786f9b260edeca643297ab575c59324969077627ca6680788499d54723"
+  },
+  "performance": {
+    "ready": true,
+    "stage": "Ready",
+    "metrics": {
+      "serialize_compress_ms": 45.13,
+      "snapshot_bytes": 425681,
+      "snapshot_uncompressed_bytes": 1300626,
+      "model_load_ms": 14798.0,
+      "identity_review": {
+        "records_checked": 180021,
+        "candidate_groups": 27995,
+        "candidate_identity_nodes": 70419,
+        "corroborated_candidate_groups": 938,
+        "automatic_inferred_merges": 5838,
+        "automatic_inferred_aliases": 5871,
+        "user_confirmed_aliases": 1
+      },
+      "payroll_identity": {
+        "source_rows_read": 1351523,
+        "invalid_or_absent_service_dates": 33,
+        "rows_not_admitted_by_spine": 108,
+        "episodes": 425825,
+        "employment_people": 135039,
+        "record_pairs": 231
+      },
+      "identity_prepare_ms": 18915.22,
+      "identity_resolve_ms": 15124.86,
+      "identity_queue_ms": 3798.31,
+      "lda_status": {
+        "lda_people": 28235,
+        "joined_to_summary": 28235,
+        "labels": {
+          "LIKELY": 4018,
+          "CONFIRMED": 3019,
+          "NO_RECORD": 21198
+        },
+        "employer_from_ruling": 23937,
+        "employer_from_sidecar_year_order": 4298,
+        "engagements": {
+          "contract": 12193,
+          "in_house": 11744
+        }
+      },
+      "automatic_identity_ms": 48774.24,
+      "names": {
+        "named": 189976
+      },
+      "ambiguous_identity_links_kept_separate": 1290,
+      "evidence_and_names_ms": 63541.33,
+      "activity_index_load_ms": 1228.69,
+      "review_assertion_coverage": {
+        "status": "PASS",
+        "declared": 100256,
+        "served_unique": 100256,
+        "promoted": 0,
+        "layers": {
+          "politico_employment_history": 70926,
+          "politico_education_history": 25245,
+          "politico_current_committee": 1958,
+          "politico_committee_side_explicit": 1711,
+          "politico_policy_delta": 416
+        }
+      },
+      "contacts": {
+        "source_people": 5777,
+        "matched_people": 4511,
+        "email_people": 5773,
+        "phone_people": 5777,
+        "revision": "2f678de7586b6f5c924de559276f196eeb2584378ed6b6811b466ca028c70e2d"
+      },
+      "person_facts": {
+        "version": "ordered-person-overlap-v4-unified-people",
+        "people_with_facts": 180021,
+        "interns_excluded_from_network": 52107,
+        "employment_status": {
+          "latest_payroll": 17157,
+          "unknown": 145750,
+          "currently_listed": 17114
+        },
+        "current_staff": 14216,
+        "dimensions": {
+          "current_employment": 17117,
+          "past_employment": 141700,
+          "committee": 23608,
+          "member": 119234,
+          "subject": 3677,
+          "party": 14106,
+          "education": 12584,
+          "major": 11386
+        }
+      },
+      "searchable_person_nodes": 180021,
+      "routing_index_ms": 26368.17,
+      "source_refresh_ms": 3813.55,
+      "initial_ready_ms": 110083.05,
+      "snapshot_ms": 0.79,
+      "network_index_build_ms": 7809.06,
+      "network_index_bytes": 10697763,
+      "network_index_people": 133691,
+      "groups_index_build_ms": 5553.0,
+      "groups_index_bytes": 9741833,
+      "groups_index_counts": {
+        "offices": 1691,
+        "organizations": 46807,
+        "office_memberships": 121932,
+        "organization_memberships": 182822,
+        "people_in_groups": 104972,
+        "people_available": 133691,
+        "littlesis_persons_scanned": 0,
+        "keys_outside_scope": 58065,
+        "memberships": {
+          "employee": 23904,
+          "listed": 121932,
+          "represents": 158918
+        },
+        "employment_people": 21494
+      }
+    },
+    "errors": []
+  },
+  "inventory": {
+    "people": 127914,
+    "aliases": 5872,
+    "reconciliation": {
+      "sources": [
+        {
+          "source": "Payroll",
+          "source_people": 144692,
+          "scope": "Current and historical records"
+        },
+        {
+          "source": "LDA",
+          "source_people": 25340,
+          "scope": "Current and historical records"
+        },
+        {
+          "source": "Politico Pro",
+          "source_people": 18618,
+          "scope": "Held directory profiles"
+        }
+      ],
+      "source_people_before_matching": 188650,
+      "verified_lda_payroll_joins": 2757,
+      "accepted_alias_reductions": 5872,
+      "network_people": 180021,
+      "balance_holds": true,
+      "additional_source_person_records": {
+        "Quorum": 5777
+      },
+      "all_source_person_records": 185798,
+      "current_congressional_staff": 14216,
+      "quorum_directory_ids": 5773,
+      "quorum_contact_ids": 5777,
+      "quorum_contact_matches": 4511,
+      "note": "Network profiles combine accepted identity matches. Unresolved identities remain separate. Source counts include historical people, not just current staff. Contact matches do not establish identity merges.",
+      "network_scope": {
+        "policy": "network-scope-no-interns-v1",
+        "excluded_intern_records": 52107,
+        "visible_records": 133691,
+        "source_records_retained": true
+      }
+    }
+  }
+}

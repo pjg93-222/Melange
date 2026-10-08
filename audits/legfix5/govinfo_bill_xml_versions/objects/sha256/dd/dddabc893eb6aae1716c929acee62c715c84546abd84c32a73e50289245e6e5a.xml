@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HEB900A52E0C24FA09881CC320B241795" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 10510 IH: Central Liquidity Facility Enhancement Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-12-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 10510</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20241218">December 18, 2024</action-date>
+<action-desc><sponsor name-id="W000187">Ms. Waters</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To permanently extend certain enhancements related to credit unions, and for other purposes.</official-title>
+</form>
+<legis-body id="H4F71B4C361A34D218CB6E2149D83250F" style="OLC"> 
+<section id="HF5897209927A419497443CFD98FE49FA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Central Liquidity Facility Enhancement Act</short-title></quote>.</text></section> <section id="H60AB7FE63DC24EFCA2CA8C0BACF85C74"><enum>2.</enum><header>Permanent extension of certain enhancements</header> <subsection id="H99D5E33157CC4B78AD63F5F377B6B3EF"><enum>(a)</enum><header>Definitions</header><text display-inline="yes-display-inline">Section 302(1) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1795a">12 U.S.C. 1795a(1)</external-xref>) is amended, in the matter preceding subparagraph (A), by striking <quote>primarily serving natural persons</quote>.</text></subsection> 
+<subsection id="H1412ED0337C04E448E0A2D593E2F4720"><enum>(b)</enum><header>Membership</header><text>Section 304(b)(2) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1795c">12 U.S.C. 1795c(b)(2)</external-xref>) is amended by striking <quote>all those credit unions</quote> and inserting <quote>such credit unions as the Board may in its discretion determine</quote>.</text></subsection> <subsection id="H554E60D4B58C4B2CA6380DCE19061D76"><enum>(c)</enum><header>Extensions of credit</header><text>Section 306(a)(1) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1795e">12 U.S.C. 1795e(a)(1)</external-xref>) is amended, in the second sentence, by striking <quote>the intent of which is to expand credit union portfolios</quote> and inserting <quote>without first having obtained evidence from the applicant that the applicant has made reasonable efforts to first use primary sources of liquidity of the applicant, including balance sheet and market funding sources, to address the liquidity needs of the applicant</quote>.</text></subsection> 
+<subsection id="H975E329ED1774FEBA0BB5D15A88064B6"><enum>(d)</enum><header>Borrowing limit</header><text display-inline="yes-display-inline">Section 307(a)(4)(A) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1795f">12 U.S.C. 1795f(a)(4)(A)</external-xref>) is amended by striking <quote>twelve times the subscribed capital stock and surplus of the Facility, provided that, the total face value of such obligations shall not exceed 16 times the subscribed capital stock and surplus of the Facility for the period beginning on the date of enactment of the Coronavirus Economic Stabilization Act of 2020 and ending on December 31, 2021</quote> and inserting <quote>16 times the subscribed capital stock and surplus of the Facility</quote>.</text></subsection></section> <section id="HA7D599147C294F59A51C6CE06B9AE66A"><enum>3.</enum><header>GAO study</header> <subsection id="H8B9F630513AA470ABAC0A7852BFDE03F"><enum>(a)</enum><header>Study</header><text display-inline="yes-display-inline">The Comptroller General of the United States shall carry out a study of the impact of the enhancements made to the National Credit Union Administration Central Liquidity Facility by section 4016 of the CARES Act and section 2 of this Act.</text></subsection> 
+<subsection id="H743580BA127A422B8B88DC0C65E700AD"><enum>(b)</enum><header>Report</header><text>Not later than the end of the 12-month period beginning on the date of enactment of this Act, the Comptroller General shall issue a report to the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate containing—</text> <paragraph id="HD3CB624F836B49FD919380F9E42B53B9"><enum>(1)</enum><text>all findings and determinations made in carrying out the study required under subsection (a); and</text></paragraph> 
+<paragraph id="H286FCE8F5CFA43B6885C24B8711CE07A"><enum>(2)</enum><text display-inline="yes-display-inline">any administrative or legislative recommendations of the Comptroller General to improve the effectiveness of the National Credit Union Administration Central Liquidity Facility.</text> </paragraph></subsection></section> </legis-body> </bill> 
+

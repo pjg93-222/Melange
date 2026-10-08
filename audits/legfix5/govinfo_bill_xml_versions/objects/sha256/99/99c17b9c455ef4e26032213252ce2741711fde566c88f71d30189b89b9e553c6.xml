@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H97BFA114A76F43279348201773B45C26" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3619 IH: Appraisal Reform Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3619</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190705">July 5, 2019</action-date><action-desc><sponsor name-id="C001049">Mr. Clay</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 to provide the
+			 Appraisal Subcommittee with the authority to modify annual registry fees
+			 for appraisal management companies, to maintain a registry of trainees and
+			 charge a lower trainee registry fee, and to allow grants to States to
+			 assist appraiser and potential appraiser compliance with the Real Property
+			 Appraiser Qualification Criteria, and for other purposes.</official-title></form>
+	<legis-body id="H8B13D45E8AFF4A028835C51BF61D45AA" style="OLC">
+ <section id="H64A7F706C4DE437E9BDF269001878CF4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Appraisal Reform Act of 2019</short-title></quote>.</text> </section><section id="H1D82BB953B2B4919AEC77A7D1F43553A"><enum>2.</enum><header>Annual registry fees for appraisal management companies</header><text display-inline="no-display-inline">Subparagraph (B) of section 1109(a)(4) of the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 (<external-xref legal-doc="usc" parsable-cite="usc/12/3338">12 U.S.C. 3338(a)(4)(B)</external-xref>) is amended—</text>
+ <paragraph id="H4B0065FE5195468FBF3C864FC41206CD"><enum>(1)</enum><text>in clause (ii), by striking the period at the end and inserting a semicolon; and</text> </paragraph><paragraph id="H9BB450516DDE43BA88C7CE11C19764B8"><enum>(2)</enum><text>by inserting after and below clause (ii) the following:</text>
+				<quoted-block display-inline="no-display-inline" id="HE5B0D7F4641B4CEB8D4FDE98F1AA1449" style="OLC">
+					<quoted-block-continuation-text quoted-block-continuation-text-level="subparagraph">except that if the Appraisal Subcommittee determines that the fees established under clause (i) or
+			 (ii) result in adverse consequences or are otherwise not appropriately
+			 tailored to meet the goals of this paragraph, the Appraisal Subcommittee
+			 may establish a new formula for fees, which new formula may not take
+			 effect until the Appraisal Subcommittee submits a report to the Congress
+			 justifying its decision to establish such a new formula, setting forth the
+			 new formula, and explaining how the new formula will affect such fees.</quoted-block-continuation-text><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section><section id="H32A17A0B7FC1440DB3BE96301B8EA32C"><enum>3.</enum><header>Trainee appraisers</header>
+ <subsection id="H0E596C43066947FF8706E71248DD0303"><enum>(a)</enum><header>Maintenance on national registry</header><text display-inline="yes-display-inline">Paragraph (3) of section 1103(a) of the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 (<external-xref legal-doc="usc" parsable-cite="usc/12/3332">12 U.S.C. 3332(a)(3)</external-xref>) is amended by striking <quote>and licensed</quote> and inserting <quote>, licensed, and trainee</quote>.</text>
+ </subsection><subsection id="H653754577E5F400284B2EA0742778C85"><enum>(b)</enum><header>Annual registry fees</header><text display-inline="yes-display-inline">Subparagraph (A) of section 1109(a)(4) of the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 (<external-xref legal-doc="usc" parsable-cite="usc/12/3338">12 U.S.C. 3338(a)(4)(A)</external-xref>) is amended—</text>
+ <paragraph id="H783E065F61584A8BBD88210BBBBDB031"><enum>(1)</enum><text>by inserting <quote>including trainee appraisers,</quote> after <quote>transactions,</quote>;</text> </paragraph><paragraph id="H3DB93C9AD493482B827E27CC799FA5C0"><enum>(2)</enum><text>by inserting <quote>except that the Appraisal Subcommittee may, in its discretion, charge a fee for trainee appraisers not exceeding $20</quote> after <quote>$40,</quote>; and</text>
+ </paragraph><paragraph id="H90B04DA1373044A69939AA01F84F5A7F"><enum>(3)</enum><text display-inline="yes-display-inline">by inserting before the semicolon the following: <quote>; except that nothing in this subparagraph may be construed to require a State to establish or operate an program for trainee appraisers</quote>.</text>
+ </paragraph></subsection><subsection id="HB7E7A9BEF8934D24AEFD7E3A6824F3C5"><enum>(c)</enum><header>Definition</header><text display-inline="yes-display-inline">Section 1121 of the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 (<external-xref legal-doc="usc" parsable-cite="usc/12/3350">12 U.S.C. 3350</external-xref>) is amended by adding at the end the following new paragraph:</text>
+				<quoted-block display-inline="no-display-inline" id="H9ED756E092154E1DBBC5DAEFF78D4CF7" style="OLC">
+ <paragraph id="HA54FB09349DE4FF6A2E7106D4F20B543"><enum>(12)</enum><header>Trainee appraiser</header><text display-inline="yes-display-inline">The term <quote>trainee appraiser</quote> means an individual who meets the minimum criteria established by the Appraiser Qualification Board for a trainee appraiser license and is credentialed by a State appraiser certifying and licensing agency.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection></section><section id="H55F611C0774347FAB5ADF8CC15BE23FC"><enum>4.</enum><header>Grants to nonprofits and institutions of higher education for compliance efforts</header><text display-inline="no-display-inline">Paragraph (5) of section 1109(b) of the Financial Institutions Reform, Recovery, and Enforcement Act of 1989 (<external-xref legal-doc="usc" parsable-cite="usc/12/3338">12 U.S.C. 3338(b)(5)</external-xref>) is amended by inserting <quote>nonprofit organizations, and institutions of higher education</quote> after <quote>licensing agencies,</quote>.</text>
+ </section><section id="H0719192282D544B6A58AD2A0C9230609" section-type="subsequent-section"><enum>5.</enum><header>Requirement to disclose appraisal fees</header><text display-inline="no-display-inline">Section 4(c) of the Real Estate Settlement Procedures Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/12/2603">12 U.S.C. 2603(c)</external-xref>) is amended by striking <quote>may</quote> and inserting <quote>shall</quote>.</text>
+ </section><section id="H2EF4D48F1252453EA3BA3B9A797AC522"><enum>6.</enum><header>Inclusion of designee of Secretary of Veterans Affairs on Appraisal Subcommittee</header><text display-inline="no-display-inline">The first sentence of section 1011 of the Federal Financial Institutions Examination Council Act of 1978 (<external-xref legal-doc="usc" parsable-cite="usc/12/3310">12 U.S.C. 3310</external-xref>) is amended by inserting <quote>the Department of Veterans Affairs,</quote> after <quote>Protection,</quote>.</text>
+		</section></legis-body></bill>
+
+

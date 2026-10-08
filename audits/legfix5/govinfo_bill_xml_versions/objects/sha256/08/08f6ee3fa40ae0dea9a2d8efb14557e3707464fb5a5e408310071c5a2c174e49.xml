@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HA773A59E54224DEFAEFDBBC6A301814D" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6892 IH: To authorize the Secretary of the Treasury to subscribe to additional shares of the capital stock of the Inter-American Investment Corporation.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-12-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6892</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251218">December 18, 2025</action-date><action-desc><sponsor name-id="S000168">Ms. Salazar</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To authorize the Secretary of the Treasury to subscribe to additional shares of the capital stock of the Inter-American Investment Corporation.</official-title></form><legis-body id="HD40B46D947134093A58AD2772B415730" style="OLC"> 
+<section id="HD8B53156579E42949F2AB0DD79CF0A7A" section-type="section-one"><enum>1.</enum><header>Subscription to additional shares of capital stock of the Inter-American Investment Corporation</header>
+<subsection id="H677E7DF96EED48A0B886A9B582ED111B"><enum>(a)</enum><header>In general</header><text>The Secretary of the Treasury may subscribe on behalf of the United States to not more than an additional 25,124 shares of the capital stock of the Inter-American Investment Corporation.</text></subsection> <subsection id="H079A28011F62435EA04094F85940D92B"><enum>(b)</enum><header>Limitation</header><text>Any subscription to such additional shares shall be effective only to such extent or in such amounts as are provided in advance by appropriations Acts.</text></subsection></section> 
+</legis-body></bill>
+

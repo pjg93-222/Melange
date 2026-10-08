@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-HEN26371-PLS-RJ-XCG"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S4455 IS: Public Lands Integrity Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-04-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 4455</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260430">April 30, 2026</action-date><action-desc><sponsor name-id="S330">Mr. Bennet</sponsor> (for himself, <cosponsor name-id="S247">Mr. Wyden</cosponsor>, <cosponsor name-id="S322">Mr. Merkley</cosponsor>, and <cosponsor name-id="S359">Mr. Heinrich</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBU00">Committee on the Budget</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend section 313 of the Congressional Budget Act of 1974 to designate provisions resulting in the sale, disposal, or transfer of Federal lands as extraneous under the Byrd Rule.</official-title></form><legis-body><section id="idb7d44140aec94b1caf06203c9737d28f" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Public Lands Integrity Act</short-title></quote>.</text></section><section commented="no" display-inline="no-display-inline" id="idac5bf9b22b734c71a8816d0714d3465b"><enum>2.</enum><header display-inline="yes-display-inline">Provisions resulting in the sale, disposal, or transfer of Federal lands designated as extraneous under the Byrd Rule</header><text display-inline="no-display-inline">Section 313(b)(1) of the Congressional Budget Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/2/644">2 U.S.C. 644(b)(1)</external-xref>) is amended—</text><paragraph commented="no" display-inline="no-display-inline" id="id0aaa57ea7a3d48e3a008808b2775be76"><enum>(1)</enum><text>by striking <quote>and (F)</quote> and inserting <quote>(F)</quote>; and</text></paragraph><paragraph commented="no" display-inline="no-display-inline" id="id17536d6fb20b40ddab82079605f5c049"><enum>(2)</enum><text>by inserting <quote>; and (G) a provision that results in the sale, disposal, or transfer of Federal lands shall be considered extraneous</quote> before the period at the end.</text></paragraph></section></legis-body></bill>
+

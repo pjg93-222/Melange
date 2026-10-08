@@ -1,0 +1,166 @@
+{
+  "input_count": 20,
+  "inputs": [
+    {
+      "bytes": 117261,
+      "scratch_name": "archive_leg.json",
+      "sha256": "ec2d6a2ef33ec7b757fd97eb75e53a140ea307f7a4a13ce3c62f2cffb3ba562a",
+      "source_mtime": "2026-07-21T03:42:47.751628Z",
+      "source_mtime_ns": 1784605367751627800,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\archive_leg.json"
+    },
+    {
+      "bytes": 120790,
+      "scratch_name": "bill_direction_queue_FILLED.csv",
+      "sha256": "9bed5a1a10bef26e69e0889788616921f659ba744fc22a836760bce61ecb7eb3",
+      "source_mtime": "2026-07-04T20:14:49.553952Z",
+      "source_mtime_ns": 1783196089553951700,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\bill_direction_queue_FILLED.csv"
+    },
+    {
+      "bytes": 3389,
+      "scratch_name": "bill_directions.csv",
+      "sha256": "b7a1e0f8d331feda30727a9bd247c22e698d10f051d38b4414a7b5a374a3007e",
+      "source_mtime": "2026-07-01T21:36:10.166929Z",
+      "source_mtime_ns": 1782941770166929100,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\bill_directions.csv"
+    },
+    {
+      "bytes": 638,
+      "scratch_name": "bill_overrides.csv",
+      "sha256": "275056306eebdcc7dd2b8de1377426b800ee79ca887a401d164672634757b39c",
+      "source_mtime": "2026-07-14T18:26:56.635587Z",
+      "source_mtime_ns": 1784053616635587300,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\bill_overrides.csv"
+    },
+    {
+      "bytes": 1253750,
+      "scratch_name": "category_stance.json",
+      "sha256": "5e5b4537d5cd1f259a155b770b8d70a223a55e2973a07813822ca61600cbfade",
+      "source_mtime": "2026-07-21T03:43:42.900903Z",
+      "source_mtime_ns": 1784605422900903200,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\category_stance.json"
+    },
+    {
+      "bytes": 1170,
+      "scratch_name": "cfpb_bill_directions.csv",
+      "sha256": "83de7a7142df87240932096532d1e5ac9daa4634a404aff61556f47caab0e6b1",
+      "source_mtime": "2026-06-26T22:18:02.626476Z",
+      "source_mtime_ns": 1782512282626475500,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\cfpb_bill_directions.csv"
+    },
+    {
+      "bytes": 171320,
+      "scratch_name": "congestion.json",
+      "sha256": "ddc9d746600dbdfc60b76c54537662e19c758cbfb9d7a478a71b7bf90cd727a6",
+      "source_mtime": "2026-06-26T22:18:02.333382Z",
+      "source_mtime_ns": 1782512282333381700,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\congestion.json"
+    },
+    {
+      "bytes": 1832697,
+      "scratch_name": "congress_bills_archive_20260624_115822.xlsx",
+      "sha256": "4ca1c81af641a2e255ab54cd78dc4c8eb43aa7d2c156893c753cdbe4faa05a73",
+      "source_mtime": "2026-07-01T21:28:33.736742Z",
+      "source_mtime_ns": 1782941313736742500,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\congress_bills_archive_20260624_115822.xlsx"
+    },
+    {
+      "bytes": 163691,
+      "scratch_name": "congress_cosponsor_network_20260625_205554.xlsx",
+      "sha256": "1feae7e161d134b9b98f0b8ce19b24c340499f6dec09a8009e580c6b611bd0bb",
+      "source_mtime": "2026-06-26T22:18:02.538410Z",
+      "source_mtime_ns": 1782512282538410400,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\congress_cosponsor_network_20260625_205554.xlsx"
+    },
+    {
+      "bytes": 136049,
+      "scratch_name": "congress_cosponsor_network_AUG20260719.xlsx",
+      "sha256": "38c760eedde997e9fe5fd81bc57895f665fa9843f16e5a39069da31d5f726f2e",
+      "source_mtime": "2026-07-19T11:34:05.759973Z",
+      "source_mtime_ns": 1784460845759973000,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\congress_cosponsor_network_AUG20260719.xlsx"
+    },
+    {
+      "bytes": 16695,
+      "scratch_name": "cu_bill_directions.json",
+      "sha256": "5be2b79026fd99ac4fba2cf99b3f4a46f64628989d533a2c7a1289f97a28b184",
+      "source_mtime": "2026-07-04T20:14:49.557084Z",
+      "source_mtime_ns": 1783196089557083600,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\cu_bill_directions.json"
+    },
+    {
+      "bytes": 6550,
+      "scratch_name": "cu_valence_registry.json",
+      "sha256": "9db5398f31e8f5f6117eb7da67f2bae8202a98616ec456eff82dcfe6cc151651",
+      "source_mtime": "2026-07-17T03:16:16.688193Z",
+      "source_mtime_ns": 1784258176688192600,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\cu_valence_registry.json"
+    },
+    {
+      "bytes": 4887231,
+      "scratch_name": "legislation_routing_audit.json",
+      "sha256": "f57b24592fe82bba812e7f2904266a9b0791bb6e0fd74f188faebe6bebb374f5",
+      "source_mtime": "2026-07-21T03:42:47.846775Z",
+      "source_mtime_ns": 1784605367846775300,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\legislation_routing_audit.json"
+    },
+    {
+      "bytes": 186587,
+      "scratch_name": "manual_bill_evidence.csv",
+      "sha256": "630e420fe57ca3b11e4530794d2425c251a4958b62ea679037fe090f6210e739",
+      "source_mtime": "2026-07-18T07:18:27.740981Z",
+      "source_mtime_ns": 1784359107740981100,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\manual_bill_evidence.csv"
+    },
+    {
+      "bytes": 3802067,
+      "scratch_name": "Moneyball Main Version - Blended.xlsx",
+      "sha256": "43f787509926d60dae06b51208983956981cd28e6abe8c99f8705800f511688c",
+      "source_mtime": "2026-07-21T03:44:03.729829Z",
+      "source_mtime_ns": 1784605443729829400,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\Moneyball Main Version - Blended.xlsx"
+    },
+    {
+      "bytes": 48736,
+      "scratch_name": "pillar_inputs_snapshot.json",
+      "sha256": "d1bf5e9eab7ab7039bbed0adcd76022f04d541add76fa3e173d1008b295874bc",
+      "source_mtime": "2026-07-17T20:32:08.467236Z",
+      "source_mtime_ns": 1784320328467235900,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\pillar_inputs_snapshot.json"
+    },
+    {
+      "bytes": 8179075,
+      "scratch_name": "press_text_cache.jsonl",
+      "sha256": "9bf47a2750292d784e6ad879f1c6b0ef4a8c6bd79ef86b29edc8f64ce1fd2413",
+      "source_mtime": "2026-07-04T13:33:43.212693Z",
+      "source_mtime_ns": 1783172023212693500,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\press_text_cache.jsonl"
+    },
+    {
+      "bytes": 232396,
+      "scratch_name": "ranks_python.json",
+      "sha256": "a7417940d6a6035c6cac01e66261eb2f5331d36f088e63946b0b194de06cec4f",
+      "source_mtime": "2026-07-21T03:43:53.516633Z",
+      "source_mtime_ns": 1784605433516632900,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\ranks_python.json"
+    },
+    {
+      "bytes": 129823,
+      "scratch_name": "say_do_gap.json",
+      "sha256": "0d5059cb17d1cbf0c571cced3dbdf5d11a976d939369550a25adb873774fb8e7",
+      "source_mtime": "2026-07-19T11:53:52.674932Z",
+      "source_mtime_ns": 1784462032674932300,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\say_do_gap.json"
+    },
+    {
+      "bytes": 223660,
+      "scratch_name": "vote_category_lean.json",
+      "sha256": "ed185763f1a66e166790b386de4e3637c86a5d58a8a6bca1eefd98b40631e009",
+      "source_mtime": "2026-06-26T22:18:02.362705Z",
+      "source_mtime_ns": 1782512282362705200,
+      "source_path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\vote_category_lean.json"
+    }
+  ],
+  "schema": "legfix2-source-manifest-v1"
+}

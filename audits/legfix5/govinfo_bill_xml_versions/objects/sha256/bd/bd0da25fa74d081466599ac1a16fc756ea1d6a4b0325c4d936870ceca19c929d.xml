@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-GOE20069-CCZ-TJ-JY4"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3230 IS: Technical Assistance for Small and Underserved Providers to Prevent Oversights and Refocus on Treatment Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-01-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>2d Session</session><legis-num>S. 3230</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20200128">January 28, 2020</action-date><action-desc><sponsor name-id="S385">Ms. Cortez Masto</sponsor> (for herself and <cosponsor name-id="S349">Mr. Portman</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend title XVIII of the Social Security Act to provide for an extension of funding for
+			 technical assistance to small practices and practices in health
+			 professional shortage areas under the Merit-based Incentive Payment System
+			 (MIPS).</official-title></form>
+	<legis-body>
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Technical Assistance for Small and Underserved Providers to Prevent Oversights and Refocus on Treatment Act</short-title></quote> or the <quote><short-title>TA SUPPORT Act</short-title></quote>.</text>
+		</section><section id="id409DEE00F3CF4F28A935F5C590178EBC"><enum>2.</enum><header>Extension of funding for technical assistance to small practices and practices in health
+			 professional shortage areas under MIPS</header>
+ <subsection id="id628B3FB55C3F4C77899728F89A86D610"><enum>(a)</enum><header>In general</header><text>Section 1848(q)(11)(B) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395w-4">42 U.S.C. 1395w–4(q)(11)(B)</external-xref>) is amended by striking <quote>through 2020</quote> and inserting <quote>through 2025</quote>.</text>
+			</subsection><subsection id="id74F20741665A49BC952BB130FEDC387B"><enum>(b)</enum><header>Study and report</header>
+ <paragraph id="id37fb657bd3ec4180a93b26d54ea36893"><enum>(1)</enum><header>Study</header><text>The Secretary of Health and Human Services (in this subsection referred to as the <quote>Secretary</quote>) shall conduct a study on the impact of the technical assistance funded under paragraph (11) of section 1848(q) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395w-4">42 U.S.C. 1395w–4(q)</external-xref>). Such study shall include an analysis of—</text>
+ <subparagraph id="id5B9BF3C6DE7447F1A8F07290FCBF9C24"><enum>(A)</enum><text>the practices that have received technical assistance through such funding; and</text>
+ </subparagraph><subparagraph id="id7D9F3994BACC4C799805D67D2B491624"><enum>(B)</enum><text>the progress that professionals in such practices have made to improve within the Merit-based Incentive Payment System (MIPS) under such section 1848(q); and</text>
+ </subparagraph><subparagraph id="id1C81470A98AB4FCAA13A861E4ACA6502"><enum>(C)</enum><text>the progress that professionals in such practices have made to transition to the implementation of and participation in an alternative payment model as described in section 1833(z)(3)(C) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395l">42 U.S.C. 1395l(z)(3)(C)</external-xref>).</text>
+ </subparagraph></paragraph><paragraph id="idb6d3b038762e42238f6726190ca3177a"><enum>(2)</enum><header>Report</header><text>Not later than 180 days after the date of enactment of this Act, the Secretary shall submit to Congress a report on the study conducted under paragraph (1), together with recommendations for such legislation and administrative action as the Secretary determines appropriate.</text></paragraph></subsection></section></legis-body></bill>
+
+

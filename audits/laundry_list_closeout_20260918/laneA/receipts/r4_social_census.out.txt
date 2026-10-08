@@ -1,0 +1,128 @@
+﻿python.exe : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\la
+undry_list_closeout_20260918\laneA\receipts\r4_social_census.py:11: SyntaxWarning: invalid escape sequence '\ '
+At line:3 char:1
++ & $py "$rc\r4_social_census.py" > "$rc\r4_social_census.out.txt" 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\pgoff\...e sequence '\ ':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  silent (uncounted-by-the-producer) drops are named.  Nothing under fec\ is imported: hash-
+====================================================================================================
+R4  SOCIAL CHANNEL CENSUS   run 2026-09-18T23:37:17
+====================================================================================================
+Social Master.xlsx  1982628 bytes  mtime 2026-09-14 00:41:52.611542
+roster members: 533
+tweet_stance_final.csv rows: 9465  mtime 2026-09-17 00:54:16.254684
+engine STACK keys: 7938   (keys that needed the majority-vote collapse: 1429)
+desk  stack keys: 7938   (last-write-wins, no collapse)
+
+Social Master sheets: ['Corpus', 'MemberRollup', 'Coverage']
+'Corpus' columns (13): ['platform', 'member', 'date', 'text', 'is_rt', 'stance', 'stance_margin', 'source', 'verified_handle', 'url', 'post_id', 'repost_of', 'original_post_uri']
+Corpus data rows: 9541
+
+-- cell-type diagnostics (divergence risk for the pandas-vs-openpyxl substitution) --
+   stance           types={'str': 9541}  distinct=3  top=["'support'", "'neutral'", "'oppose'"]
+   verified_handle  types={'int': 9541}  distinct=2  top=['1', '0']
+   date             types={'str': 9541}  distinct=1263  top=["'2025-07-17'", "'2025-02-11'", "'2025-02-10'", "'2024-05-16'"]
+   stance_margin    types={'str': 9541}  distinct=2224  top=["'0.064'", "'0.082'", "'0.146'", "'0.297'"]
+   is_rt            types={'str': 9465, 'int': 76}  distinct=3  top=["'0'", "'1'", '0']
+   platform         types={'str': 9541}  distinct=4  top=["'x'", "'facebook'", "'bluesky'", "'other'"]
+   source           types={'str': 9541}  distinct=2  top=["'quorum'", "'direct'"]
+
+-- platform / source breakdown of all 9541 Corpus rows --
+   platform: {'x': 6534, 'facebook': 2909, 'bluesky': 76, 'other': 22}
+   source: {'quorum': 9465, 'direct': 76}
+
+----------------------------------------------------------------------------------------------------
+ENGINE CHAIN  fec/stance/build_media_blend.py:58-120
+----------------------------------------------------------------------------------------------------
+RULE :59  corp=corp[(corp['stance'].fillna('')!='')&(corp['verified_handle'].astype(str)=='1')]
+   Corpus rows in                                      :   9541
+   dropped: stance blank/NaN                           :      0
+   dropped: verified_handle != '1' (on stance-bearing)  :     39
+   ENGINE `len(corp)` -- what the engine calls "source rows":   9502
+
+   per-row disposition of those 9502 rows:
+   RULE :96-97  sg=SIGN.get(_st,0.0); if sg==0.0: continue          ->   2994  *** NOT COUNTED BY THE ENGINE ***
+        breakdown by label: {'neutral': 2028, 'unrelated': 966}
+   RULE :98-99  _member=_resolver.resolve(...); if not _member: nunknown+=1; continue ->      0  (printed)
+   RULE :106    elif not _event[1]: nlinkonly+=1; continue          ->     19  (printed)
+   RULE :107-108 try: age=...; except Exception: continue           ->      0  *** NOT COUNTED BY THE ENGINE ***
+   RULE :116-117 hits=MR.route_raw_categories(...); if not hits: continue ->    780  *** NOT COUNTED BY THE ENGINE ***
+   SCORED / category-assigned (`nassigned`)                         ->   5709
+   members carrying social signal (`len(soc)`)                      ->    431
+   stack overrides applied (`nover`)                                ->   9468
+   exact cross-post duplicates seen (`ndupe`, RETAINED at CROSSPOST_DEDUP=0) ->   1018
+
+   CLOSES? 9502 = 2994 zero-sign + 0 unresolved + 19 link-only + 0 bad-date + 780 no-category + 5709 scored -> YES
+
+   what the engine PRINTS: "9502 source rows -> 5709 scored/category-assigned | 1018 exact cross-post duplicates retained | 19 link-only posts skipped | 0 unresolved identities excluded | 431 members"
+   UNPRINTED by the engine: 2994 zero-sign + 0 bad-date + 780 no-category = 3774 rows
+   ALSO UNPRINTED: the pre-filter drop at :59 -- 0 blank-stance + 39 unverified-handle = 39 rows
+
+   engine social category assignments (a row splits across its hits):
+      CFPB Issues & Structural Reform          2812
+      Payments                                 1332
+      Technology & Emerging Issues              782
+      Fraud Prevention                          742
+      CU-Bank Competitive Dynamics              508
+      General Credit Union                      363
+      Credit Card & Consumer-Fee Mandates       317
+      Mortgage Lending & Housing                282
+      Interchange                               200
+      Telephone Consumer Protection Act         184
+      CDFI Fund                                 135
+      Data Privacy & Cybersecurity              134
+      Member Business Lending                   109
+      Examination & Supervision                  53
+      Field of Membership                        32
+      Defense Credit Union Issues                31
+      Credit Union Tax Status                    21
+      Charter Modernization & Governance         19
+      Credit Union Capital Requirements           7
+
+----------------------------------------------------------------------------------------------------
+DESK CHAIN  fec/surfaces/make_member_desk.py:1721-1776
+----------------------------------------------------------------------------------------------------
+RULE :1729  if str(sv(row,'verified_handle') or '').strip() != '1': ...excluded  ->     39
+RULE :1732  nm=canon(...); if not nm: ...social_unknown_member_excluded         ->      0
+RULE :1739  if stance == 'unrelated': ...social_unrelated_excluded              ->   1032
+RULE :1745  if not raw_cats: ...social_offtopic_excluded                        ->   1891
+DISPLAYED (social_displayed)                                                   ->   6579
+   of which scored=True                                                        ->   5722
+   of which scored=False by rule:
+      neutral                                     838
+      link-only post: no scorable text             19
+   rows carrying an "also posted on" note (D-034)                              ->    895
+   social_duplicate_visible (census counter)                                   ->   1025
+   social_scored_unique (census counter)                                       ->   4834
+
+CLOSES? 9541 in = 39 unverified + 0 unknown-member + 1032 unrelated + 1891 off-topic + 6579 displayed -> YES
+
+desk social category assignments:
+   CFPB Issues & Structural Reform          3042
+   Payments                                 1445
+   Technology & Emerging Issues              883
+   Fraud Prevention                          821
+   CU-Bank Competitive Dynamics              820
+   Mortgage Lending & Housing                361
+   General Credit Union                      359
+   Credit Card & Consumer-Fee Mandates       324
+   Telephone Consumer Protection Act         267
+   Interchange                               243
+   Data Privacy & Cybersecurity              148
+   CDFI Fund                                 138
+   Member Business Lending                   112
+   Examination & Supervision                  73
+   Charter Modernization & Governance         48
+   Defense Credit Union Issues                39
+   Field of Membership                        31
+   Credit Union Tax Status                    19
+   Credit Union Capital Requirements          10
+
+-- ENGINE vs DESK denominator gap --
+   desk counts every Corpus row as a source row      :   9541
+   engine's `len(corp)` is already post-filter        :   9502
+   gap (rows the engine never calls "source rows")    :     39
+
+DONE R4

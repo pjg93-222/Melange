@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H1A242FCCF00341A9BB7C2A326CD568F5" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 6171 IH: CNL Update Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-12-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 6171</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20211207">December 7, 2021</action-date>
+<action-desc><sponsor name-id="W000813">Mrs. Walorski</sponsor> (for herself and <cosponsor name-id="M001202">Mrs. Murphy of Florida</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To modify the competitive need limitation provisions under the Generalized System of Preferences program.</official-title>
+</form>
+<legis-body id="H4ABDCD7E217C4DD48D22A3706FFB918A" style="OLC">
+<section id="H1E21C186100F4A84A0EA1600CB5471A6" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>CNL Update Act</short-title></quote>.</text></section> <section id="H5A981F2761484B28A3943D787D05C8D7"><enum>2.</enum><header>Sense of Congress</header><text display-inline="no-display-inline">It is the sense of Congress that—</text>
+<paragraph id="HC434D4B9794741E7883C803F02C1BC12"><enum>(1)</enum><text display-inline="yes-display-inline">United States trade capacity building agencies should work with, and provide appropriate resources to, beneficiary developing countries under the Generalized System of Preferences program under title V of the Trade Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/19/2461">19 U.S.C. 2461 et seq.</external-xref>) to assist such countries in meeting the eligibility criteria under such program;</text></paragraph> <paragraph id="H7119DCB911D0496CA2778489A88E88B3"><enum>(2)</enum><text>the goal of such eligibility criteria is to raise standards and improve the well-being of individuals in the beneficiary developing countries through trade and economic development; </text></paragraph>
+<paragraph id="HD835E764D5CC46F9B261CD49B3962B36"><enum>(3)</enum><text>trade policies cannot create a race to the top if punitive actions treat good and bad actors alike; </text></paragraph> <paragraph id="H7B00299F98234B56B77D524FFABBC8F5"><enum>(4)</enum><text>in determining appropriate actions to take under subsection (d) of section 502 of the Trade Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/19/2462">19 U.S.C. 2462(d)</external-xref>), the President should, in a manner consistent with statutory requirements—</text>
+<subparagraph id="H6B4DD848E3B748D49C0141E78F3F8E73"><enum>(A)</enum><text>consider the impact of withdrawal, suspension, or limitation of duty-free treatment on the criteria and factors affecting eligibility described in subsections (b) and (c) of such section; and</text></subparagraph> <subparagraph id="HF6DA508FB857445390BC49BEC9203A88"><enum>(B)</enum><text>take all available steps to facilitate continued duty-free treatment for products where the imposition of duties is likely to slow or reverse progress made toward meeting the criteria and factors described in subsections (b) and (c) of such section or result in severe economic harm to United States entities, particularly small businesses; and </text></subparagraph></paragraph>
+<paragraph id="HAE19C959483547DD911F7AE5325B93CE"><enum>(5)</enum><text>the United States Trade Representative should establish and maintain a process to mitigate the harm for products determined to meet the criteria and factors described in subsections (b) and (c) of section 502 of the Trade Act of 1974, including exploring the feasibility of preserving duty-free eligibility on a case-by-case basis for qualifying companies if the President decides to withdraw, suspend, or limit the application of the duty-free treatment accorded under title V of such Act.</text></paragraph></section> <section id="HFC360D92B7A343A7BEFB77239AD44843"><enum>3.</enum><header>Modification of competitive need limitation provisions under the Generalized System of Preferences program</header> <subsection id="HFBAFBFA8D3874780A40315B20302763A"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 503 of the Trade Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/19/2463">19 U.S.C. 2463</external-xref>) is amended—</text>
+<paragraph id="HB45878A02F6F4C98B2797A9E88A97080"><enum>(1)</enum><text display-inline="yes-display-inline">in subsection (c)(2)—</text> <subparagraph id="H114F0ABC15C14A3981B91D47EAB6D8B7"><enum>(A)</enum><text>in subparagraph (A)(ii)(II), by striking <quote>$5,000,000</quote> and inserting <quote>an amount equal to 6.5 percent of such applicable amount</quote>;</text></subparagraph>
+<subparagraph id="H2968DDDAEE624447B853A0B2655F02F3"><enum>(B)</enum><text>in subparagraph (C)—</text> <clause id="HFC2B9223CAC94C4DAB9E1EC5B1ED85A9"><enum>(i)</enum><text>by striking <quote>may, subject</quote> and inserting <quote>should, subject</quote>; and</text></clause>
+<clause id="HE7DEF45124A8408AB0B93E39630B07C7"><enum>(ii)</enum><text>by striking <quote>the limitations in subparagraph (A)</quote> and inserting <quote>the limitations in subparagraph (A) or (F)</quote>;</text></clause></subparagraph> <subparagraph id="H49A1A8BA811C41CE9B9C5462D544CC19"><enum>(C)</enum><text>in subparagraph (F)—</text>
+<clause id="HB0CA330C178248C5BF065167E4E8CE55"><enum>(i)</enum><text>in clause (i), by striking <quote>may disregard</quote> and inserting <quote>should disregard</quote>; and</text></clause> <clause id="H18D901DA1A074CC8A1F4E552130D0B32"><enum>(ii)</enum><text display-inline="yes-display-inline">in clause (ii)(II), by striking <quote>$500,000</quote> and inserting <quote>an amount equal to 6.5 percent of such applicable amount</quote>; and</text></clause></subparagraph>
+<subparagraph id="H831F2E38E369457F928C3994377B6F8F"><enum>(D)</enum><text>by inserting after subparagraph (F) the following: </text> <quoted-block style="OLC" id="H06012B27616D475DA8227A5AAAC67D58" display-inline="no-display-inline"> <subparagraph id="HD2445061E08D465395A96B95D7B56F63"><enum>(G)</enum><header>Calculation of limitations</header><text display-inline="yes-display-inline">There shall be counted against the limitations imposed under subparagraph (A) for any calendar year only that value of any eligible article of a beneficiary developing country that entered duty-free under this title during such calendar year.</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block></subparagraph></paragraph>
+<paragraph id="H8582D790EB6847E1AEE998F3D0DC66DB"><enum>(2)</enum><text>in subsection (d)(1), by striking <quote>, before November 1 of the calendar year beginning after the calendar year for which a determination described in subsection (c)(2)(A) was made with respect to such eligible article,</quote>.</text></paragraph></subsection> <subsection id="H528BE7250D3A40878C6A9689A9A56CA8"><enum>(b)</enum><header>Effective date</header><text>The amendments made by subsection (a)—</text>
+<paragraph id="HB7BD9488B35849CBB814925360DF26D5"><enum>(1)</enum><text>take effect on the date of the enactment of this Act; and</text></paragraph> <paragraph id="H8E67CB11305642E19A35E0630A6234AA"><enum>(2)</enum><text display-inline="yes-display-inline">apply with respect to imports into the United States of eligible articles from beneficiary developing countries under title V of the Trade Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/19/2461">19 U.S.C. 2461 et seq.</external-xref>) during the calendar year preceding the calendar year in which the first annual review is carried out under such title V after such date of enactment and each subsequent calendar year.</text></paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

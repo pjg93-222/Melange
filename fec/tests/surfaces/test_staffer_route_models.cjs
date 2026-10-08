@@ -73,11 +73,11 @@ test('an unreachable work route offers an explicit ecosystem retry without claim
   vm.runInContext(source.slice(source.indexOf('  function renderRoute('),source.indexOf('  const normalizedName=')),context);
   vm.runInContext("renderRoute({found:false,status:'unreachable',message:'No available routes'})",context);
   assert.match($('route-status').textContent,/does not mean either person has no connections/);
-  assert.equal(retry.text,'Search Ecosystem routes');retry.onclick();
+  assert.equal(retry.text,'Search Ecosystem');retry.onclick();
   assert.equal(selectedModel,'evidence_cost');assert.equal($('route-form').submitted,true);
   vm.runInContext("renderRoute({found:false,status:'insufficient_work_coverage',message:'Known person; insufficient authenticated coverage'})",context);
   assert.match($('route-status').textContent,/Known person/);
-  assert.equal(retry.text,'Search Ecosystem routes');
+  assert.equal(retry.text,'Search Ecosystem');
 });
 
 test('ecosystem evidence preserves its relationship class and counts observed periods as periods',()=>{

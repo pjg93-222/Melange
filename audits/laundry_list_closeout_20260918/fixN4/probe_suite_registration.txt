@@ -1,0 +1,20 @@
+discovered test suites: 345
+duplicate basenames (fatal for the whole harness): NONE
+test_sponsor_column                      discovered: True   C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\fec\tests\legislation\test_sponsor_column.py
+test_sponsor_column_producer_wiring      discovered: False  (absent)
+
+lane tuples parsed: ['_LANE_LEGISLATION', '_LANE_LEGISLATION_PKG', '_LANE_MODULES', '_LANE_PYTEST', '_LANE_SPEECH_PKG']
+registered suite names: 165
+test_sponsor_column                      registered in: ['_LANE_LEGISLATION']
+test_sponsor_column_producer_wiring      registered in: NOT REGISTERED
+
+every registered name resolves to a file (an absent one is counted as a FAILURE by the
+runner, never skipped): []
+registered-but-absent: NONE
+
+test_sponsor_column: returncode=0  _suite_verdict=(20, 0)
+last line: 'test_sponsor_column: 20 passed, 0 failed'
+runner's own pass condition (returncode==0 and verdict is not None and failed==0 and passed>0): True
+
+VERDICT: test_sponsor_column is discovered, uniquely named, registered in _LANE_LEGISLATION,
+         and the runner can read its verdict line. MONEYBALL_ROOT was unset for the run.

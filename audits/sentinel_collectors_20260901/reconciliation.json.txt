@@ -1,0 +1,86 @@
+{
+  "fulltext": {
+    "active_keys": 255,
+    "active_minus_candidate": 0,
+    "active_rows": 255,
+    "active_subset_of_candidate": true,
+    "candidate_keys": 294,
+    "candidate_minus_active": 39,
+    "candidate_rows": 294,
+    "collision_pairs": {
+      "press_refresh_20260828<-press_refresh_20260830": 248,
+      "press_refresh_20260828<-press_refresh_20260831": 248,
+      "press_refresh_20260828<-press_refresh_20260901": 64,
+      "press_refresh_20260830<-press_refresh_20260831": 29,
+      "press_refresh_20260830<-press_refresh_20260901": 29,
+      "press_refresh_20260831<-press_refresh_20260901": 4
+    },
+    "collisions_resolved_to_earliest": 622,
+    "lost_examples": [],
+    "per_run": {
+      "press_refresh_20260828": 255,
+      "press_refresh_20260830": 280,
+      "press_refresh_20260831": 281,
+      "press_refresh_20260901": 100
+    },
+    "per_run_total": 916,
+    "union": 294,
+    "union_equals_candidate": true
+  },
+  "mentions": {
+    "active_keys": 19561,
+    "active_minus_candidate": 0,
+    "active_rows": 19561,
+    "active_subset_of_candidate": true,
+    "candidate_keys": 22243,
+    "candidate_minus_active": 2682,
+    "candidate_rows": 22243,
+    "collision_pairs": {
+      "press_refresh_20260828<-press_refresh_20260830": 18669,
+      "press_refresh_20260828<-press_refresh_20260831": 18745,
+      "press_refresh_20260828<-press_refresh_20260901": 1,
+      "press_refresh_20260830<-press_refresh_20260831": 1958,
+      "press_refresh_20260830<-press_refresh_20260901": 1834,
+      "press_refresh_20260831<-press_refresh_20260901": 137
+    },
+    "collisions_resolved_to_earliest": 41344,
+    "lost_examples": [],
+    "per_run": {
+      "press_refresh_20260828": 19561,
+      "press_refresh_20260830": 20858,
+      "press_refresh_20260831": 20851,
+      "press_refresh_20260901": 2317
+    },
+    "per_run_total": 63587,
+    "union": 22243,
+    "union_equals_candidate": true
+  },
+  "tone": {
+    "active_keys": 255,
+    "active_minus_candidate": 0,
+    "active_rows": 255,
+    "active_subset_of_candidate": true,
+    "candidate_keys": 294,
+    "candidate_minus_active": 39,
+    "candidate_rows": 294,
+    "collision_pairs": {
+      "press_refresh_20260828<-press_refresh_20260830": 248,
+      "press_refresh_20260828<-press_refresh_20260831": 248,
+      "press_refresh_20260828<-press_refresh_20260901": 64,
+      "press_refresh_20260830<-press_refresh_20260831": 29,
+      "press_refresh_20260830<-press_refresh_20260901": 29,
+      "press_refresh_20260831<-press_refresh_20260901": 4
+    },
+    "collisions_resolved_to_earliest": 622,
+    "lost_examples": [],
+    "per_run": {
+      "press_refresh_20260828": 255,
+      "press_refresh_20260830": 280,
+      "press_refresh_20260831": 281,
+      "press_refresh_20260901": 100
+    },
+    "per_run_total": 916,
+    "union": 294,
+    "union_equals_candidate": true
+  }
+}

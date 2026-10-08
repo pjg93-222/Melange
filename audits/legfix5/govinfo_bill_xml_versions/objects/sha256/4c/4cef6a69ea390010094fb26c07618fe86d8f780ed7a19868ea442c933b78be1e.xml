@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Engrossed-in-House" dms-id="HF131667A8A6F44499DC81C78CF05C754" public-private="public" resolution-type="house-resolution" star-print="no-star-print" key="H" stage-count="1">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HRES 132 EH: Responding to the earthquakes in Türkiye and Syria on February 6, 2023.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-02-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IV</distribution-code>
+<congress display="no">118th CONGRESS</congress>
+<session display="no">1st Session</session>
+<legis-num display="yes">H. RES. 132</legis-num>
+<current-chamber display="yes">In the House of Representatives, U. S.,</current-chamber>
+<action>
+<action-date date="20230227">February 27, 2023</action-date>
+</action>
+<legis-type display="yes">RESOLUTION</legis-type>
+<official-title display="no">Responding to the earthquakes in Türkiye and Syria on February 6, 2023.</official-title>
+</form>
+<preamble>
+<whereas><text>Whereas, on February 6, 2023, a magnitude 7.8 earthquake struck central-southern Türkiye, followed by a magnitude 7.5 earthquake later the same day, followed by over a thousand aftershocks in Türkiye and northwest Syria;</text></whereas> <whereas><text>Whereas the earthquakes have caused massive death and destruction, killing more than 36,000 people and injuring tens of thousands more in Türkiye and Syria;</text></whereas>
+<whereas><text>Whereas the United States Agency for International Development and other agencies mobilized Federal agencies and partners to provide life-saving assistance to the people of Türkiye and Syria;</text></whereas> <whereas><text>Whereas dangerous freezing winter weather conditions negatively impacted rescue efforts and put earthquake survivors at further risk after thousands of buildings collapsed into rubble;</text></whereas>
+<whereas><text>Whereas the Republic of Türkiye is a North Atlantic Treaty Organization (NATO) ally of the United States;</text></whereas> <whereas><text>Whereas prior to the devastating earthquakes, millions of people in Syria were relying on humanitarian assistance, and Türkiye was hosting more than 3,500,000 Syrian refugees;</text></whereas>
+<whereas><text>Whereas through 12 years of war in Syria, the Assad regime has impeded the delivery of humanitarian assistance to civilians, including those in areas now impacted by the February 6, 2023, earthquakes;</text></whereas> <whereas><text>Whereas the Russian Federation and People’s Republic of China have used their veto power at the United Nations Security Council to restrict the number of United Nations-authorized border crossings between Türkiye and Syria from four to just one—Bab al-Hawa;</text></whereas>
+<whereas><text>Whereas although areas outside of the Assad regime’s control have been the worst affected by the earthquake, Foreign Minister Faisal Mekdad stated that any aid to victims must go through the Syrian Government in Damascus;</text></whereas> <whereas><text>Whereas Department of State Spokesman Ned Price has stated it would be <quote>ironic, if not even counterproductive, for us to reach out to a government that has brutalized its people over the course of a dozen years now</quote>;</text></whereas>
+<whereas><text>Whereas the Assad regime has shamefully used the earthquake to call for the lifting of United States sanctions, falsely claiming that such sanctions impede the aid response; and</text></whereas> <whereas><text>Whereas the human cost of this disaster transcends mere statistics and has resulted in deeply personal tragedies for countless families: Now, therefore, be it</text></whereas></preamble>
+<resolution-body style="traditional" id="HE77FFB06EA9148DBB00714AC51C10FF0">
+<section id="H79F52571C918455787C075863F7126BD" section-type="undesignated-section" display-inline="yes-display-inline"><enum/><text display-inline="yes-display-inline">That the House of Representatives—</text> <paragraph id="HF1F8DE31E94E416187D780BB5550E24C"><enum>(1)</enum><text>mourns the horrific loss of life in Türkiye and Syria caused by the earthquakes in Türkiye on February 6, 2023;</text></paragraph>
+<paragraph id="H878356981458472AA26CCE9CCE7CCBB1"><enum>(2)</enum><text>expresses its deep condolences to the families of the many earthquake victims;</text></paragraph> <paragraph id="HDE7D62BD1F0545739156885C2A332EEA"><enum>(3)</enum><text display-inline="yes-display-inline">applauds the heroic work of humanitarian aid and rescue workers on the ground to save lives and provide care for victims, including United States Agency for International Development Urban Search and Rescue teams, the Armed Forces of the United States, including members of such Armed Forces stationed at the Incirlik Air Force base in Türkiye, and the Syrian Civil Defense, otherwise known as the White Helmets;</text></paragraph>
+<paragraph id="HE5B8827B40DB4BC6BD1E7758B592BA12"><enum>(4)</enum><text>applauds the response to the earthquake tragedy by the United States Government, other governments, and nongovernmental organizations;</text></paragraph> <paragraph id="H6018DE0C865242D7A4F731848BF55752"><enum>(5)</enum><text>applauds the civilians in Türkiye and Syria who have selflessly volunteered to assist with response to the devastating aftermath;</text></paragraph>
+<paragraph id="H50CD97793E154507A033F7429AC32C4B"><enum>(6)</enum><text>urges the international community to support heroic disaster response efforts in Türkiye and Syria, including those by the Syrian Civil Defense, the White Helmets;</text></paragraph> <paragraph id="HA21923017ED540E2B56ABE126F3F83E3"><enum>(7)</enum><text>condemns efforts by the Assad regime to cynically exploit the disaster to evade international pressure and accountability, including by preventing the United Nations from providing assistance through multiple border crossings between Türkiye and Syria;</text></paragraph>
+<paragraph id="H000FFAD7CED1474DA4DCD6F0299ADA7B"><enum>(8)</enum><text>calls on the Biden administration to continue to use all diplomatic tools, including through the United Nations Security Council, to open all Türkiye-Syria border crossings for United Nations assistance;</text></paragraph> <paragraph id="H82413AD16F9C425BAB41E28B07B8F233"><enum>(9)</enum><text>underscores the need for international assistance to reach northwest Syria to assist with disaster relief;</text></paragraph>
+<paragraph id="H205D47C890B8456781F23307970BE467"><enum>(10)</enum><text>calls for an increased oversight mechanism to ensure that United States-funded assistance is not diverted for the benefit of the Assad regime;</text></paragraph> <paragraph id="HB4245FE19D4C4D67BC5ADF2EAD3F6945"><enum>(11)</enum><text>urges the Biden administration to remain committed to the protection of the Syrian people including by implementing the Caesar Syria Civilian Protection Act of 2019; and</text></paragraph>
+<paragraph id="HCD5B9B5A94464682974B1C67C422B31C"><enum>(12)</enum><text>welcomes the Republic of Türkiye’s continuing support to Syrian refugees in Türkiye and in northwestern Syria.</text></paragraph></section> </resolution-body> <attestation><attestation-group><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation> </resolution> 
+

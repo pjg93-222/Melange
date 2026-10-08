@@ -1,0 +1,347 @@
+{
+ "_README": "Tweet-stance hand corrections (Paul gold). Keyed by exact quorum_id (BUG-A fix: text_contains overmatched the CFPB agency name across 149 tweets). Applied LAST in tweet_stance_stack.py --score.",
+ "corrections": [
+  {
+   "quorum_id": "559890929",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "congress can put consumer protection laws back where it belo"
+  },
+  {
+   "quorum_id": "559944295",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "congress can put consumer protection laws back where it belo"
+  },
+  {
+   "quorum_id": "559500411",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the cfpb has long been a rogue agency notorious for its exce"
+  },
+  {
+   "quorum_id": "559519355",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the cfpb has long been a rogue agency notorious for its exce"
+  },
+  {
+   "quorum_id": "558857817",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rt financialcmte watch fi subcommittee chairman repandybarr "
+  },
+  {
+   "quorum_id": "558642786",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "great conversation with treasury secretary scott bessent ton"
+  },
+  {
+   "quorum_id": "558649269",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "great conversation with treasury secretary scott bessent ton"
+  },
+  {
+   "quorum_id": "558437816",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "thank you to present trump for clearing the way for new and "
+  },
+  {
+   "quorum_id": "558398478",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "thank you to realdonaldtrump for clearing the way for new an"
+  },
+  {
+   "quorum_id": "557668424",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rohit chopra s days at the cfpb are numbered his anti consum"
+  },
+  {
+   "quorum_id": "557745707",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rohit chopra s days at the cfpb are numbered his anti consum"
+  },
+  {
+   "quorum_id": "577675951",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "1 2 the senate s passage of the one big beautiful bill deliv"
+  },
+  {
+   "quorum_id": "552656700",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite voters clear message on election day and my calls to"
+  },
+  {
+   "quorum_id": "552657517",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite voters clear message on election day and my calls to"
+  },
+  {
+   "quorum_id": "552659373",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite voters clear message on election day and my calls to"
+  },
+  {
+   "quorum_id": "552665613",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rt bankinggop senatortimscott s statement on the cfpb s fina"
+  },
+  {
+   "quorum_id": "527348427",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the consumer financial protection bureau cfpb repeatedly bru"
+  },
+  {
+   "quorum_id": "515217986",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "despite president biden s claims the cfpb s cap on credit ca"
+  },
+  {
+   "quorum_id": "513864502",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "proud to partner with senjohnkennedy to save community banks"
+  },
+  {
+   "quorum_id": "494812692",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "the cfpb s overreach and abuse of power stifles economic opp"
+  },
+  {
+   "quorum_id": "522998963",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "i m incredibly relieved cfpb which congressional democrats c"
+  },
+  {
+   "quorum_id": "511248860",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "for far too long credit card companies have piled excessive "
+  },
+  {
+   "quorum_id": "469985748",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "thank you for repyoungkim s leadership on this letter to the"
+  },
+  {
+   "quorum_id": "460578651",
+   "stance": "neutral",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "regulators are disconnected from the impact their onerous ru"
+  },
+  {
+   "quorum_id": "428479113",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "after hearing from federalreserve chair jerome powell it is "
+  },
+  {
+   "quorum_id": "428479860",
+   "stance": "support",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "after hearing from federalreserve chair jerome powell it is "
+  },
+  {
+   "quorum_id": "616752012",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "no one better than rohit chopra to lead a new agency and pro"
+  },
+  {
+   "quorum_id": "601354591",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "donald trump says he wants to cap credit card interest rates"
+  },
+  {
+   "quorum_id": "601392258",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "donald trump says he wants to cap credit card interest rates"
+  },
+  {
+   "quorum_id": "597601672",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "trump and republicans got rid of the cfpb s rule to cap over"
+  },
+  {
+   "quorum_id": "597610933",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "trump and republicans got rid of the cfpb s rule to cap over"
+  },
+  {
+   "quorum_id": "596100221",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "under trump the national credit union association stopped sh"
+  },
+  {
+   "quorum_id": "592338358",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "360 million that s how much americans who were cheated or sc"
+  },
+  {
+   "quorum_id": "592351568",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "360 million that s how much americans who were cheated or sc"
+  },
+  {
+   "quorum_id": "588820229",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "walmart and navy federal credit union were investigated for "
+  },
+  {
+   "quorum_id": "588821881",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "walmart and navy federal credit union were investigated for "
+  },
+  {
+   "quorum_id": "562138525",
+   "stance": "oppose",
+   "note": "Paul gold 2026-07-15",
+   "text_head": "rt senschumer the gop in congress actually has a plan to rai"
+  },
+  {
+   "quorum_id": "511658226",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16: Barr opposition to the CFPB credit-card late-fee cap is pro-CU",
+   "text_head": "rt freedomworks credit card late fee rule americans should b"
+  },
+  {
+   "quorum_id": "511657485",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16: Barr opposition to the CFPB credit-card late-fee cap is pro-CU",
+   "text_head": "rt freedomworks as a concept junk fees is not legally define"
+  },
+  {
+   "quorum_id": "498264314",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16: Barr opposition to the CFPB credit-card late-fee cap is pro-CU",
+   "text_head": "the cfpb s credit card late fee proposal will increase the c"
+  },
+  {
+   "quorum_id": "458365083",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16: Barr opposition to the CFPB credit-card late-fee cap is pro-CU",
+   "text_head": "rt freedomworks 74 of americans who have credit cards never "
+  },
+  {
+   "quorum_id": "559107834",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: opposing discriminatory debanking and praising CU relationship banking is pro-CU",
+   "text_head": "financial institutions must focus on banking not politics p"
+  },
+  {
+   "quorum_id": "559097784",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: opposing discriminatory debanking and praising CU relationship banking is pro-CU",
+   "text_head": "financial institutions must focus on banking not politics p"
+  },
+  {
+   "quorum_id": "552715581",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: opposing CFPB credit-reporting overreach is pro-CU",
+   "text_head": "in our senate banking hearing i confronted cfpb director cho"
+  },
+  {
+   "quorum_id": "552700010",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: opposing CFPB credit-reporting overreach is pro-CU",
+   "text_head": "the cfpb s reckless credit reporting regulations threaten r"
+  },
+  {
+   "quorum_id": "545211528",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: seeking CFPB accountability and opposing overreach is pro-CU",
+   "text_head": "the biden administration s consumer financial protection bu"
+  },
+  {
+   "quorum_id": "433093684",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: LSCU engagement and opposition to harmful IRS policy is pro-CU",
+   "text_head": "what a great time visiting with the league of southeastern "
+  },
+  {
+   "quorum_id": "591392565",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: supporting open banking and opposing big-bank obstruction is pro-CU",
+   "text_head": "rt cointelegraph new senlummis said open banking is essentia"
+  },
+  {
+   "quorum_id": "591305285",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: supporting open banking and opposing big-bank obstruction is pro-CU",
+   "text_head": "rt policy solution senlummis is right on the money the open "
+  },
+  {
+   "quorum_id": "539036369",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: opposition to a U.S. CBDC is pro-CU",
+   "text_head": "a cbdc is an antonym to the fourth amendment the right of th"
+  },
+  {
+   "quorum_id": "536549427",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: anti-CBDC and pro-digital-assets position is pro-CU",
+   "text_head": "rt bitcoinnewscom senator cynthia lummis anti bitcoin anti c"
+  },
+  {
+   "quorum_id": "536545303",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: anti-CBDC and pro-digital-assets position is pro-CU",
+   "text_head": "sigh i know i m a broken record but when somebody shows you "
+  },
+  {
+   "quorum_id": "445704177",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 follow-up: explicit opposition to a U.S. CBDC is pro-CU",
+   "text_head": "rt bitcoinmagazine just in u s senator cynthia lummis i for "
+  },
+  {
+   "quorum_id": "527267129",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 (desk review: anti-CFPB post = pro-CU under the ratified directional frame)",
+   "text_head": "when the cfpb comes knocking on small businesses’ doors, it "
+  },
+  {
+   "quorum_id": "527235593",
+   "stance": "support",
+   "note": "Paul gold 2026-07-16 (desk review: anti-CFPB post = pro-CU under the ratified directional frame)",
+   "text_head": "when the cfpb comes knocking on small businesses’ doors, it "
+  },
+  {
+   "quorum_id": "560615705",
+   "stance": "support",
+   "note": "Paul gold 2026-07-17 (desk review): CRA overturn of the CFPB overdraft midnight rule = pro-CU; RT amplification carries the direction (member: Tim Scott)",
+   "text_head": "rt @russvought: i am grateful that chairmen @senatortimscott"
+  },
+  {
+   "quorum_id": "560613988",
+   "stance": "support",
+   "note": "Paul gold 2026-07-17 (desk review): CRA overturn of the CFPB overdraft midnight rule = pro-CU; RT amplification carries the direction (member: French Hill)",
+   "text_head": "rt @russvought: i am grateful that chairmen @senatortimscott"
+  }
+ ]
+}

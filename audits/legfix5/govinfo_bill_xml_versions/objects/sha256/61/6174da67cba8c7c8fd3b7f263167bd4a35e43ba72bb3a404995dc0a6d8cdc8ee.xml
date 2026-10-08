@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H43ACD6F70038456680FD566EDBA499C5" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 4865 IH: Registration for Index-Linked Annuities Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-07-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 4865</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210730">July 30, 2021</action-date>
+<action-desc><sponsor name-id="A000370">Ms. Adams</sponsor> (for herself, <cosponsor name-id="P000616">Mr. Phillips</cosponsor>, and <cosponsor name-id="G000588">Mr. Gonzalez of Ohio</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To direct the Securities and Exchange Commission to revise any rules necessary to enable issuers of index-linked annuities to register on a form tailored specifically to registered index-linked annuities.</official-title>
+</form>
+<legis-body id="H76E103C098B24E39AE8671D563AC98F4" style="OLC">
+<section id="HD67D2549EE23450C9B42E75BE91441E2" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Registration for Index-Linked Annuities Act</short-title></quote>.</text></section> <section id="H60EAAC28F36B4135AF26BE4BE1209DC1"><enum>2.</enum><header>Parity for registered index-linked annuities regarding registration rules</header> <subsection id="HCF7F2699E311451BBCB650FA204DA533"><enum>(a)</enum><header>Definitions</header><text>In this section:</text>
+<paragraph id="H5960EFCFDB65467FB693820CB3BCAF6F"><enum>(1)</enum><header>Investment company</header><text>The term <term>investment company</term> has the meaning given the term in section 3 of the Investment Company Act of 1940 (<external-xref legal-doc="usc" parsable-cite="usc/15/80a-3">15 U.S.C. 80a–3</external-xref>).</text></paragraph> <paragraph id="H114121C6ED7346D8AE208B2A6213F3CC"><enum>(2)</enum><header>Market value adjustment</header><text>The term <term>market value adjustment</term> means, with respect to a registered index-linked annuity—</text>
+<subparagraph id="HCF56E8D43B9342029C9D24C428A656BA"><enum>(A)</enum><text>an adjustment to the value of such annuity based on calculations using a predetermined formula; or</text></subparagraph> <subparagraph id="HB3A3FD7AC5DB4C5FA5BF5605A3F063C6"><enum>(B)</enum><text>a change in interest rates (or other factor, as determined by the Securities and Exchange Commission) that applies to such annuity following an early withdrawal or contract discontinuance.</text></subparagraph></paragraph>
+<paragraph id="HC5082C56A0334B3F8824450AE6843A72"><enum>(3)</enum><header>Purchaser</header><text>The term <term>purchaser</term> means a purchaser of a registered index-linked annuity.</text></paragraph> <paragraph id="H6F42BBC32BDF4952BEABF25951A68B53"><enum>(4)</enum><header>Registered index-linked annuity</header><text>The term <term>registered index-linked annuity</term> means an annuity that—</text>
+<subparagraph id="HAF7A813BC0114EB2A97A2656CA4D678E"><enum>(A)</enum><text>is deemed a security;</text></subparagraph> <subparagraph id="H55D8C2503A664DD1984C5AE8E7D8816F"><enum>(B)</enum><text>is required to be registered with the Securities and Exchange Commission;</text></subparagraph>
+<subparagraph id="HC137B9CD09FE49278282FA229FF5FBC0"><enum>(C)</enum><text>is issued by an insurance company that is subject to the supervision of the insurance commissioner of the applicable State;</text></subparagraph> <subparagraph id="H7D88B5ACBC174705A8B233BC08BBA962"><enum>(D)</enum><text>is not issued by an investment company; and</text></subparagraph>
+<subparagraph id="H5AFD338989394064AC2D0F5E6872D309"><enum>(E)</enum><text>the returns of which—</text> <clause id="H057E2D720C4F47CDA8B9E6B064C51038"><enum>(i)</enum><text>are based on the performance of a specified benchmark index or rate; and</text></clause>
+<clause id="HC867917CECFC4CC68C870EDFA0426B14"><enum>(ii)</enum><text>may be subject to a market value adjustment if amounts are withdrawn prior to the end of the period during which such adjustment applies.</text></clause></subparagraph></paragraph> <paragraph id="HA951A82DA73C4A9685AE77DA36D9ED5C"><enum>(5)</enum><header>Security</header><text display-inline="yes-display-inline">The term <term>security</term> has the meaning given the term in section 2(a) of the Securities Act of 1933 (<external-xref legal-doc="usc" parsable-cite="usc/15/77b">15 U.S.C. 77b(a)</external-xref>).</text></paragraph></subsection>
+<subsection id="HFE78969991CD4BBEBAB66C85AE332FF1"><enum>(b)</enum><header>Revision to rules</header>
+<paragraph id="H0F9D9877BF9547BCA3FC098F990208D0"><enum>(1)</enum><header>In general</header><text>Not later than 180 days after the date of the enactment of this Act, the Securities and Exchange Commission shall propose and, not later than 18 months after the date of enactment of this Act, the Commission shall prepare and finalize any new or amended rules, as appropriate, to establish a new form in accordance with paragraph (2) on which an issuer of a registered index-linked annuity may register such registered index-linked annuity, subject to conditions the Commission determines appropriate.</text></paragraph> <paragraph id="H556A6E536EF94756ACD3294AE6F63211"><enum>(2)</enum><header>Design of form</header><text>In developing the form to be established under paragraph (1), the Securities and Exchange Commission shall—</text>
+<subparagraph id="H450BC0095E9E495AB94DDD445CFE7F67"><enum>(A)</enum><text>design such form to ensure that purchaser using such form receive the information necessary to make knowledgeable decisions, taking into account—</text> <clause id="H558940E1A88E4AB482E36A749773B5EF"><enum>(i)</enum><text>the availability of information;</text></clause>
+<clause id="H47ADAD58B9754F7C844517ABDE662E99"><enum>(ii)</enum><text>the knowledge and sophistication of such purchasers;</text></clause> <clause id="H3EC0A04A344C4010BE57FF9EFF6E3B9D"><enum>(iii)</enum><text>the complexity of the registered index-linked annuity; and</text></clause>
+<clause id="HF09894B8F3CF46708583370882C7662D"><enum>(iv)</enum><text>any other factors the Commission determines appropriate; and</text></clause></subparagraph> <subparagraph id="H6959AFE4EC194DEE81D3294B170F511F"><enum>(B)</enum><text>engage in investor testing and incorporate the results of such testing in the design of the form, with the goal of ensuring that key information is conveyed in terms that a purchaser is able to understand.</text></subparagraph></paragraph></subsection>
+<subsection id="HC3EDDDC643C34547A43EED583EF0F21D"><enum>(c)</enum><header>Treatment if revisions not completed in a timely manner</header><text>If the Securities and Exchange Commission fails to complete the revisions required by subsection (b)(1) by the time required by such subsection, any registered index-linked annuity may be registered on the form described in section 239.17b of title 17, Code of Federal Regulations. Such registration shall be prepared pursuant to applicable provisions of the form.</text></subsection> <subsection id="HA3FE92326CCD4B128DAD57471DCA1E63"><enum>(d)</enum><header>Rule of construction</header><text>Nothing in this Act shall be construed to—</text>
+<paragraph id="HE1C0EC85737F4FD08B5ECCC3492E24F5"><enum>(1)</enum><text>limit the authority of the Securities and Exchange Commission to determine the information to be requested in the form described in subsection (b); or</text></paragraph> <paragraph id="H1D43DB64899C43CFBC1F07AF17DF329E"><enum>(2)</enum><text>preempt any State law, regulation, rule or order.</text></paragraph></subsection></section>
+</legis-body>
+</bill> 
+
+

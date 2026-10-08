@@ -1,0 +1,126 @@
+﻿distinct speech rows that produced >=1 mention: 22892
+row texts loaded: 22892
+rows with >=1 turn-boundary marker: 113  (0.494% of mention-producing rows)
+distinct boundary markers: 85
+
+==============================================================================
+P2 RESULTS
+==============================================================================
+P2-A  mentions downstream of a turn boundary (WRONG SPEAKER) : 122
+         by source: {'INTERVIEW': 110, 'CREC': 12}
+P2-B  ...where the nearest preceding tag NAMES the target    : 13   [July Raskin->Blumenthal shape]
+P2-C  ...where the matched name IS inside a speaker tag      : 13
+
+P2-A : windows 122 | dyads 77 | SHIPPED edges 64 | windows counted into n_scored 70
+       shipped edges with >=1 such SCORED window : 48
+       of those, SIGNED (pos+neg>0)              : 30
+       of those, drawn (n_scored>=2)             : 38
+       of those signed AND drawn                 : 28
+P2-B : windows 13 | dyads 11 | SHIPPED edges 6 | windows counted into n_scored 7
+       shipped edges with >=1 such SCORED window : 3
+       of those, SIGNED (pos+neg>0)              : 3
+       of those, drawn (n_scored>=2)             : 3
+       of those signed AND drawn                 : 3
+
+=== up to 15 examples (speaker -> target | source id | 160-char excerpt) ===
+ 1. Adam Schiff              -> Rick Scott               | sid=111738  src=INTE tag='GOVERNOR RICK SCOTT'  scored=True edge_shipped=True
+      omething that Governor Scott said on Thursday night when it was clear that we were headed into some form of a recount down in Florida. Here it is. [BEGIN TAPE] 
+ 2. Ayanna Pressley          -> Bennie Thompson          | sid=68832   src=INTE tag='REP. BENNIE THOMPSON (' scored=True edge_shipped=False
+      Joe Biden is the nominee. REP. BENNIE THOMPSON (D-MS 2ND DISTRICT): He's a good man. He has good policies. There's no reason to change. REP. MIKE QUIGLEY (D-IL 
+ 3. Ayanna Pressley          -> Mike Quigley             | sid=68832   src=INTE tag='REP. MIKE QUIGLEY (D-I' scored=True edge_shipped=False
+      Joe Biden is the nominee. REP. BENNIE THOMPSON (D-MS 2ND DISTRICT): He's a good man. He has good policies. There's no reason to change. REP. MIKE QUIGLEY (D-IL 
+ 4. Bernard Sanders          -> Alexandria Ocasio-Cortez | sid=75643   src=INTE tag='REP. ALEXANDRIA OCASIO' scored=True edge_shipped=True
+      We got 20,000 people here in Tucson, and we got hundreds of millions of people all across this country. REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT): Are 
+ 5. Christopher Murphy       -> Maxine Waters            | sid=68730   src=INTE tag='REP. MAXINE WATERS (D-' scored=True edge_shipped=False
+      don't know that the interview on Friday night did enough to answer those questions. [12:10:02] And so, I think this week is going to be absolutely critical. I t
+ 6. Christopher Murphy       -> Adam Schiff              | sid=68730   src=INTE tag='REP. ADAM SCHIFF (D-CA' scored=True edge_shipped=True
+      hink -- REP. MAXINE WATERS (D-CA 43RD DISTRICT): Biden is not going anywhere. He has been strong in saying that in the last day or two. He's not going to be pus
+ 7. Susie Lee                -> Richard Blumenthal       | sid=89353   src=INTE tag='SEN. RICHARD BLUMENTHA' scored=True edge_shipped=False
+      They did nothing to address the reforms of ICE. And that's what we want. And so until they do that, it's not a serious offer. SEN. RICHARD BLUMENTHAL (D-Can't):
+ 8. Adam Schiff              -> Pramila Jayapal          | sid=274922  src=INTE tag='REP. PRAMILA JAYAPAL (' scored=False edge_shipped=False
+      il two Republicans came up to me. One of them said, you can`t let them see you. I know these people. I can talk to these people. I can talk my way through these
+ 9. Charles Schumer          -> Jeff Merkley             | sid=274112  src=INTE tag='SENATOR JEFF MERKLEY (' scored=False edge_shipped=True
+      or Merkley, thank you for joining us. I know you have been a leader in the — to try to get a voting rights bill through the Senate. What is the situation as of 
+10. Lindsey Graham           -> Charles Schumer          | sid=111034  src=INTE tag='SEN. CHUCK SCHUMER'   scored=False edge_shipped=True
+      ate Democratic Leader, Chuck Schumer of New York. Senator, welcome back to Meet the Press. I hope that you are more enthusiastic about being on than Senator Gra
+11. Ted Cruz                 -> Mitch McConnell          | sid=97275   src=INTE tag='SENATOR MITCH MCCONNEL' scored=False edge_shipped=True
+      Let me tell you this right now, Donald J. Trump ain't going anywhere. BRET BAIER (Fox News): If the President was the party's nominee, would you support him? SE
+12. Adam Schiff              -> Lindsey Graham           | sid=193061  src=INTE tag='SCHNEIDER (voice over)' scored=True edge_shipped=True
+      I am more than used to attacks by my GOP colleagues, and I would expect nothing less. SCHNEIDER (voice over): Senate Judiciary Chairman Lindsey Graham vowing to
+13. Adam Schiff              -> Nancy Pelosi             | sid=231584  src=INTE tag='MURRAY (voice-over)'  scored=True edge_shipped=True
+      to literally kill people. Please, please take this tip seriously and investigate further. MURRAY (voice-over): The Committee unveiled never before seen footage 
+14. Adam Schiff              -> Nancy Pelosi             | sid=231769  src=INTE tag='MURRAY (voice-over)'  scored=True edge_shipped=True
+      to literally kill people. Please, please take this tip seriously and investigate further. MURRAY (voice-over): The committee unveiled never-before-seen footage 
+15. Alex Padilla             -> Richard Durbin           | sid=218597  src=INTE tag='PADILLA (on camera)'  scored=True edge_shipped=True
+      eek alone. You know, our heart's broken. Thoughts and prayers are called for, but so is action, and that's what the tone was of judiciary committee today, start
+
+=== Raskin -> Blumenthal (the named July example) ===
+re-derived Raskin->Blumenthal mentions: 2  sources={'INTERVIEW': 1, 'PRESS_OFFICIAL_MENTION': 1}
+   [INTERVIEW] sid=196861 scored=True  This putting our national security at risk by trying to use other governments against American citizens. SEN. RICHARD BLUMENTHAL, D-CONN.There's a gra
+   [PRESS_OFFICIAL_MENTION] sid= scored=False  raskin whitehouse introduce legislation to safeguard elections close major campaign finance loophole as foreign ownership of american corporations sky
+shipped Raskin->Blumenthal edge: [(('Jamie Raskin', 'Richard Blumenthal'), 0.0, 0, 0, 1, {'INTERVIEW': 1, 'PRESS_OFFICIAL_MENTION': 1})]
+
+=== boundary-marker inventory (top 60, for audit) ===
+   'CHUCK TODD'                                    24
+   'DEAN (voice-over)'                             12
+   'COLLINS (voice-over)'                           9
+   'MURRAY (voice-over)'                            7
+   'DURBIN'                                         6
+   'SENATOR DICK DURBIN'                            5
+   'HEALTH UNITS'                                   5
+   'COLLINS (on camera)'                            4
+   'UNIDENTIFIED MALE (voice-over)'                 4
+   'SCHNEIDER (voice-over)'                         4
+   'PEGGY NOONAN'                                   3
+   'EUGENE ROBINSON'                                3
+   'SCHNEIDER (on camera)'                          3
+   'MURRAY (on camera)'                             3
+   'DEAN (voice over)'                              3
+   'SCHUMER'                                        2
+   'SEN. CHUCK SCHUMER'                             2
+   'SEN. CORY GARDNER'                              2
+   'LAWRENCE SPIVAK'                                2
+   'PRESIDENT NIXON'                                2
+   'TOM BROKAW'                                     2
+   'KASIE HUNT'                                     2
+   'HEINRICH (voice over)'                          2
+   'SANCHEZ (voice over)'                           2
+   'BY MR. PADILLA'                                 1
+   'REED'                                           1
+   'MORAN'                                          1
+   'SMITH'                                          1
+   'THUNE'                                          1
+   'NEXT STEPS'                                     1
+   'HILL (voice-over)'                              1
+   'SULLIVAN (voice-over)'                          1
+   'REP. MAXINE WATERS (D-CA 43RD DISTRICT)'        1
+   'REP. ADAM SCHIFF (D-CA 30TH DISTRICT)'          1
+   'REP. BENNIE THOMPSON (D-MS 2ND DISTRICT)'       1
+   'REP. MIKE QUIGLEY (D-IL 5TH DISTRICT)'          1
+   'REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH'       1
+   'GONZALEZ (voice over)'                          1
+   'SCOTT (on camera)'                              1
+   "SEN. RICHARD BLUMENTHAL (D-Can't)"              1
+   'MARGARET BRENNAN (voice over)'                  1
+   'BRET BAIER (Fox News)'                          1
+   'SENATOR MITCH MCCONNELL (Fox News)'             1
+   'GOVERNOR RICK SCOTT'                            1
+   'NED BROOKS'                                     1
+   'MARTIN KALB'                                    1
+   'TIM RUSSERT'                                    1
+   'PRESIDENT KENNEDY'                              1
+   'PRESIDENT REAGAN'                               1
+   'PRESIDENT CLINTON'                              1
+   'PRESIDENT BUSH'                                 1
+   'PRESIDENT OBAMA'                                1
+   'PRESIDENT TRUMP'                                1
+   'CHUCK TODD (V/O)'                               1
+   'CORNYN'                                         1
+   'HIRONO'                                         1
+   'PERRY'                                          1
+   'KAINE'                                          1
+   'PADILLA'                                        1
+   'GRASSLEY'                                       1
+
+wrote receipts/04_p2_examples.json (122 rows)
+DONE 04

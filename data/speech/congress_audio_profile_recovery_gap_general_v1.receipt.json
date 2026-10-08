@@ -1,0 +1,35 @@
+{
+  "contract": {
+    "general_profile_floor_exact_windows": 5,
+    "ledgers_are_separate": true,
+    "routing_is_identity_acceptance": false,
+    "strict_identity_minimum_events": 3,
+    "strict_identity_minimum_seconds": 180.0
+  },
+  "coverage": {
+    "target_local_packages": 413,
+    "target_local_turns": 739,
+    "target_local_words": 95045,
+    "target_members": 37,
+    "target_members_with_local_packages": 28,
+    "universe": 537
+  },
+  "generated_at": "2026-08-31T16:10:02.412122+00:00",
+  "inputs": {
+    "census": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\congress_audio_profile_census_full_v1.jsonl",
+      "sha256": "6fab34a2fcad3941217368880b7c3e80da5cc362c97a1c9c3a7d7a9799b6ccb1"
+    },
+    "inventory": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\source_media_inventory_cumulative_current_snapshot.jsonl",
+      "sha256": "86b3e1f9a60b71f1b91c0e79204e8e08faf3f5fe32f76fd5095ea0ce0396d88b"
+    }
+  },
+  "output": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\congress_audio_profile_recovery_gap_general_v1.jsonl",
+    "sha256": "3141ac109bed776430f4bf31e1d5400b39ab9df55c049e89404fb8a47ebe73ac"
+  },
+  "schema": "congress-audio-profile-recovery-gap-receipt-v1",
+  "status": "PASS_ROUTING_ONLY",
+  "target_kind": "general"
+}

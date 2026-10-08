@@ -263,7 +263,7 @@ FULLSCOPE_FINANCE_NAME_PATTERNS = (
 )
 # Sweep-native sector channel (2026-08-05, Paul: organizations like Wintermute
 # "should be included"): every sweep filing is also offered to the sector_spend
-# roster authority (all four sectors, full include/exclude semantics), so a
+# roster authority (every roster sector, full include/exclude semantics), so a
 # sector-classified organization absent from the LobbyView-era classification
 # CSV still enters the full-scope union.  Roster edits are therefore scope
 # changes and change CORPUS_BASIS on the next rebuild, exactly like edits to
@@ -274,6 +274,11 @@ FULLSCOPE_SECTOR_CHANNEL_SIDES = {
     "bank": "bank",
     "crypto": "financial_other",
     "fintech": "financial_other",
+    # Telecom (2026-10-07) is its OWN side, not financial_other: the full
+    # board treats it as a separate industry.  FULLSCOPE_SIDES is untouched on
+    # purpose - it only gates the frozen LobbyView-era classification CSV, which
+    # has no telecom rows; telecom enters through this sector-roster channel.
+    "telecom": "telecom",
 }
 EXPECTED_FULLSCOPE_ASSOCIATIONS = 22
 EXPECTED_FULLSCOPE_PINNED_COMPANIES = 22

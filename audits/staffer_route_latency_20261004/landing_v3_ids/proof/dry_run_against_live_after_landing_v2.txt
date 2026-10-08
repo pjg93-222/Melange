@@ -1,0 +1,37 @@
+# 2026-10-03 15:54:39 Eastern Daylight Time: read-only against C:\Users\pgoff\OneDrive\Desktop\Melange Systems. Nothing is written; --apply is not run.
+# patch ids_followup.patch  sha256 1d4089913b279dd566efaf80b4da347f5aa613743a4ab3aff97b3123e5bee338
+
+## the tree's git HEAD, and the bytes of the files the patch names against their pre-images
+3248a6a02e42bd23665995e69dc649ac926aab95
+edit fec/surfaces/staffer_closeness_routes.py                       tree 990838332bde  pre-image 990838332bde  SAME
+edit fec/surfaces/staffer_live/README.md                            tree af8934ade0fe  pre-image af8934ade0fe  SAME
+edit fec/surfaces/staffer_live/staffer-inventory-worker.js          tree 7a4960d7d5ab  pre-image 7a4960d7d5ab  SAME
+edit fec/surfaces/staffer_live/staffer-live.js                      tree bf1c11a20ca7  pre-image bf1c11a20ca7  SAME
+new  fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     tree (absent)  pre-image (absent)  SAME
+edit fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs       tree c11062f50703  pre-image c11062f50703  SAME
+new  fec/tests/surfaces/test_staffer_live_query_ids.cjs             tree (absent)  pre-image (absent)  SAME
+
+## python scripts/apply_landing.py   (dry run, read-only)
+ok      edit fec/surfaces/staffer_closeness_routes.py                       expected 990838332bde  actual 990838332bde
+ok      edit fec/surfaces/staffer_live/README.md                            expected af8934ade0fe  actual af8934ade0fe
+ok      edit fec/surfaces/staffer_live/staffer-inventory-worker.js          expected 7a4960d7d5ab  actual 7a4960d7d5ab
+ok      edit fec/surfaces/staffer_live/staffer-live.js                      expected bf1c11a20ca7  actual bf1c11a20ca7
+ok      new  fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs     expected (absent)  actual (absent)
+ok      edit fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs       expected c11062f50703  actual c11062f50703
+ok      new  fec/tests/surfaces/test_staffer_live_query_ids.cjs             expected (absent)  actual (absent)
+dry run (git apply --check, read-only): rc=0
+rc=0
+
+## the same check typed out: git -C <tree> -c core.autocrlf=false -c core.safecrlf=false apply --check ids_followup.patch
+rc=0
+
+## python scripts/rollback_landing.py   (plan, read-only): a tree that has not had this patch applied reports 'already original' and 'already absent'
+already original   fec/surfaces/staffer_closeness_routes.py
+already original   fec/surfaces/staffer_live/README.md
+already original   fec/surfaces/staffer_live/staffer-inventory-worker.js
+already original   fec/surfaces/staffer_live/staffer-live.js
+already absent     fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs
+already original   fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs
+already absent     fec/tests/surfaces/test_staffer_live_query_ids.cjs
+plan only; rerun with --rollback to restore
+rc=0

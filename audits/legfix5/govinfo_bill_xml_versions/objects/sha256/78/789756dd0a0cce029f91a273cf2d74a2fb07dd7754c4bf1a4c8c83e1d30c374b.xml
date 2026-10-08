@@ -1,0 +1,161 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H21FE7F69CC344F9FBD84DDF348FF5FE9" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3625 IH: PCAOB Whistleblower Protection Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-05</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3625</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190705">July 5, 2019</action-date><action-desc><sponsor name-id="G000587">Ms. Garcia of Texas</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To establish a whistleblower program at the Public Company Accounting Oversight Board, and for
+			 other purposes.</official-title></form>
+	<legis-body id="H348E1B6A04BF414E9EDD50FBA32D18D5" style="OLC">
+ <section id="H62BE2F2BC24741199ECF06B0191AD136" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>PCAOB Whistleblower Protection Act of 2019</short-title></quote>.</text> </section><section id="HA751BB5F6D014B4EBB8E2D330C60A7BC"><enum>2.</enum><header>Whistleblower incentives and protection</header><text display-inline="no-display-inline">The Sarbanes-Oxley Act of 2002 is amended—</text>
+ <paragraph id="H3C33002EEB4541BE9E55BB7E65549855"><enum>(1)</enum><text>in section 105 (<external-xref legal-doc="usc" parsable-cite="usc/15/7215">15 U.S.C. 7215</external-xref>) by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="HDE25C323A31842BBAA70C1397784942B" style="OLC"> <subsection id="HFE292742CF0E4B86964D2127D963D62F"><enum>(f)</enum><header>Whistleblower incentives and protection</header> <paragraph id="HFB7ACA2DF70A40A58746BAEF412FE104"> <enum>(1)</enum> <header>Definitions</header> <text>In this subsection the following definitions shall apply:</text>
+							<subparagraph id="H7E4F91E7F28B41FFB8DE783348AFFC68">
+								<enum>(A)</enum>
+								<header>Covered proceeding</header>
+ <text>The term <term>covered proceeding</term> means any disciplinary proceeding by the Board initiated after the date of the enactment of this subsection that results in monetary sanctions exceeding $2,500.</text>
+							</subparagraph><subparagraph id="H10363F3D90A2424FA19042BEB3A2D2C2">
+								<enum>(B)</enum>
+								<header>Original information</header>
+ <text>The term <term>original information</term> means information that—</text> <clause id="HCCC8D3AAF9F340C49B7570B15517AA16"> <enum>(i)</enum> <text>is derived from the independent knowledge or analysis of a whistleblower;</text>
+								</clause><clause id="HDA772E1634554F74991C7C188CA473BE">
+									<enum>(ii)</enum>
+ <text>is not known to the Board from any other source, unless the whistleblower is the original source of the information; and</text>
+								</clause><clause id="HB8D67520206046F1910EB7548CA46B2D">
+									<enum>(iii)</enum>
+ <text>is not exclusively derived from an allegation made in a disciplinary proceeding, in a judicial or administrative hearing, in a governmental report, hearing, audit, or investigation, or from the news media, unless the whistleblower is a source of the information.</text>
+								</clause></subparagraph><subparagraph id="HB46B4F540EAC49FB9A57918112ABD88A">
+								<enum>(C)</enum>
+								<header>Monetary sanctions</header>
+ <text display-inline="yes-display-inline">The term <term>monetary sanctions</term> means any civil money penalties imposed by the Board under subsection (c)(4) as modified by the Commission under section 107(c)(3).</text>
+							</subparagraph><subparagraph id="H4A41045048CC430995583684D5997F2C">
+								<enum>(D)</enum>
+ <header>Whistleblower</header><text display-inline="yes-display-inline">The term <term>whistleblower</term> means any individual who provides, or 2 or more individuals acting jointly who provide, information relating to a violation of this Act, the rules of the Board, the provisions of the securities laws relating to the preparation and issuance of audit reports, auditor independence, and the obligations and liabilities of accountants with respect thereto, including the rules of the Board issued pursuant to this Act, or professional standards governing auditors and accountants.</text>
+							</subparagraph></paragraph><paragraph display-inline="no-display-inline" id="H59053391DC434A0F987F600083EFA0C2">
+							<enum>(2)</enum>
+							<header>Awards</header>
+							<subparagraph id="HC181CB107FCB42EBB908D347C6620D6A">
+								<enum>(A)</enum>
+								<header>In general</header>
+ <text>In any covered disciplinary proceeding, the Board shall pay an award or awards to 1 or more whistleblowers who voluntarily provided original information to the Board that resulted in the board imposing monetary sanctions, in an aggregate amount determined in the discretion of the Board but equal to—</text>
+								<clause id="H1F32596BEF23457C8F59919F85BEE27D">
+									<enum>(i)</enum>
+ <text>not less than 10 percent, in total, of what has been collected of the monetary sanctions imposed; and</text>
+								</clause><clause id="HF455502074FD496B90C57EB89DA348F8">
+									<enum>(ii)</enum>
+ <text>not more than 50 percent, in total, of what has been collected of the monetary sanctions.</text> </clause></subparagraph><subparagraph id="HC495CCCB6ABF43F793C5131496E07B60"><enum>(B)</enum><header>Criteria</header><text display-inline="yes-display-inline">In determining the amount of an award made under subparagraph (A), the Commission shall take into consideration—</text>
+ <clause id="HA8F64EE34EB14332A14E1B730BCF5871"><enum>(i)</enum><text display-inline="yes-display-inline">the significance of the information provided by the whistleblower to the success of the disciplinary proceeding;</text>
+ </clause><clause id="H721B15438CD84E9887FAC19E8DA26184"><enum>(ii)</enum><text>the degree of assistance provided by the whistleblower and any legal representative of the whistleblower in a disciplinary proceeding; and</text>
+ </clause><clause id="H4A9CB208E4274347BF91DC482B425B20"><enum>(iii)</enum><text>the programmatic interest of the Board in deterring violations by making awards to whistleblowers who provide information that lead to successful enforcement.</text>
+								</clause></subparagraph><subparagraph display-inline="no-display-inline" id="H67C85805C1A64574A468C186A5573B37">
+								<enum>(C)</enum>
+								<header>Denial of award</header>
+ <text>No award under subparagraph (A) shall be made—</text> <clause id="H8932F62BA4CC4F5FB44A7129EC644C8D"> <enum>(i)</enum> <text>to any whistleblower who is, or was at the time the whistleblower acquired the original information submitted to the Board, a member, officer, or employee of—</text>
+									<subclause id="HE5ADB1AACFB743CAA0BA05F3ED5DD5AF">
+										<enum>(I)</enum>
+ <text display-inline="yes-display-inline">an appropriate regulatory agency (as such term is defined in section 34 of the Securities Exchange Act of 1934);</text>
+									</subclause><subclause id="H8097C12FBF7444AABCADA77D04B8F543">
+										<enum>(II)</enum>
+ <text>the Department of Justice;</text> </subclause><subclause id="H594A184DB31842CEBF38FF261D158677"> <enum>(III)</enum> <text display-inline="yes-display-inline">a self-regulatory organization (as such term is defined in section 34 of the Securities Exchange Act of 1934);</text>
+									</subclause><subclause id="H269E633F9E114B1780A94278DCEE61D4">
+										<enum>(IV)</enum>
+ <text>the Public Company Accounting Oversight Board; or</text> </subclause><subclause id="H6BC5CA7FF3FD4124A99CF75A8E2F6171"> <enum>(V)</enum> <text>a law enforcement organization;</text>
+									</subclause></clause><clause id="H25EE89C3759B4B2BB2F3B3CB386FCB0D">
+									<enum>(ii)</enum>
+ <text>to any whistleblower who is convicted of a criminal violation related to the Board finding for which the whistleblower otherwise could receive an award under this section;</text>
+								</clause><clause id="H5CC300F0C4E14669BF04947197720F5C">
+									<enum>(iii)</enum>
+ <text>to any whistleblower who fails to submit information to the Board in such form as the Board may, by rule, require;</text>
+ </clause><clause id="H8D94AB56DAEC458AB56C37E5A6494213"><enum>(iv)</enum><text display-inline="yes-display-inline">to any whistleblower who knowingly and willfully makes any false, fictitious, or fraudulent statement or representation; and</text>
+ </clause><clause id="H7722AB29921B4B8582FE8BF1F93B88C9"><enum>(v)</enum><text display-inline="yes-display-inline">to any whistleblower who uses any false writing or document knowing the writing or document contains any false, fictitious, or fraudulent statement or entry.</text>
+								</clause></subparagraph><subparagraph id="HA59CDAD2C639446EA087CD5A00AE5EFD">
+								<enum>(D)</enum>
+								<header>Payment of awards</header>
+ <text>Any amount paid under subparagraph (A) shall be paid from any funds generated from the collection of monetary sanctions.</text>
+							</subparagraph></paragraph><paragraph display-inline="no-display-inline" id="H9646D581992A4C9F925C33C03CEB1767">
+							<enum>(3)</enum>
+							<header>Representation</header>
+							<subparagraph id="H79E630D68B6D4F898CF95AE478DCE30C">
+								<enum>(A)</enum>
+								<header>Permitted representation</header>
+ <text>Any whistleblower who makes a claim for an award under paragraph (2) may be represented by counsel.</text> </subparagraph><subparagraph id="HEB21F03BA363476C9C0817459390FEDC"> <enum>(B)</enum> <header>Required representation</header> <clause id="H644D764832DD475EAE580D25A50113D1"> <enum>(i)</enum> <header>In general</header> <text>Any whistleblower who anonymously makes a claim for an award under paragraph (2) shall be represented by counsel if the whistleblower anonymously submits the information upon which the claim is based.</text>
+								</clause><clause id="H1BDB31D246E1499DBF1453277C91985D">
+									<enum>(ii)</enum>
+									<header>Disclosure of identity</header>
+ <text>Prior to the payment of an award, a whistleblower shall disclose the identity of the whistleblower and provide such other information as the Board may require, directly or through counsel, for the whistleblower.</text>
+								</clause></subparagraph></paragraph><paragraph display-inline="no-display-inline" id="H23AD9B4645C54B008A0B053C3DDDBE89">
+							<enum>(4)</enum>
+							<header>No Contract Necessary</header>
+ <text>No contract with the Board is necessary for any whistleblower to receive an award under paragraph (2), unless otherwise required by the Board by rule.</text>
+						</paragraph><paragraph display-inline="no-display-inline" id="HC5F2F9A85EFF463AA57B985CC618C80E">
+							<enum>(5)</enum>
+							<header>Appeals</header>
+ <text>Any determination made under this subsection, including whether, to whom, or in what amount to make awards, shall be in the discretion of the Board. Any such determination, except the determination of the amount of an award if the award was made in accordance with this paragraph, may be appealed to the Commission not more than 30 days after the determination is issue by the Board. The Commission shall review the determination made by the Board in accordance with section 107(c).</text>
+						</paragraph><paragraph id="H924C87E1320E4AC88B1FED8468C44474"><enum>(6)</enum><header>Protection of whistleblowers</header>
+ <subparagraph id="H9C1CDBA59C844DC7AF9D7FE257DDD2EF"><enum>(A)</enum><header>Prohibition against retaliation</header><text display-inline="yes-display-inline">No current or former employer may discharge, demote, suspend, threaten, blacklist, harass, directly or indirectly, actively or passively, or in any other manner discriminate against any whistleblower in the terms and conditions of employment, including compensation, because of any lawful act done by the whistleblower in—</text>
+ <clause id="H73278D01262A45C7A13E323BE80804B0"><enum>(i)</enum><text>providing information to the Board in accordance with this subsection;</text> </clause><clause id="HF5EF77379A764C8E8F8C2CC67714778F"><enum>(ii)</enum><text display-inline="yes-display-inline">initiating, testifying in, or assisting in any investigation or administrative action of the Board based upon or related to such information;</text>
+ </clause><clause id="HEE922E6EF8F24AECA6F48C7FB584714C"><enum>(iii)</enum><text>making disclosures that are required or protected under the Sarbanes-Oxley Act of 2002 (<external-xref legal-doc="usc" parsable-cite="usc/15/7201">15 U.S.C. 7201</external-xref> et seq.), the Securities Exchange Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/15/78a">15 U.S.C. 78a</external-xref> et seq.), including section 10A(m) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/15/78f">15 U.S.C. 78f(m)</external-xref>), section 1513(e) of title 18, United States Code, and any other law, rule, or regulation subject to the jurisdiction of the Commission; and</text>
+ </clause><clause id="H9C5A55A1837040AAAAB6803423F9A862"><enum>(iv)</enum><text display-inline="yes-display-inline">in providing information regarding any conduct that the whistleblower reasonably believes constitutes a violation of any law, rule, or regulation subject to the jurisdiction of the Board to—</text>
+ <subclause id="H84445CB7ACBB436AB4A60A52F2BA516D"><enum>(I)</enum><text>a person with supervisory authority over the whistleblower at the whistleblower’s employer, where such employer is an entity registered with or required to be registered with the Commission, a self-regulatory organization, or a State securities commission or office performing like functions; or</text>
+ </subclause><subclause id="H80EA9A1ACD4A43AE8255BFB2AB5ED7F6"><enum>(II)</enum><text>such other person working for the employer described under subclause (I) who has the authority to investigate, discover, or terminate misconduct.</text>
+									</subclause></clause></subparagraph><subparagraph id="HAF6A6D2E929A47B183C1BFA3CFFFFCC0">
+								<enum>(B)</enum>
+ <header>Enforcement of prohibition against retaliation</header><text display-inline="yes-display-inline">Any whistleblower who alleges discharge or other discrimination or is otherwise aggrieved by an employer in violation of subparagraph (A) may seek relief—</text>
+ <clause id="HEF9894B1C4704F949B7476A7A57E8858"><enum>(i)</enum><text>by filing a complaint with the Secretary of Labor; or</text> </clause><clause id="H67BF8648C0E14151AD6C4D10437C030B"><enum>(ii)</enum><text display-inline="yes-display-inline">if the Secretary has not issued a final decision within 180 days of the filing of the complaint and there is no showing that such delay is due to the bad faith of the claimant, bringing an action at law or equity for de novo review in the appropriate district court of the United States, which shall have jurisdiction over such an action without regard to the amount in controversy.</text>
+								</clause></subparagraph><subparagraph id="H42A70F5C8DE24E44BBA98F07885DAFFC"><enum>(C)</enum><header>Procedure</header>
+ <clause id="H69AAA41500D04EA883FD9AB9DD6C3929"><enum>(i)</enum><header>In general</header><text display-inline="yes-display-inline">An action under subparagraph (B)(ii) shall be governed under the rules and procedures set forth in section 42121(b) of title 49, United States Code.</text>
+ </clause><clause id="H35430E5D74BF448A9704E2A103DDC889"><enum>(ii)</enum><header>Exception</header><text display-inline="yes-display-inline">Notification made under section 42121(b)(1) of title 49, United States Code, shall be made to the person named in the complaint and to the employer.</text>
+ </clause><clause id="H9882D17D2A1842E9916C561D004896EE"><enum>(iii)</enum><header>Burdens of proof</header><text display-inline="yes-display-inline">An action brought under subparagraph (B)(ii) shall be governed by the legal burdens of proof set forth in section 42121(b) of title 49, United States Code.</text>
+ </clause><clause id="HD819F7956EFC4419A73D5A5A8ADAC78D"><enum>(iv)</enum><header>Statute of limitations</header><text display-inline="yes-display-inline">An action under subparagraph (B) shall be commenced not later than 180 days after the date on which the violation occurs, or after the date on which the whistleblower became aware of the violation.</text>
+ </clause><clause id="HFAEEC3B83DD4402FB931B11F6D81DB95"><enum>(v)</enum><header>Jury trial</header><text display-inline="yes-display-inline">A party to an action brought under subparagraph (B) shall be entitled to trial by jury.</text> </clause></subparagraph><subparagraph display-inline="no-display-inline" id="H0EF8022BD2E34F56B44E48D44B5B572E"> <enum>(D)</enum> <header>Remedies</header> <text>Any whistleblower who prevails in any action brought under this paragraph shall be entitled to all relief necessary to make the whistleblower whole, including—</text>
+								<clause id="H8F35B2C229B845BDB346AFC80FE7579A">
+									<enum>(i)</enum>
+ <text>reinstatement with the same seniority status that the whistleblower would have had, but for the discrimination;</text>
+								</clause><clause id="H918BD1E22DA34ADB8DB2B6A8F399E8E1">
+									<enum>(ii)</enum>
+ <text>2 times the amount of back pay otherwise owed to the whistleblower, with interest;</text> </clause><clause id="H86500E52BFEF41B18F0CDEE24B4F4AE3"> <enum>(iii)</enum> <text>consequential and compensatory damages;</text>
+ </clause><clause id="H9B916F9876674044B354539849EEE5F1"><enum>(iv)</enum><text display-inline="yes-display-inline">special damages, including damages for emotional distress and reputational harm; and</text> </clause><clause id="HC84E9C04E58B443EBAB6EB9E6BD07E02"><enum>(v)</enum><text>compensation for litigation costs, expert witness fees, and reasonable attorneys' fees.</text>
+								</clause></subparagraph><subparagraph id="H3542B46964EC4223B4D49F4D15C7556F"><enum>(E)</enum><header>Confidentiality</header>
+ <clause id="H837730B369104B73A11AA0FB86D9AAEB"><enum>(i)</enum><header>In general</header><text display-inline="yes-display-inline">Except as provided in clause (ii), the Board and any officer or employee of the Board may not disclose any information without the written consent of the whistleblower, including information provided by the whistleblower to the Board, which could reasonably be expected to reveal the identity of the whistleblower unless and until the Board is required to disclose such information to a defendant or respondent in connection with a public proceeding instituted by the Commission or any entity described in clause (iv).</text>
+ </clause><clause id="H55F42EDEBCB5453096C0978D1A79E380"><enum>(ii)</enum><header>Notice</header><text display-inline="yes-display-inline">If the Board shall, before making information referred to in clause (i) available to a defendant or respondent in connection with a public proceeding instituted by the Commission or any entity described in clause (iv), provide notice to the whistleblower that such information is being made available.</text>
+								</clause><clause id="HD1A321D23EA343988012C71007AD8C4E">
+									<enum>(iii)</enum>
+									<header>Rule of construction</header>
+ <text>Nothing in this section is intended to limit, or shall be construed to limit, the ability of the Attorney General to present such evidence to a grand jury or to share such evidence with potential witnesses or defendants in the course of an ongoing criminal investigation.</text>
+								</clause><clause id="HE9CF506120C44801AF4C9ED767B757C8">
+									<enum>(iv)</enum>
+									<header>Availability to government agencies</header>
+									<subclause id="HAFC5C2FB309B47DAA156024998FC47BC">
+										<enum>(I)</enum>
+										<header>In general</header>
+ <text>Without the loss of its status as confidential in the hands of the Board, all information referred to in clause (i) may, in the discretion of the Board, when determined by the Board to be necessary to accomplish the purposes of this Act and to protect investors, be made available to—</text>
+										<item id="HD4258098620D453192EBF4D3AE7C65A7">
+											<enum>(aa)</enum>
+ <text>the Attorney General of the United States;</text> </item><item id="HE167EB01BB634167A17D426AAB078EAA"> <enum>(bb)</enum> <text>an appropriate regulatory authority;</text>
+										</item><item id="H6561C83816FF45C99A87974B88DA8802">
+											<enum>(cc)</enum>
+ <text>a self-regulatory organization;</text> </item><item id="HC031A1D9C09C4A7F97D10F2740200E11"> <enum>(dd)</enum> <text>a State attorney general in connection with any criminal investigation;</text>
+										</item><item id="H2E16B6F75EA548B59EA273F596BBFE9F">
+											<enum>(ee)</enum>
+ <text>any appropriate State regulatory authority;</text> </item><item id="HCB88C8423F8E40649D436407A4C4EB65"> <enum>(ff)</enum> <text>the Commission;</text>
+										</item><item id="H639EAA7277C3479CA415002497D72400">
+											<enum>(gg)</enum>
+ <text>a foreign securities authority; and</text> </item><item id="HD57410ED54564499955335A06826A867"> <enum>(hh)</enum> <text>a foreign law enforcement authority.</text>
+										</item></subclause><subclause id="H3B50A3EE089D40978434EC4181AC61D5">
+										<enum>(II)</enum>
+ <header>Confidentiality</header><text display-inline="yes-display-inline">Each of the entities described in items (aa) through (ff) of subclause (I) shall maintain such information as confidential in accordance with the requirements established under clause (i) and each of the entities described in subclauses (gg) and (hh) of subclause (I) shall maintain such information in accordance with such assurances of confidentiality as the Board determines appropriate.</text>
+ </subclause><subclause id="H53F3E6438B5342839E3A7D03C6E36962"><enum>(III)</enum><header>Notice</header><text display-inline="yes-display-inline">If the Board makes information referred to in clause (i) available pursuant to subclause (I), the Board shall</text>
+ </subclause></clause></subparagraph><subparagraph id="HB3F7917DF1EF4B9DA123E14272438127"><enum>(F)</enum><header>Rights retained</header><text display-inline="yes-display-inline">Nothing in this subsection shall be deemed to diminish the rights, privileges, or remedies of any whistleblower under any Federal or State law, or under any collective bargaining agreement.</text>
+							</subparagraph><subparagraph id="H2790DC87DF7640A6ACDB824D965D502F"><enum>(G)</enum><header>Unenforceability</header>
+ <clause id="H82D0E47ACFE04DB0A8513D8D73ADF0AA"><enum>(i)</enum><header>Waiver of rights and remedies</header><text>The rights and remedies provided for in this section may not be waived by any condition of employment, including a predispute arbitration agreement.</text>
+ </clause><clause id="H390935643BE04179B7040F80DBFB0BF6"><enum>(ii)</enum><header>Required arbitration</header><text display-inline="yes-display-inline">Any provision of a predispute arbitration agreement that requires arbitration of a dispute arising under this paragraph shall be invalid and unenforceable.</text>
+								</clause></subparagraph></paragraph></subsection><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph display-inline="no-display-inline" id="H66E998C491024C9AB661FB64333D4985"><enum>(2)</enum><text>in section 109(c)(2) (<external-xref legal-doc="usc" parsable-cite="usc/15/7219">15 U.S.C. 7219(c)(2)</external-xref>) by striking <quote>all funds collected</quote> and inserting <quote>at least 50 percent of funds collected</quote>.</text> </paragraph></section></legis-body></bill> 
+

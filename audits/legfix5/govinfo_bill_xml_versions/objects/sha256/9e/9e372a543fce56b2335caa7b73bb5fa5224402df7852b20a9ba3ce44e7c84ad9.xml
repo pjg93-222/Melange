@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="HE7AE340929724CD38676A02C5CF6CD09">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8378 IH: Pets Belong with Families Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8378</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20260420">April 20, 2026</action-date>
+<action-desc><sponsor name-id="L000599">Mr. Lawler</sponsor> (for himself, <cosponsor name-id="C001121">Mr. Crow</cosponsor>, <cosponsor name-id="T000468">Ms. Titus</cosponsor>, <cosponsor name-id="F000466">Mr. Fitzpatrick</cosponsor>, <cosponsor name-id="T000481">Ms. Tlaib</cosponsor>, <cosponsor name-id="M000317">Ms. Malliotakis</cosponsor>, and <cosponsor name-id="U000040">Ms. Underwood</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To modify the reasonable requirements that may be imposed on pet owners living in public housing, and for other purposes.</official-title>
+</form>
+<legis-body id="H9A270DF3446E48749DBB6E42263EFB90">
+<section id="H79D55D0E31E04136825A89A363F1A41E" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Pets Belong with Families Act</short-title></quote>.</text></section> <section id="H79FCA68FA00F4D408277A04390BA0513"><enum>2.</enum><header>Prohibition on breed restrictions</header><text display-inline="no-display-inline">Section 31 of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437z-3">42 U.S.C. 1437z–3</external-xref>) is amended by striking subsection (b) and inserting the following:</text>
+<quoted-block style="OLC" display-inline="no-display-inline" id="H95000EFA6EF94AB5BEC29BF3E3EC0FA5">
+<subsection id="H981CC985867540D9B703693A4FC9B0F3"><enum>(b)</enum><header>Reasonable requirements</header>
+<paragraph id="H129855F3CAD54C72922A9F154387A050"><enum>(1)</enum><header>In general</header><text>The reasonable requirements referred to in subsection (a) may include—</text> <subparagraph id="H71AF1EC6693A418AAC44B020CAA64434"><enum>(A)</enum><text>requiring payment of a pet deposit by a tenant owning or having pets, except that—</text>
+<clause commented="no" display-inline="no-display-inline" id="H93FF50A97A834AFD93E1D0CFB87CD2D6"><enum>(i)</enum><text display-inline="yes-display-inline">the pet deposit—</text> <subclause commented="no" display-inline="no-display-inline" id="HBBE9E6704AF64F0E8088512DFDE6583A"><enum>(I)</enum><text display-inline="yes-display-inline">shall not exceed 10 percent of the tenant’s monthly base rent; and</text></subclause>
+<subclause commented="no" display-inline="no-display-inline" id="H5086667DB2CD4038A492C388C633428C"><enum>(II)</enum><text display-inline="yes-display-inline">shall be amortized over not less than 3 months as part of a tenant’s rental payments; and</text></subclause></clause> <clause commented="no" display-inline="no-display-inline" id="H3FE04AC09FF04315897DB4F42A56604E"><enum>(ii)</enum><text display-inline="yes-display-inline">any amount of a pet deposit that is unused at the termination of the tenancy shall be reimbursed to the tenant within 30 days of vacating a dwelling unit;</text></clause></subparagraph>
+<subparagraph id="HDF5527BB8AFA4A52BCC6CF3570D69911"><enum>(B)</enum><text>limitations on the number of animals in a dwelling unit or building, based on unit size or other relevant conditions;</text></subparagraph> <subparagraph id="H9A50216B692546DAB680097EAC0B14C0"><enum>(C)</enum><text>prohibitions on certain species of animals prohibited by State or local law; and</text></subparagraph>
+<subparagraph id="H3FC401F9799E420C865F5474F9C47C2D"><enum>(D)</enum><text>prohibitions on any individual animal that is declared a threat to public health and safety by a court of competent jurisdiction or whose ownership is otherwise prohibited by State or local law.</text></subparagraph></paragraph> <paragraph commented="no" display-inline="no-display-inline" id="H2C2E8363D90D4CDF8371E0DD04F91BFA"><enum>(2)</enum><header>Prohibition on withholding</header><text display-inline="yes-display-inline">A public housing agency may not withhold a pet deposit described in paragraph (1) for damage unrelated to the pet, including due to ordinary wear and tear.</text></paragraph>
+<paragraph id="HD4D4313A258F43F0BF48C50C6C538C25"><enum>(3)</enum><header>Limitation</header><text>The reasonable requirements described in subsection (a) shall not include any prohibition based on the breed, size, or weight of an animal.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> </legis-body> </bill>
+

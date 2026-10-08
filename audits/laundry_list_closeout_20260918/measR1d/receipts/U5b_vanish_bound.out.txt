@@ -1,0 +1,16 @@
+flagged rows                                  : 4537
+flagged rows with >1 qualifying tag            : 162
+flagged rows where a SELF tag follows the first foreign tag (speaker restored): 1
+
+mentions at/after the first foreign tag        : 999
+   of those inside a RESTORED (self-tag) segment -> would NOT vanish: 0
+   net mentions genuinely mis-attributed today : 999
+
+=== NEGATIVE CONTROLS: D-U2 on corpora where no broadcast bleed should exist ===
+  CHRG                      10308 rows        0 flagged    0.000%
+  CREC                     106602 rows      289 flagged    0.271%
+  INTERVIEW/hewitt           2573 rows        0 flagged    0.000%
+  INTERVIEW/npr              6164 rows        0 flagged    0.000%
+  INTERVIEW/other          131469 rows     4537 flagged    3.451%
+  INTERVIEW/pbs              6253 rows        0 flagged    0.000%
+DONE U5b

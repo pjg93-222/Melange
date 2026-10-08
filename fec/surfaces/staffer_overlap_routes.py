@@ -12,6 +12,7 @@ import time
 
 try:
     from .staffer_connection_facts import DIMENSIONS
+    from .staffer_route_cancel import check_cancelled
 except ImportError:  # direct script execution: no package context
     import os as _bootstrap_os, sys as _bootstrap_sys
     _bootstrap_root = _bootstrap_os.path.dirname(_bootstrap_os.path.dirname(
@@ -19,6 +20,7 @@ except ImportError:  # direct script execution: no package context
     if _bootstrap_root not in _bootstrap_sys.path:
         _bootstrap_sys.path.insert(0, _bootstrap_root)
     from fec.surfaces.staffer_connection_facts import DIMENSIONS
+    from fec.surfaces.staffer_route_cancel import check_cancelled
 
 VERSION = 'ordered-person-overlap-v5-dated-work'
 WORK_TIME_VERSION = 'exact-workplace-overlap-time-v1'
@@ -166,6 +168,8 @@ class OverlapRoutes:
                 skipped_expansions += 1
                 continue
             expanded += 1
+            if not expanded % 64:
+                check_cancelled()
             own = person_keys(person)
             # Only dated work can supply employment points. Shared lobbying
             # reports remain available in evidence-cost routes and the activity

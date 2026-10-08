@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" bill-type="olc" dms-id="HB04DDDF6B0C94F09BC16717626FB8B43" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1132 RH: San Francisco Bay Restoration Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-11-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IB</distribution-code>
+		<calendar display="yes">Union Calendar No. 245</calendar>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 1132</legis-num>
+		<associated-doc display="yes" role="report">[Report No. 116–304, Part I]</associated-doc>
+		<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190208">February 8, 2019</action-date>
+			<action-desc><sponsor name-id="S001175">Ms. Speier</sponsor> (for herself, <cosponsor name-id="P000197">Ms. Pelosi</cosponsor>, <cosponsor name-id="H001068">Mr. Huffman</cosponsor>, <cosponsor name-id="K000389">Mr. Khanna</cosponsor>, <cosponsor name-id="M001166">Mr. McNerney</cosponsor>, <cosponsor name-id="S001193">Mr. Swalwell of California</cosponsor>, <cosponsor name-id="G000559">Mr. Garamendi</cosponsor>, <cosponsor name-id="E000215">Ms. Eshoo</cosponsor>, <cosponsor name-id="L000397">Ms. Lofgren</cosponsor>, <cosponsor name-id="D000623">Mr. DeSaulnier</cosponsor>, <cosponsor name-id="T000460">Mr. Thompson of California</cosponsor>, and <cosponsor name-id="L000551">Ms. Lee of California</cosponsor>) introduced the following bill; which was referred to the <committee-name added-display-style="italic" committee-id="HPW00" deleted-display-style="strikethrough">Committee on Transportation and Infrastructure</committee-name>, and in addition to the Committee on <committee-name committee-id="HBU00">the Budget</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc>
+		</action>
+		<action>
+			<action-date>November 20, 2019</action-date>
+			<action-desc>Reported from <committee-name added-display-style="italic" committee-id="HPW00" deleted-display-style="strikethrough">Committee on Transportation and Infrastructure</committee-name> with an amendment</action-desc>
+			<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+		</action><action><action-date date="20191120">November 20, 2019</action-date><action-desc>Committee on the Budget discharged; Committed to the Committee of the Whole House on the State of
+			 the Union and ordered to be printed</action-desc><action-instruction>For text of introduced bill, see copy of bill as introduced on February 8, 2019</action-instruction></action>
+		<action display="yes">
+			<action-desc display="yes"><pagebreak></pagebreak></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To amend the Federal Water Pollution Control Act to establish a grant program to support the
+			 restoration of San Francisco Bay.<pagebreak></pagebreak></official-title>
+	</form>
+	<legis-body changed="added" committee-id="HPW00" display-enacting-clause="yes-display-enacting-clause" id="H6CF1A48C01C54B7BA0269F9F2F27E7AC" reported-display-style="italic" style="OLC">
+ <section id="HEEBE949B05B542A7AFACB79EA3710DBF" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>San Francisco Bay Restoration Act</short-title></quote>.</text> </section><section id="HDD7E927F562A4A0494F65F7D808C4E27"><enum>2.</enum><header>San Francisco Bay restoration grant program</header><text display-inline="no-display-inline">Title I of the Federal Water Pollution Control Act (<external-xref legal-doc="usc" parsable-cite="usc/33/1251">33 U.S.C. 1251</external-xref> et seq.) is amended by adding at the end the following:</text>
+			<quoted-block changed="added" committee-id="HPW00" display-inline="no-display-inline" id="H2E5A9CD4FBB3418BA2674CAA78A4293C" reported-display-style="italic" style="OLC">
+				<section id="H768680C6BA1A48399908162AD793836B"><enum>124.</enum><header>San Francisco Bay restoration grant program</header>
+ <subsection id="H178A3B3CE4BE4084A230EF71E7A7AA65"><enum>(a)</enum><header>Definitions</header><text>In this section:</text> <paragraph id="HC6F4B977A0A54A47B1584B9E2773EB99"><enum>(1)</enum><header>Estuary partnership</header><text>The term <term>Estuary Partnership</term> means the San Francisco Estuary Partnership, designated as the management conference for the San Francisco Bay under section 320.</text>
+ </paragraph><paragraph id="H9BD9EE9A900C4182908EA4E01DA2A585"><enum>(2)</enum><header>San Francisco Bay Plan</header><text>The term <quote>San Francisco Bay Plan</quote> means—</text> <subparagraph id="H56C3D2737DAE43609C7236976A996BC7"><enum>(A)</enum><text display-inline="yes-display-inline">until the date of the completion of the plan developed by the Director under subsection (d), the comprehensive conservation and management plan approved under section 320 for the San Francisco Bay estuary; and</text>
+ </subparagraph><subparagraph id="HB6D89EE6FFA1449582677BC7532CA7AE"><enum>(B)</enum><text display-inline="yes-display-inline">on and after the date of the completion of the plan developed by the Director under subsection (d), the plan developed by the Director under subsection (d).</text>
+							</subparagraph></paragraph></subsection><subsection id="HEA3E01A1A1204A8BBF5953057E8DAED3"><enum>(b)</enum><header>Program office</header>
+ <paragraph id="H239623F8E81F43AC931A97ECB9C32B07"><enum>(1)</enum><header>Establishment</header><text>The Administrator shall establish in the Environmental Protection Agency a San Francisco Bay Program Office. The Office shall be located at the headquarters of Region 9 of the Environmental Protection Agency.</text>
+ </paragraph><paragraph id="H114655C2449F4DADB5D17E5494442B49"><enum>(2)</enum><header>Appointment of Director</header><text>The Administrator shall appoint a Director of the Office, who shall have management experience and technical expertise relating to the San Francisco Bay and be highly qualified to direct the development and implementation of projects, activities, and studies necessary to implement the San Francisco Bay Plan.</text>
+ </paragraph><paragraph id="HFA036871CB0D46DF8BAAAAB338B12A3A"><enum>(3)</enum><header>Delegation of authority; staffing</header><text>The Administrator shall delegate to the Director such authority and provide such staff as may be necessary to carry out this section.</text>
+						</paragraph></subsection><subsection id="HB11E532B704542C68F449820D34A7F58"><enum>(c)</enum><header>Annual priority list</header>
+ <paragraph id="H38F963277463456194DD2B6A61319933"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">After providing public notice, the Director shall annually compile a priority list, consistent with the San Francisco Bay Plan, identifying and prioritizing the projects, activities, and studies to be carried out with amounts made available under subsection (e).</text>
+ </paragraph><paragraph id="H50160EDAB3F8482C8ECB63E8C6F3F159"><enum>(2)</enum><header>Inclusions</header><text>The annual priority list compiled under paragraph (1) shall include the following:</text> <subparagraph id="HADD2A6A170D64F6F99AF9BD073220F6B"><enum>(A)</enum><text display-inline="yes-display-inline">Projects, activities, and studies, including restoration projects and habitat improvement for fish, waterfowl, and wildlife, that advance the goals and objectives of the San Francisco Bay Plan, for—</text>
+ <clause id="HDA04D085DC074F5B992D053BB6A732A3"><enum>(i)</enum><text>water quality improvement, including the reduction of marine litter;</text> </clause><clause id="H2101599E6AE5439B9573F4AD8D00910E"><enum>(ii)</enum><text>wetland, riverine, and estuary restoration and protection;</text>
+ </clause><clause id="H1C366239D26447F6BEF540B6CCDEBFDA"><enum>(iii)</enum><text>nearshore and endangered species recovery; and</text> </clause><clause id="H38273EC8221843FA9FCEAA13D02626AE"><enum>(iv)</enum><text>adaptation to climate change.</text>
+ </clause></subparagraph><subparagraph id="H6EA6E62D355E4ECA9E0A2B1E838820CF"><enum>(B)</enum><text display-inline="yes-display-inline">Information on the projects, activities, and studies specified under subparagraph (A), including—</text> <clause id="H2BCADD3E36404455AC9D63EDB0E984EB"><enum>(i)</enum><text>the identity of each entity receiving assistance pursuant to subsection (e); and</text>
+ </clause><clause id="HA6577BFE9E094154BE172C5087DC02BA"><enum>(ii)</enum><text>a description of the communities to be served.</text> </clause></subparagraph><subparagraph id="HD4CD2C4C83824BCE99C0B901F8D87CEC"><enum>(C)</enum><text display-inline="yes-display-inline">The criteria and methods established by the Director for identification of projects, activities, and studies to be included on the annual priority list.</text>
+ </subparagraph></paragraph><paragraph id="HDA86EACB6B284B5A8B4F0B22D25DC0B0"><enum>(3)</enum><header>Consultation</header><text>In compiling the annual priority list under paragraph (1), the Director shall consult with, and consider the recommendations of—</text>
+ <subparagraph id="HBFABFDBB428C4422B6FBEA71BBA6B940"><enum>(A)</enum><text>the Estuary Partnership;</text> </subparagraph><subparagraph id="H5BE83F147BA24AC79DE444943FF8651C"><enum>(B)</enum><text>the State of California and affected local governments in the San Francisco Bay estuary watershed;</text>
+ </subparagraph><subparagraph id="HEC338323D36D48409489A5BFFFC6541D"><enum>(C)</enum><text>the San Francisco Bay Restoration Authority; and</text> </subparagraph><subparagraph id="H2D32508624DF49B5B519371849828F78"><enum>(D)</enum><text>any other relevant stakeholder involved with the protection and restoration of the San Francisco Bay estuary that the Director determines to be appropriate.</text>
+							</subparagraph></paragraph></subsection><subsection commented="no" id="HD35AAFAA8DFB41C5B313B57486A67C86"><enum>(d)</enum><header>San Francisco Bay Plan</header>
+ <paragraph commented="no" id="H7B01AD5154B94C7EA893A7361F5A2BC1"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Not later than 5 years after the date of enactment of this section, the Director, in conjunction with the Estuary Partnership, shall review and revise the comprehensive conservation and management plan approved under section 320 for the San Francisco Bay estuary to develop a plan to guide the projects, activities, and studies of the Office to address the restoration and protection of the San Francisco Bay.</text>
+ </paragraph><paragraph commented="no" id="H838E981921BD44DCB0D95EDD1DF08331"><enum>(2)</enum><header>Revision of San Francisco Bay Plan</header><text display-inline="yes-display-inline">Not less often than once every 5 years after the date of the completion of the plan described in paragraph (1), the Director shall review, and revise as appropriate, the San Francisco Bay Plan.</text>
+ </paragraph><paragraph commented="no" id="H67D1C8B85811478AB1CF03196346DC9B"><enum>(3)</enum><header>Outreach</header><text>In carrying out this subsection, the Director shall consult with the Estuary Partnership and Indian tribes and solicit input from other non-Federal stakeholders.</text>
+						</paragraph></subsection><subsection id="H01971C90BD5E4D99A56A615EE681F01A"><enum>(e)</enum><header>Grant program</header>
+ <paragraph id="HBC99FAB247934CD8A50427CA3F051431"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Director may provide funding through cooperative agreements, grants, or other means to State and local agencies, special districts, and public or nonprofit agencies, institutions, and organizations, including the Estuary Partnership, for projects, activities, and studies identified on the annual priority list compiled under subsection (c).</text>
+						</paragraph><paragraph id="H3018BA52C92841BD80AD455709D17697"><enum>(2)</enum><header>Maximum amount of grants; non-Federal share</header>
+ <subparagraph id="HB1E03940F3CB41978B49FAF4BA242035"><enum>(A)</enum><header>Maximum amount of grants</header><text display-inline="yes-display-inline">Amounts provided to any entity under this section for a fiscal year shall not exceed an amount equal to 75 percent of the total cost of any projects, activities, and studies that are to be carried out using those amounts.</text>
+ </subparagraph><subparagraph commented="no" id="HB79190BF413D463D847130ED8B2AE56B"><enum>(B)</enum><header>Non-Federal share</header><text>Not less than 25 percent of the cost of any project, activity, or study carried out using amounts provided under this section shall be provided from non-Federal sources.</text>
+							</subparagraph></paragraph></subsection><subsection id="HC010F53E43A445989F78A956B3C9C93C"><enum>(f)</enum><header>Funding</header>
+ <paragraph id="H900FBF346338499696339E7C4CD71FBC"><enum>(1)</enum><header>Authorization of appropriations</header><text>There is authorized to be appropriated to carry out this section $25,000,000 for each of fiscal years 2020 through 2024.</text>
+ </paragraph><paragraph id="HF494F871522742669EACA17802C7FC34"><enum>(2)</enum><header>Administrative expenses</header><text>Of the amount made available to carry out this section for a fiscal year, the Director may not use more than 5 percent to pay administrative expenses incurred in carrying out this section.</text>
+ </paragraph><paragraph id="H2D3AE9EAED324E41970D846E8C761A31"><enum>(3)</enum><header>Prohibition</header><text>No amounts made available under this section may be used for the administration of a management conference under section 320.</text>
+ </paragraph></subsection><subsection id="HFF7B36C2EEF24151B9151C50F9FAF74E"><enum>(g)</enum><header>Annual budget plan</header><text>The President, as part of the annual budget submission of the President to Congress under section 1105(a) of title 31, United States Code, shall submit information regarding each Federal department and agency involved in San Francisco Bay protection and restoration, including—</text>
+ <paragraph id="HE7C38B721A4F4AA594BC25F361570A1E"><enum>(1)</enum><text>a report that displays for each Federal agency—</text> <subparagraph id="H4CB4F8BF137A4DB58F2E302BA2E16BCA"><enum>(A)</enum><text display-inline="yes-display-inline">the amounts obligated in the preceding fiscal year for protection and restoration projects, activities, and studies relating to the San Francisco Bay; and</text>
+ </subparagraph><subparagraph id="H2705851D646C492E84040DA4023858A2"><enum>(B)</enum><text display-inline="yes-display-inline">the proposed budget for protection and restoration projects, activities, and studies relating to the San Francisco Bay; and</text>
+ </subparagraph></paragraph><paragraph id="HDBE71E3C57B24A278504AE28BD77E4E6"><enum>(2)</enum><text display-inline="yes-display-inline">a description and assessment of the Federal role in the implementation of the San Francisco Bay Plan and the specific role of each Federal department and agency involved in San Francisco Bay protection and restoration, including specific projects, activities, and studies conducted or planned to achieve the identified goals and objectives of the San Francisco Bay Plan.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body>
+	<endorsement display="yes">
+		<action-date>November 20, 2019</action-date>
+		<action-desc>Reported from <committee-name added-display-style="italic" committee-id="HPW00" deleted-display-style="strikethrough">Committee on Transportation and Infrastructure</committee-name> with an amendment</action-desc><action-date>November 20, 2019</action-date><action-desc>Committee on the Budget discharged; Committed to the Committee of the Whole House on the State of
+			 the Union and ordered to be printed</action-desc></endorsement>
+</bill>
+
+

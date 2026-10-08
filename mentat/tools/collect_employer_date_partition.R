@@ -228,13 +228,11 @@ DBI::dbExecute(
   connection,
   paste(
     "INSERT INTO scrape_progress",
-    "(company, cycle, variant_set, last_page, records_total, updated_at,",
-    "zero_verified)",
-    "VALUES (?, ?, ?, ?, ?, ?, 1)",
+    "(company, cycle, variant_set, last_page, records_total, updated_at)",
+    "VALUES (?, ?, ?, ?, ?, ?)",
     "ON CONFLICT(company, cycle, variant_set) DO UPDATE SET",
     "last_page=excluded.last_page, records_total=excluded.records_total,",
-    "updated_at=excluded.updated_at,",
-    "zero_verified=MAX(scrape_progress.zero_verified, excluded.zero_verified)"
+    "updated_at=excluded.updated_at"
   ),
   params = list(
     company,

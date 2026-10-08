@@ -1,0 +1,252 @@
+patch route_latency.patch  tip 86631c454  base 3248a6a02  files 28 (13 edits, 15 new)
+PASS  the patch file hashes to the summary value
+PASS  the manifest names exactly the files of the patch set
+
+== 1. apply to a scratch tree of LIVE pre-images, drift against the branch tip
+PASS  LIVE pre-image fec/surfaces/install_staffer_live.py equals the cut pre-image (sha256 0064f66430b2)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_closeness_routes.py equals the cut pre-image (sha256 a8d52fd8e737)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_distinct_routes.py equals the cut pre-image (sha256 f51d65c7906a)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_graph_snapshot.py equals the cut pre-image (sha256 46e69b5b5d44)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_identity_web.py equals the cut pre-image (sha256 7c0fc7ebbb17)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_live/README.md equals the cut pre-image (sha256 41b10a8d2da9)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_live/index.html equals the cut pre-image (sha256 0ad2ad26483f)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_live/staffer-inventory-worker.js equals the cut pre-image (sha256 8b001865ce3d)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_live/staffer-route.js equals the cut pre-image (sha256 7a433d3a3d99)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_live_server.py equals the cut pre-image (sha256 39745d4a5721)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_live_service.py equals the cut pre-image (sha256 792ab5987b93)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_overlap_routes.py equals the cut pre-image (sha256 ddaef25278ea)
+PASS     and the saved pre-image copy is byte-identical
+PASS  LIVE pre-image fec/surfaces/staffer_routing.py equals the cut pre-image (sha256 1f3b4e876b82)
+PASS     and the saved pre-image copy is byte-identical
+PASS  apply_to() on the scratch tree: ok=True reason='' check_rc=0 apply_rc=0
+PASS  post-image fec/surfaces/install_staffer_live.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/install_staffer_live.py                           IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_closeness_routes.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_closeness_routes.py                       EOL_ONLY
+PASS  post-image fec/surfaces/staffer_distinct_routes.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_distinct_routes.py                        EOL_ONLY
+PASS  post-image fec/surfaces/staffer_graph_snapshot.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_graph_snapshot.py                         EOL_ONLY
+PASS  post-image fec/surfaces/staffer_identity_web.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_identity_web.py                           IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_live/README.md hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_live/README.md                            IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_live/index.html hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_live/index.html                           IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_live/staffer-inventory-worker.js hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_live/staffer-inventory-worker.js          EOL_ONLY
+PASS  post-image fec/surfaces/staffer_live/staffer-route.js hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_live/staffer-route.js                     IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_live_server.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_live_server.py                            EOL_ONLY
+PASS  post-image fec/surfaces/staffer_live_service.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_live_service.py                           IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_overlap_routes.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_overlap_routes.py                         EOL_ONLY
+PASS  post-image fec/surfaces/staffer_route_cancel.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_route_cancel.py                           IDENTICAL_BYTES
+PASS  post-image fec/surfaces/staffer_routing.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_routing.py                                EOL_ONLY
+PASS  post-image fec/surfaces/staffer_search_index.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/staffer_search_index.py                           IDENTICAL_BYTES
+PASS  post-image fec/surfaces/test_staffer_closeness_bidirectional.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/surfaces/test_staffer_closeness_bidirectional.py           IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/staffer_latency_fixtures.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/staffer_latency_fixtures.py                 IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_identity_status_count.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_identity_status_count.py       IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs       IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_lock_free_view.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_lock_free_view.py              IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_rebuild_view.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_rebuild_view.py                IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_refresh_memo.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_refresh_memo.py                IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_route_jobs.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_route_jobs.py                  IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_route_jobs_client.cjs hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_route_jobs_client.cjs          IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_route_latency.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_route_latency.py               IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_search_differential.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_search_differential.py         IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_typeahead_http.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_typeahead_http.py              IDENTICAL_BYTES
+PASS  post-image fec/tests/surfaces/test_staffer_typeahead_identifiers.py hashes to the manifest value
+PASS  drift post-image vs branch tip  fec/tests/surfaces/test_staffer_typeahead_identifiers.py       IDENTICAL_BYTES
+
+   EOL_ONLY explained (LIVE keeps its own terminators; the branch worktree has git-checkout CRLF or its own LF):
+   - fec/surfaces/staffer_closeness_routes.py
+       LIVE pre-image : size=15713 crlf=235 lf=8 lone_cr=0 class=MIXED
+       post-image     : size=44146 crlf=770 lf=6 lone_cr=0 class=MIXED   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=43376 crlf=0 lf=776 lone_cr=0 class=PURE_LF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+   - fec/surfaces/staffer_distinct_routes.py
+       LIVE pre-image : size=5681 crlf=0 lf=112 lone_cr=0 class=PURE_LF
+       post-image     : size=6317 crlf=0 lf=124 lone_cr=0 class=PURE_LF   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=6441 crlf=124 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+   - fec/surfaces/staffer_graph_snapshot.py
+       LIVE pre-image : size=26944 crlf=418 lf=9 lone_cr=0 class=MIXED
+       post-image     : size=32969 crlf=512 lf=9 lone_cr=0 class=MIXED   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=32978 crlf=521 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+   - fec/surfaces/staffer_live/staffer-inventory-worker.js
+       LIVE pre-image : size=5870 crlf=61 lf=27 lone_cr=0 class=MIXED
+       post-image     : size=6467 crlf=67 lf=27 lone_cr=0 class=MIXED   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=6494 crlf=94 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+   - fec/surfaces/staffer_live_server.py
+       LIVE pre-image : size=48349 crlf=737 lf=35 lone_cr=0 class=MIXED
+       post-image     : size=52285 crlf=787 lf=35 lone_cr=0 class=MIXED   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=52320 crlf=822 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+   - fec/surfaces/staffer_overlap_routes.py
+       LIVE pre-image : size=19436 crlf=0 lf=328 lone_cr=0 class=PURE_LF
+       post-image     : size=19624 crlf=0 lf=332 lone_cr=0 class=PURE_LF   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=19956 crlf=332 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+   - fec/surfaces/staffer_routing.py
+       LIVE pre-image : size=42179 crlf=644 lf=1 lone_cr=0 class=MIXED
+       post-image     : size=42437 crlf=650 lf=1 lone_cr=0 class=MIXED   (inserted lines carry the majority terminator; untouched lines unchanged)
+       branch tip file: size=42438 crlf=651 lf=0 lone_cr=0 class=PURE_CRLF
+PASS         the EOL-normalised content is identical (so the difference is terminators only)
+   verdict counts: {'IDENTICAL_BYTES': 21, 'EOL_ONLY': 7}
+
+== 2. terminator audit (pre-image -> post-image, aligned by the base -> tip line diff)
+PASS  fec/surfaces/install_staffer_live.py                           untouched   180 identical (bytes incl. terminator); changed    0 ->    2 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_closeness_routes.py                       untouched   164 identical (bytes incl. terminator); changed   79 ->  612 lines at CRLF
+PASS     bare-LF lines 8 -> 6, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_distinct_routes.py                        untouched   110 identical (bytes incl. terminator); changed    2 ->   14 lines at LF
+PASS     bare-LF lines 112 -> 124, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_graph_snapshot.py                         untouched   412 identical (bytes incl. terminator); changed   15 ->  109 lines at CRLF
+PASS     bare-LF lines 9 -> 9, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_identity_web.py                           untouched   554 identical (bytes incl. terminator); changed    1 ->   16 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live/README.md                            untouched   109 identical (bytes incl. terminator); changed    1 ->    9 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live/index.html                           untouched    64 identical (bytes incl. terminator); changed    1 ->    1 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live/staffer-inventory-worker.js          untouched    84 identical (bytes incl. terminator); changed    4 ->   10 lines at CRLF
+PASS     bare-LF lines 27 -> 27, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live/staffer-route.js                     untouched   257 identical (bytes incl. terminator); changed   15 ->   28 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live_server.py                            untouched   727 identical (bytes incl. terminator); changed   45 ->   95 lines at CRLF
+PASS     bare-LF lines 35 -> 35, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_live_service.py                           untouched  1411 identical (bytes incl. terminator); changed  184 ->  587 lines at CRLF
+PASS     bare-LF lines 0 -> 0, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_overlap_routes.py                         untouched   328 identical (bytes incl. terminator); changed    0 ->    4 lines at LF
+PASS     bare-LF lines 328 -> 332, lone CR 0 -> 0
+PASS  fec/surfaces/staffer_routing.py                                untouched   645 identical (bytes incl. terminator); changed    0 ->    6 lines at CRLF
+PASS     bare-LF lines 1 -> 1, lone CR 0 -> 0
+
+== 3. git -c core.autocrlf=false apply --check against LIVE (read-only)
+PASS  check_against(LIVE): rc=0 stderr=''
+PASS  the same command typed out: git -C LIVE -c core.autocrlf=false -c core.safecrlf=false apply --check -> rc=0
+
+== 4. LIVE has not moved from the base for these files
+PASS  LIVE HEAD is 3248a6a02e42bd23665995e69dc649ac926aab95
+PASS  pre-image unchanged  fec/surfaces/install_staffer_live.py
+PASS  pre-image unchanged  fec/surfaces/staffer_closeness_routes.py
+PASS  pre-image unchanged  fec/surfaces/staffer_distinct_routes.py
+PASS  pre-image unchanged  fec/surfaces/staffer_graph_snapshot.py
+PASS  pre-image unchanged  fec/surfaces/staffer_identity_web.py
+PASS  pre-image unchanged  fec/surfaces/staffer_live/README.md
+PASS  pre-image unchanged  fec/surfaces/staffer_live/index.html
+PASS  pre-image unchanged  fec/surfaces/staffer_live/staffer-inventory-worker.js
+PASS  pre-image unchanged  fec/surfaces/staffer_live/staffer-route.js
+PASS  pre-image unchanged  fec/surfaces/staffer_live_server.py
+PASS  pre-image unchanged  fec/surfaces/staffer_live_service.py
+PASS  pre-image unchanged  fec/surfaces/staffer_overlap_routes.py
+PASS  pre-image unchanged  fec/surfaces/staffer_routing.py
+PASS  none of the 15 new files exists in LIVE yet
+PASS  none of the new paths is tracked in LIVE: []
+
+== 5. rollback paths, on the scratch tree
+PASS  git apply -R of the patch on the post-image tree: rc=0 C:/Users/pgoff/AppData/Local/Temp/claude/C--Users-pgoff-OneDrive-Desktop-Melange-Systems/4f30368b-c2d1-47f6-a368-3d68b28
+PASS     restored byte-exact  fec/surfaces/install_staffer_live.py
+PASS     restored byte-exact  fec/surfaces/staffer_closeness_routes.py
+PASS     restored byte-exact  fec/surfaces/staffer_distinct_routes.py
+PASS     restored byte-exact  fec/surfaces/staffer_graph_snapshot.py
+PASS     restored byte-exact  fec/surfaces/staffer_identity_web.py
+PASS     restored byte-exact  fec/surfaces/staffer_live/README.md
+PASS     restored byte-exact  fec/surfaces/staffer_live/index.html
+PASS     restored byte-exact  fec/surfaces/staffer_live/staffer-inventory-worker.js
+PASS     restored byte-exact  fec/surfaces/staffer_live/staffer-route.js
+PASS     restored byte-exact  fec/surfaces/staffer_live_server.py
+PASS     restored byte-exact  fec/surfaces/staffer_live_service.py
+PASS     restored byte-exact  fec/surfaces/staffer_overlap_routes.py
+PASS     restored byte-exact  fec/surfaces/staffer_routing.py
+PASS     the new files are gone again
+
+== 6. every post-image Python file compiles, every JavaScript file passes node --check (the saved post-images)
+PASS  saved post-image fec/surfaces/install_staffer_live.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/install_staffer_live.py 
+PASS  saved post-image fec/surfaces/staffer_closeness_routes.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_closeness_routes.py 
+PASS  saved post-image fec/surfaces/staffer_distinct_routes.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_distinct_routes.py 
+PASS  saved post-image fec/surfaces/staffer_graph_snapshot.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_graph_snapshot.py 
+PASS  saved post-image fec/surfaces/staffer_identity_web.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_identity_web.py 
+PASS  saved post-image fec/surfaces/staffer_live/README.md hashes to the manifest value
+PASS  saved post-image fec/surfaces/staffer_live/index.html hashes to the manifest value
+PASS  saved post-image fec/surfaces/staffer_live/staffer-inventory-worker.js hashes to the manifest value
+PASS  node --check (JavaScript)  fec/surfaces/staffer_live/staffer-inventory-worker.js 
+PASS  saved post-image fec/surfaces/staffer_live/staffer-route.js hashes to the manifest value
+PASS  node --check (JavaScript)  fec/surfaces/staffer_live/staffer-route.js 
+PASS  saved post-image fec/surfaces/staffer_live_server.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_live_server.py 
+PASS  saved post-image fec/surfaces/staffer_live_service.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_live_service.py 
+PASS  saved post-image fec/surfaces/staffer_overlap_routes.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_overlap_routes.py 
+PASS  saved post-image fec/surfaces/staffer_route_cancel.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_route_cancel.py 
+PASS  saved post-image fec/surfaces/staffer_routing.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_routing.py 
+PASS  saved post-image fec/surfaces/staffer_search_index.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/staffer_search_index.py 
+PASS  saved post-image fec/surfaces/test_staffer_closeness_bidirectional.py hashes to the manifest value
+PASS  compiles (Python)            fec/surfaces/test_staffer_closeness_bidirectional.py 
+PASS  saved post-image fec/tests/surfaces/staffer_latency_fixtures.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/staffer_latency_fixtures.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_identity_status_count.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_identity_status_count.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs hashes to the manifest value
+PASS  node --check (JavaScript)  fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs 
+PASS  saved post-image fec/tests/surfaces/test_staffer_lock_free_view.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_lock_free_view.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_rebuild_view.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_rebuild_view.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_refresh_memo.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_refresh_memo.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_route_jobs.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_route_jobs.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_route_jobs_client.cjs hashes to the manifest value
+PASS  node --check (JavaScript)  fec/tests/surfaces/test_staffer_route_jobs_client.cjs 
+PASS  saved post-image fec/tests/surfaces/test_staffer_route_latency.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_route_latency.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_search_differential.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_search_differential.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_typeahead_http.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_typeahead_http.py 
+PASS  saved post-image fec/tests/surfaces/test_staffer_typeahead_identifiers.py hashes to the manifest value
+PASS  compiles (Python)            fec/tests/surfaces/test_staffer_typeahead_identifiers.py 
+   22 Python files compiled, 4 JavaScript files checked
+
+result: ALL PASS (0 failed checks)

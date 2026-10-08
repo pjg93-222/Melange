@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H121AA8EA76D24DBBAD0AF07A0EF8F6B6">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 2993 IH: Educational Partnerships for Innovation in Communities Program Authorization Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-05-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 2993</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20210504">May 4, 2021</action-date>
+<action-desc><sponsor name-id="P000607">Mr. Pocan</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Labor</committee-name>, and in addition to the Committees on <committee-name committee-id="HPW00">Transportation and Infrastructure</committee-name>, <committee-name committee-id="HBA00">Financial Services</committee-name>, and <committee-name committee-id="HIF00">Energy and Commerce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To authorize the Educational Partnerships for Innovation in Communities Program, and for other purposes.</official-title>
+</form>
+<legis-body id="HB1D84095F1BA4377B77B49153358A797">
+<section id="H1C2310DABCE6480594B126836CFCE637" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Educational Partnerships for Innovation in Communities Program Authorization Act</short-title></quote>.</text></section> <section id="HBE88638AD9834296A8DAF5CB1B45C7B3"><enum>2.</enum><header>Educational partnerships for innovation in communities program authorized</header> <subsection id="H4C5456862946444D8F8E16C4B5250E86"><enum>(a)</enum><header>Grant program</header><text>The Secretary of Transportation, in coordination with the Secretary of Housing and Urban Development, shall competitively award a grant to a nonprofit organization to train and support institutions of higher education to better assist local governments, by leveraging existing graduate and undergraduate classes at a large scale in order to magnify impact, with projects of need.</text></subsection>
+<subsection id="H7BD322D3880740DCA6B7E6582D1E28B2"><enum>(b)</enum><header>Award amount and duration</header><text>The amount of an award made pursuant to this Act shall be not more than $10,000,000 and shall be made available for a period not to exceed 3 years.</text></subsection> <subsection id="HFD5A52D531BE4959A8E0D4AF77D8E29A"><enum>(c)</enum><header>Permissible use of award funds</header><text>Awards made pursuant to this Act may be used to enter into agreements with any additional entity needed in order to complete a project of need.</text></subsection>
+<subsection id="H5C6F3F2A011644FEB1231156A9FF21B8"><enum>(d)</enum><header>Definitions</header><text>In this Act—</text> <paragraph id="H38ED1375F972407A851F26F51AE341D7"><enum>(1)</enum><text>the term <quote>institution of higher education</quote> has the meaning given in section 101 or section 102 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1001">20 U.S.C. 1001</external-xref>, 1002(c));</text></paragraph>
+<paragraph id="H3AF31693C9244B48A97CB3DF274610F3"><enum>(2)</enum><text>the term <quote>local government</quote> means a county, municipality, town, township, village, parish, borough, or other unit of general government below the state level;</text></paragraph> <paragraph id="HFA7B3F291FD24C96A111254F5B5401E6"><enum>(3)</enum><text>the term <quote>nonprofit organization</quote> means an entity that is described in <external-xref legal-doc="usc" parsable-cite="usc/26/501">section 501(c)(3)</external-xref> of the Internal Revenue Code of 1986;</text></paragraph>
+<paragraph id="H5887BB01844040959375F0CFB196D366"><enum>(4)</enum><text>the term <quote>project of need</quote> means a project identified by a local government that would benefit from the expertise of an institution of higher education’s faculty and students, and that advances a sustainable development goal; and</text></paragraph> <paragraph id="H448282B5F35F4113BF712CE19D3BEE8A"><enum>(5)</enum><text>the term <quote>sustainable development goal</quote> means a goal pertaining to climate change, homelessness, housing affordability, disaster resiliency, equity, economic opportunity, workforce development, and other similar high-road development principles.</text></paragraph></subsection>
+<subsection id="HA95B98E1E6554315B1EA473DBB23B179"><enum>(e)</enum><header>Authorization of appropriations</header><text>There is authorized to be appropriated $10,000,000 for each of the fiscal years 2022 through 2026 for the purposes of carrying out the provisions of this Act.</text></subsection></section> </legis-body> </bill> 
+

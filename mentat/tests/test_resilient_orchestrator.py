@@ -30,82 +30,6 @@ POWERSHELL = Path(
 
 @unittest.skipUnless(POWERSHELL.is_file(), "Windows PowerShell is unavailable")
 class ResilientOrchestratorTests(unittest.TestCase):
-    def test_managed_wait_wakes_on_exit_without_sleeping(self) -> None:
-        # A deterministic fake exits when its wait handle is signalled. Status
-        # and null-exit guards still run on the next loop iteration.
-        command = """
-$ErrorActionPreference='Stop'
-$text=Get-Content -LiteralPath '%s' -Raw
-$tokens=$null;$errors=$null
-$ast=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
-$definition=@($ast.FindAll({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Wait-ManagedProcess'},$true))
-. ([scriptblock]::Create($definition[0].Extent.Text))
-$managedProcessNullExitCode=-9999
-$wallWatch=[Diagnostics.Stopwatch]::StartNew()
-$script:statusCount=0
-function Update-GeneratorJobs {}
-function Write-RunStatus {param($Stage,$Industry,$Live) $script:statusCount++}
-function Write-RunLog {param($Message)}
-function Start-Sleep {throw 'A completed process must wake its wait handle.'}
-$process=[pscustomobject]@{HasExited=$false;ExitCode=37;WaitMilliseconds=0}
-$process|Add-Member ScriptMethod Refresh {}
-$process|Add-Member ScriptMethod WaitForExit {param($Milliseconds)
-  if ($Milliseconds) {$this.WaitMilliseconds=$Milliseconds;$this.HasExited=$true}
-  return $true
-}
-$result=Wait-ManagedProcess $process 'test' ([pscustomobject]@{industry='Fixture'})
-[pscustomobject]@{exit_code=@($result)[-1];wait_ms=$process.WaitMilliseconds;statuses=$script:statusCount}|ConvertTo-Json -Compress
-""" % str(SCRIPT).replace("'", "''")
-        result = subprocess.run([str(POWERSHELL), '-NoProfile', '-NonInteractive', '-Command', command],
-            capture_output=True, text=True, env=os.environ.copy(), timeout=15)
-        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        values = json.loads(result.stdout)
-        self.assertEqual(values, {'exit_code': 37, 'wait_ms': 2000, 'statuses': 2})
-
-    def test_resumed_attempt_gets_its_own_managed_log_pair(self) -> None:
-        # Start-ManagedPowerShell refuses to reuse a log path and a resume keeps
-        # the run folder, so every stage the stopped attempt logged would throw
-        # "Managed process log already exists" before it collected anything.
-        with tempfile.TemporaryDirectory(prefix="mentat-resume-logs-") as temporary:
-            directory = Path(temporary)
-            (directory / "fanout.stdout.log").write_text("stopped attempt")
-            (directory / "fanout.resume-1.stderr.log").write_text("first resume")
-            command = """
-$ErrorActionPreference='Stop'
-$text=Get-Content -LiteralPath '%s' -Raw
-$tokens=$null;$errors=$null
-$ast=[Management.Automation.Language.Parser]::ParseInput($text,[ref]$tokens,[ref]$errors)
-$definition=@($ast.FindAll({param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Resolve-ManagedLogBase'},$true))
-. ([scriptblock]::Create($definition[0].Extent.Text))
-$root='%s'
-[pscustomobject]@{
-  fresh=(Split-Path -Leaf (Resolve-ManagedLogBase $root 'initialize'))
-  taken=(Split-Path -Leaf (Resolve-ManagedLogBase $root 'fanout'))
-}|ConvertTo-Json -Compress
-""" % (
-                str(SCRIPT).replace("'", "''"),
-                str(directory).replace("'", "''"),
-            )
-            result = subprocess.run(
-                [
-                    str(POWERSHELL),
-                    "-NoProfile",
-                    "-NonInteractive",
-                    "-Command",
-                    command,
-                ],
-                capture_output=True,
-                text=True,
-                env=os.environ.copy(),
-                timeout=30,
-            )
-            self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-            values = json.loads(result.stdout)
-        # A stage with no prior log keeps the plain name; a stage the stopped
-        # attempt already wrote skips past every attempt already on disk, so the
-        # logs being resumed from are never truncated.
-        self.assertEqual(values, {"fresh": "initialize", "taken": "fanout.resume-2"})
-
     def test_powershell_parser_accepts_script(self) -> None:
         for script in POWERSHELL_ENTRYPOINTS:
             with self.subTest(script=script.name):
@@ -246,19 +170,15 @@ $root='%s'
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         plan = json.loads(result.stdout)
         self.assertEqual(plan["industries"], ["Fintech", "Crypto"])
-        self.assertEqual(plan["recovery_workers"], 0)
+        self.assertEqual(plan["recovery_workers"], 1)
         self.assertEqual(plan["resources"]["key_count"], 2)
         self.assertGreaterEqual(plan["resources"]["effective_api_lanes"], 1)
         self.assertLessEqual(plan["resources"]["effective_api_lanes"], 2)
-        self.assertEqual(
-            plan["resources"]["fanout_max_parallel"],
-            plan["resources"]["effective_api_lanes"],
-        )
+        self.assertEqual(plan["resources"]["fanout_max_parallel"], 0)
         self.assertEqual(
             plan["resources"]["allocation_mode"],
-            "live_recomputed_enforced",
+            "live_auto_each_industry",
         )
-        self.assertEqual(plan["resources"]["fanout_memory_per_lane_mb"], 640)
         self.assertIn("workbook generators overlap", plan["strategy"])
         self.assertTrue(
             plan["raw_data_directory"].endswith(

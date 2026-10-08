@@ -1,0 +1,24 @@
+﻿graded dry run  flagged=6284 truncate=5484 skip=800 insert=0 protection_rows=2098
+plus7  dry run  flagged=6284 truncate=5477 skip=807 insert=0 protection_rows=2105
+delta           flagged=+0 truncate=-7 skip=+7 protection_rows=+7
+both dry runs report every_row_reconstructs=True / True   rows_would_insert=0 / 0
+
+rowids in the plus7 residue and NOT in the graded residue (7): [83061, 83158, 105315, 106055, 106388, 109799, 110715]
+rowids in the graded residue and NOT in the plus7 residue (0): []
+added set == the 7: True
+rows present in both whose skip reason changed (0): []
+
+per-row, the 7:
+  rowid 83061   graded=TRUNCATED  plus7=skipped(label_or_gold_record_points_here) member=Maxine Dexter          cut_tag='PROKUPECZ (voice-over)' removed=94w
+  rowid 83158   graded=TRUNCATED  plus7=skipped(label_or_gold_record_points_here) member=Maxine Dexter          cut_tag='PROKUPECZ (voice-over)' removed=93w
+  rowid 105315  graded=TRUNCATED  plus7=skipped(label_or_gold_record_points_here) member=Susan Collins          cut_tag='CHUCK TODD' removed=54w
+  rowid 106055  graded=TRUNCATED  plus7=skipped(label_or_gold_record_points_here) member=Amy Klobuchar          cut_tag='CHUCK TODD' removed=13w
+  rowid 106388  graded=TRUNCATED  plus7=skipped(label_or_gold_record_points_here) member=Amy Klobuchar          cut_tag='CHUCK TODD' removed=64w
+  rowid 109799  graded=TRUNCATED  plus7=skipped(label_or_gold_record_points_here) member=Adam Schiff            cut_tag='CHUCK TODD' removed=1048w
+  rowid 110715  graded=TRUNCATED  plus7=skipped(label_or_gold_record_points_here) member=John Barrasso          cut_tag='CHUCK TODD' removed=266w
+
+probe rowid 245771:
+  graded  skipped(credit_union_stance_channel_row) reasons=['credit_union_stance_channel_row'] cut_tag='WALLACE (voice over)'
+  plus7   skipped(credit_union_stance_channel_row) reasons=['credit_union_stance_channel_row'] cut_tag='WALLACE (voice over)'
+
+DELTA IS EXACTLY THE 7 AND NOTHING ELSE: True

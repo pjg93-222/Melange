@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H4A6CD00FA0294AA6B42780231A3DF3FF" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 84 IH: No Free Rent for Freeloaders Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 84</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190103">January 3, 2019</action-date><action-desc><sponsor name-id="B001302">Mr. Biggs</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the Committee on <committee-name committee-id="HAP00">Appropriations</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To establish a penalty for the Department of Housing and Urban Development for failure to enforce
+			 compliance with the public housing community service and self-sufficiency
+			 requirement under law, and for other purposes.</official-title></form>
+	<legis-body id="HFE4BF2C2E595419AB0AD16C0712D6251" style="OLC">
+ <section id="H8517A4E56BAD4DE5B4403F7C9BC17A8B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>No Free Rent for Freeloaders Act of 2019</short-title></quote>.</text> </section><section id="H0229E4E97B444A819640C155A3C0B404"><enum>2.</enum><header>Monitoring compliance</header> <subsection id="H5C30A961A3ED4AE4BEB7B7A1D82E65B2"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Inspector General of the Department of Housing and Urban Development shall, on an annual basis and for each public housing agency (as such term is defined in section 3(b) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437a">42 U.S.C. 1437a(b)</external-xref>))—</text>
+ <paragraph id="H969FBAC58931424FAFE0AC8B37725F63"><enum>(1)</enum><text>monitor the extent of noncompliance with the requirements under section 12(c) of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1437j">42 U.S.C. 1437j(c)</external-xref>); and</text>
+ </paragraph><paragraph id="HA68CAC35B4FB4C999EA22AEF1AA34173"><enum>(2)</enum><text>determine the aggregate amount provided in Federal subsidies for all public housing dwelling units that were occupied by tenants who were not in compliance with such requirements.</text>
+ </paragraph></subsection><subsection id="H857E09D05D614BD5BAE86118A9DDDAB8"><enum>(b)</enum><header>Publication</header><text>Not later than September 30 of each fiscal year, the Inspector General of the Department of Housing and Urban Development shall cause to be published in the Federal Register a statement of the amount determined for such fiscal year pursuant to subsection (a)(2).</text>
+			</subsection></section><section id="HF700571328444CEFA8B06204C8B85FA9"><enum>3.</enum><header>Rescission of amounts from HUD management and administration account</header>
+ <subsection id="H674DAEBBA946461D940D2CD6982EB098"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">In each fiscal year, on October 15 or the date specified in subsection (b), whichever occurs later, there is rescinded, from amounts made available for such fiscal year for the Management and Administration account of the Department of Housing and Urban Development, an amount equal to the amount published pursuant to section 2(b) for the preceding fiscal year.</text>
+ </subsection><subsection id="HE32BDF6328BB4ABCA732A3D8B7592E97"><enum>(b)</enum><header>Late appropriations</header><text display-inline="yes-display-inline">In the case of any fiscal year for which a general appropriation Act for the Department of Housing and Urban Development that provides funds for the Management and Administration account of such Department has not been enacted before October 15, the date specified in this subsection shall be the date of the enactment of such a general appropriation Act.</text>
+			</subsection></section></legis-body></bill>
+
+

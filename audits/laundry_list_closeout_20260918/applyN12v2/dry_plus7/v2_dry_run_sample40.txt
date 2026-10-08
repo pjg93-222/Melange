@@ -1,0 +1,160 @@
+ 1. rowid=66721   2024-04-04  Christopher Coons          tag='TAUSCHE (voice-over)' [B_unknown_surname_paren]
+    KEEP (19 w)  ...This particular targeted killing, which is hard to explain or understand, I would vote to condition aid to Israel.
+    CUT  (32 w)  TAUSCHE (voice-over): Joining a faction of lawmakers calling for Biden to take a tougher line on the Mideast ally, even as CNN learns, the White House is still greenlighting new arms sales....
+
+ 2. rowid=66733   2024-04-05  Elizabeth Warren           tag='TAUSCHE (voice-over)' [B_unknown_surname_paren]
+    KEEP (18 w)  ...We cannot approve the sale of arms to a country that is in violation of our own laws.
+    CUT  (23 w)  TAUSCHE (voice-over): Israel now on guard for retaliation from Iran, days after striking an Iranian government building in Syria, killing top IRGC officials....
+
+ 3. rowid=67689   2024-05-19  James Lankford             tag='RAJU (on-camera)' [A_anchored_caps]
+    KEEP (37 w)  ...here. And today, we're still dealing with what's best for our economy. How do we deal with immigration and all the policy issues still matter on this?
+    CUT  (10 w)  RAJU (on-camera): What about character being convicted felon, et cetera....
+
+ 4. rowid=68606   2024-07-03  Nancy Pelosi               tag='LEE (voice-over)' [C_unanchored_paren]
+    KEEP (43 w)  ...thinking and the rest. He has a bad night. Now, again, I think it's a legitimate question to say is this an episode or is this a condition? [04:05:00]
+    CUT  (78 w)  LEE (voice-over): New CNN polling showing no immediate damage from Biden's halting debate performance. The president trailing Donald Trump by six points, 43 percent to 49 percent. The same numbers as April. But Biden's approval ra...
+
+ 5. rowid=68814   2024-07-09  Ritchie Torres             tag='RAJU (voice-over)' [A_anchored_caps]
+    KEEP (31 w)  ...o leave voluntarily, then he's going to be our nominee. And we have to make the best of a complicated situation. I think I'm viewing it pragmatically.
+    CUT  (18 w)  RAJU (voice-over): Some resign to supporting the president, even as they fear he may lose to Donald Trump....
+
+ 6. rowid=70352   2024-08-28  Lucy McBath                tag='TODD (voice-over)' [A_anchored_caps]
+    KEEP (29 w)  ...le, they are creating barriers to counting votes and certifying the elections. So Donald Trump can once again attempt to throw our country into chaos.
+    CUT  (19 w)  TODD (voice-over): Former President Trump recently praised those three board members, Janelle King, Rick Jeffries, and Dr. Janice Johnston....
+
+ 7. rowid=74474   2025-02-17  Jamie Raskin               tag='KAYE (voice-over)' [A_anchored_caps]
+    KEEP (44 w)  ...town, and that's Donald Trump, and the Department of Justice no longer has any independence at all in executing the criminal law enforcement function.
+    CUT  (43 w)  KAYE (voice-over): Bove got his law degree from Georgetown University. He served more than nine years as an Assistant U.S. Attorney in New York Southern District. And will now leave his mark in the nation's capital. Randi Kaye, CN...
+
+ 8. rowid=77473   2025-06-04  Chip Roy                   tag='RAJU (on camera)' [A_anchored_caps]
+    KEEP (32 w)  ... if the Senate wants to go that direction, then this bill is -- I mean, it's not even close to passing. So, they need to go further or the bills dead.
+    CUT  (75 w)  RAJU (on camera): Speaker Johnson did indicate that Donald Trump was concerned and upset about what he saw from Elon Musk post on X, but he said that it was bill he believed would ultimately still become law. He told reporters. He...
+
+ 9. rowid=86492   2026-01-08  Peter Welch                tag='SEN. CHUCK SCHUMER (D-NY)' [E_colonless_honorific]
+    KEEP (20 w)  ...Everyone is in great admiration of the capacity of our military. But there is no answer about what comes next.
+    CUT  (9 w)  SEN. CHUCK SCHUMER (D-NY) This is fraught with peril....
+
+10. rowid=89408   2026-03-26  Lindsey Graham             tag='HANCOCKS (voice-over)' [B_unknown_surname_paren]
+    KEEP (8 w)  ...And as to this commander in chief --
+    CUT  (109 w)  HANCOCKS (voice-over): Some within President Trump's circle are pushing for the U.S. military to take over Iran's Kharg Island to force the opening of the Strait of Hormuz, a tiny island off the coast of Iran that 90 percent of th...
+
+11. rowid=91283   2026-05-26  John Cornyn                tag='SAENZ (voice-over)' [A_anchored_caps]
+    KEEP (28 w)  ...hink Ken Paxton's flaws and the baggage he brings to the general election is going to be exploited to the fullest by James Tallarico and by Democrats.
+    CUT  (29 w)  SAENZ (voice-over): Senator John Cornyn in his last stand against State Attorney General Ken Paxton, who received President Donald Trump's endorsement despite concerns raised by GOP leaders in Washington....
+
+12. rowid=91340   2026-05-27  John Cornyn                tag='BENYON (voiceover)' [B_unknown_surname_paren]
+    KEEP (22 w)  ...He's gotten away with so much for so long. He is an embarrassment. The basic problem is you can't trust Ken Paxton.
+    CUT  (44 w)  BENYON (voiceover): Still, following his loss Cornyn said he respects the voters' decision and while not mentioning his rival by name said he will support the Republican nominee in the general election. And despite the bitter camp...
+
+13. rowid=92364   2026-07-02  Bonnie Watson Coleman      tag='COLLINS (voice-over)' [A_anchored_caps]
+    KEEP (25 w)  ...We were focused on what does America250 mean? What are we going to do? How are we going to recognize the greatness of our country?
+    CUT  (15 w)  COLLINS (voice-over): But once Trump took office, in January 2025, he took over the programming....
+
+14. rowid=188845  2019-01-10  Charles Schumer            tag='KRISTIE LU STOUT, HOST, "NEWS STREAM" (voice over)' [A_anchored_caps]
+    KEEP (18 w)  ...And he just got up and said, "Then we have nothing to discuss." We saw a temper tantrum.
+    CUT  (14 w)  KRISTIE LU STOUT, HOST, "NEWS STREAM" (voice over): U.S. border wall discussions going nowhere....
+
+15. rowid=194519  2019-04-22  Adam Schiff                tag='CHUCK TODD, MODERATOR, NBC "MEET THE PRESS"' [A_anchored_caps]
+    KEEP (17 w)  ...Now, it may be that we undertake an impeachment. What is the best thing for the country?
+    CUT  (13 w)  CHUCK TODD, MODERATOR, NBC "MEET THE PRESS": Do you think this is impeachable?...
+
+16. rowid=202313  2019-09-27  Elise Stefanik             tag='SCHNEIDER (voice-over)' [A_anchored_caps]
+    KEEP (28 w)  ...On page one, the complaint reads "I was not a direct witness to most of the events described." This seems like a very important line to look into.
+    CUT  (31 w)  SCHNEIDER (voice-over): Maguire explained he does not know the identity of the whistleblower and no one within the White House or the Justice Department have asked him to disclose the identity....
+
+17. rowid=212635  2020-06-25  Nancy Pelosi               tag='REP. JERRY NADLER (D-NY)' [E_colonless_honorific]
+    KEEP (18 w)  ...Pass this bill. The Senate will have a choice to honor George Floyd's life or to do nothing.
+    CUT  (28 w)  REP. JERRY NADLER (D-NY); This is not the time for half measures. It's not the time for them to study. It's not the time for sham fake reform....
+
+18. rowid=215356  2020-12-24  James Himes                tag='JOHNS (voice over)' [A_anchored_caps]
+    KEEP (51 w)  ... regarded as being useful to him. That, of course, is illegal under our Constitution. It's not even close to what the pardon power was designed to do.
+    CUT  (83 w)  JOHNS (voice over): Trump is also using his final weeks in office to try to derail a crucial piece of congressional legislation, now vetoing the Defense Spending Bill for next year, which passed through both chambers of Congress w...
+
+19. rowid=217449  2021-02-14  Mitch McConnell            tag='MICHAEL HOLMES, CNN ANCHOR (voice-over)' [A_anchored_caps]
+    KEEP (14 w)  ...Former President Trump's actions preceded the riot for a disgraceful, disgraceful dereliction of duty.
+    CUT  (48 w)  MICHAEL HOLMES, CNN ANCHOR (voice-over): Now despite those comments from the Senate Republican leader Mitch McConnell, he and other Republicans then voted to acquit Donald Trump. HOLMES (voice-over): Welcome and welcome to our vie...
+
+20. rowid=218171  2021-03-05  Ron Johnson                tag='ZELENY (voice-over)' [A_anchored_caps]
+    KEEP (34 w)  ...ive process, you know, obviously shining the light on this abusive and obscene amount of money that's going to further mortgage our children's future.
+    CUT  (27 w)  ZELENY (voice-over): Senate Majority Leader Chuck Schumer called it obstruction that could take up to ten hours, followed by what is expected to be a long debate....
+
+21. rowid=219225  2021-05-05  Elise Stefanik             tag='RANDI KAYE, CNN NATIONAL CORRESPONDENT (voice-over)' [A_anchored_caps]
+    KEEP (11 w)  ...It is truly an honor to welcome you to Fort Drum.
+    CUT  (37 w)  RANDI KAYE, CNN NATIONAL CORRESPONDENT (voice-over): Elise Stefanik at just 36 is making a very public push to become the most powerful woman in the GOP. And now has a presidential stamp of approval from Donald Trump....
+
+22. rowid=222753  2021-10-25  Richard Blumenthal         tag='NEWTON (on camera)' [B_unknown_surname_paren]
+    KEEP (53 w)  ... night with armies of lawyers, millions of dollars in lobbying. So, I must say, Facebook saying it wants regulation is the height of disingenuousness.
+    CUT  (31 w)  NEWTON (on camera): Not holding back there, Theresa. I mean, what do you think? Because Facebook has been incredibly clear about the fact that they want the government to step in....
+
+23. rowid=223435  2021-12-01  Susan Collins              tag='LEMON (on camera)' [A_anchored_caps]
+    KEEP (34 w)  ...dered Roe to be settled law. He said that he agreed with what Justice Roberts said at his nomination hearing in which he said that it was settled law.
+    CUT  (23 w)  LEMON (on camera): OK, Nia. So, remember, it was really close. She was a deciding vote at least because it was 50-50, right?...
+
+24. rowid=224358  2022-01-24  Joni Ernst                 tag='CHURCH (on camera)' [A_anchored_caps]
+    KEEP (69 w)  ...s every opportunity to do what he wants to do in Ukraine with very little pushback from the United States. So, we need to have firm resolve with this.
+    CUT  (137 w)  CHURCH (on camera): And stay tuned to CNN. Later this hour we will go live to Paris to find out what European Union leaders are saying. Well coming up here on CNN Newsroom, anti-vaccine protesters gathered at the U.S. Capitol Sund...
+
+25. rowid=225508  2022-05-02  Margaret Hassan            tag='KASIE HUNT, CNN CHIEF NATIONAL AFFAIRS ANALYST (voice-over)' [A_anchored_caps]
+    KEEP (12 w)  ...Hi, everyone. I'm here in Nogales, Arizona, right at the Mexican border.
+    CUT  (65 w)  KASIE HUNT, CNN CHIEF NATIONAL AFFAIRS ANALYST (voice-over): Democratic Senator Maggie Hassan filming this video almost 300 miles away from her home state in New Hampshire. She went because the Biden administration is planning to ...
+
+26. rowid=231935  2022-10-17  Angus King                 tag='SANCHEZ (on camera)' [A_anchored_caps]
+    KEEP (37 w)  ...r to determine the relationships of those countries surrounding the Mediterranean Sea. The question is, can we open the arctic and avoid the conflict?
+    CUT  (115 w)  SANCHEZ (on camera): By some estimates, 75% of Arctic ice has disappeared in the last quarter century. In fact, some scientists believe we could see summers without any ice blocking the north pole within the next dozen years. All ...
+
+27. rowid=236191  2023-01-11  Pete Aguilar               tag='MATTINGLY (on camera)' [A_anchored_caps]
+    KEEP (22 w)  ...The president is handling this the way that he should. He's disclosing it, he's letting the archives know, law enforcement is aware.
+    CUT  (146 w)  MATTINGLY (on camera): After more than a day of not answering any questions related to what happened back in Washington D.C., the president did address those ten classified documents saying they were surprised when he was briefed ...
+
+28. rowid=243034  2023-05-31  Chip Roy                   tag='FOX (voice over)' [B_stop_name_paren]
+    KEEP (26 w)  ...You're out there watching this. Every one of my colleagues we very clear, not one Republican should vote for this deal. It is a bad deal.
+    CUT  (28 w)  FOX (voice over): Republican Representative Dan Bishop says he's lost confidence in McCarthy over his handling of the bills negotiation and is threatening a vote of no confidence....
+
+29. rowid=256067  2020-06-16  John Cornyn                tag='Fmr. Attorney General Vanita Gupta' [D_mixed_case_label]
+    KEEP (28 w)  ...ou think systematic or structural racism can exist in a system that -- that requires individual responsibility, or do you think it's one or the other?
+    CUT  (52 w)  Fmr. Attorney General Vanita Gupta: I think every American institution has been kind of shaped by these forces, and our goal is to do what we can as policy-makers, as advocates to take that out and to provide -- and to try to figh...
+
+30. rowid=263233  2017-06-28  Mitch McConnell            tag='O`DONNELL' [A_anchored_caps]
+    KEEP (17 w)  ...We`ll continue working so we can bring legislation to the floor for debate and ultimately a vote.
+    CUT  (1161 w)  O`DONNELL: He didn`t even attempt to sound optimistic about ever actually being able to bring a health care bill to the floor for vote. He didn`t try to sound optimistic about trying to win that vote if he ever gets a vote on the ...
+
+31. rowid=267380  2019-03-06  John Hickenlooper          tag='O`DONNELL' [A_anchored_caps]
+    KEEP (200 w)  ...rcent or four percent unemployment. I mean we`ve got almost everybody working already. So that`s not as big an issue as some people make it out to be.
+    CUT  (33 w)  O`DONNELL: And Governor, on the Iran Deal that President Trump has pulled the United States out of, would you restore American participation in the Iran deal that was negotiated by the Obama administration?...
+
+32. rowid=267654  2019-03-28  Adam Schiff                tag='O`DONNELL' [A_anchored_caps]
+    KEEP (729 w)  ...ke money. I don`t think it`s OK that his attorney lied to our committee. There is a different word for that than collusion and it`s called compromise.
+    CUT  (151 w)  O`DONNELL: Those words are going to live in history. Those words are going to be in every history book of this period and of this saga. Those words are going to be seen in that form in every documentary that is ever made about thi...
+
+33. rowid=267711  2019-04-03  Bernard Sanders            tag='O`DONNELL' [A_anchored_caps]
+    KEEP (22 w)  ...We have it all done and it`s just the question of dotting the Is and crossing the Ts. Yes, we will, absolutely.
+    CUT  (457 w)  O`DONNELL: That only makes sense if Bernie Sanders is talking only about his current tax return that has to be filed in the next 12 days. But it is the officials position of the Democratic Party as expressed in the very first bill...
+
+34. rowid=268699  2019-07-01  Joaquin Castro             tag='O`DONNELL' [A_anchored_caps]
+    KEEP (67 w)  ... by an agent to drink water out of the toilet. These are the conditions – these are the conditions that have been created by the Trump administration.
+    CUT  (10 w)  O`DONNELL: Were you surprised by any of those distributions inside?...
+
+35. rowid=269612  2019-10-17  Ro Khanna                  tag='O`DONNELL' [A_anchored_caps]
+    KEEP (183 w)  ... in the United States Congress on my Committee, pay more attention. So he`s just someone who was a funny, respected, wise and touched a lot of people.
+    CUT  (15 w)  O`DONNELL: What is the plan for the Committee now to continue working without Chairman Cummings?...
+
+36. rowid=272106  2020-12-10  Charles Schumer            tag='O’DONNELL' [A_anchored_caps]
+    KEEP (20 w)  ...Make no mistake, right now, there’s one person, just one person standing in the way. And that is Leader McConnell.
+    CUT  (66 w)  O’DONNELL: Mitch McConnell is not just a member of, he is the current leader of the organized conspiracy for the purposes of maintaining power for the self-interest and the self-interest of the donor class. Mitch McConnell doesn’t...
+
+37. rowid=273731  2021-07-08  Ronny Jackson              tag='O`DONNELL' [A_anchored_caps]
+    KEEP (37 w)  ...icting coming up and the Republicans control most of that process in most the states around the country. That, alone, should get us the majority back.
+    CUT  (174 w)  O`DONNELL: Former Attorney General Eric Holder is the chair of the National Democratic Redistricting Committee, which has launched a new program called Redistricting University by its affiliate organization, all on the line, in pa...
+
+38. rowid=274705  2021-12-01  Adam Schiff                tag='O`DONNELL' [A_anchored_caps]
+    KEEP (271 w)  ...claim or whether he is invoking it in good faith. We take the Fifth Amendment very seriously but we`re going to have to assess it after his testimony.
+    CUT  (70 w)  O`DONNELL: Let`s for the moment assume he is invoking the Fifth Amendment in good faith which is to say he is invoking it because he believes he committed a crime. Doesn`t that suggest that Merrick Garland`s Justice Department sho...
+
+39. rowid=276146  2022-07-19  Sheldon Whitehouse         tag='O`DONNELL' [A_anchored_caps]
+    KEEP (40 w)  ..., manufactured new polluter-friendly legal documents, and threw out centuries-old gun safety regulations. All of it wildly unpopular with most people.
+    CUT  (129 w)  O`DONNELL: Now that the Trump and Bush Supreme Court is revoking constitutional rights and forcing ten year old girls who are rape victims to then become the victims of forced birth laws in Republican states, the House of Represen...
+
+40. rowid=287506  2026-07-08  Charles Schumer            tag='KAYE (voice-over)' [A_anchored_caps]
+    KEEP (27 w)  ...lurring the lines between public service and personal profit, he's erasing it. He is jeopardizing America's national security to line his own pockets.
+    CUT  (21 w)  KAYE (voice-over): The Qatari plane has since received $400 million or so in taxpayer-funded upgrades to help keep the president safe....
+

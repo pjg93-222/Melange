@@ -1,0 +1,322 @@
+============================================================================================
+A  EVERY ROW N12 FLAGS THAT THE MEASUREMENT DID NOT  (29 rows)
+============================================================================================
+rowid=108613  Kevin Kiley              pbs-newshour   2024-05-08  [D_mixed_case_label]
+   tag  : 'Enikia Ford Morthel, Berkeley Unified School District'  -> ledger_only_unresolved
+   B    : ...Has anyone been terminated?
+   A    : Enikia Ford Morthel, Berkeley Unified School District: In general, I can tell you that can't speak about personal matters, but I can tell you that we do follow up and we take action....
+
+rowid=116271  Ilhan Omar               pbs-newshour   2024-05-23  [D_mixed_case_label]
+   tag  : 'Gene Block, UCLA Chancellor'  -> ledger_only_unresolved
+   B    : ...Why did you not immediately send the police that were standing by, your campus police, law enforcement, to intervene?
+   A    : Gene Block, UCLA Chancellor: We tried. We notified -- as soon as we saw the violence, we notified all of our mutual aid partners. We tried to get police there as quickly as possible....
+
+rowid=137948  Michael Lawler           pbs-newshour   2024-10-22  [D_mixed_case_label]
+   tag  : 'Tom Stein, Democratic Voter'  -> ledger_only_unresolved
+   B    : ...I think I do. I will be voting for him. But the choice is between Donald Trump and Kamala Harris.
+   A    : Tom Stein, Democratic Voter: When it comes down to it, he's got to support Trump or he won't have his job. And I think that's -- I feel it's dangerous....
+
+rowid=154423  Mike Johnson             pbs-newshour   2025-05-16  [D_mixed_case_label]
+   tag  : 'Ben Sapiro, Conservative Political Commentator'  -> ledger_only_unresolved
+   B    : ... not trying to conceal anything. Laura Barrón-López: As for Qatar gifting a luxury jet, some of Trump's top MAGA allies were less forgiving.
+   A    : Ben Sapiro, Conservative Political Commentator: Taking sacks of goodies from people who support Hamas, Muslim Brotherhood, Al-Jazeera, all the rest, that's not America first. If you want President Tru...
+
+rowid=174172  Bernard Sanders          pbs-newshour   2026-01-01  [D_mixed_case_label]
+   tag  : 'Zohran Mamdani, New York City Mayor'  -> ledger_only_unresolved
+   B    : ...I, Zohran Kwame Mamdani...
+   A    : Zohran Mamdani, New York City Mayor: I, Zohran Kwame Mamdani......
+
+rowid=175673  Angus King               pbs-newshour   2026-01-19  [D_mixed_case_label]
+   tag  : 'Sarah Binder, George Washington University'  -> ledger_only_unresolved
+   B    : ...Congress has abdicated its power largely. I'd say it's the seventh inning. We're behind 4-3. But the game isn't over.
+   A    : Sarah Binder, George Washington University: The big, long picture here over the 20th century into these years of Trump is a loss of congressional power....
+
+rowid=175681  Tammy Duckworth          pbs-newshour   2026-01-19  [D_mixed_case_label]
+   tag  : 'Jamil N. Jaffer, George Mason University'  -> ledger_only_unresolved
+   B    : ...y not what the Constitution says. But, in fact, it is where Republicans are. They have basically given their powers over to the White House.
+   A    : Jamil N. Jaffer, George Mason University: President Trump has been running the table on the legislative branch for two terms now in a row....
+
+rowid=176057  Jim Jordan               pbs-newshour   2026-01-22  [D_mixed_case_label]
+   tag  : 'Jack Smith, Former Special Counsel'  -> ledger_only_unresolved
+   B    : ...So help you God?
+   A    : Jack Smith, Former Special Counsel: I do....
+
+rowid=184653  Ben Cline                pbs-newshour   2026-04-20  [D_mixed_case_label]
+   tag  : 'Jodi Nicholson, Referendum Opponent'  -> ledger_only_unresolved
+   B    : ...They're really just tilting the scales and removing rural voices from the legislative process. And that's something we have to say no to.
+   A    : Jodi Nicholson, Referendum Opponent: I used to teach preschool and it sounds like managing a preschool classroom, because, first of all, two wrongs don't make a right....
+
+rowid=184980  Adam Smith               pbs-newshour   2026-04-29  [D_mixed_case_label]
+   tag  : 'Jay Hurst, Pentagon Chief Financial Officer'  -> ledger_only_unresolved
+   B    : ...So you're saying the full cost at this point is $25 billion?
+   A    : Jay Hurst, Pentagon Chief Financial Officer: Yes, that's our estimate for the cost....
+
+rowid=185146  Troy Carter              pbs-newshour   2026-05-12  [D_mixed_case_label]
+   tag  : 'Leona Tate, Civil Rights Activist'  -> ledger_only_unresolved
+   B    : ... right to choose the person of their choice to represent them. But that means you can't just come in and summarily crack us up, break us up.
+   A    : Leona Tate, Civil Rights Activist: So now we move backwards with the Supreme Court decision that will go down as one of the most racist rulings in our nation's history....
+
+rowid=254901  Lindsey Graham           pbs-newshour   2019-07-18  [D_mixed_case_label]
+   tag  : 'Sen. John Kennedy, La.'  -> reattributed
+   B    : ...tizens, entitled to their voice. And when they do provocative things, they're going to be met with provocation. So this is a two-way street.
+   A    : Sen. John Kennedy, La.: I'm just ready to move on. I mean, this is -- I don't hate anybody. I think this is America. You're entitled to your opinion....
+
+rowid=254977  Rand Paul                pbs-newshour   2019-08-01  [D_mixed_case_label]
+   tag  : 'Sen. Ben Cardin, Md.'  -> ledger_only_unresolved
+   B    : ...their way to the front of the trough, to the front of the spending trough, to vote for as much or more debt than President Obama ever added.
+   A    : Sen. Ben Cardin, Md.: I heard a lot of my colleagues come in here and lament this agreement, saying it's going to add to the deficit. Some of those are the same people who voted for the tax cuts. Let'...
+
+rowid=255752  Amy Klobuchar            pbs-newshour   2020-02-18  [D_mixed_case_label]
+   tag  : 'Former Vice President Joseph Biden'  -> ledger_only_unresolved
+   B    : ...I can't beat him on the airways, but I can beat him on the debate stage.
+   A    : Former Vice President Joseph Biden: I'm going to get a chance to debate him on everything from redlining to stop and frisk to a whole range of other things....
+
+rowid=255829  Bernard Sanders          pbs-newshour   2020-03-16  [D_mixed_case_label]
+   tag  : 'Former Vice President Joseph Biden'  -> ledger_only_unresolved
+   B    : ...He is undermining the doctors and the scientists who are trying to help the American people.
+   A    : Former Vice President Joseph Biden: Donald Trump, he's exacerbated every single one of these problems....
+
+rowid=255904  Bernard Sanders          pbs-newshour   2020-04-13  [D_mixed_case_label]
+   tag  : 'Former Vice President Joseph Biden'  -> ledger_only_unresolved
+   B    : ...g every Democrat, I'm asking every independent, I'm asking a lot of Republicans to come together in this campaign to support your candidacy.
+   A    : Former Vice President Joseph Biden: Your endorsement means a great deal. It means a great deal to me. I think people are going to be surprised that we are apart on some issues, but we are awfully clos...
+
+rowid=256034  Cory Booker              pbs-newshour   2020-06-02  [D_mixed_case_label]
+   tag  : 'Former Vice President Joseph Biden'  -> ledger_only_unresolved
+   B    : ... every one of us should wish we were there. And I'm telling you right now, if Donald Trump wants to gas someone next time, start right here.
+   A    : Former Vice President Joseph Biden: We will not allow any president to quiet our voice....
+
+rowid=257343  Ilhan Omar               pbs-newshour   2021-10-29  [D_mixed_case_label]
+   tag  : 'Mercedes Stevenson, Minneapolis Resident'  -> ledger_only_unresolved
+   B    : ...perts, and mental health specialists. Minneapolis resident Mercedes Stevenson welcomes the amendment. She's a survivor of domestic violence.
+   A    : Mercedes Stevenson, Minneapolis Resident: It's about expanding public safety. We as a community need more trained individuals to help with mental health and emotional health crises. I myself suffer fr...
+
+rowid=257660  Ted Cruz                 pbs-newshour   2022-03-22  [D_mixed_case_label]
+   tag  : 'Judge Ketanji Brown Jackson, Supreme Court Nominee'  -> ledger_only_unresolved
+   B    : ...Is Critical Race Theory taught in schools? Is it taught in kindergarten through 12?
+   A    : Judge Ketanji Brown Jackson, Supreme Court Nominee: Senator, I don't know. I don't think so. I believe it is an academic theory that is at the law school level....
+
+rowid=257913  Harriet Hageman          pbs-newshour   2022-08-15  [D_mixed_case_label]
+   tag  : 'Crystal Sue Carr, Wyoming Voter'  -> ledger_only_unresolved
+   B    : ...at the 2020 election was stolen is earning her votes from Republicans who previously backed Cheney and even from those who know Cheney well.
+   A    : Crystal Sue Carr, Wyoming Voter: This is hard for me. This is hard, because I do like her very much as a person. Laura Barrón-López: Crystal Sue Carr served on Cheney's 2016 campaign leadership team....
+
+rowid=258130  Charles Schumer          pbs-newshour   2022-11-28  [D_mixed_case_label]
+   tag  : 'Stuart Stevens, The Lincoln Project'  -> ledger_only_unresolved
+   B    : ...former Vice President Mike Pence said that Trump should apologize for the meeting. What's your assessment of the Republican response so far?
+   A    : Stuart Stevens, The Lincoln Project: Well, look, I think this has to be taken in context of what has happened to the Republican Party, which, in my view, is a complete moral collapse, unlike any we ha...
+
+rowid=258713  Jeanne Shaheen           pbs-newshour   2023-07-11  [D_mixed_case_label]
+   tag  : 'Emmanuel Macron, French President (through translator)'  -> ledger_only_unresolved
+   B    : ...ment by 11 allied countries to provide fighter jet training, and France announced it would send long-range missiles to the Ukrainian forces.
+   A    : Emmanuel Macron, French President (through translator): We have decided to deliver new deep-strike missiles to Ukraine. They will therefore be deployed in accordance with the commitments we have made...
+
+rowid=258736  Elise Stefanik           pbs-newshour   2023-07-26  [D_mixed_case_label]
+   tag  : 'Glenn Thrush, The New York Times'  -> ledger_only_unresolved
+   B    : ...mooth sailing for Hunter Biden on this guilty plea deal, but that all broke down. What happened? You were in the courtroom. Can you explain?
+   A    : Glenn Thrush, The New York Times: It was pretty extraordinary. When you cover a plea deal, it tends to be the signing of some papers. The judge tends to go through a whole list of questions that are s...
+
+rowid=258820  Charles Schumer          pbs-newshour   2023-09-21  [D_mixed_case_label]
+   tag  : 'Mateusz Morawiecki, Polish Prime Minister (through interpreter)'  -> ledger_only_unresolved
+   B    : ... Raising the stakes further, the Polish prime minister on television last night said Poland would stop sending military supplies to Ukraine.
+   A    : Mateusz Morawiecki, Polish Prime Minister (through interpreter): We are no longer transferring weapons to Ukraine because we're now arming ourselves with the most modern weapons. Laura Barrón-López: A...
+
+rowid=260196  Charles Schumer          pbs-newshour   2018-12-11  [D_mixed_case_label]
+   tag  : 'Rep. Nancy Pelosi, De-Calif.'  -> reattributed
+   B    : ...All right, let me say something here.
+   A    : Rep. Nancy Pelosi, De-Calif.: Let me -- let me say one thing. The fact is that you do not have the votes in the House....
+
+rowid=260197  Charles Schumer          pbs-newshour   2018-12-11  [D_mixed_case_label]
+   tag  : 'Rep. Nancy Pelosi, De-Calif.'  -> ledger_only_short_turn
+   B    : ...Elections have consequences, Mr. President.
+   A    : Rep. Nancy Pelosi, De-Calif.: Let me just -- let me just......
+
+rowid=260198  Mitch McConnell          pbs-newshour   2018-12-11  [D_mixed_case_label]
+   tag  : 'Rep. Nancy Pelosi, De-Calif.'  -> reattributed
+   B    : ...r national security. I would seem as through their party is more committed to political spite for the president than to the public interest.
+   A    : Rep. Nancy Pelosi, De-Calif.: Good afternoon. We just had a meeting of which you saw the introduction to....
+
+rowid=274661  Paul Gosar               msnow          2021-11-18  [E_colonless_honorific]
+   tag  : 'JENNIFER GOSAR, REP. PAUL GOSAR'  -> ledger_only_unresolved
+   B    : ...felt offense, I self-censured. (END OF VIDEO CLIP) O`DONNELL: Compassion. Here was his sister`s reaction to that last night on this program.
+   A    : JENNIFER GOSAR, REP. PAUL GOSAR`S...
+
+rowid=305584  John Thune               pbs-newshour   2026-07-13  [D_mixed_case_label]
+   tag  : 'Benjamin Netanyahu, Israeli Prime Minister'  -> ledger_only_unresolved
+   B    : ...He was confident that the United States could be a force for good. And he gave everything he had to ensuring that we would be.
+   A    : Benjamin Netanyahu, Israeli Prime Minister: Israel has lost one of the great champions of the American-Israeli alliance. And, frankly, I have lost a beloved friend who I have had for many decades....
+
+============================================================================================
+B  CLASS D (mixed-case label): every distinct tag
+============================================================================================
+rows with a class-D foreign tag: 40 ; distinct tags: 33
+     4  Former Vice President Joseph Biden
+     3  Fmr. Attorney General Vanita Gupta
+     3  Rep. Nancy Pelosi, De-Calif.
+     1  Enikia Ford Morthel, Berkeley Unified School District
+     1  Gene Block, UCLA Chancellor
+     1  Tom Stein, Democratic Voter
+     1  Scott Bessent, U.S. Treasury Secretary Nominee
+     1  Jamieson Greer, U.S. Trade Representative
+     1  Ben Sapiro, Conservative Political Commentator
+     1  Kristi Noem, U.S. Homeland Security Secretary
+     1  Zohran Mamdani, New York City Mayor
+     1  Sarah Binder, George Washington University
+     1  Jamil N. Jaffer, George Mason University
+     1  Jack Smith, Former Special Counsel
+     1  Kristi Noem, Former U.S. Homeland Security Secretary
+     1  Jodi Nicholson, Referendum Opponent
+     1  Jay Hurst, Pentagon Chief Financial Officer
+     1  Leona Tate, Civil Rights Activist
+     1  Todd Blanche, Acting U.S. Attorney General
+     1  Scott Bessent, U.S. Treasury Secretary
+     1  Sen. John Kennedy, La.
+     1  Sen. Ben Cardin, Md.
+     1  Mercedes Stevenson, Minneapolis Resident
+     1  Judge Ketanji Brown Jackson, Supreme Court Nominee
+     1  Janet Yellen, U.S. Treasury Secretary
+     1  Crystal Sue Carr, Wyoming Voter
+     1  Stuart Stevens, The Lincoln Project
+     1  Tom Manger, U.S. Capitol Police Chief
+     1  Lisa Monaco, U.S. Deputy Attorney General
+     1  Emmanuel Macron, French President (through translator)
+     1  Glenn Thrush, The New York Times
+     1  Mateusz Morawiecki, Polish Prime Minister (through interpreter)
+     1  Benjamin Netanyahu, Israeli Prime Minister
+
+============================================================================================
+C  CLASS E (colon-less honorific): distinct tags, false-marker census, graded sample
+============================================================================================
+rows with a class-E foreign tag: 289 ; distinct tags: 170
+    83  DR. ANTHONY FAUCI
+     8  REP. NANCY PELOSI (D-CA)
+     7  DR. ROBERT REDFIELD
+     5  SEN. ELIZABETH WARREN (D-MA)
+     4  REP. BETO
+     4  JOE BIDEN, FORMER VICE PRESIDENT OF THE UNITED STATES
+     3  PRESIDENT AND
+     3  SEN. KAMALA HARRIS
+     3  SEN. MITCH
+     3  SEN. CHUCK SCHUMER
+     3  DR. YASHICA ROBINSON
+     2  SEN. PATTY MURRAY (D-WA)
+     2  REP. STEVE SCALISE
+     2  SEN. JOHN THUNE (R-SD)
+     2  SEN. BILL CASSIDY
+     2  SEN. CHUCK SCHUMER (D-NY)
+     2  DONALD TRUMP, PRESIDENT OF
+     2  SEN. SUSAN COLLINS (R-ME)
+     2  SEN. JOHN
+     2  REP. PAUL RYAN
+     2  REP. KEVIN
+     2  SEN. CORY GARDNER
+     2  PRESIDENT NIXON
+     2  SEN. CHRIS MURPHY
+     2  SEN. KAMALA HARRIS, D-CALIF.
+     2  REP. AYANNA PRESSLEY (D-MA)
+     2  RUDY GIULIANI, ATTORNEY TO PRESIDENT DONALD TRUMP
+     2  REP. JERRY NADLER (D-NY)
+     2  REP. BENNIE THOMPSON (D-MS)
+     2  REP. ADAM SCHIFF (D-CA)
+
+FALSE-MARKER CENSUS inside class E:
+  hits whose tag carries a POSSESSIVE ("...'S")      : 1  (rows [191195])
+  hits sitting INSIDE a parenthetical stage direction: 0  (rows [])
+  rows flagged ONLY by class E (nothing else sees them): 262
+  ---- rowid=191195 Nancy Pelosi [E_colonless_honorific] tag="HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S"
+       B: ...Mr. Corey (ph), Ms. Lowey that they did (ph), And Chair of the Appropriations Committee, Nita Lowey.
+       A: HENRY ROBERTO CUELLAR, (D) U.S REPRESENTATIVE FOR TEXAS'S 28TH...
+
+SEEDED (20260919) SAMPLE OF 25 CLASS-E ROWS FOR GRADING:
+ 1. rowid=66735   Michael McCaul         cnr          tag='MARK MILLEY, FORMER UNITED STATES CHAIRMAN OF' -> ledger_only_unresolved
+    B: ...ilitary generals suggested that the damage could have been mitigated if the State Department had called for an earlier non-combatant evacuation. GEN.
+    A: MARK MILLEY, FORMER UNITED STATES CHAIRMAN OF...
+ 2. rowid=69954   Jake Auchincloss       cnap         tag='KAMALA HARRIS, VICE PRESIDENT OF THE STATES' -> ledger_only_unresolved
+    B: ...with five deferments from Vietnam as a favor to my father, I would be very cautious about opening the door to attacks on those who served honorably.
+    A: KAMALA HARRIS, VICE PRESIDENT OF THE STATES...
+ 3. rowid=70117   Charles Schumer        se           tag='[21:25:00] (CHEERING) KAMALA HARRIS (D), VICE PRESIDENT OF THE UNITED' -> ledger_only_unresolved
+    B: ...s, Tim Walz, and a Democratic majority in the Senate and keep the torch of freedom burning bright for generations to come. On to victory in November.
+    A: [21:25:00] (CHEERING) KAMALA HARRIS (D), VICE PRESIDENT OF THE UNITED...
+ 4. rowid=71147   Mitch McConnell        ctmo         tag='PRESIDENT AND' -> ledger_only_unresolved
+    B: ...The mob was fed lies. They were provoked by the president. DONALD TRUMP (R), FORMER U.S.
+    A: PRESIDENT AND 2024...
+ 5. rowid=80238   Jon Husted             ip           tag='SEN. BILL CASSIDY' -> reattributed
+    B: ...nd the irony of this is, is when I talk with you, you say that. And when I talk with Secretary Kennedy, he says this, we got to get this figured out.
+    A: SEN. BILL CASSIDY, (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &...
+ 6. rowid=82055   Raphael Warnock        this-week    tag='PRESIDENT AND' -> ledger_only_unresolved
+    B: ...ote is to vote. It is to push Donald Trump a little bit closer to the White House. And that is a dangerous proposition. DONALD TRUMP (R), FORMER U.S.
+    A: PRESIDENT AND 2024...
+ 7. rowid=91491   Thom Tillis            ctmo         tag='SEN. SUSAN COLLINS (R-ME)' -> reattributed
+    B: ...This is beyond the pale. This is not good for my colleagues. There's no one positive thing that could be spun out of this between now and November.
+    A: SEN. SUSAN COLLINS (R-ME); I do not support the weaponization fund as it has been described....
+ 8. rowid=102837  Thom Tillis            ben-shapiro- tag='SEN. JOE MANCHIN, D-W.VA' -> ledger_only_unresolved
+    B: ...No, I haven't. I sit on the Judiciary Committee along with Senator Coons and I have not seen any evidence to suggest that.
+    A: SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17, 2017: I do not at all believe that Mr. Mueller has been compromised for his investigation. I think he's beyond reproach. SEN. JOHN CORNYN, R-TE...
+ 9. rowid=107230  Nancy Pelosi           meet-the-pre tag='REP. PAUL RYAN' -> ledger_only_unresolved
+    B: ...President Trump earned an F for leadership.
+    A: REP. PAUL RYAN We do some crazy things in Washington. But this is utter madness....
+10. rowid=110238  Rick Scott             meet-the-pre tag='REP. KEVIN MCCARTHY' -> ledger_only_unresolved
+    B: ...This is a crisis that is man-made by one man: Joe Biden.
+    A: REP. KEVIN MCCARTHY It’s more than just a crisis....
+11. rowid=116632  Adam Schiff            meet-the-pre tag='REP. MIKE POMPEO' -> ledger_only_unresolved
+    B: ...The C.I.A. has said that that source's name is not classified.
+    A: REP. MIKE POMPEO Name him. Put the name on national TV this morning Mr. Schiff....
+12. rowid=198822  Alexandria Ocasio-Cort sitroom      tag='REP. RASHIDA TLAIB (D-MI)' -> ledger_only_short_turn
+    B: ...tion. It's a distraction from what's most important and from our core values as American citizens. And with that, I'll hand it over to Rashida Tlaib.
+    A: REP. RASHIDA TLAIB (D-MI), MAJORITY MEMBER, HOUSE...
+13. rowid=212212  Tammy Baldwin          cnr          tag='DR. ROBERT REDFIELD' -> ledger_only_unresolved
+    B: ...Dr. Redfield. Dr. Redfield, (inaudible) think that the current testing protocols at the White House presents a model for other essential workplaces?
+    A: DR. ROBERT REDFIELD, DIRECTOR, CENTERS...
+14. rowid=212286  Rand Paul              nday         tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...I don't think you're the end all. I don't think you're the one person that gets to make the decision.
+    A: DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE...
+15. rowid=213957  Rand Paul              cnr          tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...They're no longer having the pandemic because they have enough immunity in New York City to actually stop it.
+    A: DR. ANTHONY FAUCI, NATIONAL INSTITUTE...
+16. rowid=217583  Christopher Coons      cnr          tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...(voice-over): Biden's top health officials are also pushing for the passage of his stimulus bill, arguing that schools need more resources to reopen.
+    A: DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE...
+17. rowid=218527  Rand Paul              acd          tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...... vaccines and you are wearing two masks, isn't that theater?
+    A: DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE...
+18. rowid=219771  Lindsey Graham         cg           tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...At what point in time would it become more likely it came from the lab if we don't find an intermediate animal host? How much longer?
+    A: DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE...
+19. rowid=223251  Pete Aguilar           cnr          tag='REP. BENNIE THOMPSON (D-MS)' -> reattributed
+    B: ...list of what they want to know from him, including answers to questions about a personal cell phone and messages they say Meadows may have destroyed.
+    A: REP. BENNIE THOMPSON (D-MS) (voice-over): We have information that that phone may or may not be in his possession. The number is not active anymore that he used, so we just want to know. [03:55:02] NO...
+20. rowid=231698  Steny Hoyer            cnr          tag='REP. NANCY PELOSI (D-CA)' -> ledger_only_short_turn
+    B: ...drews Air Force Base, other military bases. We need active duty, National Guard, all the people who are sworn to protect and defend the Constitution.
+    A: REP. NANCY PELOSI (D-CA), SPEAKER OF THE...
+21. rowid=267967  Maxine Waters          msnow        tag='REP. ADAM SCHIFF (D-CA)' -> ledger_only_short_turn
+    B: ...He`s prepared to fight us tooth and nail and we`re prepared to fight him back.
+    A: REP. ADAM SCHIFF (D-CA);...
+22. rowid=274971  Rand Paul              msnow        tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...You`ve advocated your infallible opinion be dictated by law.
+    A: DR. ANTHONY FAUCI, DIRECTOR, NATIONAL INSTITUTE...
+23. rowid=275908  Mitch McConnell        msnow        tag='REP. KEVIN MCCARTHY (R-CA)' -> ledger_only_unresolved
+    B: ...nate will not be intimidated. We will not be kept out of this chamber by thugs, mobs, or threats. We will not bow to the lawlessness or intimidation.
+    A: REP. KEVIN MCCARTHY (R-CA); The violence, destruction and chaos we saw earlier was unacceptable, undemocratic, and unAmerican. It was the saddest day I`ve ever had as serving as a member of this insti...
+24. rowid=307013  James Lankford         cnc          tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...fection rate going around the world from measles based on the fact that so many children would not get their measles vaccine because of the shutdown?
+    A: DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE...
+25. rowid=307106  Rand Paul              cnr          tag='DR. ANTHONY FAUCI' -> ledger_only_unresolved
+    B: ...sir. Security, please remove him from the room. FOX (voice-over): Fauci invoked his Fifth Amendment Right against self-incrimination over 100 times.
+    A: DR. ANTHONY FAUCI, FORMER DIRECTOR, NATIONAL INSTITUTE...
+
+============================================================================================
+D  ROWS WITH NO MEMBER WORDS BEFORE THE FIRST TAG (left untouched -- residue)
+============================================================================================
+rowid=69544   James Comer              cnr              2024-07-23 [A_anchored_caps]
+   tag: 'OK. OK. WILD (voice-over)'
+   OK. OK. WILD (voice-over): Members of the Committee pressed Cheatle for answers about why the former president was allowed to take the stage even after she admitted the Secret Service had been notified between two and five times police were
+rowid=244993  James Comer              cnr              2023-07-23 [A_anchored_caps]
+   tag: 'OK. OK. WILD (voice-over)'
+   OK. OK. WILD (voice-over): Members of the Committee pressed Cheatle for answers about why the former president was allowed to take the stage even after she admitted the Secret Service had been notified between two and five times police were
+rowid=278454  Bill Cassidy             cfr              2022-05-04 [A_anchored_caps]
+   tag: 'OK. Q'
+   OK. Q: Do you think that it’s possible to make progress on your plan without some serious changes to the people that the administration has put in place to design and implement energy policy?
+rowid=278528  Chris Van Hollen         cfr              2019-05-21 [A_anchored_caps]
+   tag: 'OK. Q'
+   OK. Q: Senator, David Sanger from the New York Times . Good to see you again.
+DONE

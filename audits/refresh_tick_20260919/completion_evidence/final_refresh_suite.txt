@@ -1,0 +1,241 @@
+test_T01_all_ok_publishes_with_verified_manifests (test_refresh_tick.RefreshTickTest.test_T01_all_ok_publishes_with_verified_manifests) ... ok
+test_T02_filed_failure_recovers_in_the_retry_pass (test_refresh_tick.RefreshTickTest.test_T02_filed_failure_recovers_in_the_retry_pass) ... ok
+test_T03a_stale_but_intact_source_publishes_degraded (test_refresh_tick.RefreshTickTest.test_T03a_stale_but_intact_source_publishes_degraded) ... ok
+test_T03b_source_older_than_the_window_refuses_and_touches_nothing (test_refresh_tick.RefreshTickTest.test_T03b_source_older_than_the_window_refuses_and_touches_nothing) ... ok
+test_T04_torn_source_blocks_then_heals (test_refresh_tick.RefreshTickTest.test_T04_torn_source_blocks_then_heals) ... ok
+test_T05_crash_points_and_kills_converge_to_the_control_bytes (test_refresh_tick.RefreshTickTest.test_T05_crash_points_and_kills_converge_to_the_control_bytes) ... Timeout (0:01:30)!
+Thread 0x00009808 (most recent call first):
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1590 in _wait
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1264 in wait
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 228 in run_tick
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 585 in test_T05_crash_points_and_kills_converge_to_the_control_bytes
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 589 in _callTestMethod
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 634 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 690 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 122 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 84 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 122 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 84 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\runner.py", line 240 in run
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\run_final_refresh_suite.py", line 18 in <module>
+ok
+test_T06a_every_unpublished_outcome_exits_non_zero (test_refresh_tick.RefreshTickTest.test_T06a_every_unpublished_outcome_exits_non_zero) ... ok
+test_T06b_hard_failure_after_the_chain_is_not_reported_as_published (test_refresh_tick.RefreshTickTest.test_T06b_hard_failure_after_the_chain_is_not_reported_as_published) ... ok
+test_T07_unwritable_status_marker_costs_under_two_seconds (test_refresh_tick.RefreshTickTest.test_T07_unwritable_status_marker_costs_under_two_seconds) ... ok
+test_T08_no_terminal_outcome_while_the_tick_runs (test_refresh_tick.RefreshTickTest.test_T08_no_terminal_outcome_while_the_tick_runs) ... ok
+test_T09_blocked_preserves_the_last_publication (test_refresh_tick.RefreshTickTest.test_T09_blocked_preserves_the_last_publication) ... ok
+test_T10a_recycled_pid_is_detected (test_refresh_tick.RefreshTickTest.test_T10a_recycled_pid_is_detected) ... ok
+test_T10b_backward_clock_step_cannot_reclaim_a_live_holder (test_refresh_tick.RefreshTickTest.test_T10b_backward_clock_step_cannot_reclaim_a_live_holder) ... ok
+test_T10c_absent_proc_start_keeps_the_pid_rule (test_refresh_tick.RefreshTickTest.test_T10c_absent_proc_start_keeps_the_pid_rule) ... ok
+test_T10d_second_acquirer_is_refused_while_the_first_lives (test_refresh_tick.RefreshTickTest.test_T10d_second_acquirer_is_refused_while_the_first_lives) ... ok
+test_T11_budget_stops_further_launches (test_refresh_tick.RefreshTickTest.test_T11_budget_stops_further_launches) ... ok
+test_T12_table_matches_weekly_refresh_step_for_step (test_refresh_tick.RefreshTickTest.test_T12_table_matches_weekly_refresh_step_for_step) ... ok
+test_T13_corrupt_state_is_rotated_and_everything_becomes_due (test_refresh_tick.RefreshTickTest.test_T13_corrupt_state_is_rotated_and_everything_becomes_due) ... Timeout (0:01:30)!
+Thread 0x00009808 (most recent call first):
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1590 in _wait
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1264 in wait
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 228 in run_tick
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 923 in test_T13_corrupt_state_is_rotated_and_everything_becomes_due
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 589 in _callTestMethod
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 634 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 690 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 122 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 84 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 122 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 84 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\runner.py", line 240 in run
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\run_final_refresh_suite.py", line 18 in <module>
+ok
+test_T14_read_only_modes_change_nothing (test_refresh_tick.RefreshTickTest.test_T14_read_only_modes_change_nothing) ... ok
+test_T15_zero_floor_blocks_and_a_forty_percent_shrink_does_not (test_refresh_tick.RefreshTickTest.test_T15_zero_floor_blocks_and_a_forty_percent_shrink_does_not) ... ok
+test_T15b_a_file_taken_over_by_another_step_is_not_read_as_vanished (test_refresh_tick.RefreshTickTest.test_T15b_a_file_taken_over_by_another_step_is_not_read_as_vanished)
+Last writer owns.  A handover must never read as a collapsed output. ... ok
+test_T16_hard_gate_failure_stops_the_phase_not_the_tick (test_refresh_tick.RefreshTickTest.test_T16_hard_gate_failure_stops_the_phase_not_the_tick) ... ok
+test_T17_a_failing_source_isolates (test_refresh_tick.RefreshTickTest.test_T17_a_failing_source_isolates) ... ok
+test_T18_lease_wait_publishes_a_growing_wait_then_acquires (test_refresh_tick.RefreshTickTest.test_T18_lease_wait_publishes_a_growing_wait_then_acquires) ... ok
+test_T18b_exhausted_lease_wait_is_blocked_not_a_crash (test_refresh_tick.RefreshTickTest.test_T18b_exhausted_lease_wait_is_blocked_not_a_crash) ... ok
+test_T19a_partial_exit_is_committed_and_not_retried (test_refresh_tick.RefreshTickTest.test_T19a_partial_exit_is_committed_and_not_retried) ... ok
+test_T19b_the_same_code_without_a_partial_code_is_a_plain_failure (test_refresh_tick.RefreshTickTest.test_T19b_the_same_code_without_a_partial_code_is_a_plain_failure) ... ok
+test_T20a_a_handed_over_file_collapsing_to_zero_still_blocks (test_refresh_tick.RefreshTickTest.test_T20a_a_handed_over_file_collapsing_to_zero_still_blocks) ... ok
+test_T20b_a_handed_over_file_that_merely_shrinks_does_not_block (test_refresh_tick.RefreshTickTest.test_T20b_a_handed_over_file_that_merely_shrinks_does_not_block)
+NEGATIVE CONTROL for T20a: the same hand-over, 55 rows instead of none, publishes. ... ok
+test_T21a_evidence_collected_in_this_tick_always_counts (test_refresh_tick.RefreshTickTest.test_T21a_evidence_collected_in_this_tick_always_counts) ... ok
+test_T21b_new_evidence_from_an_earlier_tick_still_wants_compute (test_refresh_tick.RefreshTickTest.test_T21b_new_evidence_from_an_earlier_tick_still_wants_compute) ... ok
+test_T21c_equal_generations_with_nothing_due_is_nothing_due (test_refresh_tick.RefreshTickTest.test_T21c_equal_generations_with_nothing_due_is_nothing_due)
+CONTROL for T21a/b: the clock-free rule must still exit 0 over a quiet system. ... ok
+test_T21d_a_publication_without_generations_still_uses_the_stamp_rule (test_refresh_tick.RefreshTickTest.test_T21d_a_publication_without_generations_still_uses_the_stamp_rule)
+A record written before generations were recorded must not read as "no evidence". ... ok
+test_T22a_a_stale_inherited_lease_claim_is_fatal_before_step_one (test_refresh_tick.RefreshTickTest.test_T22a_a_stale_inherited_lease_claim_is_fatal_before_step_one) ... ok
+test_T22b_an_adopted_lease_still_works_and_is_never_deleted_by_the_child (test_refresh_tick.RefreshTickTest.test_T22b_an_adopted_lease_still_works_and_is_never_deleted_by_the_child)
+POSITIVE CONTROL for T22a: a REAL handoff from this process still adopts and runs. ... ok
+test_T23a_read_manifest_separates_a_verdict_from_a_lock (test_refresh_tick.RefreshTickTest.test_T23a_read_manifest_separates_a_verdict_from_a_lock) ... ok
+test_T23b_a_missing_manifest_demotes_the_step_and_runs_it_in_the_same_tick (test_refresh_tick.RefreshTickTest.test_T23b_a_missing_manifest_demotes_the_step_and_runs_it_in_the_same_tick) ... ok
+test_T23c_a_manifest_that_cannot_be_opened_does_not_erase_the_step (test_refresh_tick.RefreshTickTest.test_T23c_a_manifest_that_cannot_be_opened_does_not_erase_the_step) ... ok
+test_T24a_no_step_may_spend_more_than_half_a_tick (test_refresh_tick.RefreshTickTest.test_T24a_no_step_may_spend_more_than_half_a_tick) ... ok
+test_T24b_a_step_that_hung_is_not_retried_into_a_second_hang (test_refresh_tick.RefreshTickTest.test_T24b_a_step_that_hung_is_not_retried_into_a_second_hang) ... ok
+test_T25a_the_press_baseline_path_is_pinned_to_the_press_lane (test_refresh_tick.RefreshTickTest.test_T25a_the_press_baseline_path_is_pinned_to_the_press_lane)
+The fold's own constant, read as TEXT. ... ok
+test_T25b_the_runner_imports_no_producer_in_any_mode (test_refresh_tick.RefreshTickTest.test_T25b_the_runner_imports_no_producer_in_any_mode) ... ok
+test_T26_the_review_file_is_capped_and_blocking_rows_survive_the_trim (test_refresh_tick.RefreshTickTest.test_T26_the_review_file_is_capped_and_blocking_rows_survive_the_trim) ... ok
+test_T27_accept_zero_records_the_collapse_instead_of_blocking (test_refresh_tick.RefreshTickTest.test_T27_accept_zero_records_the_collapse_instead_of_blocking) ... ok
+test_T28a_a_csv_that_comes_back_header_only_is_a_collapse (test_refresh_tick.RefreshTickTest.test_T28a_a_csv_that_comes_back_header_only_is_a_collapse) ... ok
+test_T28b_the_header_floor_is_for_csv_only_and_needs_a_real_prior (test_refresh_tick.RefreshTickTest.test_T28b_the_header_floor_is_for_csv_only_and_needs_a_real_prior) ... ok
+test_T29_external_damage_survives_failures_and_noop_until_repaired (test_refresh_tick.RefreshTickTest.test_T29_external_damage_survives_failures_and_noop_until_repaired) ... ok
+test_T30_shared_zero_verdict_survives_a_successful_noop (test_refresh_tick.RefreshTickTest.test_T30_shared_zero_verdict_survives_a_successful_noop) ... ok
+test_T31_locked_manifest_defers_due_step_without_erasing_baseline (test_refresh_tick.RefreshTickTest.test_T31_locked_manifest_defers_due_step_without_erasing_baseline) ... Timeout (0:01:30)!
+Thread 0x00009808 (most recent call first):
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1538 in _execute_child
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\subprocess.py", line 1026 in __init__
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 224 in run_tick
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 1950 in test_T31_locked_manifest_defers_due_step_without_erasing_baseline
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 589 in _callTestMethod
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 634 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\case.py", line 690 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 122 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 84 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 122 in run
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\suite.py", line 84 in __call__
+  File "C:\Users\pgoff\AppData\Local\Programs\Python\Python312\Lib\unittest\runner.py", line 240 in run
+  File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\run_final_refresh_suite.py", line 18 in <module>
+ok
+test_T32_timestamp_only_change_does_not_rerun_source (test_refresh_tick.RefreshTickTest.test_T32_timestamp_only_change_does_not_rerun_source) ... ok
+test_T33_console_unknown_torn_flag_preserves_prior_damage (test_refresh_tick.RefreshTickTest.test_T33_console_unknown_torn_flag_preserves_prior_damage) ... ok
+test_T34_crash_after_filing_failure_bypasses_attempt_gap (test_refresh_tick.RefreshTickTest.test_T34_crash_after_filing_failure_bypasses_attempt_gap) ... ok
+test_T35_normal_failed_tick_keeps_attempt_cooldown (test_refresh_tick.RefreshTickTest.test_T35_normal_failed_tick_keeps_attempt_cooldown) ... ok
+test_a_bug_in_the_runner_still_leaves_a_terminal_record (test_refresh_tick.RefreshTickTest.test_a_bug_in_the_runner_still_leaves_a_terminal_record)
+An unattended job that dies with a traceback tells the supervisor nothing. ... [2026-09-20 05:03:10Z] ===== REFRESH TICK START (budget 18.0 h) =====
+[2026-09-20 05:03:10Z] CREC floor speeches            START   (timeout 3000s, COLLECTING)
+[2026-09-20 05:03:10Z] CREC floor speeches            OK        0s  stub fetch_congressional_record.py|crec|--since wrote 60 rows (invocation 1)
+[2026-09-20 05:03:10Z] CHRG finance hearings          START   (timeout 3000s, COLLECTING)
+[2026-09-20 05:03:10Z] CHRG finance hearings          OK        0s  stub fetch_congressional_record.py|chrg|--since wrote 60 rows (invocation 1)
+[2026-09-20 05:03:10Z] Congress.gov bill discovery    START   (timeout 21600s, COLLECTING)
+[2026-09-20 05:03:10Z] Congress.gov bill discovery    OK        0s  stub refresh_legislation_discovery.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:10Z] Official bill evidence and automatic scoring admission START   (timeout 14400s, COLLECTING)
+[2026-09-20 05:03:10Z] Official bill evidence and automatic scoring admission OK        0s  stub refresh_sentinel_admissions.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:10Z] FEC source money refresh       START   (timeout 7200s, COLLECTING)
+[2026-09-20 05:03:10Z] FEC source money refresh       OK        0s  stub refresh_fec_money.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:10Z] Congress rollcall source refresh START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:10Z] Congress rollcall source refresh OK        0s  stub refresh_vote_sources.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:10Z] Congress.gov bill repository   START   (timeout 14400s, COLLECTING)
+[2026-09-20 05:03:11Z] Congress.gov bill repository   OK        0s  stub update_bill_repository.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] GovInfo BILLSTATUS bulk refresh START   (timeout 3600s, COLLECTING)
+[2026-09-20 05:03:11Z] GovInfo BILLSTATUS bulk refresh OK        0s  stub refresh_billstatus_bulk.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] interviews: CNN (14d)          START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:11Z] interviews: CNN (14d)          OK        0s  stub fetch_interviews.py|cnn|--since|--until|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] interviews: MTP                START   (timeout 1200s, COLLECTING)
+[2026-09-20 05:03:11Z] interviews: MTP                OK        0s  stub fetch_interviews.py|mtp|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] interviews: CBS                START   (timeout 1200s, COLLECTING)
+[2026-09-20 05:03:11Z] interviews: CBS                OK        0s  stub fetch_interviews.py|cbs|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] interviews: ABC                START   (timeout 1200s, COLLECTING)
+[2026-09-20 05:03:11Z] interviews: ABC                OK        0s  stub fetch_interviews.py|abc|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] interviews: PBS (21d)          START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:11Z] interviews: PBS (21d)          OK        0s  stub fetch_interviews.py|pbs|--since|--until|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] interviews: NPR (14d)          START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:11Z] interviews: NPR (14d)          OK        0s  stub fetch_interviews.py|npr|--since|--until|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:11Z] interviews: Fox archive audit  START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:12Z] interviews: Fox archive audit  OK        0s  stub fetch_interviews.py|fox|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:12Z] interviews: MS NOW             START   (timeout 3600s, COLLECTING)
+[2026-09-20 05:03:12Z] interviews: MS NOW             OK        0s  stub fetch_interviews.py|msnow|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:12Z] interviews: Washington Journal (21d) START   (timeout 5400s, COLLECTING)
+[2026-09-20 05:03:12Z] interviews: Washington Journal (21d) OK        0s  stub refresh_cspan_wj.py|--since|--until wrote 60 rows (invocation 1)
+[2026-09-20 05:03:12Z] Wikipedia biographies (full roster) START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:12Z] Wikipedia biographies (full roster) OK        0s  stub wikipedia_biographies.py|--strict wrote 60 rows (invocation 1)
+[2026-09-20 05:03:12Z] press delta refresh            START   (timeout 32400s, COLLECTING)
+[2026-09-20 05:03:12Z] press delta refresh            OK        0s  stub refresh_press_stream.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:12Z] press intake audit             START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:12Z] press intake audit             OK        0s  stub audit_collection.py|--scope|press|--output|data/engine/press_collection_intake_receipt.json wro
+[2026-09-20 05:03:12Z] press engine feed              START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:12Z] press engine feed              OK        0s  stub build_press_engine_feed.py|--intake-receipt|data/engine/press_collection_intake_receipt.json wr
+[2026-09-20 05:03:12Z] fold promoted press runs       START   (timeout 1800s, COLLECTING)
+[2026-09-20 05:03:12Z] fold promoted press runs       OK        0s  stub fold_promoted_press_runs.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:12Z] press zero-row review          START   (timeout 600s, COLLECTING)
+[2026-09-20 05:03:13Z] press zero-row review          OK        0s  stub press_zero_row_review.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:13Z] compute phase wanted: nothing has been published yet
+[2026-09-20 05:03:13Z] collection intake audit        START   (timeout 1800s, COMPUTING)
+[2026-09-20 05:03:13Z] collection intake audit        OK        0s  stub audit_collection.py|--scope|all|--output|data/engine/collection_intake_receipt.json wrote 60 ro
+[2026-09-20 05:03:13Z] accepted audio intake          START   (timeout 3600s, COMPUTING)
+[2026-09-20 05:03:13Z] accepted audio intake          OK        0s  stub b5_audio_manifest_adapter.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:13Z] collector roster verification  START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:13Z] collector roster verification  OK        0s  stub verify_collector_roster_updates.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:13Z] CU hearings extract            START   (timeout 600s, COMPUTING)
+[2026-09-20 05:03:13Z] CU hearings extract            OK        0s  stub extract_cu_hearings.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:13Z] CU interviews extract          START   (timeout 600s, COMPUTING)
+[2026-09-20 05:03:13Z] CU interviews extract          OK        0s  stub extract_cu_interviews.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:13Z] CU bluesky extract             START   (timeout 600s, COMPUTING)
+[2026-09-20 05:03:13Z] CU bluesky extract             OK        0s  stub extract_cu_bluesky.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:13Z] Big Five traits                START   (timeout 1800s, COMPUTING)
+[2026-09-20 05:03:13Z] Big Five traits                OK        0s  stub big5_traits.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:13Z] interaction features           START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:14Z] interaction features           OK        0s  stub interaction_features.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:14Z] behavior panel                 START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:14Z] behavior panel                 OK        0s  stub behavior_panel.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:14Z] behavioral dispositions        START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:14Z] behavioral dispositions        OK        0s  stub behavioral_dispositions.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:14Z] Big5 v2 (behavior-calibrated)  START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:14Z] Big5 v2 (behavior-calibrated)  OK        0s  stub big5_lexcal_v2.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:14Z] Big5 v3 (hybrid)               START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:14Z] Big5 v3 (hybrid)               OK        0s  stub big5_hybrid.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:14Z] social interaction layer       START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:14Z] social interaction layer       OK        0s  stub social_interaction_layer.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:14Z] press engagement layer         START   (timeout 600s, COMPUTING)
+[2026-09-20 05:03:14Z] press engagement layer         OK        0s  stub press_engagement_layer.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] press HCoI layer               START   (timeout 600s, COMPUTING)
+[2026-09-20 05:03:15Z] press HCoI layer               OK        0s  stub press_hcoi.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] multilayer network             START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:15Z] multilayer network             OK        0s  stub build_multilayer_network.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] co-appearance layer            START   (timeout 600s, COMPUTING)
+[2026-09-20 05:03:15Z] co-appearance layer            OK        0s  stub co_appearance_layer.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] reference layer (classify new evidence) START   (timeout 14400s, COMPUTING)
+[2026-09-20 05:03:15Z] reference layer (classify new evidence) OK        0s  stub member_reference_layer.py|--score|--go wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] press stance stack             START   (timeout 1800s, COMPUTING)
+[2026-09-20 05:03:15Z] press stance stack             OK        0s  stub press_stance_stack.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] FULL PIPELINE + dashboards     START   (timeout 7200s, COMPUTING)
+[2026-09-20 05:03:15Z] FULL PIPELINE + dashboards     OK        0s  stub run_pipeline.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] prepare dashboard deployment   SKIPPED — no DASHBOARD_PASSWORD_FILE configured
+[2026-09-20 05:03:15Z] signed coalitions (diag)       START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:15Z] signed coalitions (diag)       OK        0s  stub signed_coalitions.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:15Z] KB benchmark (diag)            START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:16Z] KB benchmark (diag)            OK        0s  stub kb_benchmark.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:16Z] LEP criterion (diag)           START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:16Z] LEP criterion (diag)           OK        0s  stub lep_criterion.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:16Z] say-do gap (diag)              START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:16Z] say-do gap (diag)              OK        0s  stub say_do_gap.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:16Z] financial_other discovery (review sheet) START   (timeout 1800s, COMPUTING)
+[2026-09-20 05:03:16Z] financial_other discovery (review sheet) OK        0s  stub financial_other_discovery.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:16Z] forecast ledger (freeze+score) START   (timeout 900s, COMPUTING)
+[2026-09-20 05:03:16Z] forecast ledger (freeze+score) OK        0s  stub forecast_ledger.py wrote 60 rows (invocation 1)
+[2026-09-20 05:03:16Z] UNHANDLED ERROR in the tick — RuntimeError: a bug in the runner, not in a producer
+[2026-09-20 05:03:16Z]    Traceback (most recent call last):
+[2026-09-20 05:03:16Z]      File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\refresh_tick.py", line 1571, in run
+[2026-09-20 05:03:16Z]        return self._finish(self._compute_and_publish())
+[2026-09-20 05:03:16Z]                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-09-20 05:03:16Z]      File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\refresh_tick.py", line 1628, in _compute_and_publish
+[2026-09-20 05:03:16Z]        record = self.publication_record()
+[2026-09-20 05:03:16Z]                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-09-20 05:03:16Z]      File "C:\Users\pgoff\Documents\Codex\2026-09-20\c-users-pgoff-onedrive-desktop-melange\work\landing\fec\tests\infra\test_refresh_tick.py", line 1856, in publication_record
+[2026-09-20 05:03:16Z]        raise RuntimeError('a bug in the runner, not in a producer')
+[2026-09-20 05:03:16Z]    RuntimeError: a bug in the runner, not in a producer
+[2026-09-20 05:03:16Z] ===== REFRESH TICK COMPUTE_FAILED (exit 1) — 49 step(s) run, 49 ok, 0 filed =====
+
+ok
+test_a_table_hook_that_does_not_exist_is_fatal_before_step_one (test_refresh_tick.RefreshTickTest.test_a_table_hook_that_does_not_exist_is_fatal_before_step_one) ... [2026-09-20 05:03:16Z] ===== REFRESH TICK START (budget 18.0 h) =====
+[2026-09-20 05:03:16Z] FATAL pre-step failure: FULL PIPELINE + dashboards names an unknown gate 'no_such_gate'
+[2026-09-20 05:03:16Z] ===== REFRESH TICK FATAL_PRESTEP (exit 1) — 0 step(s) run, 0 ok, 0 filed =====
+
+ok
+test_chain_gate_refuses_when_the_chain_tail_is_no_longer_audit_full (test_refresh_tick.RefreshTickTest.test_chain_gate_refuses_when_the_chain_tail_is_no_longer_audit_full) ... ok
+test_chain_gate_tolerates_ratified_dissent_and_refuses_novel (test_refresh_tick.RefreshTickTest.test_chain_gate_tolerates_ratified_dissent_and_refuses_novel) ... ok
+test_duplicate_producer_is_fatal_before_step_one (test_refresh_tick.RefreshTickTest.test_duplicate_producer_is_fatal_before_step_one) ... ok
+test_glassbox_events_reach_the_stream (test_refresh_tick.RefreshTickTest.test_glassbox_events_reach_the_stream) ... ok
+test_missing_producer_fails_one_step_not_the_tick (test_refresh_tick.RefreshTickTest.test_missing_producer_fails_one_step_not_the_tick) ... ok
+test_nothing_due_after_a_publication_exits_zero_without_running_anything (test_refresh_tick.RefreshTickTest.test_nothing_due_after_a_publication_exits_zero_without_running_anything) ... ok
+test_nothing_was_written_under_the_repository (test_refresh_tick.RefreshTickTest.test_nothing_was_written_under_the_repository)
+Negative control for the whole file: every tick ran in a temp root. ... ok
+test_scan_spec_watches_the_four_shapes_and_nothing_else (test_refresh_tick.RefreshTickTest.test_scan_spec_watches_the_four_shapes_and_nothing_else)
+data/ and outputs/ recursively, the ROOT's own files, and the named external file. ... ok
+test_second_instance_leaves_the_first_instances_marker_alone (test_refresh_tick.RefreshTickTest.test_second_instance_leaves_the_first_instances_marker_alone) ... ok
+
+----------------------------------------------------------------------
+Ran 64 tests in 342.059s
+
+OK

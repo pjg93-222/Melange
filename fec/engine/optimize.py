@@ -50,19 +50,22 @@ members=fm.members
 # conversion_reachable range over fundable members only.
 OVT=stance_gate_tiers(fm._CS_DOC,members)
 GATED=frozenset(m for m in members if OVT.get(m) in STANCE_GATE_BLOCKED)
+# COMPET_MULT (Paul 2026-10-05; dial OFF -> every c exactly 1.0): the competitiveness multiplier scales EFFECTIVE dollars -- c*cu and c*ind in pflip, c*amount
+# in shift_lean -- never the per-member PMAX cap, INC or the pot, which stay REAL dollars.
+CM=fm.CM
 conversion_reachable=any(m not in GATED and mr.OV.get(m) not in mr.COMMITTED and
-                         abs(mr.shift_lean(m,'cu',PMAX))>=mr.DTHRESH for m in members)
+                         abs(mr.shift_lean(m,'cu',PMAX,CM[m]))>=mr.DTHRESH for m in members)
 observations=[]   # reserved for real observed outcomes; modeled threshold crossings are stored in `conversions`
 MAT={m:dict(fm.CS0[m]) for m in members}; cu=dict(fm.cu0); ind=dict(fm.ind0)
 won=set(); secured=0.0      # H1: members WON via conversion are realized (their flip banked in `secured`) and leave the flippable pool
 CTORD=['Champion','Defender','Ally','Highly Persuadable','Persuadable','Lean Persuadable',
        'True Neutral','Lean Skeptic','Skeptic','Highly Skeptical','Opponent']
 def marg_at(m,cu_now):                            # fixed-state marginal from one full CU chunk on m
-    g=0.0; pm=fm.rc(m,'pressure_mult')
+    g=0.0; pm=fm.rc(m,'pressure_mult'); cm=CM[m]
     for c in cats:
         cs,campT,nA,nB,mAt,mBt,tgt=fm.topic_setup(c,MAT)
         if tgt[m]<=0: continue
-        g+=tgt[m]*(fm.pflip(cu_now+INC,ind[m],fm.R[m],nA[m],nB[m],mAt,mBt,pm)-fm.pflip(cu_now,ind[m],fm.R[m],nA[m],nB[m],mAt,mBt,pm))
+        g+=tgt[m]*(fm.pflip(cu_now+INC,ind[m],fm.R[m],nA[m],nB[m],mAt,mBt,pm,cm)-fm.pflip(cu_now,ind[m],fm.R[m],nA[m],nB[m],mAt,mBt,pm,cm))
     return g
 def marg(m):                                      # current next-chunk marginal
     if m in GATED or m in won or cu[m]+INC>fm.cu0[m]+PMAX: return 0.0   # F1: a stance-gated member is never funded; a won member is realized (no more spend); per-member cap requires room for a FULL chunk (never overshoot the FEC limit when INC does not divide PMAX)
@@ -85,7 +88,7 @@ def unwon_winnability():                          # winnability over members NOT
     t=0.0
     for c in cats:
         cs,campT,nA,nB,mAt,mBt,tgt=fm.topic_setup(c,MAT)
-        t+=sum(tgt[n]*fm.pflip(cu[n],ind[n],fm.R[n],nA[n],nB[n],mAt,mBt,fm.rc(n,'pressure_mult')) for n in members if n not in won)
+        t+=sum(tgt[n]*fm.pflip(cu[n],ind[n],fm.R[n],nA[n],nB[n],mAt,mBt,fm.rc(n,'pressure_mult'),CM[n]) for n in members if n not in won)
     return t
 def shift_pro(m,steps):                           # a converted member improves toward pro on their movable positions
     # M2: `steps` is derived from the OVERALL 5-tier spectrum (dlean//DTHRESH) but advances tiers in the
@@ -131,9 +134,9 @@ while spent+INC<=BUDGET and pq:
         # This triggers scenario replanning, not a claim that a real-world outcome was observed.
         converted_now=False
         if m not in converted:
-            added=cu[m]-fm.cu0[m]; nv=mr.defection(m,mr.shift_lean(m,'cu',added))
+            added=cu[m]-fm.cu0[m]; nv=mr.defection(m,mr.shift_lean(m,'cu',added,CM[m]))
             if nv and mr.OV.get(m) not in ('Champion','Opponent'):
-                steps=int(abs(mr.shift_lean(m,'cu',added))//mr.DTHRESH)
+                steps=int(abs(mr.shift_lean(m,'cu',added,CM[m]))//mr.DTHRESH)
                 contrib=sum(fm.topic_setup(c,MAT)[6][m] for c in cats)   # H1: bank m's flip at certainty (winning is a GAIN, not the old persuadability-loss)
                 conv_idx.add(len(selected_marginals)-1)   # QME 2026-10-01: this step's chunk is a conversion step -> dropped from the knee series below
                 mv=shift_pro(m,steps); converted.add(m); won.add(m); secured+=contrib; conversions.append((m,added,nv,mv))
@@ -201,6 +204,7 @@ guarantee=({'kind':'exact_discrete_separable_concave','certified_gain_ratio':1.0
 dials={'BUDGET':BUDGET,'INC':INC,'PMAX':PMAX,'TOPIC':ONLY,'CONV_MAXSTEP':CONV_MAXSTEP,   # QME 2026-10-01: effective model dials (values actually used) so a result file is self-describing
        'HALFF':fm.HALFF,'WM':fm.WM,'WP':fm.WP,'BASE':fm.BASE,'MAXSHIFT':mr.MAXSHIFT,'HALF':mr.HALF,'DTHRESH':mr.DTHRESH,'LOSSFRAME':mr.LOSSFRAME,
        'IMPUTE_IND0':fm.IMPUTE_IND0,'PERS_NONE':fm.MC.PERS_NONE,'RECEPT_LAYER':'1' if fm.MC.recept_layer_on() else '0'}
+if fm.MC.compet_on(): dials['COMPET_MULT'],dials['COMPET_SRC_SHA256']=fm.MC.compet_record()   # COMPET_MULT: recorded ONLY when ON (dial OFF leaves this file byte-identical to the pre-dial result)
 dump_atomic({'budget':BUDGET,'dials':dials,'spent':spent,'increment':INC,'per_member_cap':PMAX,
              'topic':ONLY,'issues':cats,'objective':'expected weighted flips',
              'stance_gate':{'rule':'per_topic_flip BLOCK_OVERALL via moneyball_core.stance_gate_tiers(category_stance.json)',

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H514893F2D1A146D8BF0C52DFDDC0BBC0" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6202 IH: Brand USA Restoration Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-11-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6202</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251120">November 20, 2025</action-date><action-desc><sponsor name-id="K000391">Mr. Krishnamoorthi</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAP00">Committee on Appropriations</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To appropriate funds to the Travel Promotion Fund to offset reductions to the Fund made by the One Big Beautiful Bill Act, and for other purposes.</official-title></form><legis-body id="H7394F23D68444F12B624C52414923007" style="OLC"><section id="H613C5D2D87894E9EB1E07D65D7E8CE3F" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Brand USA Restoration Act</short-title></quote>.</text></section><section id="HCB3B9030FD8E4535B5B295F42D839782"><enum>2.</enum><header>Appropriation to Travel Promotion Fund</header><text display-inline="no-display-inline">There are appropriated for fiscal year 2026, out of any money in the Treasury not otherwise appropriated, $80,000,000, to be deposited into the Travel Promotion Fund established by subsection (d) of the Travel Promotion Act of 2009 (<external-xref legal-doc="usc" parsable-cite="usc/22/2131">22 U.S.C. 2131(d)</external-xref>).</text></section></legis-body></bill>
+

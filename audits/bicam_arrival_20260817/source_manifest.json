@@ -1,0 +1,65 @@
+{
+ "schema": "bicam-fetch-map-v1",
+ "snapshot_id": "bicam-net-2026-08-17-sha256-verified-zips-textsprojected",
+ "components": {
+  "bills": {
+   "url": "https://downloads.bicam.net/bills/bicam_bills.zip",
+   "filename": "bills.csv",
+   "format": "csv",
+   "columns": {
+    "bill_id": "bill_id",
+    "congress": "congress",
+    "bill_type": "bill_type",
+    "bill_number": "bill_number"
+   }
+  },
+  "bills_texts": {
+   "url": "https://downloads.bicam.net/bills/bicam_bills.zip",
+   "filename": "bills_texts_ids.csv",
+   "format": "csv",
+   "columns": {
+    "bill_id": "bill_id"
+   }
+  },
+  "bills_sponsored": {
+   "url": "https://downloads.bicam.net/bills/bicam_bills.zip",
+   "filename": "bills_sponsored.csv",
+   "format": "csv",
+   "columns": {
+    "bill_id": "bill_id",
+    "member_id": "member_id",
+    "relationship": "relationship"
+   },
+   "cosponsor_values": [
+    "cosponsor"
+   ]
+  },
+  "members": {
+   "url": "https://downloads.bicam.net/members/bicam_members.zip",
+   "filename": "members_staged.csv",
+   "format": "csv",
+   "columns": {
+    "member_id": "member_id",
+    "bioguide_id": "bioguide_id"
+   }
+  },
+  "committees": {
+   "url": "https://downloads.bicam.net/committees/bicam_committees.zip",
+   "filename": "committees.csv",
+   "format": "csv",
+   "columns": {}
+  },
+  "hearings": {
+   "url": "https://downloads.bicam.net/hearings/bicam_hearings.zip",
+   "filename": "hearings.csv",
+   "format": "csv",
+   "columns": {}
+  },
+  "committee_reports": {
+   "url": "https://downloads.bicam.net/committeereports/bicam_committeereports.zip",
+   "filename": "committeereports_ids.csv",
+   "format": "csv",
+   "columns": {}
+  }
+ }
+}

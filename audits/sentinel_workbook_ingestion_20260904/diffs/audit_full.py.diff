@@ -1,0 +1,46 @@
+--- orig/fec/audit/audit_full.py	2026-09-03 18:13:26.978240100 -0400
++++ patched/fec/audit/audit_full.py	2026-09-04 02:12:26.762528900 -0400
+@@ -592,6 +592,43 @@
+         ck('legislative evidence coverage holds its floor',False,'archive_leg.json missing')
+ else:
+     ck('legislation routing audit present',False,'legislation_routing_audit.json missing')
++# Sentinel bill-ledger freshness (2026-09-04). sync_sentinel_bill_ledger degrades to a CLEAN SKIP
++# when the artifact-tool runtime is absent, so a missing runtime no longer halts the chain -- which
++# means nothing else would notice the ledger silently ageing out. This is that tripwire: a skip is
++# tolerated only while the last-good ledger is recent, and a PASS must still describe the bytes
++# actually installed. Absent receipt = the feature has not run yet, which is not a failure.
++_sbl_receipt_p=B+r'\data\engine\sentinel_bill_workbook_receipt.json'
++_sbl_ledger_p=B+r'\Sentinel Bill Ledger.xlsx'
++_SBL_MAX_SKIP_DAYS=21
++if os.path.exists(_sbl_receipt_p):
++    import time as _sbl_time
++    try:
++        with open(_sbl_receipt_p,encoding='utf-8') as _sbl_fh: _sbl=json.load(_sbl_fh)
++    except (OSError,ValueError): _sbl=None
++    _sbl_age=((_sbl_time.time()-os.path.getmtime(_sbl_ledger_p))/86400.0
++              if os.path.exists(_sbl_ledger_p) else None)
++    _sbl_age_text=('missing' if _sbl_age is None else '%.1f'%_sbl_age)
++    _sbl_status='' if not isinstance(_sbl,dict) else str(_sbl.get('status') or '')
++    _sbl_block=(_sbl.get('live_ledger_workbook') if isinstance(_sbl,dict) else None) or {}
++    if not isinstance(_sbl,dict):
++        ck('sentinel_ledger_freshness',False,'receipt present but unreadable')
++    elif _sbl_status=='SKIPPED_RUNTIME_ABSENT':
++        ck('sentinel_ledger_freshness',_sbl_age is not None and _sbl_age<=_SBL_MAX_SKIP_DAYS,
++           'runtime-absent skip; ledger age %s days (limit %d)'%(_sbl_age_text,_SBL_MAX_SKIP_DAYS))
++    elif _sbl_status=='PASS' and _sbl_block.get('sha256'):
++        _sbl_want=str(_sbl_block.get('sha256') or '').casefold()
++        _sbl_have=_file_sha256(_sbl_ledger_p).casefold() if os.path.exists(_sbl_ledger_p) else ''
++        ck('sentinel_ledger_freshness',_sbl_want==_sbl_have,
++           'receipt sha %s vs installed %s'%(_sbl_want[:12] or 'none',_sbl_have[:12] or 'none'))
++    elif _sbl_status=='PASS':
++        # A --no-install PASS describes no live bytes, so fall back to the same age window;
++        # otherwise a permanently uninstalled ledger would keep this check green forever.
++        ck('sentinel_ledger_freshness',_sbl_age is not None and _sbl_age<=_SBL_MAX_SKIP_DAYS,
++           'PASS without an installed-ledger block; ledger age %s days (limit %d)'%(_sbl_age_text,_SBL_MAX_SKIP_DAYS))
++    else:
++        ck('sentinel_ledger_freshness',False,'unknown receipt status %r'%_sbl_status)
++else:
++    ck('sentinel_ledger_freshness',True,'')
+ # 2026-07-04 nomological fix guard: receptivity must run on the BEHAVIORAL basis (the lexical Big5
+ # was INDICTED by the pre-registered label-free validation — big5_nomological_prereg.md). A silent
+ # fall-back to lexical (missing dispositions artifact) is a regression to an indicted instrument.

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HE212763E874F4217A9E2020AFFC01C2B" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 9716 EH: Increasing Baseline Updates Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session> 
+<legis-num display="yes">H. R. 9716</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend the Congressional Budget and Impoundment Control Act of 1974 to require the Congressional Budget Office to provide baseline updates, and for other purposes.</official-title> 
+</form> 
+<legis-body id="HF76CF0327B7348BDAC0B85CFDF530251" style="OLC"> 
+<section id="H4351B3C1959F4B7EAE355CD3C799FB1F" section-type="section-one" commented="no"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Increasing Baseline Updates Act</short-title></quote>.</text></section> <section id="HB6E934816FE14416A5427DC7030242D2"><enum>2.</enum><header>Congressional Budget Office updates to baseline</header><text display-inline="no-display-inline">Section 202(e) of the Congressional Budget and Impoundment Control Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/2/602">2 U.S.C. 602(e)</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="appropriations" id="HD62F711B030D4F30B1239A8DA439AF06" display-inline="no-display-inline"> 
+<paragraph id="H0C5DF659ADE64E0CBCBD91F368EA4CAA"><enum>(4)</enum> 
+<subparagraph commented="no" display-inline="yes-display-inline" id="H655AF6EA801343CF820F8413EEA08C02"><enum>(A)</enum><text>The Director shall, to the extent practicable, submit to the Committees on the Budget of the House of Representatives and the Senate at least two updates to the baseline submitted under paragraph (1). At least one of the updates shall include economic data used by the Director to calculate such update. </text></subparagraph> <subparagraph id="H902AE57C4929411682EAF770CB4E9B60" indent="up1"><enum>(B)</enum><text>Nothing in this paragraph shall be construed to limit the Director from providing any other update to the baseline during such year.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+<section id="HCDDFCE0092B14F679802FBBB2C14EB1C"><enum>3.</enum><header>Annual technical budget data submission by the President</header><text display-inline="no-display-inline">Section 1106 of title 31, United States Code, is amended by adding at the end the following:</text> <quoted-block style="USC" id="H1D5D94F55DCE4E7C8E7BFC2D6E63563B" display-inline="no-display-inline"> <subsection id="H82B15B3A0A90455A84063D2BCF493641"><enum>(d)</enum><text display-inline="yes-display-inline">On or before February 1 of each calendar year, the President shall submit to Congress technical budget data for the fiscal year beginning in the ensuing calendar year, which shall include up-to-date estimates for current year and prior year data and credit reestimates for the current year (as included in the Federal credit supplement of such budget).</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20241211" chamber="House">Passed the House of Representatives December 11, 2024.</attestation-date><attestor display="no">Kevin F. McCumber,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

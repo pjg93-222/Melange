@@ -37,8 +37,6 @@ receipt_path <- normalizePath(
 )
 key_id <- trimws(arguments[[5L]])
 concurrency <- suppressWarnings(as.integer(arguments[[6L]]))
-pool_width <- suppressWarnings(as.integer(Sys.getenv("MENTAT_REQUEST_POOL_WIDTH", "0")))
-if (!is.na(pool_width) && pool_width > 0L) concurrency <- max(concurrency, pool_width)
 if (!nzchar(industry) || !nzchar(key_id)) {
   stop("Industry and redacted key id are required.", call. = FALSE)
 }
@@ -61,7 +59,7 @@ assign("MENTAT_INDUSTRY", industry, envir = .GlobalEnv)
 
 for (module in c(
   "paths.R", "schema.R", "ingest.R", "fec_page.R", "collect.R",
-  "fec_api.R", "reconcile.R", "report.R", "lane_owner.R"
+  "fec_api.R", "reconcile.R", "report.R"
 )) {
   source(file.path(project_root, "R", module), local = .GlobalEnv)
 }
@@ -69,20 +67,6 @@ for (module in c(
 require_package("DBI")
 require_package("RSQLite")
 require_package("jsonlite")
-
-# A managed upgrade can attach an existing checkpointed fanout to a shared
-# request pool without changing its company/database ownership manifest.
-pool_config_path <- file.path(dirname(dirname(dirname(assignments_path))), "request-pool.json")
-if (!nzchar(Sys.getenv("MENTAT_REQUEST_POOL_URL", "")) && file.exists(pool_config_path)) {
-  pool_config <- jsonlite::read_json(pool_config_path)
-  if (!identical(pool_config$schema, "mentat-request-pool-v1") ||
-      !grepl("^http://127[.]0[.]0[.]1:[0-9]+/batch$", pool_config$url)) stop("Invalid request pool configuration.")
-  Sys.setenv(MENTAT_REQUEST_POOL_URL = pool_config$url,
-    MENTAT_REQUEST_POOL_TOKEN = pool_config$token,
-    MENTAT_REQUEST_POOL_WIDTH = as.character(pool_config$width),
-    MENTAT_REQUEST_POOL_LANE = basename(dirname(assignments_path)))
-  concurrency <- max(concurrency, as.integer(pool_config$width))
-}
 
 atomic_write_json <- function(value, target) {
   directory <- dirname(target)
@@ -128,8 +112,7 @@ parse_assignments <- function(path) {
         "-", cycle
       )
     }
-    list(task_id = task_id, company = company, cycle = cycle,
-         initialization_marker = payload$initialization_markers[[task_id]] %||% "")
+    list(task_id = task_id, company = company, cycle = cycle)
   })
   ids <- vapply(normalized, `[[`, character(1L), "task_id")
   pairs <- vapply(normalized, function(task) {
@@ -140,9 +123,6 @@ parse_assignments <- function(path) {
   }
   list(
     lane = suppressWarnings(as.integer(payload$lane %||% 0L)),
-    resume = isTRUE(payload$resume),
-    supervisor_owner_path = as.character(payload$supervisor_owner_path %||% ""),
-    supervisor_token = as.character(payload$supervisor_token %||% ""),
     tasks = normalized[order(ids, method = "radix")]
   )
 }
@@ -155,19 +135,6 @@ sqlite_cache_mb <- function(
     stop("MENTAT_SQLITE_CACHE_MB must be between 32 and 2048.", call. = FALSE)
   }
   result
-}
-
-lane_startup_delay <- function(
-  lane_number,
-  request_pool_url = Sys.getenv("MENTAT_REQUEST_POOL_URL", unset = "")
-) {
-  # A managed request pool initializes the shared ledger before dispatching R
-  # lanes and reserves requests itself. Repeating the ordinal stagger for every
-  # company invocation adds no budget protection in this mode. SQLite still
-  # keeps its busy timeout, WAL checks, durable writes and per-key accounting.
-  if (grepl("^http://127[.]0[.]0[.]1:[0-9]+/batch$", request_pool_url)) return(0)
-  lane_index <- if (is.na(lane_number) || lane_number < 1L) 1L else lane_number
-  (lane_index - 1L) * 0.25
 }
 
 write_run_status <- function(
@@ -205,21 +172,6 @@ write_run_status <- function(
   )
 }
 
-initialize_lane_tasks <- function(connection, tasks, resume) {
-  # A durable dispatch can precede R startup. Missing markers still need a
-  # fresh reset on recovery. Mark after commit, before making API requests.
-  fresh_tasks <- Filter(function(task) {
-    marker <- task$initialization_marker %||% ""
-    !isTRUE(resume) || (nzchar(marker) && !file.exists(marker))
-  }, tasks)
-  reset_count <- if (length(fresh_tasks)) reset_api_progress(connection, fresh_tasks) else 0L
-  for (task in fresh_tasks) {
-    marker <- task$initialization_marker %||% ""
-    if (nzchar(marker)) atomic_write_json(list(task_id = task$task_id, initialized = TRUE), marker)
-  }
-  reset_count
-}
-
 run_lane <- function() {
   started_wall <- Sys.time()
   started_elapsed <- proc.time()[["elapsed"]]
@@ -232,15 +184,9 @@ run_lane <- function() {
     unset = paste0(receipt_path, ".status.json")
   ))
 
-  writer_owner <- acquire_lane_writer(database_path)
-  on.exit(release_lane_writer(writer_owner), add = TRUE)
-  check_lane_supervisor(assignment$supervisor_owner_path,
-                        assignment$supervisor_token)
-
   connection <- DBI::dbConnect(RSQLite::SQLite(), database_path)
   DBI::dbExecute(connection, "PRAGMA busy_timeout=60000")
-  # Close the data connection before releasing the separate writer lease.
-  on.exit(DBI::dbDisconnect(connection), add = TRUE, after = FALSE)
+  on.exit(DBI::dbDisconnect(connection), add = TRUE)
   journal_mode <- DBI::dbGetQuery(
     connection,
     "PRAGMA journal_mode=WAL"
@@ -258,12 +204,6 @@ run_lane <- function() {
   )
   DBI::dbExecute(connection, "PRAGMA mmap_size=1073741824")
   init_schema(connection)
-  reset_unit_count <- initialize_lane_tasks(connection, tasks, assignment$resume)
-  refresh_mode <- if (isTRUE(assignment$resume)) {
-    "resume"
-  } else {
-    "fresh"
-  }
   budget_database_path <- trimws(Sys.getenv(
     "MENTAT_API_BUDGET_DB",
     unset = ""
@@ -288,7 +228,12 @@ run_lane <- function() {
         call. = FALSE
       )
     }
-    startup_jitter_seconds <- lane_startup_delay(lane_number)
+    lane_index <- if (is.na(lane_number) || lane_number < 1L) {
+      1L
+    } else {
+      lane_number
+    }
+    startup_jitter_seconds <- (lane_index - 1L) * 0.25
     if (startup_jitter_seconds > 0) {
       Sys.sleep(startup_jitter_seconds)
     }
@@ -297,7 +242,7 @@ run_lane <- function() {
       budget_database_path
     )
     DBI::dbExecute(budget_connection, "PRAGMA busy_timeout=60000")
-    on.exit(DBI::dbDisconnect(budget_connection), add = TRUE, after = FALSE)
+    on.exit(DBI::dbDisconnect(budget_connection), add = TRUE)
     budget_journal_mode <- DBI::dbGetQuery(
       budget_connection,
       "PRAGMA journal_mode=WAL"
@@ -327,8 +272,6 @@ run_lane <- function() {
     "FEC API lane:", key_id,
     "| industry=", industry,
     "| tasks=", length(tasks),
-    "| refresh_mode=", refresh_mode,
-    "| reset_units=", reset_unit_count,
     "| concurrency=", concurrency,
     "| startup_jitter_seconds=", startup_jitter_seconds,
     "| sqlite_cache_mb=", cache_mb,
@@ -506,10 +449,7 @@ run_lane <- function() {
     task_count = length(task_receipts),
     succeeded = length(task_receipts) - failed,
     failed = failed,
-    refresh_mode = refresh_mode,
-    reset_unit_count = reset_unit_count,
     concurrency = as.integer(concurrency),
-    startup_jitter_seconds = startup_jitter_seconds,
     sqlite_cache_mb = cache_mb,
     quick_check = postflight,
     started_at = format(started_wall, "%Y-%m-%dT%H:%M:%OS3%z"),
@@ -542,10 +482,6 @@ run_lane <- function() {
 exit_status <- tryCatch(
   run_lane(),
   error = function(condition) {
-    if (inherits(condition, "mentat_lane_owned")) {
-      message("FEC API lane writer refused: ", conditionMessage(condition))
-      return(4L)
-    }
     receipt <- list(
       status = "failed",
       industry = industry,

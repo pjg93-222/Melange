@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HBD7B2CE71542431597A6CFE3CC45DBB2" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5923 IH: Iran-China Energy Sanctions Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-10-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 5923</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20231011">October 11, 2023</action-date>
+<action-desc><sponsor name-id="L000599">Mr. Lawler</sponsor> (for himself, <cosponsor name-id="G000583">Mr. Gottheimer</cosponsor>, <cosponsor name-id="D000032">Mr. Donalds</cosponsor>, and <cosponsor name-id="L000583">Mr. Loudermilk</cosponsor>) introduced the following bill</action-desc>
+</action>
+<action display="yes">
+<action-date date="20231025">October 25, 2023</action-date>
+<action-desc>Referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To impose restrictions on correspondent and payable-through accounts in the United States with respect to Chinese financial institutions that conduct transactions involving the purchase of petroleum or petroleum products from Iran.</official-title>
+</form>
+<legis-body id="HC363CD57582445ABA930119FB46B7E35" style="OLC"> 
+<section id="H5F96AEC268304807BDA1974F52905ED0" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Iran-China Energy Sanctions Act of 2023</short-title></quote>.</text></section> <section id="H4998D4201DF9481BA9173236BEE95BE5"><enum>2.</enum><header>Sanctions on Chinese financial institutions that purchase petroleum products from Iran</header><text display-inline="no-display-inline">Section 1245(d) of the National Defense Authorization Act for Fiscal Year 2012 (<external-xref legal-doc="usc" parsable-cite="usc/22/8513a">22 U.S.C. 8513a(d)</external-xref>) is amended—</text> 
+<paragraph id="HF8C7263A81C34688B513768A321FC548"><enum>(1)</enum><text>by redesignating paragraph (5) as paragraph (6); and</text></paragraph> <paragraph id="HC38DF192EFB346EFB97E2C45D2F9B73D"><enum>(2)</enum><text>by inserting after paragraph (4) the following new paragraph:</text> 
+<quoted-block style="OLC" display-inline="no-display-inline" id="HAE14694F292C4B49909CFCBEA47A596A"> 
+<paragraph id="H5BA7D64D2C68480DA7A33E33B0419D15"><enum>(5)</enum><header>Applicability of sanctions with respect to Chinese financial institutions</header><text display-inline="yes-display-inline">For the purpose of paragraph (1)(A), a <quote>significant financial transaction</quote> includes any transaction by a Chinese financial institution involving the purchase of petroleum or petroleum products from Iran.</text> <subparagraph id="H21D82DDDF242490CBD1202EC069A93E6"><enum>(A)</enum><header>Determination Required</header><text>Not later than 180 days after the date of the enactment of this paragraph and every year thereafter for 5 years, the President shall—</text> 
+<clause id="H9790C47200D84B0FA6082BF0524B2CCB"><enum>(i)</enum><text>determine whether any Chinese financial institution has engaged in a significant financial transaction as described in paragraph (1)(A); and</text></clause> <clause id="H529031B797D34B699C5E9BE74C9AB5C6"><enum>(ii)</enum><text>transmit the determination under clause (i) to the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate.</text></clause></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> 
+</legis-body>
+</bill> 
+
+

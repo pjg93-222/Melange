@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" dms-id="HB932E62D8C0E44CC82F5C425DCC5850F" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 6864 RH: HUD Accountability Act of 2024</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-07-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IB</distribution-code>
+<calendar display="yes">Union Calendar No. 488</calendar>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 6864</legis-num>
+<associated-doc role="report" display="yes">[Report No. 118–588]</associated-doc>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20231219">December 19, 2023</action-date>
+<action-desc><sponsor name-id="L000599">Mr. Lawler</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<action display="yes">
+<action-date date="20240718">July 18, 2024</action-date>
+<action-desc>Additional sponsors: <cosponsor name-id="R000612">Mr. Rose</cosponsor>, <cosponsor name-id="D000594">Ms. De La Cruz</cosponsor>, <cosponsor name-id="E000246">Mr. Edwards</cosponsor>, and <cosponsor name-id="H001058">Mr. Huizenga</cosponsor></action-desc>
+</action>
+<action display="yes">
+<action-date date="20240718">July 18, 2024</action-date>
+<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc>
+<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+<action-instruction>For text of introduced bill, see copy of bill as introduced on December 19, 2023</action-instruction>
+</action>
+<action>
+<action-desc><pagebreak/></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Department of Housing and Urban Development Act to require the Secretary of Housing and Urban Development to testify on an annual basis before the Congress.<pagebreak/></official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" changed="added" style="OLC" committee-id="HBA00" reported-display-style="italic" id="H03B1771B0EA44F4CB4568963DF2BCDEB"> 
+<section id="HBD6F08B37BE845F08C5F4382CF5FF589" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>HUD Accountability Act of 2024</short-title></quote>.</text></section> <section id="HDAB81C118B7743EAB38FB944BC8AE3B5"><enum>2.</enum><header>Requirement to testify</header><text display-inline="no-display-inline"> Section 7 of the Department of Housing and Urban Development Act (<external-xref legal-doc="usc" parsable-cite="usc/42/3535">42 U.S.C. 3535</external-xref>) is amended by adding at the end the following new subsection: </text> 
+<quoted-block style="OLC" id="HDF85E6A6784C416B9D5D55165B464CD7" display-inline="no-display-inline"> 
+<subsection id="H0C183F514C7441DC882A9DD3B6BDED48"><enum>(u)</enum><header>Annual testimony</header><text display-inline="yes-display-inline">During the 5-year period beginning on the date of the enactment of this subsection, the Secretary shall appear before the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate at an annual hearing and present testimony regarding the operations of the Department during the preceding year, including regarding the following topics:</text> <paragraph id="HF29EF01131E546C78074F961C6720333"><enum>(1)</enum><text display-inline="yes-display-inline">The progress made by the Federal Government in ending the affordable housing and homelessness crises.</text></paragraph> 
+<paragraph id="H5CA3938F6327402CB8B3C296675931C5"><enum>(2)</enum><text display-inline="yes-display-inline">The current programs and operations of the Department.</text></paragraph> <paragraph id="H1B9111C711BB411591DD08B5F1141C7F"><enum>(3)</enum><text>The physical condition of all public housing and other housing assisted by the Department.</text></paragraph> 
+<paragraph id="H655EB4D5B6D745AFA7749C2D0EB77AC6"><enum>(4)</enum><text>The financial health of the mortgage insurance funds of the FHA.</text></paragraph> <paragraph id="HA62A71C66EFA43E6889CF8BB93A4A0D1"><enum>(5)</enum><text display-inline="yes-display-inline">Oversight by the Department of grantees and sub-grantees for purposes of preventing waste, fraud, and abuse.</text></paragraph> 
+<paragraph id="H7076848C0DD14F798C7974FBEBD79383"><enum>(6)</enum><text display-inline="yes-display-inline">The effects of the changes made in 2017 to the Federal income tax deduction for State and local taxes (known as the SALT deduction) on the cost of homeownership in the United States, except that this paragraph shall not apply at any time that such tax deduction is in effect in the same form and manner as immediately before such 2017 changes.</text></paragraph> <paragraph id="HA3FB401A50A44E05A43A3135C83EA1CD"><enum>(7)</enum><text>Other ongoing activities of the Department, as appropriate.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section> 
+</legis-body>
+<endorsement display="yes"> 
+<action-date date="20240718">July 18, 2024</action-date> 
+<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc></endorsement>
+</bill> 
+
+

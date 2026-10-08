@@ -1,0 +1,202 @@
+﻿====================================================================================================
+R6  TRUE-DUPLICATE CENSUS   run 2026-09-18T23:41:54
+====================================================================================================
+Social Master Corpus rows: 9541
+rows with a resolvable member: 9541
+dedup population (verified_handle==1 and member resolves): 9502
+
+----------------------------------------------------------------------------------------------------
+A.  PIPELINE KEY (normalized_text, 120-char truncation) vs AUDIT KEY (no truncation)
+----------------------------------------------------------------------------------------------------
+PIPELINE KEY  (member, normalized_text)  groups= 1434  surplus rows= 1544
+AUDIT KEY     (member, full normalised)  groups=  860  surplus rows=  915
+
+pipeline-key groups whose members do NOT share the audit key (the 120-char truncation merged DIFFERENT texts): 602 of 1434 groups
+   examples (first 130 chars of two colliding texts):
+   Ben Luján
+      | About About Ben Delivering for New Mexicans Issues Press Kit Newsroom Press Releases In the News Services Help with a Federal Agen
+      | About About Ben Delivering for New Mexicans Issues Press Kit Newsroom Press Releases In the News Services Help with a Federal Agen
+   Young Kim
+      | Check fraud can happen to anyone at any time.  My STOP Payments Fraud Act protects Americans by giving banks extra time to review 
+      | Check fraud can happen to anyone at any time.  My STOP Payments Fraud Act protects Americans by giving banks extra time to review 
+   Cindy Hyde-Smith
+      | After months of pushing OMB to release CDFI federal grant and loan funding information, I’m glad to see it’s finally out, and I’m 
+      | After months of pushing OMB to release CDFI federal grant and loan funding information, I’m glad to see it’s finally out, and I’m 
+   Addison McDowell
+      | Tune in! I'll soon be speaking before the Rules Committee on two of my NDAA amendments.  One to crack down on foreign robocalls an
+      | Tune in! I'll soon be speaking before the Rules Committee on two of my NDAA amendments.  One to crack down on foreign robocalls an
+   Christopher Coons
+      | Had a very meaningful conversation with representatives of our state’s credit unions about how they are working to help Delaware's
+      | Had a very meaningful conversation with representatives of our state’s credit unions about how they are working to help Delaware’s
+   French Hill
+      | After years of work and months of negotiations with the Senate, the first major housing bill in decades heads to the president's d
+      | After years of work and months of negotiations with the Senate, the first major housing bill in decades heads to the president's d
+
+link-only rows (normalized_text == "" after URL stripping): 21 across 9 members
+   RULE (make_member_desk.py:288-289) if not normalized_text: return (False, "link-only post: no scorable text", "")   -> visible, NOT scored
+   RULE (build_media_blend.py:106)    elif not _event[1]: nlinkonly+=1; continue          -> NOT scored by the engine
+   platform split of link-only rows: {'x': 20, 'facebook': 1}
+
+----------------------------------------------------------------------------------------------------
+B.  DUPLICATE CLASSES (audit key, excluding link-only empties)
+----------------------------------------------------------------------------------------------------
+class                                                              groups  surplus
+cross-platform twin (D-034: scores twice, RATIFIED)                   781      810
+same member + same platform, DIFFERENT dates (repeat posting)          37       46
+same member + same platform + same date  == TRUE-DUPLICATE CANDIDATE       40       47
+TOTAL (audit key, non-empty)                                          858      903
+
+----------------------------------------------------------------------------------------------------
+C.  DOES EACH CLASS SCORE ONCE OR MORE THAN ONCE TODAY?
+----------------------------------------------------------------------------------------------------
+TRUE-DUPLICATE CANDIDATES (same member/platform/date)    groups=   40  groups scoring >1x TODAY=   26  scoring rows=   58
+cross-platform twins (D-034 ratified)                    groups=  781  groups scoring >1x TODAY=  447  scoring rows=  915
+same platform, different dates                           groups=   37  groups scoring >1x TODAY=   19  scoring rows=   38
+
+  NOTE: CROSSPOST_DEDUP default is "0" in BOTH implementations
+        (build_media_blend.py:47, make_member_desk.py:256), so every signed row with
+        scorable text scores, including a same-platform same-date repeat.
+
+----------------------------------------------------------------------------------------------------
+D.  TRUE-DUPLICATE CANDIDATES -- up to 15 examples
+----------------------------------------------------------------------------------------------------
+
+ 1. member=Daniel Meuser  platform=x  date=2026-04-30  rows=5  scoring rows TODAY=5
+    text: I had a great time addressing leaders of independent community banks at the @ICBA Capital Summit.  I discussed the importance of community banks as a resource for small b
+      url=https://twitter.com/repmeuser/status/2049885402279157898               stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repmeuser/status/2049885307152031968               stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repmeuser/status/2049885196959252752               stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repmeuser/status/2049883636011249748               stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repmeuser/status/2049883475889598565               stance=support  is_rt=0 source=quorum
+
+ 2. member=Ritchie Torres  platform=x  date=2024-10-28  rows=4  scoring rows TODAY=4
+    text: Today, @RepGregoryMeeks and I announced that the Federal Home Loan Bank of New York (FHLBNY) can now pledge mortgage collateral using VantageScore 4.0, which includes alt
+      url=https://twitter.com/repritchie/status/1851033284869845012              stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repritchie/status/1851033022650622347              stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repritchie/status/1851032816886432027              stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repritchie/status/1851032573272539453              stance=support  is_rt=0 source=quorum
+
+ 3. member=Gregory Meeks  platform=x  date=2023-06-14  rows=3  scoring rows TODAY=3
+    text: One of the proudest moments of my career in Congress is helping to create the @CFPB. They are singularly focused on advocating for consumers and helping the American peop
+      url=https://twitter.com/repgregorymeeks/status/1669099435404546048         stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repgregorymeeks/status/1669099126112370688         stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repgregorymeeks/status/1669088987720429569         stance=support  is_rt=0 source=quorum
+
+ 4. member=Jason Smith  platform=x  date=2024-04-15  rows=3  scoring rows TODAY=0
+    text: ICYMI: I just spoke on the House Floor in support of H.R. 6408, legislation to revoke the tax-exempt status of entities that have been found to be providing material supp
+      url=https://twitter.com/repjasonsmith/status/1779993989698986491           stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repjasonsmith/status/1779993804654653514           stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repjasonsmith/status/1779993534390571187           stance=support  is_rt=0 source=quorum
+
+ 5. member=Andrew Garbarino  platform=x  date=2026-04-18  rows=2  scoring rows TODAY=0
+    text: Good conversation with @Nasdaq community banking leaders this week.  Community banks are critical to small businesses and local economies on Long Island.  We need policie
+      url=https://twitter.com/repgarbarino/status/2045538277822796153            stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repgarbarino/status/2045537744638640215            stance=support  is_rt=0 source=quorum
+
+ 6. member=Anna Luna  platform=x  date=2026-04-29  rows=2  scoring rows TODAY=2
+    text: I voted no on FISA this evening.  There was no SAVE America was attached and the Senate said they wouldn’t pass the anti-CBDC language.  Reforms were no good. https://twi
+      url=https://twitter.com/repluna/status/2049647070315696472                 stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/realannapaulina/status/2049644444790509717         stance=support  is_rt=0 source=quorum
+
+ 7. member=Brad Sherman  platform=x  date=2025-04-29  rows=2  scoring rows TODAY=2
+    text: Republicans talk a big talk on commonsense bank regulation. Meanwhile the #Trump Administration is closing the CFPB and laying off bank examiners.  Commonsense regulation
+      url=https://twitter.com/bradsherman/status/1917300795554378154             stance=neutral  is_rt=0 source=quorum
+      url=https://twitter.com/bradsherman/status/1917300659516322165             stance=neutral  is_rt=0 source=quorum
+
+ 8. member=Byron Donalds  platform=x  date=2025-02-26  rows=2  scoring rows TODAY=2
+    text: Constructed outside of Congressional oversight and funded directly by the @federalreserve, the CFPB is the very definition of the corrupt, unelected bureaucracy that has 
+      url=https://twitter.com/repdonaldspress/status/1894860847060488410         stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repdonaldspress/status/1894856378650427427         stance=support  is_rt=0 source=quorum
+
+ 9. member=Byron Donalds  platform=x  date=2025-02-26  rows=2  scoring rows TODAY=2
+    text: From its inception in Dodd-Frank, the CFPB has served as a left-wing tool to stifle domestic economic growth, target political opponents, and prevent the development of c
+      url=https://twitter.com/repdonaldspress/status/1894860844540010932         stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repdonaldspress/status/1894856376142409835         stance=support  is_rt=0 source=quorum
+
+10. member=Cynthia Lummis  platform=x  date=2025-10-21  rows=2  scoring rows TODAY=2
+    text: Large banks have shown they'll restrict access for political reasons, targeting industries & individuals they disagree with, including gun manufacturers, digital assets, 
+      url=https://twitter.com/senlummis/status/1980736063023743213               stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/senlummis/status/1980731535377723641               stance=support  is_rt=0 source=quorum
+
+11. member=Daniel Meuser  platform=x  date=2025-02-04  rows=2  scoring rows TODAY=2
+    text: Today, I attended the 2025 Financial Services Member Retreat, where I joined my @FinancialCmte colleagues to discuss key priorities for the 119th Congress. We focused on 
+      url=https://twitter.com/repmeuser/status/1886917728729997805               stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repmeuser/status/1886915439277609378               stance=support  is_rt=0 source=quorum
+
+12. member=Darren Soto  platform=x  date=2024-02-01  rows=2  scoring rows TODAY=2
+    text: Hey scammers and spammers! RoboCop says DROP IT! 🤖📵  Proud to introduce the #RoboBlockAct this week to protect consumers from bothersome spam calls and texts and offer ro
+      url=https://twitter.com/repdarrensoto/status/1753120244141285515           stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/repdarrensoto/status/1753085610586194244           stance=support  is_rt=0 source=quorum
+
+13. member=Debbie Wasserman Schultz  platform=x  date=2024-06-04  rows=2  scoring rows TODAY=0
+    text: Big corporations and billionaires have been ripping off Americans, raising prices while making record profits. @HouseDemocrats and President Biden are taking on special i
+      url=https://twitter.com/repdwstweets/status/1797975349105451157            stance=neutral  is_rt=0 source=quorum
+      url=https://twitter.com/repdwstweets/status/1797974224830664817            stance=neutral  is_rt=0 source=quorum
+
+14. member=Elizabeth Warren  platform=x  date=2025-02-10  rows=2  scoring rows TODAY=2
+    text: Elon Musk is trying to shut down the CFPB, the agency that has forced big banks and corporations to return more than $21 BILLION to families they cheated.  Tell me how th
+      url=https://twitter.com/senwarren/status/1889130750131503276               stance=neutral  is_rt=0 source=quorum
+      url=https://twitter.com/senwarren/status/1889129915619942890               stance=neutral  is_rt=0 source=quorum
+
+15. member=Erin Houchin  platform=x  date=2023-03-01  rows=2  scoring rows TODAY=2
+    text: Met with @IndianaLeague to hear more about the role credit unions play within the financial services landscape in southern Indiana and how my work on @FinancialCmte can h
+      url=https://twitter.com/rephouchin/status/1631028242445369350              stance=support  is_rt=0 source=quorum
+      url=https://twitter.com/rephouchin/status/1631027902241226755              stance=support  is_rt=0 source=quorum
+
+----------------------------------------------------------------------------------------------------
+E.  PRESS CHANNEL duplicates (tone rows the engine ingests)
+----------------------------------------------------------------------------------------------------
+tone rows ingested: 2679
+tone rows with a resolvable member: 2676
+
+(member, normalised TITLE) groups>1: 22  surplus rows: 41
+   of those, groups whose rows share ONE canonical url: 0  (the (url,identity) turn key already collapses these at ingest -- see R1)
+   groups spanning DIFFERENT urls (same member, same headline, different article): 22
+
+   top same-title groups:
+      John Boozman             x18   Press Releases
+          https://boozman.senate.gov/public/index.cfm/press-releases?ContentRecord_id=2DDC0FE6-4BC5-45D5-9545-7A199DF90D
+          https://boozman.senate.gov/public/index.cfm/press-releases?ContentRecord_id=58C023CD-2E62-415B-B513-5E01515472
+          https://boozman.senate.gov/public/index.cfm/press-releases?ContentRecord_id=93B9F176-D5E0-46D8-804A-050E8DA96B
+      Steve Scalise            x4    The HEAT Report
+          https://scalise.house.gov/media/press-releases/heat-report-22
+          https://scalise.house.gov/media/press-releases/heat-report-26
+          https://scalise.house.gov/media/press-releases/heat-report-28
+      Emilia Sykes             x3    Congresswoman Emilia Sykes
+          https://sykes.house.gov/media/press-releases/rep-sykes-announces-more-55-million-help-communities-ohios-13th-c
+          https://sykes.house.gov/media/press-releases/rep-sykes-secures-19200-to-strengthen-cybersecurity-in-oh-13
+          https://sykes.house.gov/media/press-releases/rep-sykes-votes-to-protect-consumers-in-ohio-13
+      Amy Klobuchar            x2    Klobuchar Reintroduces Bill to Promote Competition and Improve Antitrust Enforce
+          https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=E7191BDE-A125-4405-B8B4-DEC0F18BB622
+          https://klobuchar.senate.gov/public/index.cfm/news-releases?ID=EBF2015D-887D-46D2-842C-5A93384238E2
+      Bill Hagerty             x2    ICYMI—Hagerty Joins Balance of Power on BloombergTV to Discuss Budget Reconcilia
+          https://hagerty.senate.gov/press-releases/2025/05/21/icymi-hagerty-joins-balance-of-power-on-bloombergtv-to-di
+          https://hagerty.senate.gov/press-releases/2025/06/04/icymi-hagerty-joins-balance-of-power-on-bloombergtv-to-di
+      Brittany Pettersen       x2    Reps. Pettersen, Flood Introduce Bipartisan Legislation to Address Bank Scams Fu
+          https://pettersen.house.gov/news/documentsingle.aspx?DocumentID=412
+          https://pettersen.house.gov/news/documentsingle.aspx?DocumentID=1044
+      Cynthia Lummis           x2    Leagues, credit unions connect with policymakers before Congress returns home fo
+          https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-h
+          https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-h
+      Gabe Amo                 x2    Leagues, credit unions connect with policymakers before Congress returns home fo
+          https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-h
+          https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-h
+      Jon Husted               x2    Husted backs bill blocking Fed from issuing a Central Bank Digital Currency
+          https://husted.senate.gov/media/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digi
+          https://husted.senate.gov/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-cu
+      Juan Vargas              x2    House Passes Rep. Vargas’ Credit Union Board Modernization Act
+          https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+          https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+
+----------------------------------------------------------------------------------------------------
+F.  CROSS-CHANNEL duplicates (social text vs press title, same member)
+----------------------------------------------------------------------------------------------------
+press rows whose normalised title equals one of the same member's normalised social texts: 1
+   Josh Hawley            [x] Hawley and Braun Introduce New Legislation to Protect Consumers and Community Banks from B
+      press url: https://hawley.senate.gov/hawley-and-braun-introduce-new-legislation-p
+
+  NOTE: these are the press/social analogue of a cross-platform twin.  The press channel and
+        the social channel are p80-scaled and mixed 50/50, so such a pair contributes on BOTH
+        sides of the blend.  No rule in either implementation looks for it.
+
+DONE R6

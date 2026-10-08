@@ -1,0 +1,10 @@
+--- tests/stance/test_press_url_canon.py
+----------------------------------------------------------------------
+Ran 20 tests in 0.033s
+
+OK
+--- tests/stance/test_crosspost_key.py
+----------------------------------------------------------------------
+Ran 17 tests in 0.009s
+
+OK

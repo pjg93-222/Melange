@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" dms-id="H78556359C97040BAB47D323C70C58B5C" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 7938 RH: Klamath Basin Water Agreement Support Act of 2024</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-12-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IB</distribution-code>
+<calendar display="yes">Union Calendar No. 692</calendar>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 7938</legis-num>
+<associated-doc role="report" display="yes">[Report No. 118–847]</associated-doc>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20240411">April 11, 2024</action-date>
+<action-desc><sponsor name-id="B000668">Mr. Bentz</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HII00">Committee on Natural Resources</committee-name></action-desc>
+</action>
+<action display="yes">
+<action-date date="20241210">December 10, 2024</action-date>
+<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc>
+<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+<action-instruction>For text of introduced bill, see copy of bill as introduced on April 11, 2024</action-instruction>
+<action-desc><pagebreak/></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Klamath Basin Water Supply Enhancement Act of 2000 to provide the Secretary of the Interior with certain authorities with respect to projects affecting the Klamath Basin watershed, and for other purposes.<pagebreak/></official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" changed="added" style="OLC" committee-id="HII00" reported-display-style="italic" id="H3C6D027D182349D78BD2856660BCCBB4"> 
+<section id="HC721AE9D23824D12B0F7120A0BA921B3" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Klamath Basin Water Agreement Support Act of 2024</short-title></quote>.</text></section> <section id="HD19757A2E58F4725947A9B44C8F745EF"><enum>2.</enum><header>Klamath project water and power</header> <subsection id="HCE6FCF20D43140439986E6B7761BBBD9"><enum>(a)</enum><header>Addressing water, power, and facilities management for irrigation</header><text>Section 4 of the Klamath Basin Water Supply Enhancement Act of 2000 (<external-xref legal-doc="public-law" parsable-cite="pl/106/498">Public Law 106–498</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block id="HEFBB00718FBB4AD4B9A962830B80E38D" style="OLC"> 
+<subsection id="HAD6EE91FD86244FEA4CA504ADFCF8C23"><enum>(d)</enum><header>Restoration activities</header><text>The Secretary may—</text> <paragraph id="H832070B4090C4528A895432F06FD183D"><enum>(1)</enum><text>plan, design, construct, operate, and maintain projects in the Klamath Basin watershed, including—</text> 
+<subparagraph id="H06F28C70C3BE41B487330C64A821F906"><enum>(A)</enum><text>facilities to reduce fish entrainment;</text></subparagraph> <subparagraph id="HB5FD6068DFD24D82822CE036F2D3AC69"><enum>(B)</enum><text>projects that reduce or avoid impacts on aquatic resources of facilities involved in the storage or diversion of water for irrigation in the Klamath Project service area; and</text></subparagraph> 
+<subparagraph id="H4AFF13C89BAA4981ADCCA016C96BA940"><enum>(C)</enum><text>projects that restore habitats in the Klamath Basin watershed, including Tribal fishery resources held in trust;</text></subparagraph></paragraph> <paragraph id="H05C83E938E1F402294A891919B26904F"><enum>(2)</enum><text>undertake studies, including feasibility studies, and improvements that the Secretary determines to be necessary to implement this subsection;</text></paragraph> 
+<paragraph id="HB9A6751ECBFD467B9F18368804E6B40D"><enum>(3)</enum><text>in implementing this subsection, enter into contracts, memoranda of understanding, financial assistance agreements, cost-sharing agreements, or other appropriate agreements with—</text> <subparagraph id="H16EC1BAC06934BA09A41D9CFDBBC2CC0"><enum>(A)</enum><text>State, Tribal, and local governmental agencies; and</text></subparagraph> 
+<subparagraph id="HB379CEC731CE411DADADD05D60CD2605"><enum>(B)</enum><text>private parties; and</text></subparagraph></paragraph> <paragraph id="H548E4B7B26B741A0B086A4F4C4A6C356"><enum>(4)</enum><text>accept and expend non-Federal funds in order to facilitate implementation of this subsection.</text></paragraph></subsection> 
+<subsection id="HFEE9A8E45A52451D8C5099F396C99CB7"><enum>(e)</enum><header>Goals</header><text>The goals of activities under subsections (b) and (d) shall include, as applicable—</text> <paragraph id="HD862E7F58A1E4F89A8B67FC4506B7E73"><enum>(1)</enum><text>the short-term and long-term reduction and resolution of conflicts relating to water in the Klamath Basin watershed; and</text></paragraph> 
+<paragraph id="HFEB0E88987E24370AD692F44392F98D1"><enum>(2)</enum><text>compatibility and utility for protecting natural resources throughout the Klamath Basin watershed, including the protection, preservation, and restoration of Klamath River Tribal fishery resources, particularly through collaboratively developed agreements.</text></paragraph></subsection> <subsection id="H28863D867A1844488F8175A509E5F8AE"><enum>(f)</enum><header>Pumping plant d</header><text>The Secretary may enter into 1 or more agreements with the Tulelake Irrigation District to reimburse the Tulelake Irrigation District for not more than 69 percent of the cost incurred by the Tulelake Irrigation District for the operation and maintenance of Pumping Plant D, subject to the condition that the cost results in benefits to the United States.</text></subsection> 
+<subsection id="H93B7179911FB46B991D7216B1B8E3F7A"><enum>(g)</enum><header>Infrastructure</header> 
+<paragraph id="HF3A3CEB5F48D443CB947518E78720B3C"><enum>(1)</enum><header>Keno and link river dams</header><text>The Secretary of the Interior shall comply with the terms of the agreement entitled <quote>2016 Klamath Power and Facilities Agreement</quote>(<quote>Agreement</quote>), including Attachment A to the Agreement.</text></paragraph> <paragraph id="HE1786FEFD7A04F94B1C42B118CBB888A"><enum>(2)</enum><header>Replacement of c canal flume</header> <subparagraph id="H20B541E24C2A4813AB7421DE69E7A05C"><enum>(A)</enum><header>In general</header><text>The replacement of the C Canal flume within the Klamath Project shall be considered to be, and shall receive the treatment authorized for, qualified emergency extraordinary operation and maintenance work in accordance with Federal reclamation law (the Act of June 17, 1902 (32 Stat. 388, chapter 1093), and Acts supplemental to and amendatory of that Act (<external-xref legal-doc="usc" parsable-cite="usc/43/371">43 U.S.C. 371 et seq.</external-xref>)).</text></subparagraph> 
+<subparagraph id="H7CEE5C14FF844170AD895647A02A1594"><enum>(B)</enum><header>Contract</header> 
+<clause id="H5DC5C91133264C78BE2FAF18E052FC0E"><enum>(i)</enum><header>In general</header><text>Not later than 180 days after the date of receipt of a request from the Klamath Irrigation District to enter into a contract with that district to amend the contract numbered 16–WC–20–4838, the Secretary shall enter into a contract with the Klamath Irrigation District providing that under the contract entered into under this subparagraph—</text> <subclause id="H224AA218DC534B82882792CD260C3C9E"><enum>(I)</enum><text>35 percent of the total repayment obligation is nonreimbursable to the United States; and</text></subclause> 
+<subclause id="HA0E980DE3E9F48A9B465FE8B9BDAC07F"><enum>(II)</enum><text>65 percent of the total repayment obligation shall be repaid to the United States over a period of 50 years.</text></subclause></clause> <clause id="H5D0543D2BE8142A086062D6E806825D2"><enum>(ii)</enum><header>Inclusion</header><text>Although the Secretary shall not condition the agreement to the contract entered into under subparagraph (A) on any other term, the contract may include other terms that are not less favorable to the contractor than contract numbered 16–WC–20–4838.</text></clause></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="HFE80939845374735A741DD3598186085"><enum>(b)</enum><header>Administration; effect</header> 
+<paragraph id="H460DFB4CB395498098557DF4C316E2BF"><enum>(1)</enum><header>Compliance</header><text>In implementing the amendments made by this section, the Secretary of the Interior shall comply with—</text> <subparagraph id="H7066EC98ACDE4ACAB281B65E3BF4A091"><enum>(A)</enum><text>the National Environmental Policy Act of 1969 (<external-xref legal-doc="usc" parsable-cite="usc/42/4321">42 U.S.C. 4321 et seq.</external-xref>);</text></subparagraph> 
+<subparagraph id="HC2C75124E513426C8C20D0E97B099312"><enum>(B)</enum><text>the Endangered Species Act of 1973 (<external-xref legal-doc="usc" parsable-cite="usc/16/1531">16 U.S.C. 1531 et seq.</external-xref>); and</text></subparagraph> <subparagraph id="HA32865C9D69547D89AB057FD2B9D6849"><enum>(C)</enum><text>all other applicable laws.</text></subparagraph></paragraph> 
+<paragraph id="HE655FFD9608C46C0AD25EF14008BF440"><enum>(2)</enum><header>Effect</header><text>None of the amendments made by this section—</text> <subparagraph id="H739FBAB02696483782A2E9B67F1209A0"><enum>(A)</enum><text>modify any authority or obligation of the United States with respect to any Tribal trust or treaty obligation of the United States;</text></subparagraph> 
+<subparagraph id="H48F68F108D2748228FE8E0212094D19C"><enum>(B)</enum><text>create or determine any water right; or</text></subparagraph> <subparagraph id="HE63597431EDB43ECA1E252EB89E86EE4"><enum>(C)</enum><text>affect any water right or water right claim in existence on the date of the enactment of this Act.</text></subparagraph></paragraph></subsection></section> 
+</legis-body>
+<endorsement display="yes"> 
+<action-date date="20241210">December 10, 2024</action-date> 
+<action-desc>Reported with an amendment, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc></endorsement>
+</bill> 
+
+

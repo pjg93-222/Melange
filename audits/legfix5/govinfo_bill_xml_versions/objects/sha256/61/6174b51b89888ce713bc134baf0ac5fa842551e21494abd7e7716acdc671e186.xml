@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Referred-in-Senate" bill-type="olc" dms-id="HC2558F2348864BB391C348B2306AFA7B" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4029 : Tribal Access to Homeless Assistance Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IIB</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 4029</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date>November 19, 2019</action-date><action-desc>Received; read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name>
+			</action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To amend the McKinney-Vento Homeless Assistance Act to enable Indian Tribes and tribally designated
+			 housing entities to apply for, receive, and administer grants and
+			 subgrants under the Continuum of Care Program of the Department of Housing
+			 and Urban Development.</official-title>
+	</form>
+	<legis-body id="HEE3544915C874005A64488FBD29E85BC" style="OLC">
+ <pagebreak></pagebreak><section id="H244910FE117C42F5961FDBAF8B0D15F8" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Tribal Access to Homeless Assistance Act</short-title></quote>.</text> </section><section id="H27DB554A03EF4AA7975C6274FDAED267"><enum>2.</enum><header>Participation of Indian Tribes and tribally designated housing entities in Continuum of Care Program</header> <subsection id="H48CC199086D4419EB4ADDC9C7244DE70"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Title IV of the McKinney-Vento Homeless Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/42/11360">42 U.S.C. 11360</external-xref> et seq.) is amended—</text>
+ <paragraph id="H1EC9C27328A34708AFE40DED4CC662C5"><enum>(1)</enum><text>in section 401 (<external-xref legal-doc="usc" parsable-cite="usc/42/11360">42 U.S.C. 11360</external-xref>)—</text> <subparagraph id="H4A9F504214F74238B9736C1BCE2044F7"><enum>(A)</enum><text>by redesignating paragraphs (10) through (33) as paragraphs (12) through (35), respectively;</text>
+ </subparagraph><subparagraph id="H4CD7B9F4C1FB4ACCB69E72F7F083241C"><enum>(B)</enum><text>by redesignating paragraphs (8) and (9) as paragraphs (9) and (10), respectively;</text> </subparagraph><subparagraph id="H0204FD13E5844E179FAEDB34EAABD045"><enum>(C)</enum><text>by inserting after paragraph (7) the following:</text>
+						<quoted-block display-inline="no-display-inline" id="HB67865B85AA744ACB40679C13212EF82" style="OLC">
+ <paragraph id="H9C9F361BEBB548E0A15905109B14BDD2"><enum>(8)</enum><header>Formula area</header><text>The term <term>formula area</term> has the meaning given the term in section 1000.302 of title 24, Code of Federal Regulations, or any successor regulation.</text></paragraph><after-quoted-block>;</after-quoted-block></quoted-block>
+ </subparagraph><subparagraph id="H8D58DC2E355C4806B103202A7792D6FB"><enum>(D)</enum><text>in paragraph (9), as so redesignated, by inserting <quote>a formula area,</quote> after <quote>nonentitlement area,</quote>; and</text> </subparagraph><subparagraph id="H5D1BA049C2B44480946C5C95FD86CF21"><enum>(E)</enum><text>by inserting after paragraph (10), as so redesignated, the following:</text>
+						<quoted-block display-inline="no-display-inline" id="H5E0A1DCC18B340E0B9853CDA0E3607CA" style="OLC">
+ <paragraph id="HD631B00DB3AC43C6A17CA50E490AE012"><enum>(11)</enum><header>Indian Tribe</header><text>The term <term>Indian Tribe</term> has the meaning given the term <term>Indian tribe</term> in section 4 of the Native American Housing Assistance and Self-Determination Act of 1996 (<external-xref legal-doc="usc" parsable-cite="usc/25/4103">25 U.S.C. 4103</external-xref>).</text></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="HAABE927F5E324C959E244559869466E8"><enum>(2)</enum><text display-inline="yes-display-inline">in subtitle C (<external-xref legal-doc="usc" parsable-cite="usc/42/11381">42 U.S.C. 11381</external-xref> et seq.), by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="H26534E587F61497180FD7C6C14AF1A94" style="OLC"> <section id="HA623A2B2FC304EE58B9A28A17C5E54C5"><enum>435.</enum><header>Participation of Indian Tribes and tribally designated housing entities</header><text display-inline="no-display-inline">Notwithstanding any other provision of this title, for purposes of this subtitle, an Indian Tribe or tribally designated housing entity (as defined in section 4 of the Native American Housing Assistance and Self-Determination Act of 1996 (<external-xref legal-doc="usc" parsable-cite="usc/25/4103">25 U.S.C. 4103</external-xref>)) may—</text>
+ <paragraph id="H88F5E16A9B8F465483129A0B2668A0D5"><enum>(1)</enum><text display-inline="yes-display-inline">be a collaborative applicant or eligible entity; or</text> </paragraph><paragraph id="H8E8CE0937F5847D189E06D71CFBD2F59"><enum>(2)</enum><text display-inline="yes-display-inline">receive grant amounts from another entity that receives a grant directly from the Secretary, and use the amounts in accordance with this subtitle.</text></paragraph></section><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></subsection><subsection id="HA82DE27181AA4BB08B162A949A40B4C1"><enum>(b)</enum><header>Technical and conforming amendment</header><text>The table of contents in section 101(b) of the McKinney-Vento Homeless Assistance Act (<external-xref legal-doc="public-law" parsable-cite="pl/100/77">Public Law 100–77</external-xref>; 101 Stat. 482) is amended by inserting after the item relating to section 434 the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H496AA18F308D452AA7EDF20128D14BAD" style="OLC">
+					<toc>
+						<toc-entry bold="off" level="section">Sec. 435. Participation of Indian Tribes and tribally designated housing entities.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section></legis-body>
+	<attestation><attestation-group><attestation-date chamber="House" date="20191118">Passed the House of Representatives November 18, 2019.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+</bill>
+
+

@@ -13,8 +13,7 @@ hardcoded ``116|117|118|119``.  These tests hold the merge in place:
 
 Run with::
 
-    python fec/tests/run_focused_tests.py \
-        fec/tests/legislation/test_legislation_measure_key_contract.py
+    python -m pytest fec/tests/legislation/test_legislation_measure_key_contract.py -q
 
 Set ``XCUT_FEC_ROOT`` to point the imports at a different ``fec`` directory;
 that is how the pre-fix failure was demonstrated.

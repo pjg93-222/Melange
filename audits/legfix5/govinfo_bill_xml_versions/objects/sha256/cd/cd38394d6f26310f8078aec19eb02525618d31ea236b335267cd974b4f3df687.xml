@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="A1" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 2693 IH: School Lunch Affordability Act of 2021</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2021-04-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2693</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20210420">April 20, 2021</action-date><action-desc><sponsor name-id="H001053">Mrs. Hartzler</sponsor> (for herself and <cosponsor name-id="S001216">Ms. Schrier</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Labor</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Richard B. Russell National School Lunch Act to require that only a school food authority that had a negative balance in the nonprofit school food service account on June 30th of the year preceding the previous school year shall be required to establish a price for paid lunches.</official-title></form><legis-body id="H67AE28C931764566ADCEA261E781FD6D" style="OLC" display-enacting-clause="yes-display-enacting-clause"><section id="H746E37969418403EAE2E3D407759DF2A" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>School Lunch Affordability Act of 2021</short-title></quote>. </text></section><section id="H73616A4662B34B18995F3526D0CCCC9B"><enum>2.</enum><header>Required price for paid lunch</header><text display-inline="no-display-inline">Section 12(p)(2)(A) of the Richard B. Russell National School Lunch Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1760">42 U.S.C. 1760(p)(2)(A)</external-xref>) is amended by inserting <quote>that had a negative balance in the nonprofit school food service account on June 30th of the year preceding the previous school year</quote> after <quote>school food authority</quote>.</text></section></legis-body></bill> 
+

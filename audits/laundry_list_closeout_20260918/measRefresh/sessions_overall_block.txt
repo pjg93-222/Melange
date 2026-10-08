@@ -1,0 +1,295 @@
+== overall block, full dump for Pete Sessions (AFTER) ==
+{
+  "action_count": 70,
+  "alignment": "Mixed actions",
+  "classification_basis": "primacy_rank_with_explicit_opposition",
+  "evidence_ids": [
+    "legislative|S000250|117:hr:1729|Member Business Lending",
+    "legislative|S000250|117:hr:2311|Charter Modernization",
+    "legislative|S000250|117:hr:4773|CFPB",
+    "legislative|S000250|117:hr:5911|Fraud Prevention",
+    "legislative|S000250|117:hr:6038|CFPB",
+    "legislative|S000250|117:hr:6889|Charter Modernization",
+    "legislative|S000250|117:hr:766|Examination & Supervision",
+    "legislative|S000250|117:hr:790|CFPB",
+    "legislative|S000250|117:hr:8036|Mortgage & Housing",
+    "legislative|S000250|118:hjres:122|Credit Card Mandates",
+    "legislative|S000250|118:hjres:50|Member Business Lending",
+    "legislative|S000250|118:hjres:66|Member Business Lending",
+    "legislative|S000250|118:hr:1122|Technology & Emerging",
+    "legislative|S000250|118:hr:1313|CFPB",
+    "legislative|S000250|118:hr:2743|Member Business Lending",
+    "legislative|S000250|118:hr:3712|Technology & Emerging",
+    "legislative|S000250|118:hr:5403|Technology & Emerging",
+    "legislative|S000250|118:hr:6789|CFPB",
+    "legislative|S000250|118:hr:7428|CU Capital Requirements",
+    "legislative|S000250|118:hr:758|CU Capital Requirements",
+    "legislative|S000250|119:hr:1181|Data Privacy & Cyber",
+    "legislative|S000250|119:hr:1652|CFPB",
+    "legislative|S000250|119:hr:1919|Technology & Emerging",
+    "legislative|S000250|119:hr:2702|Examination & Supervision",
+    "legislative|S000250|119:hr:2808|Data Privacy & Cyber",
+    "legislative|S000250|119:hr:3234|Examination & Supervision",
+    "legislative|S000250|119:hr:478|CU Capital Requirements",
+    "legislative|S000250|119:hr:4936|Fraud Prevention",
+    "legislative|S000250|119:hr:654|CFPB",
+    "legislative|S000250|119:hr:6644|Mortgage & Housing",
+    "legislative|S000250|119:hr:6955|CU Capital Requirements",
+    "legislative|S000250|119:hr:8395|Payments",
+    "legislative|S000250|119:hr:940|CFPB",
+    "legislative|S000250|119:hr:976|CFPB",
+    "legislative|S000250|119:hr:987|Member Business Lending",
+    "letter|S000250|119:letter:LTR-119-CDFI-KIMCRAPO|CDFI Fund",
+    "vote|S000250|117:House:103|CFPB",
+    "vote|S000250|117:House:119|CU Capital Requirements",
+    "vote|S000250|117:House:140|Defense CU Issues",
+    "vote|S000250|117:House:161|Member Business Lending",
+    "vote|S000250|117:House:181|Member Business Lending",
+    "vote|S000250|117:House:292|Defense CU Issues",
+    "vote|S000250|117:House:350|Member Business Lending",
+    "vote|S000250|117:House:351|Fraud Prevention",
+    "vote|S000250|117:House:406|Charter Modernization",
+    "vote|S000250|117:House:603|Fraud Prevention",
+    "vote|S000250|117:House:604|CFPB",
+    "vote|S000250|117:House:700|Data Privacy & Cyber",
+    "vote|S000250|117:House:722|Charter Modernization",
+    "vote|S000250|117:House:797|Defense CU Issues",
+    "vote|S000250|118:House:288|Mortgage & Housing",
+    "vote|S000250|118:House:327|Data Privacy & Cyber",
+    "vote|S000250|118:House:685|CFPB",
+    "vote|S000250|118:House:809|Data Privacy & Cyber",
+    "vote|S000250|118:House:854|Data Privacy & Cyber",
+    "vote|S000250|118:House:872|Data Privacy & Cyber",
+    "vote|S000250|118:House:944|Examination & Supervision",
+    "vote|S000250|118:House:948|Technology & Emerging",
+    "vote|S000250|119:House:146|Fraud Prevention",
+    "vote|S000250|119:House:154|Member Business Lending",
+    "vote|S000250|119:House:198|Examination & Supervision",
+    "vote|S000250|119:House:199|Examination & Supervision",
+    "vote|S000250|119:House:200|Technology & Emerging",
+    "vote|S000250|119:House:417|Mortgage & Housing",
+    "vote|S000250|119:House:537|Examination & Supervision",
+    "vote|S000250|119:House:538|Charter Modernization",
+    "vote|S000250|119:House:584|Mortgage & Housing",
+    "vote|S000250|119:House:586|Fraud Prevention",
+    "vote|S000250|119:House:631|Fraud Prevention",
+    "vote|S000250|119:House:95|CU Capital Re
+
+== overall block BEFORE vs AFTER, watched members ==
+  -- Pete Sessions --
+     action_count                 70 -> 70
+     alignment                    'Mixed actions' -> 'Mixed actions'
+     classification_basis         'primacy_rank_with_explicit_opposition' -> 'primacy_rank_with_explicit_opposition'
+     evidence_ids                 ["legislative|S000250|117:hr:1729|Member Business Lending", "legislative|S000250|117:hr:2311|Charter Moderniza -> ["legislative|S000250|117:hr:1729|Member Business Lending", "legislative|S000250|117:hr:2311|Charter Moderniza
+     evidence_status              'observed' -> 'observed'
+     missing_tensor_measures      ["117:hr:1215", "117:hr:1443", "117:hr:1729", "117:hr:1996", "117:hr:2311", "117:hr:2543", "117:hr:2547", "117 -> ["117:hr:1215", "117:hr:1443", "117:hr:1729", "117:hr:1996", "117:hr:2311", "117:hr:2543", "117:hr:2547", "117
+     mixed_record                 True -> True
+     negative_action_count        8 -> 8
+     neutral_action_count         2 -> 2
+     opposition_cohort_size       444 -> 445   <<< CHANGED
+     opposition_cutoffs           {"highly_skeptical": null, "opponent": null, "skeptic": null} -> {"highly_skeptical": null, "opponent": null, "skeptic": null}
+     opposition_evidence          {"congresses": [], "core_measures": [], "evidence_ids": ["vote|S000250|117:House:119|CU Capital Requirements", -> {"congresses": [], "core_measures": [], "evidence_ids": ["vote|S000250|117:House:119|CU Capital Requirements",
+     opposition_rank_end          None -> None
+     opposition_rank_start        None -> None
+     positive_action_count        60 -> 60
+     priority_tier                2 -> 1   <<< CHANGED
+     rank                         15 -> 13   <<< CHANGED
+     raw_overall_score            '58.24' -> '58.24'
+     reason                       'outside_overall_champion_cutoff' -> 'active_overall_board_top13'   <<< CHANGED
+     recognition                  None -> 'Champion'   <<< CHANGED
+     record_pattern               'mixed' -> 'mixed'
+     stance                       'Ally' -> 'Champion'   <<< CHANGED
+     stance_boundary_tie          False -> False
+     stance_cohort_size           533 -> 533
+     stance_cutoffs               {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266} -> {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266}
+     stance_rank_end              15 -> 13   <<< CHANGED
+     stance_rank_start            15 -> 13   <<< CHANGED
+     stance_reason                'within_ally_rank_cutoff' -> 'active_overall_board_top13'   <<< CHANGED
+     tensor_status                'incomplete' -> 'incomplete'
+     tensor_tiebreak              None -> None
+  -- Daniel Meuser --
+     action_count                 87 -> 87
+     alignment                    'Mixed actions' -> 'Mixed actions'
+     classification_basis         'primacy_rank_with_explicit_opposition' -> 'primacy_rank_with_explicit_opposition'
+     evidence_ids                 ["legislative|M001204|117:hr:1729|Member Business Lending", "legislative|M001204|117:hr:1996|CU Capital Requir -> ["legislative|M001204|117:hr:1729|Member Business Lending", "legislative|M001204|117:hr:1996|CU Capital Requir
+     evidence_status              'observed' -> 'observed'
+     missing_tensor_measures      ["117:hr:1443", "117:hr:1729", "117:hr:1996", "117:hr:2543", "117:hr:2547", "117:hr:3172", "117:hr:4350", "117 -> ["117:hr:1443", "117:hr:1729", "117:hr:1996", "117:hr:2543", "117:hr:2547", "117:hr:3172", "117:hr:4350", "117
+     mixed_record                 True -> True
+     negative_action_count        5 -> 5
+     neutral_action_count         1 -> 1
+     opposition_cohort_size       444 -> 445   <<< CHANGED
+     opposition_cutoffs           {"highly_skeptical": null, "opponent": null, "skeptic": null} -> {"highly_skeptical": null, "opponent": null, "skeptic": null}
+     opposition_evidence          {"congresses": [], "core_measures": [], "evidence_ids": ["vote|M001204|117:House:140|Defense CU Issues", "vote -> {"congresses": [], "core_measures": [], "evidence_ids": ["vote|M001204|117:House:140|Defense CU Issues", "vote
+     opposition_rank_end          None -> None
+     opposition_rank_start        None -> None
+     positive_action_count        81 -> 81
+     priority_tier                1 -> 2   <<< CHANGED
+     rank                         13 -> 14   <<< CHANGED
+     raw_overall_score            '94.68' -> '94.68'
+     reason                       'active_overall_board_top13' -> 'outside_overall_champion_cutoff'   <<< CHANGED
+     recognition                  'Champion' -> None   <<< CHANGED
+     record_pattern               'mixed' -> 'mixed'
+     stance                       'Champion' -> 'Ally'   <<< CHANGED
+     stance_boundary_tie          False -> False
+     stance_cohort_size           533 -> 533
+     stance_cutoffs               {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266} -> {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266}
+     stance_rank_end              13 -> 14   <<< CHANGED
+     stance_rank_start            13 -> 14   <<< CHANGED
+     stance_reason                'active_overall_board_top13' -> 'within_ally_rank_cutoff'   <<< CHANGED
+     tensor_status                'incomplete' -> 'incomplete'
+     tensor_tiebreak              None -> None
+  -- Jim Costa --
+     action_count                 52 -> 52
+     alignment                    'Mixed actions' -> 'Mixed actions'
+     classification_basis         'primacy_rank_with_explicit_opposition' -> 'primacy_rank_with_explicit_opposition'
+     evidence_ids                 ["legislative|C001059|117:hr:1996|CU Capital Requirements", "legislative|C001059|117:hr:3172|Mortgage & Housin -> ["legislative|C001059|117:hr:1996|CU Capital Requirements", "legislative|C001059|117:hr:3172|Mortgage & Housin
+     evidence_status              'observed' -> 'observed'
+     missing_tensor_measures      ["117:hr:1215", "117:hr:1443", "117:hr:1996", "117:hr:2543", "117:hr:2547", "117:hr:3172", "117:hr:3962", "117 -> ["117:hr:1215", "117:hr:1443", "117:hr:1996", "117:hr:2543", "117:hr:2547", "117:hr:3172", "117:hr:3962", "117
+     mixed_record                 True -> True
+     negative_action_count        8 -> 8
+     neutral_action_count         2 -> 2
+     opposition_cohort_size       444 -> 445   <<< CHANGED
+     opposition_cutoffs           {"highly_skeptical": null, "opponent": null, "skeptic": null} -> {"highly_skeptical": null, "opponent": null, "skeptic": null}
+     opposition_evidence          {"congresses": [], "core_measures": [], "evidence_ids": ["vote|C001059|118:House:288|Mortgage & Housing", "vot -> {"congresses": [], "core_measures": [], "evidence_ids": ["vote|C001059|118:House:288|Mortgage & Housing", "vot
+     opposition_rank_end          None -> None
+     opposition_rank_start        None -> None
+     positive_action_count        42 -> 42
+     priority_tier                2 -> 2
+     rank                         14 -> 15   <<< CHANGED
+     raw_overall_score            '34.48' -> '34.48'
+     reason                       'outside_overall_champion_cutoff' -> 'outside_overall_champion_cutoff'
+     recognition                  None -> None
+     record_pattern               'mixed' -> 'mixed'
+     stance                       'Ally' -> 'Ally'
+     stance_boundary_tie          False -> False
+     stance_cohort_size           533 -> 533
+     stance_cutoffs               {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266} -> {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266}
+     stance_rank_end              14 -> 15   <<< CHANGED
+     stance_rank_start            14 -> 15   <<< CHANGED
+     stance_reason                'within_ally_rank_cutoff' -> 'within_ally_rank_cutoff'
+     tensor_status                'incomplete' -> 'incomplete'
+     tensor_tiebreak              None -> None
+  -- Juan Vargas --
+     action_count                 46 -> 46
+     alignment                    'Mixed actions' -> 'Mixed actions'
+     classification_basis         'primacy_rank_with_explicit_opposition' -> 'primacy_rank_with_explicit_opposition'
+     evidence_ids                 ["legislative|V000130|117:hr:1996|CU Capital Requirements", "legislative|V000130|117:hr:6889|Charter Moderniza -> ["legislative|V000130|117:hr:1996|CU Capital Requirements", "legislative|V000130|117:hr:6889|Charter Moderniza
+     evidence_status              'observed' -> 'observed'
+     missing_tensor_measures      ["117:hr:1215", "117:hr:1443", "117:hr:1996", "117:hr:2543", "117:hr:2547", "117:hr:4350", "117:hr:4481", "117 -> ["117:hr:1215", "117:hr:1443", "117:hr:1996", "117:hr:2543", "117:hr:2547", "117:hr:4350", "117:hr:4481", "117
+     mixed_record                 True -> True
+     negative_action_count        11 -> 11
+     neutral_action_count         2 -> 2
+     opposition_cohort_size       444 -> 445   <<< CHANGED
+     opposition_cutoffs           {"highly_skeptical": null, "opponent": null, "skeptic": null} -> {"highly_skeptical": null, "opponent": null, "skeptic": null}
+     opposition_evidence          {"congresses": [], "core_measures": [], "evidence_ids": ["vote|V000130|118:House:288|Mortgage & Housing", "vot -> {"congresses": [], "core_measures": [], "evidence_ids": ["vote|V000130|118:House:288|Mortgage & Housing", "vot
+     opposition_rank_end          None -> None
+     opposition_rank_start        None -> None
+     positive_action_count        33 -> 33
+     priority_tier                1 -> 1
+     rank                         12 -> 12
+     raw_overall_score            '24.16' -> '24.16'
+     reason                       'active_overall_board_top13' -> 'active_overall_board_top13'
+     recognition                  'Champion' -> 'Champion'
+     record_pattern               'mixed' -> 'mixed'
+     stance                       'Champion' -> 'Champion'
+     stance_boundary_tie          False -> False
+     stance_cohort_size           533 -> 533
+     stance_cutoffs               {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266} -> {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266}
+     stance_rank_end              12 -> 12
+     stance_rank_start            12 -> 12
+     stance_reason                'active_overall_board_top13' -> 'active_overall_board_top13'
+     tensor_status                'incomplete' -> 'incomplete'
+     tensor_tiebreak              None -> None
+  -- Dan Sullivan --
+     action_count                 24 -> 24
+     alignment                    'Supportive actions' -> 'Supportive actions'
+     classification_basis         'primacy_rank_with_explicit_opposition' -> 'primacy_rank_with_explicit_opposition'
+     evidence_ids                 ["legislative|S001198|117:s:3813|Member Business Lending", "legislative|S001198|117:s:4325|Charter Modernizati -> ["legislative|S001198|117:s:3813|Member Business Lending", "legislative|S001198|117:s:4325|Charter Modernizati
+     evidence_status              'observed' -> 'observed'
+     missing_tensor_measures      ["117:hr:7776", "117:s:3813", "117:s:4325", "117:s:563", "117:s:910", "118:s:1323", "118:s:1514", "118:s:2226" -> ["117:hr:7776", "117:s:3813", "117:s:4325", "117:s:563", "117:s:910", "118:s:1323", "118:s:1514", "118:s:2226"
+     mixed_record                 False -> False
+     negative_action_count        0 -> 0
+     neutral_action_count         0 -> 0
+     opposition_cohort_size       444 -> 445   <<< CHANGED
+     opposition_cutoffs           {"highly_skeptical": null, "opponent": null, "skeptic": null} -> {"highly_skeptical": null, "opponent": null, "skeptic": null}
+     opposition_evidence          {"congresses": [], "core_measures": [], "evidence_ids": [], "label": null, "lead_measures": [], "measures": [] -> {"congresses": [], "core_measures": [], "evidence_ids": [], "label": null, "lead_measures": [], "measures": []
+     opposition_rank_end          None -> None
+     opposition_rank_start        None -> None
+     positive_action_count        24 -> 24
+     priority_tier                1 -> 1
+     rank                         11 -> 11
+     raw_overall_score            '31.66' -> '31.66'
+     reason                       'active_overall_board_top13' -> 'active_overall_board_top13'
+     recognition                  'Champion' -> 'Champion'
+     record_pattern               'supportive' -> 'supportive'
+     stance                       'Champion' -> 'Champion'
+     stance_boundary_tie          False -> False
+     stance_cohort_size           533 -> 533
+     stance_cutoffs               {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266} -> {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266}
+     stance_rank_end              11 -> 11
+     stance_rank_start            11 -> 11
+     stance_reason                'active_overall_board_top13' -> 'active_overall_board_top13'
+     tensor_status                'incomplete' -> 'incomplete'
+     tensor_tiebreak              None -> None
+  -- Barry Loudermilk --
+     action_count                 64 -> 64
+     alignment                    'Mixed actions' -> 'Mixed actions'
+     classification_basis         'primacy_rank_with_explicit_opposition' -> 'primacy_rank_with_explicit_opposition'
+     evidence_ids                 ["legislative|L000583|117:hr:2040|Examination & Supervision", "legislative|L000583|117:hr:4773|CFPB", "legisla -> ["legislative|L000583|117:hr:2040|Examination & Supervision", "legislative|L000583|117:hr:4773|CFPB", "legisla
+     evidence_status              'observed' -> 'observed'
+     missing_tensor_measures      ["117:hr:1215", "117:hr:1443", "117:hr:1996", "117:hr:2040", "117:hr:2543", "117:hr:2547", "117:hr:4350", "117 -> ["117:hr:1215", "117:hr:1443", "117:hr:1996", "117:hr:2040", "117:hr:2543", "117:hr:2547", "117:hr:4350", "117
+     mixed_record                 True -> True
+     negative_action_count        6 -> 6
+     neutral_action_count         2 -> 2
+     opposition_cohort_size       444 -> 445   <<< CHANGED
+     opposition_cutoffs           {"highly_skeptical": null, "opponent": null, "skeptic": null} -> {"highly_skeptical": null, "opponent": null, "skeptic": null}
+     opposition_evidence          {"congresses": [], "core_measures": [], "evidence_ids": ["vote|L000583|117:House:140|Defense CU Issues", "vote -> {"congresses": [], "core_measures": [], "evidence_ids": ["vote|L000583|117:House:140|Defense CU Issues", "vote
+     opposition_rank_end          None -> None
+     opposition_rank_start        None -> None
+     positive_action_count        56 -> 56
+     priority_tier                2 -> 2
+     rank                         16 -> 16
+     raw_overall_score            '69.72' -> '69.72'
+     reason                       'outside_overall_champion_cutoff' -> 'outside_overall_champion_cutoff'
+     recognition                  None -> None
+     record_pattern               'mixed' -> 'mixed'
+     stance                       'Ally' -> 'Ally'
+     stance_boundary_tie          False -> False
+     stance_cohort_size           533 -> 533
+     stance_cutoffs               {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266} -> {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266}
+     stance_rank_end              16 -> 16
+     stance_rank_start            16 -> 16
+     stance_reason                'within_ally_rank_cutoff' -> 'within_ally_rank_cutoff'
+     tensor_status                'incomplete' -> 'incomplete'
+     tensor_tiebreak              None -> None
+  -- Alex Padilla --
+     action_count                 26 -> 26
+     alignment                    'Mixed actions' -> 'Mixed actions'
+     classification_basis         'primacy_rank_with_explicit_opposition' -> 'primacy_rank_with_explicit_opposition'
+     evidence_ids                 ["legislative|P000145|117:s:1684|Charter Modernization", "legislative|P000145|117:s:2920|Mortgage & Housing",  -> ["legislative|P000145|117:s:1684|Charter Modernization", "legislative|P000145|117:s:2920|Mortgage & Housing", 
+     evidence_status              'observed' -> 'observed'
+     missing_tensor_measures      ["117:hr:7776", "117:s:1684", "117:s:2920", "117:s:4325", "117:s:4879", "117:s:5183", "117:s:588", "117:s:762" -> ["117:hr:7776", "117:s:1684", "117:s:2920", "117:s:4325", "117:s:4879", "117:s:5183", "117:s:588", "117:s:762"
+     mixed_record                 True -> True
+     negative_action_count        1 -> 1
+     neutral_action_count         0 -> 0
+     opposition_cohort_size       444 -> 445   <<< CHANGED
+     opposition_cutoffs           {"highly_skeptical": null, "opponent": null, "skeptic": null} -> {"highly_skeptical": null, "opponent": null, "skeptic": null}
+     opposition_evidence          {"congresses": [], "core_measures": [], "evidence_ids": ["legislative|P000145|118:s:3549|Credit Card Mandates" -> {"congresses": [], "core_measures": [], "evidence_ids": ["legislative|P000145|118:s:3549|Credit Card Mandates"
+     opposition_rank_end          None -> None
+     opposition_rank_start        None -> None
+     positive_action_count        25 -> 25
+     priority_tier                1 -> 1
+     rank                         1 -> 1
+     raw_overall_score            '33.14' -> '33.14'
+     reason                       'active_overall_board_top13' -> 'active_overall_board_top13'
+     recognition                  'Champion' -> 'Champion'
+     record_pattern               'mixed' -> 'mixed'
+     stance                       'Champion' -> 'Champion'
+     stance_boundary_tie          False -> False
+     stance_cohort_size           533 -> 533
+     stance_cutoffs               {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266} -> {"ally": 79, "highly_persuadable": 106, "lean_persuadable": 399, "persuadable": 266}
+     stance_rank_end              1 -> 1
+     stance_rank_start            1 -> 1
+     stance_reason                'active_overall_board_top13' -> 'active_overall_board_top13'
+     tensor_status                'incomplete' -> 'incomplete'
+     tensor_tiebreak              None -> None

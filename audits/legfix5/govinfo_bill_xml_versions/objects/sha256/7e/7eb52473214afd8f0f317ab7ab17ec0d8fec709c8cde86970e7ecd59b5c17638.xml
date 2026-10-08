@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HB45FDAE59604468486385F1B122D97F7" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5253 IH: Creech Airmen Economic Security and Resilience Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-08-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 5253</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230822">August 22, 2023</action-date>
+<action-desc><sponsor name-id="L000590">Ms. Lee of Nevada</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAS00">Committee on Armed Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To direct the Secretary of the Air Force to conduct certain studies relating to members of the Air Force assigned to Creech Air Force Base, and for other purposes.</official-title>
+</form>
+<legis-body id="HC7FA033894FD4BF2A338AE4C3EAA0712" style="OLC">
+<section id="H7D391EDEDC9B4378B6F1A8488FE3099B" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Creech Airmen Economic Security and Resilience Act of 2023</short-title></quote>.</text></section> <section id="HC771EBBED64442908BA5804673104AFA" section-type="subsequent-section"><enum>2.</enum><header>Feasibility study regarding assignment incentive pay for members of the Air Force assigned to Creech Air Force Base</header><text display-inline="no-display-inline">Not later than 180 days after the date of enactment of this Act, the Secretary of the Air Force shall submit to the Committees on Armed Services of the Senate and House of Representatives a report on the feasibility of paying assignment incentive pay under section 307a of title 37, United States Code, to members of the Air Force assigned to Creech Air Force Base. The study shall include—</text>
+<paragraph id="HFEF7C7ADC9304516AC07AB7D064B98AB"><enum>(1)</enum><text>an assessment of the financial stress experienced by such members, especially junior members with families, associated with—</text> <subparagraph id="HD6EB0CD06A664D2FA1CB6F3DBAB0CF19"><enum>(A)</enum><text>the daily commute to and from the base;</text></subparagraph>
+<subparagraph id="H5A459E148FD04583871396ED173AEF4A"><enum>(B)</enum><text>the unique demands of the mission to remotely pilot aircraft; and</text></subparagraph> <subparagraph id="H2CE3D9072F4049D3B8C17E69C56DF9D3"><enum>(C)</enum><text>limited access to essential services, including childcare, housing, and readily accessible health care; and</text></subparagraph></paragraph>
+<paragraph id="H068603D1DE2741A4A6082F5B75B7C7DA"><enum>(2)</enum><text>the overall cost to the United States, and financial relief provided by, such assignment incentive pay authorized by the Secretary of the Air Force in 2008 for such members.</text></paragraph></section> <section id="H63CE21890E064B829AD006CA5F3E7568" section-type="subsequent-section"><enum>3.</enum><header>Epidemiological consultation regarding members of the Air Force assigned to Creech Air Force Base</header> <subsection id="H37F57AE42E7A46AC936717F040CAE134"><enum>(a)</enum><header>Consultation</header><text display-inline="yes-display-inline">The Secretary of the Air Force, in coordination with the Director of the Defense Health Agency, shall conduct a behavioral health epidemiological consultation on unique social and occupational stressors affecting members of the Air Force assigned to Creech Air Force Base and dependents of such members.</text></subsection>
+<subsection id="H9E2CBD8B88084788AC74DCE396AC950D"><enum>(b)</enum><header>Report</header><text>Not later than 180 days after the date of the enactment of this Act, the Secretary shall submit to the Committees on Armed Services of the Senate and House of Representatives a report that includes—</text> <paragraph id="H2852B121D92342AEA9B910C099C4E028"><enum>(1)</enum><text>an executive summary of findings from consultation; and</text></paragraph>
+<paragraph id="H348E952989874195B7C86C8FA7ED7F47"><enum>(2)</enum><text>recommendations regarding how to address key findings to improve the quality of life and resiliency of such members and dependents.</text></paragraph></subsection></section> </legis-body> </bill> 
+

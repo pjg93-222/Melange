@@ -1,0 +1,37 @@
+======================================================================================================
+N5 / D1  OVERLAP: honors per-field ACTION LEDGER vs the role-sheet BILLS ledger
+======================================================================================================
+bundle top-level keys (31): ['adj', 'art_extra_cats', 'bill_live', 'bill_lobbying', 'cats', 'cats_short', 'coalitions', 'community_meta', 'cospon', 'dadj', 'defensive', 'demo_axes', 'demo_short', 'demographic_potential_meta', 'district_briefs_meta', 'freshness', 'gh_meta', 'industry_meta', 'influence_policy', 'integrity', 'legislation_culling', 'members', 'pricing', 'rank_honors', 'selectivity', 'source_updates', 'speech_descriptive', 'speech_profile_method', 'stance_curves', 'tiername', 'weights']
+
+--- integrity ---
+
+rank_honors keys: ['as_of', 'evidence_window', 'generation_id', 'measure_titles', 'overall_board', 'overall_policy', 'policy', 'schema']
+measure_titles present: True (n=510)
+
+members with an effectiveness_shadow_html field at all: 0 / 533 (renders at tpl:1771)
+members carrying honors.fields                        : 533
+total field_action rows across the page               : 26901
+field_action rows by KIND                             : {'vote': 18755, 'legislative': 7850, 'letter': 296}
+members with >=1 field_action row                     : 533
+distinct (measure, kind, role) ledger entries         : 17256
+distinct legislative measures per member (sum)        : 5515
+
+desk bill rows that are AMENDMENTS (H.Amdt./S.Amdt.): 173
+desk bill rows the desk's OWN Bills-repository identity (tpl:1951) cannot key,
+   so they appear in the per-member Bills panel but NOT in the global Bills view: 460
+desk bill rows with no key at all under the wide identity: 287
+
+BILLS section (legHTML/legBody) rows                  : 6130 across 523 members
+
+OVERLAP on (member, bill-number) between the two surfaces:
+   in BOTH the Bills section and the honors action ledger : 5491
+   only in the Bills section (role sheets + sidecars)     : 352
+   only in the honors action ledger (routing audit)       : 24
+   examples only in the action ledger: [('Riley Moore', '119:hr:1181'), ('Riley Moore', '119:hr:987'), ('Charles Fleischmann', '119:hr:987'), ('Matt Van Epps', '119:hr:987'), ('Anna Luna', '118:hr:4686'), ('Anna Luna', '118:hr:6410'), ('Pete Stauber', '119:hr:987'), ('Mike Kelly', '119:hr:987'), ('Gus Bilirakis', '119:hr:987'), ('Andy Barr', '119:hr:4936')]
+
+   NOTE: the action ledger is per-FIELD (one table per legislative area inside the
+   honors block) and shows Measure / Title / Kind / Role / Direction / Contribution;
+   the Bills section is per-MEMBER and shows role badge / bill / Congress / title /
+   areas / sponsor / cosponsor count / summary / Congress.gov link.
+
+DONE

@@ -1,0 +1,73 @@
+start 2026-09-19 03:18:17
+cmd: python -u fec/run_pipeline.py --from build_archive_legislative.py
+  build_archive_legislative.py  OK  10.9s     Examination & Supervision  +1.6
+  extract_cu_speeches.py       OK  10.3s    Telephone Consumer Protection Act        1
+  speech_stance_stack.py       OK   5.8s  scored 311 floor speeches -> speech_stance_final.csv | gold 215 | labels {'neutral': 139, 
+  hearing_stance_stack.py      OK   4.8s  scored 790 hearing rows -> data/stance/hearing_stance_final.csv | gold 261 | labels {'neut
+  extract_cu_interviews.py     OK   4.6s    Member Business Lending                  1
+  interview_stance_stack.py    OK   3.1s  scored 37 interviews -> data/stance/interview_stance_final.csv | gold 37 | labels {'oppose
+  bluesky_stance_stack.py      OK   3.3s  scored 15 Bluesky posts -> data/stance/bluesky_stance_final.csv | gold 15 | labels {'oppos
+  tweet_stance_stack.py --score OK  14.8s    tiers: {'majority': 6262, 'review': 794, 'unanimous': 2409}
+  press_stance_stack.py        OK   8.6s  labels: {np.str_('support'): 1627, np.str_('neutral'): 816, np.str_('unrelated'): 29, np.s
+  press_engagement_layer.py    OK   4.4s  wrote press_engagement.json (65 directed edges) — candidate augmentation layer for the cas
+  press_hcoi.py                OK   1.7s  wrote press_hcoi.json (6 communities, 1900 edges — candidate 2nd graph layer for the casca
+  build_multilayer_network.py  OK   1.0s  wrote congress_cosponsor_network_AUG20260919.xlsx  -> ALL loaders pick it up by mtime; reg
+  member_reference_layer.py --rebuild OK 341.3s  member_references.json: 8010 substantive directed edges | positive 5967 | negative 1191
+  honors_workbook.py --prepare-model-update OK   0.2s  {"status": "ROLLED_BACK", "scope": "whole-file", "after_sha256": "cb6543824599e6ebce709a2c
+  build_media_blend.py         OK  27.5s  wrote media blend into Press Release - Raw: 233 cells changed (formulas untouched)
+  build_vote_category.py --publish OK   8.2s  }
+  per_category_stance.py       OK  15.8s  Interchange DEFENDERS: []
+  committee_scores.py --write  OK   7.4s  committee scores: 390 scanned, 0 repaired, max 11.575 (clean; not rewritten)
+  compute_pillars.py --write   OK  12.2s  !! ROLE REGISTRY EXPIRES IN 106 DAYS (2027-01-03) - CHAIN WILL FATAL HERE !! wrote ranks_p
+  legislation_culling_status.py  OK   0.1s  data/legislation/legislation_culling_status.json | phase=production | status=PASS_PRODUCTI
+  build_primacy_surfaces.py --engine-inputs-only OK  91.7s  primacy engine inputs: complete | official rank authority byte-identical
+  build_rank_honors.py --publish OK  10.0s  }
+  audit_rank_honors.py         OK   1.7s  }
+  sync_stance_g.py             OK 310.4s  SAVED.
+  honors_workbook.py           OK  22.8s  {"schema": "honors-workbook-v1", "status": "PASS", "generation_id": "049fbd78ae4bf13ec00ca
+  build_electoral_plays.py     OK   7.7s  Warnock now: none | 4 contest / 114 defend / 415 none
+  per_topic_flip.py            OK  11.7s  wrote per_topic_alloc.json  (mode: baseline, 19 sub-categories)
+  per_topic_coalition.py       OK  36.1s  wrote per_topic_coalition.json (seed 7, MC 20, 19 sub-categories)
+  lt_priming.py                OK   0.8s     Mike Crapo             [Lean Persuadable] 0.40 0.50  $71,860   = $71,860  + recruit —
+  budget_frontier.py           OK  46.5s  wrote budget_frontier.json (mode coalition, leverage ON, 18 topics)
+  budget_frontier.py --electoral OK  71.4s  wrote budget_frontier_electoral.json (mode ELECTORAL, leverage ON, 18 topics)
+  optimize.py                  OK  16.2s  wrote optimize_result.json (frontier + allocation + conversions)
+  build_im_allocation.py       OK   0.1s       Alex Padilla             $388,000
+  salience_shock.py --advise   OK   8.8s  wrote salience_advisory.json
+  personal_texture_layer.py --refresh-local OK  86.2s  PERSONAL TEXTURE: 480 members | 4751 retained details | 8634 candidates | 5927 classified 
+  communication_style.py       OK   0.3s  communication_style.json: 533 members, 268 with measured facets; missing evidence explicit
+  validate_communication_style.py  OK   0.1s  validated locked communication_style.json: 533 members | schema communication-style-v1 | p
+  b5_external_gold_validate.py  OK   0.8s  external gold PASS: E 509 members | insiders r=+0.529 | academics r=+0.484
+  b5_gold_multitrait_validate.py  OK  16.6s    N ACTIVE_ONE_PANEL_ASSOCIATION_SUPPORTED n=454 insider=+0.374 academic=+0.123 weights={'
+  b5_profile_basis.py          OK   0.2s  profile_basis_v2.json: 533 guarded profiles
+  validate_guarded_profile_artifacts.py  OK   0.1s  validated guarded profile artifacts: audio 0 verified members | all broad gold traits acti
+  build_member_longform_turn_features.py --if-current OK   0.7s  PASS_MEASUREMENT_ONLY: current source and producer hashes verified; existing measurement r
+  build_member_narrative_ledger.py  OK   2.1s  basis_sha256=8d72511d25ab868628fa45dbc467c22d44c786afb1a47957d322e9bb6c169ed7
+  regenerate_member_profiles.py --activate OK   0.8s  {"activated": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\member_narratives_v2.
+  build_dashboard_bundle.py    OK  45.5s  wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\dashboard_data.json  (12214.5 KB)  n
+  make_dashboard_html.py       OK   1.9s  wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\Moneyball Dashboard.html (12369 KB)
+  coalition_pricing.py         OK   1.2s  wrote coalition_pricing.json (533 members)
+  contest_screen.py            OK   5.3s  contest screen: 15 rows | panel 752 members | 5511 bytes -> C:\Users\pgoff\AppData\Local\M
+  champions_v2.py              OK   1.7s  champions v2: 133 champions | 30 threats | 110 mixed | 266117 bytes -> C:\Users\pgoff\AppD
+  efficiency_layers.py         OK   0.4s  efficiency layers: 533 members | 25 lobbying adversaries | moves no rank -> C:\Users\pgoff
+  industry_tiers.py            OK   1.4s  industry tiers: canonical CU primacy + industry evidence boards | 502303 bytes -> C:\Users
+  org_mentions.py              OK 113.1s  org mentions: 496 members | 74 orgs | 570774 bytes -> C:\Users\pgoff\AppData\Local\Melange
+  refresh_cosponsor_forecast.py  OK   0.8s  cosponsor forecast refresh SKIPPED_UNCHANGED � 353 inputs verified
+  make_lobby_network_html.py   OK   9.1s  industry HTML: C:\Users\pgoff\OneDrive\Desktop\Melange Systems\lobby-screen.html (109,159 
+  make_lobby_interactions_html.py  OK   2.6s    ledger_rows=44,496 rendered_rows=29,122 dropped_unsectored_rows=15,374 organizations=259
+  build_staffer_network_section.py --max-bytes 6000000 OK  19.7s  move_labels cells=5912 map_entries=467 unresolved=31 key_spelled=215 ledger=1268 office_ke
+  build_staffer_groups_section.py --part both --max-bytes 5000000 OK  33.6s  seconds=32.4
+  make_staffer_network_html.py --template make_staffer_network_html_01.tpl --sdata provenance OK   0.3s  clients: clients=41203 contract_filers=11021 ties=132738 dropped=0 bytes=3892182
+  bill_lobbying_sidecar.py     OK   5.7s  bill lobbying sidecar: 2961 bills | 6013408 bytes -> C:\Users\pgoff\OneDrive\Desktop\Melan
+  make_member_desk.py          OK  72.0s  wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\cu-member-desk.html (18369 KB)
+  make_combined.py             OK   8.3s  sizes: Moneyball.html 106301164 B, Moneyball_Email.html 94186530 B (staffer surface merged
+  audit_rank_honors.py --surfaces OK   4.4s  }
+  sync_live_dashboard_alias.py  OK   6.5s  {"schema": "live-dashboard-alias-v1", "status": "PASS", "checked_at": "2026-09-19T07:44:20
+  make_email_package.py        OK 191.4s    all-in-one: Moneyball_Email.html (94186530 B) zipped as Moneyball.html
+  audit_source_to_dashboard.py  OK   6.3s  }
+  audit_full.py                !! 133.9s    FAILURES: ['pillar snapshot vintage <= 14 days (stale-basis tripwire)', 'personal-textur
+FULL-BODY AUDIT — 561 passed, 7 FAILED
+  FAILURES: ['pillar snapshot vintage <= 14 days (stale-basis tripwire)', 'personal-texture artifact precision/schema/provenance (no volume reward)', 'A2b repo.data_legislation sentinels unchanged', 'A2b repo.data_engine sentinels unchanged', 'A2b repo.worktrees sentinels unchanged', 'A2 repo.git size_class agrees', 'A2b repo.git sentinels unchanged']
+
+exit=1
+end 2026-09-19 03:49:52

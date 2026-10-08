@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-TAM21D05-1K0-NX-92R"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S2084 IS: Stop Mandating Additional Requirements for Travel Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-06-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>1st Session</session><legis-num>S. 2084</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20210616">June 16, 2021</action-date><action-desc><sponsor name-id="S404">Mr. Scott of Florida</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To terminate the order requiring persons to wear masks while on conveyances and at transportation hubs.</official-title></form><legis-body><section id="idA39B32B9AF594CFD96E0BA0BDA3B2583" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stop Mandating Additional Requirements for Travel Act</short-title></quote> or the <quote><short-title>SMART Act</short-title></quote>.</text></section><section id="id9356016DCD744FADB4081BC363E325D8"><enum>2.</enum><header>Revocation of CDC order</header><text display-inline="no-display-inline">Effective on July 4, 2021, the order issued on January 29, 2021, by the Centers for Disease Control and Prevention under section 361 of the Public Health Service Act (<external-xref legal-doc="usc" parsable-cite="usc/42/264">42 U.S.C. 264</external-xref>) establishing a requirement for persons to wear masks while on conveyances and at transportation hubs shall have no force or effect.</text></section></legis-body></bill> 
+

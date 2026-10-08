@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H94C7787423504E418F2EC98386020A92" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 748 EH: Middle Class Health Benefits Tax Repeal Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 748</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend the Internal Revenue Code of 1986 to repeal the excise tax on high cost employer-sponsored health coverage.</official-title> 
+</form> 
+<legis-body id="HC05C91F74A6444C18BBC9BB3822ED66B" style="OLC"> 
+<section id="H26B7CA5A677848E4B9C449824694D8FE" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Middle Class Health Benefits Tax Repeal Act of 2019</short-title></quote>.</text></section> <section id="H75760CC3F6374B5E87740CB2013C28AE"><enum>2.</enum><header>Repeal of excise tax on high cost employer-sponsored health coverage</header> <subsection id="HDD14F9B40E044176A248B472B16F5F56"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline"><external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/26/43">Chapter 43</external-xref> of the Internal Revenue Code of 1986 is amended by striking section 4980I.</text></subsection> 
+<subsection id="H64459EDF8C76498ABBCC3BEB9B4E5EDE"><enum>(b)</enum><header>Conforming amendments</header> 
+<paragraph id="HD45C9736D021441797B59BF9FDF748AE"><enum>(1)</enum><text>Section 6051 of such Code is amended—</text> <subparagraph id="H2F793F89B0C14BB6AB1F6B7724D96256"><enum>(A)</enum><text>by striking <quote>section 4980I(d)(1)</quote> in subsection (a)(14) and inserting <quote>subsection (g)</quote>, and</text></subparagraph> 
+<subparagraph id="HCA366B1E0E274818B5BDD878A1F2A75C"><enum>(B)</enum><text>by adding at the end the following new subsection:</text> <quoted-block display-inline="no-display-inline" id="H0CFC244B703B46679AF3A341159543F3" style="OLC"> <subsection id="H37F759E17D1E40F4B9DBE973FE9A8F06"><enum>(g)</enum><header>Applicable Employer-Sponsored Coverage</header><text display-inline="yes-display-inline">For purposes of subsection (a)(14)—</text> 
+<paragraph id="HC1958698012541A1900F7672FB6B8B1B"><enum>(1)</enum><header>In general</header><text>The term <term>applicable employer-sponsored coverage</term> means, with respect to any employee, coverage under any group health plan made available to the employee by an employer which is excludable from the employee’s gross income under section 106, or would be so excludable if it were employer-provided coverage (within the meaning of such section 106).</text></paragraph> <paragraph id="HF163A341DD1E4F41AEE36F9BF2893A8B"><enum>(2)</enum><header>Exceptions</header><text>The term <term>applicable employer-sponsored coverage</term> shall not include—</text> 
+<subparagraph id="H6E2E29DF62A642BEA36A8E9A1EE9DDF4"><enum>(A)</enum><text>any coverage (whether through insurance or otherwise) described in section 9832(c)(1) (other than subparagraph (G) thereof) or for long-term care,</text></subparagraph> <subparagraph id="HA804CB540F704A23AD911ABD28C228B9"><enum>(B)</enum><text>any coverage under a separate policy, certificate, or contract of insurance which provides benefits substantially all of which are for treatment of the mouth (including any organ or structure within the mouth) or for treatment of the eye, or</text></subparagraph> 
+<subparagraph id="H04F08B441C2241EDA6872923578A84FC"><enum>(C)</enum><text>any coverage described in section 9832(c)(3) the payment for which is not excludable from gross income and for which a deduction under section 162(l) is not allowable.</text></subparagraph></paragraph> <paragraph id="HDE899FA9872245A1B82F3DC7BB2E4027"><enum>(3)</enum><header>Coverage includes employee paid portion</header><text>Coverage shall be treated as applicable employer-sponsored coverage without regard to whether the employer or employee pays for the coverage.</text></paragraph> 
+<paragraph id="H27927CA8D2B64607A28AE03767E55B02"><enum>(4)</enum><header>Governmental plans included</header><text>Applicable employer-sponsored coverage shall include coverage under any group health plan established and maintained primarily for its civilian employees by the Government of the United States, by the government of any State or political subdivision thereof, or by any agency or instrumentality of any such government.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subparagraph></paragraph> <paragraph id="HC24378CD64624E5C917283D7A4938DAB"><enum>(2)</enum><text display-inline="yes-display-inline">Section 9831(d)(1) of such Code is amended by striking “except as provided in section 4980I(f)(4)”.</text></paragraph> 
+<paragraph id="HEDBA0EB92FF748449D49160E3C0CD129"><enum>(3)</enum><text display-inline="yes-display-inline">The table of sections for chapter 43 of such Code is amended by striking the item relating to section 4980I.</text></paragraph></subsection> <subsection id="H0D1D51A8AF2E40ECBF587C3F6044BF9A"><enum>(c)</enum><header>Effective date</header><text>The amendments made by this section shall apply to taxable years beginning after December 31, 2019.</text></subsection></section> 
+<section id="H2F98166DA0974CE09DBB5D92960D384F"><enum>3.</enum><header>Budgetary effects</header> 
+<subsection id="H8E8EB5E923BD4DE1A2A5655F54DA799F"><enum>(a)</enum><header>Statutory PAYGO scorecards</header><text display-inline="yes-display-inline">The budgetary effects of this Act shall not be entered on either PAYGO scorecard maintained pursuant to section 4(d) of the Statutory Pay-As-You-Go Act of 2010.</text></subsection> <subsection id="HCF6D85189E344DA4936D2A76C280E9DF"><enum>(b)</enum><header>Senate PAYGO scorecards</header><text display-inline="yes-display-inline">The budgetary effects of this Act shall not be entered on any PAYGO scorecard maintained for purposes of section 4106 of H. Con. Res. 71 (115th Congress).</text></subsection></section> 
+</legis-body> <attestation><attestation-group><attestation-date date="20190717" chamber="House">Passed the House of Representatives July 17, 2019.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

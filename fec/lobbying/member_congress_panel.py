@@ -29,6 +29,7 @@ SECTORS = (
     "credit_union",
     "crypto",
     "fintech",
+    "telecom",
     "financial_other",
 )
 BILL_TYPE_LABELS = {
@@ -55,6 +56,7 @@ PANEL_FIELDS = (
     "att_credit_union",
     "att_crypto",
     "att_fintech",
+    "att_telecom",
     "att_financial_other",
     "att_cu_league",
     "pro_cu_sponsored",
@@ -653,6 +655,7 @@ def build_panel(
             "att_credit_union": len(attention[key].get("credit_union", ())),
             "att_crypto": len(attention[key].get("crypto", ())),
             "att_fintech": len(attention[key].get("fintech", ())),
+            "att_telecom": len(attention[key].get("telecom", ())),
             "att_financial_other": len(
                 attention[key].get("financial_other", ())
             ),

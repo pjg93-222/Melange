@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H6CEDE731E13B466ABF41DB001FA3406B" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 5473 IH: Promoting Resilient Buildings Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-09-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5473</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230914">September 14, 2023</action-date><action-desc><sponsor name-id="E000246">Mr. Edwards</sponsor> (for himself and <cosponsor name-id="N000188">Mr. Norcross</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend certain laws relating to disaster recovery and relief with respect to the implementation of building codes, and for other purposes.</official-title></form><legis-body id="H4C70B6C072B74DE6B95E85306ED77360" style="OLC"> 
+<section id="H7A1CC5AA56F84656BFBF383E879A0F74" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Promoting Resilient Buildings Act of 2023</short-title></quote>.</text></section> <section id="H65CCD3F1ABE04B76B1EC60E9D174E084" section-type="subsequent-section"><enum>2.</enum><header>Predisaster hazard mitigation</header><text display-inline="no-display-inline">Section 1234 of the Disaster Recovery Reform Act of 2018 (<external-xref legal-doc="usc" parsable-cite="usc/42/5133">42 U.S.C. 5133</external-xref> note) is amended by striking subsection (d).</text></section> 
+<section id="HFF085EF6417A4EF2933402C8C8D30ABB"><enum>3.</enum><header>Hazard mitigation revolving loan fund program</header><text display-inline="no-display-inline">Section 205(f)(5) of the Robert T. Stafford Disaster Relief and Emergency Assistance Act (<external-xref legal-doc="usc" parsable-cite="usc/42/5135">42 U.S.C. 5135(f)(5)</external-xref>) is amended—</text> <paragraph id="HBDDD3AD22DED4DA197652BD99F0495F7"><enum>(1)</enum><text>in the paragraph heading by striking <quote><header-in-text level="paragraph" style="OLC">Establishing</header-in-text></quote> and insert <quote><header-in-text level="paragraph" style="OLC">Implementing</header-in-text></quote>;</text></paragraph> 
+<paragraph id="HD20FF5B2F912490DB65D92C9F62D7A72"><enum>(2)</enum><text>by striking <quote>establish</quote> and insert <quote>implement</quote>;</text></paragraph> <paragraph id="H13F2DA43E53744F58C855059EB4B53FB"><enum>(3)</enum><text>by inserting <quote>2</quote> after <quote>latest</quote>; and</text></paragraph> 
+<paragraph id="H2476FDBBB731465788EA8A843390550F"><enum>(4)</enum><text>by inserting <quote>, including any amendments made by State, local, Tribal, or territorial governments to such codes, specifications, and standards,</quote> after <quote>standards</quote>. </text> </paragraph></section> </legis-body></bill>
+

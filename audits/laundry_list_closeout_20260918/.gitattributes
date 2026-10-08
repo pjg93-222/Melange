@@ -1,0 +1,10 @@
+patches/*.patch -text
+# The v2 interview turn-bleed receipts (2026-09-19). Each one records sha256 values for the
+# protected-set files it was produced against -- fixN12v2/v2_skipset.json and
+# v2_skipset_plus7.json above all -- so the bytes on disk have to stay the bytes that were
+# hashed. core.autocrlf=true would rewrite them to CRLF on a fresh Windows checkout and every
+# one of those recorded hashes would stop verifying. Frozen evidence, never edited in place:
+# treat it as bytes, exactly as patches/ above already is.
+fixN12v2/** -text
+gradeN12v2/** -text
+applyN12v2/** -text

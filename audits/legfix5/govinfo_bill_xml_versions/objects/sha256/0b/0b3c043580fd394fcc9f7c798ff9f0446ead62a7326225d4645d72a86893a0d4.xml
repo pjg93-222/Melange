@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HAE172B1189644DC395D3946683912B87" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3664 IH: Aiding Development of Vital Assets in Native Communities and Environments Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3664</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190710">July 10, 2019</action-date><action-desc><sponsor name-id="H001064">Mr. Heck</sponsor> (for himself, <cosponsor name-id="C001053">Mr. Cole</cosponsor>, <cosponsor name-id="D000617">Ms. DelBene</cosponsor>, <cosponsor name-id="H001080">Ms. Haaland</cosponsor>, <cosponsor name-id="H001056">Ms. Herrera Beutler</cosponsor>, <cosponsor name-id="K000381">Mr. Kilmer</cosponsor>, <cosponsor name-id="K000188">Mr. Kind</cosponsor>, <cosponsor name-id="M001143">Ms. McCollum</cosponsor>, <cosponsor name-id="N000189">Mr. Newhouse</cosponsor>, and <cosponsor name-id="T000474">Mrs. Torres of California</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name>, and in addition to the Committee on <committee-name committee-id="HBA00">Financial Services</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To direct the Community Development Financial Institutions Fund to perform an outreach program for
+			 the new markets tax credit to underserved communities, and for other
+			 purposes.</official-title></form>
+	<legis-body id="HCACACA79FB95470ABD769944B072514A" style="OLC">
+ <section id="H129D8D3F996247F799FBF92615BD5BD3" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Aiding Development of Vital Assets in Native Communities and Environments Act of 2019</short-title></quote> or the <quote><short-title>ADVANCE Act of 2019</short-title> </quote>.</text>
+		</section><section id="H0D235B18E79B4B9C924974EF988A0B08" section-type="subsequent-section"><enum>2.</enum><header>New markets tax credit outreach to underserved communities</header>
+ <subsection id="H0D6F78EC09824C3481581CE6F327FB87"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subtitle A of title I of the Riegle Community Development and Regulatory Improvement Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/12/4701">12 U.S.C. 4701</external-xref> et seq.) is amended by adding at the end the following new section:</text>
+				<quoted-block display-inline="no-display-inline" id="H639D537BD9CE45D2A000DDF790E78770" style="OLC">
+					<section id="H57544EAD6C7D4FD2AC7E04A2AB3EE9F0"><enum>123.</enum><header>New markets tax credit outreach to underserved communities</header>
+ <subsection id="HF27DA34645E448AFA9CE3B383D2B88D9"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">The Secretary of the Treasury shall—</text> <paragraph id="H23BB6CDF962B43B7934962F5D822315C"><enum>(1)</enum><text>establish a program under which the Fund shall provide outreach and training with respect to the new markets tax credit in low-income communities with a disproportionately low amount of qualified low-income community investments by qualified community development entities; and</text>
+ </paragraph><paragraph id="H8D93B9B85D824EF2859F2F48E95A0A8A"><enum>(2)</enum><text display-inline="yes-display-inline">include questions to determine in the application for allocation of new markets tax credit limitation, and consider as an innovative use or a comparable incentive in the evaluation of such applications, the extent to which such entity intends to make qualified low-income community investments within Indian country; and</text>
+ </paragraph><paragraph id="HA3DE64C253E54716914EE658B76EC741"><enum>(3)</enum><text>to the maximum extent practicable, ensure that at least one qualified community development entity whose primary mission is to fund projects within or that directly benefit Indian country receives an allocation for each allocation round.</text>
+ </paragraph></subsection><subsection id="H161F00F8574D45CCB6DD61C60B2AC009"><enum>(b)</enum><header>Definitions</header><text>For purposes of this section—</text> <paragraph id="HBD11D3BBBD204DE39E76371D22F89D75"><enum>(1)</enum><header>New markets tax credit</header><text display-inline="yes-display-inline">Any term used in this section which is also used in <external-xref legal-doc="usc" parsable-cite="usc/26/45D">section 45D</external-xref> of the Internal Revenue Code of 1986 shall have the same meaning as when used in such section 45D.</text>
+ </paragraph><paragraph commented="no" id="H2B3ACC3FC63744CC9BF3101666088702"><enum>(2)</enum><header>Indian country</header><text>The term <quote>Indian country</quote> has the meaning given such term in section 1151 of title 18, United States Code.</text></paragraph></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block> </subsection><subsection id="HDD9C01EA28FB4EA8885E96B901C1764A"><enum>(b)</enum><header>Clerical amendment</header><text display-inline="yes-display-inline">The table of contents in section 1(b) of the Riegle Community Development and Regulatory Improvement Act of 1994 is amended by inserting after the item relating to section 121 the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H9B7259AC273C479AA34F23E3051DA73B" style="OLC">
+					<toc regeneration="no-regeneration">
+						<toc-entry level="section">122. Grants to establish loan-loss reserve funds.</toc-entry>
+						<toc-entry level="section">123. New markets tax credit outreach to underserved communities.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section></legis-body></bill>
+
+

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H4779DD893D8E4971ABCDB917BFAE9E05" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8278 IH: Fostering the Use of Technology to Uphold Regulatory Effectiveness in Supervision Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8278</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260414">April 14, 2026</action-date><action-desc><sponsor name-id="S001188">Mr. Stutzman</sponsor> (for himself and <cosponsor name-id="F000454">Mr. Foster</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require certain supervisory agencies to assess their technological capabilities, and for other purposes.</official-title></form><legis-body id="H315CE8664A274C7FA20E58E31416CA53" style="OLC"> 
+<section id="HB7164F34DAC149A28A90C478067D0D47" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fostering the Use of Technology to Uphold Regulatory Effectiveness in Supervision Act</short-title></quote>.</text></section> <section id="HABF7C3E34FB94ED4B651D09562577778"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text> 
+<paragraph id="HD00459A94DAE45678EE1C19E71991437"><enum>(1)</enum><text>Banking regulators continue to examine and monitor depository institutions without sufficient access to real-time information.</text></paragraph> <paragraph id="HEBF04807081A446683581C5D9FF4FA25"><enum>(2)</enum><text>Supervisory regulators should leverage technologies to more effectively carry out their duties.</text></paragraph> 
+<paragraph id="H60AA605A79BD4B54B0387A45164F3D60"><enum>(3)</enum><text>When updating supervisory technology, risks surrounding technology procurement must be effectively managed.</text></paragraph> <paragraph id="H23D65AD663D9451B896B4D1BECA6A62B"><enum>(4)</enum><text>Agencies’ reliance on outdated technology can create vulnerabilities for the financial system, through—</text> 
+<subparagraph id="HFA5FFA22E80E42D79A266990484AD5CC"><enum>(A)</enum><text>difficulties in collecting, compiling, and analyzing relevant information about risks and noncompliance at supervised firms;</text></subparagraph> <subparagraph id="HB1AFC292B01745DFA0B0B3094B0E2224"><enum>(B)</enum><text>reliance on information that is inaccurate, incomplete, or not timely;</text></subparagraph> 
+<subparagraph id="H43777705926F4E38A7DED57452E59EFE"><enum>(C)</enum><text>reliance on limited and outdated tools for data analysis;</text></subparagraph> <subparagraph id="H54B7FBBB93B34771B7A79C51C09A3099"><enum>(D)</enum><text>difficulties in using data to identify risk trends;</text></subparagraph> 
+<subparagraph id="HD7B64DCA5167441CAA8DD79C596CB8E2"><enum>(E)</enum><text>difficulties in producing accurate and timely reports;</text></subparagraph> <subparagraph id="HFADB63781FF74AE8AEB9B20C4D37A917"><enum>(F)</enum><text>inadequacy of cybersecurity safeguards; and</text></subparagraph> 
+<subparagraph id="H17B58063A5654BE5AFC94B548BD29C27"><enum>(G)</enum><text>failure to detect illegal activities.</text></subparagraph></paragraph> <paragraph id="HCCCCFDBB091F44B2922E3BE3D81E138B"><enum>(5)</enum><text>The rapid expansion of financial firms’ use of artificial intelligence may generate opportunities to improve the financial system while also introducing a range of risks, making it essential that agencies be equipped with the technology, expertise, and skills needed to analyze these opportunities and potential risks.</text></paragraph> 
+<paragraph id="H1408674DA34B47E98B8BB85D4005B228"><enum>(6)</enum><text>While agencies assess their supervisory capabilities on an ongoing basis, it is imperative that there be a unified goal of enhancing supervisory technologies that ensure effective and sustainable oversight.</text></paragraph></section> <section id="HEAFA7D134ABC4721852AA5A7B5A6E61D"><enum>3.</enum><header>Technological capabilities and procurement practices assessment</header> <subsection id="H1AFD248B054E4DCABD2D6F5D65134F5D"><enum>(a)</enum><header>In general</header> <paragraph id="H2A6E400AD43B4981B24665BDC2C78B50"><enum>(1)</enum><header>Technological capabilities assessment</header><text display-inline="yes-display-inline">Each covered agency shall, not later than 180 days after the date of the enactment of this section, assess how existing technologies used by the covered agency pose challenges to the covered agency in conducting adequate, real-time supervisory assessments of entities over which the covered agency has supervisory authority. Such technologies include, as applicable—</text> 
+<subparagraph id="HF235124934FC461D8EAA2998E89D9D36"><enum>(A)</enum><text>core information technology infrastructure;</text></subparagraph> <subparagraph id="HADB39C1E49AC47A69152818201E35C8C"><enum>(B)</enum><text>technologies used to supervise entities;</text></subparagraph> 
+<subparagraph id="H47360321A06644E085C146FB79DE1DC4"><enum>(C)</enum><text>technologies for monitoring general market risks using reported data and external data; and</text></subparagraph> <subparagraph id="H0171CB23B9524E9683399169ED3F8582"><enum>(D)</enum><text>technologies for data collection, storage, processing, and security.</text></subparagraph></paragraph> 
+<paragraph id="H3FF6011F1B4E4E8CA0F108240DD7DC2E"><enum>(2)</enum><header>Procurement practices assessment</header><text>Each covered agency shall, not later than 180 days after the date of the enactment of this section—</text> <subparagraph id="HF1A6ABF7A0F94282A977C014CAF1E812"><enum>(A)</enum><text>assess the procurement rules and protocols adhered to by such covered agency when such covered agency acquires or develops new technological systems; and</text></subparagraph> 
+<subparagraph id="HFF296A70214D4BDF8D38A35F351AFA4F"><enum>(B)</enum><text display-inline="yes-display-inline">identify any opportunities to further streamline procurement rules and protocols, including an assessment of the impact such rules or protocols have on the ability of the covered agency to test new technological systems, that are within the covered agency’s authority to streamline.</text></subparagraph></paragraph></subsection> <subsection id="H3E4CBB5AFE30423B80743FC5FFB4C738"><enum>(b)</enum><header>Report</header><text display-inline="yes-display-inline">Not later than 18 months after the completion of the assessments required under subsection (a), and for every 5 years thereafter, the covered agencies shall coordinate and jointly submit to the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate, in a manner that does not pose a risk to the integrity or security of any technologies, systems, or capabilities of covered agencies, regulated entities, or market participants, a report that includes, as applicable, the following with respect to each covered agency:</text> 
+<paragraph id="H027F15BEF6454E489BAD9F4BA54C064C"><enum>(1)</enum><text>A general overview of hardware and software used for information gathering and advanced analytics during supervision activities, including categories of technology purchased from vendors and developed by the covered agency or contractors of the covered agency.</text></paragraph> <paragraph id="HB0FF3578B1DF48E2B34CEA7A4BF5FDFD"><enum>(2)</enum><text>A description of the procurement practices and protocols of the covered agency, including a description of—</text> 
+<subparagraph id="H4E172559855F426396C8DCD1C43D9844"><enum>(A)</enum><text>whether such processes are voluntarily adhered to or mandated; and</text></subparagraph> <subparagraph id="H03EAFA6D0CDD434DB1EFC6E3110DA121"><enum>(B)</enum><text>any opportunities to further streamline procurement rules and protocols, including an assessment of the impact such rules or protocols have on the ability of the covered agency to test new technological systems.</text></subparagraph></paragraph> 
+<paragraph id="H233FD36860774C3EA247912D5CF970BA"><enum>(3)</enum><text>A general overview of the portion of the workforce of the covered agency that is engaged materially in technology development within the covered agency, including—</text> <subparagraph id="H04F942A1FFF54FA2A507512D0AC7EA4A"><enum>(A)</enum><text>an overview of the ability of the covered agency to recruit and retain appropriate technology experts; and</text></subparagraph> 
+<subparagraph id="H218799F238B14ACDA30F608081A5042C"><enum>(B)</enum><text>a description of the degree to which the covered agency relies on contractors to design, develop, or deploy technology and perform technology-related tasks.</text></subparagraph></paragraph> <paragraph id="H60F0186C1D0B4047A8B23B0A7D910226"><enum>(4)</enum><text>A general description of the processes used by the covered agency to obtain information from entities supervised by the covered agency and any impediments thereto, including regulatory obstacles.</text></paragraph> 
+<paragraph id="H4C56571B68DE4ACE8DDE57E3E30AF2ED">
+                    <enum>(5)</enum>
+ <text display-inline="yes-display-inline">General information about market and technology trends and risks in the underlying regulated markets including, specific to the covered agency’s jurisdiction—</text>
+                    <subparagraph id="H962ED897E8794B6DB0EBB88FF6119CF0">
+                        <enum>(A)</enum>
+ <text>market developments influenced by the adoption of new technologies;</text>
+                    </subparagraph>
+                    <subparagraph id="HF657C5E74DD8471BB6FFDD162D125BF2">
+                        <enum>(B)</enum>
+ <text>the use of new technologies by supervised entities for compliance and risk management purposes;</text>
+                    </subparagraph>
+                    <subparagraph id="HACED0ED08C124E1789CFBAA379186921" commented="no">
+                        <enum>(C)</enum>
+ <text display-inline="yes-display-inline">the impact of new technologies on the collection and analysis of data submitted to the covered agencies by supervised entities as required by regulation, including on data quality, interoperability, and standardization; and</text>
+                    </subparagraph>
+                    <subparagraph id="H9EB3C6C7EF504240A72951391CF08224">
+                        <enum>(D)</enum>
+ <text>potential risks, including risks of illicit activity, related to new technologies.</text>
+                    </subparagraph>
+                </paragraph> 
+<paragraph id="H98679F97674449C68526560DD14869E2"><enum>(6)</enum><text>A general description of the ways in which the covered agency shares information or system access with other covered agencies and any impediments thereto, including regulatory obstacles.</text></paragraph> <paragraph id="H0C904BB74F274E2DA97FADB04A3738BB"><enum>(7)</enum><text>An estimate of the costs for supervised entities to modify systems to share data with covered agencies, as appropriate.</text></paragraph> 
+<paragraph id="H0D1500716E624D56AE414DB4871B2C74">
+                    <enum>(8)</enum>
+ <text>A general description of any plans of the covered agency to implement future upgrades to the technology it uses to supervise entities, including—</text>
+                    <subparagraph id="HB0CB4F4A2F0244E7AD913489A3844B55">
+                        <enum>(A)</enum>
+ <text>the anticipated timeline for any planned upgrades;</text> </subparagraph> <subparagraph id="H136B16F820144AB2909791B7584C596D"> <enum>(B)</enum> <text>the costs of any planned upgrades;</text>
+                    </subparagraph>
+                    <subparagraph id="H2E6C83A15D2C44179660D96883628011">
+                        <enum>(C)</enum>
+ <text>any impediments to procuring relevant technologies;</text> </subparagraph> <subparagraph id="HD507A1E3B8744A28A01D6901EA86F41F"> <enum>(D)</enum> <text>plans for hiring and training individuals in connection with technological upgrades;</text>
+                    </subparagraph>
+                    <subparagraph id="H4EADC8C2709B4197A0C897702B00B716">
+                        <enum>(E)</enum>
+ <text>any aspects of any planned upgrades that should be addressed on an interagency basis;</text>
+                    </subparagraph>
+                    <subparagraph id="HBDA86DF303684CCEBF661DDD7CF9C872">
+                        <enum>(F)</enum>
+ <text>any anticipated challenges and opportunities associated with entities supervised by the covered agency adapting to the covered agency’s reporting process, including—</text>
+                        <clause id="HE3D0A460C4614CC1A2671C33D91396D7">
+                            <enum>(i)</enum>
+ <text>estimates of transition costs; and</text> </clause> <clause id="H387860071F5B4244AAF5582449AF9A53"> <enum>(ii)</enum> <text>estimates of any potential cost reductions; and</text>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="HC921374A3A4D4617999B314D22F2F489">
+                        <enum>(G)</enum>
+ <text display-inline="yes-display-inline">as applicable, the covered agency’s relationships with other covered agencies in their capacity as delegated examiners.</text>
+                    </subparagraph>
+                </paragraph></subsection> 
+<subsection id="H71F0AEF7EB7E40738A4E8A3EFA85381A">
+                <enum>(c)</enum>
+                <header>Covered agency defined</header>
+ <text>In this section, the <quote>covered agency</quote> means the Board of Governors of the Federal Reserve System, the Bureau of Consumer Financial Protection, the Federal Deposit Insurance Corporation, the Department of the Treasury, including the Office of the Comptroller of the Currency and the Financial Crimes Enforcement Network, the Federal Housing Finance Agency, and the National Credit Union Administration.</text>
+            </subsection></section> 
+</legis-body></bill>
+

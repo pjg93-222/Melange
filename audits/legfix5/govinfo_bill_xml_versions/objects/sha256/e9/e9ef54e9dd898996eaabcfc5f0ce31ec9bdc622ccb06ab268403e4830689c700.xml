@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H158CD213C10844FEBC6117EBD47DCC27" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3436 IH: Chronic Care Management Improvement Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3436</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190624">June 24, 2019</action-date><action-desc><sponsor name-id="D000617">Ms. DelBene</sponsor> (for herself and <cosponsor name-id="W000800">Mr. Welch</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HWM00">Ways and Means</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title XVIII of the Social Security Act to remove cost-sharing responsibilities for chronic
+			 care management services under the Medicare program.</official-title></form>
+	<legis-body id="HEF4DFE2096BA418B99D760A376F65794" style="OLC">
+		<section id="H3AF0011678994EABB55346117902D959" section-type="section-one"><enum>1.</enum>
+ <header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Chronic Care Management Improvement Act</short-title></quote>.</text> </section><section id="H3AF0011678994EABB55346117902DK59"><enum>2.</enum><header>Removing cost-sharing responsibilities for chronic care management services under part B of the Medicare program</header> <subsection id="HFCA0432C9EB643CCA7306F62926B3E3D"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 1833 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395l">42 U.S.C. 1395l</external-xref>) is amended—</text>
+ <paragraph id="H942410A07BE74FC6B081A3B202E2B3DD"><enum>(1)</enum><text display-inline="yes-display-inline">in subsection (a)(1), by striking subparagraph (Z) and inserting the following: <quote>(Z) with respect to chronic care management services (as described in section 1848(b)(8)) furnished on or after January 1, 2021, the amount paid shall be an amount equal to 100 percent of the lesser of the actual charge for such services or the amount determined under section 1848,</quote>; and</text>
+ </paragraph><paragraph id="H80A8319C2FEE48AE9122CAA02D45C58E"><enum>(2)</enum><text>in subsection (b)—</text> <subparagraph id="H57C233D3568B440E87E1B21827273685"><enum>(A)</enum><text>in paragraph (9), by striking <quote>and</quote> at the end; and</text>
+ </subparagraph><subparagraph id="H709FADF5373247D49D08ACE44C8E1EA2"><enum>(B)</enum><text>in paragraph (10), by striking the period at the end and inserting the following: <quote>, and (11) such deductible shall not apply with respect to chronic care management services (as described in section 1848(b)(8)) furnished on or after January 1, 2021.</quote>.</text>
+					</subparagraph></paragraph></subsection><subsection id="H278ECA4BD42849FB95F5B23F8ED3AD64"><enum>(b)</enum><header>Technical amendments</header>
+ <paragraph id="HCEC51B66D292430FA2C430A4AD6B720D"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">Section 1833(a) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395l">42 U.S.C. 1395l(a)</external-xref>) is amended—</text> <subparagraph id="H3314FD33AA5346E5AA2A217BC8DCEE37"><enum>(A)</enum><text>in paragraph (3)—</text>
+ <clause id="HED349C1F3C4649F097E8A1B3851DED86"><enum>(i)</enum><text>in subparagraph (A)—</text> <subclause id="H967E02D42F5C49C19DC22242C360E05C"><enum>(I)</enum><text>by striking <quote>subparagraph (B)</quote> and inserting <quote>subparagraphs (B), (C), and (D)</quote>; and</text>
+ </subclause><subclause id="H3F875E9175D1400F8B9122CD89AE5D68"><enum>(II)</enum><text>by striking <quote>or</quote> at the end; and</text> </subclause></clause><clause id="H6BF1BBA0B3A44E05A2268DB6317556CA"><enum>(ii)</enum><text>by adding at the end the following new subparagraphs:</text>
+							<quoted-block display-inline="no-display-inline" id="HA4C1580A293C4D33A97831BA93CCFBAB" style="OLC">
+ <subparagraph id="HC7A85474FB1947858FB28E2418EAD70C"><enum>(C)</enum><text display-inline="yes-display-inline">with respect to Federally qualified health center services (other than such services that are described in clause (i) or (ii) of subparagraph (D)) furnished on or after the implementation date of the prospective payment system under section 1834(o) for which payment is made under such section, the amounts paid shall be 80 percent of the lesser of the actual charge or the amount determined under such section; and</text>
+ </subparagraph><subparagraph id="HB6796259FE2E4A2D89F0D10072A0DF9B"><enum>(D)</enum><text>with respect to Federally qualified health center services and rural health clinic services that are—</text>
+ <clause id="H5D93CEAD3B1940AA81EBE9C8D06B7B70"><enum>(i)</enum><text>personalized prevention plan services (as described in paragraph (1)(X)) or preventive services (as described in paragraph (1)(Y)) furnished on or after January 1, 2011; or</text>
+ </clause><clause id="H9376168748EC4592A28D1587DC188CC3"><enum>(ii)</enum><text>chronic care management services (as described in paragraph (1)(Z)) furnished on or after January 1, 2021;</text>
+									</clause><continuation-text continuation-text-level="subparagraph">the amounts paid shall be equal to 100 percent of the lesser of the actual charge or the amount
+			 determined under subparagraph (A), section 1834(o), or section 1848, as
+			 applicable);</continuation-text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </clause></subparagraph><subparagraph id="HAAA9894752644BD4A8D7C352320E3963"><enum>(B)</enum><text>by striking the matter following paragraph (9).</text> </subparagraph></paragraph><paragraph id="HFBFA3BB734FC450EB11EBBE961EBAF98"><enum>(2)</enum><header>Conforming amendments</header><text>Section 1834(o) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395m">42 U.S.C. 1395m(o)</external-xref>) is amended—</text>
+ <subparagraph commented="no" id="H45B647DA73E44872A2E469681C4C2FA9"><enum>(A)</enum><text>in paragraph (1)(A), by inserting <quote>(other than such services described in clause (i) or (ii) of section 1833(a)(3)(D))</quote> after <quote>Federally qualified health center services</quote>; and</text> </subparagraph><subparagraph id="H68EB3B451E684B1A98A1ED8E1343D1EC"><enum>(B)</enum><text>in paragraph (2)—</text>
+ <clause commented="no" id="H9D023D20F56442A2B2CF302F38CEC6E3"><enum>(i)</enum><text>in subparagraph (A), by inserting <quote>(other than such services described in clause (i) or (ii) of section 1833(a)(3)(D))</quote> after <quote>services</quote>; and</text> </clause><clause id="H8953DE3F72C0442E9B3406000FD54E42"><enum>(ii)</enum><text>in subparagraph (B)(i)—</text>
+ <subclause commented="no" id="HE6258921AE384A8B945208F464588811"><enum>(I)</enum><text>by inserting <quote>(other than such services described in clause (i) or (ii) of section 1833(a)(3)(D))</quote> after <quote>Federally qualified health center services</quote>; and</text> </subclause><subclause id="HB7935CCA56BF4651B4727EC4F1B0DD63"><enum>(II)</enum><text>by striking <quote>section 1833(a)(1)(Z)</quote> and inserting <quote>subparagraphs (C) and (D) of section 1833(a)(3)</quote>.</text>
+							</subclause></clause></subparagraph></paragraph></subsection></section></legis-body></bill>
+
+

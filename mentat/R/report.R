@@ -1735,318 +1735,20 @@ spending_report_lookups <- function(connection) {
   )
 }
 
-# FEC committee type and designation code books.
-#
-# The detail sheets publish the raw one-letter code AND a label beside it: the
-# code is what the FEC register actually stores and what a chart can group on
-# without ambiguity, the label is what makes that chart readable. Codes are
-# transcribed from the FEC committee master data dictionary. Anything the book
-# does not contain - including a blank - resolves to "", never to a guess,
-# because an invented label would make an unclassified committee look
-# classified.
-MENTAT_FEC_COMMITTEE_TYPE_LABELS <- c(
-  C = "Communication cost",
-  D = "Delegate committee",
-  E = "Electioneering communication",
-  H = "House",
-  I = "Independent expenditor (person or group)",
-  N = "PAC - nonqualified",
-  O = "Independent expenditure-only (Super PAC)",
-  P = "Presidential",
-  Q = "PAC - qualified",
-  S = "Senate",
-  U = "Single-candidate independent expenditure",
-  V = "Hybrid PAC (Carey) - nonqualified",
-  W = "Hybrid PAC (Carey) - qualified",
-  X = "Party - nonqualified",
-  Y = "Party - qualified",
-  Z = "National party nonfederal account"
-)
-
-MENTAT_FEC_COMMITTEE_DESIGNATION_LABELS <- c(
-  A = "Authorized by a candidate",
-  B = "Lobbyist/Registrant PAC",
-  D = "Leadership PAC",
-  J = "Joint fundraiser",
-  P = "Principal campaign committee",
-  U = "Unauthorized"
-)
-
-mentat_fec_code_label <- function(codes, book) {
-  code <- toupper(trim_text(codes))
-  label <- unname(book[match(code, names(book))])
-  label[is.na(label)] <- ""
-  label
-}
-
-# Fine-grain detail frames for the workbook's chartable sheets.
-#
-# The Chart Studio console can only chart columns that a worksheet actually
-# PUBLISHES, and the raw transaction sheet is the first thing a large industry
-# loses: tools/prepare_workbook_payload.py projects raw_rows onto 18 fields that
-# carry no ZIP, city, state, employer or occupation, and formula-fact mode
-# replaces raw_rows outright with aggregate facts. These two frames are built
-# here, on the full accepted rows, and travel as their OWN payload keys, so no
-# compaction mode can silently empty the sheets that make committee, geography,
-# employer and occupation chartable.
-#
-# The row cap exists because app/report_insights.py REFUSES a worksheet over
-# 50,000 rows - it raises rather than truncating, so an oversized sheet is not a
-# degraded chart, it is no chart at all. Past the cap the smallest rows fold into
-# one "Other" row per company and cycle, which keeps the cap and the
-# reconciliation invariant (per-cycle detail total == per-cycle included total)
-# simultaneously true. R\export_guards.R re-checks that invariant against the
-# cycle totals the rest of the workbook prints.
-#
-# nrow <= row_cap holds whenever row_cap is at least the number of
-# (cycle, company) pairs, because each pair can need an Other row of its own.
-# The caller's floor (MENTAT_DETAIL_ROW_CAP >= 100, ten companies, three
-# cycles) keeps that true; the function itself accepts any positive cap so a
-# test can exercise the fold on a handful of rows.
-spending_detail_frames <- function(rows, row_cap = 45000L) {
-  require_package("data.table")
-  row_cap <- suppressWarnings(as.integer(row_cap))
-  if (length(row_cap) != 1L || is.na(row_cap) || row_cap < 1L) {
-    stop("spending_detail_frames needs a positive row cap.", call. = FALSE)
-  }
-  detail <- data.table::as.data.table(rows)
-  required <- c(
-    "cycle", "cycle_label", "company", "committee_id", "recipient",
-    "committee_type", "committee_designation", "recipient_category", "party",
-    "state", "city", "zipcode", "employer", "occupation", "street_1",
-    "street_2", "amount", "person_key", "include_in_analysis", "date"
-  )
-  absent <- setdiff(required, names(detail))
-  if (length(absent)) {
-    stop(
-      "spending_detail_frames is missing source columns: ",
-      paste(absent, collapse = ", "),
-      call. = FALSE
-    )
-  }
-  recipient_keys <- c("cycle", "cycle_label", "company", "committee_id")
-  contributor_keys <- c(
-    "cycle", "cycle_label", "company", "state", "city", "zip5", "employer",
-    "occupation", "street_1", "street_2"
-  )
-  recipient_columns <- c(
-    recipient_keys, "recipient", "committee_type", "committee_type_label",
-    "designation", "designation_label", "recipient_category", "party",
-    "total_giving", "gift_count", "contributors", "first_date", "last_date",
-    "folded_rows"
-  )
-  contributor_columns <- c(
-    contributor_keys, "total_giving", "gift_count", "contributors",
-    "folded_rows"
-  )
-  empty_frame <- function(columns) {
-    frame <- data.table::data.table(
-      cycle = integer(), cycle_label = character(), company = character(),
-      committee_id = character(), recipient = character(),
-      committee_type = character(), committee_type_label = character(),
-      designation = character(), designation_label = character(),
-      recipient_category = character(), party = character(),
-      state = character(), city = character(), zip5 = character(),
-      employer = character(), occupation = character(),
-      street_1 = character(), street_2 = character(),
-      total_giving = numeric(), gift_count = integer(),
-      contributors = integer(), first_date = character(),
-      last_date = character(), folded_rows = integer()
-    )
-    frame[, columns, with = FALSE]
-  }
-  detail <- data.table::copy(detail[include_in_analysis == "Yes"])
-  if (!nrow(detail)) {
-    return(list(
-      recipient_detail = empty_frame(recipient_columns),
-      contributor_detail = empty_frame(contributor_columns),
-      stats = list(
-        row_cap = row_cap, recipient_rows = 0L, recipient_folded_rows = 0L,
-        contributor_rows = 0L, contributor_folded_rows = 0L
-      )
-    ))
-  }
-  detail[, cycle := as.integer(cycle)]
-  detail[, cycle_label := trim_text(cycle_label)]
-  detail[, company := trim_text(company)]
-  detail[, committee_id := toupper(trim_text(committee_id))]
-  detail[, committee_type := toupper(trim_text(committee_type))]
-  detail[, committee_designation := toupper(trim_text(committee_designation))]
-  detail[, state := trim_text(state)]
-  detail[, city := trim_text(city)]
-  detail[, employer := trim_text(employer)]
-  detail[, occupation := trim_text(occupation)]
-  detail[, street_1 := trim_text(street_1)]
-  detail[, street_2 := trim_text(street_2)]
-  detail[, person_key := trim_text(person_key)]
-  detail[, amount := as.numeric(amount)]
-  detail[, date := trim_text(date)]
-  # ZIP+4, a 9-digit string and a plain 5-digit code all share the same leading
-  # five characters; anything else (blank, truncated, alphabetic foreign codes)
-  # is counted under "" rather than dropped, so the geography sheet still
-  # reconciles to the cycle total.
-  detail[, zip5 := substr(trim_text(zipcode), 1L, 5L)]
-  detail[!grepl("^[0-9]{5}$", zip5), zip5 := ""]
-
-  # Deterministic cap and fold.
-  #
-  # Ordering is total_giving descending with the key columns ascending as the
-  # tie-break, so the same input folds the same rows no matter what order
-  # data.table produced the groups in. One row per (cycle, company) is held back
-  # from the cap because every folded group has to land in its own company's
-  # "Other" row and those rows are additional. The Other row's numbers are
-  # recomputed from the SOURCE rows of the folded groups, not summed from the
-  # group rows: summing per-group contributor counts would double-count a person
-  # who gave to more than one folded recipient.
-  fold_frame <- function(frame, key_columns, marker_column, dated) {
-    folded_count <- 0L
-    if (nrow(frame) > row_cap) {
-      data.table::setorderv(
-        frame,
-        c("total_giving", key_columns),
-        c(-1L, rep(1L, length(key_columns)))
-      )
-      reserve <- nrow(unique(frame[, .(cycle, company)]))
-      keep <- max(row_cap - reserve, 0L)
-      folded <- frame[seq.int(keep + 1L, nrow(frame))]
-      frame <- frame[seq_len(keep)]
-      folded_count <- nrow(folded)
-      group_key <- function(source) {
-        do.call(paste, c(as.list(source[, key_columns, with = FALSE]), list(sep = "\r")))
-      }
-      members <- detail[group_key(detail) %in% group_key(folded)]
-      other <- if (dated) {
-        members[, .(
-          total_giving = sum(amount, na.rm = TRUE),
-          gift_count = .N,
-          contributors = data.table::uniqueN(person_key[nzchar(person_key)]),
-          first_date = fec_min_text(date),
-          last_date = fec_max_text(date)
-        ), by = .(cycle, cycle_label, company)]
-      } else {
-        members[, .(
-          total_giving = sum(amount, na.rm = TRUE),
-          gift_count = .N,
-          contributors = data.table::uniqueN(person_key[nzchar(person_key)])
-        ), by = .(cycle, cycle_label, company)]
-      }
-      other <- merge(
-        other,
-        folded[, .(folded_rows = .N), by = .(cycle, cycle_label, company)],
-        by = c("cycle", "cycle_label", "company"),
-        sort = FALSE
-      )
-      for (column in setdiff(names(frame), names(other))) {
-        value <- if (identical(column, marker_column)) {
-          sprintf("Other (%d rows folded)", other$folded_rows)
-        } else if (is.character(frame[[column]])) {
-          ""
-        } else {
-          frame[[column]][NA_integer_]
-        }
-        other[, (column) := value]
-      }
-      frame <- data.table::rbindlist(
-        list(frame, other[, names(frame), with = FALSE]),
-        use.names = TRUE
-      )
-    }
-    sort_columns <- c("cycle", "total_giving", setdiff(key_columns, "cycle"))
-    data.table::setorderv(
-      frame,
-      sort_columns,
-      c(1L, -1L, rep(1L, length(sort_columns) - 2L))
-    )
-    list(frame = frame[], folded = folded_count)
-  }
-
-  recipient_detail <- detail[, .(
-    recipient = fec_mode_text(recipient),
-    committee_type = fec_mode_text(committee_type),
-    designation = fec_mode_text(committee_designation),
-    recipient_category = fec_mode_text(recipient_category),
-    party = fec_mode_text(party),
-    total_giving = sum(amount, na.rm = TRUE),
-    gift_count = .N,
-    contributors = data.table::uniqueN(person_key[nzchar(person_key)]),
-    first_date = fec_min_text(date),
-    last_date = fec_max_text(date),
-    folded_rows = 0L
-  ), by = c(recipient_keys)]
-  contributor_detail <- detail[, .(
-    total_giving = sum(amount, na.rm = TRUE),
-    gift_count = .N,
-    contributors = data.table::uniqueN(person_key[nzchar(person_key)]),
-    folded_rows = 0L
-  ), by = c(contributor_keys)]
-
-  # The marker goes in the first text column the SHEET shows - Recipient, State -
-  # so a chart grouped on that column gets a visible "Other" bucket instead of a
-  # blank one, and Committee ID stays clean because the PAC & Candidate Map
-  # sheet joins on it.
-  recipient_folded <- fold_frame(recipient_detail, recipient_keys, "recipient", TRUE)
-  contributor_folded <- fold_frame(contributor_detail, contributor_keys, "state", FALSE)
-  recipient_detail <- recipient_folded$frame
-  contributor_detail <- contributor_folded$frame
-  recipient_detail[, committee_type_label := mentat_fec_code_label(
-    committee_type, MENTAT_FEC_COMMITTEE_TYPE_LABELS
-  )]
-  recipient_detail[, designation_label := mentat_fec_code_label(
-    designation, MENTAT_FEC_COMMITTEE_DESIGNATION_LABELS
-  )]
-  data.table::setcolorder(recipient_detail, recipient_columns)
-  data.table::setcolorder(contributor_detail, contributor_columns)
-  list(
-    recipient_detail = recipient_detail[],
-    contributor_detail = contributor_detail[],
-    stats = list(
-      row_cap = row_cap,
-      recipient_rows = nrow(recipient_detail),
-      recipient_folded_rows = recipient_folded$folded,
-      contributor_rows = nrow(contributor_detail),
-      contributor_folded_rows = contributor_folded$folded
-    )
-  )
-}
 spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   require_package("data.table")
   if (!isTRUE(versioning_applied)) {
     apply_amendment_versioning(connection, print_summary = FALSE)
-  }
-  # Exports read immutable snapshots, including pre-migration databases. Missing
-  # source metadata stays blank/unverified instead of inventing receipt roles.
-  optional_projection <- function(table, fields) {
-    present <- DBI::dbListFields(connection, table)
-    paste0(paste(vapply(fields, function(field) {
-      if (field %in% present) field else paste0("NULL AS ", field)
-    }, character(1L)), collapse = ", "), ",")
-  }
-  receipt_projection <- function(table) {
-    optional_projection(table, c(
-      "receipt_type_full", "filing_form", "receipt_type", "line_number", "line_number_label",
-      "file_num", "report_year", "report_type",
-      "memo_code", "memoed_subtotal", "memo_text", "back_reference_transaction_id", "back_reference_schedule_name",
-      "contributor_id"))
-  }
-  # contributor_street_1/2 arrived with the street-column migration. Snapshots
-  # taken before it do not carry the columns, and SELECTing them
-  # unconditionally aborts the whole export with "no such column" before any
-  # guard downstream can run. Give them the same tolerance the receipt
-  # metadata above already has: absent means blank, never a failed export.
-  street_projection <- function(table) {
-    optional_projection(table, c("contributor_street_1", "contributor_street_2"))
   }
   people <- data.table::as.data.table(DBI::dbGetQuery(
     connection,
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation,",
-      street_projection("contributions"), "company, sub_id, matched_variant,",
+      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "two_year_transaction_period, entity_type, is_entity_contributor,",
-      receipt_projection("contributions"), "transaction_id, pdf_url,",
-      "conduit_committee_id, conduit_committee_name, is_conduit_leg,",
+      "receipt_type_full, conduit_committee_id, conduit_committee_name, is_conduit_leg,",
       "is_memo_leg, is_passthrough_leg, memo_review, possible_amendment, is_refund,",
       "superseded_by_amendment, duplicate_filing_version, duplicate_memo,",
       "company_match_status, company_match_reason, excluded_reason,",
@@ -2061,11 +1763,10 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
     paste(
       "SELECT contributor_name, committee_name, contribution_receipt_date,",
       "contribution_receipt_amount, contributor_city, contributor_state,",
-      "contributor_zip, contributor_employer, contributor_occupation,",
-      street_projection("corporate_giving"), "company, sub_id, matched_variant,",
+      "contributor_zip, contributor_employer, contributor_occupation, company, sub_id,",
       "committee_id, recipient_committee_type, recipient_committee_designation,",
       "cycle AS two_year_transaction_period, entity_type, is_entity_contributor,",
-      receipt_projection("corporate_giving"), "transaction_id, pdf_url, '' AS conduit_committee_id,",
+      "'' AS receipt_type_full, '' AS conduit_committee_id,",
       "'' AS conduit_committee_name, is_conduit_leg, is_memo_leg,",
       "is_passthrough_leg, 0 AS memo_review,",
       "CASE WHEN original_sub_id IS NOT NULL AND TRIM(original_sub_id)<>''",
@@ -2087,14 +1788,6 @@ spending_raw_report_rows <- function(connection, versioning_applied = FALSE) {
   data.table::setorder(rows, source_priority, sub_id)
   rows <- unique(rows, by = "sub_id")
   rows[, source_priority := NULL]
-  variants <- spending_report_lookups(connection)$companies
-  rows[, company_attribution_status := fec_attribution_status(rows, split(variants$variant, variants$company))]
-  rows[, receipt_role := fec_receipt_role(rows)]
-  # Never trust flags computed by an older matcher on an immutable snapshot.
-  memo_plan <- mentat_memo_duplicate_plan(rows)
-  rows[, `:=`(duplicate_memo = memo_plan$duplicate_memo,
-              duplicate_of_sub_id = memo_plan$duplicate_of_sub_id,
-              duplicate_reason = memo_plan$duplicate_reason)]
   rows[]
 }
 
@@ -2102,9 +1795,11 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   require_package("data.table")
   rows <- raw_rows %||% spending_raw_report_rows(connection)
   if (!nrow(rows)) return(rows)
-  rows <- data.table::copy(rows)
-  rows[, receipt_role := fec_receipt_role(rows)]
-  rows <- rows[fec_receipt_countable(rows)]
+  rows <- rows[
+    company_match_status == "accepted" &
+      !nzchar(trim_text(excluded_reason)) &
+      duplicate_memo == 0L
+  ]
   lookups <- lookups %||% spending_report_lookups(connection)
   variants <- lookups$companies
   company_variants <- split(variants$variant, variants$company)
@@ -2112,9 +1807,11 @@ spending_report_rows <- function(connection, lookups = NULL, raw_rows = NULL) {
   # Reclassification can discover an entity, but it must never downgrade an
   # entity already validated by the source-specific retag pass. In particular,
   # corporate_giving rows whose names use approved corporate qualifiers (for
-  # example COINBASE GLOBAL) are not literal
+  # example COINBASE GLOBAL or COINBASE COMMERCE EXCHANGE) are not literal
   # roster aliases, yet the corporate matcher has already verified them.
-  persisted_entity_flags <- as.integer(rows$source_table == "corporate_giving" & toupper(trim_text(rows$entity_type)) != "IND")
+  persisted_entity_flags <- as.integer(
+    rows$source_table == "corporate_giving"
+  )
   rows[, is_entity_contributor := pmax(
     persisted_entity_flags,
     entity_flags,
@@ -2695,12 +2392,9 @@ spending_recipient_classification <- function(connection, rows, lookups = NULL) 
   registered_conduit <- row_committee_id %in%
     c("C00401224", "C00694323") |
     row_committee_key %in% c("ACTBLUE", "WINRED")
-  # These registered hybrid committees have separate contribution and
-  # non-contribution accounts. Routing receipts through them is not evidence
-  # of independent-expenditure-only Super PAC giving.
-  category[registered_conduit] <- "Carey"
+  category[registered_conduit] <- "Super PAC"
   category_source[registered_conduit] <-
-    "fec:hybrid_committee_type:registered_conduit"
+    "user_rule:registered_conduit_super_pac"
 
   category_rows <- which(!registered_conduit & !is.na(category_match))
   if (length(category_rows)) {
@@ -3214,12 +2908,6 @@ write_spending_report <- function(
       raw_rows = raw_rows
     )
   }
-  unresolved <- fec_receipt_countable(raw_rows) &
-    fec_receipt_role_unresolved(fec_receipt_role(raw_rows))
-  if (any(unresolved)) {
-    atomic_write_csv(raw_rows[unresolved], file.path(paths$reports, "receipt_role_review.csv"))
-  }
-  fec_assert_receipt_evidence(raw_rows)
   if (nrow(raw_rows)) {
     raw_rows[, sort_date := as.integer(normalize_reconcile_date(
       contribution_receipt_date
@@ -3462,18 +3150,6 @@ reliability_report_lines <- function(connection, amendment_summary = NULL) {
     if (is.na(corporate_summary[[column]][[1L]])) {
       corporate_summary[[column]][[1L]] <- 0
     }
-  }
-  # The old SQL predicates above describe raw collection flags. Override all
-  # countability metrics with the exact report predicate and cross-table ID
-  # handling, including receipt-role exclusions and refreshed memo evidence.
-  qa_rows <- spending_raw_report_rows(connection, versioning_applied = TRUE)
-  qa_keep <- fec_receipt_countable(qa_rows)
-  for (table in c("contributions", "corporate_giving")) {
-    selected <- qa_rows$source_table == table
-    summary <- if (table == "contributions") contribution_summary else corporate_summary
-    summary[, countable_rows := sum(qa_keep & selected)]
-    summary[, countable_dollars := sum(qa_rows$contribution_receipt_amount[qa_keep & selected], na.rm = TRUE)]
-    summary[, unresolved_receipt_rows := sum(qa_keep & selected & fec_receipt_role_unresolved(qa_rows$receipt_role))]
   }
   max_load <- contribution_summary$max_load_date[[1L]]
   if (is.na(max_load) || !nzchar(trim_text(max_load))) {

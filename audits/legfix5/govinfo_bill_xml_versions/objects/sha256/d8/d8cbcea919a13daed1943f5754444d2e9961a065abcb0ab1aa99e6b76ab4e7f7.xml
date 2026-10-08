@@ -1,0 +1,272 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution resolution-stage="Introduced-in-House" dms-id="H96518E4720A040258D64EDE4B656DDB3" public-private="public" resolution-type="house-resolution" star-print="no-star-print" key="H"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HRES 1411 IH: Honey Integrity and Consumer Transparency Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-06-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. RES. 1411</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260630">June 30, 2026</action-date><action-desc><sponsor name-id="S001214">Mr. Steube</sponsor> submitted the following resolution; which was referred to the <committee-name committee-id="HRU00">Committee on Rules</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Providing for consideration of the bill (H.R. 2162) to provide for the protection of the integrity of honey marketed in the United States, and for other purposes.</official-title></form><resolution-body style="traditional" id="HD86F44CD51D14A78A7E6A4C9F1FEC411">
+    <section display-inline="yes-display-inline" section-type="undesignated-section"
+      id="H3D01977CE28044E69579189F4967631F">
+ <text display-inline="yes-display-inline">That immediately upon adoption of this resolution, the House shall proceed to the consideration in the House of the bill (H.R. 2162) to provide for the protection of the integrity of honey marketed in the United States, and for other purposes. All points of order against consideration of the bill are waived. The amendment specified in section 3 of this resolution shall be considered as adopted. The bill, as amended, shall be considered as read. All points of order against provisions in the bill, as amended, are waived. The previous question shall be considered as ordered on the bill, as amended, and on any further amendment thereto, to final passage without intervening motion except: (1) one hour of debate equally divided and controlled by the chair and ranking minority member of the Committee on Energy and Commerce; and (2) one motion to recommit.</text>
+    </section>
+    <section id="H6B42FD0FE504491680B953FD14A3A298" display-inline="no-display-inline">
+      <enum>2.</enum>
+ <text display-inline="yes-display-inline">Clause 1(c) of rule XIX and clause 8 of rule XX shall not apply to the consideration of H.R. 2162.</text>
+    </section>
+    <section id="HD6E292644C9344929C47C79779782685" section-type="subsequent-section"
+      display-inline="no-display-inline">
+      <enum>3.</enum>
+ <text display-inline="yes-display-inline">The amendment specified in this section is as follows:</text>
+    </section>
+    <section id="HF56F18D27AD84D6EAA67CB03031502E9" section-type="undesignated-section">
+ <text display-inline="yes-display-inline">Strike section 1 and all that follows and insert the following:</text>
+      <quoted-block style="OLC" id="HB36B76E36CE54436A38F45DC2AEAA7C2"
+        display-inline="no-display-inline">
+        <section id="H0440A923CC7049BDB88B814F35DF2C56" section-type="section-one">
+          <enum>1.</enum>
+          <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Honey Integrity and Consumer Transparency Act</short-title></quote>.</text>
+        </section>
+        <section id="H7E500B46FEB444AFB3B982E2977D55F4">
+          <enum>2.</enum>
+          <header>Findings</header>
+ <text display-inline="no-display-inline">Congress finds the following:</text> <paragraph id="HC9D95532A73F408D804E46CA5C812A43"> <enum>(1)</enum> <text>Managed honey bees directly pollinate more than 100 crops, contributing $20,000,000,000 annually to United States agricultural security, dietary diversity, and food system resilience.</text>
+          </paragraph>
+          <paragraph id="H5246B522CE2D49EFB008FEE4A9DFBED4">
+            <enum>(2)</enum>
+ <text>Systemic economically motivated adulteration (EMA) of imported honey suppresses domestic prices, drives down market transparency, and threatens the economic viability of American beekeepers.</text>
+          </paragraph>
+          <paragraph id="H467999EC0A5648BEA1C6DB47EC18C454">
+            <enum>(3)</enum>
+ <text>The absence of a uniform, legally binding Federal Standard of Identity for honey has created an enforcement gap that allows sophisticated, highly processed, and nutritionally degraded sweeteners to be falsely marketed as pure honey.</text>
+          </paragraph>
+        </section>
+        <section id="H341AFEA6816244D2899434D9D22A7731">
+          <enum>3.</enum>
+          <header>Standard of identity for honey</header>
+          <subsection id="HA8D0EC82A8BD43E695A1687FBEAEC7D4">
+            <enum>(a)</enum>
+            <header>Establishment</header>
+ <text>Not later than 180 days after the date of the enactment of this Act, the Secretary of Health and Human Services (referred to in this Act as the <quote>Secretary</quote>) shall publish a final rule establishing a Federal Standard of Identity for honey under section 401 of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/341">21 U.S.C. 341</external-xref>).</text>
+          </subsection>
+          <subsection id="H365097B5109749EF9296CC23379D62A9">
+            <enum>(b)</enum>
+            <header>Technical criteria and expanded scope</header>
+ <text>The standard established under subsection (a) shall—</text> <paragraph id="H19E2E99E3B8D446D89CBBD4F917353A2"> <enum>(1)</enum> <text>incorporate the foundational identity and purity markers established within the United States Pharmacopeia Honey Standard; and</text>
+            </paragraph>
+            <paragraph id="H2E77E82E7A0A40E38C99088D2587ADAE">
+              <enum>(2)</enum>
+ <text>establish clear, binding physicochemical parameters, including but not limited to—</text>
+              <subparagraph id="H61A48416B0D3412D98D4A80039E8F8FB">
+                <enum>(A)</enum>
+ <text>maximum allowable thresholds for Hydroxymethylfurfural (HMF) to identify excessive heat damage;</text>
+              </subparagraph>
+              <subparagraph id="HBA1FA3A6D5534EE3BE15C20D352CC1C6">
+                <enum>(B)</enum>
+ <text>minimum allowable units for Diastase enzyme activity to identify ultra-filtration or over-processing;</text>
+              </subparagraph>
+              <subparagraph id="H2824FF06BC514858A7DF316E5BA9EAA1">
+                <enum>(C)</enum>
+ <text>absolute moisture content limitations to verify natural ripeness and prohibit the artificial vacuum dehydration of immature honey;</text>
+              </subparagraph>
+              <subparagraph id="HCFB18F2E21E24CC391D7A58A0B05C98E">
+                <enum>(D)</enum>
+ <text>direct sugar composition profiles specifying parameters for fructose, glucose, and sucrose levels;</text>
+              </subparagraph>
+              <subparagraph id="H41A9B24CD8D4479FAA8DCF394B04E767">
+                <enum>(E)</enum>
+ <text>minimum proline content requirements; and</text> </subparagraph> <subparagraph id="H7D4EDB22E27648D7B7B2DEAA38618A05"> <enum>(F)</enum> <text>oligosaccharide profile parameters evaluating the distribution of higher-order saccharides beyond monosaccharides and disaccharides, for the purpose of identifying compositions inconsistent with authentic honey or indicative of industrial sugar addition.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H5C8DB058107C406391B00CE67B6AD14B">
+              <enum>(3)</enum>
+              <header>Secretarial discretion</header>
+ <text>The Secretary shall have the ongoing administrative discretion to update, expand, or add additional physicochemical markers, analytical parameters, or quality criteria to the Standard of Identity as necessary to address evolving methods of economic adulteration, manufacturing, or processing.</text>
+            </paragraph>
+          </subsection>
+          <subsection id="H0194CEF0E6BD432E97D0F02035861DA5">
+            <enum>(c)</enum>
+            <header>De minimis safe harbor</header>
+ <text>The Standard of Identity shall include a de minimis safe harbor to account for technically unavoidable trace residues resulting from legitimate, standard apicultural practices, including seasonal, non-production supplemental bee-feeding conducted to prevent hive starvation.</text>
+          </subsection>
+          <subsection id="H6E7937A4406944A5950A2788451D0CA4">
+            <enum>(d)</enum>
+            <header>Producer-Led consultation</header>
+ <text>In promulgating the final rule and any subsequent modifications, the Secretary shall consult with a newly established Honey Authenticity Advisory Committee. The Committee shall be composed of land-grant university forensic experts and representatives nominated by the two largest national non-profit organizations representing primary domestic honey producers. No individual or entity whose primary business focus is the commercial importation or packing of non-domestic honey may serve on the Committee.</text>
+          </subsection>
+        </section>
+        <section id="H227263D0816643DDAD74E8B2C3849291">
+          <enum>4.</enum>
+          <header>Honey integrity program</header>
+          <subsection id="H3D2450CF603442D49B4B0B4C4F732855">
+            <enum>(a)</enum>
+            <header>Establishment</header>
+ <text>The Secretary shall establish the Honey Integrity Program to ensure national compliance with the Standard of Identity promulgated under section 3.</text>
+          </subsection>
+          <subsection id="H056B7141BC4F433A87545E08C2289F65">
+            <enum>(b)</enum>
+            <header>Interagency memorandum of understanding</header>
+ <text>To prevent administrative duplication and optimize Federal resources, the Secretary shall enter into a mandatory Memorandum of Understanding (MOU) with the Secretary of Agriculture. The MOU shall explicitly delegate the field-level verification, auditing, and certification of domestic honey production to the Department of Agriculture.</text>
+          </subsection>
+          <subsection id="HB379058D53934981A21DF3A1557C7CDB">
+            <enum>(c)</enum>
+            <header>National center of excellence partnership</header>
+ <text>The Secretary shall contract with a lead land-grant university to designate and operate the National Honey Center of Excellence. The lead land-grant university shall have the sole discretion to bring in or coordinate with additional land-grant institutions, independent laboratories, or academic resources as necessary to carry out the program. The Center shall:</text>
+            <paragraph id="HDDFA346EBB1848C09C7A5BE0D353534B">
+              <enum>(1)</enum>
+ <text>Develop, optimize, and maintain an independent global authenticity reference database.</text>
+            </paragraph>
+            <paragraph id="HF12294F60D19445EA7C30726C5F410FF">
+              <enum>(2)</enum>
+ <text>Validate advanced, multi-modal testing methodologies—including but not limited to Nuclear Magnetic Resonance (NMR) Profiling, Stable Isotope Ratio Mass Spectrometry (SIRA/EA–IRMS/LC–IRMS), and Liquid Chromatography-Mass Spectrometry (LC–MS)—to establish a comprehensive <quote>Honey Fingerprint</quote>.</text>
+            </paragraph>
+            <paragraph id="H2AE9E6E88C604449831AFA8D1B69E555">
+              <enum>(3)</enum>
+ <text>Submit validated analytical protocols and reference data to the Secretary for official adoption as the formal enforcement methodologies of the Honey Integrity Program.</text>
+            </paragraph>
+          </subsection>
+          <subsection id="H1A2D6B3E1FA749B58638C64DDC84DD0B">
+            <enum>(d)</enum>
+            <header>Orthogonal testing requirement (Risk-Based)</header>
+ <text>The Secretary shall require that any honey shipment designated as moderate- or high-risk, or flagged for anomaly under screening protocols, be evaluated using not fewer than two scientifically independent analytical methodologies. Such methodologies must differ in analytical principle (including isotopic, spectrometric, chromatographic, or genomic approaches) and shall collectively be sufficient to detect compositional, isotopic, and structural adulteration.</text>
+          </subsection>
+          <subsection id="HEF789FF7976B43CDB2588468116FD71D">
+            <enum>(e)</enum>
+            <header>Risk-Based dual compliance tracks</header>
+            <paragraph id="HE43F2251616B4E4D9AB6A3C6A30BF27F">
+              <enum>(1)</enum>
+              <header>The certified domestic track</header>
+ <text>Domestic honey produced and packed within the United States by a producer verified under the USDA quality assurance program established via the MOU in subsection (b) shall be deemed automatically compliant with the Honey Integrity Program. Such domestic honey shall be exempt from mandatory per-batch forensic laboratory testing. Domestic honey producers shall remain eligible for reduced testing requirements only if they do not handle, blend, or process imported honey.</text>
+            </paragraph>
+            <paragraph id="H9A924C1541B343BD892C0AE84D3A8264">
+              <enum>(2)</enum>
+              <header>The import and non-certified track</header>
+ <text>All honey introduced or delivered for introduction into United States commerce that is not certified under paragraph (1) shall be subject to a strict risk-based mandatory testing regime. Such honey must be sampled using statistically valid lot-sampling protocols and tested at an approved, United States-based laboratory. The Secretary shall not rely upon certificates of analysis, testing data, or origin paperwork issued by foreign laboratories or foreign governmental bodies as sufficient evidence of compliance.</text>
+            </paragraph>
+          </subsection>
+          <subsection id="H36F702D298444159965DB0E6DBF04C8D">
+            <enum>(f)</enum>
+            <header>Right to re-Analysis</header>
+ <text>Any commercial importer or packer whose lot is flagged as non-compliant by the Honey Integrity Program shall have the administrative right to an independent second verification test, conducted at the owner’s expense. The confirmatory test must be performed by a separate, independent United States laboratory selected from an approved list maintained by the National Honey Center of Excellence.</text>
+          </subsection>
+          <subsection id="HCC91E516D4D04971A0DC8FC8C6B7D245">
+            <enum>(g)</enum>
+            <header>Program user fees</header>
+ <text>The operational costs of the Honey Integrity Program and the National Honey Center of Excellence shall be funded through user fees assessed exclusively upon commercial honey importers and large-scale packers of imported honey. All domestic honey producers and packers handling exclusively 100 percent domestic honey are explicitly exempt from any fees or assessments levied under this Act.</text>
+          </subsection>
+          <subsection id="HCC7BBFB140FC42818CA59063C085D29E">
+            <enum>(h)</enum>
+            <header>Savings clause</header>
+ <text>Nothing in this Act or the establishment of the Honey Integrity Program shall be construed to limit, alter, or replace the statutory authority of the Secretary to enforce any other provision of the Federal Food, Drug, and Cosmetic Act (<external-xref legal-doc="usc" parsable-cite="usc/21/301">21 U.S.C. 301 et seq.</external-xref>). The Secretary explicitly retains all standalone authority to pursue civil, administrative, or criminal remedies for the general adulteration, economic adulteration, or misbranding of food introduced into interstate commerce.</text>
+          </subsection>
+          <subsection id="HAB1FBD9E04C346BB8D713F2E63FA1D37">
+            <enum>(i)</enum>
+            <header>Mass balance and traceability requirement</header>
+ <text>Importers, blenders, and commercial packers of honey shall maintain verifiable records sufficient to demonstrate that the total volume of honey sold does not exceed the volume of authenticated honey purchased or imported.</text>
+          </subsection>
+        </section>
+        <section id="HEC8A6218CBA84B06822647CD28F878AD">
+          <enum>5.</enum>
+          <header>Systemic targeting and transparency tools</header>
+          <subsection id="H794FE21B63934D1CB2FE4871387E1C4A">
+            <enum>(a)</enum>
+            <header>AI/ML predictive targeting model</header>
+ <text>Pursuant to improving enforcement efficiency and as proposed under agency compliance planning, the Secretary, in coordination with the Commissioner of U.S. Customs and Border Protection (CBP), shall integrate artificial intelligence and machine learning predictive modeling into import targeting systems. The model shall cross-reference trade movement statistics, shipping manifests, and historical transshipment patterns to intercept high-risk fraudulent shipments at ports of entry.</text>
+          </subsection>
+          <subsection id="H84B283A236F4483DBABD7CCEE2B677FD">
+            <enum>(b)</enum>
+            <header>Centralized honey fraud registry</header>
+ <text>To enhance market transparency and deter bad actors, the Secretary shall publish and maintain a live, centralized, and publicly accessible database to be known as the Honey Fraud Registry. The registry shall log all final, confirmed administrative and civil violations under this Act, explicitly identifying the names of the violating importers, commercial packers, foreign suppliers, and associated brand names.</text>
+          </subsection>
+        </section>
+        <section id="H6DB6479F270A41DB8F8DEC34206C0A23">
+          <enum>6.</enum>
+          <header>Disposition of noncompliant commodities</header>
+          <subsection id="HF8C398B23879461784A838B2D1A8B0ED">
+            <enum>(a)</enum>
+            <header>Imported commodities</header>
+ <text>Any imported lot labeled as honey that fails to comply with the Standard of Identity established under Section 3 shall be issued a mandatory refusal of admission. The owner of the refused commodity shall have a maximum of 90 days to safely re-export the shipment out of United States jurisdiction. If the shipment is not re-exported within 90 days, it shall be subject to mandatory destruction under Federal oversight at the owner’s expense. Fraudulent or non-compliant imports shall not be permitted to be re-labeled, downgraded, or re-classified as industrial sweetener, bakery syrup, or any other food ingredient for sale within the United States.</text>
+          </subsection>
+          <subsection id="H3C6B63D2F8E64B46A7657DB001D8516E">
+            <enum>(b)</enum>
+            <header>Domestic commodities</header>
+ <text>In the case of domestic honey determined by the Secretary to fail the Standard of Identity solely due to quality or processing parameters (such as elevated HMF or depressed Diastase activity) but verified to be 100 percent pure bee product, the Secretary may permit the domestic producer to re-label and legally divert the product into secondary animal feed or commercial baking ingredient channels.</text>
+          </subsection>
+        </section>
+        <section id="H6C501F16DD814674A8AAA66599E37726">
+          <enum>7.</enum>
+          <header>Transition rules</header>
+          <subsection id="HC7CF4C302FE948D4B5438A9B818E92EA">
+            <enum>(a)</enum>
+            <header>Interim certification and compliance step</header>
+ <text>Prior to the final publication and effective date of the comprehensive Federal Standard of Identity required under Section 3, all imported honey and domestic blends shall be required to submit a verified Certification of Testing as a condition of entry or commercial distribution.</text>
+          </subsection>
+          <subsection id="H82673E41F8774249A6C387F69481F2B2">
+            <enum>(b)</enum>
+            <header>Testing protocols</header>
+ <text>The Certification of Testing required under subsection (a) shall confirm that the lot has undergone analytical evaluation demonstrating authenticity and the absence of foreign sugars. The type, methodology, and frequency of such testing shall follow best practices established and periodically updated by the National Honey Center of Excellence.</text>
+          </subsection>
+          <subsection id="HAAF613F2F4774A239BFA10DB2076790E">
+            <enum>(c)</enum>
+            <header>Commercial safe harbor</header>
+ <text>To prevent logjams at major shipping ports during database implementation, the Secretary shall permit provisional entry under bond for any lot possessing a valid Certification of Testing as outlined in this section. This interim rule shall expire immediately upon the implementation of the final rule under Section 3.</text>
+          </subsection>
+        </section>
+        <section id="HA124C5CEBB9944CE9E47AC1B068FA84E">
+          <enum>8.</enum>
+          <header>Mandatory country of origin labeling (cool) for honey</header>
+          <subsection id="HF7EE036E9BAC4332986B7B912AE5EC38">
+            <enum>(a)</enum>
+            <header>Inclusion as covered commodity</header>
+ <text>Section 281(2)(A) of the Agricultural Marketing Act of 1946 (<external-xref legal-doc="usc" parsable-cite="usc/7/1638">7 U.S.C. 1638(2)(A)</external-xref>) is amended by adding at the end the following new clause:</text>
+            <quoted-block id="H617DA1FC37624A44B30D546F4E5981C2" style="OLC">
+              <clause id="HCCB87E3C19FC44349AA5D7379B8BF070">
+                <enum>(xii)</enum>
+ <text>Honey.</text> </clause> <after-quoted-block>.</after-quoted-block> </quoted-block> </subsection> <subsection id="H4F324ADC41E141C786C1BEC5C3C290F8"> <enum>(b)</enum> <header>Specific labeling designations for blends</header> <text>Section 282(a) of the Agricultural Marketing Act of 1946 (<external-xref legal-doc="usc" parsable-cite="usc/7/1638a">7 U.S.C. 1638a(a)</external-xref>) is amended by adding at the end the following new paragraph:</text>
+            <quoted-block id="H90CF3EFE6B224838AA22951CCAFE8155" style="OLC">
+              <paragraph id="HD77A9B871C2D40F9970ECEF2DE2E440D">
+                <enum>(5)</enum>
+                <header>Special origin notice for honey</header>
+                <subparagraph id="HCFB023CDFB4C4B70B06945A691B6D551">
+                  <enum>(A)</enum>
+                  <header>Order of predominance</header>
+ <text>In the case of retail packages containing a blend of honeys originating from multiple nations, the label shall explicitly list all countries of origin in exact descending order of predominance by weight.</text>
+                </subparagraph>
+                <subparagraph id="HEE5449E6748B48FCA87EAD9E46DF57B7">
+                  <enum>(B)</enum>
+                  <header>The 5-percent disclosure floor</header>
+ <text>A country of origin shall only be required to be listed in the blend disclosure statement if the honey sourced from that specific nation constitutes 5 percent or more of the total net weight of the retail package.</text>
+                </subparagraph>
+                <subparagraph id="HED35F19611714E2FBA7C4AC438270AD1">
+                  <enum>(C)</enum>
+                  <header>USA protection principle</header>
+ <text>The terms <quote>United States</quote>, <quote>USA</quote>, or <quote>Product of USA</quote> may only be positioned in the leading, first position of the country of origin statement if the United States is the primary country of origin by weight within the container.</text>
+                </subparagraph>
+                <subparagraph id="H6DBE22EBA5884911884A23C65EE8DAB8">
+                  <enum>(D)</enum>
+                  <header>Visual conspicuity (the origin box)</header>
+ <text>The origin notification required under this paragraph shall be prominently displayed on the Principal Display Panel (front label) of the retail package, or enclosed within a highly visible, conspicuous, and bordered graphic known as an <quote>Origin Box</quote>.</text>
+                </subparagraph>
+              </paragraph>
+              <after-quoted-block>.</after-quoted-block>
+            </quoted-block>
+          </subsection>
+          <subsection id="H1A14520797BA438F9982F0B16B45C831">
+            <enum>(c)</enum>
+            <header>Small domestic producer safe harbor</header>
+ <text>The Secretary of Agriculture shall, through notice-and-comment rulemaking, establish a small producer safe harbor definition based on annual volume or revenue. Small-scale domestic apiaries meeting this definition shall be exempt from the retail COOL labeling requirements of this section, provided the honey sold is 100 percent domestically produced and packed.</text>
+          </subsection>
+        </section>
+        <after-quoted-block>.</after-quoted-block>
+      </quoted-block>
+    </section>
+  </resolution-body></resolution>
+

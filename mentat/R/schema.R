@@ -1,18 +1,9 @@
-mentat_evidence_json <- function(value) {
-  as.character(jsonlite::toJSON(value, auto_unbox = TRUE, null = "null", na = "null", digits = NA))
-}
-
-mentat_evidence_sha256 <- function(value) {
-  require_package("digest")
-  digest::digest(enc2utf8(as.character(value)), algo = "sha256", serialize = FALSE)
-}
-
 mentat_schema_sql <- function() {
   c(
     paste(
       "CREATE TABLE IF NOT EXISTS contributions (",
       "sub_id TEXT PRIMARY KEY,",
-      "transaction_id TEXT, original_sub_id TEXT, contributor_id TEXT,",
+      "transaction_id TEXT, original_sub_id TEXT,",
       "contributor_name TEXT, contributor_first_name TEXT,",
       "contributor_last_name TEXT, contributor_suffix TEXT,",
       "contributor_city TEXT, contributor_state TEXT, contributor_zip TEXT,",
@@ -22,8 +13,6 @@ mentat_schema_sql <- function() {
       "recipient_committee_type TEXT, recipient_committee_designation TEXT,",
       "entity_type TEXT, election_type TEXT, fec_election_type_desc TEXT,",
       "receipt_type_full TEXT, memo_code TEXT, memoed_subtotal INTEGER,",
-      "filing_form TEXT, receipt_type TEXT, line_number_label TEXT,",
-      "back_reference_transaction_id TEXT, back_reference_schedule_name TEXT,",
       "memo_text TEXT, conduit_committee_id TEXT, conduit_committee_name TEXT,",
       "amendment_indicator TEXT, report_year INTEGER, report_type TEXT,",
       "file_num INTEGER,",
@@ -47,8 +36,7 @@ mentat_schema_sql <- function() {
       "company_match_status TEXT NOT NULL DEFAULT 'accepted'",
       "CHECK (company_match_status IN ('accepted','review','rejected')),",
       "company_match_reason TEXT,",
-      "excluded_reason TEXT,",
-      "contributor_street_1 TEXT, contributor_street_2 TEXT",
+      "excluded_reason TEXT",
       ")"
     ),
     paste(
@@ -56,11 +44,10 @@ mentat_schema_sql <- function() {
       # can. A rate-limited walk and a genuinely empty one are byte-identical
       # afterwards: Farmers Insurance recorded 24 variant sets / 0 rows under an
       # FEC 429, and Bitnomial recorded a real 0 - both at ~0.7s per set, so even
-      # timing cannot separate them. 1 means the walk ran under a hardened,
-      # source-specific readiness rule: DataTables rendered a confirmed-empty
-      # row, or the API returned successfully and count/cursor completion was
-      # proven. Rows collected before those rules keep 0 and are reported as
-      # unverified rather than trusted as real zeros.
+      # timing cannot separate them. 1 means the walk ran under the hardened
+      # readiness rule, which accepts a zero only after DataTables renders its
+      # confirmed-empty row. Rows collected before that rule keep 0 and are
+      # reported as unverified rather than trusted as real zeros.
       "CREATE TABLE IF NOT EXISTS scrape_progress (",
       "company TEXT NOT NULL, cycle INTEGER NOT NULL, variant_set TEXT NOT NULL,",
       "last_page INTEGER NOT NULL, records_total INTEGER NOT NULL,",
@@ -78,7 +65,7 @@ mentat_schema_sql <- function() {
       "seen_keysets TEXT, fetched_complete INTEGER NOT NULL DEFAULT 0",
       "CHECK (fetched_complete IN (0,1)),",
       "stored_complete INTEGER NOT NULL DEFAULT 0",
-      "CHECK (stored_complete IN (0,1)), updated_at TEXT NOT NULL, query_contract TEXT",
+      "CHECK (stored_complete IN (0,1)), updated_at TEXT NOT NULL",
       ")"
     ),
     paste(
@@ -94,35 +81,6 @@ mentat_schema_sql <- function() {
       ")"
     ),
     paste(
-      "CREATE TABLE IF NOT EXISTS fec_response_archive (",
-      "archive_sha256 TEXT PRIMARY KEY, schema_version INTEGER NOT NULL,",
-      "payload_kind TEXT NOT NULL, payload_json TEXT NOT NULL, created_at TEXT NOT NULL)"
-    ),
-    paste(
-      "CREATE TABLE IF NOT EXISTS fec_response_observations (",
-      "observation_id TEXT PRIMARY KEY, archive_sha256 TEXT NOT NULL,",
-      "unit_id TEXT NOT NULL, query_sha256 TEXT NOT NULL, query_json TEXT NOT NULL,",
-      "page INTEGER NOT NULL, http_status INTEGER, observed_at TEXT NOT NULL, last_observed_at TEXT NOT NULL,",
-      "FOREIGN KEY (archive_sha256) REFERENCES fec_response_archive(archive_sha256))"
-    ),
-    "CREATE INDEX IF NOT EXISTS idx_fec_response_unit ON fec_response_observations(unit_id, page)",
-    paste(
-      "CREATE TABLE IF NOT EXISTS attribution_claims (",
-      "claim_id TEXT PRIMARY KEY, schema_version INTEGER NOT NULL, source_table TEXT NOT NULL,",
-      "sub_id TEXT NOT NULL, company TEXT NOT NULL, industry TEXT NOT NULL, phase TEXT NOT NULL,",
-      "matched_variant TEXT NOT NULL, company_match_status TEXT NOT NULL, company_match_reason TEXT NOT NULL,",
-      "contributor_id TEXT, evidence_json TEXT NOT NULL, observed_at TEXT NOT NULL)"
-    ),
-    "CREATE INDEX IF NOT EXISTS idx_attribution_claim_source ON attribution_claims(source_table, sub_id)",
-    paste(
-      "CREATE TABLE IF NOT EXISTS source_record_conflicts (",
-      "conflict_id TEXT PRIMARY KEY, schema_version INTEGER NOT NULL, source_table TEXT NOT NULL,",
-      "sub_id TEXT NOT NULL, field_name TEXT NOT NULL, before_json TEXT NOT NULL, after_json TEXT NOT NULL,",
-      "incoming_company TEXT NOT NULL, evidence_json TEXT NOT NULL, observed_at TEXT NOT NULL,",
-      "resolution_status TEXT NOT NULL DEFAULT 'unresolved')"
-    ),
-    "CREATE INDEX IF NOT EXISTS idx_source_conflict_record ON source_record_conflicts(source_table, sub_id)",
-    paste(
       "CREATE TABLE IF NOT EXISTS observed_employers (",
       "cycle INTEGER NOT NULL, employer_string TEXT NOT NULL,",
       "n_rows INTEGER NOT NULL CHECK (n_rows >= 0),",
@@ -135,7 +93,6 @@ mentat_schema_sql <- function() {
       "contributor_name TEXT, contributor_city TEXT, contributor_state TEXT,",
       "contributor_zip TEXT, employer_string TEXT NOT NULL,",
       "contributor_occupation TEXT, committee_id TEXT, amount REAL,",
-      "contributor_street_1 TEXT, contributor_street_2 TEXT,",
       "PRIMARY KEY (company, cycle, sub_id)",
       ")"
     ),
@@ -255,7 +212,7 @@ mentat_schema_sql <- function() {
     ),
     paste(
       "CREATE TABLE IF NOT EXISTS corporate_giving (",
-      "sub_id TEXT PRIMARY KEY, contributor_id TEXT, contributor_name TEXT, contributor_city TEXT,",
+      "sub_id TEXT PRIMARY KEY, contributor_name TEXT, contributor_city TEXT,",
       "contributor_state TEXT, contributor_zip TEXT, contributor_employer TEXT,",
       "contributor_occupation TEXT, entity_type TEXT, committee_id TEXT,",
       "is_entity_contributor INTEGER NOT NULL DEFAULT 0",
@@ -266,9 +223,6 @@ mentat_schema_sql <- function() {
       "matched_variant TEXT NOT NULL, cycle INTEGER NOT NULL, scraped_at TEXT NOT NULL,",
       "transaction_id TEXT, original_sub_id TEXT, amendment_indicator TEXT,",
       "report_year INTEGER, report_type TEXT, file_num INTEGER, pdf_url TEXT, load_date TEXT,",
-      "filing_form TEXT, receipt_type TEXT, receipt_type_full TEXT, line_number TEXT, line_number_label TEXT,",
-      "memo_code TEXT, memoed_subtotal INTEGER, memo_text TEXT,",
-      "back_reference_transaction_id TEXT, back_reference_schedule_name TEXT,",
       "is_conduit_leg INTEGER NOT NULL DEFAULT 0 CHECK (is_conduit_leg IN (0,1)),",
       "is_memo_leg INTEGER NOT NULL DEFAULT 0 CHECK (is_memo_leg IN (0,1)),",
       "is_passthrough_leg INTEGER NOT NULL DEFAULT 0 CHECK (is_passthrough_leg IN (0,1)),",
@@ -279,8 +233,7 @@ mentat_schema_sql <- function() {
       "duplicate_memo INTEGER NOT NULL DEFAULT 0 CHECK (duplicate_memo IN (0,1)),",
       "company_match_status TEXT NOT NULL DEFAULT 'review'",
       "CHECK (company_match_status IN ('accepted','review','rejected')),",
-      "company_match_reason TEXT, excluded_reason TEXT,",
-      "contributor_street_1 TEXT, contributor_street_2 TEXT",
+      "company_match_reason TEXT, excluded_reason TEXT",
       ")"
     ),
     paste(
@@ -312,15 +265,6 @@ init_schema <- function(connection) {
   DBI::dbWithTransaction(connection, {
     for (statement in mentat_schema_sql()) {
       DBI::dbExecute(connection, statement)
-    }
-    if (!"last_observed_at" %in% DBI::dbListFields(connection, "fec_response_observations")) {
-      DBI::dbExecute(connection, "ALTER TABLE fec_response_observations ADD COLUMN last_observed_at TEXT")
-      DBI::dbExecute(connection, "UPDATE fec_response_observations SET last_observed_at=observed_at")
-    }
-    for (table in c("contributions", "corporate_giving")) {
-      if (!"contributor_id" %in% DBI::dbListFields(connection, table)) {
-        DBI::dbExecute(connection, paste("ALTER TABLE", table, "ADD COLUMN contributor_id TEXT"))
-      }
     }
     if (!"memo_review" %in% DBI::dbListFields(connection, "contributions")) {
       DBI::dbExecute(
@@ -358,8 +302,6 @@ init_schema <- function(connection) {
       )
     }
     contribution_migrations <- c(
-      filing_form = "TEXT", receipt_type = "TEXT", line_number_label = "TEXT",
-      back_reference_transaction_id = "TEXT", back_reference_schedule_name = "TEXT",
       file_num = "INTEGER",
       superseded_by_amendment = paste(
         "INTEGER NOT NULL DEFAULT 0",
@@ -440,10 +382,6 @@ init_schema <- function(connection) {
     }
     corporate_fields <- DBI::dbListFields(connection, "corporate_giving")
     corporate_migrations <- c(
-      filing_form = "TEXT", receipt_type = "TEXT", receipt_type_full = "TEXT",
-      line_number = "TEXT", line_number_label = "TEXT", memo_code = "TEXT",
-      memoed_subtotal = "INTEGER", memo_text = "TEXT", back_reference_transaction_id = "TEXT",
-      back_reference_schedule_name = "TEXT",
       contributor_city = "TEXT", contributor_state = "TEXT",
       contributor_zip = "TEXT", contributor_employer = "TEXT",
       contributor_occupation = "TEXT", entity_type = "TEXT",
@@ -468,10 +406,7 @@ init_schema <- function(connection) {
         "TEXT NOT NULL DEFAULT 'review'",
         "CHECK (company_match_status IN ('accepted','review','rejected'))"
       ),
-      company_match_reason = "TEXT", excluded_reason = "TEXT",
-      # Street is migrated LAST so a legacy database ends up with the same
-      # PRAGMA column order as one created today, where street is also last.
-      contributor_street_1 = "TEXT", contributor_street_2 = "TEXT"
+      company_match_reason = "TEXT", excluded_reason = "TEXT"
     )
     for (column in setdiff(names(corporate_migrations), corporate_fields)) {
       DBI::dbExecute(
@@ -483,32 +418,6 @@ init_schema <- function(connection) {
         )
       )
     }
-    # The API returns contributor_street_1/contributor_street_2 on every
-    # receipt. Databases collected before the address block was stored carry
-    # neither column; ADD COLUMN is the only migration SQLite offers that
-    # keeps the existing rows. It can only APPEND, so street is last in the
-    # CREATE TABLE lists above and this loop runs after every other column
-    # migration: a migrated database and a fresh one then agree on PRAGMA
-    # order, which is what a shard merge compares
-    # (tools/merge_company_shards.py:264).
-    for (table in c("contributions", "bulk_candidates")) {
-      street_fields <- DBI::dbListFields(connection, table)
-      street_missing <- setdiff(
-        c("contributor_street_1", "contributor_street_2"), street_fields
-      )
-      for (column in street_missing) {
-        DBI::dbExecute(
-          connection,
-          paste(
-            "ALTER TABLE",
-            as.character(DBI::dbQuoteIdentifier(connection, table)),
-            "ADD COLUMN",
-            as.character(DBI::dbQuoteIdentifier(connection, column)),
-            "TEXT"
-          )
-        )
-      }
-    }
     if (!"company_match_status" %in% corporate_fields) {
       DBI::dbExecute(
         connection,
@@ -517,9 +426,6 @@ init_schema <- function(connection) {
           "company_match_reason='migration_requires_revalidation'"
         )
       )
-    }
-    if (!"query_contract" %in% DBI::dbListFields(connection, "api_work_progress")) {
-      DBI::dbExecute(connection, "ALTER TABLE api_work_progress ADD COLUMN query_contract TEXT")
     }
     # Existing checkpoints predate the hardened readiness rule, so their zeros
     # were never confirmed against the empty-table marker. The DEFAULT 0 is the
@@ -913,186 +819,80 @@ mentat_filing_version_plan <- function(rows, table) {
   )
 }
 
-# F13, the memo re-disclosure rule (Paul approved 2026-09-26, "Approve F13").
-# D-040(a) removes "a proven duplicate of a counted parent"; D-043 lets a row's
-# own text decide. A memo whose own text states that it re-discloses a gift
-# already itemized - collect.R's unverified_disclosure_memo role, i.e. a memo
-# row matching fec_receipt_rules.json's disclosure_pattern - duplicates the
-# counted parent it restates: same company, same recipient committee, same
-# contributor (FEC contributor_id when both rows carry one, else the normalised
-# name), the same nonzero amount to the cent, dated on or before the memo, and
-# not itself a memo. The money then counts once, via the parent; with several
-# such parents the latest-dated one is recorded (then the lowest sub_id). A
-# memo that calls the gift unitemized (redisclosure_unitemized_pattern)
-# restates no itemized parent. Missing or ambiguous information never excludes
-# (D-040): with no such parent the memo stays counted and keeps its
-# disclosure_memo_unmatched flag, and equal amounts without the statement stay
-# a clue, never proof (the 2026-09-20 contradictions-only pass). A counted
-# parent is an eligible row (company match accepted or blank, no
-# excluded_reason, a giving role) whose attribution, when the rows carry it,
-# is not contradicted. Returns each row's parent sub_id ("" for none).
-# tools/pac_evidence.py memo_redisclosure_parents() is the Python twin, and
-# tests/fixtures/memo_redisclosure_cases.json pins both.
-mentat_memo_redisclosure_parents <- function(rows, roles, eligible) {
-  rows <- as.data.frame(rows, stringsAsFactors = FALSE)
-  count <- nrow(rows)
-  parent <- rep("", count)
-  if (!count || is.null(roles) || !exists("fec_receipt_rules", mode = "function")) return(parent)
-  unitemized <- fec_receipt_rules()$redisclosure_unitemized_pattern
-  if (!is.character(unitemized) || length(unitemized) != 1L || !nzchar(unitemized)) {
-    stop("fec_receipt_rules.json lacks redisclosure_unitemized_pattern; the F13 memo rule cannot run.", call. = FALSE)
-  }
-  # Work on row subsets: the global plan runs over every row of both tables
-  # (about 850k for Banking) and only a handful are re-disclosure memos.
-  column <- function(name, index, default = "") {
-    if (name %in% names(rows)) rows[[name]][index] else rep(default, length(index))
-  }
-  text <- function(name, index) mentat_version_text(column(name, index))
-  words <- function(x) gsub("^ +| +$", "", gsub("[^A-Z0-9]+", " ", x, perl = TRUE), perl = TRUE)
-  eligible <- as.logical(eligible)
-  eligible[is.na(eligible)] <- FALSE
-  # Facts about the rows in `index`: memo flag, counted, amount key, day.
-  describe <- function(index) {
-    memo <- text("memo_code", index) == "X" | text("memoed_subtotal", index) %in% c("1", "TRUE") |
-      text("is_memo_leg", index) %in% c("1", "TRUE")
-    counted <- eligible[index]
-    if ("company_attribution_status" %in% names(rows)) {
-      counted <- counted & !text("company_attribution_status", index) %in%
-        c("CONTRADICTED_BY_REPORTED_ORGANIZATION", "EXPLICIT_SOURCE_EXCLUSION")
-    }
-    amount <- mentat_filing_identity_amount(column("contribution_receipt_amount", index, NA_real_))
-    money <- nzchar(amount) & suppressWarnings(as.numeric(amount)) != 0
-    money[is.na(money)] <- FALSE
-    day <- mentat_filing_identity_date(column("contribution_receipt_date", index))
-    dated <- grepl("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", day)
-    day_number <- rep(NA_integer_, length(index))
-    day_number[dated] <- as.integer(gsub("-", "", day[dated], fixed = TRUE))
-    committee <- text("committee_id", index)
-    sub_id <- as.character(column("sub_id", index))
-    sub_id[is.na(sub_id)] <- ""
-    data.frame(row = index, memo = memo, counted = counted & money & dated, committee = committee,
-               key = paste(text("company", index), committee, amount, sep = "\034"),
-               day_number = day_number, sub_id = sub_id,
-               entity = text("contributor_id", index), name = words(text("contributor_name", index)),
-               stringsAsFactors = FALSE)
-  }
-  memos <- describe(which(roles %in% "unverified_disclosure_memo" & eligible))
-  memos <- memos[memos$memo & memos$counted & nzchar(memos$committee), , drop = FALSE]
-  if (nrow(memos)) {
-    statement <- words(paste(text("receipt_type_full", memos$row), text("memo_text", memos$row)))
-    memos <- memos[!grepl(unitemized, statement, perl = TRUE), , drop = FALSE]
-  }
-  if (!nrow(memos)) return(parent)
-  pool <- describe(which(eligible & mentat_version_text(column("committee_id", seq_len(count))) %in% memos$committee))
-  pool <- pool[!pool$memo & pool$counted & nzchar(trimws(pool$sub_id)) & pool$key %in% memos$key, , drop = FALSE]
-  if (!nrow(pool)) return(parent)
-  for (m in seq_len(nrow(memos))) {
-    candidates <- pool[pool$key == memos$key[[m]] & pool$day_number <= memos$day_number[[m]], , drop = FALSE]
-    same <- if (nzchar(memos$entity[[m]])) {
-      ifelse(nzchar(candidates$entity), candidates$entity == memos$entity[[m]],
-             nzchar(memos$name[[m]]) & candidates$name == memos$name[[m]])
-    } else {
-      nzchar(memos$name[[m]]) & candidates$name == memos$name[[m]]
-    }
-    candidates <- candidates[same, , drop = FALSE]
-    if (!nrow(candidates)) next
-    best <- order(-candidates$day_number, candidates$sub_id, method = "radix")[[1L]]
-    parent[[memos$row[[m]]]] <- candidates$sub_id[[best]]
-  }
-  parent
-}
-
 mentat_memo_duplicate_plan <- function(rows) {
   rows <- as.data.frame(rows, stringsAsFactors = FALSE)
+  if (!nrow(rows)) {
+    return(data.frame(
+      sub_id = character(), memo_key = character(), duplicate_memo = integer(),
+      stringsAsFactors = FALSE
+    ))
+  }
   column <- function(name, default = "") {
     if (name %in% names(rows)) rows[[name]] else rep(default, nrow(rows))
   }
-  text <- function(name) mentat_version_text(column(name))
-  count <- nrow(rows)
-  company <- text("company"); committee <- text("committee_id")
-  date <- mentat_filing_identity_date(column("contribution_receipt_date"))
-  amount <- mentat_filing_identity_amount(column("contribution_receipt_amount", NA_real_))
-  contributor <- text("contributor_name"); sub_id <- text("sub_id")
-  required <- nzchar(company) & nzchar(committee) & nzchar(date) & nzchar(amount) & nzchar(contributor)
-  memo_key <- ifelse(required, paste(company, committee, date, amount, contributor, sep = "|"), "")
+  company <- mentat_version_text(column("company"))
+  committee <- mentat_version_text(column("committee_id"))
+  receipt_date <- mentat_filing_identity_date(column("contribution_receipt_date"))
+  amount <- mentat_filing_identity_amount(column(
+    "contribution_receipt_amount",
+    NA_real_
+  ))
+  contributor <- mentat_version_text(column("contributor_name"))
+  required <- nzchar(company) & nzchar(committee) & nzchar(receipt_date) &
+    nzchar(amount) & nzchar(contributor)
+  memo_key <- ifelse(
+    required,
+    paste(company, committee, receipt_date, amount, contributor, sep = "|"),
+    ""
+  )
   is_memo <- suppressWarnings(as.integer(column("is_memo_leg", 0L))) == 1L
   is_memo[is.na(is_memo)] <- FALSE
-  eligible <- text("company_match_status") %in% c("", "ACCEPTED") & !nzchar(text("excluded_reason"))
-  verified_parent <- rep(TRUE, count)
-  receipt_roles <- NULL
-  if (exists("fec_receipt_role", mode = "function")) {
-    receipt_roles <- fec_receipt_role(rows)
-    eligible <- eligible & !fec_receipt_role_excluded(receipt_roles)
-    verified_parent <- !fec_receipt_role_unresolved(receipt_roles)
+  non_memo_keys <- unique(memo_key[nzchar(memo_key) & !is_memo])
+  # Conduit (ActBlue / WinRed) legs are deliberately NOT deduped here. Paul's
+  # standing R5/R8 ruling is recipient-as-shown: every current FEC row counts to
+  # the recipient printed on it, and a memo/earmark row naming a DIFFERENT
+  # committee is a real leg that COUNTS. is_conduit_leg stays a visible audit
+  # flag, never a filter. Ratified again 2026-07-27 after an audit proposed
+  # excluding the conduit leg; the exclusion was reverted, not adopted.
+  duplicate <- is_memo & nzchar(memo_key) & memo_key %in% non_memo_keys
+
+  # Second way the SAME committee's memo leg identifies its parent: FEC prints
+  # the parent transaction id in the memo text as "[SA11AI:7772]". The key above
+  # includes the amount, so a memo leg whose amount drifts even slightly from its
+  # parent escapes it - Gemini's 2.692-bitcoin liquidation to MAKE AMERICA GREAT
+  # AGAIN INC. was filed at $176,952.05 on the parent and $176,942.05 on the memo
+  # leg, a $10 difference that counted $176,942.05 twice in the shipped Crypto
+  # book. Matching the back-reference instead of the amount catches it.
+  # This stays inside the R8 rule: same committee, a memo row re-describing a
+  # transaction already counted. It does NOT touch cross-committee earmark legs,
+  # which name a different committee and continue to count.
+  parent_ref <- toupper(mentat_version_text(column("receipt_type_full")))
+  memo_note <- toupper(mentat_version_text(column("memo_text")))
+  combined <- trimws(paste(parent_ref, memo_note))
+  reference <- rep("", length(combined))
+  found <- regexpr("\\[[A-Z0-9]+:[A-Z0-9.]+\\]", combined, perl = TRUE)
+  has_reference <- found > 0L
+  if (any(has_reference)) {
+    token <- regmatches(combined, found)
+    # "[SA11AI:7772]" -> "SA11AI.7772", the transaction_id form on the parent row.
+    reference[has_reference] <- sub(
+      ":", ".", gsub("[][]", "", token), fixed = TRUE
+    )
+    transaction <- toupper(mentat_version_text(column("transaction_id")))
+    parent_keys <- unique(paste(
+      committee, transaction, sep = "|"
+    )[!is_memo & nzchar(transaction)])
+    duplicate <- duplicate | (
+      is_memo & has_reference &
+        paste(committee, reference, sep = "|") %in% parent_keys
+    )
   }
-  parents <- which(!is_memo & eligible & verified_parent & nzchar(sub_id))
-  transaction <- text("transaction_id")
-  signed_amount <- suppressWarnings(as.numeric(column("contribution_receipt_amount", NA_real_)))
-  key <- paste(company, committee, transaction, sep = "\034")
-  refs <- split(parents[nzchar(transaction[parents])], key[parents][nzchar(transaction[parents])])
-  file <- text("file_num")
-  file[file == "0"] <- ""
-  same_context <- function(i, candidates) {
-    if (!length(candidates)) return(integer())
-    known_file <- nzchar(file[i]) & nzchar(file[candidates])
-    # Transaction references are local to a filing. Report year/type or matching
-    # amount/date alone do not establish a unique parent across amendments.
-    valid <- known_file & file[candidates] == file[i]
-    candidates[valid]
-  }
-  choose <- function(candidates) {
-    if (length(candidates) != 1L) return(NA_integer_)
-    candidates[[1L]]
-  }
-  duplicate_of <- reason <- rep("", count)
-  description <- paste(text("receipt_type_full"), text("memo_text"))
-  structured <- text("back_reference_transaction_id")
-  schedule <- text("back_reference_schedule_name")
-  for (i in which(is_memo & eligible)) {
-    candidates <- integer()
-    basis <- ""
-    # Consume FEC's structured relationship first; text is a legacy fallback.
-    reference <- structured[i]
-    if (nzchar(reference)) {
-      alternatives <- unique(c(reference, if (nzchar(schedule[i])) paste(schedule[i], reference, sep = ".")))
-      basis_ref <- "fec_structured_back_reference"
-    } else {
-      hit <- regexpr("\\[[A-Z0-9]+:[A-Z0-9.]+\\]", description[i], perl = TRUE)
-      reference <- if (hit[1L] > 0L) sub(":", ".", gsub("[][]", "", regmatches(description[i], hit)), fixed = TRUE) else ""
-      alternatives <- reference
-      basis_ref <- "fec_text_back_reference"
-    }
-    if (nzchar(reference)) {
-      linked <- unique(unlist(lapply(alternatives, function(ref) refs[[paste(company[i], committee[i], ref, sep = "\034")]])))
-      # Similarity only screens the explicit FEC relationship; it cannot create one.
-      candidates <- same_context(i, linked)
-      # A reference is insufficient if it points to another donor/date, the
-      # opposite cash direction, or a smaller amount than this memo claims.
-      covered <- contributor[candidates] == contributor[i] & date[candidates] == date[i] &
-        sign(signed_amount[candidates]) == sign(signed_amount[i]) &
-        abs(signed_amount[candidates]) + 0.005 >= abs(signed_amount[i])
-      candidates <- candidates[!is.na(covered) & covered]
-      basis <- basis_ref
-    }
-    winner <- choose(candidates)
-    if (!is.na(winner)) {
-      duplicate_of[i] <- as.character(column("sub_id"))[winner]
-      reason[i] <- basis
-    }
-  }
-  # F13: the memo's own re-disclosure statement plus a matching counted parent
-  # (mentat_memo_redisclosure_parents). An FEC back reference resolved above
-  # keeps precedence.
-  restated <- mentat_memo_redisclosure_parents(rows, receipt_roles, eligible)
-  restated[nzchar(duplicate_of)] <- ""
-  duplicate_of[nzchar(restated)] <- restated[nzchar(restated)]
-  reason[nzchar(restated)] <- "memo_redisclosure_of_counted_parent"
-  # Conduit legs remain visible and count to their named recipients (R5/R8).
-  # Only same-recipient memos with a retained, eligible counterpart are removed.
-  data.frame(sub_id = as.character(column("sub_id")), memo_key = memo_key,
-             duplicate_memo = as.integer(nzchar(duplicate_of)),
-             duplicate_of_sub_id = duplicate_of, duplicate_reason = reason,
-             stringsAsFactors = FALSE)
+  data.frame(
+    sub_id = as.character(column("sub_id")),
+    memo_key = memo_key,
+    duplicate_memo = as.integer(duplicate),
+    stringsAsFactors = FALSE
+  )
 }
 
 apply_amendment_versioning <- function(connection, print_summary = FALSE) {
@@ -1103,16 +903,13 @@ apply_amendment_versioning <- function(connection, print_summary = FALSE) {
     DBI::dbListTables(connection)
   )
   # transaction_id / receipt_type_full / memo_text feed the parent back-reference
-  # rule in mentat_memo_duplicate_plan(), and contributor_id F13's parent match.
-  # Older corporate snapshots lack these fields, so each frame is padded before
-  # combining both source tables.
+  # rule in mentat_memo_duplicate_plan(). corporate_giving has transaction_id but
+  # not the two text columns, so each frame is padded to this shape before rbind,
+  # which otherwise fails with "numbers of columns do not match".
   memo_plan_columns <- c(
     "sub_id", "company", "committee_id", "contribution_receipt_date",
     "contribution_receipt_amount", "contributor_name", "is_memo_leg",
-    "transaction_id", "receipt_type_full", "memo_text", "back_reference_transaction_id",
-    "back_reference_schedule_name", "file_num", "report_year", "report_type",
-    "filing_form", "line_number", "memo_code", "memoed_subtotal",
-    "company_match_status", "excluded_reason", "contributor_id"
+    "transaction_id", "receipt_type_full", "memo_text"
   )
   DBI::dbWithTransaction(connection, {
     global_memo_rows <- do.call(rbind, lapply(tables, function(table) {
@@ -1295,7 +1092,7 @@ apply_amendment_versioning <- function(connection, print_summary = FALSE) {
     )
   }
   if (isTRUE(print_summary)) {
-    cat("R8 row flags (only memos with retained, matched counterparts are excluded here):\n")
+    cat("R8 row flags (only exact five-key memo duplicates are excluded from analysis):\n")
     print(summary, row.names = FALSE)
     coinbase <- summary[
       summary$table == "corporate_giving" & summary$company == "Coinbase",

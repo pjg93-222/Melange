@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H860B3CFEFE4D45C5A70BF2E2470DD8C4" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1162 IH: Water Recycling Investment and Improvement Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 1162</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20190213">February 13, 2019</action-date>
+<action-desc><sponsor name-id="N000179">Mrs. Napolitano</sponsor> (for herself, <cosponsor name-id="J000126">Ms. Johnson of Texas</cosponsor>, <cosponsor name-id="R000486">Ms. Roybal-Allard</cosponsor>, <cosponsor name-id="M001166">Mr. McNerney</cosponsor>, <cosponsor name-id="H001068">Mr. Huffman</cosponsor>, <cosponsor name-id="R000616">Mr. Rouda</cosponsor>, <cosponsor name-id="B001285">Ms. Brownley of California</cosponsor>, <cosponsor name-id="L000579">Mr. Lowenthal</cosponsor>, <cosponsor name-id="V000132">Mr. Vela</cosponsor>, <cosponsor name-id="T000474">Mrs. Torres of California</cosponsor>, <cosponsor name-id="C001112">Mr. Carbajal</cosponsor>, <cosponsor name-id="H001087">Ms. Hill of California</cosponsor>, <cosponsor name-id="T000468">Ms. Titus</cosponsor>, <cosponsor name-id="C001123">Mr. Cisneros</cosponsor>, <cosponsor name-id="H001090">Mr. Harder of California</cosponsor>, <cosponsor name-id="E000215">Ms. Eshoo</cosponsor>, <cosponsor name-id="S001156">Ms. Sánchez</cosponsor>, and <cosponsor name-id="S001165">Mr. Sires</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HII00">Committee on Natural Resources</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To establish a grant program for the funding of water recycling and reuse projects, and for other purposes.</official-title>
+</form>
+<legis-body id="HE22FABA3E48044F1B0644A32692F788B" style="OLC"> 
+<section id="H829A5B0122164AFF87D1D8FAE41E0DB1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Water Recycling Investment and Improvement Act</short-title></quote>.</text></section> <section id="HBABCDF04921445C8846C8484E0FC81E6" section-type="subsequent-section"><enum>2.</enum><header>Competitive grant program for the funding of water recycling and reuse projects</header> <subsection id="H0B46146BFC074328BD8EC03CB4014D54"><enum>(a)</enum><header>Competitive grant program for the funding of water recycling and reuse projects</header><text display-inline="yes-display-inline">Section 1602(f) of the Reclamation Wastewater and Groundwater Study and Facilities Act (title XVI of <external-xref legal-doc="public-law" parsable-cite="pl/102/575">Public Law 102–575</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/43/390h">43 U.S.C. 390h</external-xref> et seq.) is amended by striking paragraphs (2) and (3) and inserting the following:</text> 
+<quoted-block display-inline="no-display-inline" id="H41E1C2CF66544394BA84B74E56D0D977" style="OLC"> 
+<paragraph id="HC58B2CBC8B054B99A1AA32D4BD6BB25D"><enum>(2)</enum><header>Priority</header><text display-inline="yes-display-inline">When funding projects under paragraph (1), the Secretary shall give funding priority to projects that meet one or more of the following criteria:</text> <subparagraph id="HFA4CFDD385814979929A35106FBF5112"><enum>(A)</enum><text display-inline="yes-display-inline">Projects that are likely to provide a more reliable water supply for States and local governments.</text></subparagraph> 
+<subparagraph id="HA5830177AC714CAE98087799D5502B16"><enum>(B)</enum><text>Projects that are likely to increase the water management flexibility and reduce impacts on environmental resources from projects operated by Federal and State agencies.</text></subparagraph> <subparagraph id="HFCF1B23FE0B34250AB57A6AD920B4092"><enum>(C)</enum><text>Projects that are regional in nature.</text></subparagraph> 
+<subparagraph id="H3AB0327C031D4C8996D61BA09B06A584"><enum>(D)</enum><text>Projects with multiple stakeholders.</text></subparagraph> <subparagraph id="HEA20F4202F0F471987A0DB23976762BE"><enum>(E)</enum><text>Projects that provide multiple benefits, including water supply reliability, eco-system benefits, groundwater management and enhancements, and water quality improvements.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="HD483B9B2197941DD9EE75397B1A949EC"><enum>(b)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">Section 1602(g) of the Reclamation Wastewater and Groundwater Study and Facilities Act (title XVI of <external-xref legal-doc="public-law" parsable-cite="pl/102/575">Public Law 102–575</external-xref>; <external-xref legal-doc="usc" parsable-cite="usc/43/390h">43 U.S.C. 390h</external-xref> et seq.) is amended—</text> <paragraph id="H045295907520491DA439B4D456F6825F"><enum>(1)</enum><text>by striking <quote>$50,000,000</quote> and inserting <quote>$500,000,000</quote>; and</text></paragraph> 
+<paragraph id="H88DB3031EF9D40EC87C5794D520FA00E"><enum>(2)</enum><text>by striking <quote>if enacted appropriations legislation designates funding to them by name,</quote>.</text></paragraph></subsection> <subsection id="HA716E231107345E29FCDF377338E8945"><enum>(c)</enum><header>Duration</header><text>Section 4013 of the WIIN Act (<external-xref legal-doc="usc" parsable-cite="usc/43/390b">43 U.S.C. 390b(2)</external-xref>) is amended—</text> 
+<paragraph id="H6C6E2484ADDC435EA4247DA5B95D7C7D"><enum>(1)</enum><text>in paragraph (1), by striking <quote>and</quote>;</text></paragraph> <paragraph id="HD98592D2741F4C7A93D7C5137741A98D"><enum>(2)</enum><text>in paragraph (2), by striking the period and inserting <quote>; and</quote>; and</text></paragraph> 
+<paragraph id="H94A88D9940394A8BB2197E7BAA8BEE8A"><enum>(3)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="H226712CE97E047F1A83A0C89868BBF58" style="OLC"> <paragraph id="HF877CFE1A77F4EC6B4E97FDAC848E4DF"><enum>(3)</enum><text display-inline="yes-display-inline">section 4009(c).</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection> 
+<subsection id="H529171ACDBAD4808A9861CAE39B86149"><enum>(d)</enum><header>Limitation on funding</header><text display-inline="yes-display-inline">Section 1631(d) of the Reclamation Wastewater and Groundwater Study and Facilities Act (<external-xref legal-doc="usc" parsable-cite="usc/43/390h-13">43 U.S.C. 390h–13(d)</external-xref>) is amended by striking <quote>$20,000,000 (October 1996 prices)</quote> and inserting <quote>$30,00,000 (January 2019 prices)</quote>. </text> </subsection></section> </legis-body> </bill> 
+

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H87A9892E03E44BE5B7CCF50EAD244C15" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 800 IH: Federal Workers Banking Assistance Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 800</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190125">January 25, 2019</action-date><action-desc><sponsor name-id="M001137">Mr. Meeks</sponsor> (for himself, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="K000385">Ms. Kelly of Illinois</cosponsor>, <cosponsor name-id="J000032">Ms. Jackson Lee</cosponsor>, <cosponsor name-id="L000559">Mr. Langevin</cosponsor>, <cosponsor name-id="R000577">Mr. Ryan</cosponsor>, <cosponsor name-id="B001304">Mr. Brown of Maryland</cosponsor>, <cosponsor name-id="V000130">Mr. Vargas</cosponsor>, <cosponsor name-id="W000822">Mrs. Watson Coleman</cosponsor>, <cosponsor name-id="G000553">Mr. Green of Texas</cosponsor>, <cosponsor name-id="W000797">Ms. Wasserman Schultz</cosponsor>, <cosponsor name-id="D000623">Mr. DeSaulnier</cosponsor>, <cosponsor name-id="D000216">Ms. DeLauro</cosponsor>, <cosponsor name-id="S001165">Mr. Sires</cosponsor>, <cosponsor name-id="Q000023">Mr. Quigley</cosponsor>, and <cosponsor name-id="P000593">Mr. Perlmutter</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Community Reinvestment Act of 1977 to provide financial institutions with credit for
+			 providing assistance during Government shutdowns.</official-title></form>
+	<legis-body id="HA060605205F54DACB648C6D57B183F7A" style="OLC">
+ <section id="HBC6669C27EAB4D73BA79C1D583FC50CA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Federal Workers Banking Assistance Act</short-title></quote>.</text> </section><section id="HFD643907B5CE46ECABBD681FFFC24223"><enum>2.</enum><header>CRA credit for providing assistance during Government shutdowns</header><text display-inline="no-display-inline">Section 804 of the Community Reinvestment Act of 1977 (<external-xref legal-doc="usc" parsable-cite="usc/12/2903">12 U.S.C. 2903</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block display-inline="no-display-inline" id="H7DD5F7DDE63E4CB7923E48C3C3ECB3BB" style="OLC">
+				<subsection id="H2E7D26126AAE4F2993EF02AD2B51B359"><enum>(e)</enum><header>Assistance during Government shutdowns</header>
+ <paragraph id="HA6E311730DB3497A87C3C1B9FEB53CBC"><enum>(1)</enum><header>In general</header><text>In assessing and taking into account, under subsection (a), the record of a financial institution, the appropriate Federal financial supervisory agency shall consider, as a factor, efforts of the financial institution to modify terms on existing loans, extend new loans with low- to no-interest rates, or the waiving of fees to help covered employees, if such modification or extension is done in a safe and sound manner.</text>
+ </paragraph><paragraph id="HC9672F8E160640129709E584AA666933"><enum>(2)</enum><header>Guidance</header><text display-inline="yes-display-inline">The appropriate Federal financial supervisory agencies shall issue guidance with respect to this subsection not later than the end of the 7-day period following—</text>
+ <subparagraph id="HF0BFDA09F6084D63828D9FBADB085CC4"><enum>(A)</enum><text>the date of enactment of this subsection; and</text> </subparagraph><subparagraph id="HB732343F243C4354AD3C29B508C20555"><enum>(B)</enum><text display-inline="yes-display-inline">any lapse in Federal appropriations.</text>
+ </subparagraph></paragraph><paragraph id="H461C2379B2244A70B37CCBDAB4129742"><enum>(3)</enum><header>Covered employee</header><text display-inline="yes-display-inline">For purposes of this subsection, the term <quote>covered employee</quote> means—</text> <subparagraph id="HE6E5D33F2D8C48CDB9E0807EA757ECAB"><enum>(A)</enum><text>a Federal or District of Columbia employee furloughed or excepted from such furlough during any lapse in Federal appropriations; and</text>
+ </subparagraph><subparagraph id="H73AE5B1FDB4246F88B877D511324807F"><enum>(B)</enum><text display-inline="yes-display-inline">a Federal contractor who, during any lapse in Federal appropriations, is not receiving pay by reason of such lapse.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

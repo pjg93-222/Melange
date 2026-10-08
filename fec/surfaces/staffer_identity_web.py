@@ -398,6 +398,21 @@ class IdentityWebIndex:
         # actual subject. Contradictory cached biographies are not merge evidence.
         return [r for r in references if actual_subject(r.get('text', ''), r.get('name', ''))]
 
+    @staticmethod
+    def _scanned_people(db):
+        """People covered by the families already checked, counted by the database, not by parsing every row in Python.
+
+        node_ids is always a JSON array, so the sum of the array lengths is the sum of len(json.loads(row)).
+        A SQLite build without the JSON functions falls back to the loop, which gives the same total.
+        """
+        where = "WHERE updated_at IS NOT NULL AND state IN ('referenced','unresolved')"
+        try:
+            return db.execute("SELECT coalesce(sum(json_array_length(node_ids)), 0) FROM queue " + where).fetchone()[0]
+        except sqlite3.OperationalError as exc:
+            if 'json_array_length' not in str(exc):
+                raise
+            return sum(len(json.loads(row[0])) for row in db.execute("SELECT node_ids FROM queue " + where))
+
     def status(self):
         with self.connect() as db:
             states = dict(db.execute('SELECT state,count(*) FROM queue GROUP BY state'))
@@ -406,7 +421,7 @@ class IdentityWebIndex:
             last = db.execute("SELECT max(updated_at) FROM queue WHERE state IN ('referenced','unresolved')").fetchone()[0]
             errors = [row[0] for row in db.execute("SELECT error FROM queue WHERE state='retry' AND error IS NOT NULL GROUP BY error ORDER BY max(updated_at) DESC LIMIT 3")]
             total_people = db.execute("SELECT value FROM metadata WHERE key='total_people'").fetchone()
-            scanned_people = sum(len(json.loads(row[0])) for row in db.execute("SELECT node_ids FROM queue WHERE updated_at IS NOT NULL AND state IN ('referenced','unresolved')"))
+            scanned_people = self._scanned_people(db)
             outcomes = dict(db.execute('SELECT outcome,count(*) FROM reference_outcomes GROUP BY outcome'))
         queued = states.get('queued', 0) + states.get('checking', 0) + states.get('retry', 0)
         return {'status': 'checking_references' if queued else 'cycle_complete', 'queued': queued,

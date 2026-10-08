@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H0532B4E806FD4EEDBA484118D9943D1C" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 5833 IH: Clean Water Affordability Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-10-24</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5833</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251024">October 24, 2025</action-date><action-desc><sponsor name-id="W000808">Ms. Wilson of Florida</sponsor> (for herself and <cosponsor name-id="S001185">Ms. Sewell</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Federal Water Pollution Control Act with respect to additional subsidization, and for other purposes.</official-title></form><legis-body id="H31F1357AF9B84B659D2856C348074035" style="OLC"> 
+<section id="HBA7CE04E04494074A1C1BE1C0588ADC7" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Clean Water Affordability Act</short-title></quote>.</text></section> 
+<section id="HE17E78BFE1C148D79CA12B839B8350F5"><enum>2.</enum><header>Water pollution control revolving loan funds</header><text display-inline="no-display-inline">Section 603(i) of the Federal Water Pollution Control Act (<external-xref legal-doc="usc" parsable-cite="usc/33/1383">33 U.S.C. 1383(i)</external-xref>) is amended—</text> <paragraph id="H0CB85D0475D7482F9D6A64440844DE22"><enum>(1)</enum><text>in paragraph (1)(A)—</text> 
+<subparagraph id="HE3D4BD97C86B46AF9F037BFE1E6DA684"><enum>(A)</enum><text>in the matter preceding clause (i), by striking <quote>in assistance</quote>; and</text></subparagraph> <subparagraph id="HBF0882C195CF4C95B1884116A0228248"><enum>(B)</enum><text>in clause (ii)(III), by striking <quote>to such ratepayers</quote> and inserting <quote>to help such ratepayers maintain access to wastewater (including stormwater) treatment services</quote>; and</text></subparagraph></paragraph> 
+<paragraph id="H427BEAA06A4B492CB7059ACFB0DCB06B"><enum>(2)</enum><text>by striking paragraph (3) and inserting the following:</text> <quoted-block id="H76CF63CEE63D4E2B80ACB3922FE84F47" style="OLC"> <paragraph id="HE9885255DFAD4A479B346892F043C017"><enum>(3)</enum><header>Subsidization amounts</header> <subparagraph id="H611EF9F975234A9FB260C6A8406ABAB8"><enum>(A)</enum><header>In general</header><text>A State may use for providing additional subsidization in a fiscal year under this subsection an amount that does not exceed the greater of—</text> 
+<clause id="HAE5A393F74CD44F283D99F97FCBB3118"><enum>(i)</enum><text>50 percent of the total amount received by the State in capitalization grants under this title for the fiscal year; or</text></clause> <clause id="H109E616C36CB46338C767FE062D4AD0F"><enum>(ii)</enum><text>the annual average over the previous 10 fiscal years of the amounts deposited by the State in the State water pollution control revolving fund from State moneys that exceed the amounts required to be so deposited under section 602(b)(2).</text></clause></subparagraph> 
+<subparagraph id="HA664C2409E6449BBB01D4C1E3A35F2C2"><enum>(B)</enum><header>Minimum</header><text>To the extent there are sufficient applications for additional subsidization under this subsection that meet the criteria under paragraph (1)(A), a State shall use for providing additional subsidization in a fiscal year under this subsection an amount that is not less than 20 percent of the total amount received by the State in capitalization grants under this title for the fiscal year.</text></subparagraph></paragraph> <paragraph id="HFA05C3A1FA8340F0B4B26F89B23EF278" commented="no"><enum>(4)</enum><header>Exclusion</header><text>A loan from the water pollution control revolving fund of a State with an interest rate equal to or greater than 0 percent shall not be considered additional subsidization for the purposes of this subsection.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> 
+</legis-body></bill>
+

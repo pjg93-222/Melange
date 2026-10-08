@@ -1,0 +1,30 @@
+{
+ "cells": 9594,
+ "cells_below_1e6": 0,
+ "crown_substitutions": 0,
+ "defender_cells": 37,
+ "defender_published_F": 37,
+ "has_press": 1701,
+ "has_press_not_signal": 0,
+ "overall_char_ok": true,
+ "parity_checked": 9594,
+ "parity_mismatch_detail": [],
+ "parity_mismatches": 0,
+ "raw_unchanged": true,
+ "sheet_nonzero_but_no_has_press": 0,
+ "signal_true": 4790,
+ "vocab": {
+  "Ally": 1787,
+  "Champion": 1316,
+  "Defender": 37,
+  "Highly Persuadable": 223,
+  "Highly Skeptical": 112,
+  "Lean Persuadable": 357,
+  "Lean Skeptic": 64,
+  "Opponent": 78,
+  "Persuadable": 296,
+  "Skeptic": 86,
+  "True Neutral": 434,
+  "\u2014": 4804
+ }
+}

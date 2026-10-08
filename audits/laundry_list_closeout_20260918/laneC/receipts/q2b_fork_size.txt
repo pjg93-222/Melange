@@ -1,0 +1,138 @@
+====================================================================================================
+Q2b  FORK SIZE : workbook role sheets (desk ledger) vs selected archive+sentinel (stance matrix)
+====================================================================================================
+workbook role-sheet rows          = 11065  (distinct member/bill/congress/role keys = 7727)
+archive+sentinel rows             = 10449  (distinct keys = 7298)
+manual_bill_evidence.csv keys     = 348  (read by BOTH sides)
+
+keys ONLY in the workbook role sheets (desk shows, stance matrix never sees) = 627
+keys ONLY in archive+sentinel        (stance matrix scores, desk never shows) = 258
+
+  only-in-workbook by role: {'cosponsor': 625, 'sponsor': 2}
+  only-in-workbook by Congress: {'117': 1, '118': 1, '119': 625}
+  only-in-workbook distinct members: 279 ; distinct bills: 94
+  top 25 only-in-workbook bills by key count:
+     H.R.1919         keys=98
+     S.401            keys=39
+     S.1467           keys=35
+     H.R.976          keys=29
+     H.R.6955         keys=29
+     H.R.6125         keys=27
+     H.R.2808         keys=27
+     H.R.4568         keys=20
+     H.R.507          keys=19
+     H.R.2702         keys=15
+     H.R.4479         keys=15
+     H.J.RES.59       keys=14
+     S.J.RES.18       keys=13
+     S.875            keys=12
+     H.R.2392         keys=11
+     H.R.2064         keys=10
+     S.3017           keys=8
+     H.R.3633         keys=8
+     S.2486           keys=8
+     S.RES.627        keys=8
+     S.557            keys=8
+     H.R.5689         keys=8
+     H.R.6449         keys=7
+     H.R.941          keys=6
+     S.2995           keys=6
+
+  only-in-archive by role: {'cosponsor': 196, 'original-cosponsor': 50, 'sponsor': 12}
+  only-in-archive by Congress: {'117': 5, '118': 11, '119': 242}
+  top 25 only-in-archive bills by key count:
+     H.R.1181         keys=129
+     H.R.987          keys=35
+     H.R.2094         keys=19
+     H.R.9514         keys=16
+     H.R.9490         keys=4
+     H.R.9668         keys=3
+     S.3940           keys=3
+     S.978            keys=3
+     H.R.4936         keys=3
+     S.3623           keys=3
+     H.R.800          keys=2
+     S.3549           keys=2
+     H.R.10082        keys=2
+     H.R.1027         keys=2
+     H.R.507          keys=1
+     S.1913           keys=1
+     S.919            keys=1
+     H.R.7035         keys=1
+     H.R.5403         keys=1
+     H.R.6410         keys=1
+     H.R.4686         keys=1
+     H.R.8395         keys=1
+     H.R.1122         keys=1
+     H.R.1944         keys=1
+     H.R.7647         keys=1
+
+  sample 30 only-in-workbook keys:
+      ('Aaron Bean', 'H.R.1919', '119', 'cosponsor')
+      ('Adam Gray', 'H.R.4479', '119', 'cosponsor')
+      ('Adam Gray', 'H.R.4568', '119', 'cosponsor')
+      ('Adam Smith', 'H.R.6125', '119', 'cosponsor')
+      ('Addison McDowell', 'H.R.1919', '119', 'cosponsor')
+      ('Adrian Smith', 'H.R.1919', '119', 'cosponsor')
+      ('Adrian Smith', 'H.R.2808', '119', 'cosponsor')
+      ('Alma Adams', 'H.R.6125', '119', 'cosponsor')
+      ('Amy Klobuchar', 'S.1467', '119', 'cosponsor')
+      ('Amy Klobuchar', 'S.3370', '119', 'cosponsor')
+      ('Andrew Clyde', 'H.R.1919', '119', 'cosponsor')
+      ('Andrew Clyde', 'H.R.987', '119', 'cosponsor')
+      ('Andrew Garbarino', 'H.R.1919', '119', 'cosponsor')
+      ('Andrew Garbarino', 'H.R.2094', '119', 'cosponsor')
+      ('Andrew Garbarino', 'H.R.2808', '119', 'cosponsor')
+      ('Andrew Garbarino', 'H.R.4568', '119', 'cosponsor')
+      ('Andrew Garbarino', 'H.R.6955', '119', 'cosponsor')
+      ('Andrew Garbarino', 'H.R.976', '119', 'cosponsor')
+      ('Andrew Ogles', 'H.J.RES.59', '119', 'cosponsor')
+      ('Andrew Ogles', 'H.R.1919', '119', 'cosponsor')
+      ('Andrew Ogles', 'H.R.2702', '119', 'cosponsor')
+      ('Andrew Ogles', 'H.R.2808', '119', 'cosponsor')
+      ('Andrew Ogles', 'H.R.6955', '119', 'cosponsor')
+      ('Andrew Ogles', 'H.R.976', '119', 'cosponsor')
+      ('André Carson', 'H.R.507', '119', 'cosponsor')
+      ('André Carson', 'H.R.6125', '119', 'cosponsor')
+      ('Andy Barr', 'H.J.RES.59', '119', 'cosponsor')
+      ('Andy Barr', 'H.R.1799', '119', 'cosponsor')
+      ('Andy Barr', 'H.R.1919', '119', 'cosponsor')
+      ('Andy Barr', 'H.R.2331', '119', 'cosponsor')
+
+-- Tim Scott specifically --
+   workbook keys=34  archive+sentinel keys=27  only-workbook=7  only-archive=0
+      ONLY-WORKBOOK ('Tim Scott', 'S.1582', '119', 'cosponsor')
+      ONLY-WORKBOOK ('Tim Scott', 'S.3017', '119', 'cosponsor')
+      ONLY-WORKBOOK ('Tim Scott', 'S.3382', '117', 'sponsor')
+      ONLY-WORKBOOK ('Tim Scott', 'S.394', '119', 'cosponsor')
+      ONLY-WORKBOOK ('Tim Scott', 'S.3992', '118', 'sponsor')
+      ONLY-WORKBOOK ('Tim Scott', 'S.401', '119', 'cosponsor')
+      ONLY-WORKBOOK ('Tim Scott', 'S.919', '119', 'cosponsor')
+
+-- S.J.Res.18 / H.J.Res.59 key parity --
+   S.J.RES.18   workbook keys=30   archive keys=17   only-workbook=13   only-archive=0
+        ONLY-WORKBOOK ('Bernie Moreno', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Bill Hagerty', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Cynthia Lummis', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('James Risch', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Jerry Moran', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('John Boozman', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Katie Britt', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Kevin Cramer', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Mike Crapo', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Mike Rounds', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Pete Ricketts', 'S.J.RES.18', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Roger Wicker', 'S.J.RES.18', '119', 'cosponsor')
+   H.J.RES.59   workbook keys=32   archive keys=18   only-workbook=14   only-archive=0
+        ONLY-WORKBOOK ('Andrew Ogles', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Andy Barr', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Ann Wagner', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Bill Huizenga', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Byron Donalds', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Daniel Meuser', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Glenn Grothman', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Maria Salazar', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Mike Haridopolos', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Ralph Norman', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Roger Williams', 'H.J.RES.59', '119', 'cosponsor')
+        ONLY-WORKBOOK ('Tim Moore', 'H.J.RES.59', '119', 'cosponsor')

@@ -33,8 +33,10 @@ RECOMPUTE_SCHEMA = "alliance-conflict-recompute-v1"
 YEARS = tuple(range(2021, 2027))
 STRICT_CHANNELS = frozenset({"formal_strict", "both_strict", "title_strict"})
 LABELS = ("Support", "Oppose", "Engage")
-SECTORS = ("bank", "credit_union", "crypto", "fintech", "financial_other")
-DIRECTIONAL_SECTORS = SECTORS[:4]
+SECTORS = ("bank", "credit_union", "crypto", "fintech", "telecom", "financial_other")
+# Explicit, not a positional slice of SECTORS: telecom is directional exactly like
+# fintech, and financial_other (the catch-all) is the only non-directional sector.
+DIRECTIONAL_SECTORS = ("bank", "credit_union", "crypto", "fintech", "telecom")
 SECTOR_PAIRS = tuple(itertools.combinations(DIRECTIONAL_SECTORS, 2))
 CCCA_BILLS = ("118:s:1838", "118:hr:3881", "117:s:4674", "117:hr:8874")
 SIGNED_ATTENTION_FIELDS = (
@@ -779,7 +781,7 @@ def _signed_rows_for_anchor(rows, bill_key):
 
 
 def recompute_alliance_conflict(signed_rows):
-    """Recompute the six pair tables and enforce the CCCA validation anchor."""
+    """Recompute the directional-sector pair tables and enforce the CCCA validation anchor."""
     by_bill = collections.defaultdict(list)
     for row in signed_rows:
         by_bill[row["bill_key"]].append(row)

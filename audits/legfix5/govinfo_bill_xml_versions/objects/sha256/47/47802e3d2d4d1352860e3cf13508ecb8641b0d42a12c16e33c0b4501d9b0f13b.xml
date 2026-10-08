@@ -1,0 +1,571 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ROM26144-JXP-8S-5NX"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S4415 IS: TEACH Improvement Act of 2026</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-04-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 4415</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260428">April 28, 2026</action-date><action-desc><sponsor name-id="S153">Mr. Grassley</sponsor> (for himself, <cosponsor name-id="S259">Mr. Reed</cosponsor>, and <cosponsor name-id="S432">Mr. Gallego</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Higher Education Act of 1965 regarding the use of TEACH grants, and for other purposes.</official-title></form><legis-body display-enacting-clause="yes-display-enacting-clause"><section section-type="section-one" id="S1"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>TEACH Improvement Act of 2026</short-title></quote>.</text></section><section id="idb6029951c130498e91997ef6a88b0582"><enum>2.</enum><header>Teach grants</header><text display-inline="no-display-inline">Subpart 9 of part A of title IV of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1070g">20 U.S.C. 1070g et seq.</external-xref>) is amended to read as follows:</text><quoted-block style="OLC" display-inline="no-display-inline" id="idf7c92788cb1a4239a8efd1d0906f03e8"><subpart id="id751332d5cff74e808c8c92b5e1aa0caa"> <enum>9</enum> <header>TEACH Grants</header> <section id="idfb391d26929b4ec29a6cf3b3a9d2cf6a"> <enum>420L.</enum> <header>Definitions</header> <text display-inline="no-display-inline">For the purposes of this subpart:</text>
+                        <paragraph id="idb8107790288840d6afef62a8e3fc1ea2">
+                            <enum>(1)</enum>
+                            <header>Eligible institution</header>
+ <text>The term <term>eligible institution</term> means an institution of higher education, as defined in section 102, that the Secretary determines—</text>
+                            <subparagraph id="id9f308f470d514773b9dab23896c2de83">
+                                <enum>(A)</enum>
+ <text>provides high-quality teacher preparation and professional development services, including extensive clinical experience as a part of pre-service preparation;</text>
+                            </subparagraph>
+                            <subparagraph id="id6a63392a2e3147008e29b75bc80376a5">
+                                <enum>(B)</enum>
+ <text>is financially responsible and is not subject to heightened cash monitoring or provisional certification;</text>
+                            </subparagraph>
+                            <subparagraph id="id2df7f989fa1542019290825ebdb27ddc">
+                                <enum>(C)</enum>
+ <text>provides pedagogical coursework, or assistance in the provision of such coursework, including the monitoring of student performance, and formal instruction related to the theory and practices of teaching; and</text>
+                            </subparagraph>
+                            <subparagraph id="id734f29ab13fd4d61a2854456d5856023">
+                                <enum>(D)</enum>
+ <text>provides supervision and support services to teachers, or assistance in the provision of such services, including mentoring focused on developing effective teaching skills and strategies.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="id6c0bc577fd724616a9020768e0efda57">
+                            <enum>(2)</enum>
+                            <header>Post-baccalaureate</header>
+ <text>The term <term>post-baccalaureate</term> means a program of instruction for individuals who have completed a baccalaureate degree that—</text>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="idbbec5ab9b2b04ca5b3f04707f1c16a1c">
+                                <enum>(A)</enum>
+ <text display-inline="yes-display-inline">is offered by an eligible institution that does not offer a baccalaureate degree in education;</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="idc339a1e77c42489791e918f79b589325">
+                                <enum>(B)</enum>
+ <text display-inline="yes-display-inline">does not lead to a graduate degree; and</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="id9687c21405f74c58bcf2b49f37ebba15">
+                                <enum>(C)</enum>
+ <text display-inline="yes-display-inline">consists of courses required by a State in order for a teacher candidate to receive a professional certification or licensing credential that is required for employment as a teacher in an elementary school or secondary school in that State.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="id8a11a72f40aa43038e38371de68d6889">
+                            <enum>(3)</enum>
+                            <header>Teacher candidate</header>
+ <text>The term <term>teacher candidate</term> means a student or teacher described in subparagraph (A) or (B) of section 420N(a)(2).</text>
+                        </paragraph>
+                    </section>
+                    <section id="id2d9febe4e7f747e693c7cfe0c0ee50ef">
+                        <enum>420M.</enum>
+                        <header>Program established</header>
+                        <subsection id="id42849771ed1c4c4ea4715b346df63a58">
+                            <enum>(a)</enum>
+                            <header>Program authority</header>
+                            <paragraph id="id6c78191df8fb46b9997a058b4485dd90">
+                                <enum>(1)</enum>
+                                <header>Payments required</header>
+ <text>The Secretary shall pay to each eligible institution such sums as may be necessary to pay to each teacher candidate who files an application and agreement in accordance with section 420N, and who qualifies under paragraph (2) of section 420N(a), a TEACH Grant in the amount of—</text>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="id753f9c6f2fdd4c5b8f3ee09e907f8d1e">
+                                    <enum>(A)</enum>
+ <text>in the case of an applicant who is not an applicant under section 420N(a)(2)(B)—</text>
+                                    <clause commented="no" display-inline="no-display-inline" id="id94003dd1df944bcaa5c781e298fe0765">
+                                        <enum>(i)</enum>
+ <text display-inline="yes-display-inline">$4,000 for each of the first 2 years during which that teacher candidate is in attendance at the institution; and</text>
+                                    </clause>
+                                    <clause id="id5ab4505d1663474997f6f1f5b54d1a42">
+                                        <enum>(ii)</enum>
+ <text>$5,000 for each of the second 2 years during which that teacher candidate is in attendance at the institution; and</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="id424bcfbedac4443fa4c3c29f68ea7381">
+                                    <enum>(B)</enum>
+ <text>in the case of an applicant under section 420N(a)(2)(B), $5,000 for each year during which that individual is in attendance at the institution.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id696a5229bdc54e289b6073d3fb8540e0">
+                                <enum>(2)</enum>
+                                <header>References</header>
+ <text>Grants made under paragraph (1) shall be known as <quote>Teacher Education Assistance for College and Higher Education Grants</quote> or <quote>TEACH Grants</quote>.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="id040ec788092a4e53af78e8d09b93a107">
+                            <enum>(b)</enum>
+                            <header>Payment methodology</header>
+                            <paragraph id="id277d5009f55d4475af3c85676a8cd4cd">
+                                <enum>(1)</enum>
+                                <header>Prepayment</header>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="id360ef5c6fbb140798749e75a6c02a843">
+                                    <enum>(A)</enum>
+                                    <header>In general</header>
+ <text display-inline="yes-display-inline">Not less than 85 percent of any funds provided to an eligible institution under subsection (a) shall be advanced to the eligible institution prior to the start of each payment period and shall be based upon an amount requested by the institution as needed to pay teacher candidates until such time as the Secretary determines and publishes in the Federal Register, with an opportunity for comment, an alternative payment system that provides payments to institutions in an accurate and timely manner, subject to subparagraph (B).</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline" id="idabe94ce6c9474a7896c686addeb13b3f">
+                                    <enum>(B)</enum>
+                                    <header>Reimbursement authority</header>
+ <text display-inline="yes-display-inline">Subparagraph (A) shall not be construed to limit the authority of the Secretary to place an institution on a reimbursement system of payment.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id10e37f4a0ece4fe59948ae0a59405ece">
+                                <enum>(2)</enum>
+                                <header>Direct payment</header>
+ <text>Nothing in this section shall be interpreted to prohibit the Secretary from paying directly to teacher candidates, in advance of the beginning of the academic term, an amount for which teacher candidates are eligible, in cases in which the eligible institution elects not to participate in the disbursement system required by paragraph (1).</text>
+                            </paragraph>
+                            <paragraph id="idd9e936d1945b4d49a7930ef98f1bb76e">
+                                <enum>(3)</enum>
+                                <header>Distribution of grants to teacher candidates</header>
+ <text>Payments under this subpart shall be made, in accordance with regulations promulgated by the Secretary for such purpose, in such manner as will best accomplish the purposes of this subpart. Any disbursement allowed to be made by crediting the teacher candidate’s account shall be used for any component of the cost of attendance for the teacher candidate, as selected by the teacher candidate.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="id4479642507a84008935cbf4d18c826eb">
+                            <enum>(c)</enum>
+                            <header>Reductions in amount</header>
+                            <paragraph id="id17c2fc1042f64601935f3f0564cccad6">
+                                <enum>(1)</enum>
+                                <header>Part-time students</header>
+ <text>In any case in which a teacher candidate attends an eligible institution on less than a full-time basis (including a teacher candidate who attends an eligible institution on less than a half-time basis) during any year, the amount of a grant under this subpart for which that teacher candidate is eligible shall be reduced in proportion to the degree to which that teacher candidate is not attending on a full-time basis, in accordance with a schedule of reductions established by the Secretary for the purposes of this subpart, computed in accordance with this subpart. Such schedule of reductions shall be established by regulation and published in the Federal Register in accordance with section 482.</text>
+                            </paragraph>
+                            <paragraph id="id257501b19608464db32b7aa53aae5785">
+                                <enum>(2)</enum>
+                                <header>No exceeding cost</header>
+ <text>The amount of a grant awarded under this subpart, in combination with Federal assistance and other assistance the student may receive, shall not exceed the cost of attendance at the eligible institution at which that teacher candidate is in attendance.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="ide53263e3582848d3a7b6e01721ba8ce8">
+                            <enum>(d)</enum>
+                            <header>Period of eligibility for grants</header>
+                            <paragraph id="id61678df01f734a2e95e9948d4b7960ca">
+                                <enum>(1)</enum>
+                                <header>Undergraduate and post-baccalaureate students</header>
+ <text>The period during which an undergraduate or post-baccalaureate student may receive grants under this subpart shall be the period required for the completion of the first undergraduate baccalaureate or post-baccalaureate course of study being pursued by the teacher candidate at the eligible institution at which the teacher candidate is in attendance, except that—</text>
+                                <subparagraph id="id62f4667151c5454e9a46e3634e17394e">
+                                    <enum>(A)</enum>
+ <text>any period during which the teacher candidate is enrolled in a noncredit or remedial course of study as described in paragraph (3) shall not be counted for the purpose of this paragraph; and</text>
+                                </subparagraph>
+                                <subparagraph id="ide5b3e17213e14f9299758660fd46fe09">
+                                    <enum>(B)</enum>
+ <text>the total amount that a teacher candidate may receive under this subpart for undergraduate or post-baccalaureate study shall not exceed $18,000.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id1d12ce2ded2a4c8a86c75da3bd09251e">
+                                <enum>(2)</enum>
+                                <header>Graduate students</header>
+ <text>The period during which a graduate student may receive grants under this subpart shall be the period required for the completion of a master’s degree course of study pursued by the teacher candidate at the eligible institution at which the teacher candidate is in attendance, except that the total amount that a teacher candidate may receive under this subpart for graduate study shall not exceed $10,000.</text>
+                            </paragraph>
+                            <paragraph id="idae79bd9f3c7947a4b32bb8b8264ac6cc">
+                                <enum>(3)</enum>
+                                <header>Remedial course; study abroad</header>
+ <text>Nothing in this section shall be construed to exclude from eligibility courses of study which are noncredit or remedial in nature (including courses in English language acquisition) that are determined by the eligible institution to be necessary to help the teacher candidate be prepared for the pursuit of a first undergraduate baccalaureate or post-baccalaureate degree or certificate or, in the case of courses in English language instruction, to be necessary to enable the teacher candidate to utilize already existing knowledge, training, or skills. Nothing in this section shall be construed to exclude from eligibility programs of study abroad that are approved for credit by the home institution at which the teacher candidate is enrolled.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="ideef1df494c2f48759ffdac52fe21c24c">
+                            <enum>(e)</enum>
+                            <header>Institutional eligibility based on candidates' failure To
+                                complete service</header>
+                            <paragraph commented="no" display-inline="no-display-inline"
+                                id="id08378fb6f1e4496ca399585e47a812e8">
+                                <enum>(1)</enum>
+                                <header>50 percent threshold requirements</header>
+ <text display-inline="yes-display-inline">Notwithstanding subsections (a) and (b) and beginning for award year 2026–2027 and each subsequent award year, an institution for which, during the period of the 3 preceding consecutive award years (referred to in this subsection as the <quote>applicable period</quote>), 50 percent or more of the covered TEACH grant recipients (defined, for purposes of this subsection, as TEACH Grant recipients who graduated from such institution and had an outstanding service obligation during the applicable period) have had their grant converted to loans under section 420N(c)(1) during the applicable period shall—</text>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="id0f4837e31c8943838e0dba94257cd6fb">
+                                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">for the 3-year period beginning on the last day of the applicable period, be ineligible to offer TEACH Grants to students at the institution who did not receive a TEACH grant from the institution for the preceding award year; and</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="id62d58e4d1b284e74b64ce0d368bc4f37">
+                                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">beginning 3 years after the last day of the applicable period, be eligible to submit an application to offer TEACH Grants to students but only in accordance with the requirements of paragraph (2), for 3 award years.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id067f89ce2b734f70bea798738a3b629c">
+                                <enum>(2)</enum>
+                                <header>40 percent threshold requirements</header>
+ <text>Notwithstanding subsections (a) and (b), an institution for which, during an applicable period, 40 percent or more of the covered TEACH Grant recipients have had their TEACH Grants converted to loans under section 420N(c)(1) shall—</text>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="id03a93231c5934b029b5f06199438fac9">
+                                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">for a period of 3 award years—</text>
+                                    <clause id="id81b1f41c1d8e4fdf805fbe0fc2ca093c">
+                                        <enum>(i)</enum>
+ <text>not be permitted to offer any student a TEACH Grant during the student's first academic year attending an institution of higher education;</text>
+                                    </clause>
+                                    <clause id="id04dc6b797ee94d3fa19c9c50c430f8ac">
+                                        <enum>(ii)</enum>
+ <text>provide a student with student teaching experience prior to offering the student a TEACH Grant; and</text>
+                                    </clause>
+                                    <clause id="ida92be51905fa4941a99ad55c9aac4449">
+                                        <enum>(iii)</enum>
+ <text>be required to provide additional financial aid counseling to students participating in the TEACH Grant program, or who express a desire to participate in the TEACH Grant program; and</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="idace23684a6e8468598da493e2d9462fe">
+                                    <enum>(B)</enum>
+ <text>be required to establish a task force that prepares a plan to—</text>
+                                    <clause id="idd783065ade1c45d6a3b0df9642c73671">
+                                        <enum>(i)</enum>
+ <text>identify contributing factors leading to high loan conversion rates; and</text>
+                                    </clause>
+                                    <clause id="id813fe3cd067f4ebb9d0ff233aec80836">
+                                        <enum>(ii)</enum>
+ <text>establish measurable objectives and actionable steps, besides counseling students, to improve the loan conversion rate.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id7be22756b6b04440b2753e9960da51b6">
+                                <enum>(3)</enum>
+                                <header>Reentry into full eligibility</header>
+ <text>An institution subject to the requirements of paragraph (2) (including an institution subject to such paragraph as required under paragraph (1)(B)) shall be eligible to apply to the Secretary to restore full eligibility and remove the restrictions under paragraph (2) when—</text>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="id5dfee9aed6f04a0987d775fb9106eac4">
+                                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">the institution has completed not less than 3 award years of participating as described in such paragraph;</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="id3d1ffb62b9a143508b476fab06719d61">
+                                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">during the period of the 3 immediately preceding award years of such participation, less than 40 percent of the covered TEACH grant recipients have had their TEACH grants converted to loans under section 420N(c)(1); and</text>
+                                </subparagraph>
+                                <subparagraph id="id6c8716ec84e540c0aae5899238f12906">
+                                    <enum>(C)</enum>
+ <text>the institution has established the task force and improvement plan as required under paragraph (2)(B), made demonstrable progress on such improvement plan, and continues to engage in review and technical assistance in order to improve the loan conversion rate.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id4401197a02c24fefb7564d27427e600c">
+                                <enum>(4)</enum>
+                                <header>Technical assistance and dissemination of best
+                                    practices</header>
+ <text>The Secretary shall—</text> <subparagraph commented="no" display-inline="no-display-inline" id="id37a84d900cd140b2a450b51a75a2f469"> <enum>(A)</enum> <text display-inline="yes-display-inline">provide technical assistance to institutions seeking to retain or regain eligibility under this section; and</text>
+                                </subparagraph>
+                                <subparagraph commented="no" display-inline="no-display-inline"
+                                    id="id226bcced23f149dfbd942e3d23d2d7c5">
+                                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">disseminate best practices outlined in section 420P(b)(7) for minimizing the conversion of TEACH grants into loans.</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                    </section>
+                    <section id="id4a63d6921ce0412a976725be7e3f802c">
+                        <enum>420N.</enum>
+                        <header>Applications; eligibility</header>
+                        <subsection id="id54c52e10165d4cd1813a5ed114f95045">
+                            <enum>(a)</enum>
+                            <header>Applications; demonstration of eligibility</header>
+                            <paragraph id="id379960ea8ddd43eeb9ef4e3240c8300b">
+                                <enum>(1)</enum>
+                                <header>Filing required</header>
+ <text>The Secretary shall periodically set dates by which teacher candidates shall file applications for TEACH grants. Each teacher candidate desiring a TEACH grant for any year shall file an application containing such information and assurances as the Secretary may determine necessary to enable the Secretary to carry out the functions and responsibilities of this subpart.</text>
+                            </paragraph>
+                            <paragraph id="idc6c249c43fb34e01b91a45dc5310175b">
+                                <enum>(2)</enum>
+                                <header>Demonstration of teach grant eligibility</header>
+ <text>Each application submitted under paragraph (1) shall contain such information as is necessary to demonstrate that—</text>
+                                <subparagraph id="idcc34e7abab9241c0aab52471869efc70">
+                                    <enum>(A)</enum>
+ <text>if the applicant is an enrolled student—</text> <clause id="idab2b07d2a284473e973c7ebea555c8d4"> <enum>(i)</enum> <text>the student is an eligible student for purposes of section 484;</text>
+                                    </clause>
+                                    <clause id="idc81b4821e9d849248e026ce36f74e030">
+                                        <enum>(ii)</enum>
+ <text>the student—</text> <subclause id="id02e39b3c8e7947d987c271c73690c3f0"> <enum>(I)</enum> <text>has a grade point average that is determined, under standards prescribed by the Secretary, to be comparable to a 3.25 average on a zero to 4.0 scale, except that, if the student is in the first year of a program of undergraduate education, such grade point average shall be determined on the basis of the student’s cumulative secondary school grade point average; or</text>
+                                        </subclause>
+                                        <subclause id="id8b985a94b5ec4db38e5ddc5a2ac26317">
+                                            <enum>(II)</enum>
+ <text>displayed high academic aptitude by receiving a score above the 75th percentile on at least one of the batteries in an undergraduate, post-baccalaureate, or graduate school admissions test; and</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="id8d795ef65ac2463d9958b3cb86dddc4a">
+                                        <enum>(iii)</enum>
+ <text>the student is completing coursework and other requirements necessary to begin a career in teaching, or plans to complete such coursework and requirements prior to graduating; or</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="idefe7bb92f4464c02bfeee49f3057dc48">
+                                    <enum>(B)</enum>
+ <text>if the applicant is a current or prospective teacher applying for a grant to obtain a graduate degree—</text>
+                                    <clause id="id2ded891462774fa6b5bda4b19395ef48">
+                                        <enum>(i)</enum>
+ <text>the applicant is a teacher or a retiree from another occupation with expertise in a field in which there is a shortage of teachers, such as mathematics, science, special education, English language acquisition, or another high-need subject;</text>
+                                    </clause>
+                                    <clause id="idf3861adffbed4a339f2c2fb5c6be96fb">
+                                        <enum>(ii)</enum>
+ <text>the applicant is or was a teacher who is using high-quality alternative certification routes; or</text>
+                                    </clause>
+                                    <clause id="id95b61cf84b694e00b2ef416fe2a1447c">
+                                        <enum>(iii)</enum>
+ <text>the applicant is a practicing teacher in another field and is pursuing an additional credential in a field in which there is a shortage of teachers, such as mathematics, science, special education, English language acquisition, or another high-need subject.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="id06145beed7be43fd81cbcff6b4fcba01">
+                            <enum>(b)</enum>
+                            <header>Agreements To serve</header>
+ <text>Each application under subsection (a) shall contain or be accompanied by an agreement by the applicant that—</text>
+                            <paragraph id="ida114f117058644ff97a0e854532e6ba4">
+                                <enum>(1)</enum>
+ <text>the applicant will—</text> <subparagraph id="id490a5ea7708c4dcda8a26cfab0f17821"> <enum>(A)</enum> <text>serve as a full-time teacher for a total of not less than 4 academic years within 8 years after completing the course of study for which the applicant received a TEACH Grant (referred to in this section as the <quote>service obligation window</quote>);</text>
+                                </subparagraph>
+                                <subparagraph id="id54a875e1def7420982eafca87ac31ee6">
+                                    <enum>(B)</enum>
+ <text>teach in a school described in section 465(a)(2)(A);</text>
+                                </subparagraph>
+                                <subparagraph id="id3a7018c956c447998385df142110f83c">
+                                    <enum>(C)</enum>
+ <text>teach in any of the following fields—</text> <clause id="idc8fef1ba6a064543a4a5696a32187f41"> <enum>(i)</enum> <text>mathematics;</text>
+                                    </clause>
+                                    <clause id="id4648ec2bc75a479a876c7029a12950d4">
+                                        <enum>(ii)</enum>
+ <text>science;</text> </clause> <clause id="idd6e30fc77f06425285dd0cd1a0edbc18"> <enum>(iii)</enum> <text>a foreign language;</text>
+                                    </clause>
+                                    <clause id="id136ad7e076c04cd189c426959febceba">
+                                        <enum>(iv)</enum>
+ <text>bilingual education;</text> </clause> <clause id="idb123680a5a484fbf8c4649af54eb4f1f"> <enum>(v)</enum> <text>special education;</text>
+                                    </clause>
+                                    <clause id="idbd572794505b41b7ad32dce08d8d5826">
+                                        <enum>(vi)</enum>
+ <text>as a reading specialist;</text> </clause> <clause id="id4eb7cf95fe8c4138b2de62ac3537abd4"> <enum>(vii)</enum> <text>career and technical education;</text>
+                                    </clause>
+                                    <clause id="id2b20d8654faa4fa8af471f98233497be">
+                                        <enum>(viii)</enum>
+ <text>school mental health; or</text> </clause> <clause id="ide1737c6ec4954cea9250922d23973d78"> <enum>(ix)</enum> <text>another field or geographic area documented as high-need by the Federal Government, State government, or local educational agency, and approved by the Secretary;</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="id3980f92f57af4682941f523dc8e77d8c">
+                                    <enum>(D)</enum>
+ <text>submit evidence of such employment in the form of a certification of employment by the chief administrative officer of the school, in accordance with subsection (d)(5), upon completion of each year of such service; and</text>
+                                </subparagraph>
+                                <subparagraph id="id539d632e36c24502abcc32e389add118">
+                                    <enum>(E)</enum>
+ <text>meet all State certification requirements for teaching (which may include meeting such requirements through a certification obtained through alternative routes to teaching);</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="idb531506b807941849b83867c3bd23e41">
+                                <enum>(2)</enum>
+ <text>in the event that the applicant is determined to have failed or refused to carry out such service obligation, an amount equal to any TEACH Grants received by such applicant, prorated in accordance with subsection (c)(1)(B), will be treated as a loan and collected from the applicant in accordance with subsection (c) and the regulations thereunder; and</text>
+                            </paragraph>
+                            <paragraph id="ide81111a57b504bc480ee299b6a9208cf">
+                                <enum>(3)</enum>
+ <text>contains, or is accompanied by, a plain-language disclosure form developed by the Secretary that clearly describes the nature of the TEACH Grant award, the service obligation, and the loan repayment requirements that are the consequence of the failure to complete the service obligation.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="id2e52ece75d164d05b36ee292c4477dc8">
+                            <enum>(c)</enum>
+                            <header>Repayment for failure To complete service</header>
+                            <paragraph id="id4417651212224adfbe124239350ea846">
+                                <enum>(1)</enum>
+                                <header>In general</header>
+ <text>In the event that any recipient of a TEACH grant fails or refuses to comply with some or all of the service obligation required under the agreement under subsection (b)—</text>
+                                <subparagraph id="id6f1211d2a1f5426e9316cda5570c0c16">
+                                    <enum>(A)</enum>
+ <text>the Secretary shall determine the proportion of the total amount of time of the service obligation that the recipient has failed or refused to complete; and</text>
+                                </subparagraph>
+                                <subparagraph id="ide6d5287400db4feaa0294b46276033cc">
+                                    <enum>(B)</enum>
+ <text>the Secretary shall—</text> <clause commented="no" display-inline="no-display-inline" id="id4b112c60168e41b6b29af7599a9a9744"> <enum>(i)</enum> <text display-inline="yes-display-inline">determine, on a prorated basis based on the proportion described in subparagraph (A), the amounts of any TEACH Grants received by such recipient that shall, upon a determination of such a failure or refusal in such service obligation, be treated as a Federal Direct Stafford Loan under part D (except that such loan shall not begin to accrue interest until the time of conversion); and</text>
+                                    </clause>
+                                    <clause commented="no" display-inline="no-display-inline"
+                                        id="iddee3e8e8966e4c2cb2ab0deb6a4144be">
+                                        <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">ensure that such amounts are subject to repayment, in accordance with terms and conditions specified by the Secretary in regulations under this subpart.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id477801d82c3a47b3950c2dcccc148f50">
+                                <enum>(2)</enum>
+                                <header>Reconsideration of conversion decisions</header>
+                                <subparagraph id="id1626cbae593d48ea883d31b0fb522783">
+                                    <enum>(A)</enum>
+                                    <header>Request to reconsider</header>
+ <text>In any case where the Secretary has determined that a recipient of a TEACH grant has failed or refused to comply with the service obligation in the agreement under subsection (b) and has converted the grant into a Federal loan in accordance with paragraph (1), (including a TEACH Grant converted to a loan prior to the date of enactment of the Consider Teachers Act of 2021, and including cases where such loans have been fully or partially paid), the recipient may request that the Secretary reconsider such initial determination and may submit additional information to demonstrate satisfaction of the service obligation. Upon receipt of such a request, the Secretary shall reconsider the determination in accordance with this paragraph not later than 90 days after the date that such request was received.</text>
+                                </subparagraph>
+                                <subparagraph id="id759e40cacc8f4d90865779a041e0cf2a">
+                                    <enum>(B)</enum>
+                                    <header>Reconsideration</header>
+ <text>If, in reconsidering an initial determination under subparagraph (A) regarding a conversion of a TEACH grant into a Federal loan in accordance with paragraph (1) (including reconsideration related to a TEACH Grant that was converted to a loan prior to the date of enactment of the Consider Teachers Act of 2021, and including cases where such loans were fully or partially paid), the Secretary determines that the reason for such determination was the recipient’s failure to timely submit a certification required under subsection (b)(1)(D) (as in effect on the day before the date of enactment of the Consider Teachers Act of 2021), an error or processing delay by the Secretary, a change to the fields considered eligible for fulfillment of the service obligation (as described in subsection (b)(1)(C)), a recipient having previously requested to have the TEACH Grant converted to a loan, or another valid reason determined by the Secretary, and that the recipient has, as of the date of the reconsideration, demonstrated that the recipient did meet, or is meeting, the service obligation in the agreement under subsection (b), the Secretary shall—</text>
+                                    <clause id="id5ddbacece4984c6cb188d2736f7cb898">
+                                        <enum>(i)</enum>
+ <text>discharge the Federal loan and reinstate the recipient’s TEACH grant under this subpart;</text>
+                                    </clause>
+                                    <clause id="idc36adc84e6f5446d83740776f9addc41">
+                                        <enum>(ii)</enum>
+ <text>discharge any interest or fees that may have accumulated during the period that the grant was converted to such Federal loan;</text>
+                                    </clause>
+                                    <clause id="idddfcf537b4144f4ca818442559822a5b">
+                                        <enum>(iii)</enum>
+ <text>if the recipient has other loans under part D, apply any payments made for such Federal loan during such period to those other loans under part D;</text>
+                                    </clause>
+                                    <clause id="idb2db07059b4c4f4188001cc0aba855ba">
+                                        <enum>(iv)</enum>
+ <text>if the recipient does not have other loans under part D, reimburse the recipient for any amounts paid on such loan during such period;</text>
+                                    </clause>
+                                    <clause id="iddd16e0940eef442b97ba3fcb079f17b1">
+                                        <enum>(v)</enum>
+ <text>request that consumer reporting agencies remove any negative credit reporting due to the conversion of the TEACH Grant to a Federal loan; and</text>
+                                    </clause>
+                                    <clause id="id9db4ad81e55e44efb719fd61502e9116">
+                                        <enum>(vi)</enum>
+ <text>use the additional information provided under subparagraph (A) to determine the progress the recipient has made in meeting the service obligation.</text>
+                                    </clause>
+                                </subparagraph>
+                                <subparagraph id="id34b495a03e924c28a9be3e291d3a1a15">
+                                    <enum>(C)</enum>
+                                    <header>Extension of time to complete service
+                                        obligation</header>
+ <text>In the case of a recipient whose TEACH Grant was reinstated in accordance with subparagraph (B), the Secretary shall, upon such reinstatement—</text>
+                                    <clause id="id05c889581bed4332bb543be75d9817dd">
+                                        <enum>(i)</enum>
+ <text>extend the time remaining for the recipient to fulfill the service obligation described in subsection (b)(1) to a period of time equal to—</text>
+                                        <subclause id="id4d63dd386cc74bf887dbc89d3970b80f">
+                                            <enum>(I)</enum>
+ <text>8 years; minus</text> </subclause> <subclause id="idb48a2ef22fa245f8b18fc7fc05e13f9f"> <enum>(II)</enum> <text>the number of full academic years of teaching that the recipient completed prior to the reconversion of the loan to a TEACH Grant under subparagraph (B), including any years of qualifying teaching completed during the period when the TEACH Grant was in loan status; and</text>
+                                        </subclause>
+                                    </clause>
+                                    <clause id="ide014a4bd78b14e658404f10533cbe1aa">
+                                        <enum>(ii)</enum>
+ <text>treat any full academic years of teaching described in clause (i)(II) as years that count toward the individual’s service obligation (regardless of whether the TEACH Grant funds were in grant or loan status) if that time otherwise meets the requirements of this section.</text>
+                                    </clause>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="idb6474adad8b4408282174d6321d67b4b">
+                            <enum>(d)</enum>
+                            <header>Additional administrative provisions</header>
+                            <paragraph id="id13e47b075f684f3fbebbebf7f91105c9">
+                                <enum>(1)</enum>
+                                <header>Change to school or high-need field</header>
+                                <subparagraph id="id0ae1b3ae967a443083389eefd453e40f">
+                                    <enum>(A)</enum>
+                                    <header>Change of high-need field designation after acquiring
+                                        degree or expertise</header>
+ <text>Notwithstanding subsection (b), if a recipient of an initial TEACH grant has acquired an academic degree, or expertise, in a field that was, at the time of the recipient’s application for that grant, designated as high need in accordance with subsection (b)(1)(C)(ix), but is no longer so designated, the grant recipient may fulfill the service obligation described in subsection (b)(1) by teaching in that field and completing the required period of service within the service obligation window.</text>
+                                </subparagraph>
+                                <subparagraph id="id109d3c182f764fbc83e3930cb79858a1">
+                                    <enum>(B)</enum>
+                                    <header>Change of high-need field or school designation after
+                                        beginning teaching</header>
+ <text>Notwithstanding subsection (b), if a recipient of a TEACH grant on or after the effective date of the <short-title>TEACH Improvement Act of 2026</short-title> begins teaching at a school described in subsection (b)(1)(B) and in a field described in subsection (b)(1)(C) during the service obligation window, but such school or field later is no longer designated under subsection (b), the grant recipient may fulfill the service obligation described in subsection (b)(1) by continuing to teach in that school and field and completing the required period of service within the service obligation window.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="id0289ef84a9dc4796966f07fdf9f48889">
+                                <enum>(2)</enum>
+                                <header>Extenuating circumstances</header>
+ <text>The Secretary shall establish, by regulation, categories of extenuating circumstances under which a recipient of a TEACH grant who is unable to fulfill all or part of the recipient’s service obligation may be excused from fulfilling that portion of the service obligation.</text>
+                            </paragraph>
+                            <paragraph id="id73530403c0b84cb3ad82d4b3ccceb30d">
+                                <enum>(3)</enum>
+                                <header>Communication with recipients</header>
+ <text>The Secretary shall notify TEACH grant recipients not less than once per calendar year regarding how to submit the employment certification under subsection (b)(1)(D) and the recommendations and requirements for submitting that certification under paragraph (5).</text>
+                            </paragraph>
+                            <paragraph id="idb2be97d290514ed8853c23420795a993">
+                                <enum>(4)</enum>
+                                <header>Qualifying schools and high-need fields</header>
+ <text>The Secretary shall maintain and annually update a list of qualifying schools as described in subsection (b)(1)(B), and a list of high-need fields as described in subsection (b)(1)(C), and shall make such lists publicly available on the Department’s website in a sortable and searchable format.</text>
+                            </paragraph>
+                            <paragraph id="id7a97fbd047e8493c9117445ae5a17cc7">
+                                <enum>(5)</enum>
+                                <header>Submission of employment certification</header>
+                                <subparagraph id="idc76b2b9767ba484fb7ac04b4525bc1bd">
+                                    <enum>(A)</enum>
+                                    <header>Recommended submissions</header>
+ <text>The Secretary shall notify TEACH Grant recipients that the Department recommends that TEACH Grant recipients submit the employment certification described in subsection (b)(1)(D) as soon as practicable after the completion of each year of service.</text>
+                                </subparagraph>
+                                <subparagraph id="id739a1ccd4656437fbc64463064988606">
+                                    <enum>(B)</enum>
+                                    <header>Required submission</header>
+ <text>A TEACH Grant recipient shall be required to submit to the Department employment certification within the timeframe that would allow that individual to complete their service obligation before the end of the service obligation window.</text>
+                                </subparagraph>
+                                <subparagraph id="id3f3728dcd2c740f28ac7d0459e5bd8e2">
+                                    <enum>(C)</enum>
+                                    <header>Notification</header>
+ <text>The Secretary shall notify TEACH Grant recipients of the required submission deadlines described in this paragraph.</text>
+                                </subparagraph>
+                                <subparagraph id="idd7cf97a86fda4e32971eb529b478d24f">
+                                    <enum>(D)</enum>
+                                    <header>Adjustment of deadline</header>
+ <text>The Secretary shall adjust the submission deadline described in subparagraph (B) to account for a service obligation window extension.</text>
+                                </subparagraph>
+                                <subparagraph id="id81d492e15acc4556ac9fbbf7ca08ccdb">
+                                    <enum>(E)</enum>
+                                    <header>Alternative to certification</header>
+ <text>The Secretary shall provide an alternative to the certification of employment described in subsection (b)(1)(D) for recipients who cannot obtain such required certification of employment from the chief administrative officer of the school because the recipient can demonstrate the school is no longer in existence or the school refuses to cooperate.</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                    </section>
+                    <section id="id466d4d2986714e2da42918593d26ddc6">
+                        <enum>420O.</enum>
+                        <header>Program period and funding</header>
+ <text display-inline="no-display-inline">Beginning on July 1, 2008, there shall be available to the Secretary to carry out this subpart, from funds not otherwise appropriated, such sums as may be necessary to provide TEACH Grants in accordance with this subpart to each eligible applicant.</text>
+                    </section>
+                    <section id="id5246ee5939e14598ad4c3efcc9b3722d">
+                        <enum>420P.</enum>
+                        <header>Reports to authorizing committees</header>
+                        <subsection id="id9ee816ef0299402b94eb31184e8b8533">
+                            <enum>(a)</enum>
+                            <header>Program reports</header>
+ <text>Not later than two years after the date of enactment of the <short-title>TEACH Improvement Act of 2026</short-title>, and every two years thereafter, the Secretary shall prepare and submit to the authorizing committees a report on TEACH grants with respect to the schools and students served by recipients of such grants. Such report shall take into consideration information related to—</text>
+                            <paragraph id="idcfcf0765f8f9421ab24d5620fecf04c6">
+                                <enum>(1)</enum>
+ <text>the number of TEACH grant recipients;</text> </paragraph> <paragraph id="idc04b2d354dd948b5afaf19332db738ea"> <enum>(2)</enum> <text>the degrees obtained by such recipients;</text>
+                            </paragraph>
+                            <paragraph id="id856d71012fe6481688e31301bb52dcc7">
+                                <enum>(3)</enum>
+ <text>the location, including the school, local educational agency, and State, where the recipients completed the service agreed to under section 420N(b), and the field taught;</text>
+                            </paragraph>
+                            <paragraph id="idb36e8681a07a4f17adb61021e2fa8947">
+                                <enum>(4)</enum>
+ <text>the duration of such service; and</text> </paragraph> <paragraph id="id64acac8f9143490da0fc01274dd5d099"> <enum>(5)</enum> <text>any other data necessary to conduct such evaluation.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="id8fc988deb88a4999b6ed8644f8e20947">
+                            <enum>(b)</enum>
+                            <header>Annual reports</header>
+ <text>Not later than 1 year after the date of enactment of the <short-title>TEACH Improvement Act of 2026</short-title>, and annually thereafter, the Secretary shall prepare and submit to the authorizing committees a report regarding the 1-year period covered by the report, including the following:</text>
+                            <paragraph id="id51f697bcd10043d090b6b7a4755baadf">
+                                <enum>(1)</enum>
+ <text>The number of TEACH grants converted to loans under section 420N(c)(1)(B).</text>
+                            </paragraph>
+                            <paragraph commented="no" id="id4ebcccd467d44f088bcb2b5b06097ccd">
+                                <enum>(2)</enum>
+ <text>The number of institutions that were subject to the heightened requirements under section 420M(e)(1).</text>
+                            </paragraph>
+                            <paragraph commented="no" display-inline="no-display-inline" id="idc8433f1307984d70aef4790e8183e5b0">
+                                <enum>(3)</enum>
+ <text display-inline="yes-display-inline">The number of institutions that were subject to the heightened requirements under section 420M(e)(2).</text>
+                            </paragraph>
+                            <paragraph id="id1f76f24b5cc04ecc985f203ad0064372">
+                                <enum>(4)</enum>
+ <text>The number of TEACH grants converted to loans under section 420N(c)(1)(B) that were reconverted to TEACH grants in accordance with section 420N(c)(2).</text>
+                            </paragraph>
+                            <paragraph id="ide4a87dad510c4816a5f98f8c90a15b00">
+                                <enum>(5)</enum>
+ <text>The number of contacts or complaints to the Department of Education or the Consumer Financial Protection Bureau (including through any ombudsman) received from a TEACH grant recipient, and the resolutions of those contacts or complaints.</text>
+                            </paragraph>
+                            <paragraph id="idb44c57be2ee64ccda94d4cd5b97c7341">
+                                <enum>(6)</enum>
+ <text>Demographic information about recipients of TEACH grants, including race, ethnicity, and gender.</text>
+                            </paragraph>
+                            <paragraph id="idf91855f54c874c0c9a2841c52315b6cc">
+                                <enum>(7)</enum>
+ <text>Recommendations on best practices for minimizing the conversion of TEACH grants into loans.</text>
+                            </paragraph>
+                        </subsection>
+                    </section>
+                    <section id="id5f8fefe2198f476f99a45ee798b4d762">
+                        <enum>420Q.</enum>
+                        <header>Servicer accountability</header>
+ <text display-inline="no-display-inline">The Secretary shall prescribe such regulations as may be necessary to ensure accurate administrative oversight and appropriate penalties for third party servicers in order to ensure that—</text>
+                        <paragraph id="id699e06639f004142a0c541cff9402ee4">
+                            <enum>(1)</enum>
+ <text>such servicers properly perform their contractual obligations with respect to this subpart; and</text>
+                        </paragraph>
+                        <paragraph id="id553c683aa73043e483433de7bc2adca0">
+                            <enum>(2)</enum>
+ <text>such servicers are held responsible with respect to the loss of benefits of TEACH grant recipients due to servicer failures.</text>
+                        </paragraph>
+                    </section>
+ </subpart><after-quoted-block>.</after-quoted-block></quoted-block></section><section commented="no" display-inline="no-display-inline" section-type="subsequent-section" id="id583fd604ae57415589b77c6e83c8df7b"><enum>3.</enum><header>Effective date</header><text display-inline="no-display-inline">The amendments made by this Act shall take effect on July 1, 2026.</text></section></legis-body></bill>
+

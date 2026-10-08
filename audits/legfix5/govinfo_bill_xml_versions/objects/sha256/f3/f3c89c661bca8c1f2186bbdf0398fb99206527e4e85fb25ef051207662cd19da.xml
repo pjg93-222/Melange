@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H442C1E1DA01C4DC0B8FAD45B90F2D09A" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 8139 IH: Surplus Utilization of Pharmaceutical Products Leveraged In Emergency Scenarios Act of 2020</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2020-09-01</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">116th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8139</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20200901">September 1, 2020</action-date>
+<action-desc><sponsor name-id="B001257">Mr. Bilirakis</sponsor> (for himself and <cosponsor name-id="S001200">Mr. Soto</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend title XIX of the Social Security Act to remove direct sales of drugs near expiration during the COVID–19 emergency from the calculation of certain pricing metrics under the Medicaid program.</official-title>
+</form>
+<legis-body id="H06AB5D67185449389F1B3F7C93DD6FB2" style="OLC"> 
+<section id="H53C863563E87413C982BAA13DF7FA465" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Surplus Utilization of Pharmaceutical Products Leveraged In Emergency Scenarios Act of 2020</short-title></quote> or the <quote><short-title>SUPPLIES Act of 2020</short-title></quote>.</text></section> <section id="HD81287299D1C445AB14B3CE3460714BB"><enum>2.</enum><header>Removing direct sales of drugs near expiration during the COVID–19 emergency from the calculation of certain pricing metrics under the Medicaid program</header> <subsection id="H002C49AE377440178EED3871B022BFAA"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 1927 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1396r-8">42 U.S.C. 1396r–8</external-xref>) is amended—</text> 
+<paragraph id="HAAB0B3EB005245B88E908CE991776A7A"><enum>(1)</enum><text>in subsection (c)(1)(C)—</text> <subparagraph id="H0698D696F2A6448286ABE74A208404EB"><enum>(A)</enum><text>in clause (i)—</text> 
+<clause id="H081A6438D4924D1DBDEB26758CF888F3"><enum>(i)</enum><text>in subclause (V), by striking <quote>and</quote> at the end;</text></clause> <clause id="H4EABD2952C144B48AEF1FB10DB010DE7"><enum>(ii)</enum><text>in subclause (VI), by striking the period and inserting <quote>; and</quote>; and</text></clause> 
+<clause id="H6D8A78D760534C959FCFFB1F23958C80"><enum>(iii)</enum><text>by adding at the end the following new subclause:</text> <quoted-block style="OLC" id="H983724E5C5B24C2D8F19798883ADCA62" display-inline="no-display-inline"> <subclause id="HCCA349B4CB2F4F01B77675AB2F452EA7"><enum>(VII)</enum><text display-inline="yes-display-inline">any prices charged with respect to the direct sale by a manufacturer of a short-dated drug (as defined in clause (iv)) during the period beginning on the first day of the emergency period described in section 1135(g)(1)(B) and ending on the date that is 6 months after the last day of such emergency period.</text></subclause><after-quoted-block>; and</after-quoted-block></quoted-block></clause></subparagraph> 
+<subparagraph id="H1C95B90851DA45619B497E109C3B0B07"><enum>(B)</enum><text>by adding at the end the following new clause:</text> <quoted-block style="OLC" id="H4C7964DC3EF7400CA8B757050E389E2A" display-inline="no-display-inline"> <clause id="HE32C559B83914525A58BAE86A2A241C1"><enum>(iv)</enum><header>Short-dated drug defined</header> <subclause id="H0CFF6BEABE0A4D7DAAC8FD074204C5A6"><enum>(I)</enum><header>In general</header><text>For purposes of clause (i)(VII), the term <quote>short-dated drug</quote> means, in the case of a drug with an applicable shelf life (as defined in subclause (II))—</text> 
+<item id="H9B8C6159D20E4F67AC2800C8D5AFA489"><enum>(aa)</enum><text>of 1 year or greater, a drug expiring (as determined by the labeled expiration date) not later than 1 year after the date of sale of such drug; and</text></item> <item id="H831B0B94821C4FA2A42EFF1A834D9B2C"><enum>(bb)</enum><text display-inline="yes-display-inline">of less than 1 year, a drug expiring (as determined by the labeled expiration date) not later than the end of the period beginning on the date of sale of such drug and ending on the date that is the number of days of the applicable shelf life of such drug after such date of sale.</text></item></subclause> 
+<subclause id="HAD98860C9ECD4526A3973BD60614864C"><enum>(II)</enum><header>Applicable shelf life</header><text>The term <quote>applicable shelf life</quote> means, with respect to a drug, 50 percent of the number of days occurring during the period beginning on the date such drug is manufactured and ending on the date such drug expires (as determined by the labeled expiration date), rounded to the nearest whole day. </text></subclause></clause><after-quoted-block>; and</after-quoted-block></quoted-block></subparagraph></paragraph> <paragraph id="HA732A4916E02443DB43B1A47317FF051"><enum>(2)</enum><text>in subsection (k)(1)(B)—</text> 
+<subparagraph id="H936322D97D6C4DBC974B220FFA05DD5E"><enum>(A)</enum><text>in subclause (IV), by striking <quote>and</quote> at the end;</text></subparagraph> <subparagraph id="H459B2CC37B214E0A820F008B8E4576BF"><enum>(B)</enum><text>in subclause (V), by striking the period and inserting <quote>; and</quote>; and</text></subparagraph> 
+<subparagraph id="HE8F86CF30F9743CBBE1431BDA4DBE8F8"><enum>(C)</enum><text>by adding at the end the following new subclause:</text> <quoted-block style="OLC" id="HE361FAA3696A48D3BDFA9EE899BF0BF8" display-inline="no-display-inline"> <subclause id="HB1C1F7342F4642CCB99C983E90F09FFD"><enum>(VI)</enum><text display-inline="yes-display-inline">any prices described in subsection (c)(1)(C)(i)(VII).</text></subclause><after-quoted-block>.</after-quoted-block></quoted-block></subparagraph></paragraph></subsection> 
+<subsection id="H95763C65E8D140CF9A6E62CC6301A05E"><enum>(b)</enum><header>Outreach to manufacturers</header><text display-inline="yes-display-inline">The Secretary of Health and Human Services shall notify drug manufacturers of the amendments made by subsection (a) through an electronic communication through MLN Connects or such other method as determined appropriate by the Secretary. </text></subsection> </section> </legis-body> </bill> 
+

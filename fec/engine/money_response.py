@@ -64,9 +64,10 @@ def receipts(m):
     # Impute the MEDIAN receipts for no-data members -> they're as movable as a typical member, not artificially cheap.
     rr=C[m].get('receipts') or 0
     return max(rr,RFLOOR) if rr>0 else _RMED
-def shift_lean(m,source,amount):
-    """source: 'cu' (helps, +) or 'comp' (banks/finserv, -). Returns signed net_lean shift (diminishing, capacity-aware)."""
-    r=amount/receipts(m)                       # donation relative to their fundraising
+def shift_lean(m,source,amount,cm=1.0):
+    """source: 'cu' (helps, +) or 'comp' (banks/finserv, -). Returns signed net_lean shift (diminishing, capacity-aware).
+    cm = COMPET_MULT competitiveness multiplier (same c on BOTH legs): the EFFECTIVE dollar is cm*amount; cm=1.0 is bitwise the old value."""
+    r=cm*amount/receipts(m)                    # (effective) donation relative to their fundraising
     mag=MAXSHIFT*(r/(r+HALF))                   # saturating: diminishing returns + capacity
     mag*=rc(m,'pressure_mult')                 # personality x incentive x PT-domain receptivity
     if source!='cu': mag*=LOSSFRAME            # loss-frame asymmetry: threats land harder than gifts

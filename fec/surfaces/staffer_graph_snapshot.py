@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import gzip
 import hashlib
+import heapq
 import itertools
 import json
 import re
+import sys
 from collections import Counter, defaultdict, OrderedDict
 from pathlib import Path
 import threading
@@ -59,6 +61,16 @@ class StaticGraph:
         self._prefix_nodes = defaultdict(set)
         self._search_text = {}
         self._by_member = defaultdict(set)
+        # Built by reindex(): every node's words, its place in the (unresolved, label, id) order, the
+        # exact-label index for tiny labels and the lazily sorted 1-2 character prefix lists.
+        self._search_words = {}
+        self._rank = {}
+        self._first_unresolved = 0
+        self._tiny_labels = {}
+        self._short_sorted = {}
+        # Identifiers are findable only whole: member ids by their casefolded spelling, ids that contain capitals likewise.
+        self._member_keys = {}
+        self._folded_ids = {}
         self.load_seconds = None
 
     def _verified(self, path, spec, role):
@@ -103,11 +115,18 @@ class StaticGraph:
             return self
 
     def reindex(self):
-        """Name-prefix candidate index: refine a small bucket, never scan 150k rows."""
-        self._prefix_nodes.clear()
-        self._search_text.clear()
-        self._by_member.clear()
-        self._view_cache.clear()
+        """Name-prefix candidate index: refine a small bucket, never scan 150k rows.
+
+        Only what a person reads is indexed: the label and the aliases. A machine identifier, such as the bioguide
+        ids in member_ids, is not a word of the index, so no fragment of one matches; the whole identifier is found
+        through _member_keys and _folded_ids instead (see search_ids).
+
+        Every structure is built on its own and assigned at the end, so a reader never sees a half-built
+        index and a shallow copy of this graph keeps sharing the old, untouched one until it is reindexed.
+        """
+        prefix_nodes, search_text, by_member = defaultdict(set), {}, defaultdict(set)
+        search_words, tiny_labels = {}, defaultdict(list)
+        member_keys, folded_ids = defaultdict(set), defaultdict(list)
         for node_id, node in self.nodes.items():
             label = str(node.get("label") or "").strip()
             raw_id = not label or label == node_id or label.startswith(("person:", "organization:", "container:", "HON:"))
@@ -117,16 +136,54 @@ class StaticGraph:
                 node["name_status"] = "UNRESOLVED_SOURCE_NAME"
             else:
                 node.setdefault("name_status", "SOURCE_NAME")
-            text = " ".join([node["label"], *node.get("aliases", []), *node.get("member_ids", [])]).casefold()
-            self._search_text[node_id] = text
-            for token in set(re.findall(r"[\w]+", text)):
+            text = " ".join([node["label"], *node.get("aliases", [])]).casefold()
+            search_text[node_id] = text
+            words = tuple(re.findall(r"[\w]+", text))
+            search_words[node_id] = tuple(map(sys.intern, words))  # names repeat across 200k nodes: share the strings
+            for token in set(words):
                 for length in (1, 2, 3):
                     if len(token) >= length:
-                        self._prefix_nodes[token[:length]].add(node_id)
+                        prefix_nodes[token[:length]].add(node_id)
             for bio in node.get("member_ids", []):
-                self._by_member[bio].add(node_id)
+                if bio not in by_member:
+                    member_keys[str(bio).casefold()].add(bio)
+                by_member[bio].add(node_id)
+            folded = node["label"].casefold()
+            if len(folded) <= 2:
+                tiny_labels[folded].append(node_id)
+            lowered = node_id.casefold()
+            if lowered != node_id:
+                folded_ids[lowered].append(node_id)
+        # The order search_ids ranks matches in, apart from the exact-label-first term that depends on the query.
+        nodes = self.nodes
+        order = sorted(nodes, key=lambda node_id: (nodes[node_id].get("name_status") == "UNRESOLVED_SOURCE_NAME", nodes[node_id]["label"], node_id))
+        rank = {node_id: place for place, node_id in enumerate(order)}
+        self._first_unresolved = sum(nodes[node_id].get("name_status") != "UNRESOLVED_SOURCE_NAME" for node_id in order)
+        self._rank, self._search_words, self._tiny_labels, self._short_sorted = rank, search_words, dict(tiny_labels), {}
+        self._member_keys, self._folded_ids = dict(member_keys), dict(folded_ids)
+        self._prefix_nodes, self._search_text, self._by_member = prefix_nodes, search_text, by_member
+        self._view_cache.clear()
+
+    def _sorted_bucket(self, token):
+        """The ids of every node with a word starting with a 1-2 character token, in match order; built once per token."""
+        cache, buckets, rank = self._short_sorted, self._prefix_nodes, self._rank  # one generation of the index, even across a reindex
+        found = cache.get(token)
+        if found is None:
+            found = sorted(buckets.get(token, ()), key=rank.__getitem__)
+            cache[token] = found  # concurrent builders produce equal lists
+        return found
 
     def search_ids(self, query, limit=None):
+        """Node ids matching every query token as a word prefix of a label or alias, best first; at most `limit` of them.
+
+        Order: resolved names before unresolved ones, then a label equal to the whole query, then label, then id.
+        The answer for a given graph is the one a full sort of all matches gives; with a limit it is built from
+        the pre-ranked candidates without sorting them all.
+
+        Identifiers are not names. A query that is a node id in full (trimmed, any case) finds that node alone, and a
+        query that is one member's whole bioguide id finds the nodes attached to that member; a fragment of either
+        finds nothing by way of the identifier.
+        """
         original = str(query).strip()
         if original in self.nodes:
             return [original]
@@ -135,12 +192,49 @@ class StaticGraph:
             return []
         if query in self.nodes:
             return [query]
+        if query in self._folded_ids:
+            return list(self._folded_ids[query])  # the same id in other capitals
         tokens = re.findall(r"[\w]+", query)
-        buckets = [self._prefix_nodes.get(token[:3], set()) for token in tokens]
-        candidates = set.intersection(*buckets) if buckets else set()
-        matched = [node_id for node_id in candidates if all(any(word.startswith(token) for word in re.findall(r"[\w]+", self._search_text[node_id])) for token in tokens)]
-        matched.sort(key=lambda node_id: (self.nodes[node_id].get("name_status") == "UNRESOLVED_SOURCE_NAME", self.nodes[node_id]["label"].casefold() != query, self.nodes[node_id]["label"], node_id))
-        return matched[:limit] if limit is not None else matched
+        if not tokens:
+            return []
+        if limit is not None and limit < 0:
+            return self.search_ids(original)[:limit]
+        want = limit
+        if want == 0:
+            return []
+        buckets = sorted((self._prefix_nodes.get(token[:3], ()) for token in tokens), key=len)
+        short = len(tokens) == 1 and len(tokens[0]) <= 2
+        rank, first_unresolved = self._rank, self._first_unresolved
+        if short:
+            # One token of at most two characters: its bucket is exactly the set of matches, already sortable.
+            bucket = buckets[0]
+            presorted = self._sorted_bucket(tokens[0])
+            tiny = self._tiny_labels.get(query, ()) if len(query) <= 2 else None
+            if tiny is None:
+                exact = [node_id for node_id in bucket if self.nodes[node_id]["label"].casefold() == query]
+            else:
+                exact = [node_id for node_id in tiny if node_id in bucket]
+            exact_set = set(exact)
+            rest = (node_id for node_id in presorted if node_id not in exact_set)
+            rest = list(rest if want is None else itertools.islice(rest, want))
+        else:
+            # The smallest bucket first; a copy of it is intersected with the others, the buckets themselves are never changed.
+            candidates = set(buckets[0]).intersection(*buckets[1:]) if len(buckets) > 1 else buckets[0]
+            if len(tokens) > 1 or len(tokens[0]) > 3:
+                words_of = self._search_words
+                candidates = [node_id for node_id in candidates
+                              if all(any(word.startswith(token) for word in words_of[node_id]) for token in tokens)]
+            if len(tokens) == 1 and tokens[0] == query and query in self._member_keys:
+                # The whole query is one member's bioguide id: everyone attached to that member, found by the whole id only.
+                candidates = {*candidates, *(node_id for bio in self._member_keys[query] for node_id in self._by_member.get(bio, ()))}
+            exact = [node_id for node_id in candidates if self.nodes[node_id]["label"].casefold() == query]
+            exact_set = set(exact)
+            rest = (node_id for node_id in candidates if node_id not in exact_set)
+            rest = sorted(rest, key=rank.__getitem__) if want is None else heapq.nsmallest(want, rest, key=rank.__getitem__)
+        exact.sort(key=rank.__getitem__)
+        ordered = ([i for i in exact if rank[i] < first_unresolved] + [i for i in rest if rank[i] < first_unresolved]
+                   + [i for i in exact if rank[i] >= first_unresolved] + [i for i in rest if rank[i] >= first_unresolved])
+        return ordered if want is None else ordered[:want]
 
     def _load(self):
         base = self.root / GENERATION

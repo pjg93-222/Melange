@@ -1,0 +1,16 @@
+test_T20a_a_handed_over_file_collapsing_to_zero_still_blocks (test_refresh_tick.RefreshTickTest.test_T20a_a_handed_over_file_collapsing_to_zero_still_blocks) ... ok
+test_T20b_a_handed_over_file_that_merely_shrinks_does_not_block (test_refresh_tick.RefreshTickTest.test_T20b_a_handed_over_file_that_merely_shrinks_does_not_block)
+NEGATIVE CONTROL for T20a: the same hand-over, 55 rows instead of none, publishes. ... ok
+test_T23a_read_manifest_separates_a_verdict_from_a_lock (test_refresh_tick.RefreshTickTest.test_T23a_read_manifest_separates_a_verdict_from_a_lock) ... ok
+test_T23b_a_missing_manifest_demotes_the_step_and_runs_it_in_the_same_tick (test_refresh_tick.RefreshTickTest.test_T23b_a_missing_manifest_demotes_the_step_and_runs_it_in_the_same_tick) ... ok
+test_T23c_a_manifest_that_cannot_be_opened_does_not_erase_the_step (test_refresh_tick.RefreshTickTest.test_T23c_a_manifest_that_cannot_be_opened_does_not_erase_the_step) ... ok
+test_T27_accept_zero_records_the_collapse_instead_of_blocking (test_refresh_tick.RefreshTickTest.test_T27_accept_zero_records_the_collapse_instead_of_blocking) ... ok
+test_T29_external_damage_survives_failures_and_noop_until_repaired (test_refresh_tick.RefreshTickTest.test_T29_external_damage_survives_failures_and_noop_until_repaired) ... ok
+test_T30_shared_zero_verdict_survives_a_successful_noop (test_refresh_tick.RefreshTickTest.test_T30_shared_zero_verdict_survives_a_successful_noop) ... ok
+test_T31_locked_manifest_defers_due_step_without_erasing_baseline (test_refresh_tick.RefreshTickTest.test_T31_locked_manifest_defers_due_step_without_erasing_baseline) ... ok
+test_T32_timestamp_only_change_does_not_rerun_source (test_refresh_tick.RefreshTickTest.test_T32_timestamp_only_change_does_not_rerun_source) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 52.393s
+
+OK

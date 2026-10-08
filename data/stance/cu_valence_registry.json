@@ -1,0 +1,254 @@
+{
+ "_doc": "CU-valence registry v2 \u2014 MOST families derived from the USER'S gold valence judgments (5-fold-validated harness: derive_valence_registry.py); a few are user-confirmed-review priors (valence_family_review.csv). HONESTY NOTE (2026-07-07): the policy_force families (cfpb_institution, cfpb_general) are USER-DIRECTED POLICY that OVERRIDES the historical golds (they encode the pre-CFPB-split harshness), so the whole-registry CV vs those golds drops (~0.52) BY DESIGN \u2014 the split reflects the user's directed axis, it is NOT claimed to be validated-more-accurate until a fresh gold sample is adjudicated on the new axis. Match precedence = list order (specific before generic). Re-eval before production. UPDATE 2026-07-15: the fresh gold arrived (Paul's 41-item CFPB tone corrections) and adjudicated the agency-existence axis as DIRECTIONAL (attacking/defunding CFPB = pro-CU/support, defending CFPB = anti-CU/oppose). The blanket neutral policy_force is now RELAXED in tweet_stance_stack.py: neutral is kept ONLY when the composed API read is itself non-directional; a confident composed direction is trusted. Validated vs the 400 tweet gold: sign acc 0.54 -> ~0.75 with ~0 overcorrection (false-directional unchanged at 2). Entries keep policy_force:true as the family marker; the code honors the relaxed rule.",
+ "entries": [
+  {
+   "key": "cfpb_reform",
+   "match": [
+    "cfpb reform",
+    "cfpb commission",
+    "rein in the cfpb",
+    "cfpb overreach",
+    "cfpb accountability"
+   ],
+   "valence": 1,
+   "source": "derived-from-gold",
+   "gold_n": 3
+  },
+  {
+   "key": "cfpb_expansion",
+   "match": [
+    "cfpb rule",
+    "cfpb's rule",
+    "cfpb overdraft",
+    "cfpb late fee",
+    "cfpb supervision",
+    "cfpb oversight",
+    "cfpb authority",
+    "expand the cfpb",
+    "expanding the cfpb",
+    "strengthen the cfpb",
+    "empower the cfpb",
+    "cfpb jurisdiction",
+    "cfpb enforcement",
+    "section 1071",
+    "1071 rule",
+    "section 1033",
+    "1033 rule",
+    "open banking rule",
+    "larger participant",
+    "cfpb medical debt",
+    "cfpb data broker"
+   ],
+   "valence": -1,
+   "source": "derived-from-gold",
+   "gold_n": 50
+  },
+  {
+   "key": "cfpb_institution",
+   "match": [
+    "save the cfpb",
+    "protect the cfpb",
+    "defend the cfpb",
+    "we need the cfpb",
+    "keep the cfpb",
+    "preserve the cfpb",
+    "without the cfpb",
+    "gut the cfpb",
+    "gutting the cfpb",
+    "dismantle the cfpb",
+    "dismantling the cfpb",
+    "defund the cfpb",
+    "abolish the cfpb",
+    "eliminate the cfpb",
+    "shut down the cfpb",
+    "shutting down the cfpb",
+    "cfpb funding",
+    "cfpb budget",
+    "cfpb staff",
+    "cfpb workers",
+    "cfpb employees",
+    "cfpb layoffs",
+    "fire cfpb",
+    "cfpb firings",
+    "vought",
+    "cfpb stop-work",
+    "stop work order",
+    "cfpb appropriations",
+    "restructure the cfpb",
+    "attack on the cfpb",
+    "attacks on the cfpb",
+    "war on the cfpb"
+   ],
+   "valence": 0,
+   "source": "user-confirmed-review",
+   "note": "user-directed 2026-07-07: agency-existence axis (cuts/defense/staffing) = no CU valence",
+   "policy_force": true
+  },
+  {
+   "key": "cfpb_general",
+   "match": [
+    "cfpb",
+    "consumer financial protection"
+   ],
+   "valence": 0,
+   "source": "user-confirmed-review",
+   "note": "user-directed 2026-07-07: bare CFPB mention without axis context = no signal",
+   "policy_force": true
+  },
+  {
+   "key": "interchange",
+   "match": [
+    "credit card competition",
+    "swipe fee",
+    "durbin"
+   ],
+   "valence": -1,
+   "source": "user-confirmed-review",
+   "note": "12 on-topic rows, 11/12 unanimous on the CCCA target"
+  },
+  {
+   "key": "rate_cap",
+   "match": [
+    "rate cap",
+    "usury",
+    "apr cap",
+    "36%",
+    "interest rate cap",
+    "10% cap",
+    "capping credit card interest"
+   ],
+   "valence": -1,
+   "source": "derived-from-gold",
+   "gold_n": 3
+  },
+  {
+   "key": "overdraft",
+   "match": [
+    "overdraft"
+   ],
+   "valence": -1,
+   "source": "user-confirmed-review",
+   "note": "1/1 confirmed"
+  },
+  {
+   "key": "junk_fees",
+   "match": [
+    "junk fee"
+   ],
+   "valence": -1,
+   "source": "derived-from-gold",
+   "gold_n": 35
+  },
+  {
+   "key": "cu_tax",
+   "match": [
+    "credit union tax",
+    "cu tax",
+    "tax exempt",
+    "tax status"
+   ],
+   "valence": 0,
+   "source": "derived-from-gold",
+   "gold_n": 20
+  },
+  {
+   "key": "cdfi",
+   "match": [
+    "cdfi",
+    "community development financial"
+   ],
+   "valence": 1,
+   "source": "derived-from-gold",
+   "gold_n": 5
+  },
+  {
+   "key": "defense_cu",
+   "match": [
+    "defense credit union",
+    "military credit union",
+    "navy federal"
+   ],
+   "valence": 1,
+   "source": "user-confirmed-review",
+   "note": "CU-access policy target; investigation rows are off-target keyword noise"
+  },
+  {
+   "key": "fraud",
+   "match": [
+    "fraud",
+    "scam",
+    "elder financial"
+   ],
+   "valence": 1,
+   "source": "derived-from-gold",
+   "gold_n": 11
+  },
+  {
+   "key": "reg_relief",
+   "match": [
+    "regulatory relief",
+    "reg relief",
+    "tailoring",
+    "regulatory burden"
+   ],
+   "valence": 1,
+   "source": "user-confirmed-review",
+   "note": "2/2 confirmed"
+  },
+  {
+   "key": "big_banks",
+   "match": [
+    "big bank",
+    "megabank",
+    "wall street",
+    "too big to fail"
+   ],
+   "valence": 0,
+   "source": "user-confirmed-review",
+   "note": "2 user corrections (support->neutral) resolved 8/9 neutral"
+  },
+  {
+   "key": "housing",
+   "match": [
+    "housing",
+    "mortgage",
+    "home loan",
+    "road to housing"
+   ],
+   "valence": 1,
+   "source": "derived-from-gold",
+   "gold_n": 4
+  },
+  {
+   "key": "cbdc",
+   "match": [
+    "cbdc",
+    "central bank digital"
+   ],
+   "valence": -1,
+   "source": "validated-system-correction",
+   "note": "CBDC disintermediates credit-union deposits; opposing or banning CBDC is pro-CU. Corrected 2026-07-16 after rank-delta audit exposed reversed composition."
+  },
+  {
+   "key": "stablecoin",
+   "match": [
+    "stablecoin",
+    "genius act",
+    "digital asset",
+    "crypto"
+   ],
+   "valence": 1,
+   "source": "derived-from-gold",
+   "gold_n": 7
+  },
+  {
+   "key": "credit_unions_generic",
+   "match": [
+    "credit union"
+   ],
+   "valence": 1,
+   "source": "derived-from-gold",
+   "gold_n": 21
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H95E4E447F5804F3C99BE4CE7FF8AC80D" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 2670 IH: National Defense Authorization Act for Fiscal Year 2024</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-04-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2670</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230418">April 18, 2023</action-date><action-desc><sponsor name-id="R000575">Mr. Rogers of Alabama</sponsor> (for himself and <cosponsor name-id="S000510">Mr. Smith of Washington</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HAS00">Committee on Armed Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To authorize appropriations for fiscal year 2024 for military activities of the Department of Defense and for military construction, and for defense activities of the Department of Energy, to prescribe military personnel strengths for such fiscal year, and for other purposes.</official-title></form><legis-body id="H0485A87AA0CA48A9A47C149646078512" style="OLC"> 
+<section id="HBB26767E845E437BB7FC97EFED7D4E47" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>National Defense Authorization Act for Fiscal Year 2024</short-title></quote>.</text></section> <title id="H41AAED21CF924C919F0BF62E1956484D"><enum>I</enum><header>PROCUREMENT</header> <section id="H13D0CAFB9EAD4DC286842190DCCBF6CF" section-type="subsequent-section"><enum>101.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">Funds are hereby authorized to be appropriated for fiscal year 2024 for procurement for the Army, the Navy and the Marine Corps, the Air Force and the Space Force, and Defense-wide activities, as specified in the funding table in section 4101.</text></section> </title> 
+<title id="H78794D52B8AF4AB1817EA5039A62DD6A"><enum>II</enum><header>RESEARCH, DEVELOPMENT, TEST, AND EVALUATION</header> 
+<section id="H02004A4314924D748470A40B847C0EB6" section-type="subsequent-section"><enum>201.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">Funds are hereby authorized to be appropriated for fiscal year 2024 for the use of the Department of Defense for research, development, test, and evaluation, as specified in the funding table in section 4201.</text></section> </title> <title id="HAE37CE8A2B974199B70660AEB6B20D8D"><enum>III</enum><header>Operation and Maintenance</header> <section id="HDC0B4B9D222A4A6597289BBEC424E2E0" section-type="subsequent-section"><enum>301.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">Funds are hereby authorized to be appropriated for fiscal year 2024 for the use of the Armed Forces and other activities and agencies of the Department of Defense for expenses, not otherwise provided for, for operation and maintenance, as specified in the funding table in section 4301.</text></section> </title> 
+</legis-body></bill>
+

@@ -20,6 +20,18 @@ TWO documents come out of ONE extraction (2026-09-05):
     deliverables were split instead.  Both come from assemble() below, over the SAME
     extracted pieces -- there is no second parse and no second staleness contract.
 
+    2026-10-07, second trim of the same kind.  The telecom sector put the all-in-one zip back
+    over the budget: 14,990,864 bytes against 14,680,064 after the zopfli fallback, 310,800 over,
+    with 14,591,006 the last good build.  The growth was 426 KB compressed, split between the
+    industry page-data (+200 KB: the fifth industry and 338 more companies) and the desk's
+    bill_lobbying sidecar (+221 KB), so no trim of the growth alone reaches the 13.8 MiB target.
+    The emailed copy therefore ships the desk profiles payload with its bill_lobbying sidecar
+    set to null (email_profiles below): the Bills view keeps every bill and loses only the
+    per-bill "Bill-citing lobbying" block, which the desk already omits when it has no sidecar
+    for a bill, and the family zip already emails cu-member-desk.html without the
+    cu-member-desk-profiles.js it points at.  The four-surface Moneyball.html and
+    cu-member-desk-profiles.js are untouched.
+
 Design for a clean merge + minimal antivirus false-positives:
 - Single file, NO external loads (no CDN/fonts/script-src), no eval/new Function/document.write.
 - Each app's JS is wrapped in its own IIFE (so the four scripts can't collide on globals),
@@ -945,6 +957,33 @@ def assemble(pieces, include_staffer):
     )
 
 
+def email_profiles(mdprof):
+    """The desk profiles <script> for the emailed variant: same payload, bill_lobbying nulled.
+
+    PURE, like assemble(): str in, str out, no module state (fec/tests/surfaces/
+    test_combined_email_variant.py lifts it into an empty namespace).  make_member_desk.py writes
+    `window.__melangeProfileMerge({"members_heavy":[...],"bill_lobbying":{...}});` with the
+    sidecar as the LAST key, and the desk's merge hook assigns D.bill_lobbying from it and treats
+    a missing one as "no lobbying block" (billLobbyingBlocks returns '' when bill.lobbying is
+    falsy).  So replacing that one value with null drops ~800 KB compressed and nothing else.
+    It refuses, rather than guessing, if the payload is not that shape: exactly one key, and the
+    value it names must be the final thing before the closing `});` -- checked by decoding it.
+    """
+    if not mdprof:                      # DESK_SPLIT=0 build: no profiles script, nothing to drop
+        return mdprof
+    import json as _json
+    key, tail = ',"bill_lobbying":', '});\n</script>'
+    assert mdprof.count(key) == 1, (
+        'expected exactly one bill_lobbying key in the desk profiles payload, found %d' % mdprof.count(key))
+    assert mdprof.endswith(tail), 'desk profiles payload no longer ends with the merge call'
+    start = mdprof.index(key)
+    _, end = _json.JSONDecoder().raw_decode(mdprof, start + len(key))
+    assert end == len(mdprof) - len(tail), 'bill_lobbying is not the last value in the desk profiles payload'
+    out = mdprof[:start]
+    out += key + 'null' + tail
+    return out
+
+
 PIECES = {
  'mdcss': mdcss, 'snacss_scoped': snacss_scoped, 'indcss_scoped': indcss_scoped,
  'stfcss_scoped': stfcss_scoped, 'ind_reset': _ind_reset, 'stf_reset': _stf_reset,
@@ -982,9 +1021,17 @@ print('wrote %s (%.0f KB)' % (out, os.path.getsize(out)/1024))
 # already ~600 MB; they are never needed together, so drop the first one here.
 del HTML
 
-# The EMAIL variant.  Same pieces, staffer omitted -- see the module header for why the emailed
-# all-in-one is the three-surface page.  When there is no staffer surface in the tree at all this
-# is byte-identical to Moneyball.html, which is correct: there is nothing to drop.
+# The EMAIL variant.  Same pieces, staffer omitted and the desk's bill_lobbying sidecar nulled --
+# see the module header for why the emailed all-in-one is the three-surface page and why it
+# carries no bill-lobbying sidecar.  Only the profiles piece is swapped, and only here, after the
+# four-surface document is written, so Moneyball.html keeps the whole payload.  `mdprof` is
+# dropped too: it is the other reference to the full string, and freeing it keeps the peak where
+# the single `del HTML` above left it.
+_full_profiles = len(PIECES['mdprof'])
+PIECES['mdprof'] = email_profiles(PIECES['mdprof'])
+del mdprof
+print('email variant: bill_lobbying sidecar dropped from the desk profiles (%d -> %d chars)'
+      % (_full_profiles, len(PIECES['mdprof'])))
 EMAIL_HTML = inject_navigation(assemble(PIECES, False))
 EMAIL_HTML = mark_page(EMAIL_HTML, _honors_generation)
 email_out = _output_path('MELANGE_MONEYBALL_EMAIL_OUTPUT', 'Moneyball_Email.html')

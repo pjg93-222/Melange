@@ -1,0 +1,164 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H38E2245ABE7844A894AA2FCF667BA130">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8830 IH: Flood Mapping Modernization and Homeowner Empowerment Pilot Program Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-05-14</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8830</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20260514">May 14, 2026</action-date>
+<action-desc><sponsor name-id="Q000023">Mr. Quigley</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure</committee-name>, and in addition to the Committee on <committee-name committee-id="HBA00">Financial Services</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To require the Administrator of the Federal Emergency Management Agency to carry out a pilot program to enhance the mapping of urban flooding and associated property damage and the availability of that mapped data to homeowners, businesses, and localities to help understand and mitigate the risk of such flooding, and for other purposes.</official-title>
+</form>
+<legis-body id="H7281B1030B2042DFA2702AC6D6CD9A84">
+<section section-type="section-one" id="HEA11BADA54A640F6B8F29354776E344B"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Flood Mapping Modernization and Homeowner Empowerment Pilot Program Act of 2026</short-title></quote>.</text></section> <section id="H1839CEE6B0F8440182FCCFE38AAFCFC2"><enum>2.</enum><header>Flood mapping modernization and homeowner empowerment pilot program</header> <subsection id="HE98A3DDDC2A944DCA63E5A52509FBC7D"><enum>(a)</enum><header>Definitions</header><text>In this section:</text>
+<paragraph id="H84577E4169434ACDADDE7E28B78E9D71"><enum>(1)</enum><header>Administrator</header><text display-inline="yes-display-inline">The term <term>Administrator</term> means the Administrator of the Federal Emergency Management Agency.</text></paragraph> <paragraph id="H49A6D0315E3E48E59764208ECE59D538"><enum>(2)</enum><header>Coastal</header><text display-inline="yes-display-inline">The term <term>coastal</term> means, with respect to a unit of general local government, that the unit borders a body of water that—</text>
+<subparagraph id="HFAD596D79C9645878721623BBE6DFB82"><enum>(A)</enum><text>is more than 2,000 square miles in size; and</text></subparagraph> <subparagraph id="H83C14CF5AD854E3598D5479DC4974FD0"><enum>(B)</enum><text>is not a river.</text></subparagraph></paragraph>
+<paragraph commented="no" display-inline="no-display-inline" id="HEDBFEDEE4831482D96D3142CC53BF7CD"><enum>(3)</enum><header>Pelagic</header><text display-inline="yes-display-inline">The term <term>pelagic</term> means, with respect to a unit of general local government, that—</text> <subparagraph commented="no" display-inline="no-display-inline" id="H656EC5A9C33F46CD87FB422A88AF11B3"><enum>(A)</enum><text display-inline="yes-display-inline">the unit is a coastal unit; and</text></subparagraph>
+<subparagraph commented="no" display-inline="no-display-inline" id="H6221FF4F4CD34289AC027A8677019159"><enum>(B)</enum><text display-inline="yes-display-inline">the body of water that the unit borders is—</text> <clause commented="no" display-inline="no-display-inline" id="H034502CE55624C1DAA380C1586D84687"><enum>(i)</enum><text display-inline="yes-display-inline">an ocean; or</text></clause>
+<clause commented="no" display-inline="no-display-inline" id="H634C8978767A488487AE150335C325D9"><enum>(ii)</enum><text display-inline="yes-display-inline">a large, open body of water, including a bay or a gulf, that empties into an ocean.</text></clause></subparagraph></paragraph> <paragraph commented="no" display-inline="no-display-inline" id="HC2CF6BA3B69A4692BE00A09DE8F0D928"><enum>(4)</enum><header>Pilot program</header><text>The term <term>pilot program</term> means the pilot program carried out by the Administrator under this section.</text></paragraph>
+<paragraph commented="no" display-inline="no-display-inline" id="H674DCD3BBB854677812F8E2FA9E9F960"><enum>(5)</enum><header>Urban flooding</header><text>The term <term>urban flooding</term>—</text> <subparagraph commented="no" display-inline="no-display-inline" id="HCA66F75012D146418EF1BEED19C58465"><enum>(A)</enum><text>means the inundation, by water, of property in a built environment, particularly in a densely populated area, that—</text>
+<clause commented="no" display-inline="no-display-inline" id="H659DA8EF1B714001ACD91785733DF4E9"><enum>(i)</enum><text>is caused by falling rain—</text> <subclause commented="no" display-inline="no-display-inline" id="H6B07023A2C0E4D8A97B20368EAB4CC65"><enum>(I)</enum><text>collecting on an impervious surface; or</text></subclause>
+<subclause commented="no" display-inline="no-display-inline" id="HB03800CFD499467096DEA3620A930A4F"><enum>(II)</enum><text>increasing the level of a body of water that is located near that built environment; and</text></subclause></clause> <clause commented="no" display-inline="no-display-inline" id="H2A5A127D42CA433FA3236E32657BB3A5"><enum>(ii)</enum><text>overwhelms the capacity of drainage systems in the built environment, such as storm sewers;</text></clause></subparagraph>
+<subparagraph commented="no" display-inline="no-display-inline" id="H5C593B6E79904D4EB790870DDA05031C"><enum>(B)</enum><text>includes—</text> <clause commented="no" display-inline="no-display-inline" id="HA856C8D675744254B654286044B592DC"><enum>(i)</enum><text>a situation in which stormwater enters a building through a window, door, or other opening;</text></clause>
+<clause commented="no" display-inline="no-display-inline" id="HF7415E03A4794D4D839F9A99C6E00F9F"><enum>(ii)</enum><text>the backup of water through a sewer pipe, shower, toilet, sink, or floor drain;</text></clause> <clause commented="no" display-inline="no-display-inline" id="H172A0EC26BEA4C658099CD94A62CA636"><enum>(iii)</enum><text>the seepage of water through a wall or a floor;</text></clause>
+<clause commented="no" display-inline="no-display-inline" id="H36F37823FBF94EAABE76CB46893E50D0"><enum>(iv)</enum><text>the accumulation of water on property or a public right-of-way; and</text></clause> <clause commented="no" display-inline="no-display-inline" id="H57F295D3588246A99944E25DDA9D1378"><enum>(v)</enum><text>the overflow from a body of water, such as a river, lake, or ocean; and</text></clause></subparagraph>
+<subparagraph commented="no" display-inline="no-display-inline" id="H50614F097BDE4EA1B633E0C57D3DF841"><enum>(C)</enum><text>does not include flooding in an undeveloped or agricultural area.</text></subparagraph></paragraph> <paragraph commented="no" display-inline="no-display-inline" id="H8081848535B94300A3670C2AD4FD9216"><enum>(6)</enum><header>Urbanized area</header><text>The term <term>urbanized area</term> means an area that has been defined and designated as an urbanized area by the Bureau of the Census during the most recently completed decennial census.</text></paragraph></subsection>
+<subsection id="HF9161C03A0824C3F82ED7952C0F9FD38"><enum>(b)</enum><header>Establishment</header><text display-inline="yes-display-inline">The Administrator shall carry out a pilot program to make grants to units of local government to—</text> <paragraph id="HEA8B9906ADD1452D91BC766D924EEC96"><enum>(1)</enum><text display-inline="yes-display-inline">enhance the production of maps relating to urban flooding and associated property damage; and</text></paragraph>
+<paragraph id="HB8E54B32CC54411E9C43562C12F8870B"><enum>(2)</enum><text display-inline="yes-display-inline">increase the availability of the maps described in paragraph (1) to homeowners, businesses, and units of local government to enable those entities to minimize the risk of urban flooding.</text></paragraph></subsection> <subsection id="HF29826BE3C5044AC901228AC894EEF9B"><enum>(c)</enum><header>Objectives</header><text>Amounts from grants made under the pilot program may be used only to carry out activities that meet the following objectives:</text>
+<paragraph id="H797F439097CC4254A2DBA60A39889499"><enum>(1)</enum><text>Developing a methodology for assessing the risk of urban flooding through the deployment of technology-based mapping tools that—</text> <subparagraph id="HD03CDF28489543BBBE1B58C7458C51E5"><enum>(A)</enum><text>are easily understandable by the public; and</text></subparagraph>
+<subparagraph id="HCEB742BE64E442BDBC0C8397140FDA93"><enum>(B)</enum><text>effectively convey information regarding the level of flood risk.</text></subparagraph></paragraph> <paragraph id="H0AD1FCBCFB0144A29A7EEEB948EEC763"><enum>(2)</enum><text>Providing structure-specific projections of annual chance flood frequency.</text></paragraph>
+<paragraph id="H652BD76F9ABC4D96A432FFE60F33B3AF"><enum>(3)</enum><text>Providing structure-based flood risk assessments.</text></paragraph> <paragraph id="HC56CD7682DD54CD6B032B2B75EE75485"><enum>(4)</enum><text>Providing program design for the mitigation of the risk of urban flooding.</text></paragraph>
+<paragraph id="H164991D7F9A2442C954A3230F465E4AA"><enum>(5)</enum><text>Incorporating information regarding climate trends into urban flooding risk assessments.</text></paragraph> <paragraph id="H8D99399C469343388DFA15977872A8D9"><enum>(6)</enum><text>Making the information described in this subsection publicly available on the internet through a web-based portal so as to increase transparency regarding homeowner flood risks.</text></paragraph></subsection>
+<subsection id="H98068CDFC965471E85D79B3D01F846B0"><enum>(d)</enum><header>Eligible recipients</header>
+<paragraph id="H66CAB0FB3DDB410689FBBFE73A1CCB80"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">A grant under the pilot program may be made only to—</text> <subparagraph id="H6C20B0069FB840B09C8E51AB9A6D77FA"><enum>(A)</enum><text display-inline="yes-display-inline">a unit of general local government that is located in an urbanized area with a population of more than 50,000 individuals; or</text></subparagraph>
+<subparagraph id="H86AFA104CDDB43C7B22950365FEA5D1C"><enum>(B)</enum><text display-inline="yes-display-inline">a stormwater management authority of a unit of general local government described in subparagraph (A).</text></subparagraph></paragraph> <paragraph id="HED03A721F58E41C08283710EE1CBA864"><enum>(2)</enum><header>One-time grants</header><text display-inline="yes-display-inline">A grant under the pilot program may not be made to—</text>
+<subparagraph id="HBD9670A490E342B7B65837683800E14A">
+                        <enum>(A)</enum>
+ <text>any unit of general local government, or the stormwater management authority of a unit of general local government, that previously received a grant under the pilot program;</text>
+                    </subparagraph>
+<subparagraph commented="no" id="HD431EEE15CCB4C5E8501E1DE191B2D5C"><enum>(B)</enum><text display-inline="yes-display-inline">any unit of general local government if the stormwater management agency for that unit previously received a grant under the pilot program; or</text></subparagraph> <subparagraph commented="no" id="HA4C1F166158646EDA8E4A2004E587A6E"><enum>(C)</enum><text display-inline="yes-display-inline">any stormwater management agency of a unit of general local government if that unit previously received a grant under the pilot program.</text></subparagraph></paragraph>
+<paragraph id="H1C34A68B603E4368BBB474F2CFD64C72"><enum>(3)</enum><header>Treatment of certain stormwater management authorities</header>
+<subparagraph id="H6F15A278FD6C48B6B3988EA025663BA6"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">In the case of a stormwater management authority that operates with respect to more than 1 unit of general local government, the application of that authority shall be considered for purposes of paragraph (2) of this subsection and subsections (f), (g), and (h)(1) to be made for the largest unit of general local government with respect to which that authority operates.</text></subparagraph> <subparagraph id="H2A6B1F7308184DFC88A5580AAB9814B0"> <enum>(B)</enum> <header>Rule of construction</header> <text display-inline="yes-display-inline">Nothing in subparagraph (A) may be construed to limit the ability of a stormwater management authority described in that subparagraph to carry out activities under a demonstration project in any other jurisdiction in, or with respect to any other unit of general local government with, which that authority operates.</text>
+                    </subparagraph></paragraph></subsection>
+<subsection id="H0BC72FB9CFA34950A336EA7822484C6D"><enum>(e)</enum><header>Applications</header><text>To be eligible for a grant under the pilot program, a unit of general local government or a stormwater management agency shall submit to the Administrator an application in such form and containing such information as the Administrator shall require.</text></subsection> <subsection id="H274A08568B53488FAF114CF07EAEB200"><enum>(f)</enum><header>Selection of recipients</header> <paragraph id="H898FB6D9A47D4529BC81AB8A53BE1503"> <enum>(1)</enum> <header>Annual selection</header> <text display-inline="yes-display-inline">Subject to paragraph (2), and to the submission of approvable applications, in each fiscal year for which amounts are made available for grants under the pilot program, the Administrator shall select, from among applications submitted under subsection (e) for that fiscal year, 3 units of general local government or stormwater management authorities to receive grants under the pilot program.</text>
+                </paragraph>
+<paragraph id="H00598C6685AF4D0F9B725BE34FDDD3E1">
+                    <enum>(2)</enum>
+                    <header>Aggregate limit</header>
+ <text display-inline="yes-display-inline">Subject only to the submission of approvable applications, the Administrator shall select, in the aggregate over the entire duration of the pilot program, 12 units of general local government or stormwater management authorities to receive grants under the pilot program, as follows:</text>
+                    <subparagraph id="HC6C5E43E520445569240214F3DA32C31">
+                        <enum>(A)</enum>
+                        <header>Tier 1</header>
+ <text>Three of the applicants selected shall be units of general local government, or stormwater management authorities for those units, each of which has a population of more than 800,000 individuals, as follows:</text>
+                        <clause id="H62C2BF04BA5C49F4B545A2AC916CACF6">
+                            <enum>(i)</enum>
+                            <header>Pelagic coastal city</header>
+ <text display-inline="yes-display-inline">One shall be—</text> <subclause id="H90C286674E044121AF7C98AC95BE9ACA"> <enum>(I)</enum> <text display-inline="yes-display-inline">a unit of general local government that is a pelagic unit; or</text>
+                            </subclause>
+                            <subclause id="HA780C3BAFBAC4D6E9B19A3D366FC170F">
+                                <enum>(II)</enum>
+ <text>a stormwater authority for a unit described in subclause (I).</text>
+                            </subclause>
+                        </clause>
+                        <clause id="HD92195B8334B467CABED3B1C2A7469D6">
+                            <enum>(ii)</enum>
+                            <header>Non-pelagic coastal city</header>
+ <text display-inline="yes-display-inline">One shall be—</text> <subclause id="HAB034AF19D834C148D23D6E1A10ECBEE"> <enum>(I)</enum> <text display-inline="yes-display-inline">a unit of general local government that—</text>
+                                <item id="H95A0E69B70E346FC9359B53B63DC13AD">
+                                    <enum>(aa)</enum>
+ <text display-inline="yes-display-inline">is a coastal unit; and</text>
+                                </item>
+                                <item id="HE23EDEDF86B4424FBB267AB669E4290B">
+                                    <enum>(bb)</enum>
+ <text display-inline="yes-display-inline">is not a pelagic unit; or</text>
+                                </item>
+                            </subclause>
+                            <subclause id="H9B0D5461CB8B4D388E7BF2001CA0AC6A">
+                                <enum>(II)</enum>
+ <text>a stormwater authority for a unit described in subclause (I).</text>
+                            </subclause>
+                        </clause>
+                        <clause id="H38796E1C61C4409AAF8CB7B39D02FE5E">
+                            <enum>(iii)</enum>
+                            <header>Non-coastal city</header>
+ <text display-inline="yes-display-inline">One shall be—</text> <subclause id="H4EEE9012D4014749B047E6ABD11AABA6"> <enum>(I)</enum> <text display-inline="yes-display-inline">a unit of general local government that is not a coastal unit; or</text>
+                            </subclause>
+                            <subclause id="H46E73072E77F4FA585C5C632E77209FB">
+                                <enum>(II)</enum>
+ <text>a stormwater authority for a unit described in subclause (I).</text>
+                            </subclause>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="HAC8D6295123747298AED80FE349A1158">
+                        <enum>(B)</enum>
+                        <header>Tier 2</header>
+ <text display-inline="yes-display-inline">Six of the applicants selected shall be units of general local government, or stormwater management authorities for those units, each of which has a population of more than 200,000 individuals and not more than 800,000 individuals, as follows:</text>
+                        <clause id="H35B239C2760B461D83AFB85F49050441">
+                            <enum>(i)</enum>
+                            <header>Coastal cities</header>
+ <text display-inline="yes-display-inline">Three shall be—</text> <subclause id="H2FF50251891748E4A12626C339D062A6"> <enum>(I)</enum> <text display-inline="yes-display-inline">units of general local government that are coastal units; or</text>
+                            </subclause>
+                            <subclause id="H658FDAA6A76149F1A9F95ABCC3FB8152">
+                                <enum>(II)</enum>
+ <text>stormwater management authorities for units described in subclause (I).</text>
+                            </subclause>
+                        </clause>
+                        <clause id="HFF14587A205A436D94D63071D0BA5162">
+                            <enum>(ii)</enum>
+                            <header>Non-coastal cities</header>
+ <text display-inline="yes-display-inline">Three shall be—</text> <subclause id="H7AC9B459380D482AAA379BDC65537659"> <enum>(I)</enum> <text display-inline="yes-display-inline">units of general local government that are not coastal units; or</text>
+                            </subclause>
+                            <subclause id="H9359A59BE124418BB4C30BBCB65335E5">
+                                <enum>(II)</enum>
+ <text>stormwater management authorities for units described in subclause (I).</text>
+                            </subclause>
+                        </clause>
+                    </subparagraph>
+                    <subparagraph id="HC50224ABA6F0420798EACBEB9C4E4CFE">
+                        <enum>(C)</enum>
+                        <header>Tier 3</header>
+ <text display-inline="yes-display-inline">Three of the applicants selected shall be—</text>
+                        <clause id="HD89E1310E15D4B51BCD4A5DA98003EF6">
+                            <enum>(i)</enum>
+ <text display-inline="yes-display-inline">units of general local government, each of which has a population of more than 50,000 individuals and not more than 200,000 individuals; or</text>
+                        </clause>
+                        <clause id="HCCA3C6F1A0854296895C840D0CF04A56">
+                            <enum>(ii)</enum>
+ <text>stormwater management authorities for units described in clause (i).</text>
+                        </clause>
+                    </subparagraph>
+                </paragraph></subsection>
+<subsection id="H60635DB61AFD4D8692AFAFD4AAD945A9"><enum>(g)</enum><header>Priority</header>
+<paragraph id="HC2B56285077A4684BD94BDC0DF3BF066"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The Administrator shall select applicants for grants under the pilot program based on the extent to which the applications of those applicants shall achieve the objectives described in subsection (c).</text></paragraph> <paragraph id="HE31AB1B4E2E447309582E86202885D24"><enum>(2)</enum><header>Tiers 2 and 3</header><text display-inline="yes-display-inline">In selecting applicants to receive grants under the pilot program under subparagraphs (B) and (C) of subsection (f)(2), the Administrator shall give priority to applicants—</text>
+<subparagraph id="H6BBF334B48F4433082CB05B1683CFA90"><enum>(A)</enum><text>that are highly vulnerable to sea level rise;</text></subparagraph> <subparagraph id="H0F1502D48495485F912BBBD5C0C35925"><enum>(B)</enum><text>within which are located a military installation or another facility relating to national security concerns; or</text></subparagraph>
+<subparagraph id="HAA208FBF7AE448F1AF9C3748459AFE7B"><enum>(C)</enum><text>that have—</text> <clause id="HD9759A6A27034D718771F4950D82A8B6"><enum>(i)</enum><text>populations that are highly vulnerable to urban flooding; and</text></clause>
+<clause id="H56C0EE52802D4970B6EB4293F66867A8"><enum>(ii)</enum><text>an uneven capacity for flood mitigation and response efforts resulting from socioeconomic factors.</text></clause></subparagraph></paragraph></subsection> <subsection id="H46FFF18787A44DF99A69E60ACA42117D"><enum>(h)</enum><header>Amount</header> <paragraph id="H982CFC3C00E54714AA73937639AF9E8A"><enum>(1)</enum><header>Considerations</header><text display-inline="yes-display-inline">In determining the amount of a grant under the pilot program, the Administrator shall consider the population of the grant recipient, which may be considered in terms of the tier under subsection (f)(2) with respect to the recipient.</text></paragraph>
+<paragraph id="HB454CD3B8979426EA2481EF4B5962331"><enum>(2)</enum><header>Federal share</header><text display-inline="yes-display-inline">The amount of a grant under the pilot program may not exceed 75 percent of the total cost incurred in carrying out the activities described in subsection (c).</text></paragraph></subsection> <subsection id="HB9F4C3BD129F42CC85A6137BBE65A0BB"><enum>(i)</enum><header>Duration</header><text display-inline="yes-display-inline">The Administrator shall require each recipient of a grant under the pilot program to complete the activities described in subsection (c), which shall be, subject to subsection (h)(2), carried out using the grant amounts, not later than 18 months after the date on which the recipient initially receives the grant amounts under the pilot program.</text></subsection>
+<subsection id="H670421C040824873A93B53225B074A44"><enum>(j)</enum><header>Use of census data</header><text display-inline="yes-display-inline">The Administrator shall make all determinations regarding population under the pilot program by using data from the most recently completed decennial census by the Bureau of the Census.</text></subsection> <subsection id="H490049D658684244B0589120AC238EFA"><enum>(k)</enum><header>Grantee reports to FEMA</header><text>Each recipient of a grant under the pilot program shall, not later than 30 months after the date on which the recipient initially receives the grant amounts, submit to the Administrator a report that describes—</text>
+<paragraph commented="no" id="H9E791D7F6E364D2E85039DBDCF8646EB"><enum>(1)</enum><text display-inline="yes-display-inline">the activities carried out with the grant amounts;</text></paragraph> <paragraph id="HE01EF0A2308F411CBF6FCD4E7F673C8A"><enum>(2)</enum><text>how the activities carried out with the grant amounts have met the objectives described in subsection (c);</text></paragraph>
+<paragraph id="H2CC60EF5AF7147CDA976AA4BD9F083BD"><enum>(3)</enum><text>any lessons learned in carrying out the activities described in paragraph (2); and</text></paragraph> <paragraph id="H3A90294EA2CC45E7A0F6E4E049B15DA5"><enum>(4)</enum><text>any recommendations for future mapping modernization efforts by the Federal Emergency Management Agency.</text></paragraph></subsection>
+<subsection id="HF2243657718648B5AEC99E603767B871"><enum>(l)</enum><header>Biennial reports by FEMA</header><text>Not later than 2 years after the date of enactment of this Act, and not less frequently than once every 2 years thereafter until the date on which all activities carried out with amounts from grants under the pilot program are completed, the Administrator shall submit to Congress and make available to the public on an internet website a report that—</text> <paragraph id="HF82BA503E6B14C038BA662BFBD4F31EE"><enum>(1)</enum><text>describes—</text>
+<subparagraph id="HC41EEF5F8D1146769AD5F641CF111B76"><enum>(A)</enum><text>the progress of the activities carried out with amounts from those grants; and</text></subparagraph> <subparagraph id="H61385269FF804A2FABB35D038F740C6E"><enum>(B)</enum><text>the effectiveness of technology-based mapping tools used in carrying out the activities described in subparagraph (A); and</text></subparagraph></paragraph>
+<paragraph id="H8554A77E208942EDA95092709D08E9EB"><enum>(2)</enum><text>with respect to the final report that the Administrator is required to submit under this subsection, includes recommendations to Congress and the executive branch of the Federal Government for implementing strategies, practices, and technologies to mitigate the effects of urban flooding.</text></paragraph></subsection> <subsection id="HD7A090FFAE4247E98713E4EC0DD07E27"><enum>(m)</enum><header>Sense of Congress</header><text>It is the sense of Congress that, because the pilot program is limited with respect to scope and resources, communities that participate in the pilot program should acknowledge that the most successful efforts to mitigate the effects of urban flooding—</text>
+<paragraph id="H81B5A6B58BF0444199998DD8E6989F72"><enum>(1)</enum><text>take a structural-based mitigation approach with respect to construction, which includes—</text> <subparagraph id="H8EAD49565DDE4F22BA3B133344DF4596"><enum>(A)</enum><text>recognizing any post-storm damage that may occur; and</text></subparagraph>
+<subparagraph id="H95C029A5BBBB456CB0BCB7C319F4DB3A"><enum>(B)</enum><text>pursuing designs that proactively minimize future flood damage;</text></subparagraph></paragraph> <paragraph id="H4986F5C58E674924A7B97781C4C96A30"><enum>(2)</enum><text>make individuals in the community aware, through any cost-effective and available means of education, of the best approaches regarding the construction of properties that are able to survive floods, which reduces the cost of future repairs; and</text></paragraph>
+<paragraph id="HBD4DD6C5860A4501854DC00FE90B9803"><enum>(3)</enum><text>encourage home and property owners to consider the measures described in paragraphs (1) and (2), which are the most cost-effective and prudent ways to reduce the impact of flooding, when constructing or renovating building components.</text></paragraph></subsection> <subsection id="HDFBB33F360A941319D4593D46BEFAC96"><enum>(n)</enum><header>Funding</header><text>There are authorized to be appropriated for grants under the pilot program—</text>
+<paragraph id="HF6D8E57539B346F088487FFAE1598D59"><enum>(1)</enum><text>$2,000,000 for fiscal year 2027; and</text></paragraph> <paragraph id="H79392E89B6B04578B6EBBB8DBEEF0DDF"><enum>(2)</enum><text>$5,000,000 for fiscal year 2028, to remain available through fiscal year 2030.</text></paragraph></subsection></section>
+</legis-body>
+</bill>
+

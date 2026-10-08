@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H968184B7BC6648D2A99F665AFA315757" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 4455 IH: Community Facilities Program for Rural Clean School Bus Infrastructure Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-06-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4455</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20230630">June 30, 2023</action-date><action-desc><sponsor name-id="V000136">Mr. Vasquez</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Consolidated Farm and Rural Development Act to support the buildout of clean school bus charging infrastructure through community facilities direct loans and grants.</official-title></form><legis-body id="HEC091469F67E40FBB24A2F065108FACD" style="OLC"> 
+<section id="HD674628309454251A0CB61F8106FDBDA" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Community Facilities Program for Rural Clean School Bus Infrastructure Act</short-title></quote>.</text></section> <section commented="no" display-inline="no-display-inline" id="H7C41105D83FA4626A58995F3F0866917"><enum>2.</enum><header>Essential community facilities</header><text display-inline="no-display-inline">Section 306(a) of the Consolidated Farm and Rural Development Act (<external-xref legal-doc="usc" parsable-cite="usc/7/1926">7 U.S.C. 1926(a)</external-xref>) is amended by adding at the end the following:</text>
+<quoted-block style="OLC" display-inline="no-display-inline" id="H238B07081B6E46EF9FFE119D28F2C610">
+<paragraph commented="no" display-inline="no-display-inline" id="HBD7A175248CC43EF9C3389B7C393CCAC"><enum>(27)</enum><header>Essential community facilities eligibility for clean school bus infrastructure</header>
+<subparagraph commented="no" display-inline="no-display-inline" id="H8B934480309040E299DF356B760F191C"><enum>(A)</enum><header display-inline="yes-display-inline">Definition of clean school bus</header><text>In this paragraph, the term <term>clean school bus</term> has the meaning given the term in section 741(a)(3) of the Energy Policy Act of 2005 (<external-xref legal-doc="usc" parsable-cite="usc/42/16091">42 U.S.C. 16091(a)(3)</external-xref>).</text></subparagraph> <subparagraph commented="no" display-inline="no-display-inline" id="HFCC26A5544244309881AFDCFA20626F1"><enum>(B)</enum><header>Eligibility</header><text display-inline="yes-display-inline">With respect to direct loans and grants made under the essential community facilities programs authorized under this subsection, a recipient of such a loan or grant may use the loan or grant funds for—</text>
+<clause id="H19A322F040AF4F6A8B87ED39076DBCDC"><enum>(i)</enum><text>acquisition and labor costs for charging or other infrastructure needed to charge or maintain clean school buses; and</text></clause> <clause id="H75E85D790E7E4D969FFBECAA51CF3ABD"><enum>(ii)</enum><text>planning and technical activities to support the adoption and deployment of clean school buses.</text></clause></subparagraph>
+<subparagraph commented="no" display-inline="no-display-inline" id="HDB7FC63694124A72B60CD52CBB1AFF6A"><enum>(C)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">There are authorized to be appropriated for the cost of loans and grants to carry out this paragraph such sums as are necessary.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section> </legis-body></bill>
+

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H350F6B5E6B9545C0AC9876B7327EC463" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2228 IH: To offer persistent poverty counties and political subdivisions of such counties the opportunity to have their rural development loans restructured.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-04-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2228</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190410">April 10, 2019</action-date><action-desc><sponsor name-id="B001251">Mr. Butterfield</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HAG00">Committee on Agriculture</committee-name>, and in addition to the Committees on <committee-name committee-id="HBA00">Financial Services</committee-name>, and <committee-name committee-id="HIF00">Energy and Commerce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To offer persistent poverty counties and political subdivisions of such counties the opportunity to
+			 have their rural development loans restructured.</official-title></form>
+	<legis-body id="H237A24D41AE64A77BD1CB706670D2AD9" style="OLC">
+		<section id="H9B85E8053CD840DB84C411CDB25B3D9E" section-type="section-one"><enum>1.</enum><header>Opportunity for persistent poverty counties and political subdivisions in those counties to have
+			 their rural development loans restructured</header>
+ <subsection id="HFC76983549224577AD773CD303EC0E37"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">On request of a persistent poverty county or a political subdivision of such a county that has an outstanding loan described in subsection (c), the entity that made the loan shall restructure the loan so that the interest rate on the loan is 0 percent and the loan term is 40 years.</text>
+ </subsection><subsection id="H9F78F081297843C4A9B8249C882BC0A5"><enum>(b)</enum><header>Persistent poverty county defined</header><text>In subsection (a), the term <term>persistent poverty county</term> means a county that has had 20 percent or more of its population living in poverty over the past 30 years, as measured by the 1990, 2000, and 2010 decennial censuses.</text>
+ </subsection><subsection id="H7B3647C0DD6F4473BCEE0FA9909460C8"><enum>(c)</enum><header>Loan described</header><text>A loan is described in this subsection if the loan is any of the following:</text> <paragraph id="HF0078F7521EC4F968EF7406EA4C0FF51"><enum>(1)</enum><header>Water and waste disposal loan</header><text display-inline="yes-display-inline">A loan made under section 306(a)(1) of the Consolidated Farm and Rural Development Act for a water and waste disposal purpose.</text>
+ </paragraph><paragraph id="H45FB0EA7C9EA4D3FAF24075BC6BADE6E"><enum>(2)</enum><header>Essential community facility loan</header><text>A loan made under section 306(a)(1) of the Consolidated Farm and Rural Development Act for an essential community facility.</text>
+ </paragraph><paragraph id="H550F771612074ED294C6382CDDE03D96"><enum>(3)</enum><header>Telecommunications infrastructure loan</header><text>A loan made under title III of the Rural Electrification Act of 1936.</text> </paragraph><paragraph id="H0CBA9DA61A08485599676B06DCFE93FA"><enum>(4)</enum><header>Rural broadband access loan</header><text>A loan made under section 601 of the Rural Electrification Act of 1936.</text>
+ </paragraph><paragraph id="HDF017840E6264AA8A4F6031285F271A6"><enum>(5)</enum><header>Distance learning and telemedicine loan</header><text display-inline="yes-display-inline">A loan made under section 2333 of the Food Agriculture, Conservation, and Trade Act of 1990.</text> </paragraph><paragraph id="H101E48B6F4A34EEF964D6CC97EF9563C"><enum>(6)</enum><header>Broadband loan and grant pilot program loan</header><text display-inline="yes-display-inline">A loan made under the program provided for in section 779 of Agriculture, Rural Development, Food and Drug Administration, and Related Agencies Appropriations Act, 2018.</text>
+ </paragraph><paragraph id="H24C8C7AE5BDC4C32A49C523946BAF0C5"><enum>(7)</enum><header>Rural electrification loan</header><text display-inline="yes-display-inline">A loan made under any provision of the Rural Electrification Act of 1936 for a rural electrification purpose.</text>
+ </paragraph><paragraph id="H659AA214B3A4427C979BB7AD9D06C9DE"><enum>(8)</enum><header>Multifamily rural rental housing loan</header><text>A loan made under section 515 of the Housing Act of 1949 (<external-xref legal-doc="usc" parsable-cite="usc/42/1485">42 U.S.C. 1485</external-xref>).</text> </paragraph></subsection></section></legis-body></bill> 
+

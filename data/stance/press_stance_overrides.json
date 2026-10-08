@@ -1,0 +1,120 @@
+{
+  "_README": "Manual corrections for DEBATE press-sentiment mislabels. Applied in make_member_desk press loading: overrides the displayed stance/label/direction for matching articles. Match each correction by 'url' (exact) OR 'title_contains' (case-insensitive substring). 'stance' is one of: support | oppose | neutral (support=pro-CU/+, oppose=anti-CU/-, neutral=0). Add entries to 'corrections' and regenerate (make_member_desk.py -> make_combined.py) to apply. NOTE: this corrects the member-desk DISPLAY; correcting the press PILLAR/ranks additionally needs the upstream press_value re-flowed (cu_press_stance_tone.csv -> Press Release - Raw).",
+  "corrections": [
+    {
+      "title_contains": "prohibit SBA from making direct 7(a) loans",
+      "stance": "support",
+      "note": "CUs support limiting government direct-lending competition; DEBATE read 'prohibit' as negative"
+    },
+    {
+      "title_contains": "Senate bill would prohibit SBA from making direct 7(a) loans",
+      "stance": "support",
+      "note": "same bill, full headline"
+    },
+    {
+      "title_contains": "resolution of disapproval for CFPB overdraft",
+      "stance": "neutral",
+      "note": "CRA disapproval of a CFPB rule is deregulatory; neutral-to-pro-CU, not 'oppose'"
+    },
+    {
+      "title_contains": "support for bill to prohibit SBA direct lending",
+      "stance": "support",
+      "note": "Nussle/CUNA supports prohibiting SBA direct lending"
+    },
+    {
+      "title_contains": "senator tim scott releases 2025 year in review",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "senator tim scott highlights major legislative wins during july work p",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "Industry win: Judge vacates CFPB credit card late fee rule",
+      "stance": "neutral",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "scott presses cfpb director on resignation calls out midnight rulemaki",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "CFPB credit card late fee rule will harm consumers that pay on time",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "House, Senate resolutions would void CFPB credit card late fees rule",
+      "stance": "support",
+      "note": "Paul gold 2026-07-16: Barr-led CRA repeal effort is pro-CU"
+    },
+    {
+      "title_contains": "SBA direct lending would harm small businesses, community financial in",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "Simpson: ‘Credit unions are the original consumer protectors’",
+      "stance": "oppose",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "Leagues, credit unions reinforce importance of tax status",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "Credit union priorities addressed during community banking hearing",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "title_contains": "Rep. Waters introduces CLF, field of membership bills",
+      "stance": "support",
+      "note": "Paul gold 2026-07-15"
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/cfpbs-regulatory-actions-questioned-lawmakers-during-senate-house-hearings#S001184",
+      "stance": "support",
+      "note": "Paul gold 2026-07-16 (desk review): CFPB’s regulatory actions questioned by lawmakers during Senate, House"
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/bills-introduced-both-chambers-clarify-cfpb-supervision-insurance#S001184",
+      "stance": "support",
+      "note": "Paul gold 2026-07-16 (desk review): Bills introduced in both chambers to clarify CFPB supervision of insur"
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/simpson-senate-banking-committee-chairman-discuss-credit-union-issues#S001184",
+      "stance": "support",
+      "note": "Paul gold 2026-07-16 (desk review): Simpson, Senate Banking Committee chairman discuss credit union issues"
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/credit-union-board-modernization-part-updated-housing-bill#S001184",
+      "stance": "support",
+      "note": "Paul gold 2026-07-16 (desk review): Credit union board modernization part of updated housing bill"
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/rep-fitzpatrick-credit-unions-act-purely-interest-members#F000466",
+      "stance": "support",
+      "note": "Paul gold 2026-07-18 (desk review, Brian Fitzpatrick): member's own quote praises credit unions; DEBATE read neutral 0.94. Production stack already scores this support/majority, so the press pillar was already correct - this fixes the DISPLAY."
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/nussle-meets-credit-union-supporters-capitol-hill#F000466",
+      "stance": "support",
+      "note": "Paul gold 2026-07-18 (desk review, Brian Fitzpatrick): counted among credit union supporters meeting Nussle. DEBATE read neutral 0.96. Production stack already scores this support/majority - display-only correction."
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/nussle-small-biz-committee-back-mbl-changes#F000466",
+      "stance": "support",
+      "note": "Paul gold 2026-07-18 (desk review, Brian Fitzpatrick - 'see the pattern and correct'): CU trade-press coverage of CU advocacy read neutral by DEBATE; production stack scores support (review tier). Display-only correction."
+    },
+    {
+      "url": "https://www.americascreditunions.org/news-media/news/maintaining-tax-advocacy-momentum-capitol-hill-visits#F000466",
+      "stance": "support",
+      "note": "Paul gold 2026-07-18 (desk review, Brian Fitzpatrick - 'see the pattern and correct'): CU trade-press coverage of CU advocacy read neutral by DEBATE; production stack scores support (review tier). Display-only correction."
+    }
+  ]
+}

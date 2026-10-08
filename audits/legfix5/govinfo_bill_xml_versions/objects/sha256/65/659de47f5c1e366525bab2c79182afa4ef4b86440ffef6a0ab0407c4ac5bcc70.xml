@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H1C32F121994E440FAAF7CEF4AFEE4AD0" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2903 IH: Blocking Investment In Our Adversaries Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2903</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190522">May 22, 2019</action-date><action-desc><sponsor name-id="B001299">Mr. Banks</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Reform</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title 5, United States Code, to prohibit the International Stock Index Investment Fund of
+			 the Thrift Savings Fund from investing in any entity in peer or near-peer
+			 competitor nations as outlined in the National Defense Strategy, and for
+			 other purposes.</official-title></form>
+	<legis-body id="HCF34259463A441E9913C130F59C0B9F0" style="OLC">
+		<section id="H89BEDDEDDEE2428D9007076B74228D6A" section-type="section-one"><enum>1.</enum><header>Short title; findings</header>
+ <subsection commented="no" id="H6D76B94BEDD3412EB94EAF3A3060D643"><enum>(a)</enum><header>Short title</header><text display-inline="yes-display-inline">This Act may be cited as the <quote><short-title>Blocking Investment In Our Adversaries Act</short-title></quote>.</text> </subsection><subsection id="H3F279ACE3BDB426EB6B8154965FA8D14"><enum>(b)</enum><header>Findings</header><text display-inline="yes-display-inline">Congress finds the following:</text>
+ <paragraph id="H28C2991A28E74B059B40FD1B9AB2164E"><enum>(1)</enum><text>Federal retirement plans, including the Thrift Savings Plan, invest a total of over $550 billion on behalf of their plan participants. With such an influence, it is critical that U.S. Federal pension plans do not contribute to stock earnings for companies demonstrated to be linked to the economies of peer or near-peer competitors, as outlined in the National Defense Strategy.</text>
+ </paragraph><paragraph id="H1946B78BC2BB48C294AEE16019F57962"><enum>(2)</enum><text>Large sector international companies such as Huawei have repeatedly committed numerous crimes such as corporate espionage, violations of US-imposed sanctions, violations of international property law, and theft.</text>
+ </paragraph><paragraph id="H99BE2BC8E58B436EBDDEF78670F6344C"><enum>(3)</enum><text>The Thrift Savings Plan is the preeminent retirement plan for Federal government employees. The plan is especially beneficial due to its low service fees and high historical returns. The provisions outlined in this Act will not increase fees imposed on clients of the Thrift Savings Plan.</text>
+ </paragraph><paragraph id="H305162858AFB4790BF9D6CDB5A6C0494"><enum>(4)</enum><text>Congress acknowledges the conflict between fiduciary duties of financial investment firms and the responsibility to ensure national security.</text>
+ </paragraph><paragraph id="HC0A331D6C7DC4A2BB38CBE11C4AA992E"><enum>(5)</enum><text display-inline="yes-display-inline">The November 2017 selection of the MSCI ACWI Index by the Federal Retirement Thrift Investment Board, to be effective in 2020, violates the terms of this Act, as outlined in section 2.</text>
+				</paragraph></subsection></section><section id="HC72DBF9095CD4A4390244398B1ECBA1C"><enum>2.</enum><header>Prohibition on investment of TSP I Fund in peer and near-peer competitors</header>
+ <subsection id="H7F8B045D1136456E98FB4C48F1BE1638"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 8438(b)(4) of title 5, United States Code, is amended by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="HBC793846FF8C4E5E90C1F17456652FC2" style="USC"> <subparagraph id="HCF5B1315D53A42DDB83C34CB8FC257D6" indent="up2"><enum>(C)</enum><text display-inline="yes-display-inline">The index selected by the Board under subparagraph (A) may not include investments in any stock of an entity based in a peer or near-peer competitor, including China or Russia.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="HE620D5C70EC74143A788767C3503294D"><enum>(b)</enum><header>Divestiture of assets</header><text>Not later than 30 days after the date of the enactment of this Act, the Federal Retirement Thrift Investment Board (as established under section 8472(a) of title 5, United States Code), in consultation with the manager of the Thrift Savings Fund, shall—</text>
+ <paragraph id="HB915737AC9DF43C0B0F317BEC5A7C5EF"><enum>(1)</enum><text>review whether any sums in the Thrift Savings Fund are invested in contravention of subparagraph (C) of section 8438(b)(4) of such title, as added by subsection (a);</text>
+ </paragraph><paragraph id="H3E48042B0D0744E49575905834411F6D"><enum>(2)</enum><text display-inline="yes-display-inline">if any sums are so invested, and consistent with the legal and fiduciary duties provided under chapter 84 of such title or any other provision of law, divest such sums; and</text>
+ </paragraph><paragraph id="H119C869006F748378510F97DBAEE2381"><enum>(3)</enum><text display-inline="yes-display-inline">re-invest the divested sums in investments that do not contradict such subparagraph.</text> </paragraph></subsection></section></legis-body></bill> 
+

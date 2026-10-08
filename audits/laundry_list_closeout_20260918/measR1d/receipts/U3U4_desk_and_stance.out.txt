@@ -1,0 +1,93 @@
+==============================================================================
+U3  DESK -- interview footprint
+==============================================================================
+displayed items = distinct (member,date,package) episodes : 95078
+   of those whose member is on the roster                 : 95078
+episodes containing >=1 U2-affected row                   : 5381  (5.660% of items)
+   roster-only                                            : 5381
+displayed word total (SUM nwords)                         : 12503451
+words sitting after a foreign tag inside those episodes    : 301026  (2.4075% of displayed words)
+members with >=1 affected displayed item                  : 345 of 518 members with items
+worst 12 members (affected items / total items):
+    Nancy Pelosi                 330 /  5217  (6.3%)
+    Mitch McConnell              272 /  3757  (7.2%)
+    Charles Schumer              239 /  3804  (6.3%)
+    Adam Schiff                  236 /  3059  (7.7%)
+    Lindsey Graham               194 /  3924  (4.9%)
+    Bernard Sanders              180 /  3437  (5.2%)
+    Elizabeth Warren             140 /  2497  (5.6%)
+    Jamie Raskin                 131 /  1278  (10.3%)
+    Ted Cruz                     116 /  2246  (5.2%)
+    Mike Johnson                 102 /  2078  (4.9%)
+    Amy Klobuchar                 95 /  1524  (6.2%)
+    Richard Blumenthal            92 /  1234  (7.5%)
+
+NOTE the desk item TITLE is metadata only: '%s appearance - %d segment%s - %s words' (make_member_desk.py:1971-1972); no row text is displayed by that path.
+
+==============================================================================
+U4  STANCE -- the interview channel of the media blend
+==============================================================================
+interview_stance_final.csv rows: 37   interviews_cu.csv rows: 37
+SIGN table read from build_media_blend.py: {'support':1.0,'oppose':-1.0,'neutral':0.0}
+own_source_tier_weight (fec/stance/media_rules.py:90-97):
+    def own_source_tier_weight(tier):
+        """OOF-calibrated trust for speech/interview labels; unknown tiers fail closed."""
+        return {
+            'gold': 1.0,
+            'unanimous': 0.9,
+            'majority': 0.6,
+            'review': 0.35,
+        }.get(str(tier or '').strip().lower(), 0.0)
+rows that survive build_media_blend's filters (the "in use" set): 25
+    excluded 12 : neutral/unrelated stance (SIGN=0)
+
+#   member                   date       stance    use   pkgs  rows   affrow VERDICT
+1   Richard Durbin           2011-10-04 oppose    Y     1     1      0      CLEAN
+2   Mitch McConnell          2013-01-26 neutral   n     1     1      0      CLEAN
+3   Mitch McConnell          2013-01-26 neutral   n     1     1      0      CLEAN
+4   Ted Cruz                 2016-02-29 neutral   n     1     1      0      CLEAN
+5   Maxine Waters            2016-12-27 oppose    Y     1     1      0      CLEAN
+6   Nancy Pelosi             2017-02-05 oppose    Y     1     1      0      CLEAN
+7   Elizabeth Warren         2017-10-25 oppose    Y     1     1      0      CLEAN
+8   John Thune               2017-11-26 support   Y     1     1      0      CLEAN
+9   Jamie Raskin             2017-11-27 oppose    Y     1     1      0      CLEAN
+10  Kirsten Gillibrand       2018-04-26 neutral   n     1     1      0      CLEAN
+11  Nancy Pelosi             2019-05-23 neutral   n     1     1      0      CLEAN
+12  Bernard Sanders          2019-06-16 support   Y     1     1      0      CLEAN
+13  Sam Liccardo             2019-11-07 support   Y     1     1      0      CLEAN
+14  Roger Marshall           2020-01-15 oppose    Y     1     1      0      CLEAN
+15  James Risch              2020-02-23 support   Y     1     1      1      FOREIGN TAG INSIDE PASSAGE
+16  Tammy Duckworth          2020-04-17 neutral   n     1     1      0      CLEAN
+17  Charles Schumer          2020-04-28 support   Y     1     1      0      CLEAN
+18  Adriano Espaillat        2020-07-23 support   Y     1     1      0      CLEAN
+19  Sheldon Whitehouse       2020-10-13 neutral   n     1     1      0      CLEAN
+20  Sheldon Whitehouse       2020-10-13 neutral   n     1     1      0      CLEAN
+21  Elizabeth Warren         2021-05-27 oppose    Y     1     1      0      CLEAN
+22  Elizabeth Warren         2021-05-27 oppose    Y     2     2      0      CLEAN
+23  Judy Chu                 2023-01-11 neutral   n     1     1      0      CLEAN
+24  Elizabeth Warren         2023-02-22 oppose    Y     1     1      0      CLEAN
+25  Al Green                 2025-02-06 oppose    Y     1     1      0      CLEAN
+26  Bill Hagerty             2025-02-09 oppose    Y     1     1      0      CLEAN
+27  Andy Kim                 2025-02-11 neutral   n     1     1      0      CLEAN
+28  Elizabeth Warren         2025-02-11 oppose    Y     1     1      0      CLEAN
+29  Elizabeth Warren         2025-02-11 oppose    Y     1     1      0      CLEAN
+30  Elizabeth Warren         2025-02-11 oppose    Y     1     1      0      CLEAN
+31  Chris Van Hollen         2025-02-12 oppose    Y     1     1      0      CLEAN
+32  Glenn Ivey               2025-02-13 oppose    Y     1     1      0      CLEAN
+33  Jamie Raskin             2025-02-16 oppose    Y     1     1      0      CLEAN
+34  Bernard Sanders          2025-02-25 oppose    Y     1     1      0      CLEAN
+35  Elizabeth Warren         2025-02-28 oppose    Y     1     1      0      CLEAN
+36  Rand Paul                2025-09-28 neutral   n     1     1      0      CLEAN
+37  John Fetterman           2025-11-12 neutral   n     1     1      0      CLEAN
+
+SCORED PASSAGES CONTAMINATED BY FOREIGN SPEECH: 1 of 37 (1 of the 25 in-use rows)
+
+  #15 James Risch 2020-02-23  stance=support tier=gold in_use=True
+     tags in passage: [(54, 'WALLACE (voice over)')]
+     rows: [245771]   affected: [245771]
+     row 245771 first_tag='WALLACE (voice over)' tag@53 passage@0 starts_after=False
+     passage: Oh, he does, clearly. We all take orders from Bertie. WALLACE (voice over): Committee members recently celebrated Bowman after the Senate Federal Credit Union announced it will name its new building after him.
+
+wrote U4_passage_audit.json
+wrote U3_displayed_excerpt_sample20_GRADED.csv (20 of 37 pinned passages)
+DONE U3U4

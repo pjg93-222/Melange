@@ -1,0 +1,160 @@
+### 1 rowid=231934 member=Angus King show=cnr tag='BORIS SANCHEZ, CNN CORRESPONDENT (voice-over)' at=135/498
+   BEFORE: ...This new ocean is appearing on our maps and it has all kinds of different implications, and we've been slow to pick up on it, frankly. 
+   AFTER : BORIS SANCHEZ, CNN CORRESPONDENT (voice-over): Maine Senator Angus King says climate change is unlocking a new crossroads and potential center of conflict, the Arctic, where irreversible trends are leading to a global rush, with world powers seeking untapped energy supplies: oil and natural gas, minerals, fishing, recreation, and highly-coveted shipping routes....
+
+### 2 rowid=211903 member=Rick Scott show=crn tag='WATT (voice-over)' at=197/409
+   BEFORE: ...You've got to figure out how to get these people off the beach, unless you can figure out how to completely be isolated from anybody else, I mean, this is individuals going to take responsibility. 
+   AFTER : WATT (voice-over): Because Even if you don't suffer much, you can give this to others, although up to 20 percent of coronavirus hospitalizations in the U.S. are between 20 and 44 according to a new Federal study....
+
+### 3 rowid=78123 member=Hakeem Jeffries show=cnr tag='REID (voiceover)' at=86/302
+   BEFORE: ...So what's your red line? What could the president ask you to do that you wouldn't do? 
+   AFTER : REID (voiceover): President Trump has appointed several personal attorneys to top legal positions in his administration, but this is the first time that he has tapped one of his lawyers to serve on the federal bench....
+
+### 4 rowid=267374 member=John Hickenlooper show=msnow tag='O`DONNELL' at=1104/1314
+   BEFORE: ...tion can do better relative to what they pay into government. And over a period of time that`s pretty — I think that becomes very damaging, that you end up watering down and filling with more and more loopholes on our tax system. 
+   AFTER : O`DONNELL: Governor, can you stay with us? Because even though I did work on tax policy in the Senate, there`s a lot of other things I`d like to talk about. We`d like to get in a foreign policy question or two....
+
+### 5 rowid=245788 member=Jimmy Patronis show=cnr tag='TODD (on camera)' at=169/640
+   BEFORE: ...Take pictures of the inside of your house. So you can make a photographic inventory of what you're entitled to if you have to file an insurance claim. It's that simple. 
+   AFTER : TODD (on camera): I asked a local emergency management official here in Wakulla, County what he would tell residents in the town of St. Mark's where we are in places nearby. What do you would tell those people who decided to stay and ride out the storm? He had a one word answer he said don't. But he did also say that if you do elect to stay and ride out the storm, make sure you have at least three to four days worth of provisi...
+
+### 6 rowid=237248 member=Judy Chu show=ctw tag='KYUNG I. LAH, CNN CORRESPONDENT (voice over)' at=90/510
+   BEFORE: ...What I want to do here is to say to the community feel safe. You are no longer in danger. 
+   AFTER : KYUNG I. LAH, CNN CORRESPONDENT (voice over): The Monterey Park shooting suspect is dead from a self-inflicted gunshot wound following a police standoff Sunday. Law enforcement track a white cargo van that fit the description of a vehicle of interest from the shooting. Four-hour SWAT officers tried to get the occupant of the vehicle to surrender until what officers believe was a gunshot heard from inside the vehicle....
+
+### 7 rowid=212525 member=James Clyburn show=sitroom tag='ACOSTA (voice-over)' at=246/968
+   BEFORE: ...y what I have always said. Nobody is going to de-fund the police. We can restructure the police forces. Restructure, re-imagine policing. That is what we are going to do. The fact of the matter is that police have a role to play. 
+   AFTER : ACOSTA (voice-over): The president is eager to get back on the road looking ahead to his rally this weekend in Oklahoma, firing back at critics who say the event could cause an outbreak of the coronavirus tweeting, "The media which had no COVID problem with the rioters and looters destroying Democrat-run cities is trying to COVID shame us on our big rallies. Won't work." The "Tulsa World" newspaper ran an editorial calling on ...
+
+### 8 rowid=248715 member=Jared Moskowitz show=cnc tag='WATT (voice-over)' at=143/327
+   BEFORE: ...This has gone into a horrible place that reminds the Jewish community, quite frankly, of the reason why Israel was created in the first place. 
+   AFTER : WATT (voice-over): Anti-Semitic incidents in the U.S. are up nearly 400 percent since the Hamas terror attacks of October 7th, according to preliminary data just released from the ADL....
+
+### 9 rowid=198470 member=Mazie Hirono show=wrn tag='ATWOOD (voice-over)' at=129/260
+   BEFORE: ...The Fourth of July's supposed to be a national holiday. He's making it not only political, but he's making it all about himself. 
+   AFTER : ATWOOD (voice-over): President Trump, downplaying the cost, tweeting, quote, "It will be very little compared to what it is worth."...
+
+### 10 rowid=305438 member=Bill Cassidy show=tsiem tag='MEG TIRRELL, CNN MEDICAL CORRESPONDENT (voice-over)' at=144/393
+   BEFORE: ...We need a CDC director that will actually stand up to crazy, stupid things being said that undermine faith in immunization. Are you the person? 
+   AFTER : MEG TIRRELL, CNN MEDICAL CORRESPONDENT (voice-over): Dr. Erica Schwartz faced a barrage of questions Wednesday from senators of both political parties about whether, as CDC director, she'd hold the line for science over potential political pressure....
+
+### 11 rowid=252230 member=Sheldon Whitehouse show=cnr tag='FOREMAN (voice over)' at=51/283
+   BEFORE: ...Your platforms really suck at policing themselves. 
+   AFTER : FOREMAN (voice over): Against a torrent of accusations from the Senate committee about enabling sexual exploitation, election meddling, fake news, drug abuse, and child endangerment, the heads of five tech giants tried to push back....
+
+### 12 rowid=204015 member=Mitch McConnell show=cnr tag='TOM FOREMAN, CNN CORRESPONDENT (voice-over)' at=106/202
+   BEFORE: ...A federal judge who, imagine this, will uphold the laws and the constitution as they're actually written. 
+   AFTER : TOM FOREMAN, CNN CORRESPONDENT (voice-over): Another judicial confirmation, another controversy....
+
+### 13 rowid=195136 member=Steve Cohen show=cnr tag='MURRAY (voice-over)' at=62/255
+   BEFORE: ...Chicken Barr should've shown up today and answered questions. 
+   AFTER : MURRAY (voice-over): Barr skipping the hearing after Democrats demanded he faced questions from staff lawyers in a 30-minute block, on top of the five-minute rounds of questions from lawmakers....
+
+### 14 rowid=219445 member=Jim Jordan show=cg tag='RAJU (voice-over)' at=151/231
+   BEFORE: ...In certain there were all kinds of people came in the Capitol and the ones who did harm and who broke the law, guilty of a crime should be punished -- 
+   AFTER : RAJU (voice-over): Do the former president was he responsible for what happened?...
+
+### 15 rowid=216511 member=Charles Schumer show=sitroom tag='RAJU (on camera)' at=555/2372
+   BEFORE: ...nduct. Let me be very clear. This is not going to fly. The trial is going to happen. It is certainly and clearly constitutional. And if the former president is convicted, there will be a vote to disqualify him from future office. 
+   AFTER : RAJU (on camera): And that is going to be a central argument that House Democratic impeachment managers will make on the Senate floor when it comes time to argue the case. The arguments themselves won't be heard in public until the week of February 8th. That's when they plan to begin those opening arguments. But the next two weeks, there will be briefs that will be filed on both sides laying out why they believe this is consti...
+
+### 16 rowid=76143 member=Anna Luna show=ow tag='BASH (voice-over)' at=283/377
+   BEFORE: ... specifically that you either have to choose between having a family and representing your constituency, or you come up here and vote and put your life and your child's life at risk, depending on if there's medical complications. 
+   AFTER : BASH (voice-over): Luna is bucking her Republican leadership by pushing for this rules change....
+
+### 17 rowid=241010 member=John Thune show=cg tag='RAJU (on camera)' at=57/801
+   BEFORE: ...I'm not going to get into what the House is doing there. 
+   AFTER : RAJU (on camera): Two other members of Senator McConnell's leadership team did come out and criticize Alvin Bragg. That's Senator John Cornyn and Senator John Barrasso. Cornyn, Barrasso and Thune, all seen as potential successors to McConnell down the line and also some other reaction than some others warning against a rush to judgment. That coming from Senator Lisa Murkowski of Alaska, one of the senators who voted to convict...
+
+### 18 rowid=215804 member=Lindsey Graham show=cnr tag='ACOSTA (voice-over)' at=44/145
+   BEFORE: ...And when it's over, it is over. It is over. 
+   AFTER : ACOSTA (voice-over): -- Trump supporters were screaming, "Traitor," as he walked through the airport....
+
+### 19 rowid=226492 member=Pete Aguilar show=cnr tag='RAJU (voice-over)' at=41/159
+   BEFORE: ...The vice president's life was in danger. 
+   AFTER : RAJU (voice-over): Trump had been told repeatedly that Pence had no authority to take such an unconstitutional action....
+
+### 20 rowid=221285 member=Debbie Wasserman Schultz show=cg tag='SANTIAGO (voice-over)' at=110/467
+   BEFORE: ...This is a man who is allowing the explosion of COVID to occur again and dismissing it as just being seasonal. 
+   AFTER : SANTIAGO (voice-over): In Hillsborough County, the school board held an emergency meeting this afternoon to talk about mandating mask as more than 10,000 students are in quarantine just one week after classes started. According to a spokesperson with the school district, that's 4.8 percent of the student population and 338 staff members are in quarantine....
+
+### 21 rowid=273244 member=Edward Markey show=msnow tag='O`DONNELL' at=1252/1588
+   BEFORE: ...e Movement and college campuses, high school campuses all across this country have demonstrated for their desire to solve this climate crisis, and to do it while being paid and then being given an opportunity to get an education. 
+   AFTER : O`DONNELL: Joe Biden scored an 85 percent approval rating for his speech last night, just the speech. And I think you and I know we`ve never heard a president use the word “jobs” more in a speech like that. You have to assume there`s some relationship between how often he drills home the notion of jobs and the approval of that speech?...
+
+### 22 rowid=225423 member=Raphael Warnock show=ndaysun tag='ZELENY (voice-over)' at=174/256
+   BEFORE: ...What if I told you shipping container companies have been making record profits, while prices have been skyrocketing on you? That's why I'm pushing to hold them accountable. 
+   AFTER : ZELENY (voice-over): But that message is competing with loud Republican criticism....
+
+### 23 rowid=220070 member=Adam Schiff show=cg tag='RAJU (voice-over)' at=261/1270
+   BEFORE: ...dinarily broad. People having nothing to do within, you know, the intelligence matters that are least being reported on. It just shows what a broad fishing expedition it was. And so many norms were broken in connection with this. 
+   AFTER : RAJU (voice-over): Sources tell CNN, the ever began in February 2018 when Attorney General Jeff Sessions ran the department. The subpoenas were related to leaks of classified information regarding contacts between Russians and Trump associates. More than 100 accounts were affected, casting a wide net that even swept up at least one minor that included a gag order, which was renewed three times before expiring this year. And it...
+
+### 24 rowid=287505 member=Joe Courtney show=tsiem tag='KAYE (voice-over)' at=147/348
+   BEFORE: ...It's just barely begun its service life, and the notion that its now already being prepared to be a museum piece defies any logic or common sense. 
+   AFTER : KAYE (voice-over): Just last year, the Qatari government gifted the U.S. Government a Boeing 747 800 for Trump's use as Air Force One. Two new 747s Trump ordered in 2017 from Boeing still aren't ready....
+
+### 25 rowid=273111 member=Alexandria Ocasio-Cortez show=msnow tag='O`DONNELL' at=347/575
+   BEFORE: ...shore up our health care, our infrastructure, our housing, and doing it in a way that draws down our carbon emissions to help us get in line with the IPCC standards, we`re talking about, realistically, $10 trillion over 10 years. 
+   AFTER : O`DONNELL: And, Mr. Secretary, I urge you to watch the rerun of that show, if you haven`t seen it already, to listen to the full case that she makes about this, because she does make a serious case. What`s your response to that?...
+
+### 26 rowid=273787 member=Joyce Beatty show=msnow tag='O`DONNELL' at=273/339
+   BEFORE: ...d especially Black women, we have become power houses, we deliver presidents of the United States. We have a strong voting base, we have a strong working base, and this is our time to make sure that we pass the voting rights act. 
+   AFTER : O`DONNELL: In that meeting today, Vice President Harris said this....
+
+### 27 rowid=86351 member=Nancy Pelosi show=ebo tag='TODD (on camera)' at=78/326
+   BEFORE: ...How many times did I hear they were going to put a bullet in my F word head.? 
+   AFTER : TODD (on camera): And these competing narratives over January 6th could last a while longer. The January 6ers who held this event today say they plan on coming back on this date every year to stage similar events for the foreseeable future -- Erin....
+
+### 28 rowid=217540 member=Mitch McConnell show=ctw tag='SANCHEZ (voice over)' at=196/282
+   BEFORE: ...President Trump is still liable for everything he did while he was in office. As an ordinary citizen, unless the statute limitation is Ron still liable for everything he did while he's in office. 
+   AFTER : SANCHEZ (voice over): For some of his top Republican allies, Trump remains the future....
+
+### 29 rowid=204901 member=Lindsey Graham show=ndaysat tag='FOREMAN (voice over)' at=165/215
+   BEFORE: ...What I can tell you about the Trump policy toward the Ukraine it was incoherent. It depends on who you talk to. They seem to be incapable of forming a quid pro quo. 
+   AFTER : FOREMAN (voice over): The response from Democrats....
+
+### 30 rowid=222355 member=Richard Durbin show=ebo tag='SCHNEIDER(voice over)' at=172/786
+   BEFORE: ...It was Cipollone who spoke up and said that he thought that this scenario of what they were trying to achieve was a murder suicide pact and the president should not do it. 
+   AFTER : SCHNEIDER(voice over): The committee's report is the most comprehensive account so far of Trump's wide ranging plot. New revelations include accounts from inside the Oval Office on January 3rd when Trump blamed former U.S. Attorney BJay Pak for failing to find mass election fraud in Georgia and wanted him fired. That prompted Acting Deputy Attorney General Richard Donoghue to call Pak that night to tell him to preemptively res...
+
+### 31 rowid=212933 member=Charles Schumer show=cnr tag='MATTINGLY (voice-over)' at=28/87
+   BEFORE: ...And then start negotiating. 
+   AFTER : MATTINGLY (voice-over): And this sharp critique. [14:30:00]...
+
+### 32 rowid=200397 member=Elizabeth Warren show=cg tag='JEFF ZELENY, CNN SENIOR WASHINGTON CORRESPONDENT (voice over)' at=24/378
+   BEFORE: ...Hello, Iowa State Fair. 
+   AFTER : JEFF ZELENY, CNN SENIOR WASHINGTON CORRESPONDENT (voice over): Elizabeth Warren is making a big summer splash in Iowa. [16:45:00] But beyond the teeming crowds, her campaign is building something that's even more impressive to many Democrats here , a muscular ground organization with a person-to-person network growing by the day in backyards like this....
+
+### 33 rowid=260859 member=Bernard Sanders show=msnow tag='O`DONNELL' at=458/1806
+   BEFORE: ...millions of dollars in special interest funds. I don`t think that you are qualified if you get $15 million from Wall Street through your Super PAC. I don`t think you are qualified if you have voted for the disastrous war in Iraq. 
+   AFTER : O`DONNELL: So, the reason candidates in the same party never say that the other one is not qualified unless they`re running against Donald Trump, is that it is deeply alienating to all those Clinton supporters in this case who Bernie Sanders is going to need in a general election if he is the Democratic nominee. And it makes it almost verbally impossible for Bernie Sanders to endorse Hillary Clinton if she is the Democratic no...
+
+### 34 rowid=223855 member=Pete Aguilar show=cnr tag='SCHNEIDER (voice-over)' at=139/252
+   BEFORE: ...So, the courts have already ruled in our favor. Our anticipation is that the Supreme Court will uphold that ruling in an expedited manner. 
+   AFTER : SCHNEIDER (voice-over): No word on how quickly the Supreme Court will decide. Jessica Schneider, CNN, Washington....
+
+### 35 rowid=265793 member=Mitch McConnell show=msnow tag='O`DONNELL' at=236/1586
+   BEFORE: ... what I want to tell you, in the very near future: Judge Kavanaugh will be on the United States Supreme Court. So, my friends, keep the faith. Don`t get rattled by all of this. We`re going to plow right through it and do our job. 
+   AFTER : O`DONNELL: They are rattled, make no mistake about it. They are trying to sound confident, but every day that passes is bringing new trouble for the Kavanaugh nomination including what Michael Avenatti claims is more evidence that will come out within the next two days, evidence from a woman who Michael Avenatti is describing, as you heard previously in this hour, as a witness and a victim. A victim of what could be possible r...
+
+### 36 rowid=223815 member=Alexandria Ocasio-Cortez show=cnr tag='MATTINGLY (on camera)' at=110/769
+   BEFORE: ...I think what Senator Manchin did yesterday represents such an egregious breach of the trust of the president. 
+   AFTER : MATTINGLY (on camera): White House officials are already in the midst of phone calls with House and Senate Democratic leadership trying to figure out what the next steps are, how to maybe restructure the proposal in order to have a shot at 50 votes, including Senator Manchin's votes. But there are real questions right now about how willing Senator Manchin is to reengage in negotiations. To some degree, it's not just a policy i...
+
+### 37 rowid=83817 member=Adelita Grijalva show=esrs tag='CONTORNO (voice-over)' at=46/281
+   BEFORE: ...We're using texts and Signal and Google Chat. 
+   AFTER : CONTORNO (voice-over): Speaker Mike Johnson says he'll swear her in when the House comes back in session and reopens the government. Until then, she can't vote and she says she needs to be escorted around certain parts of Capitol Hill....
+
+### 38 rowid=224984 member=Nancy Pelosi show=cnr tag='ZELENSKYY (through translator)' at=481/529
+   BEFORE: ...and admiration and appreciation for your courageous leadership. Members of Congress, I have the high privilege and distinct honor of presenting to you the president of Ukraine, Volodymyr Zelenskyy. (Speaking in foreign language). 
+   AFTER : ZELENSKYY (through translator): Glory to heroes....
+
+### 39 rowid=274189 member=Maxwell Frost show=msnow tag='O`DONNELL' at=117/295
+   BEFORE: ...Thank you so much. And folks can hear more about us at Frostforcongress.com, Frostforcongress.com. thanks, Lawrence. 
+   AFTER : O`DONNELL: Thank you. Maxwell Alejandro Frost gets his first word on the Last Word. It will not be his last word on the Last Word. “THE 11TH HOUR WITH BRIAN WILLIAMS” starts now....
+
+### 40 rowid=305167 member=Nancy Mace show=se tag='REID BINION, CNN REPORTER (voice-over)' at=82/225
+   BEFORE: ...And all of us across South Carolina are shocked today. No one saw this happening. 
+   AFTER : REID BINION, CNN REPORTER (voice-over): The political world stunned by the sudden death of Republican Senator Lindsey Graham of South Carolina....
+

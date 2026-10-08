@@ -1,0 +1,33 @@
+{
+ "chars_removed": 2182540,
+ "class_rows": {
+  "A_anchored_caps": 4549,
+  "B_stop_name_paren": 142,
+  "B_unknown_surname_paren": 721,
+  "C_unanchored_paren": 243,
+  "D_mixed_case_label": 40,
+  "E_colonless_honorific": 289
+ },
+ "class_segments": {
+  "A_anchored_caps": 4761,
+  "B_stop_name_paren": 145,
+  "B_unknown_surname_paren": 750,
+  "C_unanchored_paren": 250,
+  "D_mixed_case_label": 40,
+  "E_colonless_honorific": 311
+ },
+ "dispositions": {
+  "ledger_only_duplicate_row": 1,
+  "ledger_only_short_turn": 49,
+  "ledger_only_unresolved": 6139,
+  "own_later_turn": 10,
+  "reattributed": 54,
+  "row_has_no_member_words": 4
+ },
+ "n_inserts": 64,
+ "n_rows": 5863,
+ "recon_failures": [],
+ "skips": {
+  "row_has_no_member_words": 4
+ }
+}

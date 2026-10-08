@@ -1,0 +1,44 @@
+================================================================================================
+F1 SELF-CHECK  transcribed rule parity vs the LIVE producer source (ast, docstring-insensitive)
+================================================================================================
+  SAME     canonical_category     bill_rules.py
+  SAME     bill_key               bill_rules.py
+  SAME     bill_type_key          bill_rules.py
+  SAME     role_weight            bill_rules.py
+  SAME     canonical_role         bill_rules.py
+  SAME     preferred_role         bill_rules.py
+  SAME     CATEGORIES             bill_rules.py
+  SAME     LABEL_TO_CANONICAL     bill_rules.py
+  SAME     SECTION_KEYWORDS       bill_rules.py
+  SAME     normalize_name         members/member_identity.py
+  SAME     first_names_agree      members/member_identity.py
+  SAME     Resolver               members/member_identity.py
+  SAME     _SUFFIXES              members/member_identity.py
+  SAME     _FIRST_EQUIV           members/member_identity.py
+  SAME     _MEMBER_ALIASES        members/member_identity.py
+  SAME     congress_of            bill_rules.py  (renamed _congress -> congress_of)
+
+LIVE producer lines this lane depends on (fec\legislation\build_archive_legislative.py):
+    46 |     eligible=text_column('Scoring Eligible').isin({'true','1','yes'})
+    47 |     verified=text_column('Review Status').eq('verified')
+    48 |     membership=text_column('Record Type').eq('membership')
+    49 |     return eligible & verified & membership
+   182 |     role=BR.canonical_role(r['Role']); w=rolewt(role)
+   248 |     contribution=float(sign*w*dw)
+   251 |     event_key=(mm,str(r.get('Name') or '').strip().lower(),BR._congress(r.get('Congress')),cat)
+   259 |         preferred=BR.preferred_role((prior['role'],role))
+   269 | for (mm,_bill,_congress,cat),event in events.items():
+   270 |     leg[mm][cat]+=event['contribution']
+
+LIVE fec\bill_rules.py sponsor weight:
+   211 | def role_weight(role):
+   212 |     value = canonical_role(role)
+   213 |     if value == 'original-cosponsor':
+   214 |         return 2.0
+   215 |     if value == 'cosponsor':
+   216 |         return 1.0
+   217 |     if value == 'sponsor':
+   218 |         return 3.0
+   219 |     return 1.0
+
+SELF-CHECK PASS (0 mismatches)

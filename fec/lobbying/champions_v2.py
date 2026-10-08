@@ -29,7 +29,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
 SCHEMA = "champions-v2-v1"
-SECTORS = ("credit_union", "bank", "crypto", "fintech")
+SECTORS = ("credit_union", "bank", "crypto", "fintech", "telecom")
 CHAMBERS = ("House", "Senate")
 SIGN_SOURCES = ("canonical", "kim", "prior")
 SIGN_AUTHORITY = {source: index for index, source in enumerate(SIGN_SOURCES)}

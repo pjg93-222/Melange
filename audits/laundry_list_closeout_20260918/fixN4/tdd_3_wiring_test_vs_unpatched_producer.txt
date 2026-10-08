@@ -1,0 +1,74 @@
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 53, in test_only_the_archive_slice_is_searched_for_sponsors
+    assert '_archive_rows=len(A)' in SOURCE
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 89, in test_the_dial_is_named_in_the_producer_and_defaults_to_the_fix
+    assert SC.DIAL in SOURCE
+           ^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 70, in test_the_frame_assembly_the_hook_extends_is_untouched
+    assert SOURCE.index('A=pd.concat([A,_verified[A.columns]]') < SOURCE.index(CALL)
+                                                                  ^^^^^^^^^^^^^^^^^^
+ValueError: substring not found
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 47, in test_the_helper_is_handed_the_producers_own_rules
+    assert "A.iloc[:_archive_rows].to_dict('records'),matchmember,seccat,BR._congress" in SOURCE
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 84, in test_the_marker_is_recorded_only_on_the_rows_that_carry_it
+    assert 'if _evidence_source: audit' in SOURCE
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 39, in test_the_producer_calls_the_helper_exactly_once
+    assert SOURCE.count('SC.sponsor_rows_from_column(') == 1, SOURCE.count(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 35, in test_the_producer_imports_the_helper
+    assert 'from legislation import sponsor_column as SC' in SOURCE
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 74, in test_the_routing_audit_carries_the_provenance_marker
+    assert 'r.get(SC.SOURCE_COLUMN)' in SOURCE, 'the audit must read the helper constant'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: the audit must read the helper constant
+Traceback (most recent call last):
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 110, in main
+    fn()
+  File "C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\fixN4\mirror_unpatched\fec\tests\legislation\test_sponsor_column_producer_wiring.py", line 58, in test_the_rows_are_injected_before_the_row_loop_so_every_gate_still_judges_them
+    assert 'A=pd.concat([A,pd.DataFrame(_sponsor_column_rows)],ignore_index=True)' in SOURCE
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+FAIL test_only_the_archive_slice_is_searched_for_sponsors
+FAIL test_the_dial_is_named_in_the_producer_and_defaults_to_the_fix
+FAIL test_the_frame_assembly_the_hook_extends_is_untouched
+FAIL test_the_helper_is_handed_the_producers_own_rules
+FAIL test_the_marker_is_recorded_only_on_the_rows_that_carry_it
+FAIL test_the_producer_calls_the_helper_exactly_once
+FAIL test_the_producer_imports_the_helper
+PASS test_the_producer_never_reads_the_dial_itself
+FAIL test_the_routing_audit_carries_the_provenance_marker
+FAIL test_the_rows_are_injected_before_the_row_loop_so_every_gate_still_judges_them
+test_sponsor_column_producer_wiring: 1 passed, 9 failed

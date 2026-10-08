@@ -1,0 +1,300 @@
+﻿====================================================================================================
+Q1  CATEGORY / TOPIC KEY SETS -- one surface per section
+====================================================================================================
+
+-- [code] fec/bill_rules.py:16-23  CATEGORIES --
+   n = 18
+    Examination & Supervision
+    CU Capital Requirements
+    NCUA Budget & Insurance
+    Interchange
+    Payments
+    Technology & Emerging
+    Fraud Prevention
+    Data Privacy & Cyber
+    Charter Modernization
+    Defense CU Issues
+    Field of Membership
+    CU Tax Status
+    CDFI Fund
+    CFPB
+    Credit Card Mandates
+    TCPA
+    Member Business Lending
+    Mortgage & Housing
+
+-- category_stance.json  ['cats'] --
+   n = 18
+    Examination & Supervision
+    CU Capital Requirements
+    NCUA Budget & Insurance
+    Interchange
+    Payments
+    Technology & Emerging
+    Fraud Prevention
+    Data Privacy & Cyber
+    Charter Modernization
+    Defense CU Issues
+    Field of Membership
+    CU Tax Status
+    CDFI Fund
+    CFPB
+    Credit Card Mandates
+    TCPA
+    Member Business Lending
+    Mortgage & Housing
+   ['defensive'] = ['CU Tax Status', 'Credit Card Mandates', 'Interchange']
+   matrix members = 533
+   distinct keys inside matrix rows: n=18  identical to ['cats']? True
+
+-- per_topic_alloc.json  (per_topic_flip.py output) --
+   n = 19
+   Examination & Supervision                     funded_members=154  total=$2,000,000
+   Credit Union Capital Requirements             funded_members=159  total=$2,000,000
+   NCUA Budget & Share Insurance Fund            funded_members=161  total=$2,000,000
+   Interchange                                   funded_members=168  total=$2,000,000
+   Payments                                      funded_members=115  total=$2,000,000
+   Technology & Emerging Issues                  funded_members=175  total=$2,000,000
+   Fraud Prevention                              funded_members=157  total=$2,000,000
+   Data Privacy & Cybersecurity                  funded_members=155  total=$2,000,000
+   Charter Modernization & Governance            funded_members=158  total=$2,000,000
+   Defense Credit Union Issues                   funded_members=124  total=$2,000,000
+   Field of Membership                           funded_members=129  total=$2,000,000
+   CDFI Fund                                     funded_members=168  total=$2,000,000
+   CFPB Restrain                                 funded_members=165  total=$2,000,000
+   CFPB Reach (-)                                funded_members=149  total=$2,000,000
+   Telephone Consumer Protection Act Issues      funded_members=166  total=$2,000,000
+   Credit Card & Consumer-Fee Mandates           funded_members=156  total=$2,000,000
+   Member Business Lending                       funded_members=197  total=$2,000,000
+   Mortgage Lending & Housing                    funded_members=182  total=$2,000,000
+   Credit Union Tax Status                       funded_members=189  total=$2,000,000
+
+-- data\lobbying\per_topic_coalition.json --
+   n = 19
+   Examination & Supervision                     seeds=45  total=$1,779,000
+   Credit Union Capital Requirements             seeds=44  total=$1,745,000
+   NCUA Budget & Share Insurance Fund            seeds=44  total=$1,745,000
+   Interchange                                   seeds=45  total=$1,575,000
+   Payments                                      seeds=45  total=$1,474,000
+   Technology & Emerging Issues                  seeds=44  total=$1,807,000
+   Fraud Prevention                              seeds=45  total=$1,848,000
+   Data Privacy & Cybersecurity                  seeds=43  total=$1,793,000
+   Charter Modernization & Governance            seeds=45  total=$1,836,000
+   Defense Credit Union Issues                   seeds=45  total=$1,215,000
+   Field of Membership                           seeds=45  total=$1,594,000
+   CDFI Fund                                     seeds=44  total=$1,780,000
+   CFPB Restrain                                 seeds=45  total=$1,738,000
+   CFPB Reach (-)                                seeds=45  total=$1,739,000
+   Telephone Consumer Protection Act Issues      seeds=45  total=$1,507,000
+   Credit Card & Consumer-Fee Mandates           seeds=45  total=$1,568,000
+   Member Business Lending                       seeds=44  total=$1,834,000
+   Mortgage Lending & Housing                    seeds=45  total=$1,794,000
+   Credit Union Tax Status                       seeds=45  total=$1,418,000
+
+-- data\money\budget_frontier.json  ['topics'] --
+   container type = dict   n = 18
+    Examination & Supervision
+    Credit Union Capital Requirements
+    NCUA Budget & Share Insurance Fund
+    Interchange
+    Payments
+    Technology & Emerging Issues
+    Fraud Prevention
+    Data Privacy & Cybersecurity
+    Charter Modernization & Governance
+    Defense Credit Union Issues
+    Field of Membership
+    CDFI Fund
+    CFPB Restrain
+    Telephone Consumer Protection Act Issues
+    Credit Card & Consumer-Fee Mandates
+    Member Business Lending
+    Mortgage Lending & Housing
+    Credit Union Tax Status
+
+-- data\money\budget_frontier_electoral.json  ['topics'] --
+   container type = dict   n = 18
+    Examination & Supervision
+    Credit Union Capital Requirements
+    NCUA Budget & Share Insurance Fund
+    Interchange
+    Payments
+    Technology & Emerging Issues
+    Fraud Prevention
+    Data Privacy & Cybersecurity
+    Charter Modernization & Governance
+    Defense Credit Union Issues
+    Field of Membership
+    CDFI Fund
+    CFPB Restrain
+    Telephone Consumer Protection Act Issues
+    Credit Card & Consumer-Fee Mandates
+    Member Business Lending
+    Mortgage Lending & Housing
+    Credit Union Tax Status
+
+-- dashboard_data.json --
+   ['issues']  (rendered dashboard columns)  n = 19
+   [ 0] Examination & Supervision
+   [ 1] Credit Union Capital Requirements
+   [ 2] NCUA Budget & Share Insurance Fund
+   [ 3] Interchange
+   [ 4] Payments
+   [ 5] Technology & Emerging Issues
+   [ 6] Fraud Prevention
+   [ 7] Data Privacy & Cybersecurity
+   [ 8] Charter Modernization & Governance
+   [ 9] Defense Credit Union Issues
+   [10] Field of Membership
+   [11] CDFI Fund
+   [12] CFPB Restrain (pro-CU; limits agency reach)
+   [13] Telephone Consumer Protection Act Issues
+   [14] Credit Card & Consumer-Fee Mandates
+   [15] Member Business Lending
+   [16] Mortgage Lending & Housing
+   [17] Credit Union Tax Status
+   [18] Overall CU stance
+   ['engine']['categories'] (canonical category per column)  n = 19
+   [ 0] 'Examination & Supervision'
+   [ 1] 'CU Capital Requirements'
+   [ 2] 'NCUA Budget & Insurance'
+   [ 3] 'Interchange'
+   [ 4] 'Payments'
+   [ 5] 'Technology & Emerging'
+   [ 6] 'Fraud Prevention'
+   [ 7] 'Data Privacy & Cyber'
+   [ 8] 'Charter Modernization'
+   [ 9] 'Defense CU Issues'
+   [10] 'Field of Membership'
+   [11] 'CDFI Fund'
+   [12] 'CFPB'
+   [13] 'TCPA'
+   [14] 'Credit Card Mandates'
+   [15] 'Member Business Lending'
+   [16] 'Mortgage & Housing'
+   [17] 'CU Tax Status'
+   [18] None
+   len(flip)=19 len(coal)=19 len(frontier)=19 len(stats)=19
+   honors columns: 'honors' rows=533 cols=18 ; honors_meta cats n/a here
+
+-- workbook sheet names --
+    Field Recognition
+    Recognition Detail
+    Overall Standing
+    Rank & Allocation
+    IM Allocation
+    Melange - Live
+    Category Stance
+    Congestion
+    Signed Coalitions
+    Blended Model
+    Coalition Profiles
+    Closeness Between Members
+    Coalition Demographics
+    Primary Layer - Normalized
+    Primary Layer
+    Sub Layer - Normalized
+    Sub Layer - Raw
+    Legislative Score - Normalized
+    Legislative Score - Raw
+    Demographic - Normalized
+    Demographic Factors - Raw
+    Press Release - Normalized
+    Press Release - Raw
+    Committee Data
+    Topic Weights
+    Press Release Articles
+    Sponsor Interactions
+    Original Co-Sponsor Interaction
+    Co-Sponsor Interactions
+    Success Sponsor
+    Success Original Co-Sponsor
+    CFPB Bills
+    Centrality
+
+-- workbook 'Legislative Score - Normalized' topic blocks (row 1 header at each block col) --
+   sheet max_column = 160
+   col   row-1 header (raw)                            BLOCKCAT[col]                row-2 sub-weights (o=0,2,4)
+   3     'Examination & Supervision Sponsor'           Examination & Supervision    [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   11    'Credit Union Capital Requirements - Sponsor' CU Capital Requirements      [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   19    'NCUA Budget & Share Insurance Fund - Sponsor NCUA Budget & Insurance      [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   27    'Interchange - Sponsor'                       Interchange                  [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   35    'Payments - Sponsor'                          Payments                     [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   43    'Technology & Emerging Issues - Sponsor'      Technology & Emerging        [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   51    'Fraud Prevention - Sponsor'                  Fraud Prevention             [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   59    'Data Privacy & Cybersecurity - Sponsor'      Data Privacy & Cyber         [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   67    'Charter Modernization & Governance - Sponsor Charter Modernization        [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   75    'Defense Credit Union Issues - Sponsor'       Defense CU Issues            [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   83    'Field of Membership - Sponsor'               Field of Membership          [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   91    'CDFI Fund - Sponsor'                         CDFI Fund                    [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   99    'CFPB Restrain - Sponsor'                     CFPB                         [0.285714285714286, 0.142857142857143, 0.07142857142857144]
+   145   'CFPB Reach (-) - Sponsor'                    CFPB                         [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   115   'Telephone Consumer Protection Act Issues - S TCPA                         [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   107   'Credit Card & Consumer-Fee Mandates - Sponso Credit Card Mandates         [0.2857142857142858, 0.1428571428571429, 0.0714285714285714]
+   123   'Member Business Lending - Sponsor'           Member Business Lending      [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   131   'Mortgage Lending & Housing - Sponsor'        Mortgage & Housing           [0.285714285714286, 0.142857142857143, 0.0714285714285714]
+   153   'Credit Union Tax Status - Sponsor'           CU Tax Status                [0.2857142857142857, 0.1428571428571428, 0.07142857142857142]
+
+   producer label expression (per_topic_flip.py:56, per_topic_coalition.py:42, budget_frontier.py:61):
+     labels={sc:str(nrm.cell(1,sc).value).replace(' - Sponsor','').replace(' Sponsor','').strip() for sc in blocks}
+   -> derived label set, n=19:
+     col 3    -> 'Examination & Supervision'
+     col 11   -> 'Credit Union Capital Requirements'
+     col 19   -> 'NCUA Budget & Share Insurance Fund'
+     col 27   -> 'Interchange'
+     col 35   -> 'Payments'
+     col 43   -> 'Technology & Emerging Issues'
+     col 51   -> 'Fraud Prevention'
+     col 59   -> 'Data Privacy & Cybersecurity'
+     col 67   -> 'Charter Modernization & Governance'
+     col 75   -> 'Defense Credit Union Issues'
+     col 83   -> 'Field of Membership'
+     col 91   -> 'CDFI Fund'
+     col 99   -> 'CFPB Restrain'
+     col 145  -> 'CFPB Reach (-)'
+     col 115  -> 'Telephone Consumer Protection Act Issues'
+     col 107  -> 'Credit Card & Consumer-Fee Mandates'
+     col 123  -> 'Member Business Lending'
+     col 131  -> 'Mortgage Lending & Housing'
+     col 153  -> 'Credit Union Tax Status'
+
+   label-set == per_topic_alloc.json key set? True
+   labels only in workbook: []
+   keys only in per_topic_alloc: []
+
+-- archive_leg.json : categories carrying legislative evidence --
+   members = 523 ; distinct categories = 18
+   Member Business Lending        members=471  signed_sum=+2170.50
+   Mortgage & Housing             members=397  signed_sum=+1475.92
+   Fraud Prevention               members=305  signed_sum=+794.74
+   Data Privacy & Cyber           members=296  signed_sum=+662.28
+   NCUA Budget & Insurance        members=287  signed_sum=+595.82
+   Technology & Emerging          members=264  signed_sum=+830.05
+   Charter Modernization          members=258  signed_sum=+604.32
+   CU Capital Requirements        members=243  signed_sum=+493.12
+   CDFI Fund                      members=239  signed_sum=+506.68
+   Examination & Supervision      members=195  signed_sum=+570.77
+   CFPB                           members=134  signed_sum=+609.25
+   TCPA                           members= 87  signed_sum=+179.72
+   Credit Card Mandates           members= 83  signed_sum=-34.98
+   CU Tax Status                  members= 35  signed_sum=+71.50
+   Field of Membership            members= 32  signed_sum=+46.28
+   Defense CU Issues              members= 26  signed_sum=+46.69
+   Payments                       members= 25  signed_sum=+52.16
+   Interchange                    members= 18  signed_sum=-53.67
+   CATEGORIES with NO legislative evidence: []
+
+====================================================================================================
+Q1 SUMMARY -- does the surface carry 'CU Tax Status' today?
+====================================================================================================
+surface                                        n_keys  carries? key literal
+code: bill_rules.CATEGORIES                        18  YES      CU Tax Status
+category_stance.json cats                          18  YES      CU Tax Status
+per_topic_alloc.json (flip out)                    19  YES      Credit Union Tax Status
+per_topic_coalition.json                           19  YES      Credit Union Tax Status
+data\money\budget_frontier.json                    18  YES      Credit Union Tax Status
+data\money\budget_frontier_electoral.json          18  YES      Credit Union Tax Status
+dashboard_data.json issues                         19  YES      Credit Union Tax Status
+dashboard_data.json engine.categories              18  YES      CU Tax Status
+workbook Legislative-Normalized blocks             19  YES      Credit Union Tax Status
+archive_leg.json categories                        18  YES      CU Tax Status

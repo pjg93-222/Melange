@@ -1,0 +1,40 @@
+# The new and changed test files of the round and the suites around them (scripts/run_new_tests_3x.sh), three runs in a row each, one process per file.
+
+## in the worktree (git available: the tests that read a base commit run), run 1: files 16, passed/failed/errors/skipped (598, 0, 0, 0)
+   fec/surfaces/test_staffer_closeness_bidirectional.py           pass 58   fail 0   err 0  skip 0 
+   fec/surfaces/test_staffer_live_service.py                      pass 34   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_contact_group.py               pass 12   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_distinct_routes.py             pass 13   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_office_covered_staff.py        pass 67   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_payroll_people.py              pass 4    fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_prewarm.py                     pass 35   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_request_work_index.py          pass 17   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_route_jobs.py                  pass 73   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_route_latency.py               pass 9    fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_row_equality.py                pass 151  fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.py            pass 26   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_left_out_staff.cjs             pass 35   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_route_jobs_client.cjs          pass 17   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_route_models.cjs               pass 9    fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.cjs           pass 38   fail 0   err 0  skip 0 
+## in the worktree (git available: the tests that read a base commit run), run 2: files 16, passed/failed/errors/skipped (598, 0, 0, 0)
+## in the worktree (git available: the tests that read a base commit run), run 3: files 16, passed/failed/errors/skipped (598, 0, 0, 0)
+## in the clean export of the tip (no git history: those tests skip), run 1: files 16, passed/failed/errors/skipped (548, 0, 0, 50)
+   fec/surfaces/test_staffer_closeness_bidirectional.py           pass 58   fail 0   err 0  skip 0 
+   fec/surfaces/test_staffer_live_service.py                      pass 34   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_contact_group.py               pass 12   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_distinct_routes.py             pass 13   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_office_covered_staff.py        pass 26   fail 0   err 0  skip 41
+   fec/tests/surfaces/test_staffer_payroll_people.py              pass 4    fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_prewarm.py                     pass 35   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_request_work_index.py          pass 17   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_route_jobs.py                  pass 73   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_route_latency.py               pass 9    fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_row_equality.py                pass 151  fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.py            pass 20   fail 0   err 0  skip 6 
+   fec/tests/surfaces/test_staffer_left_out_staff.cjs             pass 33   fail 0   err 0  skip 2 
+   fec/tests/surfaces/test_staffer_route_jobs_client.cjs          pass 17   fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_route_models.cjs               pass 9    fail 0   err 0  skip 0 
+   fec/tests/surfaces/test_staffer_unreachable_hint.cjs           pass 37   fail 0   err 0  skip 1 
+## in the clean export of the tip (no git history: those tests skip), run 2: files 16, passed/failed/errors/skipped (548, 0, 0, 50)
+## in the clean export of the tip (no git history: those tests skip), run 3: files 16, passed/failed/errors/skipped (548, 0, 0, 50)

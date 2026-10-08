@@ -1,0 +1,20 @@
+# LIVE (C:\Users\pgoff\OneDrive\Desktop\Melange Systems) fingerprinted read-only by scripts\live_fingerprint.py: git HEAD, the sha256 of the full 'git status --porcelain=v1 -uall' text, and the sha256 of
+# 'relative path|size|mtime_ns' over every file under fec/surfaces, fec/tests/surfaces and fec/tools (__pycache__ excluded). Taken on 2026-10-03: before the cut (15:16:51); midway (15:24:40, after the four proofs and the node tests, while the first suite run was in progress);
+# and after the last suite run (15:52:04).
+# Identical three times means nothing in those trees was written, touched or re-saved by the cut, the proofs, the suite runs or the dry runs, and git status did not move anywhere in LIVE.
+
+## before
+HEAD 3248a6a02e42bd23665995e69dc649ac926aab95
+status lines 59844 sha256 f836be91b10cb6ba
+files fingerprinted 883 sha256 76ca32b2dbd7cecf
+
+## midway
+HEAD 3248a6a02e42bd23665995e69dc649ac926aab95
+status lines 59844 sha256 f836be91b10cb6ba
+files fingerprinted 883 sha256 76ca32b2dbd7cecf
+
+## after
+HEAD 3248a6a02e42bd23665995e69dc649ac926aab95
+status lines 59844 sha256 f836be91b10cb6ba
+files fingerprinted 883 sha256 76ca32b2dbd7cecf
+

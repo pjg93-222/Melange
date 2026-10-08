@@ -1,0 +1,52 @@
+{
+ "bars": {
+  "all_corpus_eer_rate_lte_0_05": false,
+  "caption_mismatch_n_gte_148": false,
+  "caption_mismatch_rejection_gte_0_99": true,
+  "human_ratified_labels": false
+ },
+ "calibration": {
+  "accept_rule": "score >= theta_accept",
+  "caption_mismatch_min_n": 148,
+  "caption_mismatch_rejection_bar": 0.99,
+  "eer_rate_stop_bar": 0.05,
+  "method": "deterministic labeled claimed_class_probability DET/EER calibration",
+  "no_threshold_retuning_for_sex_parity": true,
+  "source_sha256": "0a62a5a1c732d200ef47c217099a690b6be92fcd19b64df24cafb25e2e2d5d61",
+  "theta_accept_selection": "lowest candidate >= max corpus theta_eer that rejects >=99% caption mismatches",
+  "theta_enroll_rule": "equal to theta_accept; conservative single calibrated boundary",
+  "trial_n": 3612
+ },
+ "caption_mismatch_n": 12,
+ "caption_mismatch_rejection_rate": 1.0,
+ "eer_rate": 0.31669530355097364,
+ "far_at_theta_accept": 0.007731958762886598,
+ "frr_at_theta_accept": 0.6916666666666667,
+ "label_provenance": "MACHINE_CAPTION_HARD_SIGNAL",
+ "per_corpus": {
+  "legacy_audio_pilot": {
+   "eer_rate": 0.31669530355097364,
+   "false_accept_n": 1106,
+   "false_reject_n": 38,
+   "far": 0.3167239404352806,
+   "frr": 0.31666666666666665,
+   "genuine_n": 120,
+   "impostor_n": 3492,
+   "theta_eer": 0.00676154928813298
+  }
+ },
+ "schema": "b5-audio-identity-thresholds-v1",
+ "score_kind": "claimed_class_probability",
+ "sex_parity": {
+  "far_ratio_max_to_min": null,
+  "frr_ratio_max_to_min": null,
+  "groups": {},
+  "meaning": "reported diagnostic only; threshold selection never uses sex labels",
+  "red_flag": false,
+  "threshold_was_retuned_for_parity": false
+ },
+ "status": "CALIBRATION_STOP_BAR_MISS",
+ "theta_accept": 0.4969824365819195,
+ "theta_eer": 0.00676154928813298,
+ "theta_enroll": 0.4969824365819195
+}

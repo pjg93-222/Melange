@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2172 IS: Small Business Surcharge Relief Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 2172</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190718">July 18, 2019</action-date><action-desc><sponsor name-id="S318">Mr. Wicker</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the National Flood Insurance Act of 1968 to provide relief from surcharges to small
+			 businesses and nonprofit organizations.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Small Business Surcharge Relief Act</short-title></quote>.</text>
+ </section><section id="id18BE94DD70F749A2AA0BD1F2BDAE0F75"><enum>2.</enum><header>Relief from surcharge</header><text display-inline="no-display-inline">Section 1308A(a) of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4015a">42 U.S.C. 4015a(a)</external-xref>) is amended—</text>
+ <paragraph id="idDF3D5F5E048E4727BE19F3D9FCBC95A8"><enum>(1)</enum><text>in the first sentence, by striking <quote>The Administrator</quote> and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="id1DBE3F57C23447198848E2F9F58D5D03" style="OLC"> <paragraph id="id89846482714242F5A280128E0B00DB2D"><enum>(1)</enum><header>In general</header><text>Except as provided in paragraph (2), the Administrator</text></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="idD23AC387D5DD4A3ABB344A8E61DE895A"><enum>(2)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="idDC2CC039471E45F0BDB72BFE643526FA" style="OLC"> <paragraph id="id25CCD32DA7554FB0AB1D9CFC6DA458B1"><enum>(2)</enum><header>Relief for small businesses and nonprofits</header> <subparagraph id="id35C228EFF1B249F2A2BCB0EB42474EBC"><enum>(A)</enum><header>Definition</header><text>In this paragraph, the term <term>covered small business or nonprofit organization</term> means a small business concern (as defined in section 3 of the Small Business Act (<external-xref legal-doc="usc" parsable-cite="usc/15/632">15 U.S.C. 632</external-xref>)) or an organization that is described in <external-xref legal-doc="usc" parsable-cite="usc/26/501">section 501(c)(3)</external-xref> of the Internal Revenue Code of 1986 and is exempt from taxation under section 501(a) of such Code that owns not fewer than 3 structures that are located on a single property.</text>
+ </subparagraph><subparagraph id="id722A07CD7C7B43C59B57C8F0C415C62D"><enum>(B)</enum><header>Relief</header><text>The Administrator may not impose a surcharge under this section for a policy for flood insurance coverage under the National Flood Insurance Program for a covered small business concern or nonprofit organization with respect to more than 2 detached units or buildings located on a single property if the covered small business or nonprofit organization certifies to the Administrator that the savings from the surcharge not being imposed shall be used for flood mitigation on the property on which the units or buildings are located.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section></legis-body></bill>
+
+

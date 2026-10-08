@@ -1,0 +1,9 @@
+{
+ "path3": "holistic dashboard bundle (DASH_OUT-redirected; NOT deployed to any surface)",
+ "config": "holistic",
+ "bytes": 492695,
+ "sha256_16": "9cc038efdaa7410e",
+ "nodes": 533,
+ "drawn_edges": 2555,
+ "issues": 19
+}

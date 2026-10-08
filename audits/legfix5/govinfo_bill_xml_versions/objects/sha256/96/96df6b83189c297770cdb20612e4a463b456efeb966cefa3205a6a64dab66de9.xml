@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HAD09BFC843C8433188AA64CDEA056706" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 6415 IH: To amend the Federal Reserve Act to prohibit the Federal reserve banks from offering certain products or services directly to an individual, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-01-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 6415</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20220118">January 18, 2022</action-date><action-desc><sponsor name-id="E000294">Mr. Emmer</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Federal Reserve Act to prohibit the Federal reserve banks from offering certain products or services directly to an individual, and for other purposes.</official-title></form><legis-body id="H9CE4675D5A4449EF9CA1DCF9A973D47F" style="OLC"><section id="HAF48EEB779FB46A6B1086552734A74FA" section-type="section-one"><enum>1.</enum><header>Prohibition on Federal reserve banks relating to certain products or services for individuals</header><text display-inline="no-display-inline">Section 13 of the Federal Reserve Act is amended by adding at the end the following new paragraph:</text><quoted-block style="OLC" id="HDAB2BEB29B9E479FA55973A201076E15" display-inline="no-display-inline"><paragraph id="HFF0BC85AEFE24F72A0E87936F7E30191"><enum>(15)</enum><text display-inline="yes-display-inline">Except as specifically authorized under this Act, a Federal reserve bank may not offer products or services directly to an individual, maintain an account on behalf of an individual, or issue a central bank digital currency directly to an individual.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill> 
+

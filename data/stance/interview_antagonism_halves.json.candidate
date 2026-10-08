@@ -1,0 +1,9668 @@
+{
+ "model": "claude-haiku-4-5",
+ "rubric_version": "locked-2026-07-12-v1",
+ "eligible_n": 322,
+ "members": {
+  "Adam Schiff": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 78,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    1522,
+    1522
+   ],
+   "words": [
+    197664,
+    211320
+   ]
+  },
+  "Al Green": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 85,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 80,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 4.0
+    }
+   },
+   "packages": [
+    72,
+    71
+   ],
+   "words": [
+    31460,
+    23684
+   ]
+  },
+  "Ami Bera": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    39,
+    39
+   ],
+   "words": [
+    19751,
+    11812
+   ]
+  },
+  "Andrew Ogles": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 50,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    22,
+    22
+   ],
+   "words": [
+    3654,
+    3171
+   ]
+  },
+  "Angela Alsobrooks": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    12,
+    12
+   ],
+   "words": [
+    2207,
+    2375
+   ]
+  },
+  "Angus King": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 65,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 3.0
+    }
+   },
+   "packages": [
+    150,
+    150
+   ],
+   "words": [
+    33707,
+    21741
+   ]
+  },
+  "Anna Luna": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 60,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 15.0
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 12.667
+    }
+   },
+   "packages": [
+    33,
+    32
+   ],
+   "words": [
+    4222,
+    2275
+   ]
+  },
+  "August Pfluger": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    7,
+    6
+   ],
+   "words": [
+    5935,
+    2724
+   ]
+  },
+  "Ayanna Pressley": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 70,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    103,
+    102
+   ],
+   "words": [
+    8416,
+    8060
+   ]
+  },
+  "Adriano Espaillat": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    45,
+    44
+   ],
+   "words": [
+    16528,
+    11624
+   ]
+  },
+  "Adam Smith": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 80,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    188,
+    187
+   ],
+   "words": [
+    61250,
+    71798
+   ]
+  },
+  "Adrian Smith": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    3,
+    3
+   ],
+   "words": [
+    6697,
+    1416
+   ]
+  },
+  "Adelita Grijalva": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 3.333
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 10.333
+    }
+   },
+   "packages": [
+    24,
+    23
+   ],
+   "words": [
+    2427,
+    3004
+   ]
+  },
+  "Alan Armstrong": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 0,
+     "policy_conflict": 0,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    4,
+    3
+   ],
+   "words": [
+    1708,
+    5691
+   ]
+  },
+  "Alex Padilla": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    87,
+    86
+   ],
+   "words": [
+    15084,
+    18665
+   ]
+  },
+  "Alexandria Ocasio-Cortez": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 80,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    755,
+    755
+   ],
+   "words": [
+    49292,
+    50628
+   ]
+  },
+  "Amy Klobuchar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.667
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 45,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    759,
+    758
+   ],
+   "words": [
+    94942,
+    96848
+   ]
+  },
+  "Andrew Clyde": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    58,
+    57
+   ],
+   "words": [
+    2839,
+    2503
+   ]
+  },
+  "Andr\u00e9 Carson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 65,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 8.333
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "medium",
+     "antagonism": 20.0
+    }
+   },
+   "packages": [
+    31,
+    30
+   ],
+   "words": [
+    3169,
+    4989
+   ]
+  },
+  "Andy Barr": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    18,
+    17
+   ],
+   "words": [
+    2141,
+    2051
+   ]
+  },
+  "Andy Biggs": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 30,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    92,
+    91
+   ],
+   "words": [
+    15755,
+    18632
+   ]
+  },
+  "Austin Scott": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 35,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 14.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 40,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    22,
+    21
+   ],
+   "words": [
+    1510,
+    1933
+   ]
+  },
+  "Andy Kim": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 4.333
+    }
+   },
+   "packages": [
+    60,
+    59
+   ],
+   "words": [
+    7955,
+    7821
+   ]
+  },
+  "Barry Loudermilk": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "medium",
+     "antagonism": 14.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 42,
+     "gratuitous_cruelty": 25,
+     "principled_dissent": 20,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 22.333
+    }
+   },
+   "packages": [
+    29,
+    29
+   ],
+   "words": [
+    1651,
+    3006
+   ]
+  },
+  "Andy Harris": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 35,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    23,
+    23
+   ],
+   "words": [
+    1449,
+    1786
+   ]
+  },
+  "Becca Balint": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 13.333
+    }
+   },
+   "packages": [
+    13,
+    13
+   ],
+   "words": [
+    8415,
+    1651
+   ]
+  },
+  "Ben Luj\u00e1n": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    26,
+    26
+   ],
+   "words": [
+    3788,
+    4671
+   ]
+  },
+  "Ben Cline": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    8,
+    7
+   ],
+   "words": [
+    2941,
+    2252
+   ]
+  },
+  "Bennie Thompson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 42,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 14.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    237,
+    236
+   ],
+   "words": [
+    23071,
+    25304
+   ]
+  },
+  "Bernard Sanders": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    1705,
+    1705
+   ],
+   "words": [
+    167440,
+    153209
+   ]
+  },
+  "Beth Van Duyne": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 40,
+     "gratuitous_cruelty": 25,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 21.667
+    }
+   },
+   "packages": [
+    10,
+    9
+   ],
+   "words": [
+    5712,
+    1324
+   ]
+  },
+  "Bernie Moreno": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 12,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 17.0
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 8,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 13.0
+    }
+   },
+   "packages": [
+    28,
+    27
+   ],
+   "words": [
+    2276,
+    2082
+   ]
+  },
+  "Blake Moore": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 15,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    8,
+    8
+   ],
+   "words": [
+    5596,
+    5127
+   ]
+  },
+  "Bill Cassidy": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 72,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 5.333
+    },
+    "B": {
+     "reporter_hostility": 18,
+     "personal_contempt": 32,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 35,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 20.667
+    }
+   },
+   "packages": [
+    257,
+    257
+   ],
+   "words": [
+    38918,
+    28062
+   ]
+  },
+  "Bill Hagerty": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    37,
+    36
+   ],
+   "words": [
+    8966,
+    4536
+   ]
+  },
+  "Bonnie Watson Coleman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 72,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 78,
+     "policy_conflict": 92,
+     "confidence": "high",
+     "antagonism": 26.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 45,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 82,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 19.0
+    }
+   },
+   "packages": [
+    15,
+    15
+   ],
+   "words": [
+    4136,
+    1658
+   ]
+  },
+  "Brendan Boyle": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 65,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 2.333
+    }
+   },
+   "packages": [
+    39,
+    38
+   ],
+   "words": [
+    5446,
+    13558
+   ]
+  },
+  "Brad Sherman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    46,
+    46
+   ],
+   "words": [
+    16350,
+    11324
+   ]
+  },
+  "Bradley Schneider": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    22,
+    21
+   ],
+   "words": [
+    1974,
+    2654
+   ]
+  },
+  "Brian Babin": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 13.333
+    }
+   },
+   "packages": [
+    12,
+    11
+   ],
+   "words": [
+    1296,
+    1688
+   ]
+  },
+  "Brian Fitzpatrick": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 2.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.667
+    }
+   },
+   "packages": [
+    57,
+    57
+   ],
+   "words": [
+    10331,
+    11633
+   ]
+  },
+  "Brian Schatz": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 15.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 30,
+     "principled_dissent": 70,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 21.667
+    }
+   },
+   "packages": [
+    38,
+    38
+   ],
+   "words": [
+    11200,
+    7225
+   ]
+  },
+  "Brian Mast": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 28,
+     "principled_dissent": 15,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 23.667
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 10.667
+    }
+   },
+   "packages": [
+    27,
+    27
+   ],
+   "words": [
+    2685,
+    3994
+   ]
+  },
+  "Bruce Westerman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "medium",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 35,
+     "confidence": "medium",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    7,
+    7
+   ],
+   "words": [
+    6368,
+    11598
+   ]
+  },
+  "Burgess Owens": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 72,
+     "gratuitous_cruelty": 45,
+     "principled_dissent": 15,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 39.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 58,
+     "gratuitous_cruelty": 28,
+     "principled_dissent": 22,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 28.667
+    }
+   },
+   "packages": [
+    18,
+    17
+   ],
+   "words": [
+    5339,
+    5176
+   ]
+  },
+  "Byron Donalds": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 15,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 35,
+     "policy_conflict": 62,
+     "confidence": "medium",
+     "antagonism": 17.0
+    },
+    "B": {
+     "reporter_hostility": 22,
+     "personal_contempt": 32,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 25,
+     "policy_conflict": 68,
+     "confidence": "medium",
+     "antagonism": 22.0
+    }
+   },
+   "packages": [
+    124,
+    123
+   ],
+   "words": [
+    19841,
+    16623
+   ]
+  },
+  "Carlos Gimenez": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 30,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    90,
+    90
+   ],
+   "words": [
+    20564,
+    17704
+   ]
+  },
+  "Catherine Cortez Masto": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 55,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    35,
+    34
+   ],
+   "words": [
+    3931,
+    2256
+   ]
+  },
+  "Charles Schumer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 58,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    1897,
+    1897
+   ],
+   "words": [
+    148345,
+    144976
+   ]
+  },
+  "Chellie Pingree": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    10,
+    10
+   ],
+   "words": [
+    4157,
+    2785
+   ]
+  },
+  "Chip Roy": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 68,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 75,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    210,
+    209
+   ],
+   "words": [
+    21409,
+    15860
+   ]
+  },
+  "Chris Van Hollen": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 62,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 71,
+     "policy_conflict": 59,
+     "confidence": "high",
+     "antagonism": 4.333
+    }
+   },
+   "packages": [
+    235,
+    234
+   ],
+   "words": [
+    39080,
+    39063
+   ]
+  },
+  "Chrissy Houlahan": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 65,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 2.333
+    }
+   },
+   "packages": [
+    52,
+    52
+   ],
+   "words": [
+    9810,
+    11917
+   ]
+  },
+  "Christopher Coons": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    465,
+    465
+   ],
+   "words": [
+    87950,
+    76720
+   ]
+  },
+  "Christian Menefee": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    6,
+    6
+   ],
+   "words": [
+    1423,
+    1576
+   ]
+  },
+  "Christopher Deluzio": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    19,
+    19
+   ],
+   "words": [
+    1996,
+    3609
+   ]
+  },
+  "Christopher Murphy": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 85,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 2.333
+    }
+   },
+   "packages": [
+    487,
+    487
+   ],
+   "words": [
+    88032,
+    90428
+   ]
+  },
+  "Christopher Smith": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 0,
+     "policy_conflict": 35,
+     "confidence": "medium",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    12,
+    11
+   ],
+   "words": [
+    1205,
+    1744
+   ]
+  },
+  "Chuck Grassley": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 35,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 42,
+     "policy_conflict": 48,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    223,
+    222
+   ],
+   "words": [
+    26999,
+    30332
+   ]
+  },
+  "Claudia Tenney": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    4,
+    3
+   ],
+   "words": [
+    1058,
+    1117
+   ]
+  },
+  "Clay Higgins": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 45,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 35,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 16.0
+    }
+   },
+   "packages": [
+    18,
+    17
+   ],
+   "words": [
+    3570,
+    5673
+   ]
+  },
+  "Cory Booker": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    692,
+    692
+   ],
+   "words": [
+    79503,
+    67616
+   ]
+  },
+  "Cory Mills": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 68,
+     "confidence": "medium",
+     "antagonism": 8.333
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 42,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 9.667
+    }
+   },
+   "packages": [
+    22,
+    22
+   ],
+   "words": [
+    5206,
+    6743
+   ]
+  },
+  "Dan Crenshaw": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 40,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    105,
+    105
+   ],
+   "words": [
+    14825,
+    27242
+   ]
+  },
+  "Dan Newhouse": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    23,
+    23
+   ],
+   "words": [
+    1224,
+    5410
+   ]
+  },
+  "Daniel Meuser": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 15,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 20,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    26,
+    25
+   ],
+   "words": [
+    8045,
+    8652
+   ]
+  },
+  "Daniel Goldman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    225,
+    224
+   ],
+   "words": [
+    60556,
+    56249
+   ]
+  },
+  "Dan Sullivan": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    49,
+    48
+   ],
+   "words": [
+    16889,
+    14722
+   ]
+  },
+  "Darrell Issa": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 70,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 15.0
+    }
+   },
+   "packages": [
+    77,
+    77
+   ],
+   "words": [
+    42511,
+    45787
+   ]
+  },
+  "David Joyce": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 20,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    21,
+    21
+   ],
+   "words": [
+    3792,
+    1700
+   ]
+  },
+  "Debbie Dingell": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    218,
+    217
+   ],
+   "words": [
+    35693,
+    32340
+   ]
+  },
+  "David McCormick": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 25,
+     "confidence": "medium",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    35,
+    35
+   ],
+   "words": [
+    3335,
+    5917
+   ]
+  },
+  "Deborah Ross": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    5,
+    5
+   ],
+   "words": [
+    6539,
+    2859
+   ]
+  },
+  "Delia Ramirez": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 16.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 80,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    6,
+    6
+   ],
+   "words": [
+    2731,
+    2663
+   ]
+  },
+  "Debbie Wasserman Schultz": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 17.333
+    }
+   },
+   "packages": [
+    116,
+    116
+   ],
+   "words": [
+    14455,
+    15654
+   ]
+  },
+  "Diana DeGette": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 80,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 4.333
+    }
+   },
+   "packages": [
+    28,
+    28
+   ],
+   "words": [
+    3228,
+    1901
+   ]
+  },
+  "Derrick Van Orden": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 68,
+     "gratuitous_cruelty": 45,
+     "principled_dissent": 62,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 38.333
+    },
+    "B": {
+     "reporter_hostility": 15,
+     "personal_contempt": 32,
+     "gratuitous_cruelty": 18,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 21.667
+    }
+   },
+   "packages": [
+    26,
+    26
+   ],
+   "words": [
+    1192,
+    1207
+   ]
+  },
+  "Dina Titus": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 45,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 7.333
+    },
+    "B": {
+     "reporter_hostility": 1,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 35,
+     "policy_conflict": 48,
+     "confidence": "high",
+     "antagonism": 3.667
+    }
+   },
+   "packages": [
+    20,
+    19
+   ],
+   "words": [
+    9115,
+    7120
+   ]
+  },
+  "Don Bacon": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    162,
+    161
+   ],
+   "words": [
+    39426,
+    30996
+   ]
+  },
+  "Eleanor Norton": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 62,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    32,
+    31
+   ],
+   "words": [
+    8055,
+    6904
+   ]
+  },
+  "Donald Beyer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 60,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    22,
+    22
+   ],
+   "words": [
+    3508,
+    2646
+   ]
+  },
+  "Dusty Johnson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 40,
+     "policy_conflict": 50,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    60,
+    60
+   ],
+   "words": [
+    4169,
+    4731
+   ]
+  },
+  "Edward Markey": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    99,
+    99
+   ],
+   "words": [
+    14286,
+    12838
+   ]
+  },
+  "Elise Stefanik": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    198,
+    197
+   ],
+   "words": [
+    13866,
+    14035
+   ]
+  },
+  "Elissa Slotkin": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 82,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    166,
+    166
+   ],
+   "words": [
+    22174,
+    17409
+   ]
+  },
+  "Elizabeth Warren": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 8.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 68,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    1247,
+    1247
+   ],
+   "words": [
+    78096,
+    78940
+   ]
+  },
+  "Emanuel Cleaver": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 48,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 68,
+     "policy_conflict": 52,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    34,
+    33
+   ],
+   "words": [
+    8542,
+    7188
+   ]
+  },
+  "Eric Burlison": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    37,
+    37
+   ],
+   "words": [
+    1945,
+    1291
+   ]
+  },
+  "Eric Schmitt": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 45,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 20,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 31.667
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 40,
+     "gratuitous_cruelty": 25,
+     "principled_dissent": 15,
+     "policy_conflict": 75,
+     "confidence": "medium",
+     "antagonism": 23.333
+    }
+   },
+   "packages": [
+    44,
+    44
+   ],
+   "words": [
+    6744,
+    7859
+   ]
+  },
+  "Eugene Vindman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    21,
+    21
+   ],
+   "words": [
+    2321,
+    2784
+   ]
+  },
+  "Frank Pallone": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 25,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 60,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 25.0
+    }
+   },
+   "packages": [
+    16,
+    16
+   ],
+   "words": [
+    3577,
+    3510
+   ]
+  },
+  "French Hill": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    22,
+    21
+   ],
+   "words": [
+    16071,
+    6357
+   ]
+  },
+  "Gary Palmer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 50,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 4.333
+    }
+   },
+   "packages": [
+    7,
+    7
+   ],
+   "words": [
+    2246,
+    4085
+   ]
+  },
+  "Gary Peters": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 40,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    84,
+    83
+   ],
+   "words": [
+    10640,
+    8860
+   ]
+  },
+  "Glenn Ivey": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 1,
+     "principled_dissent": 78,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 1,
+     "personal_contempt": 3,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 1.333
+    }
+   },
+   "packages": [
+    24,
+    24
+   ],
+   "words": [
+    10000,
+    4869
+   ]
+  },
+  "Gabe Amo": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    12,
+    11
+   ],
+   "words": [
+    3851,
+    1844
+   ]
+  },
+  "Greg Landsman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 76,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    20,
+    20
+   ],
+   "words": [
+    4374,
+    7363
+   ]
+  },
+  "Glenn Grothman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 18.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 40,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    25,
+    24
+   ],
+   "words": [
+    11224,
+    5127
+   ]
+  },
+  "Grace Meng": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 71,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    25,
+    25
+   ],
+   "words": [
+    1796,
+    1661
+   ]
+  },
+  "Greg Casar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 82,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    16,
+    15
+   ],
+   "words": [
+    1476,
+    3433
+   ]
+  },
+  "Greg Stanton": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 68,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    13,
+    12
+   ],
+   "words": [
+    1174,
+    2051
+   ]
+  },
+  "Gregory Murphy": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 15,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 35,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 16.667
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 40,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    11,
+    11
+   ],
+   "words": [
+    2362,
+    2140
+   ]
+  },
+  "Guy Reschenthaler": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 30,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    11,
+    10
+   ],
+   "words": [
+    2825,
+    1204
+   ]
+  },
+  "Gregory Meeks": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 42,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 11.0
+    }
+   },
+   "packages": [
+    114,
+    114
+   ],
+   "words": [
+    23834,
+    34300
+   ]
+  },
+  "Haley Stevens": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 50,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    27,
+    26
+   ],
+   "words": [
+    2732,
+    5194
+   ]
+  },
+  "Gwen Moore": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    16,
+    16
+   ],
+   "words": [
+    6378,
+    9844
+   ]
+  },
+  "Hakeem Jeffries": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    671,
+    670
+   ],
+   "words": [
+    69815,
+    70414
+   ]
+  },
+  "Harriet Hageman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 45,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 18.333
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 38,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 42,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 17.0
+    }
+   },
+   "packages": [
+    33,
+    32
+   ],
+   "words": [
+    11100,
+    1677
+   ]
+  },
+  "Henry Cuellar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 55,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    79,
+    79
+   ],
+   "words": [
+    22570,
+    24966
+   ]
+  },
+  "Hillary Scholten": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    13,
+    13
+   ],
+   "words": [
+    1980,
+    1022
+   ]
+  },
+  "Ilhan Omar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 68,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 15.0
+    }
+   },
+   "packages": [
+    224,
+    224
+   ],
+   "words": [
+    17407,
+    16715
+   ]
+  },
+  "Jack Reed": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    67,
+    66
+   ],
+   "words": [
+    12118,
+    19753
+   ]
+  },
+  "Jacky Rosen": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    21,
+    21
+   ],
+   "words": [
+    1723,
+    1737
+   ]
+  },
+  "Jahana Hayes": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 80,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 2.333
+    }
+   },
+   "packages": [
+    16,
+    15
+   ],
+   "words": [
+    1907,
+    1647
+   ]
+  },
+  "James Clyburn": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 65,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 3.333
+    },
+    "B": {
+     "reporter_hostility": 1,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 9.0
+    }
+   },
+   "packages": [
+    418,
+    417
+   ],
+   "words": [
+    51057,
+    61770
+   ]
+  },
+  "Jake Auchincloss": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    88,
+    87
+   ],
+   "words": [
+    15329,
+    13285
+   ]
+  },
+  "James Lankford": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    170,
+    169
+   ],
+   "words": [
+    37005,
+    24894
+   ]
+  },
+  "James Comer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    280,
+    279
+   ],
+   "words": [
+    21916,
+    26263
+   ]
+  },
+  "James Himes": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 82,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 12.0
+    }
+   },
+   "packages": [
+    254,
+    254
+   ],
+   "words": [
+    55588,
+    52901
+   ]
+  },
+  "James Risch": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 45,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    41,
+    40
+   ],
+   "words": [
+    6127,
+    9242
+   ]
+  },
+  "James McGovern": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 80,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    81,
+    80
+   ],
+   "words": [
+    9087,
+    6692
+   ]
+  },
+  "James Walkinshaw": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 25,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 20.0
+    }
+   },
+   "packages": [
+    32,
+    32
+   ],
+   "words": [
+    6240,
+    3578
+   ]
+  },
+  "Jamie Raskin": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 80,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    636,
+    635
+   ],
+   "words": [
+    87975,
+    87640
+   ]
+  },
+  "Jared Huffman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 13.333
+    }
+   },
+   "packages": [
+    14,
+    14
+   ],
+   "words": [
+    1246,
+    5381
+   ]
+  },
+  "Jared Moskowitz": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 10.333
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 68,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    104,
+    103
+   ],
+   "words": [
+    18840,
+    13932
+   ]
+  },
+  "Jasmine Crockett": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 70,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 16.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    80,
+    79
+   ],
+   "words": [
+    10826,
+    11935
+   ]
+  },
+  "Janice Schakowsky": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    22,
+    22
+   ],
+   "words": [
+    3060,
+    6422
+   ]
+  },
+  "Jason Smith": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    32,
+    31
+   ],
+   "words": [
+    9457,
+    6863
+   ]
+  },
+  "Jeanne Shaheen": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 7.667
+    }
+   },
+   "packages": [
+    96,
+    96
+   ],
+   "words": [
+    13014,
+    17422
+   ]
+  },
+  "Jeff Hurd": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    8,
+    7
+   ],
+   "words": [
+    3894,
+    3791
+   ]
+  },
+  "Jason Crow": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    222,
+    222
+   ],
+   "words": [
+    40335,
+    41037
+   ]
+  },
+  "Jerrold Nadler": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 18.333
+    }
+   },
+   "packages": [
+    254,
+    254
+   ],
+   "words": [
+    25505,
+    22861
+   ]
+  },
+  "Jefferson Van Drew": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 55,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    33,
+    32
+   ],
+   "words": [
+    2916,
+    2400
+   ]
+  },
+  "Jeff Merkley": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 18,
+     "principled_dissent": 68,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 13.333
+    }
+   },
+   "packages": [
+    123,
+    123
+   ],
+   "words": [
+    17472,
+    18083
+   ]
+  },
+  "Jerry Moran": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    25,
+    25
+   ],
+   "words": [
+    4856,
+    1783
+   ]
+  },
+  "Jes\u00fas Garc\u00eda": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 62,
+     "personal_contempt": 58,
+     "gratuitous_cruelty": 48,
+     "principled_dissent": 70,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 56.0
+    }
+   },
+   "packages": [
+    5,
+    5
+   ],
+   "words": [
+    2558,
+    1192
+   ]
+  },
+  "Jill Tokuda": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 15,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    6,
+    5
+   ],
+   "words": [
+    3579,
+    1638
+   ]
+  },
+  "Jim Banks": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 20,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    64,
+    64
+   ],
+   "words": [
+    9862,
+    10137
+   ]
+  },
+  "Jimmy Gomez": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    35,
+    34
+   ],
+   "words": [
+    4468,
+    4644
+   ]
+  },
+  "Jim Jordan": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    774,
+    774
+   ],
+   "words": [
+    112657,
+    96620
+   ]
+  },
+  "Jimmy Patronis": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 5,
+     "policy_conflict": 15,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 25,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    16,
+    16
+   ],
+   "words": [
+    4389,
+    1918
+   ]
+  },
+  "Joaquin Castro": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    176,
+    175
+   ],
+   "words": [
+    23695,
+    27744
+   ]
+  },
+  "Jodey Arrington": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    14,
+    13
+   ],
+   "words": [
+    2143,
+    8864
+   ]
+  },
+  "Joe Neguse": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    75,
+    75
+   ],
+   "words": [
+    15762,
+    13913
+   ]
+  },
+  "John Curtis": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    46,
+    45
+   ],
+   "words": [
+    11032,
+    10957
+   ]
+  },
+  "Joe Wilson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 20,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    11,
+    10
+   ],
+   "words": [
+    3401,
+    2889
+   ]
+  },
+  "John Barrasso": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    127,
+    126
+   ],
+   "words": [
+    30718,
+    24171
+   ]
+  },
+  "John Hickenlooper": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 52,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    78,
+    78
+   ],
+   "words": [
+    5670,
+    8010
+   ]
+  },
+  "John Cornyn": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 45,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 16.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 50,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    311,
+    311
+   ],
+   "words": [
+    38696,
+    30482
+   ]
+  },
+  "John Hoeven": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    9,
+    9
+   ],
+   "words": [
+    2400,
+    1427
+   ]
+  },
+  "John Fetterman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 11.667
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 65,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 7.667
+    }
+   },
+   "packages": [
+    212,
+    212
+   ],
+   "words": [
+    17196,
+    18195
+   ]
+  },
+  "John Garamendi": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 62,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 6.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 58,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 7.333
+    }
+   },
+   "packages": [
+    114,
+    114
+   ],
+   "words": [
+    19008,
+    17597
+   ]
+  },
+  "John James": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 50,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    22,
+    21
+   ],
+   "words": [
+    6563,
+    4785
+   ]
+  },
+  "John Kennedy": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 35,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 8.333
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 28,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 12.667
+    }
+   },
+   "packages": [
+    448,
+    447
+   ],
+   "words": [
+    32191,
+    36747
+   ]
+  },
+  "John Thune": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    349,
+    349
+   ],
+   "words": [
+    53057,
+    77138
+   ]
+  },
+  "John Larson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    8,
+    8
+   ],
+   "words": [
+    4139,
+    11512
+   ]
+  },
+  "Joni Ernst": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 35,
+     "confidence": "medium",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 40,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    146,
+    145
+   ],
+   "words": [
+    19850,
+    11711
+   ]
+  },
+  "Johnny Olszewski": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    11,
+    11
+   ],
+   "words": [
+    1434,
+    8044
+   ]
+  },
+  "Jon Ossoff": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 72,
+     "gratuitous_cruelty": 48,
+     "principled_dissent": 65,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 40.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 68,
+     "gratuitous_cruelty": 42,
+     "principled_dissent": 72,
+     "policy_conflict": 88,
+     "confidence": "high",
+     "antagonism": 36.667
+    }
+   },
+   "packages": [
+    122,
+    122
+   ],
+   "words": [
+    12213,
+    14350
+   ]
+  },
+  "Josh Gottheimer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 55,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    99,
+    99
+   ],
+   "words": [
+    15537,
+    14973
+   ]
+  },
+  "John Rutherford": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 40,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    4,
+    4
+   ],
+   "words": [
+    2509,
+    4053
+   ]
+  },
+  "Josh Hawley": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 45,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 16.667
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 40,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 35,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 21.667
+    }
+   },
+   "packages": [
+    354,
+    354
+   ],
+   "words": [
+    28549,
+    24700
+   ]
+  },
+  "Joyce Beatty": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 78,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    27,
+    27
+   ],
+   "words": [
+    3235,
+    1883
+   ]
+  },
+  "Judy Chu": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    42,
+    41
+   ],
+   "words": [
+    14874,
+    13100
+   ]
+  },
+  "Katie Britt": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 0.667
+    }
+   },
+   "packages": [
+    47,
+    46
+   ],
+   "words": [
+    4266,
+    5083
+   ]
+  },
+  "Kat Cammack": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    14,
+    14
+   ],
+   "words": [
+    3486,
+    3666
+   ]
+  },
+  "Kevin Kiley": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 82,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    50,
+    49
+   ],
+   "words": [
+    5583,
+    13518
+   ]
+  },
+  "Katherine Clark": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 8.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 68,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    70,
+    70
+   ],
+   "words": [
+    10854,
+    7881
+   ]
+  },
+  "Ken Calvert": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 0,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 5,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    5,
+    5
+   ],
+   "words": [
+    8058,
+    4477
+   ]
+  },
+  "Kevin Cramer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 28,
+     "confidence": "medium",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 22,
+     "policy_conflict": 35,
+     "confidence": "medium",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    150,
+    150
+   ],
+   "words": [
+    11776,
+    15272
+   ]
+  },
+  "Kirsten Gillibrand": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    278,
+    278
+   ],
+   "words": [
+    28371,
+    25532
+   ]
+  },
+  "Lateefah Simon": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 0,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 25,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    6,
+    5
+   ],
+   "words": [
+    1569,
+    1771
+   ]
+  },
+  "Lindsey Graham": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 25,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 13.0
+    }
+   },
+   "packages": [
+    1951,
+    1950
+   ],
+   "words": [
+    269262,
+    273038
+   ]
+  },
+  "Lauren Boebert": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 72,
+     "gratuitous_cruelty": 58,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 43.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 68,
+     "gratuitous_cruelty": 45,
+     "principled_dissent": 35,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 37.667
+    }
+   },
+   "packages": [
+    122,
+    121
+   ],
+   "words": [
+    7450,
+    5462
+   ]
+  },
+  "Lisa Murkowski": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    203,
+    202
+   ],
+   "words": [
+    16828,
+    10866
+   ]
+  },
+  "Lauren Underwood": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 80,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    16,
+    15
+   ],
+   "words": [
+    5371,
+    1474
+   ]
+  },
+  "Lisa Blunt Rochester": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 30,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    24,
+    24
+   ],
+   "words": [
+    3230,
+    3035
+   ]
+  },
+  "Lucy McBath": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    39,
+    39
+   ],
+   "words": [
+    4417,
+    4108
+   ]
+  },
+  "Lisa McClain": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 2.333
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    19,
+    18
+   ],
+   "words": [
+    4931,
+    2743
+   ]
+  },
+  "Lloyd Doggett": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 4.333
+    }
+   },
+   "packages": [
+    67,
+    67
+   ],
+   "words": [
+    10070,
+    8214
+   ]
+  },
+  "Lois Frankel": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    7,
+    6
+   ],
+   "words": [
+    2841,
+    7355
+   ]
+  },
+  "Marc Veasey": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 7.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 58,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    19,
+    19
+   ],
+   "words": [
+    2342,
+    3309
+   ]
+  },
+  "Maggie Goodlander": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 16.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 90,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    11,
+    10
+   ],
+   "words": [
+    1418,
+    1174
+   ]
+  },
+  "Madeleine Dean": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    122,
+    121
+   ],
+   "words": [
+    21332,
+    19754
+   ]
+  },
+  "Marcy Kaptur": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    7,
+    6
+   ],
+   "words": [
+    3716,
+    2486
+   ]
+  },
+  "Marie Gluesenkamp Perez": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 0,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    14,
+    13
+   ],
+   "words": [
+    6094,
+    1052
+   ]
+  },
+  "Margaret Hassan": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 68,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 0.667
+    }
+   },
+   "packages": [
+    48,
+    47
+   ],
+   "words": [
+    5373,
+    5529
+   ]
+  },
+  "Maria Cantwell": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 55,
+     "gratuitous_cruelty": 25,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 26.667
+    }
+   },
+   "packages": [
+    30,
+    30
+   ],
+   "words": [
+    5071,
+    2938
+   ]
+  },
+  "Maria Salazar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    27,
+    27
+   ],
+   "words": [
+    3191,
+    5812
+   ]
+  },
+  "Mark Alford": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    31,
+    31
+   ],
+   "words": [
+    5936,
+    6149
+   ]
+  },
+  "Mark Pocan": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    42,
+    42
+   ],
+   "words": [
+    15269,
+    14316
+   ]
+  },
+  "Mark Takano": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    12,
+    11
+   ],
+   "words": [
+    2485,
+    4837
+   ]
+  },
+  "Marlin Stutzman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    17,
+    17
+   ],
+   "words": [
+    7036,
+    3287
+   ]
+  },
+  "Mark Harris": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 0,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    11,
+    10
+   ],
+   "words": [
+    1689,
+    1457
+   ]
+  },
+  "Mark Kelly": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    212,
+    212
+   ],
+   "words": [
+    24956,
+    35166
+   ]
+  },
+  "Mark Warner": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    338,
+    338
+   ],
+   "words": [
+    52928,
+    58069
+   ]
+  },
+  "Mary Scanlon": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    29,
+    29
+   ],
+   "words": [
+    4734,
+    2407
+   ]
+  },
+  "Marsha Blackburn": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 35,
+     "policy_conflict": 60,
+     "confidence": "medium",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 12.333
+    }
+   },
+   "packages": [
+    115,
+    115
+   ],
+   "words": [
+    15454,
+    13450
+   ]
+  },
+  "Max Miller": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 72,
+     "gratuitous_cruelty": 18,
+     "principled_dissent": 65,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 30.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 48,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 62,
+     "policy_conflict": 71,
+     "confidence": "high",
+     "antagonism": 18.667
+    }
+   },
+   "packages": [
+    26,
+    25
+   ],
+   "words": [
+    2297,
+    1399
+   ]
+  },
+  "Maxine Waters": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 72,
+     "gratuitous_cruelty": 28,
+     "principled_dissent": 45,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 35.0
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 65,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 72,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 27.333
+    }
+   },
+   "packages": [
+    265,
+    264
+   ],
+   "words": [
+    26266,
+    23225
+   ]
+  },
+  "Michael Bennet": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    146,
+    145
+   ],
+   "words": [
+    32131,
+    15256
+   ]
+  },
+  "Maxwell Frost": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    51,
+    51
+   ],
+   "words": [
+    8372,
+    7340
+   ]
+  },
+  "Mazie Hirono": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 42,
+     "gratuitous_cruelty": 18,
+     "principled_dissent": 65,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 20.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 12.0
+    }
+   },
+   "packages": [
+    172,
+    172
+   ],
+   "words": [
+    16345,
+    14156
+   ]
+  },
+  "Melanie Stansbury": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    25,
+    25
+   ],
+   "words": [
+    2999,
+    5144
+   ]
+  },
+  "Michael Turner": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    160,
+    160
+   ],
+   "words": [
+    31963,
+    37271
+   ]
+  },
+  "Michael Guest": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 50,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    13,
+    12
+   ],
+   "words": [
+    1340,
+    1185
+   ]
+  },
+  "Michael Lawler": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 13.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 40,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 60,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 16.667
+    }
+   },
+   "packages": [
+    204,
+    204
+   ],
+   "words": [
+    33182,
+    38144
+   ]
+  },
+  "Michael McCaul": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    230,
+    230
+   ],
+   "words": [
+    61700,
+    42705
+   ]
+  },
+  "Mike Flood": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    44,
+    44
+   ],
+   "words": [
+    3526,
+    10133
+   ]
+  },
+  "Mike Crapo": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "medium",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    11,
+    11
+   ],
+   "words": [
+    2533,
+    2384
+   ]
+  },
+  "Mike Collins": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 45,
+     "policy_conflict": 60,
+     "confidence": "medium",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 60,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    21,
+    20
+   ],
+   "words": [
+    3883,
+    2991
+   ]
+  },
+  "Mike Haridopolos": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 20,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    13,
+    12
+   ],
+   "words": [
+    3929,
+    8570
+   ]
+  },
+  "Mike Johnson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 45,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 5.333
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    1019,
+    1019
+   ],
+   "words": [
+    98979,
+    106492
+   ]
+  },
+  "Mike Kelly": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "medium",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 28,
+     "policy_conflict": 62,
+     "confidence": "medium",
+     "antagonism": 4.667
+    }
+   },
+   "packages": [
+    28,
+    28
+   ],
+   "words": [
+    8353,
+    9941
+   ]
+  },
+  "Mike Rogers": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 2.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 68,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    147,
+    147
+   ],
+   "words": [
+    61275,
+    66043
+   ]
+  },
+  "Mike Lee": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    160,
+    160
+   ],
+   "words": [
+    29445,
+    41408
+   ]
+  },
+  "Mike Quigley": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 70,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    156,
+    156
+   ],
+   "words": [
+    16695,
+    16381
+   ]
+  },
+  "Mike Rounds": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 2.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 55,
+     "policy_conflict": 48,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    126,
+    126
+   ],
+   "words": [
+    16064,
+    15375
+   ]
+  },
+  "Morgan McGarvey": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    12,
+    11
+   ],
+   "words": [
+    2242,
+    2500
+   ]
+  },
+  "Mitch McConnell": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 55,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    1878,
+    1877
+   ],
+   "words": [
+    137636,
+    149105
+   ]
+  },
+  "Nanette Barrag\u00e1n": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 80,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    27,
+    26
+   ],
+   "words": [
+    13578,
+    9448
+   ]
+  },
+  "Nancy Mace": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 75,
+     "gratuitous_cruelty": 35,
+     "principled_dissent": 55,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 36.667
+    }
+   },
+   "packages": [
+    219,
+    219
+   ],
+   "words": [
+    26859,
+    27048
+   ]
+  },
+  "Nancy Pelosi": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 58,
+     "policy_conflict": 45,
+     "confidence": "medium",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    2607,
+    2607
+   ],
+   "words": [
+    223129,
+    203370
+   ]
+  },
+  "Nick LaLota": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 28,
+     "policy_conflict": 42,
+     "confidence": "high",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 1,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 38,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    37,
+    36
+   ],
+   "words": [
+    1622,
+    1907
+   ]
+  },
+  "Nicole Malliotakis": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 30,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 13.333
+    }
+   },
+   "packages": [
+    69,
+    69
+   ],
+   "words": [
+    13167,
+    12877
+   ]
+  },
+  "Nikema Williams": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 40,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    32,
+    32
+   ],
+   "words": [
+    5197,
+    7148
+   ]
+  },
+  "Norma Torres": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 65,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    18,
+    17
+   ],
+   "words": [
+    2706,
+    2258
+   ]
+  },
+  "Pat Fallon": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 70,
+     "policy_conflict": 90,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    16,
+    15
+   ],
+   "words": [
+    8049,
+    2422
+   ]
+  },
+  "Pat Harrigan": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 15,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 30,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 23.333
+    }
+   },
+   "packages": [
+    5,
+    4
+   ],
+   "words": [
+    3770,
+    3514
+   ]
+  },
+  "Patrick Ryan": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 18.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    36,
+    36
+   ],
+   "words": [
+    5752,
+    4471
+   ]
+  },
+  "Patty Murray": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    58,
+    57
+   ],
+   "words": [
+    7264,
+    9062
+   ]
+  },
+  "Paul Gosar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 78,
+     "gratuitous_cruelty": 72,
+     "principled_dissent": 15,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 50.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 35,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 8.667
+    }
+   },
+   "packages": [
+    73,
+    73
+   ],
+   "words": [
+    3619,
+    5370
+   ]
+  },
+  "Peter Welch": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 78,
+     "policy_conflict": 74,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    74,
+    74
+   ],
+   "words": [
+    14064,
+    12526
+   ]
+  },
+  "Paul Tonko": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    3,
+    3
+   ],
+   "words": [
+    2335,
+    2978
+   ]
+  },
+  "Raja Krishnamoorthi": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    195,
+    194
+   ],
+   "words": [
+    24158,
+    22361
+   ]
+  },
+  "Pete Aguilar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    153,
+    153
+   ],
+   "words": [
+    15896,
+    15580
+   ]
+  },
+  "Pete Sessions": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 62,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 1,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 45,
+     "policy_conflict": 48,
+     "confidence": "high",
+     "antagonism": 6.0
+    }
+   },
+   "packages": [
+    44,
+    44
+   ],
+   "words": [
+    14355,
+    7506
+   ]
+  },
+  "Pramila Jayapal": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    357,
+    356
+   ],
+   "words": [
+    38131,
+    47187
+   ]
+  },
+  "Ralph Norman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 5.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 18,
+     "principled_dissent": 45,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 15.333
+    }
+   },
+   "packages": [
+    92,
+    92
+   ],
+   "words": [
+    17461,
+    7770
+   ]
+  },
+  "Rand Paul": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 80,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 13.333
+    }
+   },
+   "packages": [
+    580,
+    580
+   ],
+   "words": [
+    152717,
+    123315
+   ]
+  },
+  "Randy Fine": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 20,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 16.667
+    }
+   },
+   "packages": [
+    25,
+    25
+   ],
+   "words": [
+    1475,
+    3138
+   ]
+  },
+  "Raphael Warnock": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    237,
+    237
+   ],
+   "words": [
+    25917,
+    25674
+   ]
+  },
+  "Richard Durbin": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 7.333
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 65,
+     "policy_conflict": 71,
+     "confidence": "high",
+     "antagonism": 13.0
+    }
+   },
+   "packages": [
+    489,
+    488
+   ],
+   "words": [
+    53819,
+    69220
+   ]
+  },
+  "Raul Ruiz": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 80,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    32,
+    31
+   ],
+   "words": [
+    5552,
+    3909
+   ]
+  },
+  "Rashida Tlaib": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    199,
+    199
+   ],
+   "words": [
+    12928,
+    10583
+   ]
+  },
+  "Richard Blumenthal": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    603,
+    603
+   ],
+   "words": [
+    51080,
+    48408
+   ]
+  },
+  "Richard McCormick": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 15,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 78,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 5.333
+    }
+   },
+   "packages": [
+    52,
+    51
+   ],
+   "words": [
+    9285,
+    18407
+   ]
+  },
+  "Rick Scott": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 20,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 15.0
+    }
+   },
+   "packages": [
+    241,
+    240
+   ],
+   "words": [
+    35246,
+    31988
+   ]
+  },
+  "Richard Hudson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 42,
+     "gratuitous_cruelty": 28,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 23.333
+    }
+   },
+   "packages": [
+    17,
+    16
+   ],
+   "words": [
+    1270,
+    1054
+   ]
+  },
+  "Richard Neal": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    28,
+    27
+   ],
+   "words": [
+    1577,
+    1347
+   ]
+  },
+  "Ritchie Torres": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 45,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    54,
+    54
+   ],
+   "words": [
+    9100,
+    8442
+   ]
+  },
+  "Rick Larsen": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 40,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    10,
+    9
+   ],
+   "words": [
+    3932,
+    1475
+   ]
+  },
+  "Ro Khanna": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 7.667
+    }
+   },
+   "packages": [
+    409,
+    409
+   ],
+   "words": [
+    62188,
+    60158
+   ]
+  },
+  "Robert Garcia": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 9.333
+    }
+   },
+   "packages": [
+    140,
+    139
+   ],
+   "words": [
+    17837,
+    21570
+   ]
+  },
+  "Roger Marshall": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 15,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 9.333
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 7.667
+    }
+   },
+   "packages": [
+    67,
+    66
+   ],
+   "words": [
+    4547,
+    8940
+   ]
+  },
+  "Roger Wicker": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 62,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 8.333
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 3,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 45,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 2.333
+    }
+   },
+   "packages": [
+    51,
+    50
+   ],
+   "words": [
+    5173,
+    4758
+   ]
+  },
+  "Robert Menendez": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 4.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 78,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 12.0
+    }
+   },
+   "packages": [
+    167,
+    167
+   ],
+   "words": [
+    18502,
+    19817
+   ]
+  },
+  "Robert Wittman": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 0,
+     "policy_conflict": 0,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    5,
+    5
+   ],
+   "words": [
+    3572,
+    5817
+   ]
+  },
+  "Rosa DeLauro": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 55,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 2.667
+    }
+   },
+   "packages": [
+    34,
+    34
+   ],
+   "words": [
+    4699,
+    6324
+   ]
+  },
+  "Ron Wyden": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 68,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    83,
+    83
+   ],
+   "words": [
+    9191,
+    7089
+   ]
+  },
+  "Ronny Jackson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 42,
+     "gratuitous_cruelty": 28,
+     "principled_dissent": 15,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 23.333
+    }
+   },
+   "packages": [
+    67,
+    66
+   ],
+   "words": [
+    9233,
+    7586
+   ]
+  },
+  "Ron Johnson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 45,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 35,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 21.667
+    }
+   },
+   "packages": [
+    409,
+    408
+   ],
+   "words": [
+    54792,
+    64847
+   ]
+  },
+  "Ruben Gallego": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 8.333
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 78,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 14.333
+    }
+   },
+   "packages": [
+    101,
+    100
+   ],
+   "words": [
+    12964,
+    17427
+   ]
+  },
+  "Russell Fry": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 20,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    5,
+    4
+   ],
+   "words": [
+    1168,
+    1158
+   ]
+  },
+  "Ryan Zinke": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 42,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 14.0
+    }
+   },
+   "packages": [
+    35,
+    35
+   ],
+   "words": [
+    4679,
+    5287
+   ]
+  },
+  "Ryan Mackenzie": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 40,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    4,
+    4
+   ],
+   "words": [
+    1209,
+    1445
+   ]
+  },
+  "Sam Graves": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    4,
+    4
+   ],
+   "words": [
+    1373,
+    3883
+   ]
+  },
+  "Sam Liccardo": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    14,
+    13
+   ],
+   "words": [
+    3240,
+    2729
+   ]
+  },
+  "Sara Jacobs": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    24,
+    24
+   ],
+   "words": [
+    1917,
+    3476
+   ]
+  },
+  "Sarah Elfreth": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    4,
+    4
+   ],
+   "words": [
+    4960,
+    1009
+   ]
+  },
+  "Scott Perry": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 45,
+     "policy_conflict": 62,
+     "confidence": "medium",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 68,
+     "policy_conflict": 71,
+     "confidence": "high",
+     "antagonism": 5.667
+    }
+   },
+   "packages": [
+    56,
+    55
+   ],
+   "words": [
+    10674,
+    8390
+   ]
+  },
+  "Sean Casten": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 50,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    25,
+    25
+   ],
+   "words": [
+    17085,
+    15874
+   ]
+  },
+  "Scott Peters": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    8,
+    7
+   ],
+   "words": [
+    1230,
+    1178
+   ]
+  },
+  "Sharice Davids": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    11,
+    11
+   ],
+   "words": [
+    1838,
+    1479
+   ]
+  },
+  "Seth Moulton": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 10,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    152,
+    152
+   ],
+   "words": [
+    25405,
+    20157
+   ]
+  },
+  "Seth Magaziner": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 45,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 3.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 68,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.667
+    }
+   },
+   "packages": [
+    13,
+    12
+   ],
+   "words": [
+    2318,
+    4691
+   ]
+  },
+  "Sheldon Whitehouse": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 7.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 68,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 11.333
+    }
+   },
+   "packages": [
+    114,
+    113
+   ],
+   "words": [
+    16948,
+    16542
+   ]
+  },
+  "Shelley Capito": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 50,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    41,
+    41
+   ],
+   "words": [
+    7744,
+    3625
+   ]
+  },
+  "Steve Cohen": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 16.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 40,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 70,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 20.0
+    }
+   },
+   "packages": [
+    155,
+    154
+   ],
+   "words": [
+    22195,
+    31449
+   ]
+  },
+  "Steny Hoyer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 4.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 35,
+     "policy_conflict": 48,
+     "confidence": "medium",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    128,
+    128
+   ],
+   "words": [
+    20231,
+    20630
+   ]
+  },
+  "Steve Daines": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 35,
+     "confidence": "medium",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 10,
+     "policy_conflict": 55,
+     "confidence": "medium",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    44,
+    44
+   ],
+   "words": [
+    6267,
+    4659
+   ]
+  },
+  "Stephen Lynch": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 45,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 13.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 55,
+     "policy_conflict": 50,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    39,
+    38
+   ],
+   "words": [
+    3041,
+    3749
+   ]
+  },
+  "Steve Scalise": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 35,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 7.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 40,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 3.333
+    }
+   },
+   "packages": [
+    277,
+    276
+   ],
+   "words": [
+    47735,
+    52899
+   ]
+  },
+  "Steve Womack": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 35,
+     "confidence": "medium",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 30,
+     "policy_conflict": 40,
+     "confidence": "medium",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    26,
+    25
+   ],
+   "words": [
+    1613,
+    1306
+   ]
+  },
+  "Steven Horsford": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 15,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    21,
+    21
+   ],
+   "words": [
+    1901,
+    6202
+   ]
+  },
+  "Suhas Subramanyam": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    40,
+    40
+   ],
+   "words": [
+    7639,
+    8044
+   ]
+  },
+  "Susan Collins": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 82,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    312,
+    311
+   ],
+   "words": [
+    17422,
+    28683
+   ]
+  },
+  "Summer Lee": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 65,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    12,
+    12
+   ],
+   "words": [
+    4040,
+    1100
+   ]
+  },
+  "Sylvia Garcia": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 85,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 90,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    37,
+    36
+   ],
+   "words": [
+    3541,
+    7262
+   ]
+  },
+  "Sydney Kamlager-Dove": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 42,
+     "gratuitous_cruelty": 28,
+     "principled_dissent": 75,
+     "policy_conflict": 82,
+     "confidence": "high",
+     "antagonism": 23.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 68,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 10.0
+    }
+   },
+   "packages": [
+    14,
+    14
+   ],
+   "words": [
+    1137,
+    1618
+   ]
+  },
+  "Suzan DelBene": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 78,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    14,
+    14
+   ],
+   "words": [
+    2346,
+    2297
+   ]
+  },
+  "Suzanne Bonamici": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 65,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    10,
+    9
+   ],
+   "words": [
+    1912,
+    2423
+   ]
+  },
+  "Tammy Baldwin": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "low",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    47,
+    46
+   ],
+   "words": [
+    12265,
+    6868
+   ]
+  },
+  "Tammy Duckworth": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 65,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 11.667
+    }
+   },
+   "packages": [
+    130,
+    130
+   ],
+   "words": [
+    23960,
+    20655
+   ]
+  },
+  "Thom Tillis": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 68,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 10.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 58,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 13.333
+    }
+   },
+   "packages": [
+    340,
+    340
+   ],
+   "words": [
+    24455,
+    24810
+   ]
+  },
+  "Ted Lieu": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 12,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 45,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 5.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 52,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 3.667
+    }
+   },
+   "packages": [
+    180,
+    179
+   ],
+   "words": [
+    20185,
+    16941
+   ]
+  },
+  "Terri Sewell": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 8,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    27,
+    27
+   ],
+   "words": [
+    2050,
+    3900
+   ]
+  },
+  "Ted Cruz": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 50,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    1111,
+    1111
+   ],
+   "words": [
+    157645,
+    170864
+   ]
+  },
+  "Thomas Kean": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 25,
+     "confidence": "medium",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 60,
+     "policy_conflict": 40,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    10,
+    9
+   ],
+   "words": [
+    2830,
+    1861
+   ]
+  },
+  "Thomas Massie": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 8.333
+    },
+    "B": {
+     "reporter_hostility": 3,
+     "personal_contempt": 22,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 71,
+     "confidence": "high",
+     "antagonism": 11.0
+    }
+   },
+   "packages": [
+    184,
+    184
+   ],
+   "words": [
+    13730,
+    14454
+   ]
+  },
+  "Thomas Suozzi": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 2,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.667
+    }
+   },
+   "packages": [
+    49,
+    49
+   ],
+   "words": [
+    10172,
+    9223
+   ]
+  },
+  "Tim Kaine": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    272,
+    272
+   ],
+   "words": [
+    47628,
+    64505
+   ]
+  },
+  "Tim Burchett": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 7.333
+    },
+    "B": {
+     "reporter_hostility": 8,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 45,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 16.0
+    }
+   },
+   "packages": [
+    191,
+    191
+   ],
+   "words": [
+    25534,
+    17984
+   ]
+  },
+  "Tim Scott": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 32,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 45,
+     "policy_conflict": 68,
+     "confidence": "medium",
+     "antagonism": 15.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 52,
+     "policy_conflict": 62,
+     "confidence": "medium",
+     "antagonism": 8.667
+    }
+   },
+   "packages": [
+    342,
+    342
+   ],
+   "words": [
+    44363,
+    43968
+   ]
+  },
+  "Timothy Kennedy": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 65,
+     "gratuitous_cruelty": 55,
+     "principled_dissent": 20,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 40.0
+    }
+   },
+   "packages": [
+    4,
+    4
+   ],
+   "words": [
+    1506,
+    1721
+   ]
+  },
+  "Tina Smith": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    61,
+    61
+   ],
+   "words": [
+    8154,
+    9111
+   ]
+  },
+  "Tim Sheehy": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 5,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 65,
+     "confidence": "medium",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 70,
+     "confidence": "medium",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    16,
+    16
+   ],
+   "words": [
+    1757,
+    2133
+   ]
+  },
+  "Tom Cole": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 58,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    63,
+    62
+   ],
+   "words": [
+    27422,
+    30860
+   ]
+  },
+  "Tom Cotton": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 10,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 20,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 16.667
+    }
+   },
+   "packages": [
+    308,
+    307
+   ],
+   "words": [
+    63793,
+    69070
+   ]
+  },
+  "Tom McClintock": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 40,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    46,
+    46
+   ],
+   "words": [
+    15456,
+    27755
+   ]
+  },
+  "Todd Young": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 45,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 55,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 1.667
+    }
+   },
+   "packages": [
+    45,
+    44
+   ],
+   "words": [
+    6058,
+    2471
+   ]
+  },
+  "Troy Nehls": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 15,
+     "principled_dissent": 25,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 19.333
+    },
+    "B": {
+     "reporter_hostility": 12,
+     "personal_contempt": 40,
+     "gratuitous_cruelty": 20,
+     "principled_dissent": 15,
+     "policy_conflict": 55,
+     "confidence": "high",
+     "antagonism": 24.0
+    }
+   },
+   "packages": [
+    66,
+    66
+   ],
+   "words": [
+    4639,
+    4038
+   ]
+  },
+  "Tommy Tuberville": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 12,
+     "principled_dissent": 25,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 18.333
+    },
+    "B": {
+     "reporter_hostility": 5,
+     "personal_contempt": 28,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 20,
+     "policy_conflict": 62,
+     "confidence": "high",
+     "antagonism": 13.667
+    }
+   },
+   "packages": [
+    128,
+    128
+   ],
+   "words": [
+    5887,
+    5903
+   ]
+  },
+  "Troy Carter": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 15,
+     "policy_conflict": 25,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 35,
+     "policy_conflict": 40,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    16,
+    15
+   ],
+   "words": [
+    2056,
+    2521
+   ]
+  },
+  "Tom Emmer": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 2,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 25,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 7.333
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 3,
+     "principled_dissent": 20,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 7.0
+    }
+   },
+   "packages": [
+    40,
+    39
+   ],
+   "words": [
+    6194,
+    1986
+   ]
+  },
+  "Vicente Gonzalez": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 45,
+     "policy_conflict": 35,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 40,
+     "policy_conflict": 50,
+     "confidence": "high",
+     "antagonism": 6.667
+    }
+   },
+   "packages": [
+    37,
+    36
+   ],
+   "words": [
+    7188,
+    4001
+   ]
+  },
+  "Veronica Escobar": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 25,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 75,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 10.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 20,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 70,
+     "policy_conflict": 75,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    78,
+    77
+   ],
+   "words": [
+    11082,
+    12359
+   ]
+  },
+  "Victoria Spartz": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 6.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 8,
+     "principled_dissent": 75,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 8.667
+    }
+   },
+   "packages": [
+    32,
+    32
+   ],
+   "words": [
+    7019,
+    3962
+   ]
+  },
+  "Zoe Lofgren": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 65,
+     "confidence": "high",
+     "antagonism": 0.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 0,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 70,
+     "policy_conflict": 60,
+     "confidence": "high",
+     "antagonism": 0.0
+    }
+   },
+   "packages": [
+    251,
+    251
+   ],
+   "words": [
+    26409,
+    26122
+   ]
+  },
+  "Warren Davidson": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 70,
+     "confidence": "high",
+     "antagonism": 1.667
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 80,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    }
+   },
+   "packages": [
+    51,
+    51
+   ],
+   "words": [
+    11706,
+    12078
+   ]
+  },
+  "Wesley Bell": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 8,
+     "personal_contempt": 5,
+     "gratuitous_cruelty": 2,
+     "principled_dissent": 72,
+     "policy_conflict": 68,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 2,
+     "personal_contempt": 18,
+     "gratuitous_cruelty": 5,
+     "principled_dissent": 65,
+     "policy_conflict": 72,
+     "confidence": "high",
+     "antagonism": 8.333
+    }
+   },
+   "packages": [
+    16,
+    16
+   ],
+   "words": [
+    3887,
+    2560
+   ]
+  },
+  "Yassamin Ansari": {
+   "halves": {
+    "A": {
+     "reporter_hostility": 0,
+     "personal_contempt": 15,
+     "gratuitous_cruelty": 0,
+     "principled_dissent": 75,
+     "policy_conflict": 85,
+     "confidence": "high",
+     "antagonism": 5.0
+    },
+    "B": {
+     "reporter_hostility": 0,
+     "personal_contempt": 35,
+     "gratuitous_cruelty": 10,
+     "principled_dissent": 70,
+     "policy_conflict": 80,
+     "confidence": "high",
+     "antagonism": 15.0
+    }
+   },
+   "packages": [
+    26,
+    25
+   ],
+   "words": [
+    5240,
+    4577
+   ]
+  }
+ },
+ "errors": {}
+}

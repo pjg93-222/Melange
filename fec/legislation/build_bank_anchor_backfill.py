@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Restore eleven adjudicated association anchors to the primacy act universe.
+"""Restore fifteen adjudicated association anchors to the primacy act universe.
 
 This display-only producer consumes pinned official GovInfo BillStatus XML,
 resolves sponsors and cosponsors against the live 533-member roster, and
@@ -12,6 +12,7 @@ publishes:
   member links.
 
 Extended 2026-08-10 to crypto/fintech association anchors; historical filename retained.
+Extended 2026-10-07 with four telecom_primary association anchors (NCTA, USTelecom).
 Departed members are recorded in the receipt and skipped from memberships.
 The official rank authority and rank-scoring workbook are never modified.
 """
@@ -43,6 +44,8 @@ RECEIPT = ROOT / 'data' / 'legislation' / 'bank_anchor_reconciliation.json'
 RANKS = ROOT / 'ranks_python.json'
 
 COLLECTION_RECOVERY = 'bank-anchor-backfill'
+# An ANCHORS entry may carry its own 'tagged' date; the original anchors do not.
+DEFAULT_TAGGED = '2026-08-10'
 MEMBERSHIP_SCHEMA = 'bank-anchor-membership-v1'
 
 CLAWBACK_RATIONALE = (
@@ -136,12 +139,45 @@ ANCHORS = {
         'areas': ['Payments'],
         'rationale': 'AFC-backed EWA framework reintroduction',
     },
+    ('H.R.3557', '118'): {
+        'xml': 'BILLSTATUS-118hr3557.xml',
+        'class': 'telecom_primary',
+        'authority': 'L1:association-position',
+        'areas': ['Technology & Emerging'],
+        'rationale': 'NCTA and USTelecom-backed broadband permitting reform (American Broadband Deployment Act of 2023)',
+        'tagged': '2026-10-07',
+    },
+    ('H.R.2289', '119'): {
+        'xml': 'BILLSTATUS-119hr2289.xml',
+        'class': 'telecom_primary',
+        'authority': 'L1:association-position',
+        'areas': ['Technology & Emerging'],
+        'rationale': 'NCTA-led trade-association coalition letter urging floor action on the American Broadband Deployment Act of 2025',
+        'tagged': '2026-10-07',
+    },
+    ('S.3587', '117'): {
+        'xml': 'BILLSTATUS-117s3587.xml',
+        'class': 'telecom_primary',
+        'authority': 'L1:association-position',
+        'areas': ['Technology & Emerging'],
+        'rationale': 'NCTA-supported USDA ReConnect broadband funding (Connect Unserved Americans Act)',
+        'tagged': '2026-10-07',
+    },
+    ('S.4821', '118'): {
+        'xml': 'BILLSTATUS-118s4821.xml',
+        'class': 'telecom_primary',
+        'authority': 'L1:association-position',
+        'areas': ['Technology & Emerging'],
+        'rationale': 'USTelecom-endorsed faster federal-land broadband permits',
+        'tagged': '2026-10-07',
+    },
 }
 
 ACT_WEIGHT = {
     'bank_primary': 0.15,
     'crypto_primary': 0.15,
     'fintech': 0.15,
+    'telecom_primary': 0.15,
 }
 ROLE_WEIGHT = {'sponsor': 1.0, 'original': 0.5, 'cosponsor': 0.25}
 
@@ -376,7 +412,7 @@ def build():
             'areas': areas,
             'roster_role_weight': role_credit,
             'member_links': len(resolved_people),
-            'tagged': '2026-08-10',
+            'tagged': config.get('tagged', DEFAULT_TAGGED),
             'collection_recovery': COLLECTION_RECOVERY,
         })
 

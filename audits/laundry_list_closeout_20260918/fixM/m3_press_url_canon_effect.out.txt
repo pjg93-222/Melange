@@ -1,0 +1,170 @@
+============================================================================================================
+M3  PRESS_URL_CANON=2 -- effect of the shipped release_url_key on LIVE
+============================================================================================================
+
+load_tone_rows: PRESS_URL_CANON=1 -> 2679 rows | =2 -> 2667 rows
+  canon=1 ledger: read 2679 = returned 2679 + official_mention 0 + no_url 0 + exact_url_turn 0 + duplicate_url_form 0   (closes: True)
+  canon=2 ledger: read 2679 = returned 2667 + official_mention 0 + no_url 0 + exact_url_turn 0 + duplicate_url_form 12   (closes: True)
+
+------------------------------------------------------------------------------------------------------------
+A.  EVERY MERGE UNDER THE NEW KEY (12) -- complete over-merge census
+------------------------------------------------------------------------------------------------------------
+  Cynthia Lummis         NA           KNOWN (one of the 12)
+      title : Leagues, credit unions connect with policymakers before Congress returns home for election
+      kept  : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+      dropped: https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571
+      release key: https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+  Gabe Amo               NA           KNOWN (one of the 12)
+      title : Leagues, credit unions connect with policymakers before Congress returns home for election
+      kept  : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+      dropped: https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380
+      release key: https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+  Jon Husted             1/12/2026    KNOWN (one of the 12)
+      title : Husted backs bill blocking Fed from issuing a Central Bank Digital Currency
+      kept  : https://www.husted.senate.gov/media/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency
+      dropped: https://www.husted.senate.gov/press-releases/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency
+      release key: https://husted.senate.gov/husted-backs-bill-blocking-fed-from-issuing-a-central-bank-digital-currency
+  Juan Vargas            9/30/2022    *** ADDITIONAL ***
+      title : House Passes Rep. Vargas’ Credit Union Board Modernization Act
+      kept  : https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+      dropped: https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+      release key: https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act
+  Katie Britt            3/16/2023    KNOWN (one of the 12)
+      title : SENATOR KATIE BRITT ON SVB FAILURE: ‘ALABAMIANS DON’T JUST WANT ANSWERS, THEY DESERVE ANSWERS’
+      kept  : https://www.britt.senate.gov/news/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers
+      dropped: https://www.britt.senate.gov/press-releases/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers
+      release key: https://britt.senate.gov/senator-katie-britt-on-svb-failure-alabamians-dont-just-want-answers-they-deserve-answers
+  Katie Britt            11/15/2023   KNOWN (one of the 12)
+      title : U.S. Senator Katie Britt: Basel III Endgame Proposal ‘Undermines Proven Strength of U.S. Banking Sec
+      kept  : https://www.britt.senate.gov/news/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector
+      dropped: https://www.britt.senate.gov/press-releases/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector
+      release key: https://britt.senate.gov/u-s-senator-katie-britt-basel-iii-endgame-proposal-undermines-proven-strength-of-u-s-banking-sector
+  Katie Britt            2/6/2024     KNOWN (one of the 12)
+      title : U.S. Senators Katie Britt, Marco Rubio, Maggie Hassan, Colleagues Urge Biden Administration to Stren
+      kept  : https://www.britt.senate.gov/news/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement
+      dropped: https://www.britt.senate.gov/press-releases/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement
+      release key: https://britt.senate.gov/u-s-senators-katie-britt-marco-rubio-maggie-hassan-colleagues-urge-biden-administration-to-strengthen-iranian-sanctions-enforcement
+  Mike Crapo             NA           KNOWN (one of the 12)
+      title : ncua borrowing authority
+      kept  : https://www.crapo.senate.gov/media/videos/watch/fdic/ncua-borrowing-authority
+      dropped: https://www.crapo.senate.gov/news/videos/watch/2009/05/05/fdic/ncua-borrowing-authority
+      release key: https://crapo.senate.gov/ncua-borrowing-authority
+  Mike Crapo             NA           KNOWN (one of the 12)
+      title : small banks and credit unions need relief
+      kept  : https://www.crapo.senate.gov/media/videos/watch/small-banks-and-credit-unions-need-relief
+      dropped: https://www.crapo.senate.gov/news/videos/watch/2018/03/06/small-banks-and-credit-unions-need-relief
+      release key: https://crapo.senate.gov/small-banks-and-credit-unions-need-relief
+  Patty Murray           NA           KNOWN (one of the 12)
+      title : Leagues, credit unions connect with policymakers before Congress returns home for election
+      kept  : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+      dropped: https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111
+      release key: https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+  Roger Marshall         8/11/2022    KNOWN (one of the 12)
+      title : sen marshall in washington examiner credit card swipe fees are hurting consumers
+      kept  : https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+      dropped: https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+      release key: https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers
+  Seth Magaziner         NA           KNOWN (one of the 12)
+      title : Leagues, credit unions connect with policymakers before Congress returns home for election
+      kept  : https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+      dropped: https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223
+      release key: https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+
+  merges inside the 12 known groups: 11   ADDITIONAL: 1
+
+rows that no longer reach build_media_blend: 12
+
+------------------------------------------------------------------------------------------------------------
+B.  DISPOSITION OF EACH DROPPED ROW AND OF THE ROW THAT SURVIVES IN ITS PLACE
+------------------------------------------------------------------------------------------------------------
+  Cynthia Lummis         Leagues, credit unions connect with policymakers before Congress returns h
+    KEPT    used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+    DROPPED used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+           removes +0.021000 from press[General Credit Union][Cynthia Lummis]  (row-535 weight NONE -- column X, outside E:W, reaches no pillar)
+  Gabe Amo               Leagues, credit unions connect with policymakers before Congress returns h
+    KEPT    used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+    DROPPED used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+           removes +0.021000 from press[General Credit Union][Gabe Amo]  (row-535 weight NONE -- column X, outside E:W, reaches no pillar)
+  Jon Husted             Husted backs bill blocking Fed from issuing a Central Bank Digital Currenc
+    KEPT    zero-intensity     basis=body-confirms-declared cats=['Technology & Emerging Issues']  api_target=no fulltext=YES
+    DROPPED zero-intensity     basis=body-confirms-declared cats=['Technology & Emerging Issues']  api_target=no fulltext=YES
+  Juan Vargas            House Passes Rep. Vargas’ Credit Union Board Modernization Act
+    KEPT    used               basis=target                 cats=['General Credit Union']  api_target=YES fulltext=YES
+    DROPPED used               basis=target                 cats=['General Credit Union']  api_target=YES fulltext=YES
+           removes +0.011022 from press[General Credit Union][Juan Vargas]  (row-535 weight NONE -- column X, outside E:W, reaches no pillar)
+  Katie Britt            SENATOR KATIE BRITT ON SVB FAILURE: ‘ALABAMIANS DON’T JUST WANT ANSWERS, T
+    KEPT    neutral-zeroed     basis=body-confirms-declared cats=['Examination & Supervision']  api_target=no fulltext=YES
+    DROPPED neutral-zeroed     basis=body-confirms-declared cats=['Examination & Supervision']  api_target=no fulltext=YES
+  Katie Britt            U.S. Senator Katie Britt: Basel III Endgame Proposal ‘Undermines Proven St
+    KEPT    zero-intensity     basis=body-confirms-declared cats=['Examination & Supervision', 'Credit Union Capital Requirements', 'Member Business Lending', 'Mortgage Lending & Housing']  api_target=no fulltext=YES
+    DROPPED zero-intensity     basis=body-confirms-declared cats=['Examination & Supervision', 'Credit Union Capital Requirements', 'Member Business Lending', 'Mortgage Lending & Housing']  api_target=no fulltext=YES
+  Katie Britt            U.S. Senators Katie Britt, Marco Rubio, Maggie Hassan, Colleagues Urge Bid
+    KEPT    neutral-zeroed     basis=no-policy-domain       cats=[]  api_target=no fulltext=YES
+    DROPPED neutral-zeroed     basis=no-policy-domain       cats=[]  api_target=no fulltext=YES
+  Mike Crapo             ncua borrowing authority
+    KEPT    zero-intensity     basis=title                  cats=['Examination & Supervision']  api_target=no fulltext=no
+    DROPPED zero-intensity     basis=title                  cats=['Examination & Supervision']  api_target=no fulltext=no
+  Mike Crapo             small banks and credit unions need relief
+    KEPT    used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=no
+    DROPPED used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=no
+           removes +0.030000 from press[General Credit Union][Mike Crapo]  (row-535 weight NONE -- column X, outside E:W, reaches no pillar)
+  Patty Murray           Leagues, credit unions connect with policymakers before Congress returns h
+    KEPT    used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+    DROPPED used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+           removes +0.021000 from press[General Credit Union][Patty Murray]  (row-535 weight NONE -- column X, outside E:W, reaches no pillar)
+  Roger Marshall         sen marshall in washington examiner credit card swipe fees are hurting con
+    KEPT    used               basis=title                  cats=['Interchange']  api_target=no fulltext=YES
+    DROPPED used               basis=title                  cats=['Interchange']  api_target=no fulltext=YES
+           removes -0.003387 from press[Interchange][Roger Marshall]  (row-535 weight 0.3)
+  Seth Magaziner         Leagues, credit unions connect with policymakers before Congress returns h
+    KEPT    used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+    DROPPED used               basis=title                  cats=['General Credit Union']  api_target=no fulltext=YES
+           removes +0.021000 from press[General Credit Union][Seth Magaziner]  (row-535 weight NONE -- column X, outside E:W, reaches no pillar)
+
+------------------------------------------------------------------------------------------------------------
+C.  PRESS-PILLAR MOVEMENT
+------------------------------------------------------------------------------------------------------------
+  press-component cells that change: 7
+    General Credit Union                   Cynthia Lummis         -0.021000   weight=NONE (col X)
+    General Credit Union                   Gabe Amo               -0.021000   weight=NONE (col X)
+    General Credit Union                   Juan Vargas            -0.011022   weight=NONE (col X)
+    General Credit Union                   Mike Crapo             -0.030000   weight=NONE (col X)
+    General Credit Union                   Patty Murray           -0.021000   weight=NONE (col X)
+    General Credit Union                   Seth Magaziner         -0.021000   weight=NONE (col X)
+    Interchange                            Roger Marshall         +0.003387   weight=0.3
+
+  members whose PRESS PILLAR moves (a weighted, in-range column changes): 1
+    Roger Marshall         contributing tone rows 77 -> 76   |weighted delta| 0.001016
+
+  members whose only affected column is 'General Credit Union' (col X, no weight):
+    Cynthia Lummis         contributing tone rows 27 -> 26   press pillar UNCHANGED
+    Gabe Amo               contributing tone rows 6 -> 5   press pillar UNCHANGED
+    Juan Vargas            contributing tone rows 14 -> 13   press pillar UNCHANGED
+    Mike Crapo             contributing tone rows 40 -> 38   press pillar UNCHANGED
+    Patty Murray           contributing tone rows 4 -> 3   press pillar UNCHANGED
+    Seth Magaziner         contributing tone rows 6 -> 5   press pillar UNCHANGED
+
+------------------------------------------------------------------------------------------------------------
+D.  OTHER CALLERS OF load_tone_rows (row-set delta only; no key they use changes)
+------------------------------------------------------------------------------------------------------------
+    fec/audit/audit_full.py:506                          sees 2667 rows instead of 2679
+    fec/members/member_reference_layer.py:34             sees 2667 rows instead of 2679
+    fec/network/press_engagement_layer.py:25             sees 2667 rows instead of 2679
+    fec/network/press_hcoi.py:17                         sees 2667 rows instead of 2679
+    fec/stance/press_stance_stack.py:23 (LIVE only)      sees 2667 rows instead of 2679
+    fec/stance/build_media_blend.py:301                  sees 2667 rows instead of 2679
+    fec/collect/build_press_engine_feed.py has its OWN turn_key (line 317) built on
+    canonical_url(keep_fragment=False) -- untouched, so the collector is unchanged.
+
+------------------------------------------------------------------------------------------------------------
+E.  DOES THE REMOVED ROW MOVE A CATEGORY EXTREMUM?  (normalize_signed_extrema rescales
+    a whole column when its pmax/nmax moves, so this decides one cell vs one column)
+------------------------------------------------------------------------------------------------------------
+  General Credit Union                   members 175 | pmax 1.324023->1.324023  nmax 0.022783->0.022783  | extremum moved: no
+      normalised values that change: 6 of 175  ['Cynthia Lummis', 'Gabe Amo', 'Juan Vargas', 'Mike Crapo', 'Patty Murray', 'Seth Magaziner']
+       {"extremum_moved": false, "normalised_changed": 6}
+  Interchange                            members 18 | pmax 0.266014->0.266014  nmax 0.852526->0.852526  | extremum moved: no
+      normalised values that change: 1 of 18  ['Roger Marshall']
+       {"extremum_moved": false, "normalised_changed": 1}
+
+DONE M3

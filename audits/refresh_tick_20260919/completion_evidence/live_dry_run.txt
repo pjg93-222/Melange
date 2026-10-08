@@ -1,0 +1,52 @@
+REFRESH TICK — DRY RUN (no locks, no writes, no launches)
+root: C:\Users\pgoff\OneDrive\Desktop\Melange Systems
+due now: 23 of 23 collect step(s)
+  DUE      CREC floor speeches            state NEVER
+  DUE      CHRG finance hearings          state NEVER
+  DUE      Congress.gov bill discovery    state NEVER
+  DUE      Official bill evidence and aut state NEVER
+  DUE      FEC source money refresh       state NEVER
+  DUE      Congress rollcall source refre state NEVER
+  DUE      Congress.gov bill repository   state NEVER
+  DUE      GovInfo BILLSTATUS bulk refres state NEVER
+  DUE      interviews: CNN (14d)          state NEVER
+  DUE      interviews: MTP                state NEVER
+  DUE      interviews: CBS                state NEVER
+  DUE      interviews: ABC                state NEVER
+  DUE      interviews: PBS (21d)          state NEVER
+  DUE      interviews: NPR (14d)          state NEVER
+  DUE      interviews: Fox archive audit  state NEVER
+  DUE      interviews: MS NOW             state NEVER
+  DUE      interviews: Washington Journal state NEVER
+  DUE      Wikipedia biographies (full ro state NEVER
+  DUE      press delta refresh            state NEVER
+  DUE      press intake audit             state NEVER
+  DUE      press engine feed              state NEVER
+  DUE      fold promoted press runs       state NEVER
+  DUE      press zero-row review          state NEVER
+compute wanted: True (evidence is not currently publishable (CREC floor speeches: has never succeeded))
+eligible to publish: False
+  BLOCKER CREC floor speeches            has never succeeded
+  BLOCKER CHRG finance hearings          has never succeeded
+  BLOCKER Congress.gov bill discovery    has never succeeded
+  BLOCKER Official bill evidence and aut has never succeeded
+  BLOCKER FEC source money refresh       has never succeeded
+  BLOCKER Congress rollcall source refre has never succeeded
+  BLOCKER Congress.gov bill repository   has never succeeded
+  BLOCKER GovInfo BILLSTATUS bulk refres has never succeeded
+  BLOCKER interviews: CNN (14d)          has never succeeded
+  BLOCKER interviews: MTP                has never succeeded
+  BLOCKER interviews: CBS                has never succeeded
+  BLOCKER interviews: ABC                has never succeeded
+  BLOCKER interviews: PBS (21d)          has never succeeded
+  BLOCKER interviews: NPR (14d)          has never succeeded
+  BLOCKER interviews: Fox archive audit  has never succeeded
+  BLOCKER interviews: MS NOW             has never succeeded
+  BLOCKER interviews: Washington Journal has never succeeded
+  BLOCKER Wikipedia biographies (full ro has never succeeded
+  BLOCKER press delta refresh            has never succeeded
+  BLOCKER press intake audit             has never succeeded
+  BLOCKER press engine feed              has never succeeded
+  BLOCKER fold promoted press runs       has never succeeded
+last publication: never
+last tick: never

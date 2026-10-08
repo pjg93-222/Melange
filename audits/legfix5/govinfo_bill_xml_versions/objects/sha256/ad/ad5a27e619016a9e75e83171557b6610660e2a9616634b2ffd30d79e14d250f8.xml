@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HC80316102B0B4DCEB20F8002A6F304D5" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2328 IH: Community Health Investment, Modernization, and Excellence Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-04-15</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2328</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190415">April 15, 2019</action-date><action-desc><sponsor name-id="O000171">Mr. O'Halleran</sponsor> (for himself and <cosponsor name-id="S001196">Ms. Stefanik</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To reauthorize and extend funding for community health centers and the National Health Service
+			 Corps.</official-title></form>
+	<legis-body id="H8B4EE873E41449E4A92ACC3800E68DB8" style="OLC">
+ <section id="H6F898829B65A4CD1888E0314D5D9CFE4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Community Health Investment, Modernization, and Excellence Act of 2019</short-title></quote>.</text> </section><section id="HA19704274EDE42898827B8D15DAD644D"><enum>2.</enum><header>Extension of funding for community health centers and National Health Service Corps</header><text display-inline="no-display-inline">Section 10503 of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/254b-2">42 U.S.C. 254b–2</external-xref>) is amended—</text>
+ <paragraph id="H318BCFD3BA1D4AC7ABDBC65CDFCC5AFF"><enum>(1)</enum><text>in subsection (b)(1)—</text> <subparagraph id="H8B93F7491B9D42D6A2FBF09BB41DBB63"><enum>(A)</enum><text>in subparagraph (E), by striking <quote>and</quote> at the end;</text>
+ </subparagraph><subparagraph id="H495DA8723EA64EC19A5F36A5F8660F45"><enum>(B)</enum><text>in subparagraph (F), by striking the period at the end and inserting <quote>; and</quote>; and</text> </subparagraph><subparagraph id="HE71C9ED269C34AA39D0135433489CDD1"><enum>(C)</enum><text>by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="H028041EF4B2147D98D85F9A93C760D1D" style="OLC">
+ <subparagraph id="H346522F30EA74D5BAAD86C7DC5DB2235"><enum>(G)</enum><text display-inline="yes-display-inline">for fiscal year 2020, $4,200,000,000;</text> </subparagraph><subparagraph id="H5513C5F47D60477B87C26B310466D8E9"><enum>(H)</enum><text display-inline="yes-display-inline">for fiscal year 2021, $4,400,000,000;</text>
+ </subparagraph><subparagraph id="H3DB04B1306E8493AB63BCBDE88EF043F"><enum>(I)</enum><text>for fiscal year 2022, $4,600,000,000;</text> </subparagraph><subparagraph id="H0A8CB0820B9B45A29C207049810512CD"><enum>(J)</enum><text>for fiscal year 2023, $4,800,000,000; and</text>
+ </subparagraph><subparagraph id="H8B72508AD0B24D64ACB5D35495186928"><enum>(K)</enum><text>for fiscal year 2024, $5,000,000,000.</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block> </subparagraph></paragraph><paragraph id="H947A92FC38CF47C9B66A7F86F7234691"><enum>(2)</enum><text>in subsection (b)(2)—</text>
+ <subparagraph id="H91F34F5B7B91415695D9EB1D9C5CA27A"><enum>(A)</enum><text>in subparagraph (E), by striking <quote>and</quote> at the end;</text> </subparagraph><subparagraph id="H09CDA4C578F340488A8DA91A4E2BC67F"><enum>(B)</enum><text>in subparagraph (F), by striking the period at the end and inserting <quote>; and</quote>; and</text>
+ </subparagraph><subparagraph id="H16BC85D1D787465DB9894FB3987CD880"><enum>(C)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="H02F7267ED38A47B4B911427B3367E375" style="OLC"> <subparagraph id="HDA5866F96BF3493D98E3C2EA98F02D8D"><enum>(G)</enum><text>$325,000,000 for fiscal year 2020;</text>
+ </subparagraph><subparagraph id="H2E97E903E94A4E20B2150B67F3B7E2D5"><enum>(H)</enum><text>$340,000,000 for fiscal year 2021;</text> </subparagraph><subparagraph id="H36016D7A2DAF4831BB9406BC676506E8"><enum>(I)</enum><text>$355,000,000 for fiscal year 2022;</text>
+ </subparagraph><subparagraph id="H5EE643002ECF484F84677A735C56FDBC"><enum>(J)</enum><text>$370,000,000 for fiscal year 2023; and</text> </subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="HCD359C174A634E4AB82F2A530163FEE9"><enum>(K)</enum><text>$385,000,000 for fiscal year 2024.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+				</subparagraph></paragraph></section></legis-body></bill>
+
+

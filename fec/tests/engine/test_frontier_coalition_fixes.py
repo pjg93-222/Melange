@@ -6,7 +6,7 @@ lifted out of the shipped source with ast and run alone -- the real bodies, none
 
   stance_pool       order-preserving gate filter shared by coalition + frontier (dial off = identity).
   coal_waterfill    CAP-clipped excess re-split pro rata; identical to the old clip when nothing caps; dial off = old clip exactly.
-  knee_rederive     audit_frontier's second-path knee equals the engine's forward 25% rule, raw and clamped.
+  frontier knee     producer integer tenths and independent audit Decimal both meet fixed 25% boundary fixtures, raw and clamped.
   seed offset       (SEED-7)*odd constant is exactly 0 at the default seed and decorrelates other seeds (sm64 from the kernel).
   audit floor       audit_full's frontier `exp` equals the exact number of ck() calls a full audit_frontier run makes.
 """
@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import ast
 import os
-import random
 import re
 import sys
 
@@ -88,17 +87,6 @@ def test_waterfill_iterates_and_exhausts():
     assert wf({}, 50_000, 2_000_000, 1000, True) == {}
 
 
-def _engine_knee(path, raw, cap=50000):   # verbatim budget_frontier forward rule
-    k = 'spread_raw' if raw else 'spread'
-    margs = [path[i][k] - path[i - 1][k] for i in range(1, len(path))]
-    peak = max(margs) if margs else 0
-    knee = 0
-    for i, mg in enumerate(margs):
-        if mg >= 0.25 * peak:
-            knee = (i + 1) * cap
-    return knee, 0 < knee < path[-1]['b']
-
-
 def _mkpath(raws, cap=50000):
     path, run = [], None
     for i, r in enumerate(raws):
@@ -107,26 +95,50 @@ def _mkpath(raws, cap=50000):
     return path
 
 
-def test_knee_rederive_matches_engine_rule():
-    kr = _lift(AFRONT, 'knee_rederive')
-    rnd = random.Random(11)
-    for _ in range(300):
-        n = rnd.randint(0, 14)
-        raws = [20.0]
-        for _ in range(n):
-            raws.append(raws[-1] + rnd.uniform(-1.5, 6.0))
-        path = _mkpath(raws)
-        for raw in (True, False):
-            assert kr(path, raw, 50000) == _engine_knee(path, raw)
+KNEE_HELPERS = [(FRONT, 'frontier_knee'), (AFRONT, 'knee_rederive')]
 
 
-def test_knee_raw_vs_clamped_differ_and_old_artifact_fallback():
-    kr = _lift(AFRONT, 'knee_rederive')
-    path = _mkpath([10.0, 20.0, 18.0, 30.0, 30.4])
-    assert kr(path, True)[0] != 0
+@pytest.mark.parametrize('source,helper', KNEE_HELPERS)
+@pytest.mark.parametrize('raws,expected', [
+    ([100.0, 101.2, 101.5, 101.6], (100000, True)),  # equality: 0.3 is one quarter of 1.2
+    ([100.0, 101.2, 101.4, 101.5], (50000, True)),   # negative control: 0.2 is below 0.3
+    ([100.0, 101.2, 101.5], (100000, False)),        # equality at endpoint is not an interior knee
+    ([295.4, 296.6, 296.9, 297.0], (100000, True)),  # CDFI boundary, 0.3 / 1.2
+    ([91.8, 94.2, 94.8, 94.9], (100000, True)),      # consumer-fee boundary, 0.6 / 2.4
+    ([371.0, 371.8, 372.0], (100000, False)),        # business-lending boundary, 0.2 / 0.8
+    ([142.6, 145.8, 146.6, 146.7], (100000, True)),  # TCPA boundary, 0.8 / 3.2
+    ([], (0, False)),
+    ([5.0], (0, False)),
+    ([5.0, 5.0, 5.0], (100000, False)),             # preserve zero-peak endpoint convention
+])
+def test_knee_fixed_boundary_cases(source, helper, raws, expected):
+    # Fixed mathematical answers, not another implementation of the producer's oracle.
+    knee = _lift(source, helper)
+    assert knee(_mkpath(raws), True) == expected
+
+
+@pytest.mark.parametrize('source,helper', KNEE_HELPERS)
+def test_knee_raw_vs_clamped_and_actual_budgets(source, helper):
+    knee = _lift(source, helper)
+    path = _mkpath([10.0, 14.0, 12.0, 13.0, 13.1])
+    # Raw gains 4,-2,1,0.1: last qualifying point is 150k. Clamp gains 4,0,0,0: it is 50k.
+    assert knee(path, True) == (150000, True)
+    assert knee(path, False) == (50000, True)
+    varied = _mkpath([100.0, 101.2, 101.5, 101.6])
+    for point, budget in zip(varied, [0, 70000, 190000, 240000]):
+        point['b'] = budget
+    assert knee(varied, True) == (190000, True)      # use recorded dollars, not position * a cap
+    assert knee(varied[:3], True) == (190000, False)
+
+
+def test_knee_audit_old_artifact_fallback():
+    knee = _lift(AFRONT, 'knee_rederive')
+    path = _mkpath([10.0, 14.0, 12.0, 13.0, 13.1])
     old = [{k: v for k, v in p.items() if k != 'spread_raw'} for p in path]
-    assert kr(old, True) == kr(path, False)                  # artifact without spread_raw -> clamped fallback
-    assert kr([{'b': 0, 'spread': 5.0, 'spread_raw': 5.0, 'seed': None}], True) == (0, False)
+    assert knee(old, True) == (50000, True)
+    partial = [dict(p) for p in path]
+    del partial[2]['spread_raw']
+    assert knee(partial, True) == (50000, True)
 
 
 def test_seed_offset_zero_at_default_and_decorrelates():

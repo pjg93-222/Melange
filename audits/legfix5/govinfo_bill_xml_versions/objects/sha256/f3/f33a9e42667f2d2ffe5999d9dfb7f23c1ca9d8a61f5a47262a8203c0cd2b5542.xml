@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="HA8C83C9FA59A4B9CB038AA48E1C9768D" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 423 IH: Honoring the 200th anniversary of the founding of Colgate University.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-06-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 423</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190604">June 4, 2019</action-date><action-desc><sponsor name-id="B001308">Mr. Brindisi</sponsor> (for himself, <cosponsor name-id="D000630">Mr. Delgado</cosponsor>, and <cosponsor name-id="S001205">Ms. Scanlon</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HED00">Committee on Education and Labor</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Honoring the 200th anniversary of the founding of Colgate University.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas a Baptist pastor, Daniel Hascall, and Nathaniel Kendrick recruited ten local clergy and laymen, met all together on September 24, 1817, in the home of Jonathan Olmstead in Hamilton, New York, and approved the Constitution of the Baptist Education Society of the State of New York;</text>
+ </whereas><whereas><text>Whereas the thirteen men approved the Constitution of the Baptist Education Society of the State of New York with thirteen articles, prayed thirteen times, and had thirteen dollars to pay their first annual membership fee, and elected the institution’s first board of trustees;</text>
+ </whereas><whereas><text>Whereas, on March 5, 1819, a bill officially incorporating the Baptist Education Society of the State of New York cleared the New York State Legislature;</text>
+ </whereas><whereas><text>Whereas, in 1833, the society expanded to include a collegiate course and the school came to be known as the Hamilton Literary and Theological Institution;</text>
+ </whereas><whereas><text>Whereas, in 1846, the institution’s board successfully petitioned the State legislature to incorporate the collegiate department as Madison University;</text>
+ </whereas><whereas><text>Whereas, in 1853, Henry Livingston Simpson became the first African-American student to graduate from the university;</text>
+ </whereas><whereas><text>Whereas, in 1890, the New York State Supreme Court granted the petition of the board of trustees to change the name of the university to Colgate University in honor of university patron William Colgate and his family;</text>
+ </whereas><whereas><text>Whereas, in 1919, the Colgate University Alumni Corporation was founded and celebrated Colgate’s Centennial, the largest reunion at the time, followed by the introduction of the standing special liberal arts model;</text>
+ </whereas><whereas><text>Whereas, in 1935, the Washington Study Group was created, which was the first study group offered by any college or university in the Nation to send students to study in the District of Columbia;</text>
+ </whereas><whereas><text>Whereas during World Wars I and II, Colgate contributed to the war effort by serving as a preparatory school for the Army and Navy;</text>
+ </whereas><whereas><text>Whereas, in 1968, a 100-hour student civil rights sit-in on campus launched a wave of student activism;</text>
+ </whereas><whereas><text>Whereas, in 1970, Colgate admitted its first class of women and became a coeducational institution;</text> </whereas><whereas><text>Whereas, in 1973, Colgate committed to National Collegiate Athletic Association Division I athletics, hosting the first women’s varsity sports teams in basketball, field hockey, lacrosse, volleyball, and tennis;</text>
+ </whereas><whereas><text>Whereas, in 2009, Colgate signed the American College and University Presidents’ Climate Commitment and achieved a carbon-neutral campus by its Bicentennial Celebration in 2019;</text>
+ </whereas><whereas><text>Whereas Colgate now educates more than 2,900 students in 56 different majors;</text> </whereas><whereas><text>Whereas Colgate has produced many graduates of national acclaim, including several Members of Congress and other prominent elected officials;</text>
+ </whereas><whereas><text>Whereas Colgate has assured its future growth with its Vision and Plan for Colgate University’s Third Century, which will ensure it remains a first-rate, world-renowned academic institution; and</text>
+ </whereas><whereas><text>Whereas Colgate exemplifies all the best traditions of American higher education: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="H3BE2F524128F4C97BDE47A2CDB4E9E1E" style="traditional">
+ <section display-inline="yes-display-inline" id="HD5B24FA3E8D444A7A83E1B60E8AAD349" section-type="undesignated-section"><enum></enum><text display-inline="yes-display-inline">That the House of Representatives honors Colgate University, as the university celebrates 200 years as a source of pride for New York State and for the people of the United States.</text>
+		</section></resolution-body></resolution>
+
+

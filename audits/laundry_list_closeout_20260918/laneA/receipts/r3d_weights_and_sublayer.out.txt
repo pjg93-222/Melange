@@ -1,0 +1,72 @@
+﻿====================================================================================================
+R3d  press pillar weight row + sub-layer map   run 2026-09-18T23:35:25
+====================================================================================================
+
+-- A. 'Press Release - Normalized' weight row 535 (the SUMPRODUCT's second vector) --
+   row 534 col A (last member?) = 'Zoe Lofgren'
+   row 535 col A = 'Weights'
+   col  header                                 weight in row 535
+   E    Examination & Supervision              0.1                IN  E:W
+   F    Credit Union Capital Requirements      0.04               IN  E:W
+   G    NCUA Budget & Share Insurance Fund     0.1                IN  E:W
+   H    Interchange                            0.3                IN  E:W
+   I    Payments                               0.08               IN  E:W
+   J    Technology & Emerging Issues           0.08               IN  E:W
+   K    Fraud Prevention                       0.08               IN  E:W
+   L    Data Privacy & Cybersecurity           0.08               IN  E:W
+   M    Charter Modernization & Governance     0.15               IN  E:W
+   N    Defense Credit Union Issues            0.03               IN  E:W
+   O    Field of Membership                    0.15               IN  E:W
+   P    Credit Union Tax Status                0.3                IN  E:W
+   Q    CDFI Fund                              0.02               IN  E:W
+   R    CU-Bank Competitive Dynamics           0.03               IN  E:W
+   S    CFPB Issues & Structural Reform        0.05               IN  E:W
+   T    Credit Card & Consumer-Fee Mandates    0.3                IN  E:W
+   U    Telephone Consumer Protection Act      0.03               IN  E:W
+   V    Member Business Lending                0.04               IN  E:W
+   W    Mortgage Lending & Housing             0.08               IN  E:W
+   X    General Credit Union                   None               OUT of E:W
+
+   columns inside the pillar range E:W : 19
+   columns OUTSIDE it (never summed)   : 1  -> ['General Credit Union']
+   of the in-range columns, weight != 0 : 19
+   of the in-range columns, weight == 0 or blank: 0  -> []
+
+-- B. 'Sub Layer - Raw' headers (row 1) --
+   col A   District/State
+   col B   Primary Category Names
+   col C   Examination & Supervision
+   col F   Payment & Technology
+   col I   Information Security
+   col K   Credit Union Powers & Charter
+   col N   Tax, Budget, & Bank Attacks
+   col Q   Consumer Protection
+   col T   Lending
+   col V   Demographics
+   col AG  Legislative Efficency
+
+-- C. Sub Layer - Raw column -> press column it pulls (rows 2-8 sample) --
+   C    Examination & Supervision          pulls press col E      (Examination & Supervision)
+   D    None                               pulls press col F      (Credit Union Capital Requirements)
+   E    None                               pulls press col G      (NCUA Budget & Share Insurance Fund)
+   F    Payment & Technology               pulls press col H      (Interchange)
+   G    None                               pulls press col I      (Payments)
+   H    None                               pulls press col J      (Technology & Emerging Issues)
+   I    Information Security               pulls press col K      (Fraud Prevention)
+   J    None                               pulls press col L      (Data Privacy & Cybersecurity)
+   K    Credit Union Powers & Charter      pulls press col M      (Charter Modernization & Governance)
+   L    None                               pulls press col N      (Defense Credit Union Issues)
+   M    None                               pulls press col O      (Field of Membership)
+   N    Tax, Budget, & Bank Attacks        pulls press col P      (Credit Union Tax Status)
+   O    None                               pulls press col Q      (CDFI Fund)
+   P    None                               pulls press col R      (CU-Bank Competitive Dynamics)
+   Q    Consumer Protection                pulls press col S      (CFPB Issues & Structural Reform)
+   R    None                               pulls press col U      (Telephone Consumer Protection Act)
+   S    None                               pulls press col T      (Credit Card & Consumer-Fee Mandates)
+   T    Lending                            pulls press col V      (Member Business Lending)
+   U    None                               pulls press col W      (Mortgage Lending & Housing)
+
+   press columns NOT pulled by any Sub Layer - Raw column: ['X']
+      X  General Credit Union
+
+DONE R3d

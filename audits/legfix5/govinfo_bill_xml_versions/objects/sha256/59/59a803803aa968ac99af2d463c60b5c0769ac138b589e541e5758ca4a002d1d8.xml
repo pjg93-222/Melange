@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HC98AD721E88D4386AD6E6F9BB6BAE9FF" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1921 IH: Ocean Acidification Innovation Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-03-27</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1921</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190327">March 27, 2019</action-date><action-desc><sponsor name-id="K000381">Mr. Kilmer</sponsor> (for himself, <cosponsor name-id="H001056">Ms. Herrera Beutler</cosponsor>, <cosponsor name-id="B001278">Ms. Bonamici</cosponsor>, and <cosponsor name-id="Y000033">Mr. Young</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HSY00">Committee on Science, Space, and Technology</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To authorize Federal agencies to establish prize competitions for innovation or adaptation
+			 management development relating to ocean acidification.</official-title></form>
+	<legis-body id="H5057D44DEFC248BBB2073FFFE4D5CF68" style="OLC">
+ <section id="H340D636D01564E3B874FC5FE0DC59635" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Ocean Acidification Innovation Act of 2019</short-title></quote>.</text> </section><section id="HD816319C9ED44F3C815CB133828D3B37"><enum>2.</enum><header>Prize competitions</header><text display-inline="no-display-inline">Section 12404 of the Federal Ocean Acidification Research and Monitoring Act of 2009 (<external-xref legal-doc="usc" parsable-cite="usc/33/3703">33 U.S.C. 3703</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block id="H72BE16EA42FD4ABDA389F722757795A6" style="OLC">
+				<subsection id="HB088D0CDE3BB45DBA2337D25B25138DE"><enum>(d)</enum><header>Prize competitions</header>
+ <paragraph id="HD95D6A0442BC4624BC7B4AB349FFA035"><enum>(1)</enum><header>In General</header><text>Any Federal agency with a representative serving on the interagency working group established under this section may, either individually or in cooperation with one or more agencies, carry out a program to award prizes competitively under section 24 of the Stevenson-Wydler Technology Innovation Act of 1980 (<external-xref legal-doc="usc" parsable-cite="usc/15/3719">15 U.S.C. 3719</external-xref>). An agency seeking to carry out such a program shall carry out such program in coordination with the chair of such interagency working group.</text>
+ </paragraph><paragraph id="H0AC9832649AC4B15913A7BB61107D88D"><enum>(2)</enum><header>Purposes</header><text>Any prize competition carried out under this subsection shall be for the purpose of stimulating innovation to advance our Nation’s ability to understand, research, or monitor ocean acidification or its impacts, or to develop management or adaptation options for responding to ocean acidification.</text>
+ </paragraph><paragraph id="H49297C1FEEEC467C8F18D7A6FFDC7138"><enum>(3)</enum><header>Priority programs</header><text>Priority shall be given to establishing programs under this section that address communities, environments, or industries that are in distress due to the impacts of ocean acidification, including—</text>
+ <subparagraph id="H7E28FF15DF3D4604A770609EE8B36C7C"><enum>(A)</enum><text>the development of monitoring or management options for communities or industries that are experiencing significant financial hardship;</text>
+ </subparagraph><subparagraph id="H1472B72EEB574C4DB4B2BD3783A462F7"><enum>(B)</enum><text>the development of adaptation options to alleviate economic harm and job loss caused by ocean acidification;</text>
+ </subparagraph><subparagraph id="H37FDD6BB04E74E9C97DABC830AB27EBB"><enum>(C)</enum><text>the development of measures to help vulnerable communities or industries, with an emphasis on rural communities and businesses; and</text>
+ </subparagraph><subparagraph commented="no" id="H95B51B8BB85947F08CC53E7F738D98E0"><enum>(D)</enum><text>the development of adaptation and management options for impacted shellfish industries.</text> </subparagraph></paragraph><paragraph id="HB6436C527F1941B1A2FE0EFC52C95D59"><enum>(4)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">In addition to amounts made available under section 12409, there is authorized to be appropriated such sums as may be necessary to carry out this subsection.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </section><section id="H5762C382423C4055A0F8BC30FA90B797"><enum>3.</enum><header>Authorization of appropriations</header><text display-inline="no-display-inline">Section 12409 of the Federal Ocean Acidification Research and Monitoring Act of 2009 (<external-xref legal-doc="usc" parsable-cite="usc/33/3708">33 U.S.C. 3708</external-xref>) is amended—</text>
+ <paragraph id="H14E56CD7F58E4B159E100EEB31D99246"><enum>(1)</enum><text>in subsection (a), by striking <quote>subtitle—</quote> and all that follows through paragraph (4) and inserting the following: <quote>subtitle $30,500,000 for each of the fiscal years 2020 through 2024.</quote>; and</text> </paragraph><paragraph id="H6FFD07DCD330411C99FAD4014F8573BC"><enum>(2)</enum><text display-inline="yes-display-inline">in subsection (b), by striking <quote>subtitle—</quote> and all that follows through paragraph (4) and inserting the following: <quote>subtitle $20,000,000 for each of the fiscal years 2020 through 2024.</quote>.</text>
+			</paragraph></section></legis-body></bill>
+
+

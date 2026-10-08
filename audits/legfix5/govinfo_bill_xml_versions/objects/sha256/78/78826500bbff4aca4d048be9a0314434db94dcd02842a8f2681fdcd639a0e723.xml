@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Referred-in-Senate" bill-type="olc" dms-id="H4784671B8FFE4A8C9E8FB8587E47803D" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2440 : Full Utilization of the Harbor Maintenance Trust Fund Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IIB</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 2440</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date>October 29, 2019</action-date><action-desc>Received; read twice and referred to the <committee-name committee-id="SSBU00">Committee on the Budget</committee-name></action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To provide for the use of funds in the Harbor Maintenance Trust Fund for the purposes for which the
+			 funds were collected and to ensure that funds credited to the Harbor
+			 Maintenance Trust Fund are used to support navigation, and for other
+			 purposes.</official-title>
+	</form>
+	<legis-body id="H217436F7E37B4A78B7EDEE5CE5BAE5A9" style="OLC">
+ <section id="H365EF5DFDFEE4373A625465460EEECBD" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Full Utilization of the Harbor Maintenance Trust Fund Act</short-title></quote>.</text> </section><section id="H5DB5059D56BE43E0A64F11DF711F74B7"><enum>2.</enum><header>Use of Harbor Maintenance Trust Fund to support navigation</header><text display-inline="no-display-inline">Section 210 of the Water Resources Development Act of 1986 (<external-xref legal-doc="usc" parsable-cite="usc/33/2238">33 U.S.C. 2238</external-xref>) is amended—</text>
+ <paragraph id="H4752BFEDE44E4160B8E06AE6DB97D276"><enum>(1)</enum><text>in the section heading, by striking <quote><header-in-text level="section" style="OLC">Authorization of appropriations</header-in-text></quote> and inserting <quote><header-in-text level="section" style="OLC">Funding for navigation</header-in-text></quote>; and</text> </paragraph><paragraph id="H5FEA5A38DD6D47528E1866790C0182DC"><enum>(2)</enum><text>by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H84D98AA957D14C28832D1C2BE9470F6E" style="OLC">
+ <subsection id="HB3C4E55A4B2E48FE8E3FACE3F0941DCB"><enum>(g)</enum><header>Adjustments to discretionary spending limits</header><text display-inline="yes-display-inline">Amounts made available from the Harbor Maintenance Trust Fund under this section or <external-xref legal-doc="usc" parsable-cite="usc/26/9505">section 9505</external-xref> of the Internal Revenue Code of 1986 shall be made available in accordance with section 251(b)(2)(H) of the Balanced Budget and Emergency Deficit Control Act of 1985.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></section><section id="HB8AA6B2E2F204CE1A0D9A434A5EB87D3"><enum>3.</enum><header>Annual report to Congress</header><text display-inline="no-display-inline">Section 330 of the Water Resources Development Act of 1992 (<external-xref legal-doc="usc" parsable-cite="usc/26/9505">26 U.S.C. 9505</external-xref> note; 106 Stat. 4851) is amended—</text>
+ <paragraph id="HCEC690334CF24E46BC686E6E3A042316"><enum>(1)</enum><text>in subsection (a)—</text> <subparagraph id="HD763342C6D174B57B727FCAF412EE319"><enum>(A)</enum><text>by striking <quote>and annually thereafter,</quote> and inserting <quote>and annually thereafter concurrent with the submission of the President’s annual budget request to Congress,</quote>; and</text>
+ </subparagraph><subparagraph id="H52A544DC090042E6B808F9BB30177CC7"><enum>(B)</enum><text>by striking <quote>Public Works and Transportation</quote> and inserting <quote>Transportation and Infrastructure</quote>; and</text> </subparagraph></paragraph><paragraph id="H3AED43C39F224A2C80B69B95C5C8FCE7"><enum>(2)</enum><text>in subsection (b)(1) by adding at the end the following:</text>
+				<quoted-block id="H61D055AFEF4040D3BF0217AAC1BD3871" style="OLC">
+ <subparagraph id="HB1B95484280A43E08964DBAF71D3F886"><enum>(D)</enum><text>A description of the expected expenditures from the trust fund to meet the needs of navigation for the fiscal year of the budget request.</text></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></section><section id="HA4E600DD6B744F4485F126B29F98442F"><enum>4.</enum><header>Harbor Maintenance Trust Fund discretionary spending limit adjustment</header><text display-inline="no-display-inline">Section 251(b)(2) of the Balanced Budget and Emergency Deficit Control Act of 1985 (<external-xref legal-doc="usc" parsable-cite="usc/2/901">2 U.S.C. 901(b)(2)</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block display-inline="no-display-inline" id="HE46B30B24E9647D6B3F47B5B6726188A" style="OLC">
+				<subparagraph id="HF7C93F9B0DC94BABAC10C333E1DD539D"><enum>(H)</enum><header>Harbor Maintenance Trust Fund</header>
+ <clause id="H04A1508C92574A77B8A73D21D670B604"><enum>(i)</enum><header>In general</header><text display-inline="yes-display-inline">If a bill or joint resolution making appropriations for a fiscal year is enacted that specifies an amount for harbor maintenance activities, then the adjustments for that fiscal year shall be the total of such amount in that Act for such purpose for that fiscal year, but may not exceed the total amount within the Harbor Maintenance Trust Fund under subsection (a) of <external-xref legal-doc="usc" parsable-cite="usc/26/9505">section 9505</external-xref> of the Internal Revenue Code of 1986 on the last day of the fiscal year that is 2 years prior to that fiscal year.</text>
+ </clause><clause id="HEC96881615BD471BA39DB44B46FFB20B"><enum>(ii)</enum><header>Limitation</header><text display-inline="yes-display-inline">The adjustment under clause (i) with respect to an amount made available for harbor maintenance activities may only be made if such amount—</text>
+ <subclause id="H3EBBFFBCD2664FCC873B9CB26AA44AB8"><enum>(I)</enum><text display-inline="yes-display-inline">is derived solely from funds in such Trust Fund; and</text> </subclause><subclause id="HA9BB18B2CCE04D16BF34DDB0FD7BE3CC"><enum>(II)</enum><text display-inline="yes-display-inline">is made available for expenditures described under subsection (c) of such section 9505.</text></subclause></clause></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body>
+	<attestation><attestation-group><attestation-date chamber="House" date="20191028">Passed the House of Representatives October 28, 2019.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation>
+</bill>
+
+

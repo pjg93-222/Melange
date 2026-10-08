@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HA7967965A7AE4FB28077B48B53996077" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6312 IH: Tri-Share Child Care Pilot Act of 2025</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-11-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6312</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251125">November 25, 2025</action-date><action-desc><sponsor name-id="S001221">Ms. Scholten</sponsor> (for herself and <cosponsor name-id="J000307">Mr. James</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name>, and in addition to the Committee on <committee-name committee-id="HED00">Education and Workforce</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To establish a Federal pilot program for cost-sharing of child care expenses among employers, employees, and government.</official-title></form><legis-body id="H9E72A736B2C24FCE8F8224DB9AFB69BA" style="OLC"><section id="H1A36B52FE59C4261A7B9CDD538801AE5" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Tri-Share Child Care Pilot Act of 2025</short-title></quote>.</text></section><section id="H9BD04D13A51C454B9B5B5A3F248413ED"><enum>2.</enum><header>Pilot program for cost-sharing of child care expenses among employers, employees, and governments</header><subsection id="HD716BBB327C7449E8CE05ECD6D1239CA"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 418 of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/618">42 U.S.C. 618</external-xref>) is amended by adding at the end the following:</text><quoted-block style="OLC" id="HE55169FD6AAE48EFA8614889FA2C5AA1" display-inline="no-display-inline"><subsection id="H022B047D13CC441FA6E2C6D1B58C7BC2"> <enum>(e)</enum> <header>Pilot program for cost-Sharing of child care expenses among employers, employees, and governments</header> <paragraph id="H6AB68A8DEBE84C12B5A566028588E4EE"> <enum>(1)</enum> <header>Competitive grants to lead agencies</header> <subparagraph id="HB393BCCA43FB40D6AA6FEFC8634DFA72"> <enum>(A)</enum> <header>Applications</header> <text>The lead agency of a State may apply for a grant under this subsection by submitting to the Secretary an application that includes—</text>
+                <clause id="H316D7D82923A4B3DB847560A88A8B7C6">
+                  <enum>(i)</enum>
+ <text>information about which employers will participate, and how employers will be recruited to participate, in the program under this subsection;</text>
+                </clause>
+                <clause id="H6FDF81BD50B747AFA2C08E96A4E430D6">
+                  <enum>(ii)</enum>
+ <text>a certification that funds from the grant will not be provided to any child care provider who does not meet the health and safety requirements referred to in paragraph (10)(B); and</text>
+                </clause>
+                <clause id="H5A964F45301A440BA719B0212997E686">
+                  <enum>(iii)</enum>
+ <text display-inline="yes-display-inline">a certification that <fraction>1/3</fraction> of the eligible child care costs with respect to an eligible child that are the subject of an application for benefits approved by the lead agency under this subsection will be paid by each of the following:</text>
+                  <subclause id="H89BDF6C0056E4EACB0DFFCDF56539D59">
+                    <enum>(I)</enum>
+ <text>A parent of the child.</text> </subclause> <subclause id="H5D60C6B6F24A420D884D991CCAA19B15"> <enum>(II)</enum> <text>A participating employer of the parent.</text>
+                  </subclause>
+                  <subclause id="H9F76B98EF3AC4BC986D57BC9215B6BD1">
+                    <enum>(III)</enum>
+ <text>The lead agency.</text> </subclause> </clause> </subparagraph> <subparagraph id="H46257E9C693844F6912511BCF3BADF6F"> <enum>(B)</enum> <header>Approval</header> <text display-inline="yes-display-inline">The Secretary shall approve applications submitted pursuant to subparagraph (A) on the basis of—</text>
+                <clause id="H53B1F90631C64566AB2D040132AD0AE6">
+                  <enum>(i)</enum>
+ <text>the relative demonstrated unmet demand for affordable quality child care in States;</text>
+                </clause>
+                <clause id="HD37D9FB32E794F0CA290CC1673BDF6B4">
+                  <enum>(ii)</enum>
+ <text>the relative capacity of States to meet that unmet demand;</text> </clause> <clause id="HA0A4AF1139A8432E89530C85EE0AEDA3"> <enum>(iii)</enum> <text>the relative ability of States to identify specific employers committed to participate in the program under this subsection;</text>
+                </clause>
+                <clause id="H7ED12DD44013473E8227F903B937F9CF">
+                  <enum>(iv)</enum>
+ <text>the relative ability of States to provide detailed plans to recruit additional employers to so participate; and</text>
+                </clause>
+                <clause id="H41C53AA13FCB4613BC34CEF8B944A057">
+                  <enum>(v)</enum>
+ <text>the relative ability of States to ensure equitable statewide geographic access to affordable quality child care.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="HDE0EF666905A41A3AAFEF0C6EE7587AE">
+                <enum>(C)</enum>
+                <header>Amount of grant</header>
+                <clause id="H80F23B09D3BD4BD1A388B34DEBA40F7B">
+                  <enum>(i)</enum>
+                  <header>In general</header>
+ <text display-inline="yes-display-inline">The Secretary shall provide to each lead agency whose application is approved under subparagraph (B) of this paragraph, for each calendar quarter in the program period, an amount equal to the Federal medical assistance percentage for the State for the fiscal year (as defined in section 1905(b), as such section was in effect on September 30, 1995) of the total of the amounts paid by the lead agency during the quarter under paragraph (4) of this subsection or for expenses of administering the program, subject to clauses (ii) and (iii) of this subparagraph and subject to the availability of funds to carry out this subsection.</text>
+                </clause>
+                <clause id="HF13A572977CA41A09C38A1962218BBB5">
+                  <enum>(ii)</enum>
+                  <header>Limitation on reimbursable administrative expenses</header>
+ <text>Not more than 10 percent of the amounts payable to a State under this subparagraph may be with respect to administrative expenses.</text>
+                </clause>
+                <clause id="HB118BBBB936347FD9ECFB5DCF5D127DE">
+                  <enum>(iii)</enum>
+                  <header>Limitation on amount of grant</header>
+ <text>The total of the amounts payable to a State under this subparagraph shall not exceed $20,000,000.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H1D959508ED1340B7AC6DF04983502685">
+              <enum>(2)</enum>
+              <header>Employer participation</header>
+              <subparagraph id="H74F3ADBA80134D59ADEC365D2D649F6E">
+                <enum>(A)</enum>
+                <header>Application</header>
+ <text>A person who employs another person in a State may submit to the lead agency of the State an application to participate in the program carried out by the lead agency under this subsection.</text>
+              </subparagraph>
+              <subparagraph id="H582DB663E9E14053912174CEF1CBB182">
+                <enum>(B)</enum>
+                <header>Approval</header>
+ <text>The lead agency may approve an application submitted pursuant to subparagraph (A).</text>
+              </subparagraph>
+              <subparagraph id="H8FAE512FD0D241E5ACE6D1F20587F41F">
+                <enum>(C)</enum>
+                <header>Consolidated applications for multiple States</header>
+ <text>The Secretary shall ensure that a person who applies to more than 1 lead agency pursuant to subparagraph (A) may submit a single consolidated application to all such lead agencies.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="HA1CC69D760764BA2842B93E49215785F">
+              <enum>(3)</enum>
+              <header>Application for benefits</header>
+              <subparagraph id="HFEDF45E21085481FA23A60EAE28A41C5">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text display-inline="yes-display-inline">A parent of an eligible child employed in a State by a participating employer may submit to the lead agency of the State an application for benefits under this subsection, which shall include—</text>
+                <clause id="H771A5BB0272A446392E78250BB1F7425">
+                  <enum>(i)</enum>
+ <text>a joint attestation by the employer and the parent that, if the lead agency approves the application, the employer and the parent will each pay <fraction>1/3</fraction> of the eligible child care costs charged by an eligible child care provider during a specified period with respect to the child;</text>
+                </clause>
+                <clause id="H4BF45E12024344358609CA6D22F2F2C0">
+                  <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">the name and business address of the employer;</text>
+                </clause>
+                <clause id="H37B8657CD64A46DC842F78B250FBFE8F">
+                  <enum>(iii)</enum>
+ <text>the name and residential address of the parent;</text> </clause> <clause id="HEC9158533FE5462DA23FE6CC00CB2CEF"> <enum>(iv)</enum> <text>the name, age, and residential address of the child;</text>
+                </clause>
+                <clause id="HB2ED2C13104C4A38ACB94A2B621FE747">
+                  <enum>(v)</enum>
+ <text>an attestation from the parent employee that the parent employee is employed by the employer; and</text>
+                </clause>
+                <clause id="H822C3A32143E40588799C03438883103">
+                  <enum>(vi)</enum>
+ <text>sufficient information for the lead agency to verify—</text> <subclause id="H3A2A1A32192749D2B9D32A4BE3C1DFEE"> <enum>(I)</enum> <text>that the parent is employed by the employer; and</text>
+                  </subclause>
+                  <subclause id="H49ADC83B77AC47B7A6096B94F1BB696B">
+                    <enum>(II)</enum>
+ <text>the family income of the family of the parent and child, in each pay period.</text>
+                  </subclause>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H2EB24AA3F5BE41DAA4C72B19ABAC4525">
+                <enum>(B)</enum>
+                <header>Consideration</header>
+ <text display-inline="yes-display-inline">In considering applications submitted pursuant to this subsection, a lead agency shall—</text>
+                <clause id="HAFBA21BC487F49E28681B75E8A2168D8">
+                  <enum>(i)</enum>
+ <text>verify the matters described in subparagraph (A)(vi); and</text> </clause> <clause id="H1EA289DD94274BE9A36A075497066070"> <enum>(ii)</enum> <text>take into account the needs of the parents involved and the availability of funds provided to the lead agency under this subsection.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H0F3EA4AF7C914998B66412E5A2A84B97">
+                <enum>(C)</enum>
+                <header>Approval</header>
+ <text>The lead agency may approve an application submitted pursuant to subparagraph (A).</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H50F8820BF7C04ED08E40BC01E726578E">
+              <enum>(4)</enum>
+              <header>Payments to child care providers</header>
+              <subparagraph id="H77DB3338B2B4402AB193CDF2F2EB9F48">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text display-inline="yes-display-inline">The lead agency shall pay to an eligible child care provider selected by a parent whose application is approved pursuant to paragraph (3) an amount equal to the charges of the provider for eligible child care costs incurred during the period specified in the application with respect to the eligible child identified in the application.</text>
+              </subparagraph>
+              <subparagraph id="H988EEC64F7774B72BA5D436E205B7AF3">
+                <enum>(B)</enum>
+                <header>Reimbursement by employer and employee</header>
+ <text>With respect to each such payment—</text> <clause id="H6BB57642300B4452B3DE1654D44954BD"> <enum>(i)</enum> <text>the parent and the employer of the parent shall jointly pay to the lead agency an amount equal to <fraction>2/3</fraction> of the charges of the eligible child care provider; and</text>
+                </clause>
+                <clause id="H58D50B407E3C480EA1C593FA7FACD740">
+                  <enum>(ii)</enum>
+ <text>the parent may consent to the employer withholding an amount that is not more than <fraction>1/3</fraction> of the charges of the provider from the pay of the parent if the employer pays the total amount specified under clause (i) to the lead agency.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="HB9F5464927924955800AB985DA3F8ED9">
+                <enum>(C)</enum>
+                <header>Payment schedules</header>
+ <text>The lead agency shall—</text> <clause id="H69FF455FBFE64D44A55EBAC820D7363B"> <enum>(i)</enum> <text>offer more than 1 payment schedule for payments to eligible child care providers under subparagraph (A); and</text>
+                </clause>
+                <clause id="H28A9A46770E64D4E8DABF7B8C66C0420">
+                  <enum>(ii)</enum>
+ <text>pay each provider in accordance with the schedule chosen by the provider.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="HF0551BC472D0487A8B4D0DF8D7FDBCE0">
+              <enum>(5)</enum>
+              <header>Administration</header>
+ <text display-inline="yes-display-inline">A lead agency to which a grant is made under this subsection may comply with this subsection through the use of technology platforms that connect employers, child care providers, parents, and the lead agency, and may allow a third party to administer the grant.</text>
+            </paragraph>
+            <paragraph id="H565D28565A424188892AAF6A2330CE22">
+              <enum>(6)</enum>
+              <header>Regulations</header>
+ <text display-inline="yes-display-inline">The Secretary may prescribe such regulations as the Secretary deems necessary and appropriate to carry out this subsection.</text>
+            </paragraph>
+            <paragraph id="HD4662C3543D74E49AB3C7B7FB1304D59">
+              <enum>(7)</enum>
+              <header>No effect on CCDBG benefits</header>
+ <text>Eligibility for, and the amount of benefits received under, the program under this subsection shall not affect eligibility for, or the amount of benefits provided pursuant to, the Child Care and Development Block Grant Act of 1990.</text>
+            </paragraph>
+            <paragraph id="HB71C7B5010AA40AC84C6B6F9F309D417">
+              <enum>(8)</enum>
+              <header>Termination</header>
+ <text>The program under this subsection shall terminate at the end of the program period.</text>
+            </paragraph>
+            <paragraph id="H71B3AD6625174EB7BE11FDEF4E3B18BA">
+              <enum>(9)</enum>
+              <header>Evaluation; report</header>
+              <subparagraph id="H37DAA61935B149B682474951545AFB16">
+                <enum>(A)</enum>
+                <header>Evaluation</header>
+ <text>The Secretary shall conduct an evaluation, developed by the Office of Planning, Research, and Evaluation of the Administration for Children and Families, of—</text>
+                <clause id="H3F57AF2217C747B9B87900B0F0B57DE9">
+                  <enum>(i)</enum>
+ <text>the cost-effectiveness of the program; and</text> </clause> <clause id="HECB5236D8AAA4C5A9CBC23F4A074BF8A"> <enum>(ii)</enum> <text>the effects of the program on—</text>
+                  <subclause id="H8AF62C2DB606422E96975F1C62635C4E">
+                    <enum>(I)</enum>
+ <text>hiring, employment, and employee retention; and</text> </subclause> <subclause id="H2A5182E8A67E49E6A14FC704C6D86AE1"> <enum>(II)</enum> <text>affordability of, and access to, child care;</text>
+                  </subclause>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H36A6669DB0FB4B5690E7A750BA36EC05">
+                <enum>(B)</enum>
+                <header>Report to Congress</header>
+ <text display-inline="yes-display-inline">Within 1 year after the end of the program period, the Secretary shall submit to the Committee on Ways and Means of the House of Representatives a written report that contains the results of—</text>
+                <clause id="H13769A5378584D6398CCE6756C15A441">
+                  <enum>(i)</enum>
+ <text>the evaluation conducted under subparagraph (A);</text> </clause> <clause id="HC5CE4FA4EC1145E0A86975312F9C0C25"> <enum>(ii)</enum> <text>a description of the outcomes for the children involved in the program under this subsection; and</text>
+                </clause>
+                <clause id="HC52B48C8BA1645F585B45C0FD7F4A59D">
+                  <enum>(iii)</enum>
+ <text>a description of the metrics used in the evaluation.</text> </clause> </subparagraph> </paragraph> <paragraph id="H5023177DC6E141AD9E8BF0E38AFA113E"> <enum>(10)</enum> <header>Appropriation</header> <text>Out of any money in the Treasury not otherwise appropriated, there are appropriated to carry out this subsection $250,000,000 for each fiscal year ending in the program period, of which 5 percent shall be expended for the evaluation provided for in paragraph (8)(A) and 5 percent shall be expended to provide technical assistance to lead agencies in carrying out their functions under this subsection.</text>
+            </paragraph>
+            <paragraph id="HB74444C8BD0C48B99D1E59C14E9D8CD7">
+              <enum>(11)</enum>
+              <header>Definitions</header>
+ <text display-inline="yes-display-inline">In this subsection:</text> <subparagraph id="H88643043AE914037A15C9B1A34291516"> <enum>(A)</enum> <header>Eligible child</header> <text>The term <term>eligible child</term> means an individual—</text>
+                <clause id="HE1CAA03A023C4065A5F157048861C0A3">
+                  <enum>(i)</enum>
+ <text display-inline="yes-display-inline">who has not attained the minimum age at which a child is required to enter kindergarten or elementary school under the law of the State in which the individual resides;</text>
+                </clause>
+                <clause id="HFFF92B4618D64321A0C647978F1D9919">
+                  <enum>(ii)</enum>
+ <text>who has a parent employed by a participating employer;</text> </clause> <clause id="H7F67BD668F4B4A179AAA38FB04D0BE01"> <enum>(iii)</enum> <text display-inline="yes-display-inline">with respect to the State in which the parent is employed, whose family income is not less than the State threshold for child care assistance and not more than 300 percent of the State threshold for child care assistance; and</text>
+                </clause>
+                <clause id="H717696C09AD34B3EB254F157EF1B7E87">
+                  <enum>(iv)</enum>
+ <text display-inline="yes-display-inline">who is not being provided child care services for which financial assistance is provided pursuant to the Child Care and Development Block Grant Act of 1990.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="H6B89668D05FC443BB8D0E40EA9084F0B">
+                <enum>(B)</enum>
+                <header>Eligible child care costs</header>
+ <text display-inline="yes-display-inline">The term <term>eligible child care costs</term> means the costs of providing child care services to an eligible child in accordance with all applicable State and local health and safety requirements as described in section 658E(c)(2)(I) of the Child Care and Development Block Grant Act of 1990.</text>
+              </subparagraph>
+              <subparagraph id="HCCC0D9D3CA4346F8B0C43458F0FB77AA">
+                <enum>(C)</enum>
+                <header>Eligible child care provider</header>
+ <text display-inline="yes-display-inline">The term <term>eligible child care provider</term> has the meaning given the term in section 658P(6) of the Child Care and Development Block Grant Act of 1990.</text>
+              </subparagraph>
+              <subparagraph id="H0AC95B5043414A02AFC694E6C9C0A024">
+                <enum>(D)</enum>
+                <header>Lead agency</header>
+ <text display-inline="yes-display-inline">The term <term>lead agency</term> means, with respect to a State, the agency designated or established by the State under section 658D(a) of the Child Care and Development Block Grant Act of 1990.</text>
+              </subparagraph>
+              <subparagraph id="H4B5CF512C7684F7F865C68F59EF52F53">
+                <enum>(E)</enum>
+                <header>Parent</header>
+ <text>The term <term>parent</term>, with respect to a child, includes a legal guardian, relative guardian, or foster parent of the child.</text>
+              </subparagraph>
+              <subparagraph id="H2D1C63E1C6B34EF5B39CE7244DB40205">
+                <enum>(F)</enum>
+                <header>Participating employer</header>
+ <text>The term <term>participating employer</term> means a person whose application to participate in the program under this subsection is approved under paragraph (2).</text>
+              </subparagraph>
+              <subparagraph id="H55A6B4FA4A0F44F2BDC0A84E315D5DE0">
+                <enum>(G)</enum>
+                <header>Program period</header>
+ <text>The term <term>program period</term> means the 3-year period that begins with the effective date of this subsection.</text>
+              </subparagraph>
+              <subparagraph id="H7EC577FF2DEA42B7A32089C35094AA83">
+                <enum>(H)</enum>
+                <header>State threshold for child care assistance</header>
+ <text>The term <term>State threshold for child care assistance</term> means, with respect to the lead agency of a State, the maximum income limit for assistance funded pursuant to the Child Care and Development Block Grant Act of 1990 provided by the lead agency.</text>
+              </subparagraph>
+            </paragraph>
+ </subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection><subsection id="H251EDA236F3845A1BFC88E74C5FFC442"><enum>(b)</enum><header>Conforming amendments</header><text>Section 418 of such Act (<external-xref legal-doc="usc" parsable-cite="usc/42/618">42 U.S.C. 618</external-xref>) is amended—</text><paragraph id="H1FCAC5B2E8644D51A9E242CD1D31F4DC"><enum>(1)</enum><text>in subsection (a)(3), by striking <quote>section</quote> and inserting <quote>subsection</quote>; and</text></paragraph><paragraph id="H07E097DDEF0F4523A6D52D4902878CEC"><enum>(2)</enum><text>in each of subsections (b)(1), (b)(2), and (c), by striking <quote>this section</quote> and inserting <quote>subsection (a)</quote>.</text></paragraph></subsection><subsection id="HCC74074999D3416BAAB1750DD5B38456"> <enum>(c)</enum> <header>Transmission to Congress of information on feasibility of imposing child care cost-Sharing obligations of families on a sliding scale</header> <text>The Secretary of Health and Human Services, acting through the Administration for Children and Families, shall collect and transmit to the Committees on Appropriations and on Ways and Means of the House of Representatives and the Committees on Appropriations and on Finance of the Senate information about the feasibility of imposing the child care cost-sharing obligations of families under section 418(e) of the Social Security Act on a sliding scale.</text>
+ </subsection><subsection id="H4E45B0CF165C4EDDB2C6079152BFF390"><enum>(d)</enum><header>Transfer of unobligated funds to the Preschool Development Grants Program</header><text display-inline="yes-display-inline">The unobligated balances of the amounts made available to carry out section 418(e) of the Social Security Act as of September 30 of each fiscal year shall be transferred to and merged with amounts made available on or after October 1 for the preschool development grants program under section 9212 of the Every Student Succeeds Act (<external-xref legal-doc="usc" parsable-cite="usc/42/9831">42 U.S.C. 9831</external-xref> note) for the following fiscal year.</text></subsection><subsection id="H34A7009F0FE94F7B9D82603C8D23B509"><enum>(e)</enum><header>Effective date</header><text>The amendments made by this section shall take effect on the 1st day of the 1st Federal fiscal quarter that begins after the date of the enactment of this Act.</text></subsection></section></legis-body></bill>
+

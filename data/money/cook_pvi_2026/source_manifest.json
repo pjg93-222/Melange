@@ -1,0 +1,38 @@
+{
+  "metadata": {
+    "source_page_url": "https://www.cookpolitical.com/cook-pvi/2026-partisan-voting-index/district-map-and-list",
+    "source_embed_url": "https://datawrapper.dwcdn.net/fejB0/1/",
+    "source_asset_url": "https://datawrapper.dwcdn.net/fejB0/1/dataset.csv",
+    "source_asset_format": "UTF-8 tab-delimited text; .csv source filename",
+    "source_asset_sha256": "ac08becbc973ed001bb7c2da1f9af8c0addb14c6406e4bbe45f9cb499e9e841a",
+    "source_embed_sha256": "1e1af6e4b1f7bc0feb6a62473de3c08993a0d6d655803d2ec3316178301a8d60",
+    "article_publication_date": "2026-07-29",
+    "embed_last_modified_at": "2026-07-22T15:17:03.000Z",
+    "embed_public_version": 1,
+    "embed_published_at": null,
+    "retrieval_date": "2026-10-05",
+    "normalization_timestamp_utc": "2026-10-05T19:46:27.239238+00:00",
+    "record_count": 435,
+    "scope": "Neutral historical district reference; alphabetical display; no production join or model weighting.",
+    "signed_points_convention": "D negative, R positive, EVEN zero; parsed rounded labels, not unrounded estimates.",
+    "district_id_convention": "State postal code plus two-digit district; 00 means at-large. Original district label and cell retained.",
+    "source_rank_note": "Publisher rank preserved verbatim as metadata; no derived priority ranking.",
+    "incumbent_note": "Publisher's text at source vintage; not independently verified as current officeholder or candidate.",
+    "boundary_currency_status": "UNVERIFIED-HERE; July source vintage predates later reported Missouri map developments.",
+    "production_eligibility": "Not assessed; no production model changed."
+  },
+  "sha256": {
+    "raw\\dataset.csv": "ac08becbc973ed001bb7c2da1f9af8c0addb14c6406e4bbe45f9cb499e9e841a",
+    "raw\\datawrapper_fejB0_v1.html": "1e1af6e4b1f7bc0feb6a62473de3c08993a0d6d655803d2ec3316178301a8d60",
+    "cook_pvi_2026_districts.csv": "3bf2786d391323b48f4d87e9b5c5e82802bbf7749a1c83e7c6da600fa353cb71",
+    "cook_pvi_2026_districts.json": "a745154e34ab188d31b3f291ce99d876a1da834d2aae6a568a38b1ac305f1df4",
+    "source_parse_plan.md": "c9ddaf4e321ab3c99876c2ded44dd9cbb7b851302cef7cd8d6bbcb1306bb93f9",
+    "normalize_source.py": "d7ea43dc807adedc2857ea2a8ab1d4fce442983e02c5b39441ad54988bd18b90"
+  },
+  "verification_plan": {
+    "original_lock_timestamp_utc": "2026-10-05T19:44:36Z",
+    "original_pre_extraction_sha256": "c6b50d497d88801cd7b00d170c12eca4965edb987a61a8f4835a731ec7dc8de7",
+    "final_plan_with_pre_normalization_addendum_sha256": "c9ddaf4e321ab3c99876c2ded44dd9cbb7b851302cef7cd8d6bbcb1306bb93f9",
+    "change_reason": "Declared public TSV asset and display-sort suffix encoding discovered after embed inspection; recorded explicitly before normalization. No count or acceptance threshold relaxed."
+  }
+}

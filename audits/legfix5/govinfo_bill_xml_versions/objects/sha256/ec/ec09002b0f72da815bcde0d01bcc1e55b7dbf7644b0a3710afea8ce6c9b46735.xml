@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" bill-type="olc" dms-id="H1A7E780FE2AA40659778BA9904FFC3D7" key="H" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 987 RH: Marketing and Outreach Restoration to Empower Health Education Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IB</distribution-code>
+		<calendar display="yes">Union Calendar No. 31</calendar>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 987</legis-num>
+		<associated-doc display="yes" role="report">[Report No. 116–53, Part I]</associated-doc>
+		<current-chamber display="yes">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+		<action display="yes">
+			<action-date date="20190206">February 6, 2019</action-date>
+			<action-desc><sponsor name-id="B001303">Ms. Blunt Rochester</sponsor> (for herself, <cosponsor name-id="C001066">Ms. Castor of Florida</cosponsor>, <cosponsor name-id="M001208">Mrs. McBath</cosponsor>, and <cosponsor name-id="K000380">Mr. Kildee</cosponsor>) introduced the following bill; which was referred to the <committee-name added-display-style="italic" committee-id="HIF00" deleted-display-style="strikethrough">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HBU00">the Budget</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc>
+		</action>
+		<action><action-date>May 10, 2019</action-date><action-desc>Additional sponsors: <cosponsor name-id="W000800">Mr. Welch</cosponsor>, <cosponsor name-id="S001145">Ms. Schakowsky</cosponsor>, <cosponsor name-id="L000570">Mr. Luján</cosponsor>, <cosponsor name-id="R000515">Mr. Rush</cosponsor>, <cosponsor name-id="E000215">Ms. Eshoo</cosponsor>, <cosponsor name-id="P000034">Mr. Pallone</cosponsor>, <cosponsor name-id="M001163">Ms. Matsui</cosponsor>, <cosponsor name-id="V000133">Mr. Van Drew</cosponsor>, <cosponsor name-id="C001067">Ms. Clarke of New York</cosponsor>, <cosponsor name-id="M001143">Ms. McCollum</cosponsor>, <cosponsor name-id="S001185">Ms. Sewell of Alabama</cosponsor>, <cosponsor name-id="P000604">Mr. Payne</cosponsor>, <cosponsor name-id="W000797">Ms. Wasserman Schultz</cosponsor>, <cosponsor name-id="S001180">Mr. Schrader</cosponsor>, <cosponsor name-id="M001207">Ms. Mucarsel-Powell</cosponsor>, <cosponsor name-id="C001123">Mr. Cisneros</cosponsor>, <cosponsor name-id="S001165">Mr. Sires</cosponsor>, <cosponsor name-id="H001085">Ms. Houlahan</cosponsor>, <cosponsor name-id="D000624">Mrs. Dingell</cosponsor>, <cosponsor name-id="S001205">Ms. Scanlon</cosponsor>, <cosponsor name-id="M001160">Ms. Moore</cosponsor>, and <cosponsor name-id="K000389">Mr. Khanna</cosponsor></action-desc></action><action>
+			<action-date>May 10, 2019</action-date>
+			<action-desc>Reported from the <committee-name added-display-style="italic" committee-id="HIF00" deleted-display-style="strikethrough">Committee on Energy and Commerce</committee-name> with an amendment</action-desc>
+			<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+		</action>
+		<action><action-date>May 10, 2019</action-date><action-desc><committee-name committee-id="HBU00">Committee on the Budget</committee-name> discharged; committed to the Committee of the Whole House on the State of the Union and ordered to
+			 be printed</action-desc><action-instruction>For text of introduced bill, see copy of bill as introduced on February 6, 2019</action-instruction></action><action display="yes">
+			<action-desc display="yes"><pagebreak></pagebreak></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title display="yes">To amend the Patient Protection and Affordable Care Act to provide for Federal Exchange outreach
+			 and educational activities.<pagebreak></pagebreak></official-title>
+	</form>
+	<legis-body changed="added" committee-id="HIF00" display-enacting-clause="yes-display-enacting-clause" id="HD5806DAEE62B4D3F97085F6D6D2B1FE5" reported-display-style="italic" style="OLC">
+ <section id="HB1BE05995A4C48789A8A0A3662680A50" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Marketing and Outreach Restoration to Empower Health Education Act of 2019</short-title></quote> or the <quote><short-title>MORE Health Education Act</short-title></quote>.</text> </section><section id="H83F4383752524DBDB9499F12EEA6E52C"><enum>2.</enum><header>Federal Exchange outreach and educational activities</header><text display-inline="no-display-inline">Section 1321(c) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18041">42 U.S.C. 18041(c)</external-xref>) is amended by adding at the end the following new paragraph:</text>
+			<quoted-block changed="added" committee-id="HIF00" display-inline="no-display-inline" id="HCB6573826A954F2380A9644B58A19766" reported-display-style="italic" style="OLC">
+				<paragraph id="H3F2856995376427C85778C7CDB07C089"><enum>(3)</enum><header>Outreach and educational activities</header>
+ <subparagraph id="H466A53A61BAF42E4BA810A971AE4CA66"><enum>(A)</enum><header>In general</header><text display-inline="yes-display-inline">In the case of an Exchange established or operated by the Secretary within a State pursuant to this subsection, the Secretary shall carry out outreach and educational activities for purposes of informing individuals about qualified health plans offered through the Exchange, including by informing such individuals of the availability of coverage under such plans and financial assistance for coverage under such plans. Such outreach and educational activities shall be provided in a manner that is culturally and linguistically appropriate to the needs of the populations being served by the Exchange (including hard-to-reach populations, such as racial and sexual minorities, limited English proficient populations, and young adults).</text>
+ </subparagraph><subparagraph id="H4E75B352D4594224A3523B28FE6BB098"><enum>(B)</enum><header>Limitation on use of funds</header><text display-inline="yes-display-inline">No funds appropriated under this paragraph shall be used for expenditures for promoting non-ACA compliant health insurance coverage.</text>
+ </subparagraph><subparagraph id="HE10E6C4BD23945A193FFF6646716103D"><enum>(C)</enum><header>Non-ACA compliant health insurance coverage</header><text>For purposes of this subparagraph (B):</text> <clause id="HFF6CA31AF58B45949AF3AD28A03BF301"><enum>(i)</enum><text>The term <term>non-ACA compliant health insurance coverage</term> means health insurance coverage, or a group health plan, that is not a qualified health plan.</text>
+ </clause><clause id="H04F881B475DB49038041D37F4343703F"><enum>(ii)</enum><text>Such term includes the following:</text> <subclause id="HCD1648FDF118470BBB15B0DFAD2509F8"><enum>(I)</enum><text>An association health plan.</text>
+ </subclause><subclause id="H4A91FD5C74154453973428BB562A4B57"><enum>(II)</enum><text>Short-term limited duration insurance.</text> </subclause></clause></subparagraph><subparagraph id="H65753A7349194A25AED0CC882228B883"><enum>(D)</enum><header>Funding</header><text display-inline="yes-display-inline">Out of any funds in the Treasury not otherwise appropriated, there are hereby appropriated for fiscal year 2020 and each subsequent fiscal year, $100,000,000 to carry out this paragraph. Funds appropriated under this subparagraph shall remain available until expended.</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block>
+ </section><section id="HB786059F1F4B479991AEE2A64B1AD9BC"><enum>3.</enum><header>Determination of budgetary effects</header><text display-inline="no-display-inline">The budgetary effects of this Act, for the purpose of complying with the Statutory Pay-As-You-Go Act of 2010, shall be determined by reference to the latest statement titled <quote>Budgetary Effects of PAYGO Legislation</quote> for this Act, submitted for printing in the Congressional Record by the Chairman of the House Budget Committee, provided that such statement has been submitted prior to the vote on passage.</text>
+		</section></legis-body>
+	<endorsement display="yes">
+		<action-date>May 10, 2019</action-date>
+		<action-desc>Reported from the <committee-name added-display-style="italic" committee-id="HIF00" deleted-display-style="strikethrough">Committee on Energy and Commerce</committee-name> with an amendment</action-desc><action-date>May 10, 2019</action-date><action-desc><committee-name committee-id="HBU00">Committee on the Budget</committee-name> discharged; committed to the Committee of the Whole House on the State of the Union and ordered to
+			 be printed</action-desc></endorsement>
+</bill>
+
+

@@ -1,0 +1,98 @@
+== before landing_v3_ids: a tree that holds what LIVE held before it (the apply refuses, writes nothing)
+PASS  the tree differs from LIVE-now in the 6 files landing_v3_ids touches that v4 edits
+PASS  dry run on LIVE-before-landing_v3_ids: rc=2, REFUSED
+      MISMATCH edit fec/surfaces/staffer_closeness_routes.py                           expected 02922dffd027  actual 990838332bde
+      MISMATCH edit fec/surfaces/staffer_live/README.md                                expected 8efd198264c8  actual af8934ade0fe
+      MISMATCH edit fec/surfaces/staffer_live/staffer-inventory-worker.js              expected 4a420d5fdff8  actual 7a4960d7d5ab
+      MISMATCH edit fec/surfaces/staffer_live/staffer-live.js                          expected 5c479e200b84  actual bf1c11a20ca7
+      MISMATCH edit fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs         expected 900e0523f0da  actual (absent)
+      MISMATCH edit fec/tests/surfaces/test_staffer_live_query_ids.cjs                 expected ed319888f16b  actual (absent)
+      REFUSED: this patch is cut against the bytes LIVE holds after landing_v2 and landing_v3_ids are applied. Required first: landing_v2 (route_latency.patch) and landing_v3_ids (ids_followup.patch) applied to LIVE. Apply them first, or find what changed these files:
+        - fec/surfaces/staffer_closeness_routes.py does not hold its pre-image (LIVE working file now = landing_v3_ids post-image)
+        - fec/surfaces/staffer_live/README.md does not hold its pre-image (LIVE working file now = landing_v3_ids post-image)
+        - fec/surfaces/staffer_live/staffer-inventory-worker.js does not hold its pre-image (LIVE working file now = landing_v3_ids post-image)
+        - fec/surfaces/staffer_live/staffer-live.js does not hold its pre-image (LIVE working file now = landing_v3_ids post-image)
+        - fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs is missing (its pre-image is LIVE working file now = landing_v3_ids post-image)
+        - fec/tests/surfaces/test_staffer_live_query_ids.cjs is missing (its pre-image is LIVE working file now = landing_v3_ids post-image)
+PASS  --apply on LIVE-before-landing_v3_ids: rc=2, REFUSED
+PASS  nothing was written (every hash is as it was, new files still absent)
+
+== a tree that holds both landings except for one file v4 edits (a moved target)
+PASS  --apply on a moved target: rc=2, MISMATCH named fec/staffer_network/closeness_math.py
+PASS  nothing was written, the other files included
+
+== after both landings: a tree that holds their post-images (LIVE as it is now)
+      ok      edit fec/staffer_network/closeness_math.py                              expected dc3a630ffaaf  actual dc3a630ffaaf
+      ok      edit fec/surfaces/staffer_closeness_routes.py                           expected 02922dffd027  actual 02922dffd027
+      ok      edit fec/surfaces/staffer_distinct_routes.py                            expected 41a0edb6e390  actual 41a0edb6e390
+      ok      edit fec/surfaces/staffer_live/README.md                                expected 8efd198264c8  actual 8efd198264c8
+      ok      edit fec/surfaces/staffer_live/staffer-inventory-worker.js              expected 4a420d5fdff8  actual 4a420d5fdff8
+      ok      edit fec/surfaces/staffer_live/staffer-live.js                          expected 5c479e200b84  actual 5c479e200b84
+      ok      edit fec/surfaces/staffer_live/staffer-route.js                         expected 77a7c19904f4  actual 77a7c19904f4
+      ok      edit fec/surfaces/staffer_live_service.py                               expected f311203438a6  actual f311203438a6
+      ok      edit fec/surfaces/staffer_routing.py                                    expected 05fa3f38b029  actual 05fa3f38b029
+      ok      edit fec/surfaces/staffer_work_sources.py                               expected a454872caa50  actual a454872caa50
+      ok      edit fec/surfaces/test_staffer_closeness_bidirectional.py               expected 85b3eb48eaa8  actual 85b3eb48eaa8
+      ok      new  fec/tests/surfaces/staffer_unreachable_hint_contract.cjs           expected (absent)  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_contact_group.py                   expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs         expected 900e0523f0da  actual 900e0523f0da
+      ok      new  fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs expected (absent)  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_left_out_staff.cjs                 expected (absent)  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_live_query_committee_names.cjs     expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_live_query_ids.cjs                 expected ed319888f16b  actual ed319888f16b
+      ok      new  fec/tests/surfaces/test_staffer_office_covered_staff.py            expected (absent)  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_payroll_people.py                  expected (absent)  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_prewarm.py                         expected (absent)  actual (absent)
+      ok      edit fec/tests/surfaces/test_staffer_route_jobs.py                      expected 7fda7c29754f  actual 7fda7c29754f
+      ok      edit fec/tests/surfaces/test_staffer_route_models.cjs                   expected 30f80af798a0  actual 30f80af798a0
+      ok      new  fec/tests/surfaces/test_staffer_row_equality.py                    expected (absent)  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_unreachable_hint.cjs               expected (absent)  actual (absent)
+      ok      new  fec/tests/surfaces/test_staffer_unreachable_hint.py                expected (absent)  actual (absent)
+      dry run (git apply --check, read-only): rc=0
+PASS  dry run: rc=0
+PASS  the dry run wrote nothing
+      apply_to: {'ok': True, 'reason': '', 'check_rc': 0, 'apply_rc': 0, 'mismatches': []}
+PASS  --apply: rc=0
+PASS  every post-image hash matches the manifest (26 files)
+PASS  a second --apply is refused (the targets moved): rc=2
+PASS     and it changed nothing
+
+== rollback_landing.py on that tree
+      restore pre-image  fec/staffer_network/closeness_math.py
+      restore pre-image  fec/surfaces/staffer_closeness_routes.py
+      restore pre-image  fec/surfaces/staffer_distinct_routes.py
+      restore pre-image  fec/surfaces/staffer_live/README.md
+      restore pre-image  fec/surfaces/staffer_live/staffer-inventory-worker.js
+      restore pre-image  fec/surfaces/staffer_live/staffer-live.js
+      restore pre-image  fec/surfaces/staffer_live/staffer-route.js
+      restore pre-image  fec/surfaces/staffer_live_service.py
+      restore pre-image  fec/surfaces/staffer_routing.py
+      restore pre-image  fec/surfaces/staffer_work_sources.py
+      restore pre-image  fec/surfaces/test_staffer_closeness_bidirectional.py
+      remove new file    fec/tests/surfaces/staffer_unreachable_hint_contract.cjs
+      remove new file    fec/tests/surfaces/test_staffer_contact_group.py
+      restore pre-image  fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs
+      remove new file    fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs
+      remove new file    fec/tests/surfaces/test_staffer_left_out_staff.cjs
+      remove new file    fec/tests/surfaces/test_staffer_live_query_committee_names.cjs
+      restore pre-image  fec/tests/surfaces/test_staffer_live_query_ids.cjs
+      remove new file    fec/tests/surfaces/test_staffer_office_covered_staff.py
+      remove new file    fec/tests/surfaces/test_staffer_payroll_people.py
+      remove new file    fec/tests/surfaces/test_staffer_prewarm.py
+      restore pre-image  fec/tests/surfaces/test_staffer_route_jobs.py
+      restore pre-image  fec/tests/surfaces/test_staffer_route_models.cjs
+      remove new file    fec/tests/surfaces/test_staffer_row_equality.py
+      remove new file    fec/tests/surfaces/test_staffer_unreachable_hint.cjs
+      remove new file    fec/tests/surfaces/test_staffer_unreachable_hint.py
+      plan only; rerun with --rollback to restore
+PASS  plan only: rc=0
+PASS  the plan wrote nothing
+PASS  a file edited after the apply stops the rollback and nothing changes: rc=1
+PASS     (the edited file and the rest are untouched)
+      rolled back 26 files
+PASS  --rollback: rc=0
+PASS  every pre-image is back, byte for byte (15 files)
+PASS  the 11 new files are gone
+PASS  a second rollback changes nothing
+
+result: ALL PASS

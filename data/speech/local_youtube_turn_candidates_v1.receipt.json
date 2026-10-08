@@ -1,0 +1,28 @@
+{
+  "contract": {
+    "deterministic_literal_pre_span_name_recovery_allowed": true,
+    "generic_state_or_title_is_identity_evidence": false,
+    "literal_full_name_or_fuzzy_asr_name_required": true,
+    "screening_is_final_identity_acceptance": false,
+    "two_second_span_inset_required": true
+  },
+  "coverage": {
+    "classifier_errors": 0,
+    "hard_signal_turn_candidates": 18,
+    "members_with_candidates": 16,
+    "prospective_exact_windows": 852,
+    "rows": 32
+  },
+  "generated_at": "2026-08-31T16:05:17.056822+00:00",
+  "input": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\local_youtube_holdings_asr_v1.jsonl",
+    "sha256": "18c705fad5208b2623f24b5c4147262b852ee49c76e052ac12fcaad1f08aaac6"
+  },
+  "model": "claude-haiku-4-5",
+  "output": {
+    "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\local_youtube_turn_candidates_v1.jsonl",
+    "sha256": "e724d093c5e7cd3e4d7a7e4680cec400d18998b5675e1087f3f9a696b883b8da"
+  },
+  "schema": "local-youtube-turn-candidate-receipt-v1",
+  "status": "PASS_SCREENING_ONLY"
+}

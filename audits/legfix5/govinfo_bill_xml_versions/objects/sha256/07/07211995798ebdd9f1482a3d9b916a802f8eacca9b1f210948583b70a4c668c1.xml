@@ -1,0 +1,391 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-ROS25K20-TLJ-56-W6X">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S3150 IS: Guaranteeing Access and Innovation for National Artificial Intelligence Act of 2025</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2025-11-06</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+        <distribution-code>II</distribution-code>
+        <congress>119th CONGRESS</congress>
+        <session>1st Session</session>
+        <legis-num>S. 3150</legis-num>
+        <current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+        <action>
+            <action-date date="20251106">November 6, 2025</action-date>
+            <action-desc><sponsor name-id="S429">Mr. Banks</sponsor> (for himself, <cosponsor name-id="S366">Ms. Warren</cosponsor>, <cosponsor name-id="S374">Mr.
+                    Cotton</cosponsor>, <cosponsor name-id="S270">Mr. Schumer</cosponsor>,
+                    <cosponsor name-id="S433">Mr. McCormick</cosponsor>, and <cosponsor name-id="S337">Mr. Coons</cosponsor>) introduced the following bill; which was
+                read twice and referred to the <committee-name committee-id="SSBK00">Committee on
+                    Banking, Housing, and Urban Affairs</committee-name></action-desc>
+        </action>
+        <legis-type>A BILL</legis-type>
+        <official-title>To require entities seeking a license to export advanced artificial
+            intelligence chips to countries of concern to certify that United States persons have
+            priority in acquiring those chips.</official-title>
+    </form>
+    <legis-body>
+        <section id="S1" section-type="section-one">
+            <enum>1.</enum>
+            <header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Guaranteeing Access and Innovation for National Artificial Intelligence Act of 2025</short-title></quote> or the <quote><short-title>GAIN AI Act of 2025</short-title></quote>.</text>
+        </section>
+        <section id="id9ff7d3bdb58c494e8a9ac49d46e79aa3">
+            <enum>2.</enum>
+            <header>Prohibition on prioritizing countries of concern over United States persons for
+                exports of advanced integrated circuits</header>
+ <text display-inline="no-display-inline">Part I of the Export Control Reform Act of 2018 (<external-xref legal-doc="usc" parsable-cite="usc/50/4811">50 U.S.C. 4811 et seq.</external-xref>) is amended by inserting after section 1758 the following:</text>
+            <quoted-block style="OLC" display-inline="no-display-inline" id="ida6c7e4db0198480489cf7bf1db965e7d">
+                <section id="idb4cf4733062e4f1c935e434cb634a5ec">
+                    <enum>1758A.</enum>
+                    <header>Control of exports of advanced integrated circuits</header>
+                    <subsection commented="no" display-inline="no-display-inline"
+                        id="id9190589cce7d460cb047466632546dd6">
+                        <enum>(a)</enum>
+                        <header>Definitions</header>
+ <text>In this section:</text> <paragraph id="id0aa4f4450e9f42fdb2bdf551df71abde" commented="no"> <enum>(1)</enum> <header>Advanced integrated circuit</header> <subparagraph id="id19ec700bff8c470d8497984c4ec8dec2" commented="no"> <enum>(A)</enum> <header>In general</header> <text>Subject to subparagraph (B), the term <term>advanced integrated circuit</term> means—</text>
+                                <clause id="id1cbb017f3f7a4b18ba8c3acd8a4c393f" commented="no">
+                                    <enum>(i)</enum>
+ <text>an integrated circuit, computer, or other product—</text> <subclause commented="no" display-inline="no-display-inline" id="id8f19a7d648b048a990376df488e28a1e"> <enum>(I)</enum> <text display-inline="yes-display-inline">classified under Export Control Classification Number 3A090 or 4A090 or related Export Control Classification Numbers; or</text>
+                                    </subclause>
+                                    <subclause commented="no" display-inline="no-display-inline"
+                                        id="idd13ef41ab4154fbe963dc643c56352a6">
+                                        <enum>(II)</enum>
+ <text display-inline="yes-display-inline">that is functionally equivalent or substantially similar to a circuit, computer, or product described in subclause (I); or</text>
+                                    </subclause>
+                                </clause>
+                                <clause id="id657f99e8f0054a0c89acb8d8e94519fd" commented="no">
+                                    <enum>(ii)</enum>
+ <text>an integrated circuit that has one or more digital processing units with—</text>
+                                    <subclause id="id76622c02ef9949fb8ab48175894eecad"
+                                        commented="no">
+                                        <enum>(I)</enum>
+ <text>a total processing performance of 4,800 or more;</text>
+                                    </subclause>
+                                    <subclause id="id9dbf089b2f2d4708a2ae6eda4b2de8c6"
+                                        commented="no">
+                                        <enum>(II)</enum>
+ <text>a total processing performance of 2,400 or more and a performance density of 1.6 or more;</text>
+                                    </subclause>
+                                    <subclause id="id2a7ff2fe1fc6466484a2798506c0b1ee"
+                                        commented="no">
+                                        <enum>(III)</enum>
+ <text>a total processing performance of 1,600 or more and a performance density of 3.2 or more; or</text>
+                                    </subclause>
+                                    <subclause id="id6d853bae93b641babe28c2ef86428c88"
+                                        commented="no">
+                                        <enum>(IV)</enum>
+ <text>a total DRAM bandwidth of 1,400 gigabytes per second or more, interconnect bandwidth of 1,100 gigabytes per second or more, or a sum of DRAM bandwidth and interconnect bandwidth of 1,700 gigabytes per second or more.</text>
+                                    </subclause>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="id8cbdf88263e34ed0bffc0a01e0350c92" commented="no">
+                                <enum>(B)</enum>
+                                <header>Authority to update technical parameters</header>
+ <text>Beginning 36 months after the date of the enactment of this section, the Under Secretary may add new technical parameters for the definition of <quote>advanced integrated circuit</quote> for purposes of this section following publication of the parameters in the Federal Register and a period of public notice and comment.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="id49002e3e80e944528389fd309bbaf12b" commented="no">
+                            <enum>(2)</enum>
+                            <header>Backlog of requests</header>
+ <text>The term <term>backlog of requests</term>, in the case of a person submitting an application for a license under subsection (b), means the person has received a request from a United States person for a covered circuit or product that—</text>
+                            <subparagraph id="idcf212e924cf94f68bcf1b531027f69c0" commented="no">
+                                <enum>(A)</enum>
+ <text>is formally documented through—</text> <clause id="idba2641c82eab4121926424262138cddf" commented="no"> <enum>(i)</enum> <text>a purchase order or enforceable contract; or</text>
+                                </clause>
+                                <clause id="id8567ba8750904e99a6c01beb1a94ec5c" commented="no">
+                                    <enum>(ii)</enum>
+ <text>any other format consistent with ordinary commercial practice that specifies quantity, price, and time frame of delivery; and</text>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="id222f1a47c57942fba510566a7ccb61ea" commented="no">
+                                <enum>(B)</enum>
+ <text>the person has not fulfilled or will not be able to fulfill the request within a time frame consistent with commercially standard production and delivery lead times.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="idd5b5f7311afc41a78459c5504283aad2" commented="no">
+                            <enum>(3)</enum>
+                            <header>Commerce Control List</header>
+ <text>The term <term>Commerce Control List</term> means the list set forth in Supplement No. 1 to part 774 of the Export Administration Regulations.</text>
+                        </paragraph>
+                        <paragraph id="idcf76855746b24747aa81832b93feced5" commented="no">
+                            <enum>(4)</enum>
+                            <header>Country of concern</header>
+ <text>The term <term>country of concern</term> means—</text> <subparagraph id="id777d28f8465d448983581d6072d8c060"> <enum>(A)</enum> <text>a country listed in Country Group D:5 or E in Supplement No. 1 to part 740 of the Export Administration Regulations;</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="id9bc947ffe7c54852a39eaa764f4faa80">
+                                <enum>(B)</enum>
+ <text display-inline="yes-display-inline">the Macau Special Administrative Region of the People’s Republic of China; or</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="idb1b24adb46204a598ea7dbf01be8a9b9">
+                                <enum>(C)</enum>
+ <text display-inline="yes-display-inline">the Hong Kong Special Administrative Region of the People’s Republic of China.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph commented="no" display-inline="no-display-inline"
+                            id="idc7c66b1eb7f2451ebed051fe6060dcf4">
+                            <enum>(5)</enum>
+                            <header>Covered circuit or product</header>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="id8229bd8b8700420d9ef0775dc31d2df2">
+                                <enum>(A)</enum>
+                                <header>In general</header>
+ <text display-inline="yes-display-inline">Except as provided by subparagraph (B), the term <term>covered circuit or product</term> means an advanced integrated circuit or a product containing such a circuit.</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="idbf4d973cf169405baa62b2ce89ee9b8c">
+                                <enum>(B)</enum>
+                                <header>Exclusion</header>
+ <text>The term <term>covered circuit or product</term> does not include an advanced integrated circuit or a product containing such a circuit that is not designed or marketed for data centers.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="idc3bffc83798e43bdafb3a37875904888" commented="no"
+                            display-inline="no-display-inline">
+                            <enum>(6)</enum>
+                            <header display-inline="yes-display-inline">Performance density; total
+                                processing performance</header>
+ <text display-inline="yes-display-inline">The terms <term>performance density</term> and <term>total processing performance</term> have the meanings given those terms in, and are calculated as provided for under, Export Control Classification Number 3A090 in the Commerce Control List set forth in Supplement No. 1 to part 774 of the Export Administration Regulations.</text>
+                        </paragraph>
+                        <paragraph id="id689e50a1adf448c8b2582487f19307e8" commented="no">
+                            <enum>(7)</enum>
+                            <header>Trusted United States person</header>
+ <text>The term <term>trusted United States person</term> means any United States person designated as a trusted United States person pursuant to subsection (d)(2).</text>
+                        </paragraph>
+                    </subsection>
+                    <subsection id="id338644070eb04a8bbcf07341346d64aa">
+                        <enum>(b)</enum>
+                        <header>License requirement</header>
+ <text>The Under Secretary of Commerce for Industry and Security shall require a license for the export, reexport, or in-country transfer of a covered circuit or product to an entity that is located or headquartered in, or the ultimate parent company of which is headquartered in, a country of concern.</text>
+                    </subsection>
+                    <subsection id="idd3741d533c254768a08716894c78bd26">
+                        <enum>(c)</enum>
+                        <header>Certification of priority for United States customers for certain
+                            advanced integrated circuits</header>
+                        <paragraph id="idfe31c16bc41e42f5a0e18ac090703f3e">
+                            <enum>(1)</enum>
+                            <header>Certification requirement</header>
+ <text>The Under Secretary shall require a person submitting an application for a license under subsection (b) for the export, reexport, or in-country transfer of a covered circuit or product to an entity described in subsection (b) to certify in the application that—</text>
+                            <subparagraph id="id373bda6e114b4f3ea3a4ecf246e6157b">
+                                <enum>(A)</enum>
+ <text>United States persons had a right of first refusal for the covered circuit or product, which means the person submitting the application—</text>
+                                <clause id="id5f287f5aff4a45eb9312473908e4cfe6">
+                                    <enum>(i)</enum>
+ <text>provided, through a public notice, United States persons with the opportunity to inquire about purchasing a covered circuit or product that would otherwise be sold to an entity described in subsection (b);</text>
+                                </clause>
+                                <clause commented="no" display-inline="no-display-inline"
+                                    id="id6a80a91e29b241028279582c6a00ad53">
+                                    <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">provided not fewer than 15 business days for a United States person to inquire and request to purchase the covered circuit or product; and</text>
+                                </clause>
+                                <clause id="idbccccc2d9e4a4af8a7798aaf031566af">
+                                    <enum>(iii)</enum>
+ <text>provided preference to a United States person submitting an inquiry under clause (i) if the United States person—</text>
+                                    <subclause id="idc6d5cb12f85b4322b00fd19ded5a9fd9">
+                                        <enum>(I)</enum>
+ <text>requests to purchase the full quantity or a lesser quantity of the covered circuit or product offered by the person submitting the application; and</text>
+                                    </subclause>
+                                    <subclause id="id5ba3b75463cc42849cb7b4030a395ed4">
+                                        <enum>(II)</enum>
+ <text>takes material steps to complete the purchase within 15 business days of requesting to purchase the covered circuit or product; and</text>
+                                    </subclause>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph id="idf5ed58b5b25d4a28b5d9a0c3fd64b603">
+                                <enum>(B)</enum>
+ <text>the person submitting the application—</text> <clause commented="no" display-inline="no-display-inline" id="id9607dddc796943f7921c044ec634e229"> <enum>(i)</enum> <text display-inline="yes-display-inline">has no current backlog of requests from United States persons for the covered circuit or product or a comparable circuit or product that utilizes substantially similar production process, infrastructure, or supply;</text>
+                                </clause>
+                                <clause commented="no" display-inline="no-display-inline"
+                                    id="idae9137811ed443ab9111b32f4c15ede2">
+                                    <enum>(ii)</enum>
+ <text display-inline="yes-display-inline">cannot reasonably foresee, based on material information known to the person, including information disclosed to investors or shareholders or in public filings, the production and export, reexport, or in-country transfer of the covered circuit or product resulting, during the 12-month period following the export, reexport, or in-country transfer, in—</text>
+                                    <subclause commented="no" display-inline="no-display-inline"
+                                        id="idb941bc75e4fc486797fac08671ffb6b3">
+                                        <enum>(I)</enum>
+ <text display-inline="yes-display-inline">such a backlog; or</text>
+                                    </subclause>
+                                    <subclause commented="no" display-inline="no-display-inline"
+                                        id="idf6ec16375ef344baabedbd66b1dd849f">
+                                        <enum>(II)</enum>
+ <text display-inline="yes-display-inline">a reduction in critical production capacity for the production of a covered circuit or product or a substantially similar circuit or product that utilizes substantially similar production process, infrastructure, or supply for United States persons; and</text>
+                                    </subclause>
+                                </clause>
+                                <clause id="id7782b1e2aaff40e48fb098c45c43610c">
+                                    <enum>(iii)</enum>
+ <text>is not providing advantageous pricing or terms for the covered circuit or product to foreign persons that the person is not providing to United States persons.</text>
+                                </clause>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="id56d46bf53a434d339883f5f425a23bcf">
+                            <enum>(2)</enum>
+                            <header>Denial of applications without certification</header>
+ <text>If a certification described in paragraph (1) is not submitted with an application for a license required under subsection (b), the Under Secretary shall deny the license.</text>
+                        </paragraph>
+                        <paragraph id="idc8f236a95aa643ac9e30bb71f13220b8">
+                            <enum>(3)</enum>
+                            <header>Implementation</header>
+ <text>Not later than 90 days after the date of the enactment of this section, the Under Secretary shall—</text>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="id38c6d154dd82433490329f89c621a30c">
+                                <enum>(A)</enum>
+ <text display-inline="yes-display-inline">seek input from the public regarding compliance with the certification requirements under paragraph (1); and</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="id19885edca6f040179a22faaef3d5424d">
+                                <enum>(B)</enum>
+ <text display-inline="yes-display-inline">based on such input, prescribe regulations providing guidance for compliance with the certification requirements, which shall include—</text>
+                                <clause id="id5e119fc226b34024ad8f1a5bc6abfc17" commented="no">
+                                    <enum>(i)</enum>
+ <text>information that the person submitting an application for a license under subsection (b) is required to make available about transactions with entities described in subsection (b) to ensure that United States persons can exercise a right-of-first-refusal under paragraph (1)(A);</text>
+                                </clause>
+                                <clause id="ida9c070119d4f4858902bb79bc099dc70" commented="no">
+                                    <enum>(ii)</enum>
+ <text>procedures for United States persons to exercise such a right-of-first-refusal, including—</text>
+                                    <subclause commented="no" display-inline="no-display-inline"
+                                        id="id42e34f42875640b8a4afddb8288f6fc0">
+                                        <enum>(I)</enum>
+ <text display-inline="yes-display-inline">the procedural requirements for public notice under paragraph (1)(A)(i); and</text>
+                                    </subclause>
+                                    <subclause commented="no" display-inline="no-display-inline"
+                                        id="id88bc861501b24edcb275a8efc93cff8b">
+                                        <enum>(II)</enum>
+ <text>guidance on when a United States person should inform the Under Secretary of Commerce for Industry and Security that the person is seeking to exercise the right-of-first-refusal under paragraph (1)(A);</text>
+                                    </subclause>
+                                </clause>
+                                <clause id="ida017e4e71c2d41a0a87cb8ae286398f5" commented="no">
+                                    <enum>(iii)</enum>
+ <text>conditions upon which a person submitting an application for a license under subsection (b) may proceed with the export, reexport, or in-country transfer of the covered circuit or product if a request from a United States person under paragraph (1)(A) to purchase the covered circuit or product was not made in good faith or completed in a timely manner;</text>
+                                </clause>
+                                <clause id="idcc00e54c0e4b4afa813051e5f4b7c280" commented="no">
+                                    <enum>(iv)</enum>
+ <text>recordkeeping requirements;</text> </clause> <clause id="id900044c8f7c44e45bac27bb6c205557b" commented="no"> <enum>(v)</enum> <text>penalties for misrepresentation and concealment of material facts; and</text>
+                                </clause>
+                                <clause id="id9c3f2ebc02424a878a86df2a7b6db578" commented="no">
+                                    <enum>(vi)</enum>
+ <text>guidance with respect to determining whether—</text> <subclause id="idc971816fcb3545bebba57048e8576e10" commented="no"> <enum>(I)</enum> <text>a United States person exercising the right-of-first-refusal has taken a material step under paragraph (1)(A)(iii)(II);</text>
+                                    </subclause>
+                                    <subclause commented="no" display-inline="no-display-inline"
+                                        id="ide07ecc59996444ffb79cee8f52069680">
+                                        <enum>(II)</enum>
+ <text display-inline="yes-display-inline">the export, reexport, or in-country transfer of a covered circuit or product would create—</text>
+                                        <item id="id20e071c4f29e498c9e3a35764cee7ba6" commented="no">
+                                            <enum>(aa)</enum>
+ <text>a backlog of requests described in paragraph (1)(B)(i); or</text>
+                                        </item>
+                                        <item id="id1a00617b0e644f1e946369c1a8394765" commented="no">
+                                            <enum>(bb)</enum>
+ <text>a reduction in critical production capacity described in paragraph (1)(B)(ii)(II); and</text>
+                                        </item>
+                                    </subclause>
+                                    <subclause id="idb1581f80f9cb4808938dc9a7447f61a8"
+                                        commented="no">
+                                        <enum>(III)</enum>
+ <text>the person selling the circuit or product is providing advantageous pricing or terms to foreign persons as described in paragraph (1)(B)(iii).</text>
+                                    </subclause>
+                                </clause>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph commented="no" display-inline="no-display-inline"
+                            id="id6b10510726034537ad1b1012fe916ed8">
+                            <enum>(4)</enum>
+                            <header>Rules of construction</header>
+ <text display-inline="yes-display-inline">Nothing in this subsection shall be construed—</text>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="id1529b37ab17148f899cb05226d1af3f0">
+                                <enum>(A)</enum>
+ <text display-inline="yes-display-inline">in the case of more than one United States person requesting to purchase a covered circuit or product under paragraph (1)(A)(iii), to authorize the Under Secretary of Commerce for Industry and Security, or any other Federal official, to allocate, prioritize, or otherwise select one United States person over any other United States person submitting such a request;</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="id027a2a03b0634cc78598381d4ef28e60">
+                                <enum>(B)</enum>
+ <text>to require a person submitting an application for a license under subsection (b) to publicly disclose commercially sensitive or proprietary information, including—</text>
+                                <clause commented="no" display-inline="no-display-inline"
+                                    id="id61c727f4710a43b784895bdb0d00a676">
+                                    <enum>(i)</enum>
+ <text display-inline="yes-display-inline">customer identities;</text>
+                                </clause>
+                                <clause commented="no" display-inline="no-display-inline"
+                                    id="id259d189716c34517bd554a86830a01ae">
+                                    <enum>(ii)</enum>
+ <text>contract terms;</text> </clause> <clause commented="no" display-inline="no-display-inline" id="ided97d4b4b0d0485fb2466057c61732a2"> <enum>(iii)</enum> <text>delivery schedules; or</text>
+                                </clause>
+                                <clause commented="no" display-inline="no-display-inline"
+                                    id="id4bd5fb4718224283be30e9d93258d261">
+                                    <enum>(iv)</enum>
+ <text>pricing data; or</text> </clause> </subparagraph> <subparagraph commented="no" display-inline="no-display-inline" id="id9d541c1f233a4f82b05c5fed54ca3a40"> <enum>(C)</enum> <text>as applying to a covered circuit product that is designed and manufactured exclusively for internal use.</text>
+                            </subparagraph>
+                        </paragraph>
+                    </subsection>
+                    <subsection id="id2ff242b0cc41413e9ea7e55552b0a9c2">
+                        <enum>(d)</enum>
+                        <header>Exemption from certain license requirement for trusted United States
+                            persons</header>
+                        <paragraph id="idd119d0ff83ca42f9a59d44369260ef2a">
+                            <enum>(1)</enum>
+                            <header>In general</header>
+ <text>The requirement for a license under sections 742.4 and 744.23 of the Export Administration Regulations shall not apply to the export, reexport, or in-country transfer of a covered circuit or product if the covered circuit or product—</text>
+                            <subparagraph id="id44999ef5a9d745d6b981ab8417d9310d">
+                                <enum>(A)</enum>
+ <text>is destined for a country that is not a country of concern; and</text>
+                            </subparagraph>
+                            <subparagraph id="id48e3018462304c56b5ece4b22a87cf38">
+                                <enum>(B)</enum>
+ <text>remains under the ownership and control of a trusted United States person once the covered circuit or product is in operation.</text>
+                            </subparagraph>
+                        </paragraph>
+                        <paragraph id="id13b0bb3bab864ad9968076397eaee7cc">
+                            <enum>(2)</enum>
+                            <header>Implementation</header>
+ <text>Not later than 90 days after the date of the enactment of this section, the Under Secretary of Commerce for Industry and Security shall—</text>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="idd763d0895bd94b8280c6670ef004b27e">
+                                <enum>(A)</enum>
+ <text display-inline="yes-display-inline">seek input from the public regarding the standards and requirements a United States person is required to meet to obtain a designation as a trusted United States person; and</text>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="idbc9caacfcafb485fb12ad6e41e101f5f">
+                                <enum>(B)</enum>
+ <text display-inline="yes-display-inline">based on such input, prescribe regulations establishing such standards and requirements, which shall include—</text>
+                                <clause id="id6f01531252654578b15c908f1b429875">
+                                    <enum>(i)</enum>
+ <text>establishment by the United States person of physical security, cybersecurity, and other measures designed to prevent the illicit transfer or diversion of covered circuit products and comply with export control regulations;</text>
+                                </clause>
+                                <clause id="id0c4fb78f8ba44801988f9142e98981c7">
+                                    <enum>(ii)</enum>
+ <text>a requirement that the United States person may not transfer or install a majority of its aggregate total processing performance of covered circuits or products outside the United States;</text>
+                                </clause>
+                                <clause id="ide7cf226de8e143cab0d54b3902d21b13">
+                                    <enum>(iii)</enum>
+ <text>a requirement that not more than 10 percent of the ultimate beneficial ownership of the United States person may be held, directly or indirectly, by any entity that primarily resides, is domiciled, or conducts the majority of its business in a country of concern;</text>
+                                </clause>
+                                <clause id="id06f4e5a1da004502b2a5aafe5fdda117">
+                                    <enum>(iv)</enum>
+ <text>a preference for sourcing advanced integrated circuit and subcomponents from production facilities that support the revival of semiconductor manufacturing in the United States; and</text>
+                                </clause>
+                                <clause id="idb83b49fdda23449b9a05e0c370bf9fc6">
+                                    <enum>(v)</enum>
+ <text>annual audit or attestation requirements to ensure compliance with clauses (i), (ii), and (iii); and</text>
+                                </clause>
+                            </subparagraph>
+                            <subparagraph commented="no" display-inline="no-display-inline"
+                                id="idbd9aa98a105741478e60e4d61234d7c4">
+                                <enum>(C)</enum>
+ <text display-inline="yes-display-inline">prescribe regulations establishing the process by which the Under Secretary shall approve such a designation.</text>
+                            </subparagraph>
+                        </paragraph>
+                    </subsection>
+                </section>
+                <after-quoted-block>.</after-quoted-block>
+            </quoted-block>
+        </section>
+    </legis-body>
+</bill>
+

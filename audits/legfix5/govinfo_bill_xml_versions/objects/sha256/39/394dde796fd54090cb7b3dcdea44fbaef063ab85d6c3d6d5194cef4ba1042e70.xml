@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" bill-type="olc" dms-id="A1" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1804 IS: HUD Manufactured Housing Modernization Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-06-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 1804</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190612">June 12, 2019</action-date><action-desc><sponsor name-id="S385">Ms. Cortez Masto</sponsor> (for herself, <cosponsor name-id="S365">Mr. Scott of South Carolina</cosponsor>, <cosponsor name-id="S394">Ms. Smith</cosponsor>, <cosponsor name-id="S398">Mr. Cramer</cosponsor>, and <cosponsor name-id="S391">Mr. Young</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To require the Secretary of Housing and Urban Development to issue guidelines relating to the
+			 appropriate inclusion of
+			 residential manufactured homes in Consolidated Plans, and for other
+			 purposes.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause" id="H131D5818C1354917913E501AE1182342" style="OLC">
+ <section id="H5DF648E5B17942B4A99134F82FB1C3D9" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>HUD Manufactured Housing Modernization Act of 2019</short-title></quote>.</text> </section><section id="H0EE8E065208443B68485A2DE7E281208" section-type="subsequent-section"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text>
+ <paragraph id="HEB39278F8CE64F509835DD7A71372C17"><enum>(1)</enum><text display-inline="yes-display-inline">Manufactured housing is a significant source of unsubsidized affordable housing in the United States.</text>
+ </paragraph><paragraph id="HE0856BEA507B470C8D70E919310C703A"><enum>(2)</enum><text>Nearly 22,000,000 people in the United States live in manufactured housing, which opens the door to homeownership for families who, in many housing markets, cannot afford to buy a site-built home.</text>
+ </paragraph><paragraph id="HEB0CCF8EF5E542D5BBBE424B29A63D85"><enum>(3)</enum><text display-inline="yes-display-inline">Manufactured housing is the only form of housing regulated by a Federal building code, which includes standards for health, safety, energy efficiency, and durability, and is found on land owned by the homeowner and land leased by the homeowner in communities owned and operated by private entities, nonprofit organizations, or resident-owned communities.</text>
+ </paragraph><paragraph id="HD531A27172CC4ED08E22822F0B014686"><enum>(4)</enum><text>Manufactured homes can open the door to homeownership for millions of families; they can appreciate in value and be an effective long-term affordable housing solution for some families and communities across the United States.</text>
+ </paragraph></section><section id="H843A4760A10A4AED8B3AE2BD176190AD"><enum>3.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text> <paragraph commented="no" display-inline="no-display-inline" id="H190488B41EED4B569194109EC4CFB3FE"><enum>(1)</enum><header>Consolidated Plan</header><text display-inline="yes-display-inline">The term <term>Consolidated Plan</term> means a comprehensive housing affordability strategy and community development plan required under part 91 of title 24, Code of Federal Regulations, or any successor regulation.</text>
+ </paragraph><paragraph id="id9B37EFC0A2674F92AC3A3060CC6F6831"><enum>(2)</enum><header>Residential manufactured home</header><text display-inline="yes-display-inline">The term <term>residential manufactured home</term> means a manufactured home, as defined in section 603 of the Housing and Community Development Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/42/5402">42 U.S.C. 5402</external-xref>), that is used as a dwelling.</text>
+			</paragraph></section><section id="HFF0D98D53D6F46BEAFE07DDBB9991D24"><enum>4.</enum><header>Issuance of guidelines relating to residential manufactured homes</header>
+ <text display-inline="no-display-inline">The Secretary of Housing and Urban Development shall issue guidelines for jurisdictions relating to the appropriate inclusion of residential manufactured homes in a Consolidated Plan of the jurisdiction.</text>
+		</section></legis-body></bill>
+
+

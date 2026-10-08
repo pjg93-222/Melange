@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H4670DF0E073D41488B6AD3BC17C11A76" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7775 IH: CDFI Fund Transparency Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-03-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7775</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260303">March 3, 2026</action-date><action-desc><sponsor name-id="R000612">Mr. Rose</sponsor> (for himself and <cosponsor name-id="K000397">Mrs. Kim</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Riegle Community Development and Regulatory Improvement Act of 1994 to require annual testimony to Congress on the operations of the Community Development Financial Institutions Fund.</official-title></form><legis-body id="H867755E162094AAAA13A1D02E6D60F04" style="OLC"><section id="HA3905A382C4F49DA97E0670AE61BFBE6" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>CDFI Fund Transparency Act</short-title></quote>.</text></section><section id="H8C2907A8A7BA46D39E9F03E56BAE4ED7"><enum>2.</enum><header>CDFI Fund Transparency</header><text display-inline="no-display-inline">Section 104(b) of the Riegle Community Development and Regulatory Improvement Act of 1994 (<external-xref legal-doc="usc" parsable-cite="usc/12/4703">12 U.S.C. 4703(b)</external-xref>) is amended by adding to the end the following:</text><quoted-block style="OLC" id="HB4EEC17565044ED3B5905850FF3B0C62" display-inline="no-display-inline"><paragraph id="HCCD8F8664D2C496FBB32A74A6F07326F"><enum>(5)</enum><header>Annual testimony</header><text display-inline="yes-display-inline">The Secretary of the Treasury (or a designee of the Secretary) shall, at the discretion of the Chair of the Committee on Financial Services of the House of Representatives and the Chair of the Committee on Banking, Housing, and Urban Affairs of the Senate, annually testify before such committees (or a subcommittee of such committees) regarding the operations of the Fund during the previous year.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill> 
+

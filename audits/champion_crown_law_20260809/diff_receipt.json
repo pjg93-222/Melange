@@ -1,0 +1,115 @@
+{
+ "all_pass": true,
+ "board_counts": {
+  "baseline": {
+   "champions": 134,
+   "mixed": 108,
+   "threats": 31
+  },
+  "rule": {
+   "champions": 134,
+   "mixed": 110,
+   "threats": 30
+  }
+ },
+ "checks": [
+  {
+   "check": "baseline == live artifact (generated_utc excluded)",
+   "detail": "raw live sha C160D1A66344EA24ABBFEC5F6911171BAF9ED7045F9B75BD48DC47EF406CA2D6",
+   "ok": true
+  },
+  {
+   "check": "E1a CU threats: exactly Waters removed",
+   "detail": "removed=W000187",
+   "ok": true
+  },
+  {
+   "check": "E1b CU threats: backfill <= 1 entrant",
+   "detail": "entrant=[[\"B000825\", \"Lauren Boebert\", 0.067579]]",
+   "ok": true
+  },
+  {
+   "check": "E1c CU threats: Durbin/Blumenthal/Sanders/Warren/Booker retained",
+   "detail": "present=D000563,B001277,S000033,W000817,B001288",
+   "ok": true
+  },
+  {
+   "check": "E2a CU mixed: exactly Waters added",
+   "detail": "added=W000187 removed=",
+   "ok": true
+  },
+  {
+   "check": "E2b CU mixed Waters row values",
+   "detail": "{\"tier\": 1, \"threat\": 2.484746}",
+   "ok": true
+  },
+  {
+   "check": "E3a bank threats: exactly Scott removed",
+   "detail": "removed=S001184",
+   "ok": true
+  },
+  {
+   "check": "E3b bank threats: Barr + Sessions retained",
+   "detail": "count 6 -> 5, added=none",
+   "ok": true
+  },
+  {
+   "check": "E4 bank mixed: exactly Scott added, opposition_att >= 3",
+   "detail": "opposition_att=5",
+   "ok": true
+  },
+  {
+   "check": "E5 crypto + fintech boards unchanged",
+   "detail": "[]",
+   "ok": true
+  },
+  {
+   "check": "E6 champions boards unchanged in all sectors",
+   "detail": "[]",
+   "ok": true
+  },
+  {
+   "check": "E7a receipts: crown_threat_exclusions exactly Waters(CU)+Scott(bank), routed mixed",
+   "detail": "{\"credit_union\": [[\"W000187\", \"mixed\"]], \"bank\": [[\"S001184\", \"mixed\"]], \"crypto\": [], \"fintech\": []}",
+   "ok": true
+  },
+  {
+   "check": "E7b receipts: rules.champion_exclusivity present + baseline lacks it",
+   "detail": "",
+   "ok": true
+  },
+  {
+   "check": "E8 no retained row changed anywhere",
+   "detail": "[]",
+   "ok": true
+  },
+  {
+   "check": "NC1 audit check 1 FLAGS baseline exactly Waters(CU)+Scott(bank)",
+   "detail": "[[\"credit_union\", \"Maxine Waters\"], [\"bank\", \"Tim Scott\"]]",
+   "ok": true
+  },
+  {
+   "check": "NC2 audit check 2 FLAGS baseline exactly Waters(CU)+Scott(bank)",
+   "detail": "[[\"credit_union\", \"Maxine Waters\"], [\"bank\", \"Tim Scott\"]]",
+   "ok": true
+  },
+  {
+   "check": "NC3 both audit checks PASS clean on rule artifact",
+   "detail": "{\"c1\": [], \"c2\": []}",
+   "ok": true
+  },
+  {
+   "check": "ISO live artifact untouched (sha unchanged since run start)",
+   "detail": "",
+   "ok": true
+  }
+ ],
+ "cu_threat_backfill_entrant": [
+  [
+   "B000825",
+   "Lauren Boebert",
+   0.067579
+  ]
+ ],
+ "run": "champion_crown_law_20260809"
+}

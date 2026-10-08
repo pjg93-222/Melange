@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H9D7CEED621904210ACFC795946CDB4A9" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 5967 IH: Strategic Task Force on Scam Prevention Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-11-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 5967</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20251107">November 7, 2025</action-date>
+<action-desc><sponsor name-id="M001226">Mr. Menendez</sponsor> (for himself, <cosponsor name-id="H001093">Mrs. Houchin</cosponsor>, <cosponsor name-id="C001119">Ms. Craig</cosponsor>, <cosponsor name-id="D000624">Mrs. Dingell</cosponsor>, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="W000830">Mr. Whitesides</cosponsor>, <cosponsor name-id="M001227">Ms. McClellan</cosponsor>, <cosponsor name-id="T000460">Mr. Thompson of California</cosponsor>, <cosponsor name-id="K000385">Ms. Kelly of Illinois</cosponsor>, <cosponsor name-id="C001125">Mr. Carter of Louisiana</cosponsor>, and <cosponsor name-id="S001230">Mr. Subramanyam</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name>, and in addition to the Committee on <committee-name committee-id="HJU00">the Judiciary</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To direct the Federal Trade Commission, in conjunction with the Department of Justice, to convene an interagency task force for the purpose of addressing scams, and for other purposes.</official-title>
+</form>
+<legis-body id="HE914DB34830E410BBA48DBEAC802061F" style="OLC"> 
+<section id="HA5AF1FB6D57C4DE6BFC5C9F3D72E439C" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Strategic Task Force on Scam Prevention Act</short-title></quote>.</text></section> <section id="HF39D411556F94BA8B17DAF4DB47E2916"><enum>2.</enum><header>Task force</header> <subsection id="HF5AE526D8A114ACBB14BA75EE3E3F10E"><enum>(a)</enum><header>Establishment</header><text display-inline="yes-display-inline">The Federal Trade Commission, in conjunction with the Department of Justice, shall convene an interagency task force for the purpose of addressing scams.</text></subsection> 
+<subsection id="HFF79009AFE704613B98D67D8246591FC"><enum>(b)</enum><header>Composition</header><text>The task force convened under subsection (a) shall include representatives from each of the following:</text> <paragraph id="HB76BFBB7F384423CA70347B53110D176"><enum>(1)</enum><text>The Department of Homeland Security, including the United States Secret Service.</text></paragraph> 
+<paragraph id="HBD8AC531B2044859AA6A6EE4FB5B8822"><enum>(2)</enum><text>The Department of Justice, including the Federal Bureau of Investigation.</text></paragraph> <paragraph id="H4C1BF52522CC44A48333D24CC2AB9B7C"><enum>(3)</enum><text>The Department of State.</text></paragraph> 
+<paragraph id="H4CA2E8BD29424BBEA306C8BAD35BFB58"><enum>(4)</enum><text>The Department of the Treasury.</text></paragraph> <paragraph id="H968DF3B1F8FD48B88A1F465503F28665"><enum>(5)</enum><text display-inline="yes-display-inline">The Department of Veterans Affairs.</text></paragraph> 
+<paragraph id="HA62BB5164E1E4C8AB65CBDF569576948"><enum>(6)</enum><text>The Federal Communications Commission.</text></paragraph> <paragraph id="H5DBDC5B7FCE649709AC7BC2775D06E9B"><enum>(7)</enum><text>The Federal Trade Commission.</text></paragraph> 
+<paragraph id="H1F10CCD9589441079073087A64B5B13A"><enum>(8)</enum><text>The Securities and Exchange Commission.</text></paragraph> <paragraph id="H24EE5060C40A4AAB8EF0FBB0FA52BAB9"><enum>(9)</enum><text display-inline="yes-display-inline">The Social Security Administration.</text></paragraph> 
+<paragraph id="H722D8FAD8175421ABABCCA844F3C1BB1"><enum>(10)</enum><text display-inline="yes-display-inline">The United States Postal Service.</text></paragraph></subsection> <subsection id="H7DF49EB2EAB549239C44B8813198B440"><enum>(c)</enum><header>Duties</header> <paragraph id="HDA278398D93F4F4D8D5FF58239C50137"><enum>(1)</enum><header>In general</header><text display-inline="yes-display-inline">The task force convened under subsection (a) shall develop and implement a national strategy to address scams that includes—</text> 
+<subparagraph id="H75D445BE2B43463FB625C30BC52E9846"><enum>(A)</enum><text>utilization of—</text> <clause id="H7D1295ED67E0457AB66F97DE4F625E8C"><enum>(i)</enum><text>the Consumer Sentinel Network of the Federal Trade Commission; and</text></clause> 
+<clause id="H5E68CA318DF847A2854C4A9F8C0B6D36"><enum>(ii)</enum><text display-inline="yes-display-inline">the Internet Crime Complaint Center of the Federal Bureau of Investigation;</text></clause></subparagraph> <subparagraph id="H3ADD1FADA6E14934A7336E7DF4EF176B"><enum>(B)</enum><text>public education;</text></subparagraph> 
+<subparagraph id="HA83C7C47764C474E9DE68BFE5994DFA9"><enum>(C)</enum><text>coordination with industry entities, including providers of online platforms;</text></subparagraph> <subparagraph id="H8E1EEEF8CE464C84BD25942E681EC559"><enum>(D)</enum><text>enforcement actions using existing authorities, including authorities with respect to money laundering, human trafficking, and fraud;</text></subparagraph> 
+<subparagraph id="H3B14D3DA2FA748438D1ED6F37E6E7077"><enum>(E)</enum><text>coordination with international partners; and</text></subparagraph> <subparagraph id="HE54CD5FF56AB4038BFA3764581A313C9"><enum>(F)</enum><text>strategies to reduce the systemic risk of financial losses as a result of scams and improve recovery resources for victims of scams.</text></subparagraph> </paragraph> 
+<paragraph id="H1CCC3A1E7B754B3D9348A848E107D78F"><enum>(2)</enum><header>Report</header><text>Not later than 1 year after the date of the enactment of this Act, the task force convened under subsection (a) shall submit to Congress, and make available to the public, a report on the actions taken by the task force pursuant to paragraph (1).</text></paragraph></subsection> <subsection id="H013A6E6271A24150A87885505EAE45C9"><enum>(d)</enum><header>Consultation</header><text>In carrying out the duties specified in subsection (c), the task force convened under subsection (a) shall consult with representatives of the following:</text> 
+<paragraph id="HEA49B774F8E046AC8489F054FFAF1841"><enum>(1)</enum><text>Consumer advocacy organizations that address fraud and scams.</text></paragraph> <paragraph id="H3E23CDAB533449CEBD5FD478C6206077"><enum>(2)</enum><text>Industry, including the following industry sectors:</text> 
+<subparagraph id="H46C155DE43304760B603EEBE9D37262F"><enum>(A)</enum><text>Banking.</text></subparagraph> <subparagraph id="HEF51CEE4619245E489F2C3B84BDBB574"><enum>(B)</enum><text>Consumer-facing generative artificial intelligence applications.</text></subparagraph> 
+<subparagraph id="H8781688971FC46F5849D7EDD260CCB64"><enum>(C)</enum><text>Cryptocurrency. </text></subparagraph> <subparagraph id="HC3850084F6B84663B451E4B884315EFE"><enum>(D)</enum><text>Dating applications.</text></subparagraph> 
+<subparagraph id="H39A382E2416B469E878A00FC9E8FCB81"><enum>(E)</enum><text>Peer-to-peer payment platforms.</text></subparagraph> <subparagraph id="HF5141F48BE8846A4BD7C96A4052F836C"><enum>(F)</enum><text>Search engines.</text></subparagraph> 
+<subparagraph id="H0F998AB350554F1E8EE794833F7D1565"><enum>(G)</enum><text>Social media.</text></subparagraph> <subparagraph id="H8302B2E1C3D549858B4604B16E3F30F9"><enum>(H)</enum><text>Communications equipment manufacturers.</text></subparagraph> 
+<subparagraph id="H9487B515F5994BE98CD177747B7FD8D4"><enum>(I)</enum><text>Communications providers.</text></subparagraph></paragraph> <paragraph id="H85881AFCA39040159E681130B6734241"><enum>(3)</enum><text>State attorneys general.</text></paragraph> 
+<paragraph id="H2B60766797204A488598834BA570C4A6"><enum>(4)</enum><text>State securities commissions (including State agencies and offices that perform similar functions).</text></paragraph> <paragraph id="H01DBCE70985C49C4A4219C673473DC90"><enum>(5)</enum><text>Local law enforcement entities.</text></paragraph></subsection> 
+<subsection id="H27C0D6A91C37447799EE99D3E24CAA58"><enum>(e)</enum><header>Termination</header><text display-inline="yes-display-inline">The task force convened under subsection (a) shall terminate on the date that is 10 years after the date of the enactment of this Act.</text></subsection> </section> </legis-body> </bill> 
+

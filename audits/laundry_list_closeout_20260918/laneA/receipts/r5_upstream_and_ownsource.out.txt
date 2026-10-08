@@ -1,0 +1,197 @@
+﻿====================================================================================================
+R5  SOCIAL UPSTREAM + OWN-SOURCE CHANNELS   run 2026-09-18T23:40:04
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+PART 1  SOCIAL CHANNEL PROVENANCE
+----------------------------------------------------------------------------------------------------
+   Quorum Master.xlsx (raw licensed export)     8478026 bytes  mtime 2026-07-02 00:53:10.777847
+   Quorum Processed.xlsx                        9332289 bytes  mtime 2026-09-14 00:41:34.338234
+   data/stance/quorum_member_tweets.csv         5528240 bytes  mtime 2026-09-14 00:40:56.827674
+   Social Master.xlsx                           1982628 bytes  mtime 2026-09-14 00:41:52.611542
+
+   Quorum Processed.xlsx sheets: ['Members', 'Staffers', 'Excluded', 'Summary']
+      Members      data rows:  13362
+      Staffers     data rows:   6723
+      Excluded     data rows:  22224
+      Summary      data rows:      1
+
+   process_quorum Summary sheet (its own persisted census):
+      rows_in                      43038
+      true_duplicates_removed      729
+      rows                         42309
+
+   sheet Members    rows=13362
+      bucket      : {'member': 13362}
+      cu_relevant : {'1': 9465, '0': 3897}
+      stance      : {'support': 5693, '': 3897, 'neutral': 2904, 'oppose': 868}
+
+   sheet Staffers   rows=6723
+      bucket      : {'staffer': 6723}
+      cu_relevant : {'0': 5357, '1': 1366}
+      stance      : {'': 6723}
+
+   sheet Excluded   rows=22224
+      bucket      : {'organization': 11105, 'former_member': 5987, 'committee': 2362, 'candidate_nonmember': 2110, 'executive': 646, 'member_unmatched': 14}
+      cu_relevant : {'1': 15182, '0': 7042}
+      stance      : {'': 22224}
+
+   quorum_member_tweets.csv rows: 9465
+   RULE (process_quorum.py:150)  memtw=members[(members['cu_relevant']==1)]
+   RULE (process_quorum.py:119-122) TRUE duplicates = same Source + normalized Content + date;
+        df.drop_duplicates(subset='_k',keep='first')   -- retweets across sources survive
+   quorum_member_tweets.csv columns: ['Quorum ID', 'Source', 'member', 'principal_member', 'bucket', 'dt', 'Document Type', 'Region', 'Title', 'Content', 'Issues', 'cu_relevant', 'is_rt', 'stance', 'stance_margin', 'Source URL']
+   platform (Document Type) split: {'Tweet': 6534, 'Facebook Post': 2909, 'Press Release': 17, 'Newsletters to Constituents': 4, 'Letter': 1}
+   stance split: {'support': 5693, 'neutral': 2904, 'oppose': 868}
+
+   RULE (build_social_master.py:60)  bc=b[b['rel']==1][list(qc.columns)]
+        -> a direct BLUESKY post enters the Corpus ONLY if CU_TERMS matched its text.
+   RULE (build_social_master.py:53)  verified_handle=int(verified_bluesky_handle(...))
+        -> look-alike handles are INCLUDED in the Corpus but flagged 0 and dropped downstream.
+
+----------------------------------------------------------------------------------------------------
+PART 2  OWN-SOURCE CHANNELS (speech / hearing / interview) as build_media_blend reads them
+----------------------------------------------------------------------------------------------------
+
+== SPEECH channel ==
+   final:  speech_stance_final.csv                              44551 bytes  mtime 2026-09-17 00:47:15.769299
+   dep:    speeches_cu.csv                                      856277 bytes  mtime 2026-09-17 00:46:26.613864
+   dep:    data/stance/speech_gold_queue.csv                    118684 bytes  mtime 2026-07-16 00:35:23.767944
+   STALENESS GATE (_cu_stale, build_media_blend.py:130-137): fresh -> channel active
+   rows in: 311
+   tier   : {'gold': 215, 'majority': 47, 'unanimous': 46, 'review': 3}
+   stance : {'neutral': 139, 'support': 103, 'oppose': 69}
+   per-row disposition of the 311 rows the channel works on:
+      RULE  if _sg==0.0: continue            neutral/unrelated  ->    139  (unprinted)
+      RULE  if not _m: continue              unresolved member  ->      0  (unprinted)
+      RULE  except Exception: continue       unparseable date   ->      0  (unprinted)
+      RULE  if _inten==0.0: continue         unknown tier       ->      0  (unprinted)
+      RULE  if not _cats: continue           no category        ->      0  (unprinted)
+      SIGNED rows fed to the press side (own-source weight 1.00) ->    172
+      members reached                                            ->     74
+   CLOSES? 311 = 311 -> YES
+   per-event 1/n normalization applied (build_media_blend :167/:210/:252): one (member,date) event contributes one unit regardless of passage count
+   categories:
+      CFPB Issues & Structural Reform           132
+      CU-Bank Competitive Dynamics               41
+      Fraud Prevention                           35
+      Mortgage Lending & Housing                 34
+      Examination & Supervision                  27
+      Technology & Emerging Issues               17
+      Defense Credit Union Issues                16
+      Data Privacy & Cybersecurity               15
+      Member Business Lending                    11
+      Charter Modernization & Governance         10
+      Interchange                                10
+      Payments                                   10
+      Credit Card & Consumer-Fee Mandates         8
+      NCUA Budget & Share Insurance Fund          7
+      CDFI Fund                                   6
+      General Credit Union                        6
+      Credit Union Capital Requirements           4
+      Credit Union Tax Status                     2
+
+== HEARING channel ==
+   final:  data/stance/hearing_stance_final.csv                 98059 bytes  mtime 2026-09-17 00:47:41.278891
+   dep:    data/stance/hearings_cu.csv                          559414 bytes  mtime 2026-09-14 00:40:00.428314
+   dep:    data/stance/hearing_gold_queue.csv                   186042 bytes  mtime 2026-07-16 13:25:42.432361
+   STALENESS GATE (_cu_stale, build_media_blend.py:130-137): fresh -> channel active
+   rows in: 790
+   tier   : {'majority': 336, 'gold': 261, 'unanimous': 138, 'review': 55}
+   stance : {'support': 301, 'oppose': 286, 'neutral': 203}
+   RULE :192  _eligible=[r for r in _prows if MR.hearing_tier_weight(r.get('tier'))>0.0]
+      gold-eligible: 261   non-gold EXCLUDED (_hreview): 529
+   per-row disposition of the 261 rows the channel works on:
+      RULE  if _sg==0.0: continue            neutral/unrelated  ->     74  (unprinted)
+      RULE  if not _m: continue              unresolved member  ->      0  (unprinted)
+      RULE  except Exception: continue       unparseable date   ->      0  (unprinted)
+      RULE  if _inten==0.0: continue         unknown tier       ->      0  (unprinted)
+      RULE  if not _cats: continue           no category        ->      0  (unprinted)
+      SIGNED rows fed to the press side (own-source weight 0.85) ->    187
+      members reached                                            ->     64
+   CLOSES? 261 = 261 -> YES
+   per-event 1/n normalization applied (build_media_blend :167/:210/:252): one (member,date) event contributes one unit regardless of passage count
+   categories:
+      CFPB Issues & Structural Reform           114
+      Technology & Emerging Issues               28
+      Fraud Prevention                           19
+      Examination & Supervision                  18
+      Mortgage Lending & Housing                 18
+      CU-Bank Competitive Dynamics               18
+      General Credit Union                       11
+      CDFI Fund                                   8
+      Data Privacy & Cybersecurity                8
+      Member Business Lending                     6
+      Defense Credit Union Issues                 6
+      Credit Card & Consumer-Fee Mandates         5
+      Charter Modernization & Governance          3
+      Payments                                    3
+      Credit Union Tax Status                     2
+      Interchange                                 2
+      Field of Membership                         1
+
+== INTERVIEW channel ==
+   final:  data/stance/interview_stance_final.csv               4261 bytes  mtime 2026-09-17 00:49:52.260504
+   dep:    data/stance/interviews_cu.csv                        23202 bytes  mtime 2026-09-17 00:47:55.438998
+   dep:    data/stance/interview_gold_queue.csv                 24863 bytes  mtime 2026-07-16 00:34:28.107973
+   STALENESS GATE (_cu_stale, build_media_blend.py:130-137): fresh -> channel active
+   rows in: 37
+   tier   : {'gold': 37}
+   stance : {'oppose': 19, 'neutral': 12, 'support': 6}
+   per-row disposition of the 37 rows the channel works on:
+      RULE  if _sg==0.0: continue            neutral/unrelated  ->     12  (unprinted)
+      RULE  if not _m: continue              unresolved member  ->      0  (unprinted)
+      RULE  except Exception: continue       unparseable date   ->      0  (unprinted)
+      RULE  if _inten==0.0: continue         unknown tier       ->      0  (unprinted)
+      RULE  if not _cats: continue           no category        ->      0  (unprinted)
+      SIGNED rows fed to the press side (own-source weight 1.00) ->     25
+      members reached                                            ->     16
+   CLOSES? 37 = 37 -> YES
+   per-event 1/n normalization applied (build_media_blend :167/:210/:252): one (member,date) event contributes one unit regardless of passage count
+   categories:
+      CFPB Issues & Structural Reform            18
+      General Credit Union                        4
+      CU-Bank Competitive Dynamics                2
+      Credit Card & Consumer-Fee Mandates         2
+      Fraud Prevention                            2
+      Interchange                                 1
+
+== BLUESKY press-side channel ==
+   data/stance/bluesky_cu.csv            5517 bytes  mtime 2026-09-14 00:40:10.164634  rows=15
+   data/stance/bluesky_stance_final.csv  1921 bytes  mtime 2026-09-17 00:51:07.370334  rows=15
+   RULE (build_media_blend.py:267-273) BLUESKY_ON default '0'; even at 1 the block prints a
+        refusal and injects NOTHING -- bluesky already rides the SOCIAL corpus, so a press-side
+        injection would double-count.  blc stays empty by construction.
+
+-- press_component_meta.json own_source_channels (engine self-report, for cross-check) --
+{
+   "speech": {
+      "enabled": true,
+      "loaded": true,
+      "signed_rows": 172,
+      "members": 74,
+      "tier_policy": "gold 1.0 / unanimous 0.9 / majority 0.6 / review 0.35"
+   },
+   "hearing": {
+      "enabled": true,
+      "loaded": true,
+      "signed_gold_rows": 187,
+      "members": 64,
+      "non_gold_rows_excluded": 529,
+      "tier_policy": "gold only"
+   },
+   "interview": {
+      "enabled": true,
+      "loaded": true,
+      "signed_rows": 25,
+      "members": 16,
+      "tier_policy": "gold 1.0 / unanimous 0.9 / majority 0.6 / review 0.35"
+   },
+   "bluesky": {
+      "enabled": false,
+      "loaded": false,
+      "tier_policy": "existing social event only; no press-side duplicate"
+   }
+}
+
+DONE R5

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="HE341C83D723C48B1BDC37E3995B54ECF" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 397 IH: Recognizing the challenges, achievements, and significant contributions of women and minorities in the fields of housing, housing finance, and community development.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 397</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190522">May 22, 2019</action-date><action-desc><sponsor name-id="C001049">Mr. Clay</sponsor> (for himself and <cosponsor name-id="S001157">Mr. David Scott of Georgia</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name>, and in addition to the Committee on <committee-name committee-id="HJU00">the Judiciary</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such
+			 provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Recognizing the challenges, achievements, and significant contributions of women and minorities in
+			 the fields of housing, housing finance, and community development.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas President Lyndon Baines Johnson signed the Fair Housing Act into law in 1968 which prohibits discrimination in the sale, rental, or financing of housing based on race, color, religion, national origin, sex, familial status, and handicap to counter pervasive, systemic, and debilitating franchised racism;</text>
+ </whereas><whereas commented="no"><text>Whereas public and private investment and the economic health and stability of communities are influenced by housing opportunity;</text>
+ </whereas><whereas><text>Whereas women and minorities have been historically excluded in housing;</text> </whereas><whereas><text>Whereas women and minorities have been historically underrepresented in housing;</text>
+ </whereas><whereas><text>Whereas months after Congress passed a landmark law directing the Federal Government to dismantle segregation in the Nation’s housing, President Nixon’s Secretary of Housing and Urban Development George Romney began working to implement a plan to use the law to its fullest effect to reverse past discrimination and institute fair housing in a low-key manner;</text>
+ </whereas><whereas><text>Whereas home ownership and stable housing amongst women and minorities bring significant economic benefits to communities;</text>
+ </whereas><whereas commented="no"><text>Whereas more women are living independently or serving as heads of households today than when the Fair Housing Act became law, with women compromising nearly 20 percent of home buyers today;</text>
+ </whereas><whereas commented="no"><text>Whereas evidence from the International Monetary Fund suggests that adding women to the labor market will increase overall productivity and stimulate wage growth for both women and men;</text>
+ </whereas><whereas commented="no"><text>Whereas a recent study found that increased diversity of leadership teams in business resulted in 19 percent higher revenue due to innovation, a substantial factor in tech companies, startups, and industries of the future;</text>
+ </whereas><whereas commented="no"><text>Whereas historic and systemic racial barriers to wealth building and the implication this has had for home ownership left many in cities across America vulnerable to displacement and economic isolation; and</text>
+ </whereas><whereas><text>Whereas lack of housing opportunity contributes to the continued racial wealth gap: Now, therefore, be it</text></whereas></preamble>
+	<resolution-body id="HE6006F225A7D4D8D88CC563E5F996308" style="traditional">
+ <section display-inline="yes-display-inline" id="HD565891C152340309FE1A173432E8467" section-type="undesignated-section"><enum></enum><text>That the House of Representatives—</text> <paragraph commented="no" id="HCE6D59D5BAF848CA86FB68C2167A39F5"><enum>(1)</enum><text display-inline="yes-display-inline">recognizes the significant contributions and importance of representation of women and minorities in housing;</text>
+ </paragraph><paragraph id="HD7D1F70AD623456BB95BE300AE2B08B0"><enum>(2)</enum><text display-inline="yes-display-inline">encourages increased participation of women and minorities in housing and related fields; and</text> </paragraph><paragraph id="H92E0A96361B54701A37CD87365BACB1C"><enum>(3)</enum><text display-inline="yes-display-inline">will look to promote diversity, policies, and robust investment in programs which serve to countermand historic segregation perpetrated against women and minorities.</text>
+			</paragraph></section></resolution-body></resolution>
+
+

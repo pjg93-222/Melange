@@ -1,0 +1,67 @@
+flagged rows: 5863 ; artifacts touching one: 26
+INTERVIEW rows with chamber=axefiles (the axe clip block): 251
+axe clips_manifest.jsonl in the collision list: False
+
+artifact                                             what happens to the record                     label field                            n
+systematic_encounters.ndjson                         NO TEXT/OFFSET/SHA FIELD                       (no label field)                     416
+source_media_candidates_cumulative_all_verified_v4.j SHA BREAKS                                     speaker_identity_status               85
+source_media_candidates_cumulative_all_verified_v5.j SHA BREAKS                                     speaker_identity_status               85
+source_media_candidates_cumulative_expanded_v3.jsonl SHA BREAKS                                     speaker_identity_status               85
+source_media_candidates_cumulative_all_verified_v3.j SHA BREAKS                                     speaker_identity_status               84
+source_media_candidates_cumulative_current.jsonl     SHA BREAKS                                     speaker_identity_status               84
+source_media_candidates_cumulative_expanded_v2_merge SHA BREAKS                                     speaker_identity_status               84
+source_media_candidates_cumulative_expanded_v4.jsonl SHA BREAKS                                     speaker_identity_status               79
+source_media_verified_cumulative_exact_windows_v6.js SHA BREAKS                                     identity_contract                     18
+mined_candidates.ndjson                              EXCERPT LOST (it is the other speaker)         review_status                         15
+calibration_sample.ndjson                            EXCERPT LOST (it is the other speaker)         review_status                         10
+source_media_candidates_priority_consolidated_expand SHA BREAKS                                     speaker_identity_status                6
+calibration_reviewed.ndjson                          NO TEXT/OFFSET/SHA FIELD                       review_status                          5
+source_media_supplement_v1.jsonl                     SHA BREAKS                                     (no label field)                       5
+source_media_verified_cumulative_all_verified_v3.jso SHA BREAKS                                     identity_contract                      4
+source_media_verified_cumulative_all_verified_v4.jso SHA BREAKS                                     identity_contract                      4
+source_media_verified_cumulative_all_verified_v5.jso SHA BREAKS                                     identity_contract                      4
+mined_candidates.ndjson                              EXCERPT SURVIVES                               review_status                          3
+routine_encounter_candidates.ndjson                  NO TEXT/OFFSET/SHA FIELD                       review_status                          2
+routine_reviewed.ndjson                              NO TEXT/OFFSET/SHA FIELD                       review_status,use_as_relationship_     2
+source_media_verified_abc_all_verified_v3.jsonl      SHA BREAKS                                     identity_contract                      2
+source_media_verified_priority_all_verified_v3.jsonl SHA BREAKS                                     identity_contract                      2
+candidates.ndjson                                    EXCERPT LOST (it is the other speaker) + OFFSE review_status                          1
+events.ndjson                                        EXCERPT LOST (it is the other speaker) + OFFSE review_status                          1
+
+roll-up:
+  SHA BREAKS                                                   631
+  NO TEXT/OFFSET/SHA FIELD                                     425
+  EXCERPT LOST (it is the other speaker)                        25
+  EXCERPT SURVIVES                                               3
+  EXCERPT LOST (it is the other speaker) + OFFSETS PAST THE NEW END + SHA BREAKS     2
+
+examples of records that carry a review/label field:
+  mined_candidates.ndjson                      rowid=71180   EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      I looked at Kamala Harris and Colin Allred partying with their celebrity friends with Beyonce, with Willie Nelson. I got
+  mined_candidates.ndjson                      rowid=199257  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      Elizabeth is a friend of mine. M.J. LEE, CNN NATIONAL POLITICAL CORRESPONDENT (voice-over): Two long-time colleagues bat
+  mined_candidates.ndjson                      rowid=200468  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      I can't stand by and watch this attack on our freedom of speech and the right to boycott the racist policies of the gove
+  mined_candidates.ndjson                      rowid=202744  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      When you read these texts, is it basically substantiate every aspect of the whistleblower's complaint that the President
+  mined_candidates.ndjson                      rowid=220925  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      He's such a moron. LEMON (on camera): That as on the House floor Republican Lauren Boebert reportedly threw a mask back
+  mined_candidates.ndjson                      rowid=242623  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      ice-over): A source tell CNN Speaker Pelosi has made it clear that Feinstein's decision to remain in the Senate is entir
+  mined_candidates.ndjson                      rowid=242623  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      ice-over): A source tell CNN Speaker Pelosi has made it clear that Feinstein's decision to remain in the Senate is entir
+  mined_candidates.ndjson                      rowid=242623  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      ice-over): A source tell CNN Speaker Pelosi has made it clear that Feinstein's decision to remain in the Senate is entir
+  mined_candidates.ndjson                      rowid=258130  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      eally dangerous right now, because it generates more and more publicity for himself. It generates more and more profit f
+  mined_candidates.ndjson                      rowid=258130  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      eally dangerous right now, because it generates more and more publicity for himself. It generates more and more profit f
+  mined_candidates.ndjson                      rowid=267287  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      I think they were very important because they added, you know, some real documentary evidence to corroborate his oral ev
+  mined_candidates.ndjson                      rowid=267871  EXCERPT LOST (it is the other speaker)  fields=['review_status']
+      inpoint for us where we are in this story. What is to come? Jon Meacham was the Managing Editor of “Newsweek” during the
+  mined_candidates.ndjson                      rowid=274128  EXCERPT SURVIVES  fields=['review_status']
+      Well, it`s extraordinary, but the challenge in dealing with Donald Trump is that not only is he a malignant narcissist,
+  mined_candidates.ndjson                      rowid=274128  EXCERPT SURVIVES  fields=['review_status']
+      Well, it`s extraordinary, but the challenge in dealing with Donald Trump is that not only is he a malignant narcissist,
+DONE

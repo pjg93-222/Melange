@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HEACBAC74E982466F8551E9321F298C81" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 503 IH: No Political Pay Raises During Shutdowns Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 503</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190111">January 11, 2019</action-date><action-desc><sponsor name-id="S001190">Mr. Schneider</sponsor> (for himself, <cosponsor name-id="C001117">Mr. Casten of Illinois</cosponsor>, and <cosponsor name-id="B000574">Mr. Blumenauer</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HGO00">Committee on Oversight and Reform</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To prohibit pay raises for the Vice President and any senior political appointee at a Federal
+			 agency subject to a lapse in appropriations, and for other purposes.</official-title></form>
+	<legis-body id="H67C1721A202A4D54AEE2F1A7B728E7B7" style="OLC">
+ <section commented="no" id="H020A5F58DC244A098554309E3BAC94A6" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>No Political Pay Raises During Shutdowns Act</short-title></quote>.</text> </section><section id="H1185E2F857C846C9B6C7205A3F70507C"><enum>2.</enum><header>Prohibition on pay raise during Government shutdown</header> <subsection id="H573256BF100F469C9FCE31F7EA5F193B"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Notwithstanding any other provision of law, during any period of a lapse in discretionary appropriations beginning on or after December 22, 2018, the Vice President and any senior political appointee at an agency with respect to which appropriations have lapsed may not receive a pay rate increase.</text>
+ </subsection><subsection id="H53F0024E2FC34A5E9DF2ED8C65B71766"><enum>(b)</enum><header>Administration</header><text display-inline="yes-display-inline">In carrying out any pay freeze under subsection (a)—</text> <paragraph id="H090DC640033C494188BAE30C32630B57"><enum>(1)</enum><text>the term <quote>senior political appointee</quote> means an individual occupying any position described under subsections (b) through (e) of section 738 of the Financial Services and General Government Appropriations Act, 2018 (division E of <external-xref legal-doc="public-law" parsable-cite="pl/115/141">Public Law 115–141</external-xref>); and</text>
+ </paragraph><paragraph id="HA36CED147DA346DFBE1D9AAF91EA8DA8"><enum>(2)</enum><text display-inline="yes-display-inline">the requirements of subsections (f) through (k) of such section 738 shall apply.</text> </paragraph></subsection></section></legis-body></bill> 
+

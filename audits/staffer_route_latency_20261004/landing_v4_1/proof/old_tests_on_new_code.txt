@@ -1,0 +1,59 @@
+# The four test files the round changed, as they were at 79ef9f1b7, laid over the clean export of the v4.1 tip and run against its code (scripts/old_tests_on_new_code.sh). Every test that fails here asserts
+# something the round changed on purpose (see the README, "Intended changes"); every other test of those files passes.
+
+fec/tests/surfaces/test_staffer_office_covered_staff.py                  rc=1     31.5s  py     pass 27   fail 35  err 0  skip 0 
+fec/tests/surfaces/test_staffer_prewarm.py                               rc=1     22.3s  py     pass 28   fail 3   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.py                      rc=1     11.5s  py     pass 20   fail 1   err 0  skip 0 
+fec/tests/surfaces/test_staffer_left_out_staff.cjs                       rc=1     28.0s  cjs    pass 27   fail 1   err 0  skip 0 
+fec/tests/surfaces/test_staffer_unreachable_hint.cjs                     rc=0     25.6s  cjs    pass 38   fail 0   err 0  skip 0 
+TOTAL {'passed': 140, 'failed': 40, 'errors': 0, 'skipped': 0} files 5
+
+## failures, by file
+fec/tests/surfaces/test_staffer_office_covered_staff.py
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_an_office_with_nobody_covered_is_insufficient_work_coverage_with_the_suggested_objective
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[1-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[1-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[1-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[3-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[3-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[3-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[5-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[5-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_fully_covered_office_answers_byte_for_byte_as_the_base_commit_does_apart_from_the_two_new_fields[5-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_an_uncovered_origin_behaves_as_before[operational0-unavailable0]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_an_uncovered_origin_behaves_as_before[operational1-unavailable1]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-1-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-1-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-1-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-3-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-3-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-3-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-5-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-5-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[False-5-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-1-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-1-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-1-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-3-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-3-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-3-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-5-ranked]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-5-distinct]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_a_mixed_office_answers_exactly_as_its_covered_staff_alone_would[True-5-independent]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[target_without_work_connections]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[no_path_in_work_records]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[office_without_work_records]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_an_unreachable_reason_is_judged_on_the_covered_staff[origin_without_work_connections]
+    FAILED fec/tests/surfaces/test_staffer_office_covered_staff.py::test_office_requests_in_random_worlds_follow_the_rule_and_equal_the_base_commit_where_it_changes_nothing
+fec/tests/surfaces/test_staffer_prewarm.py
+    FAILED fec/tests/surfaces/test_staffer_prewarm.py::test_a_router_swap_during_the_prewarm_discards_it
+    FAILED fec/tests/surfaces/test_staffer_prewarm.py::test_one_collection_runs_before_the_first_build_of_a_prewarm_and_none_in_an_abandoned_one
+    FAILED fec/tests/surfaces/test_staffer_prewarm.py::test_a_request_that_reaches_the_released_router_builds_again_and_answers_exactly_as_before
+fec/tests/surfaces/test_staffer_unreachable_hint.py
+    FAILED fec/tests/surfaces/test_staffer_unreachable_hint.py::test_results_equal_the_base_commits_except_for_the_new_fields
+fec/tests/surfaces/test_staffer_left_out_staff.cjs
+    ✖ negative control: the line says the staff have no work records, as it did before the coverage wording was corrected is caught (1.0908ms)
+    ✖ failing tests:
+    ✖ negative control: the line says the staff have no work records, as it did before the coverage wording was corrected is caught (1.0908ms)
+fec/tests/surfaces/test_staffer_unreachable_hint.cjs
+    (none)

@@ -1,0 +1,11 @@
+apply  : {'rows_truncated': 1, 'chars_removed': 106, 'words_removed': 19, 'rows_skipped': 0, 'rows_inserted': 0, 'rows_deleted': 0, 'rows_after': 1, 'already_migrated': 0}
+restore: {'rows_restored': 1, 'rows_deleted': 0}
+
+speeches content identical to the original row: True
+original sha256 b6c7df540a195a656bbac53ce5821576c94cb123a19fcf1ddf1963f9b9fd9b67 (8192 bytes)
+restored sha256 d0911d0876abef3304cf7440cecbadf4a847e5217788141a2e9f378fdc63a6fe (8192 bytes)
+differing byte offsets: [27, 43, 95]
+   offset   27  03 -> 07   file change counter
+   offset   43  02 -> 06   schema cookie
+   offset   95  03 -> 07   version-valid-for number
+differing offsets at or past byte 100 (i.e. OUTSIDE the header): []

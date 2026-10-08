@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/css" href="uslm.css"?><pLaw xmlns="http://schemas.gpo.gov/xml/uslm" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en" xsi:schemaLocation="http://schemas.gpo.gov/xml/uslm https://www.govinfo.gov/schemas/xml/uslm/uslm-2.0.17.xsd">
+
+<?I97 136 STAT. ?>
+<?I98 136 STAT. ?>
+<?I99 136 STAT. ?>
+<?I50 PUBLIC LAW 117–182—SEPT. 30, 2022?>
+<?I51 PUBLIC LAW 117–182—SEPT. 30, 2022?>
+<?I52 PUBLIC LAW 117–182—SEPT. 30, 2022?>
+
+
+<!--Disclaimer: Legislative measures that include compacts or other non-standard data structures will require additional modeling and may contain inconsistencies in the converted USLM XML.-->
+<meta><dc:title>Public Law 117–182: To amend the Help America Vote Act of 2002 to explicitly authorize distribution of grant funds to the voting accessibility protection and advocacy system of the Commonwealth of the Northern Mariana Islands and the system serving the American Indian consortium, and for other purposes.</dc:title>
+<dc:type>Public Law</dc:type><docNumber>182</docNumber>
+<citableAs>Public Law 117–182</citableAs><citableAs>136 Stat. 2178</citableAs>
+<approvedDate>2022-09-30</approvedDate>
+<dc:date>2022-09-30</dc:date>
+<dc:publisher>United States Government Publishing Office</dc:publisher><dc:creator>National Archives and Records Administration</dc:creator><dc:creator>Office of the Federal Register</dc:creator><dc:format>text/xml</dc:format><dc:language>EN</dc:language><dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+<processedBy>GPO Locator to USLM Converter 4.15.31;Stage2.20250702</processedBy><processedDate>2026-01-02</processedDate>
+<congress>117</congress><publicPrivate>public</publicPrivate>
+</meta>
+<preface><centerRunningHead>PUBLIC LAW 117–182—SEPT. 30, 2022</centerRunningHead>
+<page identifier="/us/stat/136/2178">136 STAT. 2178</page>
+<dc:type>Public Law</dc:type><docNumber>117–182</docNumber>
+<congress value="117">117th Congress</congress>
+</preface>
+<main>
+<longTitle>
+<docTitle class="centered fontsize12" style="-uslm-lc:I658005">An Act</docTitle>
+<officialTitle class="indentUp0 firstIndent1 fontsize8" style="-uslm-lc:I658011">To amend the Help America Vote Act of 2002 to explicitly authorize distribution of grant funds to the voting accessibility protection and advocacy system of the Commonwealth of the Northern Mariana Islands and the system serving the American Indian consortium, and for other purposes.<sidenote><p class="centered fontsize8" id="xb50ce43b-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076"><approvedDate date="2022-09-30">Sept. 30, 2022</approvedDate></p><p class="centered fontsize8" id="xb50ce43c-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658076">[<ref href="/us/bill/117/s/3969">S. 3969</ref>]<?GPOvSpace 08?></p></sidenote></officialTitle>
+</longTitle>
+<enactingFormula style="-uslm-lc:I658120"><i>  Be it enacted by the Senate and House of Representa­tives of the United States of America in Congress assembled,</i></enactingFormula><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xb50ce43d-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180">Protection and Advocacy for Voting Access Program Inclusion Act.</p><p class="leftAlign firstIndent0 fontsize8" id="xb50ce43e-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t52/s10101">52 USC 10101 note</ref>.</p></sidenote>
+<section id="d119812e92" identifier="/us/pl/117/182/s1" style="-uslm-lc:I658146"><num class="bold" value="1">SECTION 1. </num><heading>SHORT TITLE.</heading><content style="-uslm-lc:I658120">  This Act may be cited as the “<shortTitle role="act">Protection and Advocacy for Voting Access Program Inclusion Act</shortTitle>” or the “<shortTitle role="act">PAVA Program Inclusion Act</shortTitle>”.</content></section>
+<section id="d119812e105" identifier="/us/pl/117/182/s2" style="-uslm-lc:I658141"><num class="fontsize12" value="2">SEC. 2. </num><heading>AUTHORIZING PAYMENTS TO VOTING ACCESSIBILITY PROTECTION AND ADVOCACY SYSTEMS SERVING THE COMMONWEALTH OF THE NORTHERN MARIANA ISLANDS AND THE AMERICAN INDIAN CONSORTIUM.</heading><subsection class="firstIndent0 fontsize10" id="yb50d325f-e81a-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/182/s2/a" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="a">(a) </num><heading class="fontsize10"><inline class="smallCaps">Recipients Defined</inline>.—</heading><chapeau>Section 291 of the Help America Vote Act of 2002 (<ref href="/us/usc/t52/s21061">52 U.S.C. 21061</ref>) <amendingAction type="amend">is amended</amendingAction>—</chapeau><paragraph class="fontsize10" id="yb50d3260-e81a-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/182/s2/a/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><content>by <amendingAction type="redesignate">redesignating</amendingAction> subsection (c) as subsection (d); and</content></paragraph>
+<paragraph class="fontsize10" id="yb50d3261-e81a-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/182/s2/a/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>by <amendingAction type="insert">inserting</amendingAction> after subsection (b) the following new subsection:<quotedContent><subsection class="indentDown1 firstIndent0 fontsize10" id="yb50d5972-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="c">“(c) </num><heading class="fontsize10"><inline class="smallCaps">Eligible Grant Recipients</inline>.—</heading><paragraph class="fontsize10" id="yb50d5973-e81a-11f0-bc57-ad3ac4b1618c" role="definitions" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">“(1) </num><heading class="fontsize10"><inline class="smallCaps">Definition of state</inline>.—</heading><content>For the purposes of this section, the term ‘<term>State</term>’ shall have the meaning given such term in section 102 of the Developmental Disabilities Assistance and Bill of Rights Act of 2000 (<ref href="/us/usc/t42/s15002">42 U.S.C. 15002</ref>).</content></paragraph>
+<paragraph class="fontsize10" id="yb50d5974-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">“(2) </num><heading class="fontsize10"><inline class="smallCaps">American indian consortium eligible</inline>.—</heading><content>A system serving the American Indian consortium for which funds have been reserved under section 509(c)(1)(B) of the Rehabilitation Act of 1973 (<ref href="/us/usc/t29/s794e/c/1/B">29 U.S.C. 794e(c)(1)(B)</ref>) shall be eligible for payments under subsection (a) in the same manner as a protection and advocacy system of a State.”</content></paragraph>
+</subsection>
+</quotedContent>.</content></paragraph>
+</subsection>
+<subsection class="firstIndent0 fontsize10" id="yb50d5975-e81a-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/182/s2/b" role="instruction" style="-uslm-lc:I658120"><num class="fontsize10" style="-uslm-lc:emspace2" value="b">(b) </num><heading class="fontsize10"><inline class="smallCaps">Grant Minimums for American Indian Consortium</inline>.—</heading><chapeau>Section 291(b) of such Act (<ref href="/us/usc/t52/s21061/b">52 U.S.C. 21061(b)</ref>) <amendingAction type="amend">is amended</amendingAction>—</chapeau><paragraph class="fontsize10" id="yb50d5976-e81a-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/182/s2/b/1" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="1">(1) </num><content>by <amendingAction type="insert">inserting</amendingAction> “<quotedText>(c)(1)(B),</quotedText>” after “<quotedText>as set forth in subsections</quotedText>”; and</content></paragraph>
+<paragraph class="fontsize10" id="yb50d5977-e81a-11f0-bc57-ad3ac4b1618c" identifier="/us/pl/117/182/s2/b/2" style="-uslm-lc:I658122"><num class="fontsize10" style="-uslm-lc:emspace2" value="2">(2) </num><content>by <amendingAction type="delete">striking</amendingAction> “<quotedText>subsections (c)(3)(B) and (c)(4)(B) of that section shall be not less than $70,000 and $35,000, respectively.</quotedText>” and <amendingAction type="insert">inserting</amendingAction> the following: “<quotedText>subsection (c)(3)(B) shall not be less than $70,000, and the amount of the grants to systems referred to in subsections (c)(1)(B) and (c)(4) shall not be less than $35,000.</quotedText>”.<page identifier="/us/stat/136/2179">136 STAT. 2179</page></content></paragraph>
+</subsection>
+</section>
+<section id="d119812e219" identifier="/us/pl/117/182/s3" style="-uslm-lc:I658141"><num class="fontsize12" value="3">SEC. 3. </num><sidenote><p class="leftAlign firstIndent0 fontsize8" id="xb50d5978-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658180"><ref href="/us/usc/t52/s21061">52 USC 21061 note</ref>.</p></sidenote><heading>EFFECTIVE DATE.</heading><content style="-uslm-lc:I658120">  The amendments made by section 2 shall take effect at the start of the first fiscal year starting after the date of the enactment of this Act.</content></section>
+<action>
+<actionDescription style="-uslm-lc:I658030">Approved</actionDescription> <date date="2022-09-30">September 30, 2022</date>.</action>
+</main>
+<legislativeHistory>
+<heading style="-uslm-lc:I658031"><inline class="underline">LEGISLATIVE HISTORY</inline>—<ref href="/us/bill/117/s/3969">S. 3969</ref>:</heading>
+<note>
+<heading style="-uslm-lc:I658032">CONGRESSIONAL RECORD, Vol. 168 (2022):</heading>
+<p class="indentUp4 firstIndent-1" id="xb50d5979-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Mar. 30, considered and passed Senate.</p><p class="indentUp4 firstIndent-1" id="xb50d597a-e81a-11f0-bc57-ad3ac4b1618c" style="-uslm-lc:I658035">Sept. 29, considered and passed House.</p></note>
+</legislativeHistory>
+<endMarker>○</endMarker>
+</pLaw>

@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H0C5E29EC525D49248AB879EB18C2F2BC" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 6895 IH: Debt Solution and Accountability Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2025-12-18</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 6895</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20251218">December 18, 2025</action-date><action-desc><sponsor name-id="S001199">Mr. Smucker</sponsor> (for himself and <cosponsor name-id="S001201">Mr. Suozzi</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To provide further means of accountability with respect to the United States debt and promote fiscal responsibility.</official-title></form><legis-body id="HCE822CE49C29430DA66954D8C377C3B1" style="OLC"> 
+<section id="HC9CC1892669541C885DEF1C8720F0114" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Debt Solution and Accountability Act</short-title></quote>.</text></section> <section id="HC44EBF0A4EF4491EA99129C77C391B3D"><enum>2.</enum><header>Secretary of the Treasury report to Congress before debt limit is increased</header> <subsection id="H7990A955EE4E430DA58BC79326C5BB65"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Subchapter II of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/31/31">chapter 31</external-xref> of title 31, United States Code, is amended by adding at the end the following:</text> 
+<quoted-block display-inline="no-display-inline" id="H1CA58DDE0EE5459DB3570AF5FA85A859" style="USC"> 
+<section id="HD1FFD5FB83C7468D8DAD64A262AF7A80">
+                        <enum>3131.</enum>
+                        <header>Report before debt limit is increased</header>
+                        <subsection id="HD2A355B899C7402FA4C492E2B4E389B1">
+                            <enum>(a)</enum>
+                            <header>In general</header>
+ <text display-inline="yes-display-inline">On each specified reporting date, the Secretary of the Treasury shall submit a report to the Committee on Ways and Means of the House of Representatives, the Committee on Appropriations of the House of Representatives, the Committee on the Budget of the House of Representatives, the Committee on Finance of the Senate, the Committee on Appropriations of the Senate, and the Committee on the Budget of the Senate consisting of the following:</text>
+                            <paragraph id="H69A49F252A0C4B0F9FC932DC7F99804B">
+                                <enum>(1)</enum>
+                                <header>Debt Report</header>
+ <text display-inline="yes-display-inline">A report on the state of the public debt, including—</text>
+                                <subparagraph id="H59100F1F8DD84955982830C9399A5328">
+                                    <enum>(A)</enum>
+ <text display-inline="yes-display-inline">the historical levels of the debt, current amount and composition of the debt, and future projections of the debt;</text>
+                                </subparagraph>
+                                <subparagraph id="HA5511C2E423847A99701985C56580F49">
+                                    <enum>(B)</enum>
+ <text>the drivers and composition of future debt; and</text> </subparagraph> <subparagraph id="HAD6BCF378C454A1D9033BE2033F82184"> <enum>(C)</enum> <text>how the United States will meet debt obligations, including principal and interest.</text>
+                                </subparagraph>
+                            </paragraph>
+                            <paragraph id="H866CA8FA81434EBD909A6F3A6994A884">
+                                <enum>(2)</enum>
+                                <header>Statement of intent</header>
+ <text>A detailed explanation of—</text> <subparagraph id="H04EF690D8B534DCFAB647CAD809A33B5"> <enum>(A)</enum> <text display-inline="yes-display-inline">proposals of the President to reduce or slow the growth of the public debt in the short term (the current and following three fiscal years), medium term (approximately five to nine fiscal years), and long term (approximately ten to twenty-five fiscal years), and proposals of the President to lower the debt-to-gross domestic product ratio;</text>
+                                </subparagraph>
+                                <subparagraph id="H143ED45B4F1B49A787A450B1A2C70081">
+                                    <enum>(B)</enum>
+ <text display-inline="yes-display-inline">the impact (including the impact on future Government spending, debt service, and the position of the United States dollar as the international reserve currency) of increasing the debt limit and of leaving the debt limit unchanged; and</text>
+                                </subparagraph>
+                                <subparagraph id="H53E31B4FC3DF459A877DDC0F59B3855B">
+                                    <enum>(C)</enum>
+ <text display-inline="yes-display-inline">projections of fiscal health and sustainability of major direct-spending entitlement programs (including Social Security, Medicare, and Medicaid).</text>
+                                </subparagraph>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="HEBCB0FDD9A884D1F953620EA7EE717EA">
+                            <enum>(b)</enum>
+                            <header>Progress report</header>
+ <text display-inline="yes-display-inline">Not more than 180 days after any date on which any increase, or suspension, of the limitation imposed under section 3101 takes effect, the Secretary of the Treasury shall submit a detailed report on the progress of implementing all proposals of the President described under subsection (a)(2)(A).</text>
+                        </subsection>
+                        <subsection id="H865B24AA3BFF43A3B3C1B41F71B398CB">
+                            <enum>(c)</enum>
+                            <header>Specified reporting date</header>
+ <text>For purposes of this section, the term <quote>specified reporting date</quote> means—</text>
+                            <paragraph id="H78C483DDBC324FDDBF662499BD86308C">
+                                <enum>(1)</enum>
+ <text>any date on which the debt subject to limit under section 3101 reaches 99.5 percent of the limitation imposed under such section; and</text>
+                            </paragraph>
+                            <paragraph id="H79DF8E7A6407496CAB9DB842DBA374BD">
+                                <enum>(2)</enum>
+ <text display-inline="yes-display-inline">with respect to any period for which the limitation imposed under section 3101 is suspended, the date which is 1 month before the expiration of such suspension.</text>
+                            </paragraph>
+                        </subsection>
+                        <subsection id="H6842F1C31047449EB93EC6B6E41BDF6A">
+                            <enum>(d)</enum>
+                            <header>Public access to information</header>
+ <text display-inline="yes-display-inline">The Secretary of the Treasury shall furnish publicly accessible links on the web page of the Department of the Treasury to each report submitted under this section. Such links shall be available for not less than the 6-month period following the date of such submission.</text>
+                        </subsection>
+                    </section><after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="HE5F364C6EE9C43168BF7E8680526A1C3"><enum>(b)</enum><header>Clerical amendment</header><text display-inline="yes-display-inline">The table of analysis for <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/31/31">chapter 31</external-xref> of title 31, United States Code, is amended by inserting after the item relating to <external-xref legal-doc="usc" parsable-cite="usc/31/3130">section 3130</external-xref> the following:</text> <quoted-block display-inline="no-display-inline" id="H0E620ECE38E54B6AB4A77AEB9D5254C2" style="USC"> <toc regeneration="no-regeneration"> <toc-entry level="section">3131. Report after debt limit is increased.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block></subsection></section> <section display-inline="no-display-inline" id="H2669D73E6BB749849A7FE55778431C11" section-type="subsequent-section"><enum>3.</enum><header>Access to certain Treasury Department data</header><text display-inline="no-display-inline">Not later than thirty days after receipt of a written request from the Chairman of the Committee on Ways and Means of the House of Representatives or the Committee on Finance of the Senate, the Secretary of the Treasury shall provide to the requesting Chairman financial and economic data relevant to determining the amount of the public debt of the United States, including—</text> 
+<paragraph id="HEC95F43FE62044CA8113A62CC1DF72CE"><enum>(1)</enum><text>cash flow and debt transaction information used in preparing the Daily Treasury Statement, including current balances, receipts, and payments;</text></paragraph> <paragraph id="HF45C72640B2E415C9AC0E81813645850"><enum>(2)</enum><text>operating cash balance projections; and</text></paragraph> 
+<paragraph id="HD6D26322A5834C9F874B1FB15629F6CD"><enum>(3)</enum><text display-inline="yes-display-inline">relevant information regarding any extraordinary measures taken to prevent the public debt from exceeding the limitation imposed by section 3101 of title 31, United States Code.</text></paragraph></section> </legis-body></bill>
+

@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Referred-in-Senate" bill-type="olc" dms-id="HBEB2C3DA3A0C4B8196B257CD37C7B85E" key="G" public-private="public" stage-count="1">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2114 : Enhancing State Energy Security Planning and Emergency Preparedness Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-09-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">IIB</distribution-code>
+		<congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session>
+		<legis-num display="yes">H. R. 2114</legis-num>
+		<current-chamber display="yes">IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action><action-date date="20190910">September 10, 2019</action-date><action-desc>Received; read twice and referred to the <committee-name committee-id="SSEG00">Committee on Energy and Natural Resources</committee-name></action-desc></action><legis-type>AN ACT</legis-type>
+		<official-title display="yes">To amend the Energy Policy and Conservation Act to provide Federal financial assistance to States
+			 to implement, review, and revise State energy security plans, and for
+			 other purposes.</official-title>
+	</form>
+	<legis-body id="H336BB6687A614C578E67469FC3A6B230" style="OLC">
+ <section id="HED50947686D445839093590B34F4B0C6" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Enhancing State Energy Security Planning and Emergency Preparedness Act of 2019</short-title></quote>.</text> </section><section id="H92E3B82C0ABD4B61B05D73DC0A1FF8B6"><enum>2.</enum><header>State energy security plans</header> <subsection id="H15C41EDB2C2747BF94F2AE55ED276D5B"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Part D of title III of the Energy Policy and Conservation Act (<external-xref legal-doc="usc" parsable-cite="usc/42/6321">42 U.S.C. 6321</external-xref> et seq.) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H83B0BD50059D4A93BCD29CB79A0DF795" style="OLC">
+					<section id="HF3E85BEBFA234E608CD3170FE9607132"><enum>367.</enum><header>State energy security plans</header>
+ <subsection commented="no" id="HBEC6088F7F58404086D0202B8BB9D0D8"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Federal financial assistance made available to a State under this part may be used for the implementation, review, and revision of a State energy security plan that assesses the State’s existing circumstances and proposes methods to strengthen the ability of the State, in consultation with owners and operators of energy infrastructure in such State, to—</text>
+ <paragraph id="H0BF0A59D5790493C818B32B84BAC9FF5"><enum>(1)</enum><text>secure the energy infrastructure of the State against all physical and cybersecurity threats;</text> </paragraph><paragraph id="H43AAFB5D9E7D455F81F186D1E018AAC9"><enum>(2)</enum><text>mitigate the risk of energy supply disruptions to the State and enhance the response to, and recovery from, energy disruptions; and</text>
+ </paragraph><paragraph id="HE731B4374182441596149A149806C08B"><enum>(3)</enum><text>ensure the State has a reliable, secure, and resilient energy infrastructure.</text> </paragraph></subsection><subsection commented="no" id="H5C5F8E92724542E1990A059933F81DA5"><enum>(b)</enum><header>Contents of plan</header><text>A State energy security plan described in subsection (a) shall—</text>
+ <paragraph commented="no" id="H0B374904737C4FCB83F0E9F438537CE1"><enum>(1)</enum><text display-inline="yes-display-inline">address all fuels, including petroleum products, other liquid fuels, coal, electricity, and natural gas, as well as regulated and unregulated energy providers;</text>
+ </paragraph><paragraph id="H388DBCFF8D494455AC6E0C69EE9979D1"><enum>(2)</enum><text>provide a State energy profile, including an assessment of energy production, distribution, and end-use;</text>
+ </paragraph><paragraph id="H6576DE6ADE2849DDB0F5DFBEBB036E07"><enum>(3)</enum><text>address potential hazards to each energy sector or system, including physical threats and cybersecurity threats and vulnerabilities;</text>
+ </paragraph><paragraph id="H8A69352A3F934ABD9E5A838D1D53A147"><enum>(4)</enum><text>provide a risk assessment of energy infrastructure and cross-sector interdependencies;</text> </paragraph><paragraph id="H3574EE1E6DBB40E3A6EA7652ED816541"><enum>(5)</enum><text>provide a risk mitigation approach to enhance reliability and end-use resilience; and</text>
+ </paragraph><paragraph id="H6EA916AB04B44434880723001B84E451"><enum>(6)</enum><text display-inline="yes-display-inline">address multi-State, Indian Tribe, and regional coordination planning and response, and to the extent practicable, encourage mutual assistance in cyber and physical response plans.</text>
+ </paragraph></subsection><subsection id="H9BD38677F7394B5E8BBC140E51BC7DB0"><enum>(c)</enum><header>Coordination</header><text display-inline="yes-display-inline">In developing a State energy security plan under this section, the energy office of the State shall, to the extent practicable, coordinate with—</text>
+ <paragraph id="HC9FFD97E2D004EA0896EAB97613C2549"><enum>(1)</enum><text>the public utility or service commission of the State;</text> </paragraph><paragraph id="H88630AC9B08A4C3386313CA7F4D03C77"><enum>(2)</enum><text>energy providers from the private sector; and</text>
+ </paragraph><paragraph id="H11DCE118600845348AA3FFE4EE159372"><enum>(3)</enum><text display-inline="yes-display-inline">other entities responsible for maintaining fuel or electric reliability.</text> </paragraph></subsection><subsection commented="no" id="H88342C75CA954B28A9DE99F96869133B"><enum>(d)</enum><header>Financial assistance</header><text display-inline="yes-display-inline">A State is not eligible to receive Federal financial assistance under this part, for any purpose, for a fiscal year unless the Governor of such State submits to the Secretary, with respect to such fiscal year—</text>
+ <paragraph id="H0750D0AFFB094356819E9730DFC331DC"><enum>(1)</enum><text>a State energy security plan described in subsection (a) that meets the requirements of subsection (b); or</text>
+ </paragraph><paragraph id="H3292037CAEAC42D5B11866E6C71B510C"><enum>(2)</enum><text>after an annual review of the State energy security plan by the Governor—</text> <subparagraph id="H7B88D191A8824B8DABA0A2B696010389"><enum>(A)</enum><text>any necessary revisions to such plan; or</text>
+ </subparagraph><subparagraph id="HFC68C28694BA44EF92B25B0735AC479F"><enum>(B)</enum><text>a certification that no revisions to such plan are necessary.</text> </subparagraph></paragraph></subsection><subsection id="H4FDADE1240A74E5AADFB0F2C698C83BA"><enum>(e)</enum><header>Technical assistance</header><text>Upon request of the Governor of a State, the Secretary may provide information and technical assistance, and other assistance, in the development, implementation, or revision of a State energy security plan.</text>
+ </subsection><subsection commented="no" id="HEE21A31F195544B2B90197A7BE3F909F"><enum>(f)</enum><header>Sunset</header><text>This section shall expire on October 31, 2024.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block> </subsection><subsection id="H57757DA4A00A4C019D648D5AB6F07CF5"><enum>(b)</enum><header>Authorization of appropriations</header><text display-inline="yes-display-inline">Section 365(f) of the Energy Policy and Conservation Act (<external-xref legal-doc="usc" parsable-cite="usc/42/6325">42 U.S.C. 6325(f)</external-xref>) is amended—</text>
+ <paragraph id="H6912D06EA16040EBAB3456E157EB94FD"><enum>(1)</enum><text>by striking <quote>$125,000,000</quote> and inserting <quote>$90,000,000</quote>; and</text> </paragraph><paragraph id="H3EBD37DADCE24C9B8B5D25897F47AF82"><enum>(2)</enum><text>by striking <quote>2007 through 2012</quote> and inserting <quote>2021 through 2025</quote>.</text>
+				</paragraph></subsection><subsection id="H5C603EF3047D4A3F941CB3792A4EBC2F"><enum>(c)</enum><header>Technical and conforming amendments</header>
+ <paragraph id="H5ECAA1A31A4344DE826FA56C6968FC0C"><enum>(1)</enum><header>Conforming amendments</header><text display-inline="yes-display-inline">Section 363 of the Energy Policy and Conservation Act (<external-xref legal-doc="usc" parsable-cite="usc/42/6323">42 U.S.C. 6323</external-xref>) is amended—</text> <subparagraph id="H2E1C372E2428427B9F4ECE14D93B5B2F"><enum>(A)</enum><text>by redesignating subsection (f) as subsection (e); and</text>
+ </subparagraph><subparagraph id="H81E61AE82C8B4FC3A81339EB7F892482"><enum>(B)</enum><text>by striking subsection (e).</text> </subparagraph></paragraph><paragraph id="HA337462487EF4695AF15493C5192AFD5"><enum>(2)</enum><header>Technical amendment</header><text display-inline="yes-display-inline">Section 366(3)(B)(i) of the Energy Policy and Conservation Act (<external-xref legal-doc="usc" parsable-cite="usc/42/6326">42 U.S.C. 6326(3)(B)(i)</external-xref>) is amended by striking <quote>approved under section 367</quote>.</text>
+ </paragraph><paragraph display-inline="no-display-inline" id="H64F5DD17754C4FF3B929C61A80EC99CA"><enum>(3)</enum><header>Reference</header><text display-inline="yes-display-inline">The item relating to <quote>Department of Energy—Energy Conservation</quote> in title II of the Department of the Interior and Related Agencies Appropriations Act, 1985 (<external-xref legal-doc="usc" parsable-cite="usc/42/6323a">42 U.S.C. 6323a</external-xref>) is amended by striking <quote>sections 361 through 366</quote> and inserting <quote>sections 361 through 367</quote>.</text>
+ </paragraph><paragraph id="H9BF452953AB84CF39FD69D1FDC62606E"><enum>(4)</enum><header>Table of sections</header><text>The table of sections for part D of title III of the Energy Policy and Conservation Act is amended by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="HA17AF2D1078E4DBAB98013139F2A1AC0" style="OLC">
+						<toc regeneration="no-regeneration">
+							<toc-entry level="section">Sec. 367. State energy security plans.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph></subsection></section></legis-body><attestation><attestation-group><attestation-date chamber="House" date="20190909">Passed the House of Representatives September 9, 2019.</attestation-date><attestor display="yes">Cheryl L. Johnson,</attestor><role>Clerk</role></attestation-group></attestation>
+</bill>
+
+

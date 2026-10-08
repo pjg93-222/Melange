@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" public-private="public" dms-id="H69B5E398CB344AC7AD2D465BF077DBE7">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8489 IH: HUD Payment Integrity and Accountability Act of 2026</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-23</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8489</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20260423">April 23, 2026</action-date>
+<action-desc><sponsor name-id="M001204">Mr. Meuser</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To require the Secretary of Housing and Urban Development to conduct an improper payment assessment for project-based and tenant-based assistance, and for other purposes.</official-title>
+</form>
+<legis-body id="H22DD991173CC4DF39C758D48F3E1B99A">
+<section id="H57C9743A800047948ACFE4A6EDF60E65" section-type="section-one"> <enum>1.</enum> <header>Short title</header> <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>HUD Payment Integrity and Accountability Act of 2026</short-title></quote>.</text> </section> <section commented="no" display-inline="no-display-inline" id="HAD3DD59CC0094D0982A54D2622E50CDC"> <enum>2.</enum> <header>Definitions</header> <text display-inline="no-display-inline">In this Act:</text> 
+<paragraph commented="no" display-inline="no-display-inline" id="H3A539C951248435A8A69E8C4E334DB9C"> <enum>(1)</enum> <header>Department</header> <text>The term <term>Department</term> means the Department of Housing and Urban Development.</text> </paragraph> <paragraph commented="no" display-inline="no-display-inline" id="H7BF01AFCC71146379B16D51B22B0DF25"> <enum>(2)</enum> <header display-inline="yes-display-inline">Project-based assistance; tenant-based assistance</header> <text>The terms <term>project-based assistance</term> and <term>tenant-based assistance</term> have the meanings given those terms in section 8(f) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(f)</external-xref>).</text> </paragraph> 
+<paragraph commented="no" display-inline="no-display-inline" id="H921E11F505C443DDA3688FC67F10E777"> <enum>(3)</enum> <header>Public housing agency</header> <text display-inline="yes-display-inline">The term <term>public housing agency</term> has the meaning given the term in section 3(b) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437a">42 U.S.C. 1437a(b)</external-xref>).</text> </paragraph> <paragraph commented="no" display-inline="no-display-inline" id="HEBFCD2345871457FBDCA49470F74EEEE"> <enum>(4)</enum> <header>Secretary</header> <text display-inline="yes-display-inline">The term <term>Secretary</term> means the Secretary of Housing and Urban Development.</text> </paragraph> </section> 
+<section commented="no" display-inline="no-display-inline" id="H52445187965A4B43BF42DFF33962EFE7"> <enum>3.</enum> <header>Mandatory compliance date</header> 
+<subsection commented="no" display-inline="no-display-inline" id="HD880276B5EB1449484C6310BED3E5857"> <enum>(a)</enum> <header display-inline="yes-display-inline">In general</header> <text>Not later than December 1, 2027, the Secretary shall include, as part of the agency financial report for fiscal year 2027 required under OMB Circular No. A–36, a compliant improper payment assessment for project-based assistance and tenant-based assistance.</text> </subsection> <subsection commented="no" display-inline="no-display-inline" id="H2B10BA67D2B34CB0B5073049F0B778CE"> <enum>(b)</enum> <header>Detailed plan and timeline</header> <text>The Secretary shall develop and execute a detailed plan and timeline for testing and reporting improper payment estimates in the Office of Public and Indian Housing’s Tenant-Based Rental Assistance program and the Office of Multifamily Housing's Project-Based Rental Assistance program, in full compliance with Federal law and applicable guidance issued by the Office of Management and Budget.</text>
+            </subsection> </section> 
+<section id="H7A4FA5FE2357422C81B368D4DCC62AB3"> <enum>4.</enum> <header>Identifying fraud in housing and rental assistance</header> 
+<subsection id="HF79CF7AE5F9C4BDB9A9A99A5C48B06F1"> <enum>(a)</enum> <header>Public and section 8 housing</header> 
+<paragraph id="H8E60AB3E2F6E420191CB1D172D0CE1AA"> <enum>(1)</enum> <header>In general</header> <text>Not later than 60 days after making a determination described in paragraph (2), the Secretary shall notify the Inspector General of the Department of the determination.</text> </paragraph> <paragraph id="H6D8520B304F24DAE872E479F3991DCEE"> <enum>(2)</enum> <header>Determination</header> <text>A determination described in this paragraph is a determination that—</text> 
+<subparagraph id="H056F4C11CBC448EB9A8549F1DABC7245">
+            <enum>(A)</enum>
+ <text>the aggregate amount of housing assistance payments or grants paid under the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437">42 U.S.C. 1437 et seq.</external-xref>) for a ZIP Code and county or county equivalent increased by more than 100 percent in a single year; or</text>
+          </subparagraph> 
+<subparagraph id="H8C6EBB43931E4EE6A26A1D9C84941766">
+            <enum>(B)</enum>
+ <text>the number of owners, landlords, or public housing agencies receiving Federal rental assistance or operating subsidies increased in a ZIP Code and county or county equivalent by more than 100 percent in a single year.</text>
+          </subparagraph> </paragraph> </subsection> 
+<subsection id="HC0B161909CAF47089540EC112B1FD4A2"> <enum>(b)</enum> <header>Community development and disaster recovery grants</header> 
+<paragraph id="H9A90AE7F08CA41BCA9D36EBCA6AEF8D1"> <enum>(1)</enum> <header>In general</header> <text>Not later than 60 days after making a determination described in paragraph (2), the Secretary shall notify the Inspector General of the Department of the determination.</text> </paragraph> <paragraph id="HD33149115FDB4A44AD3D8E1111352F0C"> <enum>(2)</enum> <header>Determination</header> <text>A determination described in this paragraph is a determination that—</text> 
+<subparagraph id="H7F4238268A944E4E8BD6436A0F12ED01">
+            <enum>(A)</enum>
+ <text>the aggregate amount paid under the Community Development Block Grant program under title I of the Housing and Community Development Act of 1974 (<external-xref legal-doc="usc" parsable-cite="usc/42/3601">42 U.S.C. 3601 et seq.</external-xref>) or funds paid under the Community Development Block Grant program for Disaster Recovery for a specific project or within a ZIP Code and county equivalent increased by more than 100 percent in a single year; or</text>
+          </subparagraph> 
+<subparagraph id="H237FD5158B1F41EF857A8EAA6434B38B"> <enum>(B)</enum> <text>the number of sub-recipients or contractors receiving payments under the programs described in subparagraph (A) in a specific jurisdiction increased by more than 100 percent in a single year.</text> </subparagraph> </paragraph> </subsection> <subsection id="HB5356EA3E93F4E28B312E33D0EA0D4A6"> <enum>(c)</enum> <header>Audit by the Inspector General of HUD</header> <text>Not later than 2 years after the date of enactment of this Act, and annually thereafter, the Inspector General of the Department shall—</text> 
+<paragraph id="H72132E6C22D34AFB974CABC41490F066"> <enum>(1)</enum> <text>identify, based on the results of notifications received under subsection (a)(1) or (b)(1), any program or geographic area in which the aggregate amount paid or the number of participating housing providers increased by not less than 400 percent during the preceding 5-year period; and</text> </paragraph> <paragraph id="H9A40EFEA384248599B5A5AAC64AE8D68"> <enum>(2)</enum> <text>audit any such program, agency, or recipient to ensure compliance with improper payment testing requirements and to detect potential fraudulent activity.</text> </paragraph> </subsection> </section> 
+<section id="H94D67D66E23C48E1A2013E09AA8622EA"> <enum>5.</enum> <header>Inspector General oversight</header> 
+<subsection id="HF706B76B3A2741BAAAB1C9ED01C7D3D9">
+        <enum>(a)</enum>
+        <header>Pre-Validation</header>
+ <text>Not later than 180 days before the deadline described in section 3(a), the Inspector General of the Department shall certify whether or not—</text>
+        <paragraph commented="no" display-inline="no-display-inline"
+          id="H997AC55B54BB42AD942D5198986BF4F5">
+          <enum>(1)</enum>
+ <text display-inline="yes-display-inline">the methodology chosen by the Secretary for the assessment described in that section is statistically sound and addresses all material findings from financial statement audits and program audits conducted by the Inspector General related to improper payment testing, eligibility tier verification, and validation of payments to property owners; and</text>
+        </paragraph>
+        <paragraph commented="no" display-inline="no-display-inline"
+          id="H4B9363920AF1487F87BAEB4D0346CC95">
+          <enum>(2)</enum>
+ <text>the Secretary made a serious effort to conduct a data draw and receive supporting documents needed to conduct the assessment described in section 3(a).</text>
+        </paragraph>
+      </subsection> 
+<subsection id="HBD2C3DD7A0CC422A8A5709A4AFE3590B"> <enum>(b)</enum> <header>Fraud risk assessment</header> 
+<paragraph commented="no" display-inline="no-display-inline" id="H97E5C1BE6BBF4916BF8F956467A6AB8B"> <enum>(1)</enum> <header display-inline="yes-display-inline">In general</header> <text>The Inspector General of the Department shall conduct, and submit to the Committee on Banking, Housing, and Urban Affairs and the Committee on Homeland Security and Governmental Affairs of the Senate a report on, a separate fraud risk assessment specifically for the approximately $50,000,000,000 expended annually for rental assistance, including tenant-based ad project-based assistance under section 8(o) of the United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(o)</external-xref>), to identify high-risk nodes in the payment chain.</text> </paragraph> <paragraph id="H1D1094BDC3DB4FF19F29B987BC5C7528"> <enum>(2)</enum> <header>Data draw and analytics</header> <text>In conducting the assessment under paragraph (1), the Inspector General shall of the Department shall—</text> 
+<subparagraph id="H1F1DA67B8285413FA94008C8112F1DC1"> <enum>(A)</enum> <text>execute a comprehensive data draw from all relevant departmental and third-party contract administrator systems to reconcile payments at the eligibility tier;</text> </subparagraph> <subparagraph id="H6DE2D3E54DD2425BB8DDF54FBD4F1B1B"> <enum>(B)</enum> <text>identify specific barriers preventing the Department from reestablishing computer matching agreements with the <quote>Do Not Pay</quote> database of the Department of the Treasury; and</text> </subparagraph> 
+<subparagraph id="H43D170AB65314115B071AA78F92444F6"> <enum>(C)</enum> <text>include in the report an analysis on how system enhancement funding provided in previous fiscal years has been utilized to specifically address noncompliance with subchapter IV of <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/31/33">chapter 33</external-xref> of title 31, United States Code, and other provisions of law related to improper payments.</text> </subparagraph> </paragraph> </subsection> </section> </legis-body> </bill>
+

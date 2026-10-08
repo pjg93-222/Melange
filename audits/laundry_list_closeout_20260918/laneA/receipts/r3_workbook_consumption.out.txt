@@ -1,0 +1,92 @@
+﻿====================================================================================================
+R3  WORKBOOK CONSUMPTION OF THE MEDIA BLEND COLUMNS   run 2026-09-18T23:32:12
+====================================================================================================
+sheets (33):
+   Field Recognition
+   Recognition Detail
+   Overall Standing
+   Rank & Allocation
+   IM Allocation
+   Melange - Live
+   Category Stance
+   Congestion
+   Signed Coalitions
+   Blended Model
+   Coalition Profiles
+   Closeness Between Members
+   Coalition Demographics
+   Primary Layer - Normalized
+   Primary Layer
+   Sub Layer - Normalized
+   Sub Layer - Raw
+   Legislative Score - Normalized
+   Legislative Score - Raw
+   Demographic - Normalized
+   Demographic Factors - Raw
+   Press Release - Normalized
+   Press Release - Raw
+   Committee Data
+   Topic Weights
+   Press Release Articles
+   Sponsor Interactions
+   Original Co-Sponsor Interaction
+   Co-Sponsor Interactions
+   Success Sponsor
+   Success Original Co-Sponsor
+   CFPB Bills
+   Centrality
+
+formula cells referencing 'Press Release - Raw': 0
+
+referencing sheets and the columns they pull:
+
+-- per category column: is it referenced by any other sheet? --
+col  header                                 refs       referencing sheets
+E    Examination & Supervision              0          (NONE)
+F    Credit Union Capital Requirements      0          (NONE)
+G    NCUA Budget & Share Insurance Fund     0          (NONE)
+H    Interchange                            0          (NONE)
+I    Payments                               0          (NONE)
+J    Technology & Emerging Issues           0          (NONE)
+K    Fraud Prevention                       0          (NONE)
+L    Data Privacy & Cybersecurity           0          (NONE)
+M    Charter Modernization & Governance     0          (NONE)
+N    Defense Credit Union Issues            0          (NONE)
+O    Field of Membership                    0          (NONE)
+P    Credit Union Tax Status                0          (NONE)
+Q    CDFI Fund                              0          (NONE)
+R    CU-Bank Competitive Dynamics           0          (NONE)
+S    CFPB Issues & Structural Reform        0          (NONE)
+T    Credit Card & Consumer-Fee Mandates    0          (NONE)
+U    Telephone Consumer Protection Act      0          (NONE)
+V    Member Business Lending                0          (NONE)
+W    Mortgage Lending & Housing             0          (NONE)
+X    General Credit Union                   0          (NONE)
+
+columns written by the media blend but referenced by NO other sheet: 20
+   E  Examination & Supervision
+   F  Credit Union Capital Requirements
+   G  NCUA Budget & Share Insurance Fund
+   H  Interchange
+   I  Payments
+   J  Technology & Emerging Issues
+   K  Fraud Prevention
+   L  Data Privacy & Cybersecurity
+   M  Charter Modernization & Governance
+   N  Defense Credit Union Issues
+   O  Field of Membership
+   P  Credit Union Tax Status
+   Q  CDFI Fund
+   R  CU-Bank Competitive Dynamics
+   S  CFPB Issues & Structural Reform
+   T  Credit Card & Consumer-Fee Mandates
+   U  Telephone Consumer Protection Act
+   V  Member Business Lending
+   W  Mortgage Lending & Housing
+   X  General Credit Union
+
+-- sample formulas per (sheet, column) --
+
+-- range-style references (these consume every column in the range) --
+
+DONE R3

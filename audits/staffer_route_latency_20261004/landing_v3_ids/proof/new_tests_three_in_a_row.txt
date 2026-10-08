@@ -1,0 +1,227 @@
+# The three node test files of the identifier follow-up, three runs in a row (worktree C:\Users\pgoff\Melange-wt\route-search at f23a40aee4c749bae9db132599a853a52c81d9bf, git available: no negative control is skipped)
+# node --test fec/tests/surfaces/test_staffer_live_query_ids.cjs fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs
+
+=== run 1
+✔ ruling: a piece of a node id finds nothing by way of the id (6.7401ms)
+✔ ruling: a piece of a member, committee or policy id finds nothing by way of it, alone or inside a longer query (2.2567ms)
+✔ ruling: a whole node id finds its row and lists it first, trimmed and in any case (4.0438ms)
+✔ ruling: the bare uuid of a politico id is a whole id too (2.4595ms)
+✔ ruling: a whole member, committee or policy id lists the rows that hold it, trimmed and in any case (3.4183ms)
+✔ ruling: the person a whole id names is listed first, then the people attached to it, then the rows that match only by words (0.9726ms)
+✔ ruling: a null code is skipped and a number is a code like any other (0.7628ms)
+✔ ruling: every other column searches as before (1.0286ms)
+✔ over a seeded world the new answers equal the ruling, for every 1- and 2-character query, sampled names and pieces of ids and codes (1261.1007ms)
+ℹ seeded world: 125 rows, {"queries":3748,"nonEmpty":1383,"wholeCodeQueries":63,"codeFragmentQueries":188}
+✔ negative control: the previous worker fails the checks that are this step and passes the others (27.7957ms)
+✔ negative control: the previous worker differs from the ruling over the seeded world (1501.6629ms)
+ℹ previous worker over the same world: {"queries":3748,"differ":295,"spurious":2436,"missing":0,"reordered":26}
+✔ negative control: the codes are searched by their pieces again is caught by codeFragments (8.6445ms)
+✔ negative control: no whole-code match is caught by wholeCodes and ranking (8.1938ms)
+✔ negative control: a case-sensitive code is caught by wholeCodes (8.7556ms)
+✔ negative control: only the member id is matched whole is caught by wholeCodes (17.5702ms)
+✔ negative control: the attached rows after the rest is caught by ranking (25.5448ms)
+✔ negative control: the attached rows before the row named by the id is caught by ranking (27.3709ms)
+✔ negative control: an untrimmed query is caught by wholeCodes and wholeIds (25.0382ms)
+✔ negative control: a null code becomes the word null is caught by oddCodes (26.0617ms)
+✔ negative control: the column-0 handling is dropped is caught by wholeIds and bareUuids (18.7899ms)
+✔ a piece of an id finds nothing by way of the id (11.3496ms)
+✔ a whole id finds its row and lists it first, trimmed and in any case (5.0515ms)
+✔ the bare uuid of a politico id is a whole id too (2.1032ms)
+✔ a whole id outranks a row that matches only by words (1.1684ms)
+✔ every other column searches as before (2.0603ms)
+✔ over a seeded world the new answers equal the ruling and the previous filter equals the previous rules (2401.812ms)
+✔ negative control: the previous search fails the ruling checks that are the ruling and passes the others (11.1946ms)
+✔ negative control: the id is searched with the rest again is caught by fragments (5.5272ms)
+✔ negative control: no whole-id match is caught by wholeIds and bareUuids (3.164ms)
+✔ negative control: a case-sensitive id is caught by wholeIds (5.136ms)
+✔ negative control: an untrimmed query is caught by wholeIds (4.3153ms)
+✔ negative control: no bare uuid is caught by bareUuids (8.3985ms)
+✔ negative control: the whole-id rows after the rest is caught by wholeIds and ranking (5.6845ms)
+✔ negative control: the whole-id rows in row order is caught by wholeIds and ranking (5.8194ms)
+✔ ruling: a piece of a node id, a politico id or a uuid finds nothing by way of the id (4.7208ms)
+✔ ruling: a piece of a member, committee or policy id finds nothing by way of it (1.0121ms)
+✔ ruling: a whole node id finds its node, trimmed and in any case (1.5518ms)
+✔ ruling: the bare uuid of a politico id is a whole id, and no other prefix has a bare form (1.0919ms)
+✔ ruling: a whole member, committee or policy id finds the nodes attached to it, trimmed and in any case (1.5917ms)
+✔ ruling: names and summaries are still searched by pieces, in any case, all words required (0.9655ms)
+✔ ruling: a node without a label is not searched by pieces of the id its label falls back to (0.8356ms)
+✔ ruling: the server flag is honoured for the query it answered and for no other (1.1346ms)
+✔ ruling: a null among the ids is skipped and a number is an id like any other (0.8735ms)
+✔ ruling: the legacy list and the map sample follow the same rule (18.8575ms)
+✔ over a seeded world every answer equals the ruling, for every 1- and 2-character query, sampled names and pieces of ids (374.5226ms)
+ℹ seeded world: 120 nodes, {"queries":3767,"hits":10446,"wholeIdHits":827,"fragmentsThatWouldHaveHit":1252,"predicateCalls":452040,"callerQueries":419}
+✔ the cache holds one entry per node and survives a second pass (3.6204ms)
+✔ negative control: the previous code fails the checks that are the ruling and passes the others (12.5865ms)
+✔ negative control: the previous code differs from the ruling over the seeded world (230.0207ms)
+ℹ previous code over the same world: {"queries":3767,"differ":1604,"spurious":10399,"missing":0}
+✔ negative control: the id is searched by its pieces again is caught by idFragments and callers (9.0261ms)
+✔ negative control: the label falls back to the id again is caught by labelFallback (7.1607ms)
+✔ negative control: the member, committee and policy ids are searched by their pieces again is caught by codeFragments and callers (5.1506ms)
+✔ negative control: no whole-id match is caught by wholeIds and bareUuids and wholeCodes and callers (5.1517ms)
+✔ negative control: a case-sensitive id is caught by wholeIds (5.5065ms)
+✔ negative control: ids are matched by substring is caught by idFragments and codeFragments and callers (3.8702ms)
+✔ negative control: an untrimmed query is caught by wholeIds and wholeCodes (8.4404ms)
+✔ negative control: no bare uuid is caught by bareUuids (4.7183ms)
+✔ negative control: the member, committee and policy ids are not whole-matched is caught by wholeCodes (5.0476ms)
+✔ negative control: a null among the ids becomes the word null is caught by oddIds (5.8559ms)
+✔ negative control: the server flag is dropped is caught by flag (6.1259ms)
+ℹ tests 59
+ℹ suites 0
+ℹ pass 59
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3206.6623
+
+=== run 2
+✔ ruling: a piece of a node id finds nothing by way of the id (4.7791ms)
+✔ ruling: a piece of a member, committee or policy id finds nothing by way of it, alone or inside a longer query (1.7703ms)
+✔ ruling: a whole node id finds its row and lists it first, trimmed and in any case (2.3832ms)
+✔ ruling: the bare uuid of a politico id is a whole id too (1.5037ms)
+✔ ruling: a whole member, committee or policy id lists the rows that hold it, trimmed and in any case (2.3223ms)
+✔ ruling: the person a whole id names is listed first, then the people attached to it, then the rows that match only by words (0.9781ms)
+✔ ruling: a null code is skipped and a number is a code like any other (0.6932ms)
+✔ ruling: every other column searches as before (1.101ms)
+✔ over a seeded world the new answers equal the ruling, for every 1- and 2-character query, sampled names and pieces of ids and codes (1065.764ms)
+ℹ seeded world: 125 rows, {"queries":3748,"nonEmpty":1383,"wholeCodeQueries":63,"codeFragmentQueries":188}
+✔ negative control: the previous worker fails the checks that are this step and passes the others (23.4258ms)
+✔ negative control: the previous worker differs from the ruling over the seeded world (1079.2438ms)
+ℹ previous worker over the same world: {"queries":3748,"differ":295,"spurious":2436,"missing":0,"reordered":26}
+✔ negative control: the codes are searched by their pieces again is caught by codeFragments (11.8635ms)
+✔ negative control: no whole-code match is caught by wholeCodes and ranking (8.5928ms)
+✔ negative control: a case-sensitive code is caught by wholeCodes (8.2826ms)
+✔ negative control: only the member id is matched whole is caught by wholeCodes (8.4416ms)
+✔ negative control: the attached rows after the rest is caught by ranking (10.3108ms)
+✔ negative control: the attached rows before the row named by the id is caught by ranking (10.0296ms)
+✔ negative control: an untrimmed query is caught by wholeCodes and wholeIds (7.9383ms)
+✔ negative control: a null code becomes the word null is caught by oddCodes (10.9635ms)
+✔ negative control: the column-0 handling is dropped is caught by wholeIds and bareUuids (8.5848ms)
+✔ a piece of an id finds nothing by way of the id (4.9439ms)
+✔ a whole id finds its row and lists it first, trimmed and in any case (4.8371ms)
+✔ the bare uuid of a politico id is a whole id too (2.3613ms)
+✔ a whole id outranks a row that matches only by words (0.8691ms)
+✔ every other column searches as before (1.4231ms)
+✔ over a seeded world the new answers equal the ruling and the previous filter equals the previous rules (1756.6896ms)
+✔ negative control: the previous search fails the ruling checks that are the ruling and passes the others (11.0241ms)
+✔ negative control: the id is searched with the rest again is caught by fragments (5.5814ms)
+✔ negative control: no whole-id match is caught by wholeIds and bareUuids (5.3853ms)
+✔ negative control: a case-sensitive id is caught by wholeIds (4.3123ms)
+✔ negative control: an untrimmed query is caught by wholeIds (3.36ms)
+✔ negative control: no bare uuid is caught by bareUuids (5.2092ms)
+✔ negative control: the whole-id rows after the rest is caught by wholeIds and ranking (4.5384ms)
+✔ negative control: the whole-id rows in row order is caught by wholeIds and ranking (5.2062ms)
+✔ ruling: a piece of a node id, a politico id or a uuid finds nothing by way of the id (4.8108ms)
+✔ ruling: a piece of a member, committee or policy id finds nothing by way of it (0.9975ms)
+✔ ruling: a whole node id finds its node, trimmed and in any case (1.6638ms)
+✔ ruling: the bare uuid of a politico id is a whole id, and no other prefix has a bare form (1.1179ms)
+✔ ruling: a whole member, committee or policy id finds the nodes attached to it, trimmed and in any case (1.7568ms)
+✔ ruling: names and summaries are still searched by pieces, in any case, all words required (0.9616ms)
+✔ ruling: a node without a label is not searched by pieces of the id its label falls back to (0.8195ms)
+✔ ruling: the server flag is honoured for the query it answered and for no other (1.059ms)
+✔ ruling: a null among the ids is skipped and a number is an id like any other (0.9395ms)
+✔ ruling: the legacy list and the map sample follow the same rule (18.4ms)
+✔ over a seeded world every answer equals the ruling, for every 1- and 2-character query, sampled names and pieces of ids (319.4009ms)
+ℹ seeded world: 120 nodes, {"queries":3767,"hits":10446,"wholeIdHits":827,"fragmentsThatWouldHaveHit":1252,"predicateCalls":452040,"callerQueries":419}
+✔ the cache holds one entry per node and survives a second pass (0.9239ms)
+✔ negative control: the previous code fails the checks that are the ruling and passes the others (8.9743ms)
+✔ negative control: the previous code differs from the ruling over the seeded world (198.7853ms)
+ℹ previous code over the same world: {"queries":3767,"differ":1604,"spurious":10399,"missing":0}
+✔ negative control: the id is searched by its pieces again is caught by idFragments and callers (4.9094ms)
+✔ negative control: the label falls back to the id again is caught by labelFallback (7.0862ms)
+✔ negative control: the member, committee and policy ids are searched by their pieces again is caught by codeFragments and callers (5.0189ms)
+✔ negative control: no whole-id match is caught by wholeIds and bareUuids and wholeCodes and callers (4.0584ms)
+✔ negative control: a case-sensitive id is caught by wholeIds (7.0975ms)
+✔ negative control: ids are matched by substring is caught by idFragments and codeFragments and callers (4.0151ms)
+✔ negative control: an untrimmed query is caught by wholeIds and wholeCodes (6.4071ms)
+✔ negative control: no bare uuid is caught by bareUuids (4.9587ms)
+✔ negative control: the member, committee and policy ids are not whole-matched is caught by wholeCodes (6.5668ms)
+✔ negative control: a null among the ids becomes the word null is caught by oddIds (5.826ms)
+✔ negative control: the server flag is dropped is caught by flag (7.1394ms)
+ℹ tests 59
+ℹ suites 0
+ℹ pass 59
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2409.3082
+
+=== run 3
+✔ ruling: a piece of a node id finds nothing by way of the id (4.7744ms)
+✔ ruling: a piece of a member, committee or policy id finds nothing by way of it, alone or inside a longer query (1.5286ms)
+✔ ruling: a whole node id finds its row and lists it first, trimmed and in any case (2.4477ms)
+✔ ruling: the bare uuid of a politico id is a whole id too (1.4664ms)
+✔ ruling: a whole member, committee or policy id lists the rows that hold it, trimmed and in any case (2.1959ms)
+✔ ruling: the person a whole id names is listed first, then the people attached to it, then the rows that match only by words (0.8974ms)
+✔ ruling: a null code is skipped and a number is a code like any other (0.7287ms)
+✔ ruling: every other column searches as before (1.0674ms)
+✔ over a seeded world the new answers equal the ruling, for every 1- and 2-character query, sampled names and pieces of ids and codes (1477.9133ms)
+ℹ seeded world: 125 rows, {"queries":3748,"nonEmpty":1383,"wholeCodeQueries":63,"codeFragmentQueries":188}
+✔ negative control: the previous worker fails the checks that are this step and passes the others (26.6697ms)
+✔ negative control: the previous worker differs from the ruling over the seeded world (1100.7701ms)
+ℹ previous worker over the same world: {"queries":3748,"differ":295,"spurious":2436,"missing":0,"reordered":26}
+✔ negative control: the codes are searched by their pieces again is caught by codeFragments (9.7792ms)
+✔ negative control: no whole-code match is caught by wholeCodes and ranking (10.8231ms)
+✔ negative control: a case-sensitive code is caught by wholeCodes (9.1147ms)
+✔ negative control: only the member id is matched whole is caught by wholeCodes (9.822ms)
+✔ negative control: the attached rows after the rest is caught by ranking (11.0493ms)
+✔ negative control: the attached rows before the row named by the id is caught by ranking (9.902ms)
+✔ negative control: an untrimmed query is caught by wholeCodes and wholeIds (8.1555ms)
+✔ negative control: a null code becomes the word null is caught by oddCodes (12.2156ms)
+✔ negative control: the column-0 handling is dropped is caught by wholeIds and bareUuids (8.289ms)
+✔ a piece of an id finds nothing by way of the id (4.7287ms)
+✔ a whole id finds its row and lists it first, trimmed and in any case (5.1235ms)
+✔ the bare uuid of a politico id is a whole id too (1.7777ms)
+✔ a whole id outranks a row that matches only by words (0.9018ms)
+✔ every other column searches as before (1.1971ms)
+✔ over a seeded world the new answers equal the ruling and the previous filter equals the previous rules (2164.8432ms)
+✔ negative control: the previous search fails the ruling checks that are the ruling and passes the others (11.011ms)
+✔ negative control: the id is searched with the rest again is caught by fragments (5.1114ms)
+✔ negative control: no whole-id match is caught by wholeIds and bareUuids (3.312ms)
+✔ negative control: a case-sensitive id is caught by wholeIds (5.4996ms)
+✔ negative control: an untrimmed query is caught by wholeIds (3.7991ms)
+✔ negative control: no bare uuid is caught by bareUuids (7.1045ms)
+✔ negative control: the whole-id rows after the rest is caught by wholeIds and ranking (5.2401ms)
+✔ negative control: the whole-id rows in row order is caught by wholeIds and ranking (5.1798ms)
+✔ ruling: a piece of a node id, a politico id or a uuid finds nothing by way of the id (4.4226ms)
+✔ ruling: a piece of a member, committee or policy id finds nothing by way of it (0.9761ms)
+✔ ruling: a whole node id finds its node, trimmed and in any case (1.5388ms)
+✔ ruling: the bare uuid of a politico id is a whole id, and no other prefix has a bare form (1.0287ms)
+✔ ruling: a whole member, committee or policy id finds the nodes attached to it, trimmed and in any case (1.588ms)
+✔ ruling: names and summaries are still searched by pieces, in any case, all words required (0.9743ms)
+✔ ruling: a node without a label is not searched by pieces of the id its label falls back to (0.7823ms)
+✔ ruling: the server flag is honoured for the query it answered and for no other (1.1267ms)
+✔ ruling: a null among the ids is skipped and a number is an id like any other (0.8655ms)
+✔ ruling: the legacy list and the map sample follow the same rule (18.2648ms)
+✔ over a seeded world every answer equals the ruling, for every 1- and 2-character query, sampled names and pieces of ids (353.6728ms)
+ℹ seeded world: 120 nodes, {"queries":3767,"hits":10446,"wholeIdHits":827,"fragmentsThatWouldHaveHit":1252,"predicateCalls":452040,"callerQueries":419}
+✔ the cache holds one entry per node and survives a second pass (1.3126ms)
+✔ negative control: the previous code fails the checks that are the ruling and passes the others (11.8683ms)
+✔ negative control: the previous code differs from the ruling over the seeded world (223.3454ms)
+ℹ previous code over the same world: {"queries":3767,"differ":1604,"spurious":10399,"missing":0}
+✔ negative control: the id is searched by its pieces again is caught by idFragments and callers (6.5666ms)
+✔ negative control: the label falls back to the id again is caught by labelFallback (11.199ms)
+✔ negative control: the member, committee and policy ids are searched by their pieces again is caught by codeFragments and callers (7.5802ms)
+✔ negative control: no whole-id match is caught by wholeIds and bareUuids and wholeCodes and callers (5.5491ms)
+✔ negative control: a case-sensitive id is caught by wholeIds (7.7738ms)
+✔ negative control: ids are matched by substring is caught by idFragments and codeFragments and callers (5.3897ms)
+✔ negative control: an untrimmed query is caught by wholeIds and wholeCodes (6.7156ms)
+✔ negative control: no bare uuid is caught by bareUuids (4.3605ms)
+✔ negative control: the member, committee and policy ids are not whole-matched is caught by wholeCodes (4.6942ms)
+✔ negative control: a null among the ids becomes the word null is caught by oddIds (5.9048ms)
+✔ negative control: the server flag is dropped is caught by flag (5.4176ms)
+ℹ tests 59
+ℹ suites 0
+ℹ pass 59
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2877.9914
+
+# every node test in fec/tests/surfaces (20 files), once
+ℹ tests 159
+ℹ pass 159
+ℹ fail 0
+ℹ skipped 0

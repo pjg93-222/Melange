@@ -247,7 +247,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         self.assertEqual(result["missing_from_bicam"], ["B000532"])
 
     @staticmethod
-    def _act_records(count: int = 644) -> list[dict[str, object]]:
+    def _act_records(count: int = 648) -> list[dict[str, object]]:
         return [{"bill": f"H.R.{index}", "congress": 119} for index in range(1, count + 1)]
 
     @staticmethod
@@ -260,7 +260,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
     def test_09_act_bar_uses_pre_119_bills_not_legacy_composite(self) -> None:
         pre_119_records = [
             {"bill": f"H.R.{index}", "congress": 118}
-            for index in range(1, 545)
+            for index in range(1, 549)
         ]
         congress_119_records = [
             {"bill": f"H.R.{index}", "congress": 119}
@@ -273,13 +273,13 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
                 "bill_type": "hr",
                 "bill_number": str(index),
             }
-            for index in range(1, 545)
+            for index in range(1, 549)
         ]
         result, _ = b0.audit_act_universe(
             pre_119_records + congress_119_records, pre_119_bills
         )
         self.assertTrue(result["pass"])
-        self.assertEqual((result["joined"], len(result["misses"])), (544, 100))
+        self.assertEqual((result["joined"], len(result["misses"])), (548, 100))
         self.assertTrue(all(miss["reason"] == "NO_BICAM_MATCH" for miss in result["misses"]))
         self.assertEqual(result["pre_119_bill_stratum"]["hit_rate"], 1.0)
         self.assertFalse(result["armed_strata"]["119"]["armed"])
@@ -393,13 +393,13 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
                 "bill_type": "hr",
                 "bill_number": str(index),
             }
-            for index in range(1, 645)
+            for index in range(1, 649)
         ]
         self._write_csv(snapshot / "bills.csv", ["bill_id", "congress", "bill_type", "bill_number"], [list(row.values()) for row in bills])
-        self._write_csv(snapshot / "bills_texts.csv", ["bill_id"], [[f"b{index}"] for index in range(1, 645)])
+        self._write_csv(snapshot / "bills_texts.csv", ["bill_id"], [[f"b{index}"] for index in range(1, 649)])
         identifiers = [f"B{index:06d}" for index in range(533)]
         self._write_csv(snapshot / "members.csv", ["member_id", "bioguide_id"], [[f"m{index}", identifier] for index, identifier in enumerate(identifiers)])
-        self._write_csv(snapshot / "bills_sponsored.csv", ["bill_id", "member_id", "relationship"], [[f"b{index}", "m0", "cosponsor"] for index in range(1, 645)])
+        self._write_csv(snapshot / "bills_sponsored.csv", ["bill_id", "member_id", "relationship"], [[f"b{index}", "m0", "cosponsor"] for index in range(1, 649)])
         roster = integration / "congestion.json"
         roster.write_text(json.dumps([{"bioguide": value} for value in identifiers]), encoding="utf-8")
         legislators = integration / "legislators.csv"
@@ -409,19 +409,19 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         tags = integration / "tags.ndjson"
         self._write_ndjson(tags, [
             {"bill": f"H.R.{index}", "congress": 118}
-            for index in range(1, 645)
+            for index in range(1, 649)
         ])
         discovery = integration / "discovery.ndjson"
         discovery_records = [
             {
                 "canonical_key": f"118:hr:{index + 1}",
-                "bill_id": f"b{(index % 644) + 1}",
+                "bill_id": f"b{(index % 648) + 1}",
             }
             for index in range(18000)
         ] + [
             {
                 "canonical_key": f"119:hr:{index + 1}",
-                "bill_id": f"b{((18000 + index) % 644) + 1}",
+                "bill_id": f"b{((18000 + index) % 648) + 1}",
             }
             for index in range(557)
         ]
@@ -442,7 +442,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         billstatus = integration / "billstatus.ndjson"
         self._write_ndjson(billstatus, [
             {"bill": f"H.R.{index}", "congress": 118, "cosponsors": ["B000000"]}
-            for index in range(1, 645)
+            for index in range(1, 649)
         ])
         return {
             "root": integration, "snapshot": snapshot, "manifest": manifest_path,
@@ -466,7 +466,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         report = json.loads((out_dir / b0.AUDIT_FILENAME).read_text(encoding="utf-8"))
         self.assertEqual(report["status"], "PASS")
         self.assertEqual(report["roster_join"]["roster_distinct"], 533)
-        self.assertEqual(report["act_universe_join"]["unique_bill_congress_rows"], 644)
+        self.assertEqual(report["act_universe_join"]["unique_bill_congress_rows"], 648)
         self.assertEqual(report["text_presence"]["denominator"], 18557)
         serialized = json.dumps(report).casefold()
         self.assertNotIn("https://", serialized)
@@ -524,7 +524,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
         )
         stats: dict[str, int] = {}
         records = list(b0.iter_json_records(path, stats))
-        self.assertEqual(len(records), 644)
+        self.assertEqual(len(records), 648)
         self.assertEqual(stats["skipped_nonrecord"], 1)
         report, _ = b0.audit_act_universe(
             records, self._bill_rows(640), stats["skipped_nonrecord"]
@@ -666,7 +666,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
     def test_29_armed_119_threshold_exact_and_just_below(self) -> None:
         pre_119_records = [
             {"bill": f"H.R.{index}", "congress": 118}
-            for index in range(1, 545)
+            for index in range(1, 549)
         ]
         congress_119_records = [
             {"bill": f"H.R.{index}", "congress": 119}
@@ -679,7 +679,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
                 "bill_type": "hr",
                 "bill_number": str(index),
             }
-            for index in range(1, 545)
+            for index in range(1, 549)
         ]
         def audit_with_119_hits(hit_count: int) -> dict[str, object]:
             congress_119_bills = [
@@ -766,7 +766,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
     def test_31_malformed_miss_vetoes_otherwise_passing_act_bar(self) -> None:
         records = [
             {"bill": f"H.R.{index}", "congress": 118}
-            for index in range(1, 644)
+            for index in range(1, 648)
         ] + [{"bill": "not an act", "congress": 118}]
         bills = [
             {
@@ -775,14 +775,14 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
                 "bill_type": "hr",
                 "bill_number": str(index),
             }
-            for index in range(1, 644)
+            for index in range(1, 648)
         ]
         result, _ = b0.audit_act_universe(records, bills)
         self.assertGreaterEqual(
             result["pre_119_bill_stratum"]["hit_rate"], 0.987
         )
-        self.assertEqual(result["pre_119_bill_stratum"]["denominator"], 644)
-        self.assertEqual(result["pre_119_bill_stratum"]["hit"], 643)
+        self.assertEqual(result["pre_119_bill_stratum"]["denominator"], 648)
+        self.assertEqual(result["pre_119_bill_stratum"]["hit"], 647)
         self.assertEqual(result["malformed_misses"], 1)
         self.assertTrue(result["legacy_composite"]["pass"])
         self.assertFalse(result["pass"])
@@ -825,9 +825,9 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
     def test_33_empty_mandatory_strata_fail_closed(self) -> None:
         congress_119_records = [
             {"bill": f"H.R.{index}", "congress": 119}
-            for index in range(1, 645)
+            for index in range(1, 649)
         ]
-        congress_119_bills = self._bill_rows(644)
+        congress_119_bills = self._bill_rows(648)
         empty_pre_119, _ = b0.audit_act_universe(
             congress_119_records, congress_119_bills
         )
@@ -837,7 +837,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
 
         pre_119_records = [
             {"bill": f"H.R.{index}", "congress": 118}
-            for index in range(1, 645)
+            for index in range(1, 649)
         ]
         pre_119_bills = [
             {
@@ -846,7 +846,7 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
                 "bill_type": "hr",
                 "bill_number": str(index),
             }
-            for index in range(1, 645)
+            for index in range(1, 649)
         ]
         snapshot_only_119_bills = [
             {
@@ -1488,7 +1488,8 @@ class B0BicamArrivalAuditTests(unittest.TestCase):
             "future contract - amendments component not downloaded, schema unseen",
         ).encode("utf-8")
         # Golden sha256 generated by the coordinator on 2026-08-17 from the TRUE pre-change tool at commit 22c55d0ac over this fixture builder with deterministic gzip writes (mtime=0); proven identical across independent fixture instances, and the normalized current output was separately proven byte-equal. A mismatch means the v1 integration surface moved: investigate, and re-pin only for a deliberately ratified v1 change.
-        expected_sha256 = "255fdd432b90bcf87c956c4874657770f5797005f9a84a643420f8c994cb2064"
+        # RE-PINNED 2026-10-07 (not re-derived from a pre-change tool): the act universe grew 644 -> 648 (telecom association anchors), so EXPECTED_ACTS and the fixture universe moved with it.
+        expected_sha256 = "fd13e507c0b099aa1bffa2cbccb547e6be47f8102beda55bc3eb7931c2518c10"
         actual_sha256 = hashlib.sha256(normalized_bytes).hexdigest()
         diagnostic_path = None
         if actual_sha256 != expected_sha256:

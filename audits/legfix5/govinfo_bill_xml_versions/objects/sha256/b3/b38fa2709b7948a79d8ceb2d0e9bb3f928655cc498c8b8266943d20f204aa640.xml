@@ -1,0 +1,1401 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution public-private="public" resolution-stage="Reported-in-Senate" resolution-type="senate-concurrent" star-print="no-star-print">
+	<form>
+		<distribution-code display="yes">III</distribution-code>
+		<calendar>Calendar No. 50</calendar>
+		<congress display="yes">116th CONGRESS</congress>
+		<session display="yes">1st Session</session>
+		<legis-num>S. CON. RES. 12</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action display="yes">
+			<action-date>April 1, 2019</action-date>
+			<action-desc><sponsor name-id="S254">Mr. Enzi</sponsor>, from the <committee-name committee-id="SSBU00">Committee on the Budget</committee-name>, reported the following original concurrent resolution; which was placed on the calendar</action-desc>
+		</action>
+		<legis-type>CONCURRENT RESOLUTION</legis-type>
+		<official-title display="yes">Setting forth the congressional budget for the United States Government for fiscal year 2020 and
+			 setting forth the appropriate budgetary levels for fiscal years 2021
+			 through 2024.</official-title>
+	</form>
+	<resolution-body>
+		<section id="id8C693AE2390143F9BE05871843168BE5" section-type="section-one"><enum>1.</enum><header>Concurrent resolution on the budget for fiscal year 2020</header>
+			<subsection id="idD2813059724A43DDAEE17E21BC965EC6"><enum>(a)</enum><header>Declaration</header><text>Congress declares that this resolution is the concurrent resolution on the budget for fiscal year
+			 2020 and that this resolution sets forth the appropriate budgetary levels
+			 for fiscal years 2021 through 2024.</text>
+			</subsection><subsection id="id1748B04BF0C843A48DED5F66810C2678"><enum>(b)</enum><header>Table of contents</header><text>The table of contents for this concurrent resolution is as follows:</text><toc><toc-entry idref="id8C693AE2390143F9BE05871843168BE5" level="section">Sec. 1. Concurrent resolution on the budget for fiscal year 2020.</toc-entry>
+					<toc-entry idref="ID1DA511C9A8A94285BD4CD9A60A5289E2" level="title">TITLE I—Recommended levels and amounts</toc-entry>
+					<toc-entry idref="ID7C494110A75B45EE89D3A017F0122138" level="section">Sec. 1001. Recommended levels and amounts.</toc-entry>
+					<toc-entry idref="IDEBE8BA53DD54439097BE08925C355591" level="section">Sec. 1002. Major functional categories.</toc-entry>
+					<toc-entry idref="ID505703BAD383433C83902D60783E0C67" level="section">Sec. 1003. Social Security in the Senate.</toc-entry>
+					<toc-entry idref="id5C6818256A434039AFB997C0DE88A026" level="section">Sec. 1004. Postal Service discretionary administrative expenses in the Senate.</toc-entry>
+					<toc-entry idref="id6E35F3860B224CB684512A47B388F883" level="title">TITLE II—Reconciliation</toc-entry>
+					<toc-entry idref="id612D29020EFB4904B169FFA581AAA8F4" level="section">Sec. 2001. Reconciliation in the Senate.</toc-entry>
+					<toc-entry idref="id957C684DF12E472DB65F341884356997" level="title">TITLE III—Reserve funds</toc-entry>
+					<toc-entry idref="id16d3cc21298d45459063c7a6ed306780" level="section">Sec. 3001. Deficit-neutral reserve fund for legislation modifying statutory discretionary caps.</toc-entry>
+					<toc-entry idref="idF3A2E5BA4DE04FEABE3D9B79CB9B12F7" level="section">Sec. 3002. Deficit-neutral reserve fund to promote American energy and natural resources.</toc-entry>
+					<toc-entry idref="id6a507e808a0d417d95bf757d33cb4558" level="section">Sec. 3003. Deficit-neutral reserve fund for public lands and the environment.</toc-entry>
+					<toc-entry idref="ida3c52eae99bc4eb3add56f19764f0831" level="section">Sec. 3004. Deficit-neutral reserve fund for American agriculture.</toc-entry>
+					<toc-entry idref="ideb6736a80f144231b68863fbd24b9ac1" level="section">Sec. 3005. Deficit-neutral reserve fund to strengthen American families.</toc-entry>
+					<toc-entry idref="id28a3255c3bc24e4781a1ff225b78c397" level="section">Sec. 3006. Deficit-neutral reserve fund to strengthen American communities.</toc-entry>
+					<toc-entry idref="idadd24931838142658e000f9e3ceca4bf" level="section">Sec. 3007. Deficit-neutral reserve fund to promote innovation in education.</toc-entry>
+					<toc-entry idref="idb2b0df090a2d4b628e6e6d0aaa8f6a1a" level="section">Sec. 3008. Deficit-neutral reserve fund to promote economic growth and prosperity for American
+			 workers.</toc-entry>
+					<toc-entry idref="idC7944979F5324307887B3A76765BBA6E" level="section">Sec. 3009. Deficit-neutral reserve fund to promote economic opportunity and self-sufficiency.</toc-entry>
+					<toc-entry idref="id08ba9b0142bd4a2ba93f2f733bf6c4cf" level="section">Sec. 3010. Deficit-neutral reserve fund for Federal banking, insurance, or housing finance
+			 programs.</toc-entry>
+					<toc-entry idref="idB86D22B5A3A446E196D9DAF84EBB26C1" level="section">Sec. 3011. Deficit-neutral reserve fund to improve tax administration.</toc-entry>
+					<toc-entry idref="id4a593117f4544ee49c6befcb851f6ec9" level="section">Sec. 3012. Deficit-neutral reserve fund to improve Americans’ health care options.</toc-entry>
+					<toc-entry idref="id07fe622c838548d5835ee7ee90c4a57b" level="section">Sec. 3013. Deficit-neutral reserve fund to protect Medicaid and Medicare.</toc-entry>
+					<toc-entry idref="id6781ee2dd9b14f2290869f078e8fa33b" level="section">Sec. 3014. Deficit-neutral reserve fund to restore American military power.</toc-entry>
+					<toc-entry idref="iddf3a1a8bdac44b50a681035f9a68d57d" level="section">Sec. 3015. Deficit-neutral reserve fund to improve cybersecurity.</toc-entry>
+					<toc-entry idref="id6d1bcaeee0484e0d945edf0b6cd26233" level="section">Sec. 3016. Deficit-neutral reserve fund for veterans and service members.</toc-entry>
+					<toc-entry idref="idB8AC6C5932E94C0BBF6231D20110CC7C" level="section">Sec. 3017. Deficit-neutral reserve fund for border security and immigration.</toc-entry>
+					<toc-entry idref="id25298ABEA1AC4C0E8B022F28B1559156" level="section">Sec. 3018. Deficit-neutral reserve fund for American transportation and infrastructure.</toc-entry>
+					<toc-entry idref="idDA82D7AF6F7C46D59D6013E52C5BF660" level="section">Sec. 3019. Deficit-neutral reserve fund to promote financial security.</toc-entry>
+					<toc-entry idref="id23B45D3431B044D3B587456210C09750" level="section">Sec. 3020. Deficit-neutral reserve fund to prevent a taxpayer bailout of pension plans.</toc-entry>
+					<toc-entry idref="id430ab617233140b68bcd74f8dda764dd" level="section">Sec. 3021. Deficit-neutral reserve fund for efficiencies, consolidations, curbing budgetary
+			 gimmicks, and other savings.</toc-entry>
+					<toc-entry idref="id79BB93A1E9374F4898C30CA93D355632" level="section">Sec. 3022. Deficit-neutral reserve fund for legislation modifying statutory budget controls.</toc-entry>
+					<toc-entry idref="id54644A93E1DC4719BDDEB124CA42A750" level="section">Sec. 3023. Deficit-neutral reserve fund for reducing fraud in taxpayer-funded Government assistance
+			 programs.</toc-entry>
+					<toc-entry idref="id3E7370623A15430E9D42D24F9C3D51D0" level="section">Sec. 3024. Deficit-neutral reserve fund relating to Federal compensation.</toc-entry>
+					<toc-entry idref="id5E38AD26215A44819DE999AFAE00D843" level="section">Sec. 3025. Deficit-neutral reserve fund relating to pre-existing conditions protections.</toc-entry>
+					<toc-entry idref="idA183E5EB162D47F4AC703280E6C0DBAD" level="section">Sec. 3026. Deficit-neutral reserve fund relating to reforming the broken congressional budget
+			 process.</toc-entry>
+					<toc-entry idref="idDEF41911C2A64E388C36B29B9BCBE216" level="section">Sec. 3027. Deficit-neutral reserve fund to improve coordination and Federal Government disaster
+			 response and mitigation.</toc-entry>
+					<toc-entry idref="idF3D4D195BCF54D969C3B6CFA2C303763" level="section">Sec. 3028. Deficit-neutral reserve fund to provide continued tax relief for family-owned
+			 businesses, farms, and ranches.</toc-entry>
+					<toc-entry idref="idB0DE30D81D7F4682A30D4ED647520F14" level="section">Sec. 3029. Deficit-neutral reserve fund relating to supporting programs to analyze the threats to
+			 installations of the Department of Defense due to extreme storms,
+			 wildfire, droughts, rising sea level, and other conditions.</toc-entry>
+					<toc-entry idref="idE95D3C732B3346BCA90D7B1161B02C96" level="section">Sec. 3030. Deficit-neutral reserve fund relating to improving the affordability of rental housing
+			 for low-income families.</toc-entry>
+					<toc-entry idref="idE810D58FEE1F4366AC738E2F39E4DB4E" level="section">Sec. 3031. Deficit-neutral reserve fund to improve Federal flood control efforts.</toc-entry>
+					<toc-entry idref="id11DD3A657C9F4F388E8CBF5AA477AE90" level="section">Sec. 3032. Deficit-neutral reserve fund relating to a clean audit opinion at the Department of
+			 Defense.</toc-entry>
+					<toc-entry idref="idCD88DBDC282541A1B4902DCCF4552CB0" level="section">Sec. 3033. Deficit-neutral reserve fund to continue proven middle class tax relief.</toc-entry>
+					<toc-entry idref="idD07A2A7A53AB49078CB3701425D465A8" level="section">Sec. 3034. Deficit-neutral reserve fund to support servicemembers' access to safe housing.</toc-entry>
+					<toc-entry idref="id765316A41AEB4AE5BEDACC6FFE92B6F8" level="section">Sec. 3035. Deficit-neutral reserve fund to provide the Department of Homeland Security with the
+			 necessary resources to protect migrant children and families.</toc-entry>
+					<toc-entry idref="idDFB972DAA4994E1BB9B543A64415CC10" level="section">Sec. 3036. Deficit-neutral reserve fund relating to reducing prescription drug costs for Americans.</toc-entry>
+					<toc-entry idref="ID6a47cea4a9ee457a80e13b4ca4884ce9" level="section">Sec. 3037. Deficit-neutral reserve fund to allow program integrity funding for targeted denial
+			 reviews.</toc-entry>
+					<toc-entry idref="H1A7DC50515A04E1C8F37C9A3C3730068" level="title">TITLE IV—Budget process</toc-entry>
+					<toc-entry idref="H62BAE2D6E7E04D659ADA85034D05B64D" level="subtitle">Subtitle A—Budget enforcement</toc-entry>
+					<toc-entry idref="H48C22C851A0844F2A4D0BBAAAB9FE1A9" level="section">Sec. 4101. Point of order against advance appropriations in the Senate.</toc-entry>
+					<toc-entry idref="H5BF3D32DE4D3472797B29E99AA4D8DA0" level="section">Sec. 4102. Point of order against changes in mandatory programs.</toc-entry>
+					<toc-entry idref="HC04A15CF81F242DFBE10E2816AC9B7ED" level="section">Sec. 4103. Honest accounting: cost estimates for major legislation to incorporate macroeconomic
+			 effects.</toc-entry>
+					<toc-entry idref="H2476C50535874F32AA1FA80C16C2019D" level="section">Sec. 4104. Adjustment authority for amendments to statutory caps.</toc-entry>
+					<toc-entry idref="id8E3FC26610DE4977894A0DCF909FE293" level="section">Sec. 4105. Point of order against certain legislation related to surface transportation funding.</toc-entry>
+					<toc-entry idref="idB379A9211C9D4A5EA23D25B681381187" level="section">Sec. 4106. Surgical strike point of order in the Senate against directing budgetary treatment.</toc-entry>
+					<toc-entry idref="id91B1F829E40D43D7A076D9C65131F7F2" level="section">Sec. 4107. Point of order against designation of funds for Overseas Contingency Operations/Global
+			 War on Terrorism.</toc-entry>
+					<toc-entry idref="H7DE945215BAE4058BE7F8AC7DBDA2DF8" level="subtitle">Subtitle B—Other provisions</toc-entry>
+					<toc-entry idref="HC325195D046246BAB5A5DFF20A6AADC7" level="section">Sec. 4201. Budgetary treatment of certain discretionary administrative expenses.</toc-entry>
+					<toc-entry idref="H20699AD11CCD4132BC1D2DB58467AB18" level="section">Sec. 4202. Application and effect of changes in allocations and aggregates.</toc-entry>
+					<toc-entry idref="H451C77359BCE4BDAA222F31562623A9F" level="section">Sec. 4203. Adjustments to reflect changes in concepts and definitions.</toc-entry>
+					<toc-entry idref="H11AD767680CF4BFE837273FB2015F3EA" level="section">Sec. 4204. Exercise of rulemaking powers.</toc-entry>
+				</toc>
+			</subsection></section><title commented="no" id="ID1DA511C9A8A94285BD4CD9A60A5289E2" level-type="subsequent"><enum>I</enum><header display-inline="yes-display-inline">Recommended levels and amounts</header>
+			<section commented="no" display-inline="no-display-inline" id="ID7C494110A75B45EE89D3A017F0122138" section-type="subsequent-section"><enum>1001.</enum><header display-inline="yes-display-inline">Recommended levels and
+			 amounts</header><text display-inline="no-display-inline">The following
+			 budgetary levels are appropriate for each of fiscal years 2020 through
+			 2024:</text>
+				<paragraph commented="no" display-inline="no-display-inline" id="ID05F040F8F84A405D97D0E1D4FEDB90F9"><enum>(1)</enum><header display-inline="yes-display-inline">Federal revenues</header><text display-inline="yes-display-inline">For purposes of the enforcement of this
+			 resolution:</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="ID43CBD0D715B5437DBF8DE197A3442CC9"><enum>(A)</enum><text display-inline="yes-display-inline">The recommended levels of Federal revenues
+			 are as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $2,761,633,000,000.</list-item><list-item>Fiscal year 2021: $2,891,558,000,000.</list-item><list-item>Fiscal year 2022: $3,033,552,000,000.</list-item><list-item>Fiscal year 2023: $3,196,633,000,000.</list-item><list-item>Fiscal year 2024: $3,401,278,000,000.</list-item></list>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="IDF42D892A00254F7CBFCB897A702BFCC3"><enum>(B)</enum><text display-inline="yes-display-inline">The amounts by which the aggregate levels
+			 of Federal revenues should be changed are as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $16,213,000,000.</list-item><list-item>Fiscal year 2021: $29,104,000,000.</list-item><list-item>Fiscal year 2022: $36,495,000,000.</list-item><list-item>Fiscal year 2023: $43,833,000,000.</list-item><list-item>Fiscal year 2024: $50,844,000,000.</list-item></list>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID93A73ECEAFE040329707BD1A26483AF8"><enum>(2)</enum><header display-inline="yes-display-inline">New budget authority</header><text display-inline="yes-display-inline">For purposes of the enforcement of this
+			 resolution, the appropriate levels of total new budget authority are as
+			 follows:</text><list list-type="none"><list-item>Fiscal year 2020: $3,588,211,000,000.</list-item><list-item>Fiscal year 2021: $3,720,114,000,000.</list-item><list-item>Fiscal year 2022: $3,870,878,000,000.</list-item><list-item>Fiscal year 2023: $3,958,315,000,000.</list-item><list-item>Fiscal year 2024: $4,018,079,000,000.</list-item></list>
+				</paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID966F2B2EB38C4001BAC86017AD3942BE"><enum>(3)</enum><header display-inline="yes-display-inline">Budget
+			 outlays</header><text display-inline="yes-display-inline">For purposes of the
+			 enforcement of this resolution, the appropriate levels of total budget
+			 outlays
+			 are as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $3,595,894,000,000.</list-item><list-item>Fiscal year 2021: $3,711,295,000,000.</list-item><list-item>Fiscal year 2022: $3,879,799,000,000.</list-item><list-item>Fiscal year 2023: $3,936,726,000,000.</list-item><list-item>Fiscal year 2024: $3,982,549,000,000.</list-item></list>
+				</paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID82859822DB4B423F96854DB062B93842"><enum>(4)</enum><header display-inline="yes-display-inline">Deficits</header><text display-inline="yes-display-inline">For purposes of the enforcement of this
+			 resolution, the amounts of the deficits are as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $834,261,000,000.</list-item><list-item>Fiscal year 2021: $819,737,000,000.</list-item><list-item>Fiscal year 2022: $846,247,000,000.</list-item><list-item>Fiscal year 2023: $740,093,000,000.</list-item><list-item>Fiscal year 2024: $581,271,000,000.</list-item></list>
+				</paragraph><paragraph commented="no" display-inline="no-display-inline" id="IDC144C5CB19C34C4685E1C91E6AED9A46"><enum>(5)</enum><header display-inline="yes-display-inline">Public debt</header><text display-inline="yes-display-inline">Pursuant to section 301(a)(5) of the
+			 Congressional Budget Act of 1974 (2 U.S.C. 632(a)(5)), the appropriate
+			 levels of the public
+			 debt are
+			 as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $23,497,927,000,000.</list-item><list-item>Fiscal year 2021: $24,477,491,000,000.</list-item><list-item>Fiscal year 2022: $25,451,182,000,000.</list-item><list-item>Fiscal year 2023: $26,346,711,000,000.</list-item><list-item>Fiscal year 2024: $27,102,434,000,000.</list-item></list>
+				</paragraph><paragraph commented="no" display-inline="no-display-inline" id="idCE4841F8A64C490BBA2514439D708B97"><enum>(6)</enum><header display-inline="yes-display-inline">Debt held by the public</header><text display-inline="yes-display-inline">The appropriate levels of debt held by the
+			 public are as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $17,560,895,000,000.</list-item><list-item>Fiscal year 2021: $18,488,481,000,000.</list-item><list-item>Fiscal year 2022: $19,469,210,000,000.</list-item><list-item>Fiscal year 2023: $20,381,526,000,000.</list-item><list-item>Fiscal year 2024: $21,174,257,000,000.</list-item></list>
+				</paragraph></section><section commented="no" display-inline="no-display-inline" id="IDEBE8BA53DD54439097BE08925C355591" section-type="subsequent-section"><enum>1002.</enum><header display-inline="yes-display-inline">Major functional categories</header><text display-inline="no-display-inline">Congress determines and declares that the
+			 appropriate levels of new budget authority and outlays for fiscal years
+			 2020
+			 through 2024 for each major functional category are:</text>
+				<paragraph commented="no" display-inline="no-display-inline" id="ID454E27DE50BF4A2CBB5CCE32D1B738E3"><enum>(1)</enum><text display-inline="yes-display-inline">National Defense (050):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="ID5C1E0068CEAF415590D7BB61161E2548"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idBA29A9B7ECB446DFBD56D2A2D217C93F"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $586,773,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idBA570907282249008F0E8CE6D6CFB679"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $620,199,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ID53BEA600095742D2AC959792107AE82C"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA3AD2F8936AA4B5DBCC0066E1387A49D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $600,892,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDD584ABB94644B509BEB3FBD588CD932"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $603,490,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ID01793F5B5BFE4349B7742145529904B3"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id07CCC3DF3ACD46ABA6F48CD376220EDF"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $670,879,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE35300B6F4A447CBAEACFBBE0CEC881F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $642,849,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id36AE8D1B7696450889D349A864AEA3E9"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id433DD828AD6C496CB15861D34D834534"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $687,439,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC54A85D6644C48339B6019277F56F7A3"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $661,388,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7C7D28AEB9CD470294478AA8E58555E3"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8C323D3AA1B44BB9AEB94B7CB94CDC2D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $704,436,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id37C31655906C4970B08876629DC65888"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $675,345,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="IDB65C27E15401491C8A0747DAAC0B8194"><enum>(2)</enum><text display-inline="yes-display-inline">International Affairs (150):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="IDBA0FC7EDA3C2411585B1ED0116617C30"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id11C1BB99216546D884878E96B992F596"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $48,548,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7D5DD8E2A55049499D30B97BB882C32D"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $46,255,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="IDDFD4FF89545F4F26A3C493A26B65ECD9"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA6BED07E111C4EFAB57A1FF4C644CBC8"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $47,383,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8496A80B9C4C4CAD9E014A6C97544014"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $45,065,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE6EFF5EEBD774B6E85466D37DD3AAED3"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE6CE4CFFB698495BA0DD635C00C39514"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $47,042,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB176055D0C1B46F7866843FA80A67432"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $45,094,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA3351A85FEF34C9081F9E5E99B7C47C2"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id5EA54FC8826C443092FF4C6858374799"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $48,119,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6387B58AF7AD45AD8568070208B248AC"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $44,986,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD368CC5E1541406397EFA8506E1C046B"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7AA2BFEA4AD3459CB4ED0B11D2C6DDA6"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $49,260,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2754C2CD3E404DC989D53DBF87941889"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $45,724,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID4E1387231142480F984AEC13BDB28822"><enum>(3)</enum><text display-inline="yes-display-inline">General Science, Space, and Technology
+			 (250):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="IDE3EED3335DB24AC28F962ADBEFB6657E"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idBDFCE7037B854C4AB383B97DAA4AF9DC"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $35,256,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7054A65BDA7B4CF88ACD9D770E392DB4"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $34,360,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ID6E563FBE39B2425C9E20C49003CB9EC4"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id0E2A03D7EC8E4B098D960E4D780A3038"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $36,041,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id50A9FC93516448D497EA7546CBE17547"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $35,602,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="IDB9BB6ED761F841BB8B57BD36C1CC9871"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id96174A7212684B4C9C19392ECDA270AC"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $36,839,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id66B6D3DE99CD4638820F34FE48B757B2"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $36,250,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD12E8D3A645C483BA03CD5D0700E3D86"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2F03033D14EF47F7BA1AC93C199E3B4D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $37,664,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA00DFDCDCBE14681B6147F57CA2E5C72"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $36,901,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8AA4C895FA314B09A89CFD14DFDF4AC4"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6B939CEDED4C4FDEB203A45E90EB6358"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $38,526,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7FA0765CE31B4C24B66C0D51240F1921"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $37,702,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="IDAADDD4661EFA4C25B49FEAD01103D5E1"><enum>(4)</enum><text display-inline="yes-display-inline">Energy (270):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="ID163F3737872F44F4BB1726B7C8DC2E55"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id91CC1E2BA37C44A6ADBF1A3AEC4A7665"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$1,432,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2E2B062403D048F7A18A11AE8EF2AF2F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $2,240,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ID02BB47CCDE6D4504A7683698BB20E0C4"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7CC641B03DB94796842740F6C517B276"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $3,970,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8CFFEC8F4C6D4C829D09BCFFA354A9EC"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $2,825,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ID17931EA04FEB493EAD0CC32459B61633"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idEB7DA1B176A34716BC989417277E4418"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $4,064,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id62BBA80E62D443FEB39330DB8F1A8409"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $2,837,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA9D40147D7A94FE1AD6937315F28AEA6"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id53A674A5D708483E9E6B119E1C7D4E78"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $4,243,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA633C504EE65435B9AD75CE2FBA45186"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $2,963,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idFECBF052E40E49E3BBC86B8F1B1018C1"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE504E8133546452F9E1B235A16F1DB64"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $4,399,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id01B3E8BC080447F3B614E797DB2FC75F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $3,134,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="IDE2ED63978ED9440CAAEC17EF70679055"><enum>(5)</enum><text display-inline="yes-display-inline">Natural Resources and Environment
+			 (300):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="IDBF156A9073DF47D3BB19BE930C1E3317"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id138DDF4A7FDF418299C960B4D62D5B89"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $45,196,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id29235F1C60E041FCB7AA192892F3033E"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $46,587,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="IDC7E90CCD378D4CC4A3A3CF60BF4A1FB1"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id0F56E58C96DC4845BD4AE073C1F70713"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $46,496,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idCDE52CF53FBC44239FEAD45B05F3694E"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $47,565,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="ID58985851DEEF4A3E8B92FF5A1F232650"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id64590DADE0074D5BB8FEC08A572DBB4D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $43,870,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1D281EACD29A421C894FBF17AEEF9302"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $44,772,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idCDC230F2C2944939AF1360E3F4F8C08D"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDD1888AFBAD2428E84179F16856F276B"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $45,837,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id35E297D315B543B189E67113155CC49C"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $45,962,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id04AFD710B541403590EB047CE4B92C70"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6C6DDAB2BD5C414C8C438516952C98C2"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $47,758,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF42DBB7872C9456F83E6F59E37495FB4"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $46,799,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID6BBF2891DD9C4C78A557FA9EDB738725"><enum>(6)</enum><text display-inline="yes-display-inline">Agriculture (350):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id351D18423E754541A2FA1005148CB22F"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id042644386845471D9FBF5712CE8BBFBA"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $17,920,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2ED7D645D04D416DAB341394D8AD4604"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $17,718,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6747968DD30B463EAC0894A0A8DD27A4"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idCAABB7D16CC042799C3A54C6B56DC43B"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $20,087,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7BA7EFE72F8A482E9B95DF5861C98491"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $18,500,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id85DF3E63ECB941DB9E5E032A46786189"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8114B97AA2D64B31984CC375FED57E78"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $20,268,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id462E5431112844CF847D8023877CB563"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $19,657,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id10ED2E23BAB8450AB7F645CBBC30DC11"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3DBB38B3FFDA450D83ECCD1F9F80411B"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $20,691,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6DCCD09DF620432887FB8AC1543421F2"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $20,029,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id31D2736D0F5049A68F47F4B2F6980C93"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id389F0C4054AC42528CC86DA841A96AC6"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $20,847,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDADB0396FC3E4C03BDD442FDCC30F021"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $20,207,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID44B178CC025C4153BADC5A697583A868"><enum>(7)</enum><text display-inline="yes-display-inline">Commerce and Housing Credit (370):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id0AED3BFD0C3C446AA30992F45FEB9625"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7978E46B25154143B66F387CF04610BC"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $12,145,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB0E75821AE4D4A4BA305961EEBEC703F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $6,310,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA39DE7CCBB784AAAAF2064B708409052"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF7B8260D6BEA458EB3CB5EC5FA08B197"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $12,168,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD505152588084B63997AB4BB77AD057E"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $5,710,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3791B47E394A428DB3A32EB8FD250DD7"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA1B9B2112B304847941D370AB87D5CCE"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $11,557,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC2D17A5A49924E00814B3633556AA3A9"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $3,058,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3C8914C1EABC456A9AD6882E0E599778"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id67223E232EE24DEC83EF7BD4CF05AC09"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $9,496,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id281A60D717EA46ADBA7BD8D844701858"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$236,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idEC68D996F0404294A0382344A7CC66F6"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6CD3FFF984F34935B4061A6AE610631B"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $1,838,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idBA0FADCFF8354C0AA57064D2B7F2BA5F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$8,274,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID9C5F3339D14649AE84D2D2378E028769"><enum>(8)</enum><text display-inline="yes-display-inline">Transportation (400):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id90E1AB769A4940B492C8D78197B009FC"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC929ABA51E6740F89376CEE821979F20"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $97,801,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id80A127FA9BAB46B1B3A9CFAA04877BF7"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $98,176,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB22232D6C6C64ECD8EEE7886BD749CD0"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idFFA0E07F78764E1B8FAFAAE7FF92E1FF"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $98,427,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id05771E780B2B47EAA50915A065563728"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $101,565,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF62CBC171EAB45F6AF6BAAF4ACE5DEF2"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE7932F3350B042B489601079E72FA9B4"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $99,063,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7BB7AE46685F451E9D9AFABD975CB582"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $104,738,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id764AEADB01954ACCB9A69A75A3E44D12"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1FF3AA08EFB4485DBC3DEF7123534B18"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $99,698,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF699DF0146034C19A26A799190B15BAC"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $106,700,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDAA07223B52F48C0BBB2E924D5D75AEA"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id5ACE530BD2B84E1E8EF8EE85555059A0"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $100,337,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id4C8F4E18E6A74832A701EB4497003577"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $108,211,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID1FD49CFC77DF434295A8D60EF93045EB"><enum>(9)</enum><text display-inline="yes-display-inline">Community and Regional Development
+			 (450):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="idFDB6C2D1BBA944A799604912A6A5BE39"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC881A1B056244E61BE2773D7813D4401"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $26,555,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6A991C534E6A4165826308DE2ED24166"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $28,161,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id16E021520E29433D9821E2D6295A03C0"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id01431D9729154072AB0EB8769293041D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $21,773,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF3463BE713DE4FB09333151E3ED9B795"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $27,529,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1EC791ABADA24BE5B25BEBD36B2677E3"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id97A0496EDD0A422EBB240EC256962103"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $14,771,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE21EB7ED8D4445D28BD9BE6A6270B678"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $27,154,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8C1E565D83CF4D92BED2AB7924B6990B"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id93CA69B5DB2A41C88FB5CF81461BD092"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $15,108,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA46F8271AD084E38A83D1D6FA1049293"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $26,089,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6E8477650C724774A3DBAA2EF585370D"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC04E07AEAE10446BABFA8ECAD2E6E4A3"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $15,462,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idEEC9C4EA750E47918DE73FDEF1AA7532"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $25,595,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID5B6D7E8763F04F559052CF81A660DA66"><enum>(10)</enum><text display-inline="yes-display-inline">Education, Training, Employment, and Social
+			 Services (500):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id56A09E69851844AEAAEE609F8F985760"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id061279590F294390A9D40D759E9A25D3"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $104,559,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id4F6D5F9F87A842FDB27754BB4B9BC22D"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $112,432,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3D0B8E43E53548629C6463D03F08AC4C"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idACB81C4DB2D54BA3884D38BB13B817A3"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $111,171,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id60E557D080B341E8AF9650C24642534F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $111,614,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id903B102A487145E7830AB67943A49202"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id5F6EA9D5B60949428BD87B5D4ABF70DB"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $111,897,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA5BFC1035FD14CB28DEF77A93BB01594"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $105,567,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id4DDC676802CB4B9F9D306DF5D891C7C0"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id18A90E0329B24557AD034AF3A06A4B0C"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $112,662,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id62881305A1D54BF7B1E471F03EA5692D"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $111,276,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9236B63126D4476FB471A2F0CCE765D4"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD0925F549FA74B5298BA98DCF3F790C2"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $113,342,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idBEF1B41AEA754863BFD443EB8907B30D"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $112,057,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID492F304D60074C1681CD234A8984BFF6"><enum>(11)</enum><text display-inline="yes-display-inline">Health (550):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id6781930EC98B4DDDB26B1E34C01890FE"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF8A439576EB44A2D9100CFC5919CF233"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $621,563,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idCA8753DE4F5A4219B9D7251DA5A245FC"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $595,863,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC572C142E0624A539CEB771CBEF86A8B"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7A17B786F5664AD79AB8E216A74903EA"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $624,390,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7A5D959DE61246A29903BCD9F8C3ADFD"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $609,589,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id93774E3404764E07AE9505DD97BFF8BE"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF6DDCFE897B74B92AE00C04AA8B4CC91"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $616,981,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA73A619C20DB468AA10C00220003E7C9"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $599,699,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id660F3A8DC5304BDC8F9E3251CB964A4B"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id57783A19D843400F82ED571B77072D0D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $619,741,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD90E33287AC54F3F9E552516F3B23BDE"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $603,412,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2AAD686F1F8145A4B3DEAEBDCE6219A0"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id477CF25F5E4C4C378103CE3F5F6CFD3A"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $623,027,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id24BFD4881BAE4435A57C4919501222ED"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $618,895,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID9456024198A54273BD56916E14BABA0D"><enum>(12)</enum><text display-inline="yes-display-inline">Medicare (570):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id5BF16982616E427BB502E45F4E7F4276"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id59A495A79AAD4F27ADD1F6D4860D401B"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $682,599,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3004C584F0F949319D18378230C05D5F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $682,385,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC3526FE1C0264F0EB99A8B65E77B8C25"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6F10504F9BEF4C98929574530487E29B"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $725,899,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7DD4782685924B01A8D999D6337D7D17"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $725,586,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id82E31F8EED284F5990F7C573D8FDF69D"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDCC7CF6FA1C64AA78CFFB7E27EBB08C9"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $810,776,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id26A7A3BB1EA148AF82B7B1DB44006AC4"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $810,472,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idAB8099434F074EA3A86A9700291A3AFB"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id893E48DDFC5449F69B0B66827E549EE6"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $826,603,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id42F005A6ABCF4EDCB9421BF9C82A245A"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $826,278,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9B1BEB89D334475DBEB79387D76DADF9"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id4BE9854B0F4D4933AF675F9854AFC770"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $835,529,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF489BDA9BE9C4F04A484DCCF6DE219F6"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $835,202,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID8D44F978C430409DA2A7B3C84737E294"><enum>(13)</enum><text display-inline="yes-display-inline">Income Security (600):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id48899481057C45A3A17AB3D6524411B2"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE2685A23737345BC940D1682619001ED"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $533,186,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id37C7C19B31A14FF389171796F744D5A4"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $524,843,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idFC4F4294DB714B61B10A42260EFD01D8"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id0266B05BA38A4A1CAF351ECEC172DE0F"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $548,364,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9A4F058E8AF845218EBA558E65789A89"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $540,643,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3E4ED18B91AA4D3FB3D20452E74ADB8A"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id069F7C8386CB4FAE8C88ACF9648F79C1"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $570,992,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id092ABC57A0F34F83BC952AA3EF164196"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $569,005,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDA529DF141754C9EAAA797B098D3C1C1"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8C28330E4C4C4472994BE36C341216CB"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $579,546,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id022C60FF519344CBB2BFEF7BD2AE20C5"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $572,829,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE8275A419F4341B79D5DCDE41EC97A56"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id0A1888ACEA9043368E7D67673154D264"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $585,933,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id0AE22E731FBE4D0BA06E3B3074A5F761"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $574,082,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID35ED3427359F43B883E5B6CBD39C3EC2"><enum>(14)</enum><text display-inline="yes-display-inline">Social Security (650):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id26AE3AFD98B14C35A7C08196875EC0C6"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idED41AA72A8154A26AF481DC6AAACEFD6"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $39,252,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1ABB3DEF64654BD9A913718D8269C6CE"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $39,252,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE6F68D259EFA43DDA1DF7807456A9DF0"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idAC33341BF6A8450C992F09FD8D1440D6"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $42,275,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8A1FBA0432ED4DBA91115429F26FE057"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $42,275,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id4D2C3FE311BC4D8B9BF695021035AFBC"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id92AF153D74D24E898A74000071487661"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $45,349,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD827C7A8BC074030A5C9E44D3DF71A9E"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $45,349,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDF3AF2CB58F04357BD4FE16C93453E3D"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id55826B0F4F854937BBDC11555D918303"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $48,517,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id045C3D2CB36945E18A9C6AE12445A096"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $48,517,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id844ACD0ECBF549F3B7F725B02650F39E"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id69ABB878C1A64B7C9ABF2310A5B18780"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $51,914,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idFF4F909D27444D9FB6A8A2B0185AFA81"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $51,914,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID8C245AFDA34B4A79B80DB2C63F300D0D"><enum>(15)</enum><text display-inline="yes-display-inline">Veterans Benefits and Services
+			 (700):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id1FCD4426EFB748D4B52D6C11A0B9A66A"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8E0C64B702744825B134897FD53C88B3"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $211,192,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8684B63F963C4AD4A7C04C5081A2ADCC"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $209,859,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB06FF28FA3154BF7B717AA856914FEAC"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1C182F6F70FD479CB01080AAE0655025"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $217,571,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1C897A8129474E2FB31226C51D578440"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $214,286,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id61A891CC07E149178E9B0C5FB6D21D68"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD88431053C0941239E9B9CEFF6D9133B"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $225,575,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA03A644145AB48C68ABD4058D67EF640"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $232,222,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD69C83BD6BF54694BCDD51A36A9C6680"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id19271350AE1F451EB00FBEC38D376A2C"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $232,135,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6A7A253C39A74814A5A0C6D2C595CBB3"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $230,152,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6C99841115BA4FDD87E52B821A9B6D58"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idAE77906EC2A747E6AE111EAF057726D0"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $238,779,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id79A27BC9B6AC4FFE8E1F6E668C90BE24"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $227,128,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID97C6DC2F36E94BC4978B8F924CB5537A"><enum>(16)</enum><text display-inline="yes-display-inline">Administration of Justice (750):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="idC4430E43259A4D75BB4B7A710FEA4C9C"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6B3548913F8E4F4EB0204DF9F5634AF8"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $71,333,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9452CBB674E943A8B9F1F51E9EC24582"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $65,758,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id87A10833417D423BB542419671E3A437"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id8DFEF06C60244910BE1035E84A62124E"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $65,954,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id54242ACB814B42EAA4FA5173AE97394C"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $69,242,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idAE5B9ACE4C3C43D18CF1286960133682"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id71E64629C18C4EBA981DBA8DD88D792A"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $67,740,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2C80D16E040645899B524AFE5D8E2E09"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $71,273,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1AA90C02447A481892D7609F97CFEF62"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB731E76ED0B1452EAEFFB5CC95AF3854"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $69,638,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id5942E0D8A76F452C9D98D0B3555B3C14"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $72,468,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id50C3C122B910447FB4B73076AF624904"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9E00729901324C06828513E21F64F9F3"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $71,369,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id0CC8CFC9E56F4217AFCDA99E8CB9B9EA"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $72,506,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="IDA92071651A404362A7C81FEDA3EB89BA"><enum>(17)</enum><text display-inline="yes-display-inline">General Government (800):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id8547B03B83734244AF09A26EFDD21F37"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA910C67D529B4E2B830904DCFF339B31"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $25,491,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id110CA08229DD47DCB2E47F2553C10F1C"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $25,205,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF2A24C4853164469B6009A62FEFC2014"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDDBECC2EE2A24F03BD04C3134BFB05EE"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $26,023,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id66BADF7F7C474224A556F83E89A244D6"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $25,515,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id296D25C9F63141CE998B83A03952E5EC"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC789D880B3F64E088ADB006C2D75C090"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $27,350,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3206104A2EB94939909548A8B7EE0BA7"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $26,905,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9C2114FB364C45B78CE407B77911B4E3"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id5FD76A5A2F444C8EB20317439444857A"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $27,407,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF0ECB3077BDF4CF29B041063456A48AF"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $26,929,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1398A8F2132E455C8FEFAD03E2DE9954"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB9F2805D52724A0CAA7BB264486F8BFA"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $27,866,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id4AE2859186314C488E812AB274E1F423"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $27,438,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID108A6C6F9C9B46D095D9646F34D142A2"><enum>(18)</enum><text display-inline="yes-display-inline">Net Interest (900):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id694A401E1A42400481224C98BC73E83B"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1EB1252F76A84077B3E810D01C5DCF96"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $538,701,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idEF5FFF114DAC4A89910255517261DE2F"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $538,701,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id46FD672C85354B688F9BD04EDD7E0283"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA0ED61B0E198493A951E5EF7071E1FA2"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $596,977,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1F4D9F7444694C08BA44AF80771FF8C1"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $596,977,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9228EE635921431795285E3E35EB56EF"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id27B376EA2DDA48178701E04E82DC024F"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $651,037,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3D5E58306FEC42158FC45AE4CA86008C"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $651,037,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idFC95955890D34B09ABB5DD3AF1BFCAA3"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id09185FEC1ED74016996F88A490FD11DB"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $697,296,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9D8573217779473F82E8B6239B7E8243"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $697,296,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id187B9E1822364FE19B108C8A493D59A3"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id691431B9907D4BCDAFFB08BA5C89CDBF"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $731,580,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idCA9E56A5CB6049949848204D49E85FD5"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $731,580,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID4BC38A59F5944FB8AE83F5E32D96C805"><enum>(19)</enum><text display-inline="yes-display-inline">Allowances (920):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="idD11884885D9D4E458AEA6A361CF08FB6"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id50C9731D6FB9486F9AE1DCF5ADFA22D4"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$90,168,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idCB2BFB378D2C429AA62FC032B2207016"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$50,001,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF6AB7F5633E24419AB8EBCCA0633868D"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id5AA384A2FBD04C97BD3C04F966DFFCBD"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$99,138,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id26CA0C88B5A3400EBDBD0AB0DF04568C"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$76,084,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA8E563DECF124618BBAC4355B50D6E6D"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id885297D8E99B41BF91A6ECE74AE8A22E"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$116,758,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF9BFF2B5491E4741961184E03513445C"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$93,395,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3952B0AFC3504D12B264ED2A0461860E"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDF0908974CDE4670803B9235FF4081C2"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$134,026,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE63B22A6767C4CB1B9DDB6799779DE33"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$116,064,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2E65E6E9883D482D9E2A0517341FCE64"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF678C5DC53114D599652E1828FC4141A"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$152,068,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id53F71FF30AC14679B4AA029C132420A5"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$134,166,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="ID00D8CD8E838C4BF18997E68B07A16C11"><enum>(20)</enum><text display-inline="yes-display-inline">Undistributed Offsetting Receipts
+			 (950):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id049A5B4334F34DABA7FB4FB3E59946B5"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7B66CBD328484B95AAC2DA05C7D8855F"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$85,259,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE06710F42EA84B288F52FBDDE832678D"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$85,259,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE889F07F2EC4433D9D88A0FF1D8B6D3F"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id927CC1277767490D8C7E1DD9460172E1"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$89,609,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id462DC6211E4C4E02B9ACBBEA5F70B439"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$89,609,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id075217E56E9B4BB29454D757D432E485"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id90FCAF3DF5FD44F69EB4F1ED2A895816"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$88,414,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id606BFA674C4C42AC92F4A4358B742CD3"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$88,414,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA923AC126B094CE0A3B588B76D581054"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id484E906316BF4ED69AABF4FCD534370F"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 −$89,499,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2AEA7110DDF54532ACE7176F9FFF05AC"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$89,499,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idFF74DC0EA095452CB5984F09D02FB351"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE58A2DA61D61464C95C8FEF24928AAB4"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority, −$92,055,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1B63FF6B31B64104B4757FFB2A848F43"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, −$92,055,000,000.</text>
+					</subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="idA94A9503261143F9AA736F3BF33F1012"><enum>(21)</enum><text display-inline="yes-display-inline">Overseas Contingency Operations
+			 (970):</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id47004BFA341E48D8A68BFE9623C39CA6"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2020:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idF2132E8BEC0144AA82B8801588F53ABC"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $67,000,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idCB3EF9C53ED44BD39326C7C6FA74B775"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $36,850,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA703E0C280B946CDAF3A9F0D97A17FEB"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idE25B4ED3B9E34874ADB4EE596FC4AEB4"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $63,000,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id5707F6AB22814EF3B7EEC0EC5F44C69E"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $53,410,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA46C337D43E149C0A97DC3BB66A1B9F9"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id1FADCFCE30CA4A62ADB7A1C1D9570BC7"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $0.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD8A6958D10724FC58FF30F7543494383"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $23,670,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id77A1F205C48F4530BA0D3EF3940A4E2B"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id7055C102AEB54EA08B5EB52F6B20CABA"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $0.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id97226B0C084D43A39CC0A187FC8A98E7"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $8,350,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id43B313B1207743E69C5A339D2A2BB982"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA5EC1928F4E54868A447C52A6EAE2805"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $0.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id4E7A631046244665ADC291C965C65023"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $3,525,000,000.</text>
+					</subparagraph></paragraph></section><section commented="no" display-inline="no-display-inline" id="ID505703BAD383433C83902D60783E0C67" section-type="subsequent-section"><enum>1003.</enum><header display-inline="yes-display-inline">Social Security in the Senate</header>
+				<subsection commented="no" display-inline="no-display-inline" id="IDB83500B484944A38B4105B4B4028FC8B"><enum>(a)</enum><header display-inline="yes-display-inline">Social Security Revenues</header><text display-inline="yes-display-inline">For purposes of Senate enforcement under
+			 sections 302 and 311 of the Congressional Budget Act of 1974 (2 U.S.C. 633
+			 and 642), the amounts
+			 of
+			 revenues of the Federal Old-Age and Survivors Insurance Trust Fund and the
+			 Federal Disability Insurance Trust Fund are as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $940,397,000,000.</list-item><list-item>Fiscal year 2021: $978,052,000,000.</list-item><list-item>Fiscal year 2022: $1,015,255,000,000.</list-item><list-item>Fiscal year 2023: $1,055,379,000,000.</list-item><list-item>Fiscal year 2024: $1,097,703,000,000.</list-item></list>
+				</subsection><subsection commented="no" display-inline="no-display-inline" id="ID47E344E9F2454CBC9B18ECC62517B629"><enum>(b)</enum><header display-inline="yes-display-inline">Social Security Outlays</header><text display-inline="yes-display-inline">For purposes of Senate enforcement under
+			 sections 302 and 311 of the Congressional Budget Act of 1974 (2 U.S.C. 633
+			 and 642), the amounts
+			 of
+			 outlays of the Federal Old-Age and Survivors Insurance Trust Fund and the
+			 Federal Disability Insurance Trust Fund are as follows:</text><list list-type="none"><list-item>Fiscal year 2020: $964,280,000,000.</list-item><list-item>Fiscal year 2021: $1,029,849,000,000.</list-item><list-item>Fiscal year 2022: $1,101,572,000,000.</list-item><list-item>Fiscal year 2023: $1,178,289,000,000.</list-item><list-item>Fiscal year 2024: $1,256,973,000,000.</list-item></list>
+				</subsection><subsection commented="no" display-inline="no-display-inline" id="ID46D20D1A0A6741C8BD7E1AA94ECD5832"><enum>(c)</enum><header display-inline="yes-display-inline">Social Security Administrative
+			 Expenses</header><text display-inline="yes-display-inline">In the Senate, the
+			 amounts of new budget authority and budget outlays of the Federal Old-Age
+			 and
+			 Survivors Insurance Trust Fund and the Federal Disability Insurance Trust
+			 Fund
+			 for administrative expenses are as follows:</text>
+					<paragraph id="idCB78793C8C96478986708CDF72D8E7AA"><enum></enum><text>Fiscal year
+			 2020:</text>
+						<subparagraph commented="no" display-inline="no-display-inline" id="id398A3834F2E5405DAFEDD8B01FDE650D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $5,895,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idC997F50929D64331BFF9BB68D63F4C36"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $5,777,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="LEXA-RepairidC027B06F82594EA7AA3A228283FD2D7E" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year 2021:</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id20914DDAE89D478090384AC5B8955E2D"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $6,088,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id84379CC24A964ADF9E1229506378FD9E"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $5,953,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id497222A5A50F4B169754AC3AB01A4E4D" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year
+			 2022:</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id2408EE9B1CEF4864B4A08E6EA748D640"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $6,283,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id364B3E5CCCBC475EA032DA0294664F72"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $6,239,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idBAFBFDC469304352A8456D42D8ADF1B9" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year
+			 2023:</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id885451E425154365BB77425D54AA0AC4"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $6,477,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idD67B0AF1167E4E958D4277D65F0475D2"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $6,426,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id832BE5511A144745AEE8D27DC1B4B587" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year
+			 2024:</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id9A765C55743B491CAC133B2CFEFB4CC9"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $6,678,000,000.</text>
+						</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB8410B0DB8C343D8A7FFA95D13C8235A"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $6,625,000,000.</text>
+						</subparagraph></paragraph></subsection></section><section commented="no" display-inline="no-display-inline" id="id5C6818256A434039AFB997C0DE88A026" section-type="subsequent-section"><enum>1004.</enum><header display-inline="yes-display-inline">Postal Service discretionary administrative
+			 expenses in the Senate</header><text display-inline="no-display-inline">In the Senate, the
+			 amounts of new budget authority and budget outlays of the Postal Service
+			 for
+			 discretionary administrative expenses are as follows:</text>
+				<paragraph id="id7D91C98052954A81A810CCC3C99C8A55"><enum></enum><text>Fiscal year
+			 2020:</text>
+					<subparagraph commented="no" display-inline="no-display-inline" id="id01A75F0147B34C63B143D381EDD77ABA"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $271,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id50D3A7944C87439697E7F397428E1DEF"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $270,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA498729FA390404F97ADE90ACF7A1959" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year
+			 2021:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id3CEC21C295204ACB9A548810AE5E1DAC"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $281,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id27C40DFBD7CD4B3291FAF8B5AB518CED"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $281,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idB8E5F94EFF5C4BAE97344EC99C0B5113" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year
+			 2022:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idDBB53D1E3FA04DDDBA16A30080B0D60C"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $292,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idA6C340A9EE90499EB21C70CB08BCB5F0"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $292,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id15CCAB86FB5C499AAB85C9DA27AD20FF" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year
+			 2023:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id31FB2CABF66A4240B4F5C72AE8B7BED8"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $302,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id6507C6CFE6F34E2697963853206F3184"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $302,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id39A6CA1E87E04C09943FBEBD926417C3" indent="up1"><enum></enum><text display-inline="yes-display-inline">Fiscal year
+			 2024:</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="idBADFD791888242A38B509117E85F8618"><enum>(A)<?LEXA-Enum (A)?></enum><text display-inline="yes-display-inline">New budget authority,
+			 $313,000,000.</text>
+					</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="id20C9DA2D8A4C4A0FBF79E1A8874EA93D"><enum>(B)<?LEXA-Enum (B)?></enum><text display-inline="yes-display-inline">Outlays, $313,000,000.</text>
+					</subparagraph></paragraph></section></title><title commented="no" id="id6E35F3860B224CB684512A47B388F883" style="OLC"><enum>II</enum><header>Reconciliation</header>
+			<section commented="no" id="id612D29020EFB4904B169FFA581AAA8F4"><enum>2001.</enum><header>Reconciliation in the Senate</header>
+				<subsection commented="no" id="id68694CB8899045B9B937CB3C43CEBBA2"><enum>(a)</enum><header>Committees</header>
+					<paragraph commented="no" id="id91C82D501D0E4D758CA66611ABE37C71"><enum>(1)</enum><header>Committee on Agriculture, Nutrition, and Forestry</header><text>The Committee on Agriculture, Nutrition, and Forestry of the Senate shall report changes in laws
+			 within
+			 its jurisdiction that reduce the
+			 deficit by not less than $9,000,000,000 for the period of fiscal years
+			 2020
+			 through 2024.</text>
+					</paragraph><paragraph commented="no" id="id597f29cb95a54082afdc5adc54c81689"><enum>(2)</enum><header>Committee on Banking, Housing, and Urban Affairs</header><text>The Committee on Banking, Housing, and Urban Affairs of the Senate shall report changes in laws
+			 within
+			 its jurisdiction that reduce the
+			 deficit by not less than $10,000,000,000 for the period of fiscal years
+			 2020
+			 through 2024</text>
+					</paragraph><paragraph commented="no" id="id88EDF5AABBE941E8AFFFA76667F54E62"><enum>(3)</enum><header>Committee on Finance</header><text>The Committee on Finance of the Senate shall report changes in laws within
+			 its jurisdiction that reduce the
+			 deficit by not less than $50,000,000,000 for the period of fiscal years
+			 2020
+			 through 2024.</text>
+					</paragraph><paragraph commented="no" id="id439C6A0E40B2442A96B0A72E098FB271"><enum>(4)</enum><header>Committee on Health, Education, Labor, and Pensions</header><text>The Committee on Health, Education, Labor, and Pensions of the Senate shall report changes in laws
+			 within
+			 its jurisdiction that reduce the
+			 deficit by not less than $10,000,000,000 for the period of fiscal years
+			 2020
+			 through 2024.</text>
+					</paragraph><paragraph commented="no" id="id4E73CB977FC64809BC755B44F7BD2559"><enum>(5)</enum><header>Committee on Homeland Security and Governmental Affairs</header><text>The Committee on Homeland Security and Governmental Affairs of the Senate shall report changes in
+			 laws within
+			 its jurisdiction that reduce the
+			 deficit by not less than $15,000,000,000 for the period of fiscal years
+			 2020
+			 through 2024.</text>
+					</paragraph></subsection><subsection commented="no" id="idb1ca7e6b35ff4d47b7d9c08fd586c729"><enum>(b)</enum><header>Submissions</header><text>In the Senate, not later than July 31, 2019, the Committees named in subsection
+			 (a) shall submit their recommendations to the Committee on the
+			 Budget of the Senate. Upon receiving such recommendations, the Committee
+			 on the Budget of the Senate shall report to the Senate a reconciliation
+			 bill carrying out all such recommendations without any substantive
+			 revision.</text>
+				</subsection></section></title><title id="id957C684DF12E472DB65F341884356997" style="OLC"><enum>III</enum><header>Reserve funds</header>
+			<section id="id16d3cc21298d45459063c7a6ed306780"><enum>3001.</enum><header>Deficit-neutral reserve fund for legislation modifying statutory discretionary caps</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to adjustments to the
+			 discretionary spending limits imposed by the Budget Control Act of 2011  
+			 (Public Law 112–25; 125 Stat. 240), by the amounts provided in such
+			 legislation for those purposes, provided that such legislation
+			 would not increase the deficit over the period of the total of fiscal
+			 years
+			 2020 through 2029.</text>
+			</section><section id="idF3A2E5BA4DE04FEABE3D9B79CB9B12F7"><enum>3002.</enum><header>Deficit-neutral reserve fund to promote American energy and natural resources</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to American energy and natural
+			 resources policies, which may include—</text>
+				<paragraph id="id7DA6EE8D5F294B46BE11F68C20E7D3F4"><enum>(1)</enum><text display-inline="yes-display-inline">energy development and permitting;</text>
+				</paragraph><paragraph id="id2D33ABB28A234D58BC91F45DCEE90260"><enum>(2)</enum><text display-inline="yes-display-inline">nuclear waste;</text>
+				</paragraph><paragraph id="idBCF0FDE63C8B4EF7BE521620ECE1B962"><enum>(3)</enum><text display-inline="yes-display-inline">State mineral royalty revenues; or</text>
+				</paragraph><paragraph id="idE4CD0624D25B468AB1233631AE786918"><enum>(4)</enum><text display-inline="yes-display-inline">soda ash royalties,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="id6a507e808a0d417d95bf757d33cb4558"><enum>3003.</enum><header>Deficit-neutral reserve fund for public lands and the environment</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports related to public lands and the
+			 environment, which may include—</text>
+				<paragraph id="id93B512B9F1EE4D559A83D4C259102738"><enum>(1)</enum><text display-inline="yes-display-inline">protecting and managing wildlife and species conservation and recovery;</text>
+				</paragraph><paragraph id="idA41E9BE381984037B9C5AF722751BB81"><enum>(2)</enum><text display-inline="yes-display-inline">forest health and wildfire prevention and control;</text>
+				</paragraph><paragraph id="id9168B20B40F344C6BDD56D58F91C89DF"><enum>(3)</enum><text display-inline="yes-display-inline">resources for wildland firefighting for the Forest Service and the Department of the Interior;</text>
+				</paragraph><paragraph id="idF8222484147C488C9A6BD56CA3DBE07C"><enum>(4)</enum><text display-inline="yes-display-inline">deferred maintenance backlogs at Federal land management agencies;</text>
+				</paragraph><paragraph id="idDF5DEDECFB464B0188D2380F9776EA8C"><enum>(5)</enum><text display-inline="yes-display-inline">the Payments in Lieu of Taxes program;</text>
+				</paragraph><paragraph id="id76DA44098ACE4AC3AEADFCDA04D6FA29"><enum>(6)</enum><text display-inline="yes-display-inline">the Secure Rural Schools and Community Self-Determination program;</text>
+				</paragraph><paragraph id="idC8CD6860FA854E88940B3E9FD8B43FCD"><enum>(7)</enum><text>restoring the Everglades;</text>
+				</paragraph><paragraph id="id1C262E90BF0D4871A70552C7424B0465"><enum>(8)</enum><text display-inline="yes-display-inline">carbon capture, utilization, and sequestration; or</text>
+				</paragraph><paragraph id="idDD74008FD5444BE4A847D562BF68389F"><enum>(9)</enum><text display-inline="yes-display-inline">advanced innovative nuclear technologies,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="ida3c52eae99bc4eb3add56f19764f0831"><enum>3004.</enum><header>Deficit-neutral reserve fund for American agriculture</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to American agriculture, which may
+			 include—</text>
+				<paragraph id="id60635D66B7684031BFA45AF0FA25D0B1"><enum>(1)</enum><text display-inline="yes-display-inline">grain standards, inspections, and weighing;</text>
+				</paragraph><paragraph id="id0B33820010284620B7C145B1F8D54569"><enum>(2)</enum><text display-inline="yes-display-inline">mandatory price reporting for livestock; or</text>
+				</paragraph><paragraph id="id757892017A374E6D8DB5D10F6A3A4AD4"><enum>(3)</enum><text display-inline="yes-display-inline">the regulation of commodities and futures trading,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="ideb6736a80f144231b68863fbd24b9ac1"><enum>3005.</enum><header>Deficit-neutral reserve fund to strengthen American families</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to strengthening American
+			 families, which may include—</text>
+				<paragraph id="id23CEC3777B2B492DB54738236211B9A1"><enum>(1)</enum><text display-inline="yes-display-inline">addressing the opioid and substance abuse crisis;</text>
+				</paragraph><paragraph id="idcb28df3391a7455f81e75183affdf152"><enum>(2)</enum><text>improving child and maternal health;</text>
+				</paragraph><paragraph id="id42139BA7BCE64D128A1DFD59C7E7D77E"><enum>(3)</enum><text display-inline="yes-display-inline">making child and dependent care more affordable and useful for American families;</text>
+				</paragraph><paragraph id="id670A3BE7399142BDB018E3E7669155AF"><enum>(4)</enum><text display-inline="yes-display-inline">child nutrition programs;</text>
+				</paragraph><paragraph id="id49096B845ADB495FBBCFFC5CE3E09D91"><enum>(5)</enum><text display-inline="yes-display-inline">foster care, marriage, and fatherhood programs; or</text>
+				</paragraph><paragraph id="id742C1E34421A4C6C83714A969D38498A"><enum>(6)</enum><text>provide transitional supports to States implementing the Family First Prevention Services Act
+			 (title VII of division E of the Bipartisan Budget Act of 2018 (Public Law
+			 115–123; 132 Stat. 232)),</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="id28a3255c3bc24e4781a1ff225b78c397"><enum>3006.</enum><header>Deficit-neutral reserve fund to strengthen American communities</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to strengthening American
+			 communities, which may include—</text>
+				<paragraph id="idAAB28EEA8F984EAFA2186D4B5A51EE56"><enum>(1)</enum><text display-inline="yes-display-inline">reforming the American public housing system;</text>
+				</paragraph><paragraph id="id8F89FE2066FA401B91AF6ED079126E87"><enum>(2)</enum><text display-inline="yes-display-inline">combating violent crime;</text>
+				</paragraph><paragraph id="id42EBD64594094189A82FCE28A3CAD2D6"><enum>(3)</enum><text display-inline="yes-display-inline">protecting and assisting survivors of domestic abuse;</text>
+				</paragraph><paragraph id="id7833CAD753384CCA906DE4BF62176D92"><enum>(4)</enum><text display-inline="yes-display-inline">ensuring long-term, stable access to funding for victims of crime; or</text>
+				</paragraph><paragraph id="id77A482AEDC11410D984C5329788EE5BA"><enum>(5)</enum><text display-inline="yes-display-inline">reforming the criminal justice system,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="idadd24931838142658e000f9e3ceca4bf"><enum>3007.</enum><header>Deficit-neutral reserve fund to promote innovation in education</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to promoting innovation in
+			 education, which may include—</text>
+				<paragraph id="idF80A69832CBD4D48936A3C6393B346A9"><enum>(1)</enum><text display-inline="yes-display-inline">higher education;</text>
+				</paragraph><paragraph id="id07F1012416574F6FB7691E83655B2442"><enum>(2)</enum><text display-inline="yes-display-inline">education programs for students with disabilities;</text>
+				</paragraph><paragraph id="id40EC20983C3441E8AA61FCAA2DAA0E97"><enum>(3)</enum><text display-inline="yes-display-inline">ensuring State flexibility in education; or</text>
+				</paragraph><paragraph id="id02DCF7A15E954744BE3913328A957ECC"><enum>(4)</enum><text display-inline="yes-display-inline">consolidating and streamlining overlapping early education and child care programs,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="idb2b0df090a2d4b628e6e6d0aaa8f6a1a"><enum>3008.</enum><header>Deficit-neutral reserve fund to promote economic growth and prosperity for American workers</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to promoting economic growth and
+			 prosperity for American workers, which may include—</text>
+				<paragraph id="id9B8F5D19DE254B8399C3EF8BC3EC7556"><enum>(1)</enum><text display-inline="yes-display-inline">reducing the costs to businesses and individuals stemming from Federal regulations;</text>
+				</paragraph><paragraph id="id7A8966785F6442F28957C8841BBA2F65"><enum>(2)</enum><text display-inline="yes-display-inline">streamlining and enhancing outcomes from Federal workforce development, job training, and
+			 reemployment programs,
+			 such as apprenticeship or certificate programs that
+			 provide training for a new industry;</text>
+				</paragraph><paragraph id="id72D6FCE83EA24A678A04A58E3BEC7FD4"><enum>(3)</enum><text display-inline="yes-display-inline">increasing job creation, commerce, and economic growth;</text>
+				</paragraph><paragraph id="id2de9685edb89450295da991c1d9b616a"><enum>(4)</enum><text>increasing exports from the United States;</text>
+				</paragraph><paragraph id="id1f338cf1f580435182ae8009963ebcb9"><enum>(5)</enum><text>supporting robust intellectual property protections; or</text>
+				</paragraph><paragraph id="idcf51119dfe1d40a8be65d8d7c4fb6b64"><enum>(6)</enum><text>as part of Federal tax reform, provide continued tax relief to working families and the middle
+			 class, such as through extension of tax provisions of Public Law 115–97
+			 (131 Stat. 2054),</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="idC7944979F5324307887B3A76765BBA6E"><enum>3009.</enum><header>Deficit-neutral reserve fund to promote economic opportunity and self-sufficiency</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to promoting economic opportunity
+			 and self-sufficiency, which may include—</text>
+				<paragraph id="id7F28CBEE41C044E295433BBE030575F4"><enum>(1)</enum><text display-inline="yes-display-inline">advancing policies that promote economic opportunities for all Americans; or</text>
+				</paragraph><paragraph id="id1AFEA261814D44FCA32F4B35A3A8A239"><enum>(2)</enum><text display-inline="yes-display-inline">implementing work requirements in means-tested welfare programs and promoting self-sufficiency,</text>
+				</paragraph><continuation-text commented="no" continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="id08ba9b0142bd4a2ba93f2f733bf6c4cf"><enum>3010.</enum><header>Deficit-neutral reserve fund for Federal banking, insurance, or housing finance programs</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to Federal banking, insurance, or
+			 housing finance programs, by the amounts provided in such legislation for
+			 those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="idB86D22B5A3A446E196D9DAF84EBB26C1"><enum>3011.</enum><header>Deficit-neutral reserve fund to improve tax administration</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to changes improving tax
+			 administration, by the
+			 amounts provided
+			 in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="id4a593117f4544ee49c6befcb851f6ec9"><enum>3012.</enum><header>Deficit-neutral reserve fund to improve Americans’ health care options</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to improving American health care,
+			 which may include—</text>
+				<paragraph id="idCC5311EBAB334B97B4EB02FAC38CBF02"><enum>(1)</enum><text display-inline="yes-display-inline">repealing and replacing the Patient Protection and Affordable Care Act or the Health Care and
+			 Education Reconciliation Act of 2010, and preserving pre-existing
+			 conditions
+			 protections;</text>
+				</paragraph><paragraph id="id5E3D8CE33D4D448FA3314D34B86E3887"><enum>(2)</enum><text display-inline="yes-display-inline">increasing health care options for individuals;</text>
+				</paragraph><paragraph id="id43ED4EEADADE481BAB7C1B1CBD656BEF"><enum>(3)</enum><text display-inline="yes-display-inline">lowering health care costs for American families, such as reducing prescription drug costs and
+			 promoting
+			 biosimilar competition;</text>
+				</paragraph><paragraph id="id485E2835E19D434AB306CD40F7DDAF71"><enum>(4)</enum><text display-inline="yes-display-inline">encouraging State flexibility and innovation;</text>
+				</paragraph><paragraph id="id9914C3E4E32542AB97D086D1E48326F7"><enum>(5)</enum><text display-inline="yes-display-inline">improving consumers’ access to care; or</text>
+				</paragraph><paragraph id="id2F45862B64574D298702033A3A45A5D8"><enum>(6)</enum><text display-inline="yes-display-inline">investing in public health,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="id07fe622c838548d5835ee7ee90c4a57b"><enum>3013.</enum><header>Deficit-neutral reserve fund to protect Medicaid and Medicare</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to protecting the Medicaid and
+			 Medicare programs, which may include strengthening and improving Medicaid
+			 for
+			 the most vulnerable populations, and extending the life of the Federal
+			 Hospital Insurance Trust Fund, by the amounts provided in such legislation
+			 for those purposes, provided that such legislation would not increase the
+			 deficit over either the period of the total of fiscal years 2020 through
+			 2024 or the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="id6781ee2dd9b14f2290869f078e8fa33b"><enum>3014.</enum><header>Deficit-neutral reserve fund to restore American military power</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to restoring American military
+			 power, which may include—</text>
+				<paragraph id="id3A673292A59049EF9FA99F0222B78E2E"><enum>(1)</enum><text display-inline="yes-display-inline">military readiness, including facilities sustainment restoration and modernization;</text>
+				</paragraph><paragraph id="id419F9FD7FC60417C8618CB594CB92572"><enum>(2)</enum><text display-inline="yes-display-inline">military technological superiority;</text>
+				</paragraph><paragraph id="id07CA42B49EDF4905B90238F2B57288F7"><enum>(3)</enum><text display-inline="yes-display-inline">modernizing and protecting the integrity and credibility of the triad of strategic nuclear delivery
+			 systems;</text>
+				</paragraph><paragraph id="id9FC24A9067074EB9A4569E142F206EA1"><enum>(4)</enum><text display-inline="yes-display-inline">the ability of the Department of Defense to conduct cyber operations; or</text>
+				</paragraph><paragraph id="idADD0D29E04EE437EA8C45FA583DBAF5B"><enum>(5)</enum><text display-inline="yes-display-inline">structural defense reforms,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="iddf3a1a8bdac44b50a681035f9a68d57d"><enum>3015.</enum><header>Deficit-neutral reserve fund to improve cybersecurity</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to improving cybersecurity, which
+			 may include cybersecurity for critical infrastructure, by the amounts
+			 provided in such legislation for those purposes, provided that such
+			 legislation would not increase the deficit over either the period of the
+			 total of fiscal years 2020 through 2024 or the period of the total of
+			 fiscal
+			 years 2020 through 2029.</text>
+			</section><section id="id6d1bcaeee0484e0d945edf0b6cd26233"><enum>3016.</enum><header>Deficit-neutral reserve fund for veterans and service members</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to improving the delivery of
+			 benefits and services to veterans and service members, by the amounts
+			 provided in such legislation for those
+			 purposes, provided that such legislation would not increase the deficit
+			 over either the period of the total of fiscal years 2020 through 2024 or
+			 the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="idB8AC6C5932E94C0BBF6231D20110CC7C"><enum>3017.</enum><header>Deficit-neutral reserve fund for border security and immigration</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to border security and
+			 immigration, which may include—</text>
+				<paragraph id="id1b54b6a0b55e42b5a408289304c5303c"><enum>(1)</enum><text>securing the  borders of the United States;</text>
+				</paragraph><paragraph id="idaf3f00fac6724f3db262327fe7cf099d"><enum>(2)</enum><text>reforming immigration laws;</text>
+				</paragraph><paragraph id="id0642146f628c4a7f9c792dbad23db6e2"><enum>(3)</enum><text>ending human trafficking; or</text>
+				</paragraph><paragraph id="id098db5f5701c430c8c68f20e4ae89ac6"><enum>(4)</enum><text>intercepting narcotics being transported into the United States,</text>
+				</paragraph><continuation-text continuation-text-level="section">by the amounts provided in such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</continuation-text></section><section id="id25298ABEA1AC4C0E8B022F28B1559156"><enum>3018.</enum><header>Deficit-neutral reserve fund for American transportation and infrastructure</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to improving American
+			 transportation and
+			 infrastructure, which may include strengthening surface, air, or maritime
+			 transportation systems, water resources development, or
+			 broadband deployment, by the amounts provided in such legislation for
+			 those purposes, provided that such legislation would not increase the
+			 deficit over either the period of the total of fiscal years 2020 through
+			 2024 or the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="idDA82D7AF6F7C46D59D6013E52C5BF660"><enum>3019.</enum><header>Deficit-neutral reserve fund to promote financial security</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to promoting financial security,
+			 which may include making it easier to save for retirement and
+			 consolidating and streamlining overlapping and duplicative financial
+			 literacy programs, by the amounts provided in such legislation for those
+			 purposes, provided that such legislation would not increase the deficit
+			 over either the period of the total of fiscal years 2020 through 2024 or
+			 the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="id23B45D3431B044D3B587456210C09750"><enum>3020.</enum><header>Deficit-neutral reserve fund to prevent a taxpayer bailout of pension plans</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to preventing taxpayer bailouts of
+			 pension plans by the amounts provided in such legislation for those
+			 purposes, provided that such legislation would not increase the deficit
+			 over either the period of the total of fiscal years 2020 through 2024 or
+			 the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="id430ab617233140b68bcd74f8dda764dd"><enum>3021.</enum><header>Deficit-neutral reserve fund for efficiencies, consolidations, curbing budgetary gimmicks, and
+			 other
+			 savings</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a
+			 committee or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to efficiencies, consolidations,
+			 curbing budgetary gimmicks, and other savings,  by the
+			 amounts provided in such legislation for those purposes, provided that
+			 such legislation would not increase the deficit
+			 over either the period of the total of fiscal years 2020 through 2024 or
+			 the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="id79BB93A1E9374F4898C30CA93D355632"><enum>3022.</enum><header>Deficit-neutral reserve fund for legislation modifying statutory budget controls</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to changes to the scope of
+			 sequestration as carried out by the Office of Management and Budget, such
+			 as for the Financial Accounting Standards Board, Public Company Accounting
+			 Oversight Board, Securities Investor Protection Corporation, and other
+			 similar entities,  by the
+			 amounts provided in such legislation for those purposes, provided that
+			 such legislation would not increase the deficit
+			 over either the period of the total of fiscal years 2020 through 2024 or
+			 the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="id54644A93E1DC4719BDDEB124CA42A750"><enum>3023.</enum><header>Deficit-neutral
+		reserve fund for reducing fraud in taxpayer-funded Government assistance programs</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to reducing fraud in
+			 taxpayer-funded Government assistance programs by the amounts provided in
+			 such legislation for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="id3E7370623A15430E9D42D24F9C3D51D0"><enum>3024.</enum><header>Deficit-neutral
+		reserve fund relating to Federal compensation</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to Federal compensation, including
+			 the possibility of allowing elected officials to voluntarily reduce their
+			 pensions, by the amounts provided in such legislation for those purposes,
+			 provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="id5E38AD26215A44819DE999AFAE00D843"><enum>3025.</enum><header>Deficit-neutral reserve fund relating to pre-existing conditions protections</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports  relating to supporting Congressional
+			 efforts to preserve pre-existing condition protections with respect to
+			 health insurance, by the amounts provided in such legislation for those
+			 purposes, provided that such legislation would not increase the deficit
+			 over either the period of the total of fiscal years 2020 through 2024 or
+			 the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section id="idA183E5EB162D47F4AC703280E6C0DBAD"><enum>3026.</enum><header>Deficit-neutral
+		reserve fund relating to reforming the broken congressional budget process</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to reforming the broken
+			 congressional budget process, which may include establishing an optional
+			 bipartisan budget pathway, by the amounts provided in such legislation for
+			 those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="idDEF41911C2A64E388C36B29B9BCBE216"><enum>3027.</enum><header>Deficit-neutral reserve fund to improve coordination and Federal Government disaster response and
+			 mitigation</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to changes in disaster management
+			 and mitigation laws, which may include enhanced cooperation by Federal
+			 Government departments and agencies and State governments in responding,
+			 recovering, or preventing major disasters, by amounts provided in such
+			 legislation for these purposes, provided that such legislation would not
+			 increase the deficit over either the period of the total of fiscal years
+			 2020 through 2024 or the period of the total of fiscal years 2020 though
+			 2029.</text>
+			</section><section id="idF3D4D195BCF54D969C3B6CFA2C303763"><enum>3028.</enum><header>Deficit-neutral reserve fund to provide continued tax relief for family-owned businesses, farms,
+			 and ranches</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to changes in Federal tax laws,
+			 which may include provision of continued tax relief for family-owned
+			 businesses, farms, and ranches such as through extensions of provisions of
+			 Public Law 115–97 (131 Stat. 2054), by the amounts provided in such
+			 legislation for those purposes, provided that such legislation would not
+			 increase the deficit over either the period of the total of fiscal years
+			 2020 through 2024 or the period of the total of fiscal years 2020 through
+			 2029.</text>
+			</section><section id="idB0DE30D81D7F4682A30D4ED647520F14"><enum>3029.</enum><header>Deficit-neutral
+		reserve fund relating to supporting programs to analyze the threats to
+			 installations of the Department of Defense due to extreme storms,
+			 wildfire, droughts, rising sea level, and other conditions</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to supporting programs to analyze
+			 the threats to installations of the Department of Defense due to extreme
+			 storms, wildfire, droughts, rising sea level, and other conditions by the
+			 amounts provided in such legislation for those purposes, provided that
+			 such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="idE95D3C732B3346BCA90D7B1161B02C96"><enum>3030.</enum><header>Deficit-neutral
+		reserve fund relating to improving the affordability of rental housing for
+			 low-income families</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to improving the affordability of
+			 rental housing for low-income families by the amounts provided in such
+			 legislation
+			 for those purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="idE810D58FEE1F4366AC738E2F39E4DB4E"><enum>3031.</enum><header>Deficit-neutral reserve fund to improve Federal flood control efforts</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to changes in Federal flood
+			 control efforts and river management laws, which may include reforms to
+			 project prioritization and increased focus on the Missouri River, by the
+			 amounts provided in such legislation for those purposes, provided that
+			 such legislation would not increase the deficit over either the period of
+			 the total of fiscal years 2020 through 2024 or the period of the total of
+			 fiscal years 2020 through 2029.</text>
+			</section><section id="id11DD3A657C9F4F388E8CBF5AA477AE90"><enum>3032.</enum><header>Deficit-neutral reserve fund relating to a clean audit opinion at the Department of Defense</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a
+			 committee or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to Department of Defense financial
+			 management, which may include legislation that holds the Department of
+			 Defense
+			 accountable for failing to pass a clean audit, or eliminates waste, fraud,
+			 and abuse, by the amounts provided in such legislation for those purposes,
+			 provided that such legislation would not increase the deficit over either
+			 the period of the total of fiscal years 2020 through 2024 or the period of
+			 the total of fiscal years 2020 to 2029.</text>
+			</section><section id="idCD88DBDC282541A1B4902DCCF4552CB0"><enum>3033.</enum><header>Deficit-neutral reserve fund to continue proven middle class tax relief</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a
+			 committee or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to changes in Federal tax laws,
+			 which may include provision of continued tax relief to working families
+			 and the middle class such as through extension of tax provisions of Public
+			 Law 115–97 (131 Stat. 2054), by the amounts provided in such legislation
+			 for those purposes, provided that such legislation would not increase the
+			 deficit over either the period of the total of fiscal years 2020 through
+			 2024 or the period of the total of fiscal years 2020 through 2029.</text>
+			</section><section commented="no" display-inline="no-display-inline" id="idD07A2A7A53AB49078CB3701425D465A8" section-type="subsequent-section"><enum>3034.</enum><header display-inline="yes-display-inline">Deficit-neutral reserve fund to support servicemembers' access to safe housing</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports related to addressing health, safety, and
+			 environmental hazards for tenants of military barracks or military family
+			 housing, which may include establishing the administrative framework
+			 necessary to ensure that accountability is increased and improvements are
+			 made reliably and without fear of retaliation, by the amounts provided in
+			 such legislation for those purposes, provided that such legislation would
+			 not increase the deficit over either the period of the total of fiscal
+			 years 2020 through 2024 or the period of the total of fiscal years 2020
+			 through 2029.</text>
+			</section><section id="id765316A41AEB4AE5BEDACC6FFE92B6F8"><enum>3035.</enum><header>Deficit-neutral reserve fund to provide the Department of Homeland Security with the necessary
+			 resources to protect migrant children and families</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to providing the Department of
+			 Homeland Security with the necessary resources to properly secure the
+			 border and protect migrant children and families, which may include
+			 supporting efforts to keep families together, by the amounts provided in
+			 such legislation for those purposes, provided that such legislation would
+			 not increase the deficit over either the period of the total of fiscal
+			 years 2020 through 2024 or the period of the total of fiscal years 2020
+			 through 2029.</text>
+			</section><section id="idDFB972DAA4994E1BB9B543A64415CC10"><enum>3036.</enum><header>Deficit-neutral
+		reserve fund relating to reducing prescription drug costs for
+			 Americans</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to improving
+			 access to, and affordability of, prescription drugs for all Americans,
+			 holding the health care industry accountable for the prices that consumers
+			 and Federal programs pay for critical medications, and addressing issues
+			 that artificially increase the costs of drugs, such as price gouging and
+			 pay-for-delay, by the amounts provided in such legislation for those
+			 purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section><section id="ID6a47cea4a9ee457a80e13b4ca4884ce9"><enum>3037.</enum><header>Deficit-neutral
+		reserve fund to allow program integrity funding for targeted denial reviews</header><text display-inline="no-display-inline">The Chairman of the Committee on the Budget of the Senate may revise the allocations of a committee
+			 or committees, aggregates, and other appropriate levels in this
+			 resolution, and make adjustments to the pay-as-you-go ledger, for one or
+			 more bills, joint resolutions, amendments, amendments between the Houses,
+			 motions, or conference reports relating to the addition of Target Denial
+			 Reviews in the allowable activities in section 815 of the Bipartisan
+			 Budget Act of 2015 (Public Law 114–74; 129 Stat. 604) by the amounts
+			 provided in such legislation for those
+			 purposes, provided that such legislation
+			 would not increase the deficit over either the period of the total of
+			 fiscal years 2020 through 2024 or the period of the total of fiscal years
+			 2020 through 2029.</text>
+			</section></title><title id="H1A7DC50515A04E1C8F37C9A3C3730068" style="OLC"><enum>IV</enum><header>Budget process</header>
+			<subtitle id="H62BAE2D6E7E04D659ADA85034D05B64D" style="OLC"><enum>A</enum><header>Budget enforcement</header>
+				<section id="H48C22C851A0844F2A4D0BBAAAB9FE1A9"><enum>4101.</enum><header>Point of order against advance appropriations in the Senate</header>
+					<subsection id="H3C9EADD1AFE840DCB2DA387898AFEADD"><enum>(a)</enum><header>In general</header>
+						<paragraph id="H8E7BB88157FC483AA7A2D9840C7DFBAC"><enum>(1)</enum><header>Point of order</header><text>Except as provided in subsection (b), it shall not be in order in the Senate to consider any bill,
+			 joint resolution, motion, amendment, amendment between the Houses, or
+			 conference report that would provide an advance appropriation for a
+			 discretionary account.</text>
+						</paragraph><paragraph id="H9D4ADD65767E4852951504D7D15D9794"><enum>(2)</enum><header>Definition</header><text>In this section, the term <term>advance appropriation</term> means any new budget authority provided in a bill or joint resolution making appropriations for
+			 fiscal year 2020 that first becomes available for any fiscal year after
+			 2020, or any new budget authority provided in a bill or joint resolution
+			 making general appropriations or continuing appropriations for fiscal year
+			 2021, that first becomes available for any fiscal year after 2021.</text>
+						</paragraph></subsection><subsection commented="no" id="H1030F0D348F747EEBAD47F2EDDF4EED2"><enum>(b)</enum><header>Exceptions</header><text>Advance appropriations may be provided—</text>
+						<paragraph commented="no" id="HD03F5AAD57874F2D8175FD89732C4156"><enum>(1)</enum><text>for fiscal years 2021 and 2022 for programs, projects, activities, or accounts identified in the
+			 joint explanatory statement of managers accompanying this concurrent
+			 resolution under the heading <quote>Accounts Identified for Advance Appropriations</quote> in an aggregate amount not to exceed $28,852,000,000 in new budget authority in each fiscal year;</text>
+						</paragraph><paragraph commented="no" id="H2D7B0511790E4963A962536434BADFA9"><enum>(2)</enum><text>for the Corporation for Public Broadcasting; and</text>
+						</paragraph><paragraph commented="no" id="HCDCFBCE7973F463281B82E5237E0B287"><enum>(3)</enum><text>for the Department of Veterans Affairs for the Medical Services, Medical Support and Compliance,
+			 Veterans Medical Community Care, and Medical Facilities accounts of the
+			 Veterans Health Administration.</text>
+						</paragraph></subsection><subsection id="H1584292C33234CFD82340FA22680DE4D"><enum>(c)</enum><header>Supermajority waiver and appeal</header>
+						<paragraph id="HD8CCBCCC542040BDA87F9427CF6E7C75"><enum>(1)</enum><header>Waiver</header><text>In the Senate, subsection (a) may be waived or suspended only by an affirmative vote of
+			 three-fifths of the Members, duly chosen and sworn.</text>
+						</paragraph><paragraph id="HB1F454C1FC6842EE999F346259D1D8A9"><enum>(2)</enum><header>Appeal</header><text>An affirmative vote of three-fifths of the Members of the Senate, duly chosen and sworn, shall be
+			 required to sustain an appeal of the ruling of the Chair on a point of
+			 order raised under subsection (a).</text>
+						</paragraph></subsection><subsection id="H88A39F204B2E4A3EBB2BD3298DD6A7C9"><enum>(d)</enum><header>Form of point of order</header><text>A point of order under subsection (a) may be raised by a Senator as provided in section 313(e) of
+			 the Congressional Budget Act of 1974 (2 U.S.C. 644(e)).</text>
+					</subsection><subsection id="H5F4E448EABCC4B05AADF2D863161CC09"><enum>(e)</enum><header>Conference reports</header><text>When the Senate is considering a conference report on, or an amendment between the Houses in
+			 relation to, a bill or joint resolution, upon a point of order being made
+			 by any Senator pursuant to this section, and such point of order being
+			 sustained, such material contained in such conference report or House
+			 amendment shall be stricken, and the Senate shall proceed to consider the
+			 question of whether the Senate shall recede from its amendment and concur
+			 with a further amendment, or concur in the House amendment with a further
+			 amendment, as the case may be, which further amendment shall consist of
+			 only that portion of the conference report or House amendment, as the case
+			 may be, not so stricken. Any such motion in the Senate shall be debatable.
+			 In any case in which such point of order is sustained against a conference
+			 report (or Senate amendment derived from such conference report by
+			 operation of this subsection), no further amendment shall be in order.</text>
+					</subsection></section><section id="H5BF3D32DE4D3472797B29E99AA4D8DA0"><enum>4102.</enum><header>Point of order against changes in mandatory programs</header><text display-inline="no-display-inline">Section 4102(b) of H. Con. Res. 71 (115th Congress), the concurrent resolution on the budget
+			 for
+			 fiscal year 2018,  is amended—</text>
+					<paragraph id="id93A930EC1E434F7DB7A289C810BC4434"><enum>(1)</enum><text display-inline="yes-display-inline">in paragraph (1), by inserting <quote>(which shall not include a rescission bill or impoundment resolution, as such terms are defined in
+			 section 1011 of the Congressional Budget
+			 and Impoundment Control Act of 1974 (2 U.S.C. 682))</quote> after <quote>making appropriations for a full fiscal year</quote>; and</text>
+					</paragraph><paragraph id="id497A6F65BD984830A113D9DA6AE94AF6"><enum>(2)</enum><text display-inline="yes-display-inline">in paragraph (2)(C), by striking <quote>fiscal year 2020, $15,000,000,000</quote> and inserting <quote>fiscal year 2020 and each fiscal year thereafter, $0</quote>.</text>
+					</paragraph></section><section id="HC04A15CF81F242DFBE10E2816AC9B7ED"><enum>4103.</enum><header>Honest accounting: cost estimates for major legislation to incorporate macroeconomic effects</header>
+					<subsection commented="no" display-inline="no-display-inline" id="H975C64FAC4D64D8B8A1C36E6BC219E13"><enum>(a)</enum><header display-inline="yes-display-inline">CBO and JCT estimates</header><text display-inline="yes-display-inline">During the 116th Congress, any estimate provided by the Congressional Budget Office under section
+			 402 of the Congressional Budget Act of 1974 (2 U.S.C. 653) or by the Joint
+			 Committee on Taxation to the Congressional Budget Office under section
+			 201(f) of such Act (2 U.S.C. 601(f)) for major legislation considered in
+			 the Senate shall, to the greatest extent practicable, incorporate the
+			 budgetary effects of changes in economic output, employment, capital
+			 stock, and other macroeconomic variables resulting from such major
+			 legislation.</text>
+					</subsection><subsection commented="no" display-inline="no-display-inline" id="H5869A9CE5E3B4CFFB33E5CC11422A323"><enum>(b)</enum><header display-inline="yes-display-inline">Contents</header><text display-inline="yes-display-inline">Any estimate referred to in subsection (a) shall, to the extent practicable, include—</text>
+						<paragraph commented="no" display-inline="no-display-inline" id="HB9550798AB1B4B7B805F6F518B7076C6"><enum>(1)</enum><text display-inline="yes-display-inline">a qualitative assessment of the budgetary effects (including macroeconomic variables described in
+			 subsection (a)) of the major legislation in the 20-fiscal year period
+			 beginning after the last fiscal year of the most recently agreed to
+			 concurrent resolution on the budget that sets forth budgetary levels
+			 required under section 301 of the Congressional Budget Act of 1974 (2
+			 U.S.C. 632); and</text>
+						</paragraph><paragraph commented="no" display-inline="no-display-inline" id="HDC5D4A3307D94ECD9D8BFEC34F892151"><enum>(2)</enum><text display-inline="yes-display-inline">an identification of the critical assumptions and the source of data underlying that estimate.</text>
+						</paragraph></subsection><subsection commented="no" display-inline="no-display-inline" id="H9A43A95040CD4884B0DD88D243083979"><enum>(c)</enum><header display-inline="yes-display-inline">Definitions</header><text display-inline="yes-display-inline">In this section:</text>
+						<paragraph commented="no" display-inline="no-display-inline" id="HE27A5AA56EF64846BC14310B8642DA2B"><enum>(1)</enum><header display-inline="yes-display-inline">Major legislation</header><text display-inline="yes-display-inline">The term <term>major legislation</term> means a bill, joint resolution, conference report, amendment, amendment between the Houses, or
+			 treaty considered in the Senate—</text>
+							<subparagraph commented="no" display-inline="no-display-inline" id="HA2898B67B64144B1A41A09960B194230"><enum>(A)</enum><text display-inline="yes-display-inline">for which an estimate is required to be prepared pursuant to section 402 of the Congressional
+			 Budget Act of 1974 (2 U.S.C. 653) and that causes a gross budgetary effect
+			 (before incorporating macroeconomic effects and not including timing
+			 shifts) in a fiscal year in the period of years of the most recently
+			 agreed to concurrent resolution on the budget equal to or greater than—</text>
+								<clause commented="no" display-inline="no-display-inline" id="H3CFC605CABA04CB1946386434B0C2D90"><enum>(i)</enum><text display-inline="yes-display-inline">0.25 percent of the current projected gross domestic product of the United States for that fiscal
+			 year; or</text>
+								</clause><clause commented="no" display-inline="no-display-inline" id="H31CD72172EA7492C96E9BB4414DA8FAD"><enum>(ii)</enum><text display-inline="yes-display-inline">for a treaty, equal to or greater than $15,000,000,000 for that fiscal year; or</text>
+								</clause></subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="H125652D9936E4292A705F2E941389917"><enum>(B)</enum><text display-inline="yes-display-inline">designated as such by—</text>
+								<clause commented="no" display-inline="no-display-inline" id="H58D0AE1B64494F62A4BDA1AED2ABB6DF"><enum>(i)</enum><text display-inline="yes-display-inline">the Chairman of the Committee on the Budget of the Senate for all direct spending and revenue
+			 legislation; or</text>
+								</clause><clause commented="no" display-inline="no-display-inline" id="HB4E325ADCC49453E8839319649CE9458"><enum>(ii)</enum><text display-inline="yes-display-inline">the Senator who is Chairman or Vice Chairman of the Joint Committee on Taxation for revenue
+			 legislation.</text>
+								</clause></subparagraph></paragraph><paragraph commented="no" display-inline="no-display-inline" id="H7B682988528941C7B6AC74737C553774"><enum>(2)</enum><header display-inline="yes-display-inline">Budgetary effects</header><text display-inline="yes-display-inline">The term <term>budgetary effects</term> means changes in revenues, direct spending outlays, and deficits.</text>
+						</paragraph><paragraph commented="no" display-inline="no-display-inline" id="H1FCA373E177145CAA7502D3592FF2067"><enum>(3)</enum><header display-inline="yes-display-inline">Timing shifts</header><text display-inline="yes-display-inline">The term <term>timing shifts</term> means—</text>
+							<subparagraph commented="no" display-inline="no-display-inline" id="H24374C8DC75647AFBB330E4648F911E9"><enum>(A)</enum><text display-inline="yes-display-inline">provisions that cause a delay of the date on which outlays flowing from direct spending would
+			 otherwise occur from one fiscal year to the next fiscal year; or</text>
+							</subparagraph><subparagraph commented="no" display-inline="no-display-inline" id="HC30E3B8E1A8B44BC80340BC2B7373C6C"><enum>(B)</enum><text display-inline="yes-display-inline">provisions that cause an acceleration of the date on which revenues would otherwise occur from one
+			 fiscal year to the prior fiscal year.</text>
+							</subparagraph></paragraph></subsection></section><section id="H2476C50535874F32AA1FA80C16C2019D"><enum>4104.</enum><header>Adjustment authority for amendments to statutory caps</header><text display-inline="no-display-inline">During the 116th Congress, if a measure becomes law that revises the discretionary spending limits
+			 established under section 251(c) of the Balanced Budget and Emergency
+			 Deficit Control Act of 1985 (2 U.S.C. 901(c)), such as a measure
+			 increasing the limits for the revised security category in support for a
+			 total defense budget of $750,000,000,000 for fiscal year 2020, the
+			 Chairman of
+			 the Committee on the
+			 Budget
+			 of the Senate may adjust the allocation called for under section 302(a) of
+			 the Congressional Budget Act of 1974 (2 U.S.C. 633(a)) to the appropriate
+			 committee or committees of the Senate, and may adjust all other budgetary
+			 aggregates, allocations, levels, and limits contained in this resolution,
+			 as necessary, consistent with such measure.</text>
+				</section><section id="id8E3FC26610DE4977894A0DCF909FE293"><enum>4105.</enum><header>Point of order against certain legislation related to surface transportation funding</header>
+					<subsection id="id1AC6418D1096446A8F62BA4AE84AAD5F"><enum>(a)</enum><header>Repeal of sunset</header><text display-inline="yes-display-inline">Section 405 of S. Con. Res. 13 (111th Congress), the concurrent resolution on the budget for fiscal
+			 year 2010, is amended by striking subsection (c).</text>
+					</subsection><subsection id="id97AE8EB11D9641018C0B7A73B1759F6A"><enum>(b)</enum><header>Effective date</header><text>The amendment made by subsection (a) shall take effect as though this resolution were agreed to on
+			 September 29, 2018.</text>
+					</subsection></section><section id="idB379A9211C9D4A5EA23D25B681381187"><enum>4106.</enum><header>Surgical strike point of order in the Senate against directing budgetary treatment</header>
+					<subsection id="idf863dc47394a43abafaebdce674ac0c8"><enum>(a)</enum><header>Definition</header><text>In this section, the term <term>directs budgetary treatment</term> with respect to a provision  means that the  provision, as determined by the Chairman of
+			 the Committee on the Budget of the Senate—</text>
+						<paragraph id="id01CEACB8D43A4D8182066D68D170E83A"><enum>(1)</enum><text>directs the congressional
+			 estimating process for determining the budgetary effects of legislation;</text>
+						</paragraph><paragraph id="idb12eb1ac965b4833ab5fa0f6d91fe1e1"><enum>(2)</enum><text>directs that a provision of legislation be considered a change in concepts and definitions
+			 under section 251(b) of the Balanced Budget and Emergency Deficit Control
+			 Act of 1985  (2 U.S.C. 901(b)); or</text>
+						</paragraph><paragraph id="idCE336E1FF83544B5889931D44873E2D0"><enum>(3)</enum><text>reclassifies the budgetary treatment of funding.</text>
+						</paragraph></subsection><subsection id="idDDC71C6429474F2B9F51A90F026EA397"><enum>(b)</enum><header>Point of order</header>
+						<paragraph id="id48BF308E5EE146BCA64E26375D0FCBD9"><enum>(1)</enum><header>In general</header><text>In the Senate, it shall not be in order to consider a provision that directs budgetary treatment
+			 in a bill, joint resolution, motion, amendment,
+			 amendment between the
+			 Houses, or
+		conference report,  unless  the provision is included in—</text>
+							<subparagraph id="idD2B1B7883FBD437AB6B511CBAAA864C0"><enum>(A)</enum><text>a bill or resolution which has been reported by the Committee on the
+			 Budget  (or from the consideration of which such committee has been
+			 discharged); or</text>
+							</subparagraph><subparagraph id="id6203DCB5C572445D95A904A509E2AEC3"><enum>(B)</enum><text>a motion on, amendment to, amendment between the
+			 Houses in relation to, or
+		conference report on a bill or resolution described
+			 in subparagraph (A).</text>
+							</subparagraph></paragraph><paragraph id="idBA71E501B9A44557AABC1423E199E4EB"><enum>(2)</enum><header>Point of order sustained</header><text>If a point of order is made by a Senator against a provision described in paragraph (1), and the
+			 point of order is sustained by the Chair, that provision shall be stricken
+			 from the
+			 measure and may not be offered as an amendment from the floor.</text>
+						</paragraph></subsection><subsection id="id80aa70217caf41cda759f9512a40e0b5"><enum>(c)</enum><header>Form of the point of order</header><text>A point of order under subsection (b)(1) may be raised by a Senator as provided in section 313(e)
+			 of
+			 the Congressional Budget Act of 1974 (2 U.S.C. 644(e)).</text>
+					</subsection><subsection id="id2a99a6ec2cd144a298098b8fbcb22e73"><enum>(d)</enum><header>Conference reports</header><text>When the Senate is considering a conference report on, or an amendment between the Houses in
+			 relation to, a bill or resolution, upon a
+			 point of order being made
+			 by any Senator pursuant to subsection (b)(1), and such point of order
+			 being
+			 sustained, such material contained in such conference report or House
+			 amendment shall be stricken, and the Senate shall proceed to consider the
+			 question of whether the Senate shall recede from its amendment and concur
+			 with a further amendment, or concur in the House amendment with a further
+			 amendment, as the case may be, which further amendment shall consist of
+			 only that portion of the conference report or House amendment, as the case
+			 may be, not so stricken. Any such motion in the Senate shall be debatable.
+			 In any case in which such point of order is sustained against a conference
+			 report (or Senate amendment derived from such conference report by
+			 operation of this subsection), no further amendment shall be in order.</text>
+					</subsection><subsection commented="no" id="id6a56a950f0c947459941df63740b1ec7"><enum>(e)</enum><header>Supermajority waiver and appeal</header><text>In the Senate, this section may be waived or suspended only by an affirmative vote of
+			 three-fifths of the Members, duly chose and sworn. An affirmative vote of
+			 three-fifths of Members of the Senate, duly chosen and sworn shall be
+			 required to sustain an appeal of the ruling of the Chair on a point of
+			 order raised under this section.</text>
+					</subsection></section><section id="id91B1F829E40D43D7A076D9C65131F7F2"><enum>4107.</enum><header>Point of order against designation of funds for Overseas Contingency Operations/Global War on
+			 Terrorism</header>
+					<subsection commented="no" display-inline="no-display-inline" id="IDE502ADB5C6E34D508EDD3A0A55158902"><enum>(a)</enum><header>In general</header><text>When the Senate is considering a bill, joint resolution, amendment, motion, amendment between the
+			 Houses,
+			 or conference report, if a point of order is made by a Senator against a
+			 designation of funds for Overseas Contingency Operations/Global War on
+			 Terrorism, in accordance with section 251(b)(2)(A)(ii) of the Balanced
+			 Budget and Emergency Deficit Control Act of 1985 (2 U.S.C.
+			 901(b)(2)(A)(ii)),  in that measure, that provision making such a
+			 designation shall be stricken from the measure and may not be offered as
+			 an amendment from the floor.</text>
+					</subsection><subsection commented="no" display-inline="no-display-inline" id="IDB54186F432384FE0BA049003A80BC807"><enum>(b)</enum><header>Supermajority waiver and appeals</header>
+						<paragraph id="ID28BFFE4CFEDF48DAAABC76A2FDC2D8AF"><enum>(1)</enum><header>Waiver</header><text>Subsection (a) may be waived or suspended in the Senate only by an affirmative vote of three-fifths
+			 of the Members, duly chosen and sworn.</text>
+						</paragraph><paragraph id="ID993B4575EAEB4D889C8AEEA6C714D963"><enum>(2)</enum><header>Appeals</header><text>Appeals in the Senate from the decisions of the Chair relating to any provision of this subsection
+			 shall be limited to 1 hour, to be equally divided between, and controlled
+			 by, the appellant and the manager of the bill or joint resolution, as the
+			 case may be. An affirmative vote of three-fifths of the Members of the
+			 Senate, duly chosen and sworn, shall be required to sustain an appeal of
+			 the ruling of the Chair on a point of order raised under this subsection.</text>
+						</paragraph></subsection><subsection commented="no" display-inline="no-display-inline" id="IDE6ED79C0992D4056BCA076B787AC9BD9"><enum>(c)</enum><header>Form of the point of order</header><text>A point of order under subsection (a) may be raised by a Senator as provided in section 313(e) of
+			 the Congressional Budget Act of 1974 (2 U.S.C. 644(e)).</text>
+					</subsection><subsection commented="no" display-inline="no-display-inline" id="ID63E2C43163AE4C01AC5EC6E53655C47B"><enum>(d)</enum><header>Conference reports</header><text>When the Senate is considering a conference report on, or an amendment between the Houses in
+			 relation to, a bill or joint resolution, upon a point of order being made
+			 by any Senator
+			 pursuant to this section, and such point of order being sustained, such
+			 material contained in such conference report or House amendment shall be
+			 stricken, and
+			 the Senate shall proceed to consider the question of whether the Senate
+			 shall recede from its amendment and concur with a further amendment, or
+			 concur in the House amendment with a further amendment, as the case may
+			 be, which further amendment shall consist of only that portion of the
+			 conference report or House amendment, as the case may be, not so stricken.
+			 Any such motion in the Senate shall be debatable. In any case in which
+			 such point of order is sustained against a conference report (or Senate
+			 amendment derived from such conference report by operation of this
+			 subsection), no further amendment shall be in order.</text>
+					</subsection></section></subtitle><subtitle id="H7DE945215BAE4058BE7F8AC7DBDA2DF8"><enum>B</enum><header>Other provisions</header>
+				<section id="HC325195D046246BAB5A5DFF20A6AADC7"><enum>4201.</enum><header>Budgetary treatment of certain discretionary administrative expenses</header>
+					<subsection id="H347DADB3C41042AFA7749A6F477416E7"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">In the Senate, notwithstanding section 302(a)(1) of the Congressional Budget Act of 1974 (2 U.S.C.
+			 633(a)(1)), section 13301 of the Budget Enforcement Act of 1990 (2 U.S.C.
+			 632 note), and section 2009a of title 39, United States Code, the joint
+			 explanatory statement accompanying the conference report on any concurrent
+			 resolution on the budget shall include in its allocations under section
+			 302(a) of the Congressional Budget Act of 1974 (2 U.S.C. 633(a)) to the
+			 Committees on Appropriations amounts for the discretionary administrative
+			 expenses of the Social Security Administration and of the Postal Service.</text>
+					</subsection><subsection id="HF30576CC380F4361BD16933E7104F097"><enum>(b)</enum><header>Special rule</header><text>In the Senate, for purposes of enforcing sections 302(f) of the Congressional Budget Act of 1974 (2
+			 U.S.C. 633(f)), estimates of the level of total new budget authority and
+			 total outlays provided by a measure shall include any discretionary
+			 amounts described in subsection (a).</text>
+					</subsection></section><section id="H20699AD11CCD4132BC1D2DB58467AB18"><enum>4202.</enum><header>Application and effect of changes in allocations and aggregates</header>
+					<subsection id="H80E4E2C471E040FBBD4B60749409DDBC"><enum>(a)</enum><header>Application</header><text>Any adjustments of allocations and aggregates made pursuant to this resolution shall—</text>
+						<paragraph id="H521FBCFDBA644317B49579EEB32DDFFE"><enum>(1)</enum><text>apply while that measure is under consideration;</text>
+						</paragraph><paragraph id="HAE48BD87D6BB4F0A927A13D6E50C71D6"><enum>(2)</enum><text>take effect upon the enactment of that measure; and</text>
+						</paragraph><paragraph id="H9EE59D359A1543DAB8DFAE0AF185CA46"><enum>(3)</enum><text>be published in the Congressional Record as soon as practicable.</text>
+						</paragraph></subsection><subsection id="H6FCEF030691C4A0EBB1289771C277EE0"><enum>(b)</enum><header>Effect of changed allocations and aggregates</header><text>Revised allocations and aggregates resulting from these adjustments shall be considered for the
+			 purposes of the Congressional Budget Act of 1974 (2 U.S.C. 621 et seq.) as
+			 allocations and aggregates contained in this resolution.</text>
+					</subsection><subsection id="HB4AB41B5CA0745F5BCEEB54ECBD03F05"><enum>(c)</enum><header>Budget committee determinations</header><text>For purposes of this resolution the levels of new budget authority, outlays, direct spending, new
+			 entitlement authority, revenues, deficits, and surpluses for a fiscal year
+			 or period of fiscal years shall be determined on the basis of estimates
+			 made by the Committee on the Budget of the Senate.</text>
+					</subsection></section><section id="H451C77359BCE4BDAA222F31562623A9F"><enum>4203.</enum><header>Adjustments to reflect changes in concepts and definitions</header><text display-inline="no-display-inline">Upon the enactment of a bill or joint resolution providing for a change in concepts or definitions,
+			 the Chairman of the Committee on the Budget of the Senate may make
+			 adjustments to the levels and allocations in this resolution in accordance
+			 with section 251(b) of the Balanced Budget and Emergency Deficit Control
+			 Act of 1985 (2 U.S.C. 901(b)).</text>
+				</section><section id="H11AD767680CF4BFE837273FB2015F3EA"><enum>4204.</enum><header>Exercise of rulemaking powers</header><text display-inline="no-display-inline">Congress adopts the provisions of this title—</text>
+					<paragraph id="H2EDD466CEAFA42429915390379A60AC0"><enum>(1)</enum><text>as an exercise of the rulemaking power of the Senate, and as such they shall be considered as part
+			 of the rules of the Senate and such rules shall supersede other rules only
+			 to the extent that they are inconsistent with such other rules; and</text>
+					</paragraph><paragraph commented="no" display-inline="no-display-inline" id="H99ADE49A656E4C8881652622164101C0"><enum>(2)</enum><text>with full recognition of the constitutional right of the Senate to change those rules at any time,
+			 in the same manner, and to the same extent as is the case of any other
+			 rule of the Senate.</text>
+					</paragraph></section></subtitle></title></resolution-body>
+	<endorsement><action-date>April 1, 2019</action-date><action-desc>Placed on the calendar</action-desc></endorsement></resolution>

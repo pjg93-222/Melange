@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HAC13E913F2694E96B2AEC6EABFAF2DA9" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 3928 IH: Deposit Insurance Reform Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2023-06-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session>
+<legis-num display="yes">H. R. 3928</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20230607">June 7, 2023</action-date>
+<action-desc><sponsor name-id="S001150">Mr. Schiff</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Federal Deposit Insurance Act to permit an insured depository institution to elect to have a higher standard maximum deposit insurance amount applicable to commercial deposits of the institution and to require higher assessments of such an institution, to amend the Federal Credit Union Act to provide a similar program for insured credit unions, and for other purposes.</official-title>
+</form>
+<legis-body id="H3050077B5DDC438FBA96157448EBCE42" style="OLC"> 
+<section id="H5A80FBB0A370481A89A46BE48B41CC02" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Deposit Insurance Reform Act of 2023</short-title></quote>.</text></section> <section id="H493B832B1ACC45DB9868DA64EE01CFC3"><enum>2.</enum><header>Election of higher standard maximum deposit insurance amount for commercial deposits</header><text display-inline="no-display-inline">Section 11 of the Federal Deposit Insurance Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1821">12 U.S.C. 1821</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" id="HB342FE35325B48CD931AD85FC0E74209" display-inline="no-display-inline"> 
+<subsection id="H85BC3FA9756B42D69BF807294C85209C"><enum>(x)</enum><header>Election of higher standard maximum deposit insurance amount for commercial deposits</header> 
+<paragraph id="H10B978E7782740AB93414242C4327C1B"><enum>(1)</enum><header>Multiple levels of deposit insurance</header><text display-inline="yes-display-inline">The Corporation shall establish multiple levels of standard maximum deposit insurance amounts that are applicable to commercial deposits and are above the amount defined under subsection (a)(1)(E).</text></paragraph> <paragraph id="H1E73329E0A384F3E98B946B4AEBB6CE0"><enum>(2)</enum><header>Election</header><text display-inline="yes-display-inline">An insured depository institution may elect to apply a standard maximum deposit insurance amount established under paragraph (1) to the commercial deposits of the insured depository institution.</text></paragraph> 
+<paragraph id="H04B74D21315C4B3791A944E0456D5D2B"><enum>(3)</enum><header>Deposit Insurance Fund assessments</header><text display-inline="yes-display-inline">The Corporation shall set the assessment rate of an insured depository institution making an election under paragraph (2) at such higher rate as is necessary to reflect the increased risk to the Deposit Insurance Fund from the failure of an insured depository institution with a higher standard maximum deposit insurance.</text></paragraph> <paragraph id="H4D5C28CD26854D6B980614539C507907"><enum>(4)</enum><header>Rulemaking</header><text>The Corporation shall issue such rules as may be necessary to carry out this subsection.</text></paragraph> 
+<paragraph id="HF88CF8C51D434CE98D587BFE161D9AAC"><enum>(5)</enum><header>Commercial deposits defined</header><text display-inline="yes-display-inline">In this subsection, the term <quote>commercial deposits</quote> means any deposits other than deposits of an individual (unless the individual is operating in the capacity of a sole proprietorship).</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block> </section> <section id="H9223D827C5274ED9BB5646646C051EE0"><enum>3.</enum><header>Election of higher standard maximum share insurance amount for commercial deposits</header><text display-inline="no-display-inline">Section 207(k) of the Federal Credit Union Act (<external-xref legal-doc="usc" parsable-cite="usc/12/1787">12 U.S.C. 1787(k)</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" id="H2476FF529ABF46EF84BE00BA28EB65BD" display-inline="no-display-inline"> 
+<paragraph id="H4400475EF7BE45E6904FD3023755BE1C"><enum>(7)</enum><header>Election of higher standard maximum share insurance amount for commercial deposits</header> 
+<subparagraph id="H1294859B545C490BAA9FAD525707AE5E"><enum>(A)</enum><header>Multiple levels of share insurance</header><text display-inline="yes-display-inline">The Board shall establish multiple levels of standard maximum share insurance amounts that are applicable to commercial deposits and are above the amount defined under paragraph (6).</text></subparagraph> <subparagraph id="HE1FFA9C871774DFA83C9E509EA3C4CF4"><enum>(B)</enum><header>Election</header><text display-inline="yes-display-inline">An insured credit union may elect to apply a standard maximum share insurance amount established under subparagraph (A) to the commercial deposits instead of the amount defined under paragraph (6).</text></subparagraph> 
+<subparagraph id="H9D5EB31096824FD7946D5BA138F6B09A"><enum>(C)</enum><header>Fund premium charges</header><text display-inline="yes-display-inline">The Board shall set the premium charge rate applicable to an insured credit union making an election under subparagraph (B) at such higher rate as is necessary to reflect the increased risk to the Fund from the failure of an insured credit union with a higher standard maximum share insurance amount.</text></subparagraph> <subparagraph id="H69BF549CC4024E9596DD1C5F50B7B5DB"><enum>(D)</enum><header>Rulemaking</header><text>The Board shall issue such rules as may be necessary to carry out this paragraph.</text></subparagraph> 
+<subparagraph id="HE7E3120CBC9C45F0A353A0866743D412" display-inline="no-display-inline"><enum>(E)</enum><header>Commercial deposits defined</header><text display-inline="yes-display-inline">In this paragraph, the term <quote>commercial deposits</quote> means any deposits other than deposits of an individual (unless the individual is operating in the capacity of a sole proprietorship).</text></subparagraph></paragraph><after-quoted-block>.</after-quoted-block></quoted-block> </section> </legis-body> </bill> 
+

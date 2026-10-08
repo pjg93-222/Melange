@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HAF3839A4BD7A42C4B9E40B42BB7599EC" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 5291 IH: Fair Indexing for Health Care Affordability Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-12-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 5291</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20191203">December 3, 2019</action-date><action-desc><sponsor name-id="V000133">Mr. Van Drew</sponsor> (for himself, <cosponsor name-id="M001163">Ms. Matsui</cosponsor>, and <cosponsor name-id="H001066">Mr. Horsford</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Patient Protection and Affordable Care Act to require the Secretary of Health and
+			 Human Services to set forth a method of determining annual updates to
+			 premium tax credit eligibility and maximum out-of-pocket limits.</official-title></form>
+	<legis-body id="H3A77246D318A4CD4B2E5416519E7909D" style="OLC">
+ <section id="H9E035F3A848F4F5CA58A3F6AE5B12344" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fair Indexing for Health Care Affordability Act</short-title></quote>.</text> </section><section id="HB34C94DD92384DED93DEAE6D0E0689A4"><enum>2.</enum><header>Premium adjustment percentage</header><text display-inline="no-display-inline">Section 1302(c)(4) of the Patient Protection and Affordable Care Act (<external-xref legal-doc="usc" parsable-cite="usc/42/18022">42 U.S.C. 18022(c)(4)</external-xref>) is amended by striking <quote>calendar year)</quote> and inserting <quote>calendar year, based on estimates and projections for the applicable calendar year of the percentage (if any) by which the average per enrollee premium for eligible employer-sponsored health plans (as defined in <external-xref legal-doc="usc" parsable-cite="usc/26/5000A">section 5000A(f)(2)</external-xref> of the Internal Revenue Code of 1986) exceeds such average per enrollee premium for the preceding calendar year, as published in the National Health Expenditure Accounts)</quote>.</text>
+		</section></legis-body></bill>
+
+

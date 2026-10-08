@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H9EFC75FE54F545A882545F734D36DB70" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4450 IH: Increasing American Jobs and Exports Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-09-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4450</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190920">September 20, 2019</action-date><action-desc><sponsor name-id="R000599">Mr. Ruiz</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To authorize the Export-Import Bank of the United States to use 3 percent of its profits for
+			 administrative expenses.</official-title></form>
+	<legis-body id="HD0D2DB6442DD4EBDBF8F2E4767431DC8" style="OLC">
+ <section id="H7DD463F033584BB88732C6DD4206DC8A" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Increasing American Jobs and Exports Act</short-title></quote>.</text> </section><section id="H5624697D67C2475DA031767E38DDB08C"><enum>2.</enum><header>Authority of the Export-Import Bank to use <enum-in-header>3</enum-in-header> percent of its profits for administrative expenses</header><text display-inline="no-display-inline">Section 3 of the Export-Import Bank Act of 1945 (<external-xref legal-doc="usc" parsable-cite="usc/12/635a">12 U.S.C. 635a</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block display-inline="no-display-inline" id="H8DD390EC279743339FA9CF4A02928551" style="OLC">
+				<subsection id="HFB41237E73E74291B5DC8685CF9076E5"><enum>(n)</enum><header>Authority To use portion of bank surplus for administrative expenses</header>
+					<paragraph id="H8F17B5696CAC4A74A849C18FEB5FC99B"><enum>(1)</enum><header>Authority</header>
+ <subparagraph id="HCDF6AD682D7942FA8BD45741E7053398"><enum>(A)</enum><header>In general</header><text>Subject to paragraph (2), in addition to any other amounts that the Bank may use to cover administrative expenses of the Bank, the Bank may use not more than 3 percent of the surplus (as defined in subsection (j)(2), without regard to subparagraph (B)(ii) of such subsection) of the Bank, for each fiscal year in the 5-year period beginning with the date of the enactment of this paragraph, to cover administrative expenses of the Bank.</text>
+ </subparagraph><subparagraph id="H250746B8B55C455FB13816AECB5FD899"><enum>(B)</enum><header>Use for regional offices</header><text display-inline="yes-display-inline">Of the amount of the surplus which may be used as provided in subparagraph (A), the Bank shall use at least <fraction>1/3</fraction> to expand or establish regional offices of the Bank.</text>
+ </subparagraph></paragraph><paragraph id="H99BC2C0609E54462B5C9599210C0CA51"><enum>(2)</enum><header>Subject to appropriations</header><text display-inline="yes-display-inline">The authority provided by paragraph (1) may be exercised only to such extent and in such amounts as are provided in advance in appropriations Acts.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

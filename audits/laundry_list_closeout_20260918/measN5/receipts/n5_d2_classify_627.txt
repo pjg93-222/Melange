@@ -1,0 +1,156 @@
+======================================================================================================
+N5 / D2  CLASSIFY THE 627 WORKBOOK-ONLY KEYS
+======================================================================================================
+workbook role-sheet rows      = 11065  ({'Sponsor Interactions': 638, 'Original Co-Sponsor Interaction': 2972, 'Co-Sponsor Interactions': 7455})
+selected archive rows         = 10181   old archive rows = 10986
+sentinel ledger rows          = 18887   verified+eligible membership = 268
+manual_bill_evidence rows     = 371
+routing audit rows            = 10820  (declared source_rows=10820, selected_events=8123)
+  frame arithmetic check: 10181 archive + 268 sentinel-verified + 371 manual = 10820  (audit says 10820) -> MATCH
+
+REPRODUCTION: only-in-workbook = 627 (lane C: 627) ; only-in-archive = 258 (lane C: 258) -> MATCH
+  by role: {'cosponsor': 625, 'sponsor': 2} ; by Congress: {'117': 1, '118': 1, '119': 625}
+
+routing-audit triples indexed = 6157 ; rows whose member_source did not resolve = 16 {'Stacey Plaskett': 10, 'James Moylan': 1, 'Michael C. Burgess': 1, 'Ed Perlmutter': 2, 'Alexander X. Mooney': 1, 'Marco Rubio': 1}
+
+======================================================================================================
+D2 CLASSIFICATION (627 keys, one class each)
+======================================================================================================
+  a   n=2     (a) routing audit holds the triple, EVERY row non-selected (withdrawn/superseded/ineligible)
+  b   n=622   (b) routing audit SELECTS the triple under a different role (bill survives a switch)
+  c   n=0     (c) triple absent from the producer frame, present in Sentinel Bill Ledger.xlsx
+  d   n=0     (d) absent from routing+sentinel, present in the OLDER 20260624 archive only
+  e   n=3     (e) found nowhere else -- workbook-only residue
+  TOTAL = 627
+  !! member names in the 627 that the producer Resolver cannot resolve: {'James Moylan': 1}
+
+------------------------------------------------------------------------------------------------------
+CLASS a  n=2  (a) routing audit holds the triple, EVERY row non-selected (withdrawn/superseded/ineligible)
+------------------------------------------------------------------------------------------------------
+  distinct members=2  distinct bills=2  by Congress={'119': 2}  by workbook role={'cosponsor': 2}
+  top bills: [('S.1512', 1), ('H.R.3149', 1)]
+  DISPOSITION STRINGS on the matching routing-audit rows (triples carrying each):
+     'excluded-title'                                     triples=2
+  reason / override_reason strings: [('protecting military servicemembers', 1), ('app store accountability', 1)]
+  routing source bucket: [(('selected-archive',), 2)]
+  examples (up to 10):
+     Elizabeth Warren       S.1512         C119  wb=cosponsor          | routing={'excluded-title': 1}                          | arc_roles=['original-cosponsor'] sent=False old=True | live_date=None wd=None
+     Gus Bilirakis          H.R.3149       C119  wb=cosponsor          | routing={'excluded-title': 1}                          | arc_roles=['original-cosponsor'] sent=False old=True | live_date=None wd=None
+
+------------------------------------------------------------------------------------------------------
+CLASS b  n=622  (b) routing audit SELECTS the triple under a different role (bill survives a switch)
+------------------------------------------------------------------------------------------------------
+  distinct members=276  distinct bills=90  by Congress={'119': 622}  by workbook role={'cosponsor': 622}
+  top bills: [('H.R.1919', 98), ('S.401', 39), ('S.1467', 35), ('H.R.6955', 29), ('H.R.976', 29), ('H.R.6125', 27), ('H.R.2808', 27), ('H.R.4568', 20), ('H.R.507', 19), ('H.R.4479', 15), ('H.R.2702', 15), ('H.J.RES.59', 14)]
+  routing SELECTED effective_role vs workbook role:
+     workbook=cosponsor          routing_selected=('original-cosponsor',)      n=622
+  examples (up to 10):
+     Aaron Bean             H.R.1919       C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-03-06 wd=
+     Adam Gray              H.R.4479       C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-07-17 wd=
+     Adam Gray              H.R.4568       C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-07-21 wd=
+     Adam Smith             H.R.6125       C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-11-19 wd=
+     Addison McDowell       H.R.1919       C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-03-06 wd=
+     Adrian Smith           H.R.1919       C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-03-06 wd=
+     Adrian Smith           H.R.2808       C119  wb=cosponsor          | routing={'selected': 3}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-04-10 wd=
+     Alma Adams             H.R.6125       C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-11-19 wd=
+     Amy Klobuchar          S.1467         C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-04-10 wd=
+     Amy Klobuchar          S.3370         C119  wb=cosponsor          | routing={'selected': 1}                                | arc_roles=['original-cosponsor'] sent=False old=True | live_date=2025-12-04 wd=
+
+------------------------------------------------------------------------------------------------------
+CLASS e  n=3  (e) found nowhere else -- workbook-only residue
+------------------------------------------------------------------------------------------------------
+  distinct members=2  distinct bills=3  by Congress={'117': 1, '118': 1, '119': 1}  by workbook role={'cosponsor': 1, 'sponsor': 2}
+  top bills: [('H.R.2094', 1), ('S.3382', 1), ('S.3992', 1)]
+  examples (up to 10):
+     James Moylan           H.R.2094       C119  wb=cosponsor          | routing={}                                             | arc_roles=[]                     sent=False old=False | live_date=None wd=None
+     Tim Scott              S.3382         C117  wb=sponsor            | routing={}                                             | arc_roles=[]                     sent=False old=False | live_date= wd=
+     Tim Scott              S.3992         C118  wb=sponsor            | routing={}                                             | arc_roles=[]                     sent=False old=False | live_date= wd=
+
+======================================================================================================
+RAW CROSS-TAB (re-sliceable): in_routing x in_selected_archive_triple x in_sentinel x in_old_archive
+======================================================================================================
+  routing=True  sel_archive=True  sentinel=False old_archive=True   n=623
+  routing=False sel_archive=False sentinel=False old_archive=False  n=3
+  routing=True  sel_archive=True  sentinel=True  old_archive=True   n=1
+
+======================================================================================================
+D2 DATE EVIDENCE for when the 627 workbook rows were appended
+======================================================================================================
+
+1) APPEND ORDER inside each role sheet (rows are 1-based; header is row 1).
+   Sponsor Interactions               sheet data rows=638    627-rows here=2     min=476    median=477    max=477    | in LAST 10% of the sheet=0
+      non-627 rows in the same sheet: min=2 median=320 max=639
+   Original Co-Sponsor Interaction    no 627-rows
+   Co-Sponsor Interactions            sheet data rows=7455   627-rows here=863   min=15     median=3910   max=7452   | in LAST 10% of the sheet=68
+      non-627 rows in the same sheet: min=2 median=3715 max=7456
+
+2) BILLSTATUS cosponsorship DATE from bill_repository_live.json (updated_at=2026-09-14T04:38:12Z).
+   bill cached in the live repository      : 625 / 627
+   member found on that bill with a date   : 622
+   member found with a WITHDRAWN date      : 0
+   join-date histogram by month:
+      2025-01    n=24
+      2025-02    n=131
+      2025-03    n=169
+      2025-04    n=82
+      2025-05    n=24
+      2025-06    n=9
+      2025-07    n=54
+      2025-08    n=1
+      2025-09    n=3
+      2025-10    n=23
+      2025-11    n=32
+      2025-12    n=19
+      2026-01    n=35
+      2026-02    n=1
+      2026-03    n=8
+      2026-04    n=7
+   joined AFTER the selected archive snapshot 2026-08-25 : 0
+   joined AFTER the older archive snapshot    2026-06-24 : 0
+   by class:
+      class a: dated=0      min=-            max=-             after-08-25=0    withdrawn=0
+      class b: dated=622    min=2025-01-13   max=2026-04-21    after-08-25=0    withdrawn=0
+      class c: dated=0      min=-            max=-             after-08-25=0    withdrawn=0
+      class d: dated=0      min=-            max=-             after-08-25=0    withdrawn=0
+      class e: dated=0      min=-            max=-             after-08-25=0    withdrawn=0
+
+3) SENTINEL LEDGER Join Date where the triple is in the ledger (any status).
+   distinct join dates: [('2025-02-04', 1)]
+
+4) FILE-LEVEL timestamps (context, not per-row):
+   Moneyball Main Version - Blended.xlsx          mtime=2026-09-18 02:09:29 size=11316932
+   congress_bills_archive_20260825_115305.xlsx    mtime=2026-08-25 11:54:47 size=814147
+   congress_bills_archive_20260624_115822.xlsx    mtime=2026-07-01 17:28:33 size=1832697
+   Sentinel Bill Ledger.xlsx                      mtime=2026-09-17 00:42:55 size=4115616
+   legislation_routing_audit.json                 mtime=2026-09-17 00:45:23 size=5740582
+   bill_repository_live.json                      mtime=2026-09-14 00:38:29 size=3808966
+   member_desk_bundle.json                        mtime=2026-09-18 02:35:43 size=77552295
+
+======================================================================================================
+D2-bis  DO THE 627 SURVIVE INTO THE DESK PAGE?
+======================================================================================================
+make_member_desk.py:2325-2343 collapses each member's ledger to ONE row per (bill, congress)
+keeping the most specific role (sponsor > original > cosponsor).  So a workbook-only
+'cosponsor' key whose 'original-cosponsor' twin is ALSO in the sheets adds nothing.
+  627 keys whose STRONGER-role twin is also in the workbook role sheets (collapse eats them) = 623
+  627 keys with NO stronger twin in the sheets = 4
+     Josh Hawley            S.381          C119  wb=cosponsor    class=b routing={'selected': 1, 'duplicate-same-role': 1
+     James Moylan           H.R.2094       C119  wb=cosponsor    class=e routing={}
+     Tim Scott              S.3382         C117  wb=sponsor      class=e routing={}
+     Tim Scott              S.3992         C118  wb=sponsor      class=e routing={}
+
+  SHIPPED member_desk_bundle.json (mtime 2026-09-18 02:35) -- is the (member,bill,congress) shown?
+     class a  displayed=False n=2
+     class b  displayed=True  n=622
+     class e  displayed=False n=1
+     class e  displayed=True  n=2
+     displayed role vs the 627 workbook role: {('cosponsor', 'original'): 622, ('sponsor', 'sponsor'): 2}
+  -> distinct displayed (member,bill,congress) rows the 627 map onto = 624
+
+  class (e) bill presence elsewhere:
+     James Moylan           H.R.2094     C119  | bill in sel_archive=True  old_archive=True  sentinel=True  live_repo=True  | displayed=False role=None
+     Tim Scott              S.3382       C117  | bill in sel_archive=True  old_archive=True  sentinel=True  live_repo=True  | displayed=True role=sponsor
+     Tim Scott              S.3992       C118  | bill in sel_archive=True  old_archive=True  sentinel=True  live_repo=True  | displayed=True role=sponsor
+  [state] C:\Users\pgoff\AppData\Local\Temp\claude\C--Users-pgoff-OneDrive-Desktop-Melange-Systems--claude-worktrees-unfinished-work-handoff-a3bbad\5b7f7c28-909b-48f8-a495-2da7aebcc0fe\scratchpad\measN5\d2_state.json
+
+DONE

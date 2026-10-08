@@ -1,0 +1,109 @@
+
+====================================================================================================
+S3-a  DEFECT POPULATION at the grain archive_leg.json actually sums on
+====================================================================================================
+(bill,Congress,category) cells with NO sponsor-role row whose named sponsor IS a roster member: 5
+   of which the whole bill has no sponsor row anywhere ..... 4
+   of which the bill HAS a sponsor row, but under other categories only ... 1
+
+====================================================================================================
+S3-b  is the cell SELECTED into archive_leg.json, and what does the missing row cost?
+====================================================================================================
+bill         C    category                 sponsor        sel  sign      decay would-be  missing
+S.3992       118  Member Business Lending  Tim Scott      YES  1        0.8000   +2.400   +2.400
+S.3382       117  Member Business Lending  Tim Scott      YES  1        0.6400   +1.920   +1.920
+S.762        117  Member Business Lending  Tim Scott      YES  1        0.6400   +1.920   +1.920
+H.R.4686     118  Mortgage & Housing       Anna Luna      YES  1        0.8000   +2.400   +0.000
+H.R.6410     118  Data Privacy & Cyber     Anna Luna      YES  1        0.8000   +2.400   +0.000
+
+per-cell detail:
+
+  H.R.4686 (118th) / Mortgage & Housing   sponsor = Anna Luna   [Sponsor cell: Luna, Anna Paulina]
+     archive rows in this cell = 21 ; routing-audit rows = 12 ; dispositions = {'selected': 12}
+     sign = [1] (mechanism ['section-default']) ; decay = [0.8]
+     rows the producer already has for Anna Luna in this cell: [('sponsor', 'selected', 2.4000000000000004, 10190)]
+     currently credited +2.400 as sponsor -> a sponsor row would credit +2.400 ; MISSING +0.000
+     official-membership check: official repository CONFIRMS sponsor, not withdrawn -> admitted [('sponsor', False)]
+
+  H.R.6410 (118th) / Data Privacy & Cyber   sponsor = Anna Luna   [Sponsor cell: Luna, Anna Paulina]
+     archive rows in this cell = 5 ; routing-audit rows = 4 ; dispositions = {'selected': 4}
+     sign = [1] (mechanism ['section-default']) ; decay = [0.8]
+     rows the producer already has for Anna Luna in this cell: [('sponsor', 'selected', 2.4000000000000004, 10192)]
+     currently credited +2.400 as sponsor -> a sponsor row would credit +2.400 ; MISSING +0.000
+     official-membership check: official repository CONFIRMS sponsor, not withdrawn -> admitted [('sponsor', False)]
+
+  S.3382 (117th) / Member Business Lending   sponsor = Tim Scott   [Sponsor cell: Scott, Tim]
+     archive rows in this cell = 37 ; routing-audit rows = 20 ; dispositions = {'selected': 20}
+     sign = [1] (mechanism ['section-default']) ; decay = [0.64]
+     rows the producer already has for Tim Scott in this cell: NONE
+     currently credited +0.000 as None -> a sponsor row would credit +1.920 ; MISSING +1.920
+     official-membership check: official repository CONFIRMS sponsor, not withdrawn -> admitted [('sponsor', False)]
+
+  S.3992 (118th) / Member Business Lending   sponsor = Tim Scott   [Sponsor cell: Scott, Tim]
+     archive rows in this cell = 28 ; routing-audit rows = 16 ; dispositions = {'selected': 16}
+     sign = [1] (mechanism ['section-default']) ; decay = [0.8]
+     rows the producer already has for Tim Scott in this cell: NONE
+     currently credited +0.000 as None -> a sponsor row would credit +2.400 ; MISSING +2.400
+     official-membership check: official repository CONFIRMS sponsor, not withdrawn -> admitted [('sponsor', False)]
+
+  S.762 (117th) / Member Business Lending   sponsor = Tim Scott   [Sponsor cell: Scott, Tim]
+     archive rows in this cell = 4 ; routing-audit rows = 3 ; dispositions = {'selected': 3}
+     sign = [1] (mechanism ['section-default']) ; decay = [0.64]
+     rows the producer already has for Tim Scott in this cell: NONE
+     currently credited +0.000 as None -> a sponsor row would credit +1.920 ; MISSING +1.920
+     official-membership check: official repository CONFIRMS sponsor, not withdrawn -> admitted [('sponsor', False)]
+
+====================================================================================================
+S3-c  MISSING SIGNED WEIGHT per member (top 25 by absolute missing weight)
+====================================================================================================
+member               missing    in leg    as pct   bills / categories
+Tim Scott             +6.240   +10.760    58.0%   S.3382(117)/Member Business Lending +1.92; S.3992(118)/Member Business Lending +2.40; S.762(117)/Member Business Lending +1.92
+Anna Luna             +0.000    +7.800     0.0%   H.R.4686(118)/Mortgage & Housing +0.00; H.R.6410(118)/Data Privacy & Cyber +0.00
+
+members affected .............................. 2
+total missing signed weight (signed sum) ...... +6.240
+total missing signed weight (absolute sum) .... 6.240
+archive_leg.json total absolute weight ........ 10022.9  across 523 members
+missing as a share of the whole matrix ........ 0.0623%
+
+per-member per-category view of what the matrix holds vs what is missing:
+   Tim Scott      Member Business Lending  archive_leg =  +10.760   missing  +1.920   (=17.8% of the cell as published)
+   Tim Scott      Member Business Lending  archive_leg =  +10.760   missing  +2.400   (=22.3% of the cell as published)
+   Tim Scott      Member Business Lending  archive_leg =  +10.760   missing  +1.920   (=17.8% of the cell as published)
+   Anna Luna      Mortgage & Housing       archive_leg =   +4.400   missing  +0.000   (=0.0% of the cell as published)
+   Anna Luna      Data Privacy & Cyber     archive_leg =   +3.400   missing  +0.000   (=0.0% of the cell as published)
+
+====================================================================================================
+S3-d  CROSS-CHECK against the prior lane (laneC q2c) Tim Scott x Member Business Lending
+====================================================================================================
+workbook 'Sponsor Interactions' credits Tim Scott as sponsor on 5 MBL bills totalling 12.24;
+laneC receipt q2c_scott_sponsor_trace.txt found 6.24 of that reaches the matrix nowhere.
+this lane, measured independently from the archive + routing audit:
+   S.3382       C=117  missing +1.920
+   S.3992       C=118  missing +2.400
+   S.762        C=117  missing +1.920
+   SUM = +6.240   MATCHES the 6.24 prior finding
+
+====================================================================================================
+S4  REGRESSION CHECK against congress_bills_archive_20260624_115822.xlsx (10,986 rows)
+====================================================================================================
+older archive rows = 10986 ; (bill,Congress) groups = 468 ; cells = 624
+
+DEFECT CELLS  present-in-old / absent-in-old:
+bill         C    category                 sponsor        in-old-bill old cell    old sponsor-role holders in the cell
+S.3382       117  Member Business Lending  Tim Scott      yes         37 rows     ABSENT-IN-OLD
+S.762        117  Member Business Lending  Tim Scott      yes         4 rows      ABSENT-IN-OLD
+H.R.4686     118  Mortgage & Housing       Anna Luna      yes         21 rows     ABSENT-IN-OLD
+H.R.6410     118  Data Privacy & Cyber     Anna Luna      yes         5 rows      ABSENT-IN-OLD
+S.3992       118  Member Business Lending  Tim Scott      yes         28 rows     ABSENT-IN-OLD
+
+tabulation: {'ABSENT-IN-OLD': 5}
+
+ALL 53 sponsorless (bill,Congress) -- did the older archive have a sponsor row?
+   ALSO-SPONSORLESS-IN-OLD        53
+
+old-archive sponsor-role rows overall .......... 559 / 10986
+selected-archive sponsor-role rows overall ..... 561 / 10181
+old archive (bill,Congress) with ZERO sponsor row ... 54 / 468  (11.5%)
+
+wrote s3_state.json

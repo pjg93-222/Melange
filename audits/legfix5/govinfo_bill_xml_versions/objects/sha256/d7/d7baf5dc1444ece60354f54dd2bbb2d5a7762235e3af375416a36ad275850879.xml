@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H497EB5F17906463C9083CAB2E348D964" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 235 IH: To provide for a comfortable and safe temperature level in dwelling units receiving certain Federal housing assistance, and for other purposes.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 235</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190103">January 3, 2019</action-date><action-desc><sponsor name-id="W000808">Ms. Wilson of Florida</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To provide for a comfortable and safe temperature level in dwelling units receiving certain Federal
+			 housing assistance, and for other purposes.</official-title></form>
+	<legis-body id="HE52205357C2742758E0277AAE6A0CF8C" style="OLC">
+		<section id="HC5E84C5B0A814176823663C0DEE0E2B1" section-type="section-one"><enum>1.</enum><header>Comfortable and safe temperature level in Federally assisted housing</header>
+ <subsection id="HFDF5D0E1A75F4947863576DFB074ABB6"><enum>(a)</enum><header>Public housing and project-Based assistance</header><text display-inline="yes-display-inline">The United States Housing Act of 1937 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437">42 U.S.C. 1437</external-xref> et seq.) is amended—</text> <paragraph id="H690604A864A042FCB8A3EFBBEC5FAF5A"><enum>(1)</enum><text>in section 8(o)(13) (<external-xref legal-doc="usc" parsable-cite="usc/42/1437f">42 U.S.C. 1437f(o)(13)</external-xref>), by adding at the end the following:</text>
+					<quoted-block display-inline="no-display-inline" id="HE292AE2B47C54B2A944295D0D92D32CD" style="OLC">
+ <subparagraph id="H202CFCB753F34E18A4FE237B0E1C5004"><enum>(P)</enum><header>Maintaining temperature level in units</header><text>The Secretary may require the owner of a dwelling unit receiving assistance under a housing assistance payment contract under this paragraph to ensure that the dwelling unit maintains a comfortable and safe temperature level ranging from 71 degrees to 81 degrees Fahrenheit.</text></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </paragraph><paragraph id="HA50B2100DBC94B58A631EDF23596B33E"><enum>(2)</enum><text>in section 9 (<external-xref legal-doc="usc" parsable-cite="usc/42/1437g">42 U.S.C. 1437g</external-xref>), by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="HCAC0307A5B0D413582481283D35CBC4A" style="OLC"> <subsection id="HE1C9A15702894314B7FA73BC727A3368"><enum>(p)</enum><header>Use of funds To maintain temperate level in units</header><text>With respect to a public housing dwelling unit, the Secretary may use amounts in the Capital Fund or the Operating Fund to ensure that the dwelling unit maintains a comfortable and safe temperature level ranging from 71 degrees to 81 degrees Fahrenheit.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+ </paragraph></subsection><subsection id="HEC3FD63786E349268807EDAE91C711BF"><enum>(b)</enum><header>Supportive housing for the elderly</header><text>Section 202 of the Housing Act of 1959 (<external-xref legal-doc="usc" parsable-cite="usc/12/1701q">12 U.S.C. 1701q</external-xref>) is amended by striking the first and second subsections (m) and inserting the following:</text>
+				<quoted-block display-inline="no-display-inline" id="H56545D1E976649CB94995209ED2F7321" style="OLC">
+ <subsection id="HA58324A9ABC94EFCBC5C15D8FE25326B"><enum>(m)</enum><header>Maintaining temperature in units</header><text>The Secretary may require the owner of housing assisted under this section to ensure that each unit in that housing maintains a comfortable and safe temperature level ranging from 71 degrees to 81 degrees Fahrenheit.</text></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+			</subsection></section></legis-body></bill>
+
+

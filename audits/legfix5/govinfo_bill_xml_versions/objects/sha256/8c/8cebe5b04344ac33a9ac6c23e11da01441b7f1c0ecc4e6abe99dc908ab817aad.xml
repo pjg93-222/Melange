@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HB2DD5F1CF087422988CBB711CD9D4B0F" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 1036 IH: Preserving Access to Rural Installment Transactions for Years Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-02-07</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 1036</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190207">February 7, 2019</action-date><action-desc><sponsor name-id="R000611">Mr. Riggleman</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Truth in Lending Act to clarify the exclusion for seller-financers from the definition
+			 of mortgage originator, and for other purposes.</official-title></form>
+	<legis-body id="H51C817270AC04AB69204594DFC54B2A7" style="OLC">
+ <section id="H2AB723AF13DF4BC59A4C3CAB0A95C2C4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Preserving Access to Rural Installment Transactions for Years Act of 2019</short-title></quote> or the <quote><short-title>PARITY Act of 2019</short-title></quote>.</text> </section><section id="HCFB0685539474DD490538F90D897D639"><enum>2.</enum><header>Amendments related to the exclusion of seller-financers in the definition of mortgage originator</header><text display-inline="no-display-inline">Section 103(dd)(2)(E) of the Truth in Lending Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1602">15 U.S.C. 1602(dd)(2)(E)</external-xref>) is amended—</text>
+ <paragraph id="H5DF5E46B234946BC9ED6C497311CD1FE"><enum>(1)</enum><text>in the matter preceding clause (i)—</text> <subparagraph id="H7C74DE613EAD44B6ACEDEBAECB0C2863"><enum>(A)</enum><text>by striking <quote>3 properties</quote> and inserting <quote>5 properties</quote>;</text>
+ </subparagraph><subparagraph id="H3BFA0A90C81C4C5DBDF43C7C013D05B3"><enum>(B)</enum><text>by striking <quote>a person, estate, or trust</quote> and inserting <quote>a person or entity (including a corporation, partnership, proprietorship, association, cooperative, estate, or trust)</quote>; and</text>
+ </subparagraph><subparagraph id="H78E763D4F2764587AB0CB62F04606C06"><enum>(C)</enum><text display-inline="yes-display-inline">by striking <quote>such person, estate, or trust</quote> and inserting <quote>such a person or entity</quote>;</text> </subparagraph></paragraph><paragraph id="H43E014C732284F7ABAA9FCF27F0427CB"><enum>(2)</enum><text>in clause (i)—</text>
+ <subparagraph id="HAB59AE82139F4927811F5AEA4B740348"><enum>(A)</enum><text>by inserting <quote>or</quote> after the semicolon;</text> </subparagraph><subparagraph id="H04C95449C3EF464C9FFF65555ECDC8F3"><enum>(B)</enum><text>by striking <quote>a person, estate, or trust that has constructed</quote> and inserting</text>
+					<quoted-block display-inline="yes-display-inline" id="HD7DA9136C3074E56A8BC5073E7125683" style="OLC">
+ <text>such a person or entity that—</text><subclause id="H0FBF32E148264659A27398C054B0134A"><enum>(I)</enum><text display-inline="yes-display-inline">has constructed</text></subclause><after-quoted-block>; and </after-quoted-block></quoted-block> </subparagraph><subparagraph id="H2BF976D322704C4D8AA66BA08AB0A0A6"><enum>(C)</enum><text>by inserting at the end the following new subclause:</text>
+					<quoted-block display-inline="no-display-inline" id="H705A4987ED4847D6AA0B881B4C451873" style="OLC">
+ <subclause id="HC3C555A0FBD543FEB2B566CB54732AF2"><enum>(II)</enum><text display-inline="yes-display-inline">has received any other compensation related to such loan, including origination points or fees and excluding interest payments;</text></subclause><after-quoted-block>;</after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="H2D41D734EE8D4F8AB7FC7A15F983ADB7"><enum>(3)</enum><text>by striking clauses (ii), (iii), and (iv); and</text> </paragraph><paragraph id="HF82D9D7583F245948F7C12CF19511BEF"><enum>(4)</enum><text>by inserting after clause (i) the following new clauses:</text>
+				<quoted-block display-inline="no-display-inline" id="HFF7A7BD2F853423CBBE98EDE13E627F5" style="OLC">
+ <clause id="H73DC02A591834BCB91059FCA502CA468"><enum>(ii)</enum><text display-inline="yes-display-inline">is not a high-cost mortgage;</text> </clause><clause id="HA28E300EDEAE41A5B93479B8021BD390"><enum>(iii)</enum><text display-inline="yes-display-inline">does not include terms under which the outstanding principal balance will increase at any time over the course of the loan because the regular periodic payments do not cover the full amount of interest due;</text>
+ </clause><clause id="HEA350B3CB5BF4CBC93EF1DE7E61312F4"><enum>(iv)</enum><text display-inline="yes-display-inline">has—</text> <subclause id="H3100CAB5E19C44FF9102FA05F6003739"><enum>(I)</enum><text display-inline="yes-display-inline">a fixed rate; or</text>
+ </subclause><subclause id="HAC818B902AA44E8E94C4040C52ECDFDF"><enum>(II)</enum><text>an adjustable rate that was not determined by a prior contractual obligation between the consumer and such a person or entity and—</text>
+ <item id="H9A42E03C2C9044398294BC6E3C0E5D2C"><enum>(aa)</enum><text>is adjustable after 5 or more years (as determined by the addition of a margin to a widely available index rate) subject to reasonable annual and lifetime limitations on interest rate increases or is determined by a prior obligation that is included in or assumed by the terms of the loan; or</text>
+ </item><item id="H411F271DBDB341178432A595FD2C7F08"><enum>(bb)</enum><text>with respect to any part of such loan contractually required to be used to make payments on an existing mortgage loan secured by such a property, is adjustable on or after the date of a rate adjustment on such existing mortgage loan; and</text></item></subclause></clause><after-quoted-block>.</after-quoted-block></quoted-block>
+			</paragraph></section></legis-body></bill>
+
+

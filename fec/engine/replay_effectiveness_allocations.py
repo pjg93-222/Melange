@@ -133,7 +133,7 @@ def _worker(args):
                'output_sha256':{path:_sha(path) for path in calls},
                'replay_implementation_sha256':_sha(__file__),
                'scope':'Native current-network allocation with frozen current nonlegislative inputs; only the tier/priority authority changes. Historical results do not recreate historical networks or budgets.',
-               'environment':{key:os.environ.get(key) for key in ('NET_CONFIG','PRIMACY_BOARD','SEED','MC','HALFF','RECEPT_LAYER','IMPUTE_IND0','BRIDGE','PERS_NONE')},
+               'environment':{key:os.environ.get(key) for key in ('NET_CONFIG','PRIMACY_BOARD','SEED','MC','HALFF','RECEPT_LAYER','IMPUTE_IND0','BRIDGE','PERS_NONE','COMPET_MULT','COMPET_SRC')},
                'candidate_coverage':board['summary']}
     (output/'receipt.json').write_text(json.dumps(receipt,indent=2,sort_keys=True),encoding='utf-8')
 

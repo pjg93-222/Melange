@@ -1,0 +1,9 @@
+# Derived media are reproducible from the source WAV inventory and must not be
+# staged accidentally.
+media/*.wav
+media/*.mp3
+media/*.mp4
+
+# Python execution cache.
+__pycache__/
+*.pyc

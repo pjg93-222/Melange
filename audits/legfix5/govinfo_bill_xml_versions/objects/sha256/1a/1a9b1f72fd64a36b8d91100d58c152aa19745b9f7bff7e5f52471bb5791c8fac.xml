@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HB7EFB550F50C472F8488FD7DD620BB4E" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4040 IH: Protecting Access to Spinal Surgeries Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4040</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190725">July 25, 2019</action-date><action-desc><sponsor name-id="L000287">Mr. Lewis</sponsor> (for himself, <cosponsor name-id="C001121">Mr. Crow</cosponsor>, <cosponsor name-id="P000593">Mr. Perlmutter</cosponsor>, <cosponsor name-id="M001208">Mrs. McBath</cosponsor>, and <cosponsor name-id="D000197">Ms. DeGette</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend title XVIII of the Social Security Act to extend the temporary exception to the
+			 application of the site neutral IPPS payment rate to discharges from
+			 certain spinal cord specialty hospitals, and for other purposes.</official-title></form>
+	<legis-body id="H59B372289AF14B61B579C73E23E0A875" style="OLC">
+ <section id="HA4BCD29F93CB4FAAB02F439FA177B3F2" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Protecting Access to Spinal Surgeries Act</short-title></quote>.</text> </section><section id="H37BB1F3295014D00923EE65BCBBDD674" section-type="subsequent-section"><enum>2.</enum><header>Extension of temporary exception to application of site neutral IPPS payment rate to discharges from certain spinal cord specialty hospitals</header><text display-inline="no-display-inline">Section 1886(m)(6)(F) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395ww">42 U.S.C. 1395ww(m)(6)(F)</external-xref>) is amended by striking <quote>fiscal years 2018 and 2019</quote> and inserting <quote>any of fiscal years 2018 through 2024</quote>.</text>
+		</section></legis-body></bill>
+
+

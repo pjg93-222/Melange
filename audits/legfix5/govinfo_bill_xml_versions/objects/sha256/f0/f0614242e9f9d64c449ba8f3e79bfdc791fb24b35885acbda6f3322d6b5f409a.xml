@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H9898E19EA40E4A049BF10D505FC9BA36" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2436 IH: Investment Adviser Regulatory Flexibility Improvement Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-05-01</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2436</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190501">May 1, 2019</action-date><action-desc><sponsor name-id="S001204">Mr. San Nicolas</sponsor> (for himself and <cosponsor name-id="H001058">Mr. Huizenga</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require the Securities and Exchange Commission to revise the definitions of a <quote>small business</quote> and <quote>small organization</quote> for purposes of assessing the impact of the Commission’s rulemakings under the Investment Advisers
+			 Act of 1940.</official-title></form>
+	<legis-body id="HEF739517BF7144B5AA6B82F0BDD1927E" style="OLC">
+ <section id="H059D3E7DF84142018A6CEC69ACD73A32" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Investment Adviser Regulatory Flexibility Improvement Act</short-title></quote>.</text> </section><section id="H7EF69443BC8A43F5AB02103BA40D9249"><enum>2.</enum><header>Definition of small business of small organization</header><text display-inline="no-display-inline">Not later than the end of the 1-year period beginning on the date of the enactment of this Act, the Securities and Exchange Commission shall revise the definitions of a <quote>small business</quote> and <quote>small organization</quote> under section 275.0–7 of title 17, Code of Federal Regulations, to provide alternative methods under which a business or organization may qualify as a <quote>small business</quote> or <quote>small organization</quote> under such section. In making such revision, the Commission shall consider whether such alternative methods should include a threshold based on the number of nonclerical employees of the business or organization.</text>
+		</section></legis-body></bill>
+
+

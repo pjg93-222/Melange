@@ -67,14 +67,14 @@ BLOCK_VERB_OBJECT_RE = re.compile(r"\s+(?:A|AN|THE|THIS|THAT|THESE|THOSE)\b")
 # Any candidate exposing one of these as a bare one-token alias is Tier B.
 ENGLISH_DICTIONARY_WORDS = frozenset(
     {
-        "AFFIRM", "BETTERMENT", "BLOCK", "BULLISH", "CHIME", "CIRCLE",
-        "DAVE", "DEEL", "DISCOVER", "GUSTO", "LEDGER", "MERCURY",
-        "PARADIGM", "PHANTOM", "PUBLIC", "RAMP", "RIPPLE", "SQUARE",
-        "STRATEGY", "STRIPE", "TOAST", "VISA", "WISE",
+        "AFFIRM", "BETTERMENT", "BLOCK", "BULLISH", "CHARTER", "CHIME", "CIRCLE",
+        "COX", "DAVE", "DEEL", "DISCOVER", "DISH", "GUSTO", "LEDGER", "LUMEN",
+        "MERCURY", "PARADIGM", "PHANTOM", "PUBLIC", "RAMP", "RIPPLE", "SQUARE",
+        "STRATEGY", "STRIPE", "TDS", "TOAST", "VISA", "WISE",
     }
 )
 STRICT_TIER_B = frozenset(
-    {"BLOCK", "LEDGER", "WISE", "BETTERMENT", "PARADIGM", "SQUARE"}
+    {"BLOCK", "LEDGER", "WISE", "BETTERMENT", "PARADIGM", "SQUARE", "CHARTER"}
 )
 RESIDUAL_PRECISION = {
     "VISA": {"genuine": 50, "accepted": 50, "precision": 1.0},
@@ -132,6 +132,12 @@ TOPICAL_PATTERNS = {
         re.compile(r"\bFINTECH\b"),
         re.compile(r"\bBUY NOW PAY LATER\b"),
         re.compile(r"\bINTERCHANGE\b"),
+    ),
+    "telecom": (
+        re.compile(r"\bTELECOMMUNICATIONS?\b"),
+        re.compile(r"\bBROADBAND\b"),
+        re.compile(r"\bROBOCALLS?\b"),
+        re.compile(r"\bSPECTRUM AUCTIONS?\b"),
     ),
 }
 

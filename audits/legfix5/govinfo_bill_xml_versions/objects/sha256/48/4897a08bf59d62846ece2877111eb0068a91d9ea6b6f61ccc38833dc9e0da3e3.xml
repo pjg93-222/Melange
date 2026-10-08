@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Reported-in-House" dms-id="H294CFD7A76B54152A423BD7BF689DB25" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 8689 RH: Amtrak Executive Bonus Disclosure Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2024-11-26</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IB</distribution-code>
+<calendar display="yes">Union Calendar No. 645</calendar>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 8689</legis-num>
+<associated-doc role="report" display="yes">[Report No. 118–780]</associated-doc>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20240611">June 11, 2024</action-date>
+<action-desc><sponsor name-id="M001221">Mr. Molinaro</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HPW00">Committee on Transportation and Infrastructure</committee-name></action-desc>
+</action>
+<action display="yes">
+<action-date date="20241126">November 26, 2024</action-date>
+<action-desc>Additional sponsor: <cosponsor name-id="G000546">Mr. Graves of Missouri</cosponsor></action-desc>
+</action>
+<action display="yes">
+<action-date date="20241126">November 26, 2024</action-date>
+<action-desc>Reported with amendments, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc>
+<action-instruction>Strike out all after the enacting clause and insert the part printed in italic</action-instruction>
+<action-instruction>For text of introduced bill, see copy of bill as introduced on June 11, 2024</action-instruction>
+<action-desc><pagebreak/></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To require Amtrak to publicly disclose certain bonus compensation paid to Amtrak executives, and for other purposes.<pagebreak/></official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" changed="added" style="OLC" committee-id="HPW00" reported-display-style="italic" id="H5DEE7CF5DD1F43BAB296A5934311D065"> 
+<section id="H2C4B4BD33B8144BC835CA11D4C6A0AF1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Amtrak Executive Bonus Disclosure Act</short-title></quote>.</text></section> <section id="H27935E391A7F4A148E115AD316B07228" section-type="subsequent-section"><enum>2.</enum><header>Amtrak reports and audits</header><text display-inline="no-display-inline">Section 24315(a) of title 49, United States Code, is amended—</text> 
+<paragraph id="H06187316096F4E058B093C415DE3AEE2"><enum>(1)</enum><text>by inserting <quote>, and make available to the public on the website of Amtrak,</quote> after <quote>submit to Congress</quote>; and</text></paragraph> <paragraph id="H291E28B4960A4AEEAA694874CDA5E18A"><enum>(2)</enum><text>by striking paragraph (2) and inserting the following: </text> 
+<quoted-block style="USC" display-inline="no-display-inline" id="H8F4362E2CA954AB6B02CB93C183ED4CA"> 
+<paragraph id="H971E4D292A2444F6B007F7BEF4797360"><enum>(2)</enum><text display-inline="yes-display-inline">provide the annual base pay and any bonus compensation paid to a member of the executive leadership team (including the chief executive officer, president, and officers) of Amtrak, including the criteria and metrics used to determine any such bonus compensation; and</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> </legis-body><official-title-amendment>Amend the title so as to read: <quote>A bill to amend title 49, United States Code, to require Amtrak to include information on base pay and bonus compensation of certain Amtrak executives, and for other purposes.</quote>.</official-title-amendment> <endorsement display="yes"> <action-date date="20241126">November 26, 2024</action-date> <action-desc>Reported with amendments, committed to the Committee of the Whole House on the State of the Union, and ordered to be printed</action-desc></endorsement> </bill> 
+

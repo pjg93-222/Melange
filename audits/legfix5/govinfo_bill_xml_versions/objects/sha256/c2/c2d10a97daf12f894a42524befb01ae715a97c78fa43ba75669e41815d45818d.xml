@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HDA91C54525C148F7A5AB1D04029C6C08" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 7895 IH: PBM Kickback Prohibition Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-03-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 7895</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260312">March 12, 2026</action-date><action-desc><sponsor name-id="A000372">Mr. Allen</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Workforce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend section 408 of the Employee Retirement Income Security Act of 1974 to prohibit kickbacks to pharmacy benefit managers.</official-title></form><legis-body id="H75F772C5F3DE468C82A653FB95A17FED" style="OLC"> 
+<section id="HA953B9A7AFD3428FB9591B887936D097" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>PBM Kickback Prohibition Act</short-title></quote>.</text></section> <section id="H0BE4F135DD894D33B7887B56F97A6B13"><enum>2.</enum><header>PBM Kickback prohibition</header> <subsection id="H766788D672DD4D988D8362BE4059B1B9"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 408(b)(2)(B) of the Employee Retirement Income Security Act (<external-xref legal-doc="usc" parsable-cite="usc/29/1108">29 U.S.C. 1108(b)(2)(B)</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" id="H48F368C1B6ED472594843809C3DC11D0" display-inline="no-display-inline"> 
+<clause id="HF5A1129B3D30488185CB69F25617A791" indent="up2"><enum>(x)</enum><text display-inline="yes-display-inline">In the case of a contract or arrangement between a covered plan and a covered service provider for pharmacy benefit management services, no amount of compensation may be paid, directly or indirectly, by such service provider to a brokerage firm, broker, consultant, advisor, or any other individual for the referral of the covered plan’s or health insurance issuer's business to the covered service provider.</text></clause><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="HB216A3C0E1C44D8488FFF033C9BD90D8"><enum>(b)</enum><header>Effective date</header><text>The amendment made by this section shall apply for plan years beginning after the date of enactment of this Act.</text></subsection></section> 
+</legis-body></bill>
+

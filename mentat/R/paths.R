@@ -41,30 +41,9 @@ mentat_paths <- function(data_root = mentat_default_data_root()) {
   list(
     root = root,
     database = file.path(root, "mentat.db"),
-    reports = mentat_report_directory(),
+    reports = file.path(root, "reports"),
     rosters_summary = file.path(root, "rosters_summary.txt")
   )
-}
-
-mentat_report_directory <- function(project_root = NULL) {
-  configured <- trimws(Sys.getenv("MENTAT_REPORT_DIRECTORY", unset = ""))
-  if (!nzchar(configured)) {
-    if (is.null(project_root)) {
-      project_root <- get0("MENTAT_PROJECT_ROOT", inherits = TRUE, ifnotfound = NULL) %||% mentat_project_root()
-    }
-    config_path <- file.path(project_root, "config", "report-directory.json")
-    if (!file.exists(config_path)) stop("The authoritative report directory is not configured.", call. = FALSE)
-    require_package("jsonlite")
-    config <- jsonlite::fromJSON(config_path)
-    if (!identical(as.integer(config$schema_version), 1L)) stop("Unsupported report-directory configuration.", call. = FALSE)
-    configured <- config$directory
-  }
-  if (!is.character(configured) || length(configured) != 1L || is.na(configured) ||
-      !grepl("^(?:[A-Za-z]:[/\\\\]|/|\\\\\\\\)", configured, perl = TRUE)) {
-    stop("The report directory must be an explicit absolute path.", call. = FALSE)
-  }
-  if (!dir.exists(configured)) stop("The configured report directory is unavailable; no alternate directory will be used.", call. = FALSE)
-  normalizePath(configured, winslash = "/", mustWork = TRUE)
 }
 
 mentat_bulk_dir <- function(data_root = mentat_default_data_root()) {
@@ -255,12 +234,6 @@ atomic_write_xlsx <- function(sheets, target, col_names = TRUE) {
     fileext = ".xlsx"
   )
   on.exit(if (file.exists(temporary)) unlink(temporary, force = TRUE), add = TRUE)
-  arguments <- list(x = sheets, path = temporary, col_names = col_names)
-  # Header restoration expects inline strings. writexl 2.x now defaults small
-  # workbooks to shared strings; explicitly retain the established XML format.
-  if ("constant_memory" %in% names(formals(writexl::write_xlsx))) {
-    arguments$constant_memory <- TRUE
-  }
-  do.call(writexl::write_xlsx, arguments)
+  writexl::write_xlsx(sheets, path = temporary, col_names = col_names)
   atomic_replace(temporary, target)
 }

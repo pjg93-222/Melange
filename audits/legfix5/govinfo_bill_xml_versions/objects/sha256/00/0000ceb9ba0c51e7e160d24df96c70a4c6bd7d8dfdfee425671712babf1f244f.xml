@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-MIR23A94-KWN-NC-31M">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 S2852 IS: Flood Insurance Affordability Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2023-09-19</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code>
+<congress>118th CONGRESS</congress><session>1st Session</session>
+<legis-num>S. 2852</legis-num>
+<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+<action>
+<action-date date="20230919">September 19, 2023</action-date>
+<action-desc><sponsor name-id="S404">Mr. Scott of Florida</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title>To establish a grace period for nonpayment of premiums for flood insurance coverage under the national flood insurance program until the Administrator of the Federal Emergency Management Agency implements the option for monthly payment of such premiums, and for other purposes.</official-title>
+</form>
+<legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H8F5B04DE319D40FAB97C62AB48DF2A4A">
+<section section-type="section-one" id="HB39D69FD7DE745D083F03319D4C1207F"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Flood Insurance Affordability Act</short-title></quote>.</text></section> <section id="H455F18CA5AD74EA68184025E70680659"><enum>2.</enum><header>Grace period for flood insurance coverage</header> <subsection id="H302BF0998E334D00B9AF1778601CE7B9"><enum>(a)</enum><header>Authority To suspend premium payments</header><text display-inline="yes-display-inline">During the period that begins on the date of enactment of this Act and ends 30 days after the date on which the Administrator of the Federal Emergency Management Agency first makes available to policyholders of flood insurance coverage under the national flood insurance program a monthly premium payment option for flood insurance coverage in compliance with section 1308(g) of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4015">42 U.S.C. 4015(g)</external-xref>), any new and existing policyholders to which such section 1308(g) applies shall remain covered under such a flood insurance policy notwithstanding the nonpayment of premiums to cover that period.</text></subsection>
+<subsection id="HE1B02C039E5848CCA478FF7BAE722445"><enum>(b)</enum><header>Recoupment of unpaid premium amounts</header><text>The Administrator of the Federal Emergency Management Agency shall provide that, after the expiration of the period referred to in subsection (a), there shall be assessed on each policyholder who elects to pay flood insurance coverage premiums on a monthly basis pursuant to section 1308(g) of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4015">42 U.S.C. 4015(g)</external-xref>) an extra monthly fee in an amount calculated by the Administrator to recover, on a cumulative basis, the amount of premiums unpaid pursuant to subsection (a).</text></subsection> <subsection id="HBD87F8B02DB1482D8D8C75F207805410"><enum>(c)</enum><header>Other grace periods</header><text display-inline="yes-display-inline">The grace period under subsection (a) for nonpayment of premiums shall be in addition to any other grace period provided for under a policy for flood insurance coverage under the national flood insurance program.</text></subsection></section>
+<section id="HDB594C16D71745399B50A774634F6544"><enum>3.</enum><header>Prohibition on fees associated with monthly payments</header><text display-inline="no-display-inline">Section 1308(g) of the National Flood Insurance Act of 1968 (<external-xref legal-doc="usc" parsable-cite="usc/42/4015">42 U.S.C. 4015(g)</external-xref>) is amended by striking <quote>annually or monthly.</quote> and inserting <quote>annually or monthly, and may not apply any fee or additional charge with respect to a policyholder who chooses to make monthly payments compared to a policyholder who chooses to make payments annually.</quote>.</text></section> </legis-body> </bill> 
+

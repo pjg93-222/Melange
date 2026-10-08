@@ -1,0 +1,10 @@
+LIVE fec/stance/build_media_blend.py: 34356 bytes, 433 CRLF, 47 bare LF
+guards OK: _nrm, CROSSPOST_DEDUP default, and the lifted dedup block are all intact
+
+wrote N2_crosspost_key_live_hook.patch  (4239 bytes, 76 CRLF content lines, 2 hunks)
+
+wrote A5_press_ledger_live_hook.patch  (1514 bytes, 3 CRLF content lines, 2 hunks)
+
+wrote M_both_live_hooks.patch  (5598 bytes, 79 CRLF content lines, 4 hunks)
+
+DONE M5

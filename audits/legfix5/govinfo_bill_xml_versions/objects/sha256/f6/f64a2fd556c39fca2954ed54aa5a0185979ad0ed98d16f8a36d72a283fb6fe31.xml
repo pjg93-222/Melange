@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HE04FE7DF5811414B8C65397FF69A2789" public-private="public" key="H" bill-type="olc">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 HR 6913 IH: Stop the Nosy Obsession with Online Payments Act of 2022</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2022-03-03</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code>
+<congress display="yes">117th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 6913</legis-num>
+<current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<action display="yes">
+<action-date date="20220303">March 3, 2022</action-date>
+<action-desc><sponsor name-id="S001135">Mrs. Steel</sponsor> (for herself, <cosponsor name-id="D000032">Mr. Donalds</cosponsor>, <cosponsor name-id="B001305">Mr. Budd</cosponsor>, <cosponsor name-id="B001309">Mr. Burchett</cosponsor>, <cosponsor name-id="B001297">Mr. Buck</cosponsor>, <cosponsor name-id="H001084">Ms. Herrell</cosponsor>, <cosponsor name-id="G000597">Mr. Garbarino</cosponsor>, <cosponsor name-id="D000628">Mr. Dunn</cosponsor>, <cosponsor name-id="M001180">Mr. McKinley</cosponsor>, <cosponsor name-id="M001177">Mr. McClintock</cosponsor>, <cosponsor name-id="J000292">Mr. Johnson of Ohio</cosponsor>, and <cosponsor name-id="G000593">Mr. Gimenez</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HWM00">Committee on Ways and Means</committee-name></action-desc>
+</action>
+<legis-type>A BILL</legis-type>
+<official-title display="yes">To amend the Internal Revenue Code of 1986 to repeal the amendments made to reporting of third party network transactions by the American Rescue Plan Act of 2021.</official-title>
+</form>
+<legis-body id="HD60AD7A824974A9F97B7D4F84DD9BACF" style="OLC"> 
+<section id="H36891E89F15E49BCA58C64FC4F72E434" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Stop the Nosy Obsession with Online Payments Act of 2022</short-title></quote> or the <quote><short-title>SNOOP Act of 2022</short-title></quote>.</text></section> <section section-type="subsequent-section" id="H16638C0883624CB9A507D6F32A448974"><enum>2.</enum><header>Repeal of modification of exceptions for reporting of third party network transactions</header> <subsection id="H803BFBE5368D40B4BC0F1B58DD990301"><enum>(a)</enum><header>In general</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/6050W">Section 6050W(e)</external-xref> of the Internal Revenue Code of 1986 is amended to read as follows:</text> 
+<quoted-block style="OLC" display-inline="no-display-inline" id="HAF3C7977D38545F697050419ED110166"> 
+<subsection id="H916B7FD617024EB7A7B93E9BB850A625"><enum>(e)</enum><header>Exception for de minimis payments by third party settlement organizations</header><text>A third party settlement organization shall be required to report any information under subsection (a) with respect to third party network transactions of any participating payee only if—</text> <paragraph id="H293AEC4ACF7A4141A72C3A8BA31BD49D"><enum>(1)</enum><text>the amount which would otherwise be reported under subsection (a)(2) with respect to such transactions exceeds $20,000, and</text></paragraph> 
+<paragraph id="H5B4C398EF34A40FAA67EFB30061BB7F1"><enum>(2)</enum><text>the aggregate number of such transactions exceeds 200.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></subsection> <subsection id="H3E64CE93A58A45888479971D8594F0B4"><enum>(b)</enum><header>Conforming amendment</header><text><external-xref legal-doc="usc" parsable-cite="usc/26/6050W">Section 6050W(c)(3)</external-xref> of the Internal Revenue Code of 1986 is amended by striking <quote>described in subsection (d)(3)(A)(iii)</quote>.</text></subsection> 
+<subsection id="H74072FE3CC9648488D3A8F0156AD4DB9"><enum>(c)</enum><header>Effective date</header> 
+<paragraph id="H37063B18198847B8B808A359AF1C2582"><enum>(1)</enum><header>In general</header><text>The amendment made by subsection (a) shall apply to returns for calendar years beginning after December 31, 2021. </text></paragraph> <paragraph id="H7AB204CB3470439A8AC82E23F853874D"><enum>(2)</enum><header>Clarification</header><text>The amendment made by subsection (b) shall apply to transactions after the date of the enactment of the American Rescue Plan Act of 2021.</text></paragraph></subsection></section> 
+</legis-body>
+</bill> 
+

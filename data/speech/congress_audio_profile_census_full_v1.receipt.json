@@ -1,0 +1,80 @@
+{
+  "contract": {
+    "nonfloor_profile_excludes_houselive": true,
+    "persisted_target_eligible_flags_are_not_dispositive": true,
+    "profile_floor_exact_windows": 5,
+    "raw_youtube_title_matches_never_promoted": true,
+    "strict_identity_minimum_events": 3,
+    "strict_identity_minimum_seconds": 180.0,
+    "superseded_canonical_rows_excluded": true,
+    "verified_audio_profile_uses_max_not_sum_across_sources": true,
+    "window_frames": 128000
+  },
+  "coverage": {
+    "members_with_unverified_youtube_holdings": 61,
+    "needs_nonfloor_descriptive_profiles": 293,
+    "needs_strict_identity_prerequisite": 121,
+    "needs_verified_audio_profiles": 37,
+    "persisted_target_eligible_contradictions": 28,
+    "strict_identity_prerequisite_ready": 416,
+    "verified_audio_profiles": 500,
+    "verified_nonfloor_descriptive_profiles": 244
+  },
+  "generated_at": "2026-08-31T16:08:46.639829+00:00",
+  "inputs": {
+    "anchor_manifest": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\speaker_anchor_vault_all_verified_v3.jsonl",
+      "sha256": "199ae5cf0a845d8fc1c8d611831139dbfa12e8b47b948f23ed332f8d25b7c297"
+    },
+    "b5_cache": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\members\\b5_audio_cache.json",
+      "sha256": "4af340d1df9daa0c2df3b3f8ea29a189c384d5597d5de6ac980554664e9e9830"
+    },
+    "canonical_manifest": {
+      "path": "C:\\melange-data\\member_clips\\clips_manifest.jsonl",
+      "sha256": "8d7de1984e56d5df17642e8f189a161aa0f9c4133dbc24a2af5948df8e9f79a6"
+    },
+    "descriptive_artifact": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\speech_descriptive_v1.json",
+      "sha256": "17656f5e38686f612aee9c1b128c1c59f23b50c1f505c465b336decb8223dfe1"
+    },
+    "locked_gap": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\member_speech_profile_gap_locked_exact_v2.jsonl",
+      "sha256": "2536b85ff5ce25ff521008a086f8322f7754d36e2d195245d2a9cc7ed9ece7a5"
+    },
+    "reconciliation": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\congress_audio_roster_reconciliation_2026-08-31.json",
+      "sha256": "3540b7aadce04c48d89ab791cf1603a044674d4d495687a956254c34e5865081"
+    },
+    "roster": {
+      "path": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\engine\\congestion.json",
+      "sha256": "ddc9d746600dbdfc60b76c54537662e19c758cbfb9d7a478a71b7bf90cd727a6"
+    },
+    "youtube_manifest": {
+      "path": "C:\\melange-data\\youtube_audio\\youtube_manifest.jsonl",
+      "sha256": "ba255182318a06b2a9ac8bcdafaf330d7f6f9be4e18ac855b651dd487939f64e"
+    }
+  },
+  "output": {
+    "manifest": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\data\\speech\\congress_audio_profile_census_full_v1.jsonl",
+    "manifest_sha256": "6fab34a2fcad3941217368880b7c3e80da5cc362c97a1c9c3a7d7a9799b6ccb1",
+    "rows_sha256": "418aa7f708571be68d7df8ef65f6994f0bc7a50827152c1a778435bcc81c4d2f"
+  },
+  "schema": "congress-audio-profile-census-receipt-v1",
+  "status": "PASS",
+  "universe": {
+    "local_members": 533,
+    "official_additions": [
+      "Aumua Amata Coleman Radewagen",
+      "Darline Graham",
+      "James C. Moylan",
+      "Kimberlyn King-Hinds",
+      "Stacey E. Plaskett"
+    ],
+    "official_named_members": 537,
+    "official_removals": [
+      "Lindsey Graham"
+    ],
+    "requested_536_requires_one_named_exclusion": true
+  }
+}

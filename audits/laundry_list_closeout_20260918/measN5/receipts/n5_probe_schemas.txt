@@ -1,0 +1,160 @@
+====================================================================================================
+1. WORKBOOK role sheets
+====================================================================================================
+  Sponsor Interactions               max_row=639 max_col=13 data_rows=638
+     header (13 cols): ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     LAST data row  : ['Examination & Supervision', 'sponsor', 'John Kennedy', 'S.Amdt.6241', 'Greenlit amendment to measure', 'Kennedy, John [Sen.-R-LA]', 0, None, 'Introduced', 119, 0.5, None, 'operative text raises and indexes the Currency Transaction Report and Suspicious Activity Report thresholds; ACU records SUPPORT for the STREAMLINE Act threshold update']
+  Original Co-Sponsor Interaction    max_row=2973 max_col=13 data_rows=2972
+     header (13 cols): ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     LAST data row  : ['Mortgage Lending & Housing', 'original-cosponsor', 'Zachary Nunn', 'H.R.2808', 'Homebuyers Privacy Protection Act', 'Rep. Rose, John W. [R-TN-6]', 89, 'House - Financial Services', 'Became Law', 119, 1, '/help/legislative-glossary#glossary_billsummary', 'Homebuyers Privacy Protection Act']
+  Co-Sponsor Interactions            max_row=7456 max_col=13 data_rows=7455
+     header (13 cols): ['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+     LAST data row  : ['Mortgage Lending & Housing', 'cosponsor', 'Zoe Lofgren', 'H.R.2891', 'SAFE Banking Act of 2023', 'Joyce, David P. [Rep.-R-OH-14]', 130, "Committees: House - Financial Services; Judiciary; Veterans' Affairs", 'Introduced', 118, 0.8, '/bill/118th-congress/house-bill/2891?hl=credit+union+mortgage+flood+insurance+affordable+National+Flood+Insurance+Program+reauthorization+NFIP+predictable+homebuyer+regulatory+exception+secondary+market+liquidity+product+first-time+down+payment+assistance+accessory+dwelling+unit+financing+ADU+FHA+%22Home%5C+Mortgage%5C+Disclosure%5C+Act%22+%22HELPER%5C+Act%22+%22Home%5C+of%5C+Your%5C+Own%5C+Act%22+%22SUPPLY%5C+Act%22&s=3&r=2', None]
+
+====================================================================================================
+2. SELECTED + OLD archive "All Bills"
+====================================================================================================
+  congress_bills_archive_20260825_115305.xlsx sheets=['All Bills']
+     data_rows=10181 header=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+  congress_bills_archive_20260624_115822.xlsx sheets=['All Bills', '01 Examination & Supervision', '02 Credit Union Capital Require', '03 NCUA Budget & Share Insuranc', '04 Interchange', '05 Payments', '06 Technology & Emerging Issues', '07 Fraud Prevention', '08 Data Privacy & Cybersecurity', '09 Charter Modernization & Gove', '10 Defense Credit Union Issues', '11 Field of Membership', '12 CDFI Fund', '13 CFPB Issues & Structural Ref', '14 Credit Card & Consumer-Fee M', '15 Telephone Consumer Protectio', '16 Member Business Lending', '17 Mortgage Lending & Housing']
+     data_rows=10986 header=['Section', 'Role', 'Member', 'Name', 'Title', 'Sponsor', 'CosponsorCount', 'Committee', 'LastAction', 'Congress', 'DecayWeight', 'DetailLink', 'bill_summary']
+
+====================================================================================================
+3. Sentinel Bill Ledger
+====================================================================================================
+  sheets=['Sentinel Bill Ledger', 'Original Co-Sponsor Interaction', 'Co-Sponsor Interactions', 'Sponsor Interactions']
+  data_rows=18887
+  header=['Record Type', 'Review Status', 'Scoring Eligible', 'Canonical Bill ID', 'Bill', 'Congress', 'Measure Type', 'Number', 'Section', 'Member', 'Bioguide', 'Role', 'Join Date', 'Title', 'Sponsor', 'Cosponsor Count', 'Introduced Date', 'Repository Updated Date', 'Latest Action Date', 'Latest Action', 'Policy Area', 'Source', 'Detail Link', 'Summary', 'Verified At', 'Pending Reason', 'Repository SHA256', 'DecayWeight']
+  Record Type        -> {'discovery candidate': 18133, 'bill': 473, 'membership': 281}
+  Review Status      -> {'included_unreviewed_candidate': 13915, 'excluded_false_positive': 2905, 'held_visible_non_scoring': 1156, 'tracked': 473, 'verified': 268, 'included_scoring_ready': 60, 'automated_exclude_non_scoring': 54, 'automated_hold_non_scoring': 38, 'pending review': 13, 'included_membership_only_non_scoring': 5}
+  Scoring Eligible   -> {'False': 18619, 'True': 268}
+  Role               -> {'sponsor candidate': 18133, 'None': 473, 'cosponsor': 203, 'original': 62, 'sponsor': 16}
+  Source             -> {'Congress.gov Advanced Search': 18133, 'U.S. Government Publishing Office BILLSTATUS / Congress.gov': 473, 'congress.gov BILLSTATUS via bill_repository_live': 223, 'official BILLSTATUS; automated evidence admission': 35, 'verified official BILLSTATUS roster': 23}
+  sample row: {"Record Type": "bill", "Review Status": "tracked", "Scoring Eligible": "False", "Canonical Bill ID": "117:hr:1010", "Bill": "H.R.1010", "Congress": "117", "Measure Type": "hr", "Number": "1010", "Section": null, "Member": null, "Bioguide": null, "Role": null, "Join Date": null, "Title": "UPLIFT Act of 2021", "Sponsor": "Rep. Mfume, Kweisi [D-MD-7]", "Cosponsor Count": "6", "Introduced Date": "2021-02-11", "Repository Updated Date": "44943.83513888889", "Latest Action Date": "2021-02-11", "Latest Action": "Referred to the House Committee on Small Business.", "Policy Area": "Commerce", "Source": "U.S. Government Publishing Office BILLSTATUS / Congress.gov", "Detail Link": "https://www.congress.gov/bill/117th-congress/house-bill/1010", "Summary": "Ushering Progress by Leveraging Innovation and Future Techno", "Verified At": "46279.19322916667", "Pending Reason": null, "Repository SHA256": 
+
+====================================================================================================
+4. legislation_routing_audit.json
+====================================================================================================
+  top keys: ['schema', 'source', 'source_rows', 'selected_events', 'sentinel_ledger_rows', 'sentinel_verified_rows', 'summary', 'rows']
+  schema                 legislation-routing-audit-v1
+  source                 congress_bills_archive_20260825_115305.xlsx + Sentinel Bill Ledger
+  source_rows            10820
+  selected_events        8123
+  sentinel_ledger_rows   18887
+  sentinel_verified_rows 268
+  summary.dispositions = {
+  "selected": 8123,
+  "excluded-title": 578,
+  "excluded-override": 53,
+  "neutral-override": 12,
+  "official-membership-withdrawn-or-role-superseded": 1854,
+  "duplicate-lower-role": 19,
+  "unmatched-member": 14,
+  "duplicate-same-role": 133,
+  "neutral-registry": 33,
+  "neutral-official-evidence": 1
+}
+  rows = 10820
+  row field frequency: {'source_row': 10820, 'member_source': 10820, 'bill': 10820, 'congress': 10820, 'title': 10820, 'source_section': 10820, 'source_role': 10820, 'tracker_status': 10820, 'category_mechanism': 10820, 'disposition': 10820, 'member': 10175, 'contribution': 10175, 'direction_mechanism': 8321, 'effective_category': 8321, 'sign': 8321, 'effective_role': 8275, 'decay_weight': 8275, 'reason': 578, 'override_reason': 233, 'selected_role': 152}
+  --- duplicate-lower-role                           n=19     sample={"source_row": "395", "member_source": "Robert Menendez", "bill": "S.2860", "congress": "118", "title": "SAFER Banking Act", "source_section": "Examination & Supervision", "source_role": "cosponsor", "tracker_status": "Introduced", "category_mechanism": "source-section", "direction_mechanism": "section-default", "member": "Robert Menendez", "effective_category": "Examination & Supervision", "effective_role": "cospons
+  --- duplicate-same-role                            n=133    sample={"source_row": "970", "member_source": "Bill Foster", "bill": "H.R.7036", "congress": "118", "title": "Strengthening Cybersecurity for the Fina", "source_section": "NCUA Budget & Share Insurance Fund", "source_role": "sponsor", "tracker_status": "Introduced", "category_mechanism": "bill-override", "override_reason": "Strengthening Cybersecurity for the Fina", "direction_mechanism": "section-default", "member": "Bill 
+  --- excluded-override                              n=53     sample={"source_row": "16", "member_source": "Donald Beyer", "bill": "H.R.5746", "congress": "117", "title": "Freedom to Vote: John R. Lewis Act", "source_section": "Examination & Supervision", "source_role": "sponsor", "tracker_status": "Resolving Differences", "category_mechanism": "source-section", "override_reason": "Voting and election legislation is not C", "disposition": "excluded-override"}
+  --- excluded-title                                 n=578    sample={"source_row": "13", "member_source": "Darrell Issa", "bill": "H.R.1707", "congress": "118", "title": "SMART Act", "source_section": "Examination & Supervision", "source_role": "sponsor", "tracker_status": "Introduced", "category_mechanism": "source-section", "disposition": "excluded-title", "reason": "auto repair SMART Act"}
+  --- neutral-official-evidence                      n=1      sample={"source_row": "10435", "member_source": "Warren Davidson", "bill": "H.R.9900", "congress": "119", "title": "To amend the Federal Credit Union Act wi", "source_section": "NCUA Budget & Insurance", "source_role": "sponsor", "tracker_status": "Referred to the House Committee on Finan", "category_mechanism": "source-section", "direction_mechanism": "automated-official-evidence-policy", "member": "Warren Davidson", "effe
+  --- neutral-override                               n=12     sample={"source_row": "23", "member_source": "Ilhan Omar", "bill": "H.R.4895", "congress": "117", "title": "Sending Unconditional Payments to People", "source_section": "Examination & Supervision", "source_role": "sponsor", "tracker_status": "Introduced", "category_mechanism": "bill-override", "override_reason": "FedAccounts and digital-dollar balances;", "direction_mechanism": "override-direction", "member": "Ilhan Omar", 
+  --- neutral-registry                               n=33     sample={"source_row": "4219", "member_source": "Amy Klobuchar", "bill": "S.349", "congress": "117", "title": "Seniors Fraud Prevention Act of", "source_section": "CFPB Issues & Structural Reform", "source_role": "sponsor", "tracker_status": "Introduced", "category_mechanism": "source-section", "direction_mechanism": "registry-exact", "member": "Amy Klobuchar", "effective_category": "CFPB", "sign": "0", "contribution": "0.0"
+  --- official-membership-withdrawn-or-role-superseded n=1854   sample={"source_row": "184", "member_source": "Alex Padilla", "bill": "S.588", "congress": "117", "title": "Addressing Climate Financial Risk Act of", "source_section": "Examination & Supervision", "source_role": "cosponsor", "tracker_status": "Introduced", "category_mechanism": "source-section", "disposition": "official-membership-withdrawn-or-role-su", "member": "Alex Padilla", "contribution": "0.0"}
+  --- selected                                       n=8123   sample={"source_row": "2", "member_source": "Andy Barr", "bill": "H.R.8264", "congress": "118", "title": "Bank Supervision Appeals Improvement Act", "source_section": "Examination & Supervision", "source_role": "sponsor", "tracker_status": "Introduced", "category_mechanism": "source-section", "direction_mechanism": "section-default", "member": "Andy Barr", "effective_category": "Examination & Supervision", "effective_role":
+  --- unmatched-member                               n=14     sample={"source_row": "913", "member_source": "Stacey Plaskett", "bill": "H.R.2891", "congress": "118", "title": "SAFE Banking Act of 2023", "source_section": "Credit Union Capital Requirements", "source_role": "cosponsor", "tracker_status": "Introduced", "category_mechanism": "source-section", "disposition": "unmatched-member"}
+
+====================================================================================================
+5. bill_repository_live.json  (per-bill BILLSTATUS cache: cosponsorship DATES)
+====================================================================================================
+  top keys: ['bills', 'failures', 'schema', 'self_repair', 'source', 'updated_at']
+  bills = 473 ; updated_at=2026-09-14T04:38:12Z
+  sample key='117:hr:1010'  field keys=['amendments', 'areas', 'congress', 'cosponsor_count', 'cosponsors', 'display', 'introduced_date', 'key', 'latest_action', 'number', 'original_cosponsors', 'policy_area', 'source', 'sponsor', 'stale', 'summary', 'title', 'type', 'update_date', 'updated_at', 'url']
+     sponsor = {"bioguide": "M000687", "date": "", "district": "7", "name": "Rep. Mfume, Kweisi [D-MD-7]", "party": "D", "state": "MD", "withdrawn_date": ""}
+     cosponsors[0] = {"bioguide": "W000822", "date": "2021-02-18", "district": "12", "name": "Rep. Watson Coleman, Bonnie [D-NJ-12]", "party": "D", "state": "NJ", "withdrawn_date": ""}
+  introduced/date-ish fields on sample: {'introduced_date': '2021-02-11', 'latest_action': {'date': '2021-02-11', 'text': 'Referred to the House Committee on Small Business.'}, 'updated_at': '2026-09-14T04:38:15Z'}
+
+====================================================================================================
+6. xlsx zip entry timestamps (workbook + selected archive)
+====================================================================================================
+  Moneyball Main Version - Blended.xlsx
+     docProps/core.xml                        (2026, 9, 18, 1, 46, 16)  520 bytes
+     xl/worksheets/sheet1.xml                 (2026, 9, 18, 1, 46, 16)  474188 bytes
+     xl/worksheets/_rels/sheet1.xml.rels      (2026, 9, 18, 1, 46, 16)  238 bytes
+     xl/worksheets/sheet2.xml                 (2026, 9, 18, 1, 46, 16)  413114 bytes
+     xl/worksheets/_rels/sheet2.xml.rels      (2026, 9, 18, 1, 46, 16)  238 bytes
+     xl/worksheets/sheet3.xml                 (2026, 9, 18, 1, 46, 16)  9428 bytes
+     xl/worksheets/sheet4.xml                 (2026, 9, 18, 1, 46, 18)  647383 bytes
+     xl/worksheets/_rels/sheet4.xml.rels      (2026, 9, 18, 1, 46, 18)  238 bytes
+     xl/worksheets/sheet5.xml                 (2026, 9, 18, 1, 46, 18)  327828 bytes
+     xl/worksheets/_rels/sheet5.xml.rels      (2026, 9, 18, 1, 46, 18)  238 bytes
+     xl/worksheets/sheet6.xml                 (2026, 9, 18, 1, 46, 18)  80683 bytes
+     xl/worksheets/_rels/sheet6.xml.rels      (2026, 9, 18, 1, 46, 18)  238 bytes
+     xl/worksheets/sheet7.xml                 (2026, 9, 18, 1, 46, 18)  852405 bytes
+     xl/worksheets/sheet8.xml                 (2026, 9, 18, 1, 46, 18)  30922 bytes
+     xl/worksheets/_rels/sheet8.xml.rels      (2026, 9, 18, 1, 46, 18)  376 bytes
+     xl/worksheets/sheet9.xml                 (2026, 9, 18, 1, 46, 18)  876006 bytes
+     xl/worksheets/_rels/sheet9.xml.rels      (2026, 9, 18, 1, 46, 18)  238 bytes
+     xl/worksheets/sheet10.xml                (2026, 9, 18, 1, 46, 18)  6701 bytes
+     xl/worksheets/sheet11.xml                (2026, 9, 18, 1, 46, 18)  1124345 bytes
+     xl/worksheets/_rels/sheet11.xml.rels     (2026, 9, 18, 1, 46, 18)  238 bytes
+     xl/worksheets/sheet12.xml                (2026, 9, 18, 1, 46, 18)  723279 bytes
+     xl/worksheets/_rels/sheet12.xml.rels     (2026, 9, 18, 1, 46, 18)  239 bytes
+     xl/worksheets/sheet13.xml                (2026, 9, 18, 1, 46, 18)  4984313 bytes
+     xl/worksheets/sheet14.xml                (2026, 9, 18, 1, 46, 20)  4853544 bytes
+     xl/worksheets/sheet15.xml                (2026, 9, 18, 1, 46, 20)  3269229 bytes
+     xl/worksheets/_rels/sheet15.xml.rels     (2026, 9, 18, 1, 46, 20)  239 bytes
+     xl/worksheets/sheet16.xml                (2026, 9, 18, 1, 46, 22)  2705172 bytes
+     xl/worksheets/_rels/sheet16.xml.rels     (2026, 9, 18, 1, 46, 22)  239 bytes
+     xl/worksheets/sheet17.xml                (2026, 9, 18, 1, 46, 22)  2554885 bytes
+     xl/worksheets/_rels/sheet17.xml.rels     (2026, 9, 18, 1, 46, 22)  239 bytes
+     xl/worksheets/sheet18.xml                (2026, 9, 18, 1, 46, 22)  632074 bytes
+     xl/worksheets/_rels/sheet18.xml.rels     (2026, 9, 18, 1, 46, 22)  239 bytes
+     xl/worksheets/sheet19.xml                (2026, 9, 18, 1, 46, 22)  4068807 bytes
+     xl/worksheets/_rels/sheet19.xml.rels     (2026, 9, 18, 1, 46, 22)  239 bytes
+     xl/worksheets/sheet20.xml                (2026, 9, 18, 1, 46, 22)  536972 bytes
+     xl/worksheets/_rels/sheet20.xml.rels     (2026, 9, 18, 1, 46, 22)  239 bytes
+     xl/worksheets/sheet21.xml                (2026, 9, 18, 1, 46, 24)  128967 bytes
+     xl/worksheets/_rels/sheet21.xml.rels     (2026, 9, 18, 1, 46, 24)  239 bytes
+     xl/worksheets/sheet22.xml                (2026, 9, 18, 1, 46, 24)  7767 bytes
+     xl/worksheets/sheet23.xml                (2026, 9, 18, 1, 46, 24)  5276115 bytes
+     xl/worksheets/_rels/sheet23.xml.rels     (2026, 9, 18, 1, 46, 24)  498 bytes
+     xl/worksheets/sheet24.xml                (2026, 9, 18, 1, 46, 26)  693467 bytes
+     xl/worksheets/_rels/sheet24.xml.rels     (2026, 9, 18, 1, 46, 26)  239 bytes
+     xl/worksheets/sheet25.xml                (2026, 9, 18, 1, 46, 26)  3509962 bytes
+     xl/worksheets/_rels/sheet25.xml.rels     (2026, 9, 18, 1, 46, 26)  239 bytes
+     xl/worksheets/sheet26.xml                (2026, 9, 18, 1, 46, 28)  8956210 bytes
+     xl/worksheets/_rels/sheet26.xml.rels     (2026, 9, 18, 1, 46, 28)  239 bytes
+     xl/worksheets/sheet27.xml                (2026, 9, 18, 1, 46, 28)  90988 bytes
+     xl/worksheets/_rels/sheet27.xml.rels     (2026, 9, 18, 1, 46, 28)  239 bytes
+     xl/worksheets/sheet28.xml                (2026, 9, 18, 1, 46, 28)  1111626 bytes
+     xl/worksheets/_rels/sheet28.xml.rels     (2026, 9, 18, 1, 46, 28)  239 bytes
+     xl/worksheets/sheet29.xml                (2026, 9, 18, 1, 46, 28)  85624 bytes
+     xl/worksheets/sheet30.xml                (2026, 9, 18, 1, 46, 28)  174770 bytes
+     xl/workbook.xml                          (2026, 9, 18, 1, 46, 28)  3182 bytes
+     xl/worksheets/melange_recognition_0.xml  (2026, 9, 18, 2, 9, 28)  703651 bytes
+     xl/worksheets/melange_recognition_1.xml  (2026, 9, 18, 2, 9, 28)  6250540 bytes
+     xl/worksheets/melange_recognition_2.xml  (2026, 9, 18, 2, 9, 28)  563748 bytes
+     docProps/core.xml = <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:creator>openpyxl</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">2026-09-03T21:56:04Z</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">2026-09-18T05:46:17Z</dcterms:modified><cp:lastModifiedBy>Paul Goff (Contractor)</cp:lastModifiedBy></cp:coreProperties>
+  congress_bills_archive_20260825_115305.xlsx
+     docProps/core.xml                        (2026, 8, 25, 11, 54, 38)  459 bytes
+     xl/worksheets/sheet1.xml                 (2026, 8, 25, 11, 54, 46)  11883964 bytes
+     xl/workbook.xml                          (2026, 8, 25, 11, 54, 46)  556 bytes
+     docProps/core.xml = <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:creator>openpyxl</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">2026-08-25T15:54:35Z</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">2026-08-25T15:54:38Z</dcterms:modified></cp:coreProperties>
+
+====================================================================================================
+7. manual_bill_evidence.csv + congestion roster + movements/admissions/collector sizes
+====================================================================================================
+  manual rows=371 fields=['Member', 'Role', 'Bill', 'Title', 'Sponsor', 'Congress', 'Category', 'Direction', 'DecayWeight', 'LastAction', 'DetailLink', 'Summary', 'Note']
+  congestion roster=533
+  data/legislation/official_membership_movements.json            5368475 bytes
+  data/legislation/sentinel_admissions.json                      808859 bytes
+  data/members/collector_roster_updates.ndjson                   181637 bytes
+  data/members/sentinel_verified_membership_history.ndjson       440340 bytes
+  data/legislation/membership_withdrawals.csv                    MISSING
+  data/members/primacy_act_memberships.ndjson                    82487 bytes
+  data/members/registry_anchor_memberships.ndjson                54294 bytes
+  data/members/bank_anchor_memberships.ndjson                    87097 bytes

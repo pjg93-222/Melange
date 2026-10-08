@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-FLO24310-SYG-7D-3WN"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 S4458 IS: Rural Water Supply Program Reauthorization Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2024-06-04</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>118th CONGRESS</congress><session>2d Session</session><legis-num>S. 4458</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20240604">June 4, 2024</action-date><action-desc><sponsor name-id="S381">Mr. Rounds</sponsor> (for himself and <cosponsor name-id="S311">Ms. Klobuchar</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSEG00">Committee on Energy and Natural Resources</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To reauthorize the Reclamation Rural Water Supply Act of 2006, and for other purposes.</official-title></form><legis-body><section id="id050b32ae261744d3aa7de462772052f0" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Rural Water Supply Program Reauthorization Act</short-title></quote>.</text></section><section commented="no" display-inline="no-display-inline" id="id7d66f099258345c4a6a0f5a749ceb111"><enum>2.</enum><header>Reauthorization of Reclamation Rural Water Supply Act of 2006</header><subsection id="idd15dd2cfb26b42f69684569b62a6b083"><enum>(a)</enum><header>Authorization of appropriations</header><text>Section 109(a) of the Reclamation Rural Water Supply Act of 2006 (<external-xref legal-doc="usc" parsable-cite="usc/43/2408">43 U.S.C. 2408(a)</external-xref>) is amended by striking <quote>2016</quote> and inserting <quote>2032</quote>.</text></subsection><subsection id="id418f87ebea8e42d885f8a3729365833f"><enum>(b)</enum><header>Termination of authority</header><text>Section 110 of the Reclamation Rural Water Supply Act of 2006 (<external-xref legal-doc="usc" parsable-cite="usc/43/2409">43 U.S.C. 2409</external-xref>) is amended by striking <quote>2016</quote> and inserting <quote>2032</quote>.</text></subsection></section></legis-body></bill> 
+

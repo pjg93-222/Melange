@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H0B676A3B5070439C8FB3D7F7433E89D2" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 4047 IH: Open Banking Study Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 4047</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190725">July 25, 2019</action-date><action-desc><sponsor name-id="M001137">Mr. Meeks</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To require certain Federal financial regulators to carry out an independent study of their
+			 regulated entities’ processes for allowing third parties to access
+			 consumer-authorized financial data.</official-title></form>
+	<legis-body id="HFA1549AC2CCB450BB39B69818D4230B8" style="OLC">
+ <section id="H7B41EFB292AF43F0809ACC14A6792FEE" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Open Banking Study Act of 2019</short-title></quote>.</text> </section><section id="H3F29C69600CB4EA6AAF5A20F1AE9FEF4"><enum>2.</enum><header>Consumer-authorized financial data study</header> <subsection id="HE84B646EE5DE4BC6BCCA1B826DB51A37"><enum>(a)</enum><header>Study</header><text display-inline="yes-display-inline">The Board of Governors of the Federal Reserve System, the Bureau of Consumer Financial Protection, the Comptroller of the Currency, the Federal Deposit Insurance Corporation, and the National Credit Union Administration shall, jointly, carry out a study of their regulated entities’ processes for allowing third parties to access consumer-authorized financial data.</text>
+ </subsection><subsection id="H0EFAF507DFE241CF8BF06059A988BCE4"><enum>(b)</enum><header>Report</header><text>Not later than the end of the 1-year period beginning on the date of enactment of this Act, the Federal agencies required to carry out a study under subsection (a) shall submit a report to the Committee on Financial Services of the House of Representatives and the Committee on Banking, Housing, and Urban Affairs of the Senate containing—</text>
+ <paragraph id="HCDBF314F820441B1896C81919D45975A"><enum>(1)</enum><text>a description of all findings and determinations made in carrying out the study required under subsection (a); and</text>
+ </paragraph><paragraph id="H121BC238B1F54F55AF297AF9A7FC200F"><enum>(2)</enum><text display-inline="yes-display-inline">administrative and legislative recommendations that would encourage consumer-authorized financial data sharing and aggregation consistent with the agencies’ safety and soundness, consumer protection, and cybersecurity standards, and all applicable laws and regulations.</text>
+				</paragraph></subsection></section></legis-body></bill>
+
+

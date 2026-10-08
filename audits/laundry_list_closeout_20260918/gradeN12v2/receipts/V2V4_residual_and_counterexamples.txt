@@ -1,0 +1,835 @@
+====================================================================================================
+A.  EVERY CUT TAG THAT NAMES A RANKED OFFICE-HOLDER (SEN./REP./GOV./DR.) -- is the tag the
+    ROW'S OWN MEMBER?  own_lenient() is supposed to make that impossible.
+====================================================================================================
+rows whose cut tag starts with a rank: 221
+cut tags that contain the row member's own surname: 0  []
+
+distinct ranked cut tags with the row member beside them:
+   DR. ANTHONY FAUCI                                       | member=Jamie Raskin
+   DR. ANTHONY FAUCI                                       | member=Jim Jordan
+   DR. ANTHONY FAUCI                                       | member=Debbie Wasserman Schultz
+   DR. ANTHONY FAUCI                                       | member=John Kennedy
+   DR. ANTHONY FAUCI                                       | member=Rand Paul
+   DR. ANTHONY FAUCI                                       | member=Steve Scalise
+   DR. ANTHONY FAUCI                                       | member=Margaret Hassan
+   DR. ANTHONY FAUCI                                       | member=Elizabeth Warren
+   DR. ANTHONY FAUCI                                       | member=Andy Kim
+   DR. ANTHONY FAUCI                                       | member=Nydia Velázquez
+   DR. ANTHONY FAUCI                                       | member=Lindsey Graham
+   DR. ANTHONY FAUCI                                       | member=Roger Marshall
+   DR. ANTHONY FAUCI                                       | member=Nancy Pelosi
+   DR. ANTHONY FAUCI                                       | member=Glenn Grothman
+   DR. ANTHONY FAUCI                                       | member=James Lankford
+   DR. ANTHONY FAUCI                                       | member=Rick Scott
+   DR. ANTHONY FAUCI                                       | member=Josh Hawley
+   DR. BEN CARSON                                          | member=Ted Cruz
+   DR. DONELL HARVIN                                       | member=Jamie Raskin
+   DR. ERICA SCHWARTZ                                      | member=Bill Cassidy
+   DR. MEHMET OZ                                           | member=Ben Luján
+   DR. MENE PANGALOS                                       | member=Frank Pallone
+   DR. MUSTAFA ALI                                         | member=Alexandria Ocasio-Cortez
+   DR. PETER MCCOLLOUGH                                    | member=Ron Johnson
+   DR. PETERS MARKS                                        | member=Bill Cassidy
+   DR. ROBERT REDFIELD                                     | member=Tammy Baldwin
+   DR. ROBERT REDFIELD                                     | member=Patty Murray
+   DR. ROBERT REDFIELD                                     | member=Steve Scalise
+   DR. ROBERT REDFIELD                                     | member=Maxine Waters
+   DR. ROBERT REDFIELD                                     | member=Tim Kaine
+   DR. SANJAY GUPTA, CNN CHIEF MEDICAL CORRESPONDENT (voic | member=Elizabeth Warren
+   DR. YASHICA ROBINSON                                    | member=Chip Roy
+   DR. YASHICA ROBINSON                                    | member=Mike Johnson
+   FMR. GOV. NIKKI HALEY                                   | member=Tim Scott
+   Fmr. Attorney General Vanita Gupta                      | member=John Cornyn
+   GOV. CHRIS CHRISTIE (R-NJ)                              | member=Lindsey Graham
+   GOV. GREG ABBOTT (R-TX)                                 | member=Ted Cruz
+   GOV. JOHN KASICH, R-OHIO                                | member=Ted Cruz
+   GOV. RON                                                | member=Cynthia Lummis
+   GOV. TIM WALZ (D-MN)                                    | member=Alexandria Ocasio-Cortez
+   GOVERNOR JAY INSLEE I'                                  | member=Cory Booker
+   GOVERNOR RON                                            | member=Tim Scott
+   REP. ADAM KINZINGER (D-IL)                              | member=Lisa Blunt Rochester
+   REP. ADAM SCHIFF (D-CA)                                 | member=Maxine Waters
+   REP. ADAM SMITH                                         | member=Adam Schiff
+   REP. ALEXANDRIA OCASIO-CORTEZ (D-NY 14TH DISTRICT)      | member=Bernard Sanders
+   REP. AYANNA PRESSLEY (D-MA)                             | member=Ilhan Omar
+   REP. BETO                                               | member=Ted Cruz
+   REP. BETO                                               | member=Elizabeth Warren
+   REP. BETO                                               | member=Bernard Sanders
+   REP. BETO O`ROURKE (D-TX)                               | member=Bernard Sanders
+   REP. CARLOS GIMENEZ (R-FL)                              | member=Chip Roy
+   REP. CATHY RODGERS (R-or)                               | member=Mark Warner
+   REP. DEBBIE WASSERMAN SCHULTZ, D-FLA.                   | member=Richard Durbin
+   REP. DEVIN NUNES                                        | member=John Kennedy
+   REP. DEVIN NUNES (R-CA)                                 | member=Adam Schiff
+   REP. DEVIN NUNES (R-CA)                                 | member=Lindsey Graham
+   REP. DON BACON (R-NE)                                   | member=Tim Burchett
+   REP. ELIJAH CUMMINGS (D, MD)                            | member=Ayanna Pressley
+   REP. ELISE STEFANIK (R-NY)                              | member=Lindsey Graham
+   REP. ERIC BURLISON                                      | member=Josh Hawley
+   REP. GERRY CONNOLLY (D-VA)                              | member=Ted Lieu
+   REP. HAKEEM                                             | member=Elissa Slotkin
+   REP. JAMES COMER (R-KY)                                 | member=Ayanna Pressley
+   REP. JASMINE CROCKETT (D-TX)                            | member=Robert Garcia
+   REP. JERRY NADLER (D-NY)                                | member=Nancy Pelosi
+   REP. JESUS                                              | member=Jim Jordan
+   REP. JIM                                                | member=Hakeem Jeffries
+   REP. JOAQUIN                                            | member=Ted Cruz
+   REP. JOHN DELANEY, D-MD                                 | member=Kirsten Gillibrand
+   REP. KEVIN                                              | member=Steve Scalise
+   REP. KEVIN                                              | member=Lindsey Graham
+   REP. KEVIN MCCARTHY                                     | member=Rick Scott
+   REP. KEVIN MCCARTHY (R-CA)                              | member=Mitch McConnell
+   REP. KEVIN MCCARTHY, R-CALIF.                           | member=Mitch McConnell
+   REP. LIZ CHENEY (R-WY)                                  | member=Adam Schiff
+   REP. MARJORY TAYLOR GREENE (R-GA)                       | member=Nancy Pelosi
+   REP. MAXINE WATERS (D-CA 43RD DISTRICT)                 | member=Christopher Murphy
+   REP. MIKE                                               | member=Rick Scott
+   REP. MIKE JOHNSON                                       | member=Thomas Massie
+   REP. MIKE POMPEO                                        | member=Adam Schiff
+   REP. NANCY                                              | member=Mitch McConnell
+   REP. NANCY PELOSI (D-CA)                                | member=Mitch McConnell
+   REP. NANCY PELOSI (D-CA)                                | member=Steny Hoyer
+   REP. NANCY PELOSI (D-CA)                                | member=Tom Cotton
+   REP. NANCY PELOSI, D-CALIF.                             | member=John Garamendi
+   REP. PAT FALLON (R-TX)                                  | member=Nancy Mace
+   REP. PETE AGUILAR (D)                                   | member=Jamie Raskin
+   REP. PRAMILA JAYAPAL                                    | member=Joaquin Castro
+   REP. PRAMILA JAYAPAL (D-WA)                             | member=Ritchie Torres
+   REP. PRAMILA JAYAPAL (D-WA4)                            | member=Adam Schiff
+   REP. PRAMILA JAYAPAL (D-WASHINGTON'S 7TH DISTRICT)      | member=Mike Johnson
+   REP. RAJA KRISHNAMOORTHI                                | member=Ashley Hinson
+   REP. RALPH NORMAN (R-SC)                                | member=Andrew Clyde
+   REP. RASHIDA TLAIB (D-MI)                               | member=Alexandria Ocasio-Cortez
+   REP. ROBERT GARCIA (D-CA)                               | member=James Walkinshaw
+   REP. STEVE SCALISE                                      | member=Elise Stefanik
+   REP. STEVE SCALISE                                      | member=Lucy McBath
+   REP. TROY NEHIS                                         | member=Carlos Gimenez
+   REP. ZOE LOFGREN (D)                                    | member=Adam Schiff
+   Rep. Nancy Pelosi, De-Calif.                            | member=Mitch McConnell
+   SEN. AMY KLOBUCHAR (D-MN)                               | member=Bryan Steil
+   SEN. ANDY KIM                                           | member=Christopher Murphy
+   SEN. BERNIE SANDERS (I-VT)                              | member=Elizabeth Warren
+   SEN. BILL CASSIDY                                       | member=Jon Husted
+   SEN. BILL CASSIDY                                       | member=Lindsey Graham
+   SEN. CHRIS COONS                                        | member=Jeanne Shaheen
+   SEN. CHRIS MURPHY                                       | member=Charles Schumer
+   SEN. CHUCK                                              | member=Mitch McConnell
+   SEN. CHUCK SCHUMER                                      | member=Mitch McConnell
+   SEN. CHUCK SCHUMER (D-NY)                               | member=Mike Johnson
+   SEN. CHUCK SCHUMER (D-NY)                               | member=Peter Welch
+   SEN. CLAIRE MCCASKILL                                   | member=Josh Hawley
+   SEN. ELIZABETH WARREN (D-MA)                            | member=John Hickenlooper
+   SEN. ELIZABETH WARREN (D-MA)                            | member=Amy Klobuchar
+   SEN. ELIZABETH WARREN (D-MA)                            | member=Bernard Sanders
+   SEN. ERIC SCHMITT                                       | member=Josh Hawley
+   SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17 | member=Thom Tillis
+   SEN. JOHN                                               | member=Lindsey Graham
+   SEN. JOHN THUNE (R-SD)                                  | member=John Cornyn
+   SEN. JOSH HAWLEY (R-MO)                                 | member=Lindsey Graham
+   SEN. KAMALA HARRIS                                      | member=Amy Klobuchar
+   SEN. KAMALA HARRIS                                      | member=Chuck Grassley
+   SEN. KAMALA HARRIS                                      | member=Jack Reed
+   SEN. KAMALA HARRIS (D-CA)                               | member=Nancy Pelosi
+   SEN. KAMALA HARRIS, D-CALIF.                            | member=Mazie Hirono
+   SEN. KAMALA HARRIS, D-CALIF.                            | member=Chuck Grassley
+   SEN. LAMAR ALEXANDER (R-TN)                             | member=Susan Collins
+   SEN. LINDSEY GRAHAM, R-S.C.                             | member=Christopher Murphy
+   SEN. MARCO RUBIO (R-FL)                                 | member=Lindsey Graham
+   SEN. MARIA CANTWELL (D-WA)                              | member=Ron Wyden
+   SEN. MARK WARNER                                        | member=Adam Schiff
+   SEN. MARKWAYNE MULLIN (R-OK)                            | member=Rand Paul
+   SEN. MICHAEL BENNET (D-CO)                              | member=Amy Klobuchar
+   SEN. MICHAEL BENNETT, D-COLO.                           | member=Jason Crow
+   SEN. MITCH                                              | member=Charles Schumer
+   SEN. MITT ROMNEY (R-UT)                                 | member=Thom Tillis
+   SEN. PATTY MURRAY (D-WA)                                | member=Chuck Grassley
+   SEN. PATTY MURRAY (D-WA)                                | member=Ted Cruz
+   SEN. RICHARD BLUMENTHAL (D-CT)                          | member=Ruben Gallego
+   SEN. RICHARD BLUMENTHAL (D-Can't)                       | member=Susie Lee
+   SEN. RICHARD BLUMENTHAL, D-CONN.T                       | member=Jamie Raskin
+   SEN. SHELLEY MOORE CAPITO (R)                           | member=Dan Sullivan
+   SEN. SUSAN COLLINS (R-ME)                               | member=Thom Tillis
+   SEN. THOM TILLIS (R-NC)                                 | member=John Thune
+   SEN. TIM KAINE                                          | member=Rand Paul
+   SEN. TIM KAINE, D-VA., "GMA"/ABC                        | member=Charles Schumer
+   SEN. TIM SCOTT (R-SC)                                   | member=Elizabeth Warren
+   SEN. TOM COTTON, R-ARKANSAS (through telephone)         | member=Jim Jordan
+   SENATOR BOB CORKER                                      | member=Rand Paul
+   SENATOR JEFF MERKLEY (D-OR)                             | member=Charles Schumer
+   Sen. Ben Cardin, Md.                                    | member=Rand Paul
+   Sen. John Kennedy, La.                                  | member=Lindsey Graham
+   [04:40:06] SEN. MICHAEL BENNET (D-CO)                   | member=Amy Klobuchar
+   [05:59:59] SEN. BERNIE                                  | member=Elizabeth Warren
+   [13:34:57] SEN. CHUCK SCHUMER                           | member=Nancy Pelosi
+
+====================================================================================================
+B.  S4 (kept text ends without terminal punctuation) -- EVERY row in the buckets that are
+    NOT the benign CNN-timestamp form, plus a 10-row read of each benign bucket.
+====================================================================================================
+--- bucket bare_word: n=6 (ALL SHOWN)
+  rowid=69517   Melanie Stansbury          2024-07-23          cut_class=C_unanchored_paren
+     CUT_TAG='PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)'  kept=19w  removed=28w  orig=47w
+     KEPT ...Madam Director with all due respect. The answers that we've received here in this hearing today are completely unsatisfactory
+     GONE    PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over): Republican and Democratic members of Congress frustrated with the head of the Secret Service, many calling for her immediate resignation.
+
+  rowid=213747  James Clyburn              2020-09-17          cut_class=C_unanchored_paren
+     CUT_TAG='SCHNEIDER (voice-over)'  kept=36w  removed=24w  orig=60w
+     KEPT ...at statement by Mr. Barr was the most ridiculous, tone-deaf, God-awful things I've ever heard. It is incredible. The chief law enforcement officer in this country would equate human bondage to expert advice to save lives
+     GONE    SCHNEIDER (voice-over): Bill Barr used the speech to assert his authority as Attorney General and slam the hundreds of DOJ prosecutors working under him.
+
+  rowid=221150  Elizabeth Warren           2021-08-09          cut_class=C_unanchored_paren
+     CUT_TAG='LAH (voice-over)'  kept=8w  removed=9w  orig=17w
+     KEPT ...Vote no to protect California and our democracy
+     GONE    LAH (voice-over): Republicans do have challenges of their own.
+
+  rowid=221208  Elizabeth Warren           2021-08-10          cut_class=C_unanchored_paren
+     CUT_TAG='LAH (voice-over)'  kept=8w  removed=9w  orig=17w
+     KEPT ...Vote no to protect California and our democracy
+     GONE    LAH (voice-over): Republicans do have challenges of their own.
+
+  rowid=223716  Nancy Pelosi               2021-12-16          cut_class=C_unanchored_paren
+     CUT_TAG='WILD (voice-over)'  kept=32w  removed=70w  orig=102w
+     KEPT ...I did not accept two of the five people were appointed. They had made statements and taken actions that I think would impact the integrity of the commission -- of the committee
+     GONE    WILD (voice-over): Behind the cameras a long line of witnesses willing to talk. Today, CNN has confirmed officials with the Georgia Secretary of State's office met with the panel for hours. And as the house referred Mead
+
+  rowid=240796  Jay Obernolte              2023-03-24          cut_class=C_unanchored_paren
+     CUT_TAG='BERTRAND (voice-over)'  kept=19w  removed=43w  orig=62w
+     KEPT ...I don't believe that it is technically possible to accomplish what TikTok says it will accomplish through Project Texas
+     GONE    BERTRAND (voice-over): Lawmakers provided no evidence that the Chinese government has used the app to surveil Americans. But they repeatedly pointed to an episode from last year when four TikTok employees, including two 
+
+--- bucket comma: n=3 (ALL SHOWN)
+  rowid=210901  Bernard Sanders            2020-02-20          cut_class=C_unanchored_paren
+     CUT_TAG='NOBLES (voice-over)'  kept=31w  removed=28w  orig=59w
+     KEPT ...We have more income and wealth inequality today than any time in the last hundred years. Mr. Bloomberg himself is worth more as one person than the bottom 125 million Americans,
+     GONE    NOBLES (voice-over): Sanders seeming to survive his first debate at the top of the polls, with so much of the focus on the new guy on stage, Bloomberg,
+
+  rowid=210902  Amy Klobuchar              2020-02-20          cut_class=C_unanchored_paren
+     CUT_TAG='NOBLES (voice-over)'  kept=18w  removed=29w  orig=47w
+     KEPT ...I don't think you look at Donald Trump and say we need someone richer in the White House,
+     GONE    NOBLES (voice-over): Not just Bloomberg's billions, his opponents also attacked his past. Vice President Joe Biden raising Bloomberg's previous support for New York City's controversial stop and frisk policing.
+
+  rowid=219245  Mitch McConnell            2021-05-06          cut_class=C_unanchored_paren
+     CUT_TAG='COLLINS (voice-over)'  kept=12w  removed=18w  orig=30w
+     KEPT ...Yes, 100 percent of our focus is on stopping this new administration,
+     GONE    COLLINS (voice-over): Alongside Louisiana's Democratic Governor and Lake Charles's Republican Mayor, Biden argued for bipartisanship outside of Washington.
+
+--- bucket colon: n=0 (ALL SHOWN)
+--- bucket ts_after_NONterminal: n=2 (ALL SHOWN)
+  rowid=225743  David McCormick            2022-05-16          cut_class=C_unanchored_paren
+     CUT_TAG='ZELENY (voice-over)'  kept=51w  removed=28w  orig=79w
+     KEPT ...ink, we, as Republicans, have to win this seat. And so, I believe I'm going to win this primary. But if I weren't to win, then I would support whoever the candidate was that was selected by the voters. (MUSIC) [21:55:00]
+     GONE    ZELENY (voice-over): Republicans are not deciding whether to choose a candidate, in Trump's mold. That's been settled. But rather how Trumpian they hope their next senator will be.
+
+  rowid=227834  Charles Schumer            2022-08-06          cut_class=C_unanchored_paren
+     CUT_TAG='WHITFIELD (on camera)'  kept=228w  removed=310w  orig=538w
+     KEPT ...d highway and industrial site. And as the most significant action of climate change ever. It will help deliver our children and grandchildren the planet they deserve. The Inflation Reduction Act was written -- [12:15:01]
+     GONE    WHITFIELD (on camera): You're listening to Senate -- you're listening to Senate Majority Leader Chuck Schumer there, kind of tick through what he believes the advantages are of this Inflation Reduction Act. It's going to
+
+--- bucket paren: n=14 (ALL SHOWN)
+  rowid=71813   Marsha Blackburn           2024-11-21          cut_class=C_unanchored_paren
+     CUT_TAG='LAH (on camera)'  kept=18w  removed=103w  orig=121w
+     KEPT ...It was a great meeting. Pete Hegseth is a Tennessean. We look forward to supporting him. (END VIDEOTAE)
+     GONE    LAH (on camera): Hegseth's attorney also tells CNN that the woman was indeed paid as part of a settlement account, and that there is a confidentiality clause. I did meet and speak briefly with the victim last week, and C
+
+  rowid=83752   David McCormick            2025-10-26          cut_class=C_unanchored_paren
+     CUT_TAG='RAJU (on camera)'  kept=24w  removed=181w  orig=205w
+     KEPT ...They're I think irresponsibly imposing pain on the American people. INSIDE POLITICS, the best reporting from inside the corridors of power, starts now. (MUSIC)
+     GONE    RAJU (on camera): Good morning and welcome to INSIDE POLITICS SUNDAY. I'm Manu Raju. It's time to bring out the heavy hitters. With just nine days until this year's marquee elections and President Trump facing his first 
+
+  rowid=91943   Jim Banks                  2026-06-14          cut_class=C_unanchored_paren
+     CUT_TAG='RAJU (on camera)'  kept=29w  removed=321w  orig=350w
+     KEPT ...This guy thinks he can be president and he can't even run his own state. INSIDE POLITICS, the best reporting from inside the corridors of power, starts now. (MUSIC)
+     GONE    RAJU (on camera): Good morning. And welcome to INSIDE POLITICS SUNDAY. I'm Manu Raju. In a presidency defined by breaking norms -- well, tonight may be the most unusual spectacle yet when a little cage match is held on t
+
+  rowid=92125   Brian Schatz               2026-06-21          cut_class=C_unanchored_paren
+     CUT_TAG='RAJU (on camera)'  kept=32w  removed=121w  orig=153w
+     KEPT ...We've got a lot of work to do in terms of recovering the trust that we once had. INSIDE POLITICS, the best reporting from inside the corridors of power, starts now. (MUSIC)
+     GONE    RAJU (on camera): Good morning. And welcome to INSIDE POLITICS SUNDAY and a happy Father's Day. I'm Manu Raju. President Trump is dispatching his vice president, J.D. Vance, on a mission to salvage his emerging deal with
+
+  rowid=193812  James Clyburn              2019-04-06          cut_class=C_unanchored_paren
+     CUT_TAG='NOBLES (voice-over)'  kept=23w  removed=57w  orig=80w
+     KEPT ...Oh, it should. I hope it does. I really believe that people ought to give just due to people who do things. (APLAUSE)
+     GONE    NOBLES (voice-over): While the Sanders strategy shift is apparent, it's too early to tell if it's paying off. His raucous rallies typically draw predominantly white crowds, even in places such as north Charleston, a city
+
+  rowid=207548  Amy Klobuchar              2019-12-23          cut_class=C_unanchored_paren
+     CUT_TAG='KYUNG LAH, CNN SENIOR NATIONAL CORRESPONDENT (voice-over)'  kept=20w  removed=23w  orig=43w
+     KEPT ...The Midwest is not flyover country to me. I live here. I hope you saw the debates. (CHEERING AND APPLAUSE)
+     GONE    KYUNG LAH, CNN SENIOR NATIONAL CORRESPONDENT (voice-over): Senator Amy Klobuchar believes now is her upswing, the Minnesota moderate crisscrossing 27 counties in Iowa.
+
+  rowid=207558  Amy Klobuchar              2019-12-23          cut_class=C_unanchored_paren
+     CUT_TAG='LAH (voice-over)'  kept=18w  removed=18w  orig=36w
+     KEPT ...The Midwest is not flyover country to me. I live here. I hope you saw the debates. (CHEERING)
+     GONE    LAH (voice-over): Senator Amy Klobuchar believes now is her upswing. The Minnesota moderate crisscrossing 27 counties in Iowa.
+
+  rowid=210744  Bernard Sanders            2020-02-17          cut_class=C_unanchored_paren
+     CUT_TAG='JEFF ZELENY, CNN SENIOR WASHINGTON CORRESPONDENT (voice-over)'  kept=13w  removed=13w  orig=26w
+     KEPT ...With your help, we're going to win here in Nevada. (CHEERING AND APPLAUSE)
+     GONE    JEFF ZELENY, CNN SENIOR WASHINGTON CORRESPONDENT (voice-over): The fight is on for Nevada.
+
+  rowid=210791  Bernard Sanders            2020-02-17          cut_class=C_unanchored_paren
+     CUT_TAG='ZELENY (voice-over)'  kept=13w  removed=8w  orig=21w
+     KEPT ...With your help, we're going to win here in Nevada. (CHEERING AND APPLAUSE)
+     GONE    ZELENY (voice-over): The fight is on for Nevada.
+
+  rowid=212900  Ted Cruz                   2020-07-20          cut_class=C_unanchored_paren
+     CUT_TAG='ZAKARIA (voice-over)'  kept=9w  removed=19w  orig=28w
+     KEPT ...God bless the Great State of Iowa. (CROWD CHEERS)
+     GONE    ZAKARIA (voice-over): In the 2016 primaries, he accused Ted Cruz of stealing Iowa and Marco Rubio of rigging Florida.
+
+  rowid=212956  Ted Cruz                   2020-07-24          cut_class=C_unanchored_paren
+     CUT_TAG='ZAKARIA (voice-over)'  kept=9w  removed=19w  orig=28w
+     KEPT ...God bless the Great State of Iowa. (CROWD CHEERS)
+     GONE    ZAKARIA (voice-over): In the 2016 primaries, he accused Ted Cruz of stealing Iowa and Marco Rubio of rigging Florida.
+
+  rowid=218571  Mitch McConnell            2021-03-21          cut_class=C_unanchored_paren
+     CUT_TAG='PHILLIP (voice-over)'  kept=15w  removed=85w  orig=100w
+     KEPT ...Nobody can even begin to imagine what a completely scorched-earth Senate would look like. (MUSIC)
+     GONE    PHILLIP (voice-over): Welcome to INSIDE POLITICS SUNDAY. I'm Abby Phillip and to our viewers in the United States and around the world, thank you for spending part of your weekend with us. Eight weeks into his presidency
+
+  rowid=236015  Kat Cammack                2023-01-10          cut_class=C_unanchored_paren
+     CUT_TAG='FOREMAN (voice-over)'  kept=27w  removed=52w  orig=79w
+     KEPT ...They want us to fight each other. That much has been made clear by the popcorn and blankets and alcohol that is coming over there. (DEMOCRATS BOOING)
+     GONE    FOREMAN (voice-over): Normally, cameras, in the chamber, are controlled by government workers, and confined to general shots, of the podiums, for congressional rules and practice. [21:05:00] But there are rare exceptions
+
+  rowid=247829  Nancy Pelosi               2007-05-18          cut_class=C_unanchored_paren
+     CUT_TAG='BAIER (on camera)'  kept=25w  removed=51w  orig=76w
+     KEPT ...We'll now proceed to write a bill, to fund the troops. When we leave here for Memorial Day, our troops will be funded. (END VIDEO)
+     GONE    BAIER (on camera): Speaker Pelosi also said negotiations are not dead. A top aide to a moderate Democratic senator tells FOX the leadership knows that they will not end up with a timeline for withdrawal. But, quote, poli
+
+--- bucket dash: n=63 (first 8 shown)
+  rowid=67103   Donald Davis               2024-04-18          cut_class=A_anchored_caps
+     CUT_TAG='RAJU (voice over)'  kept=26w  removed=14w  orig=40w
+     KEPT ...I'll put it this way that the Speaker is -- the thing as working in the better interest of American people, I would definitely consider --
+     GONE    RAJU (voice over): All as many Republicans warning hardliners not to seek Johnson's ouster.
+
+  rowid=67319   Yvette Clarke              2024-04-29          cut_class=A_anchored_caps
+     CUT_TAG='CARROLL (on camera)'  kept=20w  removed=12w  orig=32w
+     KEPT ...Absolutely. We need to make sure that that's bill comes to the floor to make sure that we can --
+     GONE    CARROLL (on camera): But it hasn't come to the floor so far.
+
+  rowid=67828   Christopher Murphy         2024-05-27          cut_class=A_anchored_caps
+     CUT_TAG='MARGARET BRENNAN, MODERATOR, "FACE THE NATION"'  kept=39w  removed=7w  orig=46w
+     KEPT ...rast as has ever been available to the Democratic Party on the issue of the border. Democrats support bipartisan border security. Republicans want the border to be a mess because it's good politics --
+     GONE    MARGARET BRENNAN, MODERATOR, "FACE THE NATION": Right.
+
+  rowid=68730   Christopher Murphy         2024-07-08          cut_class=A_anchored_caps
+     CUT_TAG='REP. MAXINE WATERS (D-CA 43RD DISTRICT)'  kept=35w  removed=137w  orig=172w
+     KEPT ...I love Joe Biden. I don't know that the interview on Friday night did enough to answer those questions. [12:10:02] And so, I think this week is going to be absolutely critical. I think --
+     GONE    REP. MAXINE WATERS (D-CA 43RD DISTRICT): Biden is not going anywhere. He has been strong in saying that in the last day or two. He's not going to be pushed out. REP. ADAM SCHIFF (D
+
+  rowid=68836   Maxine Waters              2024-07-09          cut_class=A_anchored_caps
+     CUT_TAG='RAJU (on camera)'  kept=15w  removed=14w  orig=29w
+     KEPT ...All I can tell you is I am a big supporter of Biden, I --
+     GONE    RAJU (on camera): What about people who believe that he is going to lose?
+
+  rowid=69390   Kweisi Mfume               2024-07-22          cut_class=A_anchored_caps
+     CUT_TAG='BIANNA GOLODRYGA, HOST, "CNN NEWSROOM"'  kept=39w  removed=205w  orig=244w
+     KEPT ...Thank you, Mr. Chair. I want to commend you and the Ranking Member on your joint statement and for holding this hearing that we might all at least attempt to try to get some answers. Some of us --
+     GONE    BIANNA GOLODRYGA, HOST, "CNN NEWSROOM": All right. You've been listening to the Director of the U.S. Secret Service testifying on Capitol Hill right now. She was being grilled by l
+
+  rowid=70310   Summer Lee                 2024-08-26          cut_class=A_anchored_caps
+     CUT_TAG='MARGARET BRENNAN, MODERATOR, CBS "FACE THE NATION"'  kept=16w  removed=8w  orig=24w
+     KEPT ...Defeating Trump is the top concern. But we can do that, and we can also --
+     GONE    MARGARET BRENNAN, MODERATOR, CBS "FACE THE NATION": Yeah.
+
+  rowid=71196   Andy Harris                2024-11-01          cut_class=A_anchored_caps
+     CUT_TAG="O'SULLIVAN (voice-over)"  kept=40w  removed=37w  orig=77w
+     KEPT ...- hey, look, you got disenfranchised 25 counties. You know what that vote probably would have been, which would be if I were in the legislature not to go, Yeah, we got to be the legislature, we can --
+     GONE    O'SULLIVAN (voice-over): Before eventually walking it back. The idea that the only way Harris can win is if the election is stolen is being pushed across hundreds of MAGA media out
+
+--- bucket ts_after_terminal: n=95 (first 8 shown)
+  rowid=67803   Lauren Boebert             2024-05-24          cut_class=C_unanchored_paren
+     CUT_TAG="O'SULLIVAN (voice-over)"  kept=11w  removed=10w  orig=21w
+     KEPT ...I'm tired of this separation of church and state junk. [23:20:01]
+     GONE    O'SULLIVAN (voice-over): It has a name. It's called Christian nationalism.
+
+  rowid=68431   George Latimer             2024-06-25          cut_class=C_unanchored_paren
+     CUT_TAG='UNKNOWN (voice-over)'  kept=38w  removed=28w  orig=66w
+     KEPT ...n Port Chester, Greenberg, or Coop City, we're fed up with the chaos that's hanging over our heads, Trump extremists in Washington, and a congressman spreading lies and conspiracy theories. [23:45:04]
+     GONE    UNKNOWN (voice-over): George Latimer has sold out a republican-funded AIPAC supporting Netanyahu's unpopular war over Biden's calls for peace. But Jamaal Bowman always stands up fo
+
+  rowid=68548   James Clyburn              2024-07-02          cut_class=C_unanchored_paren
+     CUT_TAG='LEE (voice-over)'  kept=31w  removed=32w  orig=63w
+     KEPT ...I do not believe that Joe Biden has a problem leading for the next four years because he has done a great job of leading for the last 3.5 years. [02:35:00]
+     GONE    LEE (voice-over): Amid the panic, the campaign doing its best to spin last week's presidential debate to their advantage, namely pointing to the 90-minute face off as showing Donal
+
+  rowid=68560   James Clyburn              2024-07-02          cut_class=C_unanchored_paren
+     CUT_TAG='LEE (voice-over)'  kept=11w  removed=25w  orig=36w
+     KEPT ...I will support her if he were to step aside. [18:05:00]
+     GONE    LEE (voice-over): Some prominent Biden supporters also expressing support for Harris, but insisting for now that the president remains at the top of the ticket.
+
+  rowid=68606   Nancy Pelosi               2024-07-03          cut_class=C_unanchored_paren
+     CUT_TAG='LEE (voice-over)'  kept=43w  removed=78w  orig=121w
+     KEPT ...as knowledge. He has judgment. He has a strategic thinking and the rest. He has a bad night. Now, again, I think it's a legitimate question to say is this an episode or is this a condition? [04:05:00]
+     GONE    LEE (voice-over): New CNN polling showing no immediate damage from Biden's halting debate performance. The president trailing Donald Trump by six points, 43 percent to 49 percent. 
+
+  rowid=68892   Marc Veasey                2024-07-10          cut_class=C_unanchored_paren
+     CUT_TAG='RAJU (voice-over)'  kept=71w  removed=24w  orig=95w
+     KEPT ...t I think they need to do whatever it is they need to do in order to come back and be reelected. And so, if they need to, you know, distance themselves and then that's what they need to do. [02:20:09]
+     GONE    RAJU (voice-over): Yet some like Congressman Jerry Nadler now say they are on board with Biden, despite privately calling for a change on Sunday.
+
+  rowid=68899   Marc Veasey                2024-07-10          cut_class=C_unanchored_paren
+     CUT_TAG='RAJU (voice-over)'  kept=68w  removed=24w  orig=92w
+     KEPT ... that I think they need to do whatever it is they need to do in order to come back and be reelected. And so if they need to, you know, distance themselves, then that's what they need to do. [03:05:07]
+     GONE    RAJU (voice-over): Yet some, like Congressman Jerry Nadler, now say they are on board with Biden, despite privately calling for a change on Sunday.
+
+  rowid=68994   Michael Bennet             2024-07-11          cut_class=C_unanchored_paren
+     CUT_TAG='TAUSCHE (voice-over)'  kept=47w  removed=107w  orig=154w
+     KEPT ...on and maybe win it by a landslide. And the White House in the time since that disastrous debate, I think, has done nothing to really demonstrate that they have a plan to win this election. [04:05:02]
+     GONE    TAUSCHE (voice-over): An adviser to the president said few in Biden's inner circle are concerned enough to pierce Biden's firm position. Only family could do that. And only if ther
+
+====================================================================================================
+C.  X1 cut tags that are ONE bare token (no honorific, no parenthetical): distinct list
+====================================================================================================
+   1238  'O`DONNELL'                  example rowid=260292
+    138  'O’DONNELL'                  example rowid=263653
+      5  'O`ROURKE'                   example rowid=266126
+      2  'WALLACE'                    example rowid=187602
+      1  'HAYES'                      example rowid=275925
+
+====================================================================================================
+D.  X3 rows where <=10%% of the words survive -- distinct cut tags
+====================================================================================================
+     59  'O`DONNELL'
+     13  'LEMON (on camera)'
+      6  'RAJU (on camera)'
+      5  'NOBLES (voice-over)'
+      5  'RAJU (voice-over)'
+      5  'MATTINGLY (on camera)'
+      5  'FOREMAN (voice-over)'
+      4  'Laura Barrón-López'
+      4  'O’DONNELL'
+      3  'CHUCK TODD'
+      3  'BELL (voice-over)'
+      2  'PROKUPECZ (voice-over)'
+      2  'SERFATY (voice over)'
+      2  'HANCOCKS (voice-over)'
+      2  'LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)'
+      2  'ZELENY (voice-over)'
+      2  'DIAMOND (voice-over)'
+      2  'COLLINS (voice-over)'
+      2  'NOBLES (on camera)'
+      2  'TOM FOREMAN, CNN CORRESPONDENT (voice-over)'
+      2  'TOM FOREMAN, CNN CORRESPONDENT (voice over)'
+      2  'ESSIG (voice over)'
+      2  'ZANONA (on camera)'
+      2  'BELL (voice over)'
+      2  'WATT (voice-over)'
+      1  'MATTINGLY (voice-over)'
+      1  'WALSH (voice-over)'
+      1  'WALSH (voice over)'
+      1  'KAYE (voice-over)'
+      1  'LAVANDERA (on camera)'
+      1  'TAPPER (voice-over)'
+      1  'REP. JESUS'
+      1  'SERFATY (on camera)'
+      1  'LAUREN FOX, CNN CORRESPONDENT (voice-over)'
+      1  'JOHN DICKERSON (voice over)'
+      1  'MARGARET BRENNAN (voice over)'
+      1  'BREAM (voice-over)'
+      1  'LU STOUT (on camera)'
+      1  'NATALIE ALLEN, CNN ANCHOR (voice-over)'
+      1  'MJ LEE, CNN NATIONAL POLITICAL CORRESPONDENT (voice-over)'
+      1  'MALVEAUX (voice-over)'
+      1  'MALVEAUX (voice over)'
+      1  'HOLMES (voice-over)'
+      1  'BASH (on camera)'
+      1  'RAJU (Voice Over)'
+      1  'MARQUARDT (on camera)'
+      1  'FOREMAN (on camera)'
+      1  'AVLON (on camera)'
+      1  'ATHENA JONES, CNN U.S. NATIONAL CORRESPONDENT (voice over)'
+      1  'COOPER (voice over)'
+      1  'LAH (voice-over)'
+      1  'TODD (voice-over)'
+      1  'COLLINS (on camera)'
+      1  'COATES (on camera)'
+      1  'NOBLES (voiceover)'
+      1  'ZELENY (on camera)'
+      1  'SCIUTTO (on-camera)'
+      1  'REID (voice-over)'
+      1  'CHEN (voice over)'
+      1  'GUTFELD (on camera)'
+      1  'RAJU (voiceover)'
+      1  'ZANONA (on-camera)'
+      1  'Fred de Sam Lazaro'
+      1  'Laura Barrón-López'
+
+====================================================================================================
+E.  X5 class-E (colon-less) rows removing >=25 words -- ALL 34 shown
+====================================================================================================
+  rowid=66438   Carlos Gimenez             2024-03-17          cut_class=E_colonless_honorific
+     CUT_TAG='REP. TROY NEHIS'  kept=16w  removed=27w  orig=43w
+     KEPT ...We're not going to get much involved in their stuff. They shouldn't get involved in ours.
+     GONE    REP. TROY NEHIS, (R-TX). That's not a healthy situation when you start targeting other members and especially when the Republican conference does it -- can't do that.
+
+  rowid=66969   Chuck Grassley             2024-04-17          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. PATTY MURRAY (D-WA)'  kept=39w  removed=88w  orig=127w
+     KEPT ...s appertaining to the trial or impeachment of Alejandro N. Mayorkas, secretary of Homeland Security now pending, you will do impartial justice according to the Constitution and laws. So help you, God.
+     GONE    SEN. PATTY MURRAY (D-WA) I do. Yes. At this time, I will administer the oath to all Senators in the chamber in conformance with the Article I, Section 3, Clause 6 of the Constitution, and the Senate impeachment rules. Will all Senators now stand and raise their right hands? Do you solemnly swear that in all things appertaining t
+
+  rowid=66973   Ted Cruz                   2024-04-17          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. PATTY MURRAY (D-WA)'  kept=77w  removed=39w  orig=116w
+     KEPT ...this Senate to vote on political expediency to avoid listening to arguments. The only rational way to resolve this question is actually to debate it, to consider the Constitution and consider the law.
+     GONE    SEN. PATTY MURRAY (D-WA). The Senator will recognize that the Senate is in a non-debatable position. The Senator has a right to offer his point of order but - or his motion. But we are in a non-debatable position.
+
+  rowid=73089   Bryan Steil                2025-01-06          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. AMY KLOBUCHAR (D-MN)'  kept=53w  removed=57w  orig=110w
+     KEPT ... authentic, and it appears therefrom that Kamala D. Harris of the state of California received three votes for president and Tim Walz of the state of Minnesota received three votes for vice president.
+     GONE    SEN. AMY KLOBUCHAR (D-MN) Madam President, the certificate of the electoral vote of the Commonwealth of Virginia seems to be regular in form and authentic, and it appears therefrom that Kamala D. Harris of the state of California received 13 votes for president and Tim Walz of the state of Minnesota received 13 votes for vice pr
+
+  rowid=84935   Josh Hawley                2025-11-20          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. ERIC SCHMITT'  kept=17w  removed=32w  orig=49w
+     KEPT ...I don't think they'll do that, Elex. I think I'd be really surprised if they tried that.
+     GONE    SEN. ERIC SCHMITT (R- I've been saying for a long time that I think that all the credible information that can be released should be released, and so that's where we're at.
+
+  rowid=86942   Jim Jordan                 2026-01-22          cut_class=E_colonless_honorific
+     CUT_TAG='REP. JESUS'  kept=10w  removed=190w  orig=200w
+     KEPT ...Without objection. The Chair now recognizes the gentleman from Illinois.
+     GONE    REP. JESUS "CHUY" GARCIA, (D-IL): Thank you, Chairman. And thank you, Mr. Smith, for being here today. Let's remember why we're here today. Donald Trump incited an insurrection in 2020 because he refused to accept that he lost that election. And when he -- and then he took classified documents with him and put them in Mar-a-Lago
+
+  rowid=87072   Ted Cruz                   2026-01-26          cut_class=E_colonless_honorific
+     CUT_TAG='GOV. GREG ABBOTT (R-TX)'  kept=16w  removed=44w  orig=60w
+     KEPT ...What I think the administration could do better is the tone with which they're describing this.
+     GONE    GOV. GREG ABBOTT (R-TX) (voice-over): They, being the White House, need to recalibrate on what needs to be done. I know that they're working on a game plan to make sure that they're going to let's say recalibrate, maybe work from a different direction.
+
+  rowid=89101   Josh Hawley                2026-03-19          cut_class=E_colonless_honorific
+     CUT_TAG='REP. ERIC BURLISON'  kept=9w  removed=26w  orig=35w
+     KEPT ...Let's wait and see what the request amounts to.
+     GONE    REP. ERIC BURLISON (R-Mop: It'll give me comfort if they pass an audit, and then I'll know that at least they're keeping track of the dollars.
+
+  rowid=89961   Elizabeth Warren           2026-04-21          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. TIM SCOTT (R-SC)'  kept=666w  removed=56w  orig=722w
+     KEPT ... by installing his chosen sock puppet as chair. It's an invitation for corruption and for economic catastrophe. We have the power to stop it and we should be using that power. Thank you, Mr. Chairman.
+     GONE    SEN. TIM SCOTT (R-SC), CHAIR, SENATE BANKING COMMITTEE:: Well, there you have it. I'll just say it. It is interesting that we're going to hear from Senator Dave McCormick and his introduction of Kevin Warsh was last time unanimously confirmed by the United States Senate, unanimously confirmed by the U.S. Senate. Dave, the floor 
+
+  rowid=91180   Thom Tillis                2026-05-22          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. SUSAN COLLINS (R-ME)'  kept=10w  removed=30w  orig=40w
+     KEPT ...This is, I mean, this is just stupid on stilts.
+     GONE    SEN. SUSAN COLLINS (R-ME) I do not believe that individuals who were convicted of violence against police officers on January 6 should be entitled to reimbursement for their legal fees.
+
+  rowid=103014  Nancy Pelosi               2021-01-31          cut_class=E_colonless_honorific
+     CUT_TAG='REP. MARJORY TAYLOR GREENE (R-GA)'  kept=22w  removed=29w  orig=51w
+     KEPT ...The enemy is within the House of Representatives. A threat that members are concerned about in addition to what is happening outside.
+     GONE    REP. MARJORY TAYLOR GREENE (R-GA) (2019): How did you get over 30 appointments with senators? How'd you do that? How did you get major press coverage on this issue?
+
+  rowid=103939  Tim Scott                  2023-04-16          cut_class=E_colonless_honorific
+     CUT_TAG='FMR. GOV. NIKKI HALEY'  kept=13w  removed=64w  orig=77w
+     KEPT ...I'm not going to talk about six or five or seven or ten.
+     GONE    FMR. GOV. NIKKI HALEY I don't want unelected justices deciding something this personal. … We're not going to let this be a political football. Let's let the states work this out. If Congress decides to do it -- but don't get in that game of them saying “how many weeks, how many weeks.” No. Let's first figure out what we agree on
+
+  rowid=104285  Rand Paul                  2017-04-09          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. TIM KAINE'  kept=35w  removed=84w  orig=119w
+     KEPT ...My heart breaks seeing those images, say what can we do? But it doesn't mean we just sort of rip up the Constitution and say okay it's fine to bomb anybody if they're committing atrocities.
+     GONE    SEN. TIM KAINE Doing this without consulting Congress without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in responding to Syria’s chemical attack than the U.S. ambassador to the United Nations Nikki Haley. Haley has been the face of the administration in this cris
+
+  rowid=107897  Rand Paul                  2017-01-08          cut_class=E_colonless_honorific
+     CUT_TAG='SENATOR BOB CORKER'  kept=19w  removed=27w  orig=46w
+     KEPT ...I think it's imperative that Republicans do a replacement simultaneous to repeal. If they don't, Obamacare continues to unravel.
+     GONE    SENATOR BOB CORKER During the campaign, he said that the repeal and replacement should take place simultaneously, okay? That to me is the prudent course of action.
+
+  rowid=108462  Tim Scott                  2023-07-30          cut_class=E_colonless_honorific
+     CUT_TAG='GOVERNOR RON'  kept=36w  removed=54w  orig=90w
+     KEPT ...arating families, about mutilating humans, and even raping their wives. It was devastating. So, I would hope that every person in our country and certainly running for president would appreciate that.
+     GONE    GOVERNOR RON DeSANTIS: You know, I think part of the reason our country has struggled is because D.C. Republicans all too often accept false narratives, accept lies that are perpetrated by the left, and to, you know, accept the lie that Kamala Harris has been perpetrating, even when that has been debunked. [END TAPE]
+
+  rowid=112183  Ted Cruz                   2015-11-22          cut_class=E_colonless_honorific
+     CUT_TAG='DR. BEN CARSON'  kept=17w  removed=42w  orig=59w
+     KEPT ...Those planes that flew into the Twin Towers weren’t piloted by a bunch of ticked off Presbyterians.
+     GONE    DR. BEN CARSON If there’s a rabid dog running around your neighborhood, you’re probably not going to assume something good about that dog, and you’re probably going to push your children out of the way. Doesn’t mean that you hate all dogs.
+
+  rowid=167914  Jeanne Shaheen             2018-04-12          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. CHRIS COONS'  kept=11w  removed=50w  orig=61w
+     KEPT ...Do you think Special Counsel Mueller's investigation is a witch hunt?
+     GONE    SEN. CHRIS COONS, D—DELAWARE: Do you believe Special Counsel Mueller's investigation is an attack on our country and all we stand for? SEN. CHRIS MURPHY, D—CONNECTICUT: It will be really troubling if you couldn't say here today that you don't believe that the Mueller investigation is an attack on America.
+
+  rowid=187143  Charles Schumer            2018-03-14          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. CHRIS MURPHY'  kept=28w  removed=40w  orig=68w
+     KEPT ...The NRA has been made public enemy number one and I'm proud of it. We are going to win! We're going win to win! We're going to win!
+     GONE    SEN. CHRIS MURPHY, D—CONN.: I want to know, are you prepared to do whatever it takes to beat the gun lobby? SEN. RICHARD BLUMENTHAL, D—CONN.: Are we going to ban assault weapons? Are we going to have universal background checks?
+
+  rowid=191915  Jack Reed                  2018-11-23          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. KAMALA HARRIS'  kept=44w  removed=53w  orig=97w
+     KEPT ...order, this is not an effort to defend the nation. This is an effort to divide -- divide the nation for the politics of the last election. The troops are just sort of extras in his political campaign.
+     GONE    SEN. KAMALA HARRIS, (D) California: I believe that it is inappropriate to require the limited resources of the United States military to be used in such a way all because there needed to be some demonstration for the TV cameras based on a political agenda instead of what is a national security threat.
+
+  rowid=196219  Nancy Pelosi               2019-05-23          cut_class=E_colonless_honorific
+     CUT_TAG='DONALD TRUMP (R), PRESIDENT OF THE UNITED STATES'  kept=14w  removed=51w  orig=65w
+     KEPT ...We believe that the president of the United States is engaged in a cover-up.
+     GONE    DONALD TRUMP (R), PRESIDENT OF THE UNITED STATES; Instead of walking in happily into a meeting, I walk in to look at people that had just said that I was doing a cover-up. I don't do cover-ups. This whole thing was a takedown attempt at the president of the United States.
+
+  rowid=197182  Elizabeth Warren           2019-06-10          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. BERNIE SANDERS (I-VT)'  kept=13w  removed=57w  orig=70w
+     KEPT ...There are people who are ready for big structural change in this country.
+     GONE    SEN. BERNIE SANDERS (I-VT); I understand that there are some well- intentioned Democrats and candidates who believe that the best way forward is a middle-ground strategy that antagonizes no one, that stands up to nobody, and that changes nothing. In my view, that approach is not just bad public policy, but it is a failed politic
+
+  rowid=208795  Bernard Sanders            2020-01-19          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. ELIZABETH WARREN (D-MA)'  kept=33w  removed=62w  orig=95w
+     KEPT ...Well, as a matter of fact, I didn't say it. Anybody who knows me, knows that it's incomprehensible that I would think that a woman could not be President of the United States.
+     GONE    SEN. ELIZABETH WARREN (D-MA), PRESIDENTIAL CANDIDATE Bernie is my friend, and I am not here to try to fight with Bernie. Can a woman beat Donald Trump? Look at the man on this stage. Collectively, they have last 10 elections. The only people on this stage who have won every single election that they've been in, are the women. Am
+
+  rowid=212635  Nancy Pelosi               2020-06-25          cut_class=E_colonless_honorific
+     CUT_TAG='REP. JERRY NADLER (D-NY)'  kept=18w  removed=28w  orig=46w
+     KEPT ...Pass this bill. The Senate will have a choice to honor George Floyd's life or to do nothing.
+     GONE    REP. JERRY NADLER (D-NY); This is not the time for half measures. It's not the time for them to study. It's not the time for sham fake reform.
+
+  rowid=215057  Lindsey Graham             2020-12-09          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. JOSH HAWLEY (R-MO)'  kept=25w  removed=32w  orig=57w
+     KEPT ...I'm okay with the way things are going. The president's challenging the election results and within the rule of law, and that's allowed in America.
+     GONE    SEN. JOSH HAWLEY (R-MO) (voice over): The president has every right to present his case and every court that he wants to go to and has every right to be heard. [11:50:05]
+
+  rowid=219462  Andrew Clyde               2021-05-13          cut_class=E_colonless_honorific
+     CUT_TAG='REP. RALPH NORMAN (R-SC)'  kept=74w  removed=25w  orig=99w
+     KEPT ...ying between the stanchions and ropes, taking videos and pictures. You know, if you didn't know the TV footage was a video from January the 6th, you would actually think it was a normal tourist visit.
+     GONE    REP. RALPH NORMAN (R-SC); At 2:07, a mob of Trump supporters breached the steps. I don't know who did a poll that it's Trump supporters.
+
+  rowid=224617  Thom Tillis                2022-02-08          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. MITT ROMNEY (R-UT)'  kept=32w  removed=48w  orig=80w
+     KEPT ...I've told anyone, that the minute you enter the Capitol building, it was no longer discourse. It was riot. They need to be held accountable for what they did. That's not discourse.
+     GONE    SEN. MITT ROMNEY (R-UT) (voice over): It could not have been a more inappropriate message, one, to sanction two people of character as they did. But number two, to suggest that a violent attack on the seat of democracy is legitimate political discourse is so far from accurate.
+
+  rowid=230193  John Thune                 2022-09-22          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. THOM TILLIS (R-NC)'  kept=29w  removed=25w  orig=54w
+     KEPT ...I think there's a process, for declassifying documents, and - and I think it ought to be adhered to and followed. And I think that should apply to anybody.
+     GONE    SEN. THOM TILLIS (R-NC) I believe there's a formal process it needs to go through it - that needs to be gone through, and documented.
+
+  rowid=234547  Josh Hawley                2018-11-04          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. CLAIRE MCCASKILL'  kept=11w  removed=37w  orig=48w
+     KEPT ...Their agenda is open borders. Their agenda is liberal activist judges.
+     GONE    SEN. CLAIRE MCCASKILL, D—MO.: All the bigwigs in the Republican Party, they were kind of drooling, chomping at the bit, because you know what they thought? They thought Missouri was over. Not so fast. Not so fast!
+
+  rowid=243863  Tim Burchett               2023-06-21          cut_class=E_colonless_honorific
+     CUT_TAG='REP. DON BACON (R-NE)'  kept=33w  removed=34w  orig=67w
+     KEPT ...Yes, I thought it was pretty weak. But I can guarantee you, if some guy, some working man or woman gets popped with a gun charge, they're probably going to do some time.
+     GONE    REP. DON BACON (R-NE) I believe, in the end, you had a Trump-appointed attorney. I don't know who this judge is in this case. But I trust our justice system to get it right.
+
+  rowid=248449  Lindsey Graham             2015-12-08          cut_class=E_colonless_honorific
+     CUT_TAG='GOV. CHRIS CHRISTIE (R-NJ)'  kept=28w  removed=34w  orig=62w
+     KEPT ...He's a race-baiting, xenophobic religious bigot. He doesn't represent my party. He doesn't represent the values that the men and women who wear the uniform are fighting for.
+     GONE    GOV. CHRIS CHRISTIE (R-NJ), PRESIDENTIAL CANDIDATE (via phone): You do not need to be banning Muslims from the country. That's, in my view, that's a ridiculous position and one that won't even be productive.
+
+  rowid=249127  Ritchie Torres             2023-11-08          cut_class=E_colonless_honorific
+     CUT_TAG='REP. PRAMILA JAYAPAL (D-WA)'  kept=57w  removed=29w  orig=86w
+     KEPT ...state, you're advocating for the destruction of Israel as a Jewish state. And that crosses a line that no member of Congress should ever cross. It's hate speech and Congress has a right to condemn it.
+     GONE    REP. PRAMILA JAYAPAL (D-WA) It is outrageous. I am embarrassed for those Democrats who voted to censure their own colleague, who voted against free speech. It is an embarrassment.
+
+  rowid=265823  Lindsey Graham             2018-09-26          cut_class=E_colonless_honorific
+     CUT_TAG='SEN. BILL CASSIDY'  kept=59w  removed=57w  orig=116w
+     KEPT ...0 parties over two years where you witnessed drugging and raping and you kept coming back and back and you never told anybody, you never warned any of your girlfriends, I find that to be over the top.
+     GONE    SEN. BILL CASSIDY, (R) LOUISIANA; And we`re being told that a woman went to 10 different parties where women were being gang raped and never reported it. SEN. ORRIN HATCH, (R) UTAH; I think it is a smear. I don`t think there`s any question in my mind about it. But I`m willing to keep an open mind.
+
+  rowid=273301  Lindsey Graham             2021-05-07          cut_class=E_colonless_honorific
+     CUT_TAG='REP. ELISE STEFANIK (R-NY)'  kept=45w  removed=48w  orig=93w
+     KEPT ...ut President Trump? The answer is no. I`ve always liked Liz Cheney, but she`s made a determination that the Republican Party can`t grow with President Trump. I`ve determined we can`t grow without him.
+     GONE    REP. ELISE STEFANIK (R-NY) (voice over): We have to work with President Trump to win back the majority. We need fighters. President Trump is a fighter on behalf of the American people, and voters want fighters to stand up for them, and that`s what I`m committed to doing.
+
+  rowid=275908  Mitch McConnell            2022-06-08          cut_class=E_colonless_honorific
+     CUT_TAG='REP. KEVIN MCCARTHY (R-CA)'  kept=31w  removed=33w  orig=64w
+     KEPT ...The United States Senate will not be intimidated. We will not be kept out of this chamber by thugs, mobs, or threats. We will not bow to the lawlessness or intimidation.
+     GONE    REP. KEVIN MCCARTHY (R-CA); The violence, destruction and chaos we saw earlier was unacceptable, undemocratic, and unAmerican. It was the saddest day I`ve ever had as serving as a member of this institution.
+
+====================================================================================================
+F.  V4 -- the v1 counter-examples
+====================================================================================================
+  rowid=80238   Jon Husted               2025-09-17  TRUNCATED
+     cut_class=E_colonless_honorific cut_tag='SEN. BILL CASSIDY' cut_at=197
+     ALL_TAGS=[{"tag": "SEN. BILL CASSIDY", "class": "E_colonless_honorific", "ownership": "foreign", "at": 197}]
+     kept(41w): Yeah, and thank you, Mr. Chairman. And the -- and the irony of this is, is when I talk with you, you say that. And when I talk with Secretary Kennedy, he says this, we got to get this figured out.
+     gone(12w): SEN. BILL CASSIDY, (R-KY) CHAIRMAN, SENATE COMMITTEE ON HEALTH, EDUCATION, LABOR &
+
+  rowid=192027  Lucy McBath              2019-03-02  TRUNCATED
+     cut_class=E_colonless_honorific cut_tag='REP. STEVE SCALISE' cut_at=99
+     ALL_TAGS=[{"tag": "REP. STEVE SCALISE", "class": "E_colonless_honorific", "ownership": "foreign", "at": 99}]
+     kept(19w): I urge my colleagues to vote yes on HR8; the bipartisan Background Checks Act of 2019. It is time.
+     gone(10w): REP. STEVE SCALISE, (R-LA), MINORITY WHIP, UNITED STATES HOUSE OF
+
+  rowid=226287  Jim Jordan               2022-06-11  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='NOBLES (voice-over)' cut_at=109
+     ALL_TAGS=[{"tag": "NOBLES (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 109}, {"tag": "REP. BENNIE THOMPSON (D)", "class": "E_colonless_honorific", "ownership": "foreign", "at": 217}]
+     kept(21w): This was a partisan production put on by the former head of ABC News. I don't think we learned anything new.
+     gone(29w): NOBLES (voice-over): And committee chair Bennie Thompson telling CNN the committee has a lot more to share. REP. BENNIE THOMPSON (D), CHAIR, U.S. HOUSE SELECT COMMITTEE ON JANUARY 6
+
+  rowid=245558  Mike Johnson             2023-08-17  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='LISA KING, EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)' cut_at=612
+     ALL_TAGS=[{"tag": "JOHNSON (voice-over)", "class": "C_unanchored_paren", "ownership": "own", "at": 238}, {"tag": "LISA KING, EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 612}, {"tag": "JOHNSON (voice-over)", "class": "A_anchored_caps", "ownership": "own", "at": 998}, {"tag": "JOHNSON (voice-over)", "class": "C_unanchored_paren", "ownership": "own", "at": 1629}, {"tag": "JOHNSON (voice-over)", "class": "C_unanchored_paren", "ownership": "own", "at": 1950}, {"tag": "KING (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 2741}, {"tag": "KING (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 2820}, {"tag": "JOHNSON (voice-over)", "class": "A_anchored_caps", "ownership": "own", "at": 2936}]
+     kept(110w): You see there are these large flowers down there. There's some white ones, some pink ones; that's a native hibiscus. It's in the mallow family and the wetland ones they call them marsh mallows. Get it? Marsh mallows, yes. (MUSIC PLAYING) JOHNSON (voice-over): My name is Mike Johnson. I'm the chief o
+        ...tail: would never know that this was ever a golf course. The vegetation that you see behind me, 90 percent of it is native; whereas when this was a golf course, 90 percent of it was non native and invasive.
+     gone(502w): LISA KING, EXECUTIVE DIRECTOR, SUMMIT METRO PARKS (voice-over): This park is right within the city of Akron limits. And when we started the acquisition, we realized that how important it was to connect the other two parks to this area. It allowed us to knit together 1,800 acres. That is something that is very difficult to do in a county where everything is beginning to be built out. JOHNSON (voice-over): The first ch
+
+  rowid=66969   Chuck Grassley           2024-04-17  TRUNCATED
+     cut_class=E_colonless_honorific cut_tag='SEN. PATTY MURRAY (D-WA)' cut_at=239
+     ALL_TAGS=[{"tag": "SEN. PATTY MURRAY (D-WA)", "class": "E_colonless_honorific", "ownership": "foreign", "at": 239}]
+     kept(39w): Do you solemnly swear and in all things appertaining to the trial or impeachment of Alejandro N. Mayorkas, secretary of Homeland Security now pending, you will do impartial justice according to the Constitution and laws. So help you, God.
+     gone(88w): SEN. PATTY MURRAY (D-WA) I do. Yes. At this time, I will administer the oath to all Senators in the chamber in conformance with the Article I, Section 3, Clause 6 of the Constitution, and the Senate impeachment rules. Will all Senators now stand and raise their right hands? Do you solemnly swear that in all things appertaining to the trial of the impeachment of Alejandro Mayorkas, secretary of Homeland Security, now,
+
+  rowid=69544   James Comer              2024-07-23  SKIPPED:kept_text_under_min_turn_words
+     cut_class=A_anchored_caps cut_tag='WILD (voice-over)' cut_at=8
+     ALL_TAGS=[{"tag": "WILD (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 8}]
+     kept(2w): OK. OK.
+     gone(62w): WILD (voice-over): Members of the Committee pressed Cheatle for answers about why the former president was allowed to take the stage even after she admitted the Secret Service had been notified between two and five times police were looking for suspicious person. Cheatle repeatedly said law enforcement didn't immediately determine that person who turned out to be the shooter was a threat.
+
+  rowid=244993  James Comer              2023-07-23  SKIPPED:kept_text_under_min_turn_words
+     cut_class=A_anchored_caps cut_tag='WILD (voice-over)' cut_at=8
+     ALL_TAGS=[{"tag": "WILD (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 8}]
+     kept(2w): OK. OK.
+     gone(62w): WILD (voice-over): Members of the Committee pressed Cheatle for answers about why the former president was allowed to take the stage even after she admitted the Secret Service had been notified between two and five times police were looking for suspicious person. Cheatle repeatedly said law enforcement didn't immediately determine that person who turned out to be the shooter was a threat.
+
+  rowid=278454  NOT FLAGGED AT ALL by v2 (no plan, no ledger record)
+  rowid=278528  NOT FLAGGED AT ALL by v2 (no plan, no ledger record)
+  rowid=83061   Maxine Dexter            2025-10-07  TRUNCATED
+     cut_class=B_unknown_surname_paren cut_tag='PROKUPECZ (voice-over)' cut_at=36
+     ALL_TAGS=[{"tag": "PROKUPECZ (voice-over)", "class": "B_unknown_surname_paren", "ownership": "foreign", "at": 36}, {"tag": "PROKUPECZ (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 493}]
+     kept(8w): I need people to not take the bait.
+     gone(94w): PROKUPECZ (voice-over): That's why Maxine Dexter wants all these protesters to leave the ICE facility. The Democratic congresswoman from Portland supports their message, but fears they're playing into President Trump's hands. The question is, are we being strategic? Are we being effective? And I would argue that being down there, taking a risk, that you become a player in this reality TV vision that Donald Trump has 
+
+  rowid=68730   Christopher Murphy       2024-07-08  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='REP. MAXINE WATERS (D-CA 43RD DISTRICT)' cut_at=188
+     ALL_TAGS=[{"tag": "REP. MAXINE WATERS (D-CA 43RD DISTRICT)", "class": "A_anchored_caps", "ownership": "foreign", "at": 188}, {"tag": "REP. ADAM SCHIFF (D-CA 30TH DISTRICT)", "class": "A_anchored_caps", "ownership": "foreign", "at": 349}]
+     kept(35w): I love Joe Biden. I don't know that the interview on Friday night did enough to answer those questions. [12:10:02] And so, I think this week is going to be absolutely critical. I think --
+     gone(137w): REP. MAXINE WATERS (D-CA 43RD DISTRICT): Biden is not going anywhere. He has been strong in saying that in the last day or two. He's not going to be pushed out. REP. ADAM SCHIFF (D-CA 30TH DISTRICT): He should take a moment to make the best informed judgment. And if the judgment is run, then run hard and beat that S.O.B. Meanwhile, it appears Donald Trump is very close to picking his running mate. Indications are tha
+
+  rowid=102837  Thom Tillis              2018-01-24  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17, 2017' cut_at=123
+     ALL_TAGS=[{"tag": "SEN. JOE MANCHIN, D-W.VA, \"MEET THE PRESS\"/NBC, DEC. 17, 2017", "class": "A_anchored_caps", "ownership": "foreign", "at": 123}, {"tag": "SEN. JOHN CORNYN, R-TEXAS, \"THIS WEEK\"/ABC, DEC. 17, 2017", "class": "A_anchored_caps", "ownership": "foreign", "at": 301}, {"tag": "SEN. CHRIS VAN HOLLEN, D-MD., \"THIS WEEK\"/ABC, DEC. 17, 2017", "class": "A_anchored_caps", "ownership": "foreign", "at": 422}, {"tag": "UNIDENTIFIED MALE, MSNBC, AUG. 3, 2017", "class": "A_anchored_caps", "ownership": "foreign", "at": 590}]
+     kept(23w): No, I haven't. I sit on the Judiciary Committee along with Senator Coons and I have not seen any evidence to suggest that.
+     gone(121w): SEN. JOE MANCHIN, D-W.VA, "MEET THE PRESS"/NBC, DEC. 17, 2017: I do not at all believe that Mr. Mueller has been compromised for his investigation. I think he's beyond reproach. SEN. JOHN CORNYN, R-TEXAS, "THIS WEEK"/ABC, DEC. 17, 2017 : I have a lot of admiration and respect for Director Mueller. SEN. CHRIS VAN HOLLEN, D-MD., "THIS WEEK"/ABC, DEC. 17, 2017: You've got somebody who, by all accounts, is an independent
+
+  rowid=104285  Rand Paul                2017-04-09  TRUNCATED
+     cut_class=E_colonless_honorific cut_tag='SEN. TIM KAINE' cut_at=190
+     ALL_TAGS=[{"tag": "SEN. TIM KAINE", "class": "E_colonless_honorific", "ownership": "foreign", "at": 190}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 298}]
+     kept(35w): My heart breaks seeing those images, say what can we do? But it doesn't mean we just sort of rip up the Constitution and say okay it's fine to bomb anybody if they're committing atrocities.
+     gone(84w): SEN. TIM KAINE Doing this without consulting Congress without a vote, I think, is a clear violation of law. CHUCK TODD:It’s fair to say that no one has been more forceful in responding to Syria’s chemical attack than the U.S. ambassador to the United Nations Nikki Haley. Haley has been the face of the administration in this crisis and yesterday, I asked her whether the Trump administration believes it has achieved it
+
+  rowid=108647  Richard Durbin           2018-07-08  SKIPPED:credit_union_stance_channel_row
+     cut_class=A_anchored_caps cut_tag='CHUCK TODD' cut_at=616
+     ALL_TAGS=[{"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 616}, {"tag": "SENATOR DICK DURBIN", "class": "A_anchored_caps", "ownership": "own", "at": 987}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 1473}, {"tag": "SENATOR DICK DURBIN", "class": "A_anchored_caps", "ownership": "own", "at": 1938}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 2530}, {"tag": "SENATOR DICK DURBIN", "class": "A_anchored_caps", "ownership": "own", "at": 2619}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 2655}, {"tag": "SENATOR DICK DURBIN", "class": "A_anchored_caps", "ownership": "own", "at": 2702}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 3007}, {"tag": "SENATOR DICK DURBIN", "class": "A_anchored_caps", "ownership": "own", "at": 3161}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 3211}]
+     kept(107w): But let's get down to the heart of it. This Supreme Court is going to decide whether or not people in families with pre-existing conditions can have access to affordable health insurance. That's it. It's real, and it's a constitutional challenge by the Trump administration this court will face. This
+        ...tail: heir families. That is a critical decision this court will face. So beyond the procedure, beyond the gamesmanship, it is a life and death important decision to be made by this court on so many issues.
+     gone(528w): CHUCK TODD:And yet you have this political dilemma that stares, I think, you and Chuck Schumer really in the face as the two leaders, which is this: staying united to stop the Supreme Court pick could cost you red state senators. Not fighting it as hard might allow the red state senators to get reelected and get Democrats in control of the Senate. That's your dilemma. SENATOR DICK DURBIN:It is a dilemma in one respec
+
+  rowid=111034  Lindsey Graham           2017-05-14  SKIPPED:kept_text_under_min_turn_words
+     cut_class=A_anchored_caps cut_tag='CHUCK TODD' cut_at=20
+     ALL_TAGS=[{"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 20}, {"tag": "SEN. CHUCK SCHUMER", "class": "A_anchored_caps", "ownership": "foreign", "at": 282}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 516}, {"tag": "SEN. CHUCK SCHUMER", "class": "A_anchored_caps", "ownership": "foreign", "at": 927}, {"tag": "CHUCK TODD", "class": "A_anchored_caps", "ownership": "foreign", "at": 2154}]
+     kept(3w): Happy Mother's Day.
+     gone(441w): CHUCK TODD:Thank you, sir. Appreciate it. Well, let me go to the other side of the aisle, Senate Democratic Leader, Chuck Schumer of New York. Senator, welcome back to Meet the Press. I hope that you are more enthusiastic about being on than Senator Graham was. SEN. CHUCK SCHUMER:Yeah, I didn’t see Senator Graham but I just want to join him in wishing all the moms of America, and your family Chuck, Happy Mother’s Day
+
+  rowid=242833  Mitch McConnell          2012-04-19  SKIPPED:credit_union_stance_channel_row
+     cut_class=E_colonless_honorific cut_tag='SEN. DICK DURBIN' cut_at=207
+     ALL_TAGS=[{"tag": "SEN. DICK DURBIN", "class": "E_colonless_honorific", "ownership": "foreign", "at": 207}, {"tag": "BRET BAIER, HOST OF “SPECIAL REPORT”", "class": "A_anchored_caps", "ownership": "foreign", "at": 538}]
+     kept(39w): They want to ram this gigantic $1 trillion bill through Congress and they're using once again the Christmas break as an inducement to vote for it. Now look we all know that this is not the way to legislate.
+     gone(264w): SEN. DICK DURBIN, SENATE MAJORITY WHIP D-Ill.: Many of the same senators who are criticizing congressionally directed spending, or earmarks, have earmarks in the bill. That is the height of hypocrisy, to stand up and request earmark, have it included in the bill, and then fold your arms and piously announce I'm against earmarks. BRET BAIER, HOST OF “SPECIAL REPORT”: The omnibus spending bill, $1.1 trillion, is going 
+
+  rowid=70149   Lateefah Simon           2024-08-20  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='BRIAN NELSON, GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTICE (2011- 2015)' cut_at=122
+     ALL_TAGS=[{"tag": "BRIAN NELSON, GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTICE (2011- 2015)", "class": "A_anchored_caps", "ownership": "foreign", "at": 122}]
+     kept(20w): Kamala, had been a hard and tough prosecutor in Alameda County, prosecuting men who were pimping young girls and rapists.
+     gone(28w): BRIAN NELSON, GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTICE (2011- 2015): Kamala wanted to make sure that murderers and child abusers face meaningful accountability and consequences for those actions.
+
+  rowid=83941   Robert Wittman           2025-11-01  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='KIM PHAM, GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through text translation)' cut_at=73
+     ALL_TAGS=[{"tag": "KIM PHAM, GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through text translation)", "class": "A_anchored_caps", "ownership": "foreign", "at": 73}]
+     kept(13w): And they threatened the guards with the angle cutters to hold them back.
+     gone(42w): KIM PHAM, GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through text translation): The security team on the site had the initial reaction to evacuate the public from the room. Their first instinct was to get the public away from the robbers equipped with power tools.
+
+  rowid=192133  Ilhan Omar               2019-03-05  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='SUZANNE MALVEAUX, NATIONAL CORRESPONDENT, CNN(off-camera)' cut_at=127
+     ALL_TAGS=[{"tag": "SUZANNE MALVEAUX, NATIONAL CORRESPONDENT, CNN(off-camera)", "class": "A_anchored_caps", "ownership": "foreign", "at": 127}]
+     kept(24w): I know how it feels to be hated because of my religious beliefs. I am proof that as Americans, we can embrace our differences.
+     gone(36w): SUZANNE MALVEAUX, NATIONAL CORRESPONDENT, CNN(off-camera): Freshman Congresswoman Ilhan Omar sworn into office just two months ago, now facing an extraordinary public admonishment from her own party for several controversial comments about Israel supporters and American politics.
+
+  rowid=193439  Alexandria Ocasio-Cortez 2019-04-02  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='SUNLEN SERFATY, CONGRESSIONAL CORRESPONDENT, CNN (voice over)' cut_at=40
+     ALL_TAGS=[{"tag": "SUNLEN SERFATY, CONGRESSIONAL CORRESPONDENT, CNN (voice over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 40}]
+     kept(8w): And it's systemic and it has an impact.
+     gone(30w): SUNLEN SERFATY, CONGRESSIONAL CORRESPONDENT, CNN (voice over): New freshman members of Congress are pulling back the curtain on what many see as a pervasive culture of sexism on Capitol Hill.
+
+  rowid=225128  NOT FLAGGED AT ALL by v2 (no plan, no ledger record)
+  rowid=225771  NOT FLAGGED AT ALL by v2 (no plan, no ledger record)
+  rowid=242500  NOT FLAGGED AT ALL by v2 (no plan, no ledger record)
+  rowid=82055   Raphael Warnock          2024-04-28  SKIPPED:label_or_gold_record_points_here
+     cut_class=E_colonless_honorific cut_tag='DONALD TRUMP (R), FORMER U.S. PRESIDENT AND' cut_at=251
+     ALL_TAGS=[{"tag": "DONALD TRUMP (R), FORMER U.S. PRESIDENT AND", "class": "E_colonless_honorific", "ownership": "foreign", "at": 251}]
+     kept(50w): I think that Georgia voters, black voters included, are going to show up for Joe Biden the same way they showed up for me. Not to vote is to vote. It is to push Donald Trump a little bit closer to the White House. And that is a dangerous proposition.
+     gone(8w): DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+
+  rowid=71147   Mitch McConnell          2024-10-29  TRUNCATED
+     cut_class=E_colonless_honorific cut_tag='DONALD TRUMP (R), FORMER U.S. PRESIDENT AND' cut_at=59
+     ALL_TAGS=[{"tag": "DONALD TRUMP (R), FORMER U.S. PRESIDENT AND", "class": "E_colonless_honorific", "ownership": "foreign", "at": 59}]
+     kept(11w): The mob was fed lies. They were provoked by the president.
+     gone(8w): DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+
+  rowid=70812   Lindsey Graham           2024-09-30  TRUNCATED
+     cut_class=E_colonless_honorific cut_tag='[06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND' cut_at=190
+     ALL_TAGS=[{"tag": "[06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND", "class": "E_colonless_honorific", "ownership": "foreign", "at": 190}]
+     kept(34w): And here's what I would tell President Trump, when people look at the state of play, they trust you on the economy, the border, inflation and foreign policy by wide margins. Focus on those.
+     gone(9w): [06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND 2024
+
+  rowid=205497  Daniel Goldman           2019-11-19  TRUNCATED
+     cut_class=E_colonless_honorific cut_tag='TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT TRUMP ON RUSSIA AND' cut_at=70
+     ALL_TAGS=[{"tag": "TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT TRUMP ON RUSSIA AND", "class": "E_colonless_honorific", "ownership": "foreign", "at": 70}]
+     kept(13w): What did Ambassador Sondland say to tell you that he told Mr. Yermak?
+     gone(14w): TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT TRUMP ON RUSSIA AND EUROPE ON THE
+
+  rowid=258713  Jeanne Shaheen           2023-07-11  TRUNCATED
+     cut_class=D_mixed_case_label cut_tag='Laura Barrón-López' cut_at=64
+     ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 64}, {"tag": "Emmanuel Macron, French President (through translator)", "class": "D_mixed_case_label", "ownership": "foreign", "at": 584}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 795}]
+     kept(11w): We can see something move forward when we see the ratification.
+     gone(198w): Laura Barrón-López: All the while, the war in Ukraine goes on. Overnight, Russian forces attacks Kyiv and Odessa in drone strikes, where Ukrainian forces struck down 26 of the 28 drones. But one month into the Ukrainian counteroffensive, efforts to regain territory from Russia move slower than expected, and artillery is running low. Back in Vilnius, Ukraine welcomed a commitment by 11 allied countries to provide fi
+
+  rowid=257343  Ilhan Omar               2021-10-29  TRUNCATED
+     cut_class=D_mixed_case_label cut_tag='Fred de Sam Lazaro' cut_at=127
+     ALL_TAGS=[{"tag": "Fred de Sam Lazaro", "class": "D_mixed_case_label", "ownership": "foreign", "at": 127}, {"tag": "Mercedes Stevenson, Minneapolis Resident", "class": "D_mixed_case_label", "ownership": "foreign", "at": 721}, {"tag": "Fred de Sam Lazaro", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1103}, {"tag": "Fred de Sam Lazaro", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1618}]
+     kept(24w): We're voting yes because there is a vision we can collectively create as a city on what public safety should look like for us.
+     gone(273w): Fred de Sam Lazaro: The plan would amend the Minneapolis charter, removing the police department and the city's requirement to fund a minimum number of officers. There would instead be a Department of Public Safety that takes a -- quote -- "comprehensive public health approach," including police officers, if necessary. The department would report not just to the mayor, but also the City Council. And it would likely i
+
+  rowid=258736  Elise Stefanik           2023-07-26  TRUNCATED
+     cut_class=D_mixed_case_label cut_tag='Laura Barrón-López' cut_at=200
+     ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 200}, {"tag": "Glenn Thrush, The New York Times", "class": "D_mixed_case_label", "ownership": "foreign", "at": 783}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1750}]
+     kept(30w): With each passing day, House Republicans' investigations uncover more and more evidence showing that Joe Biden not only knew about, but was involved in his family's illegal influence peddling scheme.
+     gone(316w): Laura Barrón-López: Again, those accusations are unsubstantiated. But Republican attacks on the president and his son will almost certainly ramp up in the aftermath of today's hearing, which left Hunter Biden's legal future unresolved. To help us understand it all, I'm joined by Glenn Thrush of The New York Times. He's in Wilmington, Delaware, where he was inside the courtroom. Glenn, thanks so much for joining. Toda
+
+  rowid=258820  Charles Schumer          2023-09-21  TRUNCATED
+     cut_class=D_mixed_case_label cut_tag='Laura Barrón-López' cut_at=187
+     ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 187}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 731}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1172}, {"tag": "Mateusz Morawiecki, Polish Prime Minister (through interpreter)", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1912}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 2091}]
+     kept(31w): Providing aid is not just a matter of Ukrainian security. It's a matter of American security, because a victorious Putin is an emboldened Putin, making the world less safe for democracy.
+     gone(347w): Laura Barrón-López: Among the key things Zelenskyy asked for during his Capitol Hill visit, more air defense and long-range rockets, called ATACMS, which President Biden has been reluctant to provide. Just before Zelenskyy arrived at the White House to meet with Biden, National Security Adviser Jake Sullivan said the president would not be sending ATACMS to Ukraine, for now. Jake Sullivan, U.S. National Security Advi
+
+  rowid=258130  Charles Schumer          2022-11-28  SKIPPED:label_or_gold_record_points_here
+     cut_class=D_mixed_case_label cut_tag='Laura Barrón-López' cut_at=409
+     ALL_TAGS=[{"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 409}, {"tag": "Stuart Stevens, The Lincoln Project", "class": "D_mixed_case_label", "ownership": "foreign", "at": 1730}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 2784}, {"tag": "Laura Barrón-López", "class": "D_mixed_case_label", "ownership": "foreign", "at": 4453}]
+     kept(68w): For a former president to sit down and have dinner with a high-profile antisemite is disgusting and dangerous. To give an antisemite even the smallest platform, much less an audience over dinner, is pure evil. Even assuming the former president didn't realize Mr. Fuentes was coming to Mar-a-Lago, fo
+        ...tail: . Even assuming the former president didn't realize Mr. Fuentes was coming to Mar-a-Lago, for him to refuse to condemn Fuentes and his bigoted words after the dinner is appalling, and it is dangerous.
+     gone(745w): Laura Barrón-López: We asked every Republican senator and every member of Republican House leadership today whether they thought the meeting was appropriate and if they condemned it. Louisiana Senator Bill Cassidy said: "Trump hosting racist antisemites for dinner encourages other racist antisemites." And Maine Senator Susan Collins told us "NewsHour": "The president should never have had a meal or even a meeting wit
+
+  rowid=225986  Daniel Webster           2022-05-29  TRUNCATED
+     cut_class=A_anchored_caps cut_tag='TODD (voice-over)' cut_at=158
+     ALL_TAGS=[{"tag": "TODD (voice-over)", "class": "A_anchored_caps", "ownership": "foreign", "at": 158}]
+     kept(23w): Their rates of gun violence declined quite substantially, both with respect to homicides and with suicides. And it virtually eliminated fatal mass shootings.
+     gone(52w): TODD (voice-over): Since Australia's gun control laws went into effect in 1996, mass shootings have gone from almost once a year to almost never, with only one since that time. And John Howard later pointed out, his government was able to get that done, even though he's a political conservative. JOHN HOWARD,
+
+  rowid=174172  Bernard Sanders          2026-01-01  SKIPPED:kept_text_under_min_turn_words
+     cut_class=D_mixed_case_label cut_tag='Zohran Mamdani, New York City Mayor' cut_at=27
+     ALL_TAGS=[{"tag": "Zohran Mamdani, New York City Mayor", "class": "D_mixed_case_label", "ownership": "foreign", "at": 27}]
+     kept(4w): I, Zohran Kwame Mamdani...
+     gone(10w): Zohran Mamdani, New York City Mayor: I, Zohran Kwame Mamdani...
+
+  rowid=274133  Ron Wyden                2021-09-17  SKIPPED:kept_text_under_min_turn_words
+     cut_class=E_colonless_honorific cut_tag='MR. WILLIAM CAMPBELL, FORMER PRESIDENT AND CHIEF' cut_at=42
+     ALL_TAGS=[{"tag": "MR. WILLIAM CAMPBELL, FORMER PRESIDENT AND CHIEF", "class": "E_colonless_honorific", "ownership": "foreign", "at": 42}]
+     kept(7w): Do you believe nicotine is not addictive?
+     gone(7w): MR. WILLIAM CAMPBELL, FORMER PRESIDENT AND CHIEF
+
+  rowid=69517   Melanie Stansbury        2024-07-23  TRUNCATED
+     cut_class=C_unanchored_paren cut_tag='PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)' cut_at=126
+     ALL_TAGS=[{"tag": "PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)", "class": "C_unanchored_paren", "ownership": "foreign", "at": 126}]
+     kept(19w): Madam Director with all due respect. The answers that we've received here in this hearing today are completely unsatisfactory
+     gone(28w): PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over): Republican and Democratic members of Congress frustrated with the head of the Secret Service, many calling for her immediate resignation.
+
+--- v1 gap censuses, measured over the v2 ledger ---
+rows whose CUT TAG carries a curly apostrophe U+2019: 165 (truncated 141) e.g. [80974, 81023, 81316, 81318, 82120, 82245, 82246, 113401, 181804, 263653, 263852, 263854]
+rows with ANY tag carrying U+2019: 165
+flagged rows carrying a NO-SPACE colon after one of their tags: 38 (truncated 23)
+rows whose cut tag contains "FORMER U.S.": 5 -> [(70812, '[06:43:28] DONALD TRUMP (R), FORMER U.S. PRESIDENT AND'), (71147, 'DONALD TRUMP (R), FORMER U.S. PRESIDENT AND'), (82055, 'DONALD TRUMP (R), FORMER U.S. PRESIDENT AND'), (180228, 'Kristi Noem, Former U.S. Homeland Security Secretary'), (205497, 'TIM MORRISON, FORMER U.S. ADVISER TO PRESIDENT TRUMP ON RUSSIA AND')]
+rows cut on the v1 fragment tag "PRESIDENT AND" or similar: 0 -> []
+class D rows flagged: 88 (truncated 79); distinct D cut tags: 29

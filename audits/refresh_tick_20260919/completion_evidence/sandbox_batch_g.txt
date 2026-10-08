@@ -1,0 +1,13 @@
+G1   tick2 (gap satisfied): launched=['press delta refresh', 'press intake audit', 'press engine feed', 'fold promoted press runs', 'press zero-row review'] wall=62.69s outcome=COLLECTED_NOT_PUBLISHED exit=1
+G1   -> the whole budget goes to the hung step again, nothing after it ever runs: **FAIL**
+G2   seed outcome=PUBLISHED  walk manifest=[]  fold manifest=['data/out/fold.csv', 'data/press/shared_index.csv']
+G2   walk returns 0 rows: state=FAILED coverage=SUSPECT blocking_review=1 exit=1 outcome=COLLECTED_NOT_PUBLISHED
+G2   ZERO FLOOR FIRED: PASS
+
+G3   observed outcome -> exit map (from every scenario run):
+     PUBLISHED                  0
+     PUBLISHED_DEGRADED         0
+     NOTHING_DUE                0
+     COLLECTED_NOT_PUBLISHED    1
+     COMPUTE_FAILED             1
+     BLOCKED                    75

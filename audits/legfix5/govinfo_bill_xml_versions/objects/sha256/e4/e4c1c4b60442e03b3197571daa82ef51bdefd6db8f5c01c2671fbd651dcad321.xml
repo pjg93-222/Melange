@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="HACC1AD5666BB479CBFE342961044AA36" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 799 IH: Federal Worker Credit Protection Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-01-25</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 799</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190125">January 25, 2019</action-date><action-desc><sponsor name-id="M001137">Mr. Meeks</sponsor> (for himself, <cosponsor name-id="B001292">Mr. Beyer</cosponsor>, <cosponsor name-id="N000147">Ms. Norton</cosponsor>, <cosponsor name-id="K000385">Ms. Kelly of Illinois</cosponsor>, <cosponsor name-id="J000032">Ms. Jackson Lee</cosponsor>, <cosponsor name-id="L000559">Mr. Langevin</cosponsor>, <cosponsor name-id="R000577">Mr. Ryan</cosponsor>, <cosponsor name-id="B001304">Mr. Brown of Maryland</cosponsor>, <cosponsor name-id="V000130">Mr. Vargas</cosponsor>, <cosponsor name-id="W000822">Mrs. Watson Coleman</cosponsor>, <cosponsor name-id="G000553">Mr. Green of Texas</cosponsor>, <cosponsor name-id="W000797">Ms. Wasserman Schultz</cosponsor>, <cosponsor name-id="D000623">Mr. DeSaulnier</cosponsor>, <cosponsor name-id="H001064">Mr. Heck</cosponsor>, <cosponsor name-id="D000216">Ms. DeLauro</cosponsor>, <cosponsor name-id="Q000023">Mr. Quigley</cosponsor>, and <cosponsor name-id="P000593">Mr. Perlmutter</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Fair Credit Reporting Act to prohibit certain persons from furnishing negative credit
+			 information of furloughed employees, and for other purposes.</official-title></form>
+	<legis-body id="HC85450A7A2EB4103B4777BE0A83C03F8" style="OLC">
+ <section id="H98C8821DEC114D57AACA149FF0B9A0B9" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Federal Worker Credit Protection Act of 2019</short-title></quote>.</text> </section><section id="HDD4A4D792B8C43EB9EAF2073EAA8F8F2"><enum>2.</enum><header>Prohibition on furnishing negative credit information of furloughed employees</header><text display-inline="no-display-inline">Section 623(a)(1) of the Fair Credit Reporting Act (<external-xref legal-doc="usc" parsable-cite="usc/15/1681s-2">15 U.S.C. 1681s–2(a)(1)</external-xref>) is amended by adding at the end the following new subparagraph:</text>
+			<quoted-block display-inline="no-display-inline" id="H102EE4DD52174E578AA52B656C4E8235" style="OLC">
+				<subparagraph id="H347D07864E8E42B5B31ABD6AFC3A7247"><enum>(F)</enum><header>Reporting information of furloughed employees</header>
+ <clause id="HC5F704C741E64DF59E811C9BA9BF479E"><enum>(i)</enum><header>In general</header><text>Notwithstanding any other provision of this section and upon request of a furloughed employee, a person that furnishes information to any consumer reporting agency may not provide negative credit information of such furloughed employee to a consumer reporting agency if the action or inaction to which such negative credit information relates originated, and was rectified, during the period beginning 30 days before a shutdown and ending 90 days after such shutdown.</text>
+ </clause><clause id="H205A24F62536497A8D046F1CAAB44844"><enum>(ii)</enum><header>Notification</header><text display-inline="yes-display-inline">With respect to any negative credit information described in clause (i) and upon request of the furloughed employee to which such negative credit information relates, a person that furnishes information to any consumer reporting agency shall notify a consumer reporting agency that the action or inaction to which such negative credit information relates occurred during the period described in clause (i).</text>
+ </clause><clause id="HC1191D73BBC54109A5E1F86F56295784"><enum>(iii)</enum><header>Definitions</header><text>For purposes of this subparagraph—</text> <subclause id="H9B7AC83E696B46E9BF005C9CC0FD3A61"><enum>(I)</enum><text display-inline="yes-display-inline">the term <quote>furloughed employee</quote> means—</text>
+ <item id="HD0044A7A2FEC483F9AB7BAD45BF3B04F"><enum>(aa)</enum><text>a Federal or District of Columbia employee who is furloughed or excepted from furlough during a shutdown; and</text>
+ </item><item id="H3367C017F2C94303970D395D2926F996"><enum>(bb)</enum><text>a Federal contractor who, during a shutdown, is not receiving pay by reason of such shutdown; and</text> </item></subclause><subclause id="H93996590D3F548B78E6F45BD55FF2AAF"><enum>(II)</enum><text display-inline="yes-display-inline">the term <quote>shutdown</quote> means any lapse in appropriations beginning on or about December 22, 2018.</text></subclause></clause></subparagraph><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

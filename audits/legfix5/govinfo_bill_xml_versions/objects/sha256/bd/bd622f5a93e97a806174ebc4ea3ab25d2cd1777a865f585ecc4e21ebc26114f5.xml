@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2123 IS: Break the Higher Education Monopoly Act of 2019</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2123</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190716">July 16, 2019</action-date>
+			<action-desc><sponsor name-id="S399">Mr. Hawley</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSHR00">Committee on Health, Education, Labor, and Pensions</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Federal Pell Grant Program to support career training opportunities for young
+			 Americans.</official-title>
+	</form>
+	<legis-body>
+		<section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header>
+ <text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Break the Higher Education Monopoly Act of 2019</short-title></quote>.</text>
+ </section><section id="id92877D897A4D4A11A1495953C4CD0B9B"><enum>2.</enum><header>Supporting career training opportunities for all young Americans</header><text display-inline="no-display-inline">Section 401 of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1070a">20 U.S.C. 1070a</external-xref>) is amended by adding at the end the following:</text>
+			<quoted-block display-inline="no-display-inline" id="idEADA635BD4B240D3BD85FF15AF99D350" style="OLC">
+				<subsection id="idCBDAC5D2B58D4863B68501BDFBEE4FCA"><enum>(k)</enum><header>Alternative certification program</header>
+ <paragraph id="idD0510137803E4D4A972514FA5171F272"><enum>(1)</enum><header>In general</header><text>The Secretary shall devise an alternative certification program to enable students to use Federal Pell Grants to enroll in educational programs (either at eligible institutions or institutions that are not eligible institutions) for which students are not otherwise eligible to use Federal Pell Grants under this section.</text>
+ </paragraph><paragraph id="idc28e10d1b89a491db25c800939b453e7"><enum>(2)</enum><header>Definitions</header><text>In this subsection:</text> <subparagraph id="id250301e65292449ca3427c8cd13eac52"><enum>(A)</enum><header>Program completion rate</header><text>The term <term>program completion rate</term> means the percentage of enrollees in a program who successfully complete the program requirements within the standard program duration.</text>
+ </subparagraph><subparagraph id="id6179b753d0b44a328d2385a46ada58fb"><enum>(B)</enum><header>Job placement rate</header><text>The term <term>job placement rate</term> means the percentage of graduates who have obtained full-time employment in the graduate’s field of study.</text>
+ </subparagraph></paragraph><paragraph id="id66d47fb5002f4db6b174e6801910e78d"><enum>(3)</enum><header>No requirement for accreditation or state authorization</header><text>The alternative certification program shall not require accreditation, State authorization, minimum instructional hours, or minimum classroom time of educational programs for which students may use Federal Pell Grants to enroll pursuant to this subsection.</text>
+ </paragraph><paragraph id="id9735937660764A93946B6A1D4B399DFD"><enum>(4)</enum><header>Continuous operation; determination of eligibility</header><text>The Secretary shall—</text> <subparagraph id="id7AE9C9A5286B4304B4A7F1374168D245"><enum>(A)</enum><text>only certify an educational program under the alternative certification program that—</text>
+ <clause id="id6E577534E49345808047A896A733C1E4"><enum>(i)</enum><text>has been in existence for not less than 5 years; and</text> </clause><clause id="id21A17B3238DF49EFB707E50D8BDD78DD"><enum>(ii)</enum><text>has an annual cost of enrollment for a year that is equal to or less than the maximum Federal Pell Grant award applicable to that year;</text>
+ </clause></subparagraph><subparagraph id="idBFFD15743A824BD0B54C41058D365631"><enum>(B)</enum><text>make an initial determination of educational program eligibility under the alternative certification program not later than 180 days after the date of application of the educational program; and</text>
+ </subparagraph><subparagraph id="idDFCB87D640DF498ABAD2B52EC348FB61"><enum>(C)</enum><text>re-evaluate educational program eligibility under the alternative certification program not less often than once every 5 years.</text>
+						</subparagraph></paragraph><paragraph id="id56c80cac50814ae98ccb3b2b39ab0fe7"><enum>(5)</enum><header>Information to assess program eligibility</header>
+ <subparagraph id="id14CADD4A307A4E828C77B81E03329722"><enum>(A)</enum><header>In general</header><text>Each educational program applying for certification or re-certification under the alternative certification program, the Secretary of the Treasury, and the Secretary of Labor shall submit to the Secretary all data necessary for the Secretary to assess educational program eligibility under the alternative certification program.</text>
+ </subparagraph><subparagraph id="idB3A0FA33E36F41A28009ED4AABE201CC"><enum>(B)</enum><header>Privacy</header><text>The Secretary shall keep all student data submitted under subparagraph (A) private and confidential.</text>
+ </subparagraph></paragraph><paragraph id="id2c5d8584861348329f22cb03e9ed8002"><enum>(6)</enum><header>Determinations of program eligibility</header><text>The Secretary shall make a determination of educational program eligibility under the alternative certification program on the basis of student outcomes in the educational program, including based on each of the following:</text>
+ <subparagraph id="id76A35CCE482C43CE9B81066C27B23660"><enum>(A)</enum><text>Program completion rate.</text> </subparagraph><subparagraph id="id9da52428e3fd4825af912d0796043225"><enum>(B)</enum><text>Job placement rate within 90 days of program completion.</text>
+ </subparagraph><subparagraph id="id5698d9d36ee14bd1a18c5bddb561afcb"><enum>(C)</enum><text>Job placement rate within 12 months of program completion.</text> </subparagraph><subparagraph id="ida1904a5724ea468090990d55a100320d"><enum>(D)</enum><text>Graduate median starting salary.</text>
+ </subparagraph><subparagraph id="idf9a21977359e4a7baf1fb37b0454f1c2"><enum>(E)</enum><text>Graduate median salary 5 years after program completion.</text> </subparagraph><subparagraph id="id2dbb8afaa5de4f0996cd08afcf96b8ec"><enum>(F)</enum><text>Graduate average starting salary.</text>
+ </subparagraph><subparagraph id="id38C15C9B731D45CDB3AB93705131A52A"><enum>(G)</enum><text>Graduate average salary 5 years after program completion.</text> </subparagraph></paragraph><paragraph id="iddab625065fa04d9d8f3aede761eaae91"><enum>(7)</enum><header>Decertification</header><text>The Secretary may decertify an educational program under the alternative certification program if the program meets any of the following:</text>
+ <subparagraph id="idaac6ebb704ff400bb969cb390ece8a2c"><enum>(A)</enum><text>The program completion rate is less than 70 percent.</text> </subparagraph><subparagraph id="id7962dc81ca254a4f83333ae0a737d5d4"><enum>(B)</enum><text>The job placement rate within 90 days of program completion is less than 50 percent.</text>
+ </subparagraph><subparagraph id="idcb75547e3c4e4580ae608bb8b06b3b63"><enum>(C)</enum><text>The job placement rate within 12 months of program completion is less than 70 percent.</text> </subparagraph><subparagraph id="idf479dea84b8646d088c3a82ba91dbe6f"><enum>(D)</enum><text>The graduate median starting salary is less than 200 percent of the Federal poverty level for a one-person household.</text>
+ </subparagraph><subparagraph id="idf63eff8fff32483b8ac40bf3f8b9effd"><enum>(E)</enum><text>The graduate median salary 5 years after program completion is less than 300 percent of the Federal poverty level for a one-person household.</text>
+ </subparagraph></paragraph><paragraph id="id8a8465a9d5f24004a6b7d7af34b02b86"><enum>(8)</enum><header>Rule of construction</header><text>Nothing in this subsection shall be construed to extend eligibility with respect to an educational program that is certified under the alternative certification program under this subsection to other programs under this title.</text>
+					</paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body>
+</bill>
+
+

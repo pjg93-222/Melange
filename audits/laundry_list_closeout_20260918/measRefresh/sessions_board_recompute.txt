@@ -1,0 +1,31 @@
+== VALIDATION: recomputed board vs rank_honors AFTER generation 6df55c4075768f860f941d95 ==
+   roster: member_desk_src=533  rankable=533  honors order=533
+   order identical: True
+   priority_tiers identical: True
+   top13 identical: True
+   evidence-floor displacements: 419 | conduct-ladder floors: 2 | overrides: 0
+
+== the deciding quantities NOW (live artifacts) ==
+member               chamber seat factor_ranked  grade_pct          score    seat_pct  cu_prim    seatB
+Pete Sessions        House   13     0.521096000    0.96527    0.517476467     0.97685    1.750       15
+Daniel Meuser        House   14     0.515934000    0.99768    0.515694607     0.97453    2.250       13
+Jim Costa            House   15     0.523325000    0.91435    0.514360443     0.97222    1.500       14
+Juan Vargas          House   12     0.565037000    0.60416    0.520304151     0.97916    4.000       12
+Barry Loudermilk     House   16     0.512838000    0.99305    0.512125155     0.96990    2.750       16
+   tier-1 cutoff = seat 13 of 13 (BUCKETS[0]); seat 14 is the first tier-2 seat
+   margin at the boundary: Pete Sessions score=0.517476467184  vs  Daniel Meuser score=0.515694606624   delta=1.782e-03
+   same-chamber pair? House / House
+
+== which term puts Sessions ahead of Meuser NOW ==
+   factor_ranked  : Sessions 0.521096000  Meuser 0.515934000  -> factor-only order: Pete Sessions first
+   grade multiplier (0.80+0.20*grade%): Sessions 0.993054000  Meuser 0.999536000
+   product        : Sessions 0.517476467184  Meuser 0.515694606624  -> Pete Sessions first
+   grade_pct needed by Meuser to retake seat 13 (holding his factor): 1.014948
+   factor_ranked needed by Meuser to retake seat 13 (holding his grade): 0.517716688
+   Sessions grade_pct that would have left him at/below Meuser: <= 0.948173
+   Sessions factor_ranked that would have left him at/below Meuser: <= 0.519301676
+
+== population terms in the score (why a bill refresh moves everyone) ==
+   primacy_factors _constants: {"role_weights": {"sponsor": 1.0, "original": 0.5, "cosponsor": 0.25}, "act_weights": {"cu_primary": 1.0, "shared": 0.5, "bank_primary": 0.15, "crypto_primary": 0.15, "fintech": 0.15, "offtopic": 0.0, "oppose": -1.0}, "acu_position_relevance": {"OPPOSE": -1.0, "SUPPORT": 0.5}, "letter_weight": 0.6, "uncertainty_penalty_k": 0.25, "amendment_measure_weight": 0.5, "measure_weight_policy": {"name": "o
+   per_area_grade counts/meta: {"as_of": "2026-09-19", "counts": {"accepted": 8182, "acts_with_cell": 242, "dedup_dropped": 0, "dedup_upgraded": 0, "kept": 8171, "members": 533, "members_at_year_cap": 0, "outside_window": 11, "press_floor_zeroed": 142, "rows": 10847, "tensor_cells": 15, "unknown_category": 0, "unknown_role": 0, "years_basis": {"service_dates": 533}}, "inputs": {"data/engine/congestion.json": "4aa2ae4cab704fab38b0420ed7477e7458604e595baafd0c2e0c191e4e91028d", "data/engine/primacy_factors.json": "f9c1b7ff9b07ad6808962a128d4aeccbe0075668978eebe908a4b4e14e8e64e6", "data/lobbying/industry_axes.ndjson": "9bcd9870
+   House members in grade population: 433 | Senate: 100

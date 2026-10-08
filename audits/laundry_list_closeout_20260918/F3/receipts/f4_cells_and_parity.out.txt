@@ -1,0 +1,82 @@
+============================================================================================================
+F3 r4  CELL-level closure + publication parity   run 2026-09-19T00:15:39
+============================================================================================================
+
+(A) IS THE RAW SHEET STILL THE ONE THE STANCE RUN READ?
+    category_stance.json  mtime 2026-09-17T02:14:04
+    workbook              mtime 2026-09-18T02:09:29   (later: a downstream step re-saved other sheets)
+    TEST: per_category_stance.py:156 stores MC.press_general_exclusions() = the VERBATIM col-24
+          values.  Byte-compare those stored floats against col 24 of the workbook today.
+    stored entries 270 | today's col-24 nonzero 270 | exact float match 270
+    only-in-artifact none | only-in-workbook none
+    => Raw-sheet col 24 is byte-identical to what the stance run read: True
+       (col 24 is written by the same blend pass, same run, as cols 5..23 -- blend.py:443-470)
+
+(B) CELL-LEVEL CLOSURE: 533 members x 18 stance categories = 9594 cells
+    RULE moneyball_core.py:98  norm={c:MR.normalize_signed_extrema(raw_all[c]) for c in COLS}
+    RULE per_category_stance.py:46  press={(m,lab):_normM[pc].get(m,0.0) ...}  <- .get default 0.0
+    RULE per_category_stance.py:60  has_press=abs(prraw[m])>1e-9   <- the media-evidence test
+    cells with media evidence (has_press True) : 1701 of 9594 (17.7%)
+    cells with NO media evidence              : 7893
+    roster members absent from the Raw sheet (would silently read 0.0 via .get): 0 []
+
+    per-category cell counts:
+    stance category            has_press pos       neg       raw-sheet nonzero
+    Examination & Supervision  63        51        12        63
+    CU Capital Requirements    7         6         1         7
+    NCUA Budget & Insurance    4         4         0         4
+    Interchange                47        25        22        47
+    Payments                   172       146       26        172
+    Technology & Emerging      177       157       20        177
+    Fraud Prevention           209       118       91        209
+    Data Privacy & Cyber       73        60        13        73
+    Charter Modernization      26        25        1         26
+    Defense CU Issues          32        9         23        32
+    Field of Membership        26        25        1         26
+    CU Tax Status              53        52        1         53
+    CDFI Fund                  78        70        8         78
+    CFPB                       290       95        195       290
+    Credit Card Mandates       88        9         79        88
+    TCPA                       60        59        1         60
+    Member Business Lending    75        66        9         75
+    Mortgage & Housing         221       181       40        221
+
+    ANNIHILATION BUCKETS -- where an item's contribution vanishes before has_press:
+    RULE blend.py:468-469  nv_rounded=round(nv,6); rw.cell(...).value=nv_rounded
+         -> any blended cell with |nv| < 5e-7 is written as 0.0 and is indistinguishable
+            from 'no media at all'.  The sheet keeps no record of the discarded magnitude.
+    cells written at |value| < 1e-6 (survivors just above the rounding floor): 0
+    cells nonzero on the sheet but has_press False (killed by the 1e-9 test): 0
+    NOTE  a cell whose positive and negative items cancel to 0.0 is recorded by
+          per_category_stance.py:60 as ABSENT media evidence, not as measured-zero.
+          The producer keeps no counter for this class, so the count of items whose
+          contribution was cancelled away CANNOT be recovered from the artifacts.
+
+    RECONCILE vs category_stance.json 'signal' (= has_leg OR has_press OR has_vote):
+    cells with signal True: 4790   cells with has_press True: 1701
+    has_press True but signal False: 0  <- MUST be 0 (has_press implies signal)
+    => media evidence is never dropped between press_matrix and the signal ledger: True
+
+(C) M5 PUBLICATION PARITY: category_stance.json -> dashboard_data.json
+    per_topic_alloc.json labels 19 -> source 18 (dropped display clones: ['CFPB Reach (-)'])
+    bundle 'issues' in the artifact: 19   last entry 'Overall CU stance'
+    reconstructed display list + 'Overall CU stance' == artifact 'issues': True
+    issue_cat one-to-one over 18 categories: True
+    issue_cat set == category_stance 'cats' set: True
+    dashboard members 533   category_stance matrix members 533   roster 533
+    every dashboard member present in the matrix: True
+    stance string length: [19]  (expect 19 issues incl. the appended overall char)
+
+    PER-CATEGORY CELLS COMPARED: 9594  (533 members x 18 categories)
+    MISMATCHES: 0
+
+    19th char ('Overall CU stance', appended at bundle.py:665-667) == gen[k] for all members: True
+    that char is overall_display_tier (moneyball_core.py:558-572) -- the board-top-13 Champion
+    crown -- NOT a per-category label, so it is reported separately and not counted above.
+    members displayed overall 'C' with no Champion cell in the matrix (crown substitution): 0
+
+    Defender cells in category_stance.json: 37 ; published as 'F': 37 ; altered: 0
+    label vocabulary in the matrix: {'—': 4804, 'True Neutral': 434, 'Ally': 1787, 'Champion': 1316, 'Highly Skeptical': 112, 'Defender': 37, 'Lean Persuadable': 357, 'Highly Persuadable': 223, 'Persuadable': 296, 'Skeptic': 86, 'Opponent': 78, 'Lean Skeptic': 64}
+    labels with NO entry in the bundle's TC decode map (would publish as '-'): none
+
+DONE F3 r4

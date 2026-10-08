@@ -1,0 +1,54 @@
+{
+  "base": "203a69812893e09c718a5bcafeaab8e9c686fc4d",
+  "tip": "a7a11b5df1c123568a0672138bb1318d858be9a0",
+  "changed_paths": [
+    "audits/refresh_tick_20260919/CONTRACT.md",
+    "audits/refresh_tick_20260919/PROGRESS_AND_NEXT_STEPS.md",
+    "audits/refresh_tick_20260919/codex_astra_critique_verbatim.md",
+    "audits/refresh_tick_20260919/council_review_packet_sent_to_codex.md",
+    "fec/audit_collection.py",
+    "fec/collect/build_press_engine_feed.py",
+    "fec/collect/fold_promoted_press_runs.py",
+    "fec/collect/press_baseline_fold.py",
+    "fec/collect/press_pending_tombstones.py",
+    "fec/collect/press_zero_row_review.py",
+    "fec/collect/refresh_press_stream.py",
+    "fec/pipeline_lock.py",
+    "fec/process_liveness.py",
+    "fec/refresh_state.py",
+    "fec/refresh_table.py",
+    "fec/refresh_tick.py",
+    "fec/tests/collect/test_press_pending_tombstones.py",
+    "fec/tests/collect/test_press_zero_row_review.py",
+    "fec/tests/infra/test_refresh_tick.py",
+    "fec/tests/run_tests.py"
+  ],
+  "before_sha256": {
+    "fec/audit_collection.py": "93fee779b3d450a2b370e73f5db7d8770ab949a34e2b1b7511fda4bb77f023c7",
+    "fec/collect/build_press_engine_feed.py": "aee928f6749e824cfb12b997bdba753ce712cf17c178d76362bdd8f8ad66ae43",
+    "fec/collect/fold_promoted_press_runs.py": "5e21d6a4f56f49316009ca9e870d17178638e7df9213d3233c436b1d4ce94d10",
+    "fec/collect/press_baseline_fold.py": "7cc142e58d20e27aff5eff8d72955a39790c76be939553be75fb08f33ea44d52",
+    "fec/collect/refresh_press_stream.py": "4f1dece602add3659713f41100899c444cd3fbdcaeb82164ebad838ee8fc507b",
+    "fec/pipeline_lock.py": "cb979aec661400ee24de026408ad208c31111bdfe0182687f4498e0d9b8ac0a9",
+    "fec/process_liveness.py": "59ac52d07b877baf8f42e33b5ce70db3dcea97737a757e6916c7a87a828315de",
+    "fec/tests/run_tests.py": "23bb1fc47e0492fcd18c3f67fe014c0180d8336fc6b82b61ac83c6fbc5f730fa"
+  },
+  "preexisting_dirty_paths": [
+    "collector_sentinels/abc.done",
+    "collector_sentinels/cbs.done",
+    "collector_sentinels/cnn.done",
+    "collector_sentinels/msnow.done",
+    "collector_sentinels/mtp.done",
+    "collector_sentinels/npr.done",
+    "collector_sentinels/pbs.done",
+    "data/money/Moneyball_email.zip",
+    "data/stance/own_source_stance_model.joblib",
+    "data/system/system_manifest.json",
+    "fec/liwc/behavior_calibrated.json.candidate"
+  ],
+  "holds": [
+    "fold default off",
+    "R retry gate unchanged",
+    "scheduled task unchanged"
+  ]
+}

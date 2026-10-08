@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-HEY20016-B74-D4-3VB"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3182 IS: Helping Expand and Launch Transitional Health for Women Veterans Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-01-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>2d Session</session><legis-num>S. 3182</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20200113">January 13, 2020</action-date><action-desc><sponsor name-id="S383">Mr. Sullivan</sponsor> (for himself and <cosponsor name-id="S341">Mr. Blumenthal</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSVA00">Committee on Veterans' Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To direct the Secretary of Veterans Affairs to carry out the Women’s Health Transition Training
+			 pilot program through at least fiscal year 2020, and for other purposes.</official-title></form>
+	<legis-body>
+ <section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Helping Expand and Launch Transitional Health for Women Veterans Act</short-title></quote> or <quote><short-title>HEALTH Act</short-title></quote>.</text>
+		</section><section id="ida7fe066045bd42dfa9872390be3f1a84"><enum>2.</enum><header>Continuation of Women’s Health Transition Training pilot program of Department of Veterans Affairs</header>
+ <subsection id="id1D00C6D1A3FE40768B3D27A6A905BA09"><enum>(a)</enum><header>Duration</header><text display-inline="yes-display-inline">The Secretary of Veterans Affairs shall carry out the Women’s Health Transition Training pilot program of the Department of Veterans Affairs (in this section referred to as the <quote>pilot program</quote>) until at least September 30, 2020.</text>
+ </subsection><subsection id="id7bcf45b214084108befd5be26f60650a"><enum>(b)</enum><header>Report</header><text>Not later than September 30, 2020, the Secretary of Defense and the Secretary of Veterans Affairs shall jointly submit to the appropriate congressional committees a report on the pilot program that includes the following:</text>
+ <paragraph id="id5168D3DCD4304166A1D1FC9BC40A7EF6"><enum>(1)</enum><text>The number of women members of the Armed Forces, disaggregated by military department (with respect to the Department of the Navy, dis­ag­gre­gated by the Navy and Marine Corps), who participated in the pilot program.</text>
+ </paragraph><paragraph id="ide33991a5e9a24f5b91ee300b2f148c3f"><enum>(2)</enum><text>The number of courses held under the pilot program.</text> </paragraph><paragraph id="id234dfff9156642808d13432dcc955b11"><enum>(3)</enum><text>The locations at which such courses were held, the number of seats available for such courses, and the number of participants at each such location.</text>
+ </paragraph><paragraph id="id975c4f783b9548bf8be1b7061d22d067"><enum>(4)</enum><text>With respect to the number of members of the Armed Forces who participated in the pilot program as specified under paragraph (1)—</text>
+ <subparagraph id="idb97fab4eb65c4b09bc79326505ef479f"><enum>(A)</enum><text>the number who enrolled in the health care system of the Department of Veterans Affairs under section 1705(a) of title 38, United States Code; and</text>
+ </subparagraph><subparagraph id="id7669A09CC85C4AB6960A719FAF0400AA"><enum>(B)</enum><text>the number who attended at least one health care appointment at a medical facility of the Department of Veterans Affairs.</text>
+ </subparagraph></paragraph><paragraph id="id2304f5cb214f448ebb0921748ac2b114"><enum>(5)</enum><text>Data relating to—</text> <subparagraph id="idDDBA6A270226474CB176147E25B60E28"><enum>(A)</enum><text>satisfaction with courses held under the pilot program;</text>
+ </subparagraph><subparagraph id="id877D090142904F7D9BB6401593F17DC1"><enum>(B)</enum><text>improved awareness of health care services administered by the Secretary of Veterans Affairs; and</text> </subparagraph><subparagraph id="id253E2A14ACE34445824F1FCFEA3B933B"><enum>(C)</enum><text>any other available statistics regarding the pilot program.</text>
+ </subparagraph></paragraph><paragraph id="idFA9D576D71C94B399867339009F0F5C8"><enum>(6)</enum><text>A discussion of regulatory, legal, or resource barriers to—</text> <subparagraph id="idC2FA385C20404922BDC30C1ADAE277C5"><enum>(A)</enum><text>making the pilot program permanent to enable access to services provided under the pilot program by a greater number of women members of the Armed Forces at locations throughout the United States;</text>
+ </subparagraph><subparagraph id="id02BA77739C194922A58F951AA2A19F7C"><enum>(B)</enum><text>offering the pilot program online for women members of the Armed Forces who are unable to attend courses held under the pilot program in person; and</text>
+ </subparagraph><subparagraph id="id552A16AAA91D4D50AAD7DADC73C19106"><enum>(C)</enum><text>the feasability of automatically enrolling pilot program participants in the health care system of the Department of Veterans Affairs under section 1705(a) of title 38, United States Code.</text>
+ </subparagraph></paragraph></subsection><subsection id="id92A1812A2FE1452F95F1CFF96E580FFF"><enum>(c)</enum><header>Appropriate congressional committees defined</header><text>In this section, the term <term>appropriate congressional committees</term> means—</text> <paragraph id="idF5109395EC1D457794B9F0BE5A593D2D"><enum>(1)</enum><text>the Committee on Armed Services and the Committee on Veterans’ Affairs of the Senate; and</text>
+ </paragraph><paragraph id="id9D9BEB2285F54C5F953646F76382908E"><enum>(2)</enum><text>the Committee on Armed Services and the Committee on Veterans’ Affairs of the House of Representatives.</text></paragraph></subsection></section></legis-body></bill>
+
+

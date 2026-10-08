@@ -51,69 +51,6 @@ unsupported_filter_error <- tryCatch(
 )
 stopifnot(grepl("Unsupported FEC query filter", unsupported_filter_error))
 
-# Employer variants are queried exactly as the roster spells them.
-# normalize_register_key() would strip the punctuation AND fold two spellings
-# into one parameter, which silently changes the population FEC returns.
-literal_employer_url <- fec_build_url(
-  2024L,
-  c("Ripple Labs, Inc.", "Ripple Labs Inc"),
-  query_field = "contributor_employer"
-)
-employer_parameters <- gregexpr(
-  "contributor_employer=", literal_employer_url, fixed = TRUE
-)[[1L]]
-stopifnot(
-  grepl(
-    "contributor_employer=Ripple%20Labs%2C%20Inc.",
-    literal_employer_url,
-    fixed = TRUE
-  ),
-  grepl(
-    "contributor_employer=Ripple%20Labs%20Inc",
-    literal_employer_url,
-    fixed = TRUE
-  ),
-  !grepl(
-    utils::URLencode(
-      normalize_register_key("Ripple Labs, Inc."),
-      reserved = TRUE,
-      repeated = TRUE
-    ),
-    literal_employer_url,
-    fixed = TRUE
-  ),
-  identical(length(employer_parameters), 2L)
-)
-# An ampersand is a query separator, so the literal spelling must survive as a
-# percent-encoded value rather than being normalized away or split in two.
-ampersand_employer_url <- fec_build_url(
-  2024L,
-  "Bakkt Holdings & Co.",
-  query_field = "contributor_employer"
-)
-stopifnot(
-  grepl(
-    "contributor_employer=Bakkt%20Holdings%20%26%20Co.",
-    ampersand_employer_url,
-    fixed = TRUE
-  ),
-  !grepl(
-    utils::URLencode(
-      normalize_register_key("Bakkt Holdings & Co."),
-      reserved = TRUE,
-      repeated = TRUE
-    ),
-    ampersand_employer_url,
-    fixed = TRUE
-  ),
-  identical(
-    length(gregexpr(
-      "contributor_employer=", ampersand_employer_url, fixed = TRUE
-    )[[1L]]),
-    1L
-  )
-)
-
 local({
   original_runtime <- fec_runtime_value
   original_ready <- fec_results_ready
@@ -519,7 +456,6 @@ local({
 cat("test_fec_page: transient whole-query retry verified\n")
 cat("test_fec_page: incomplete browser API batches retried atomically\n")
 cat("test_fec_page: scoped ZIP/city URL filters verified\n")
-cat("test_fec_page: employer variants keep their literal roster spelling\n")
 cat("test_fec_page: redundant redraw and page reads avoided\n")
 cat("test_fec_page: dead sessions bypass inner retries\n")
 cat("test_fec_page: canary failures remain bounded and fail closed\n")

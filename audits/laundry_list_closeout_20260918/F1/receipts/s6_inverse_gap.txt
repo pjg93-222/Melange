@@ -1,0 +1,43 @@
+====================================================================================================
+ADDENDUM  sponsor rows in the SCORED FRAME that the workbook sheet does not carry
+====================================================================================================
+scored-frame sponsor keys .................... 661
+present in the workbook ..................... 635
+ABSENT from the workbook .................... 26
+
+by source lane:
+   sentinel-verified                        14
+   manual-evidence                          12
+
+by Congress:
+   C=117   2
+   C=118   6
+   C=119   18
+
+every absent key:
+   Andy Barr                  ltr-117-cdfi-barr      C=117   CDFI Fund                  manual-evidence
+   Anna Luna                  h.r.4686               C=118   Mortgage & Housing         sentinel-verified
+   Anna Luna                  h.r.6410               C=118   Data Privacy & Cyber       sentinel-verified
+   Bill Foster                ltr-119-cdfi-waters    C=119   CDFI Fund                  manual-evidence
+   Brandon Gill               h.r.9514               C=119   Mortgage & Housing         sentinel-verified
+   Clay Higgins               h.r.10242              C=119   CFPB                       sentinel-verified
+   Clay Higgins               h.r.10242              C=119   Fraud Prevention           sentinel-verified
+   Donald Davis               h.r.9668               C=119   Fraud Prevention           sentinel-verified
+   Janelle Bynum              h.r.10082              C=119   Charter Modernization      sentinel-verified
+   Juan Ciscomani             ltr-119-cutax-ciscomani C=119   CU Tax Status              manual-evidence
+   Lisa Blunt Rochester       ltr-117-cdfi-bluntrochester C=117   CDFI Fund                  manual-evidence
+   Mark Warner                ltr-118-cdfi-warner    C=118   CDFI Fund                  manual-evidence
+   Maxine Waters              ltr-119-cdfi-waters    C=119   CDFI Fund                  manual-evidence
+   Mike Crapo                 ltr-118-cdfi-warner    C=118   CDFI Fund                  manual-evidence
+   Mike Crapo                 ltr-119-cdfi-kimcrapo  C=119   CDFI Fund                  manual-evidence
+   Rashida Tlaib              h.r.9490               C=119   Examination & Supervision  sentinel-verified
+   Rashida Tlaib              h.r.9490               C=119   NCUA Budget & Insurance    sentinel-verified
+   Riley Moore                h.r.1181               C=119   Data Privacy & Cyber       sentinel-verified
+   Scott Fitzgerald           h.r.9459               C=119   Mortgage & Housing         sentinel-verified
+   Scott Fitzgerald           h.r.9460               C=119   Mortgage & Housing         sentinel-verified
+   Scott Fitzgerald           h.r.9461               C=119   Mortgage & Housing         sentinel-verified
+   Seth Magaziner             ltr-119-cutax-ciscomani C=119   CU Tax Status              manual-evidence
+   Tim Scott                  ltr-118-cfpb-scott     C=118   CFPB                       manual-evidence
+   Tim Scott                  ltr-118-cfpb-scott     C=118   Credit Card Mandates       manual-evidence
+   Warren Davidson            h.r.9900               C=119   NCUA Budget & Insurance    sentinel-verified
+   Young Kim                  ltr-119-cdfi-kimcrapo  C=119   CDFI Fund                  manual-evidence

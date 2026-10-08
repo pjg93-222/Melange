@@ -1,0 +1,159 @@
+
+====================================================================================================
+N4-a  INPUTS (all read-only)
+====================================================================================================
+archive                       congress_bills_archive_20260825_115305.xlsx        rows=10181
+sentinel verified scoring rows                                                   rows=268
+manual_bill_evidence.csv                                                         rows=371
+frame the producer scores today = 10181 + 268 + 371 = 10820
+legislation_routing_audit.json  source_rows=10820  rows=10820  selected_events=8123
+archive_leg.json                members=523
+roster (data/engine/congestion.json)                                          members=533
+frame row count reconciles with the audit: 10820 == source_rows == len(rows)
+official membership facts checked_at=2026-09-14T04:38:34Z  age=5.0 days  (OM.load refuses >8 days: fresh)
+
+====================================================================================================
+N4-b  THE SHIPPED HELPER, RUN OVER THE LIVE ARCHIVE
+====================================================================================================
+LEG_SPONSOR_FROM_COLUMN default -> 5 synthesised rows
+LEG_SPONSOR_FROM_COLUMN=0       -> 0 synthesised rows  (negative control)
+
+bill         C    category                   Member (Sponsor cell)  Role      decay   provenance
+H.R.6410     118  Data Privacy & Cyber       Luna, Anna Paulina     sponsor   0.8     archive-sponsor-column
+S.3382       117  Member Business Lending    Scott, Tim             sponsor   0.6400000000000001 archive-sponsor-column
+S.762        117  Member Business Lending    Scott, Tim             sponsor   0.6400000000000001 archive-sponsor-column
+S.3992       118  Member Business Lending    Scott, Tim             sponsor   0.8     archive-sponsor-column
+H.R.4686     118  Mortgage & Housing         Luna, Anna Paulina     sponsor   0.8     archive-sponsor-column
+
+independent re-derivation of the same rule: 5 cells
+F1 s3_state.json defect cells ......... 5  [('H.R.4686', '118', 'Mortgage & Housing'), ('H.R.6410', '118', 'Data Privacy & Cyber'), ('S.3382', '117', 'Member Business Lending'), ('S.3992', '118', 'Member Business Lending'), ('S.762', '117', 'Member Business Lending')]
+this lane synthesises ................. 5  [('H.R.4686', '118', 'Mortgage & Housing'), ('H.R.6410', '118', 'Data Privacy & Cyber'), ('S.3382', '117', 'Member Business Lending'), ('S.3992', '118', 'Member Business Lending'), ('S.762', '117', 'Member Business Lending')]
+SETS MATCH: True
+
+====================================================================================================
+N4-c  FAIL-CLOSED: the sponsor cells that must NOT mint a row
+====================================================================================================
+distinct Sponsor spellings the Resolver refuses (not a current member, or ambiguous): 27
+   REFUSED  Armstrong, Kelly
+   REFUSED  Bass, Karen
+   REFUSED  Blumenauer, Earl
+   REFUSED  Cardin, Benjamin L.
+   REFUSED  Cartwright, Matt
+   REFUSED  Casey, Robert P., Jr.
+   REFUSED  Crist, Charlie
+   REFUSED  DeFazio, Peter A.
+   REFUSED  Deutch, Theodore E.
+   REFUSED  Feinstein, Dianne
+   REFUSED  Luetkemeyer, Blaine
+   REFUSED  Maloney, Sean Patrick
+   REFUSED  Manchin, Joe, III
+   REFUSED  McHenry, Patrick T.
+   REFUSED  McNerney, Jerry
+   REFUSED  Mooney, Alexander X.
+   REFUSED  Perlmutter, Ed
+   REFUSED  Phillips, Dean
+   REFUSED  Porter, Katie
+   REFUSED  Rubio, Marco
+   REFUSED  Rush, Bobby L.
+   REFUSED  Scott, David
+   REFUSED  Sinema, Kyrsten
+   REFUSED  Stabenow, Debbie
+   REFUSED  Swalwell, Eric
+   REFUSED  Tester, Jon
+   REFUSED  Wexton, Jennifer
+probe Scott, David       -> None   (must be None)
+probe Armstrong, Kelly   -> None   (must be None)
+
+====================================================================================================
+N4-d  EVERY GATE THE NEW ROWS MUST PASS, read from the producer's own audit
+====================================================================================================
+
+  H.R.6410 (118) / Data Privacy & Cyber   -> Anna Luna
+     repository key 118:hr:6410    bioguide L000596  official-membership: ADMITTED  [official fact role=sponsor withdrawn=False]
+     the cell today: 4 audit rows, 4 selected, sign=[1], decay=[0.8]
+     template row = archive row 3166 (audit source_row 3168), disposition 'selected', category 'Data Privacy & Cyber'
+     new row: role sponsor (weight 3.0) x sign 1 x decay 0.8 -> +2.400000
+     strongest-role-wins vs what Anna Luna already holds here ('sponsor', +2.400) -> duplicate-same-role, +2.400000
+     archive_leg.json delta for (Anna Luna, Data Privacy & Cyber): +0.000000
+
+  S.3382 (117) / Member Business Lending   -> Tim Scott
+     repository key 117:s:3382     bioguide S001184  official-membership: ADMITTED  [official fact role=sponsor withdrawn=False]
+     the cell today: 20 audit rows, 20 selected, sign=[1], decay=[0.64]
+     template row = archive row 4963 (audit source_row 4965), disposition 'selected', category 'Member Business Lending'
+     new row: role sponsor (weight 3.0) x sign 1 x decay 0.6400000000000001 -> +1.920000
+     strongest-role-wins vs what Tim Scott already holds here (None, +0.000) -> selected, +1.920000
+     archive_leg.json delta for (Tim Scott, Member Business Lending): +1.920000
+
+  S.762 (117) / Member Business Lending   -> Tim Scott
+     repository key 117:s:762      bioguide S001184  official-membership: ADMITTED  [official fact role=sponsor withdrawn=False]
+     the cell today: 3 audit rows, 3 selected, sign=[1], decay=[0.64]
+     template row = archive row 4997 (audit source_row 4999), disposition 'selected', category 'Member Business Lending'
+     new row: role sponsor (weight 3.0) x sign 1 x decay 0.6400000000000001 -> +1.920000
+     strongest-role-wins vs what Tim Scott already holds here (None, +0.000) -> selected, +1.920000
+     archive_leg.json delta for (Tim Scott, Member Business Lending): +1.920000
+
+  S.3992 (118) / Member Business Lending   -> Tim Scott
+     repository key 118:s:3992     bioguide S001184  official-membership: ADMITTED  [official fact role=sponsor withdrawn=False]
+     the cell today: 16 audit rows, 16 selected, sign=[1], decay=[0.8]
+     template row = archive row 5007 (audit source_row 5009), disposition 'selected', category 'Member Business Lending'
+     new row: role sponsor (weight 3.0) x sign 1 x decay 0.8 -> +2.400000
+     strongest-role-wins vs what Tim Scott already holds here (None, +0.000) -> selected, +2.400000
+     archive_leg.json delta for (Tim Scott, Member Business Lending): +2.400000
+
+  H.R.4686 (118) / Mortgage & Housing   -> Anna Luna
+     repository key 118:hr:4686    bioguide L000596  official-membership: ADMITTED  [official fact role=sponsor withdrawn=False]
+     the cell today: 12 audit rows, 12 selected, sign=[1], decay=[0.8]
+     template row = archive row 6748 (audit source_row 6750), disposition 'selected', category 'Mortgage & Housing'
+     new row: role sponsor (weight 3.0) x sign 1 x decay 0.8 -> +2.400000
+     strongest-role-wins vs what Anna Luna already holds here ('sponsor', +2.400) -> duplicate-same-role, +2.400000
+     archive_leg.json delta for (Anna Luna, Mortgage & Housing): +0.000000
+
+====================================================================================================
+N4-e  PREDICTED archive_leg.json
+====================================================================================================
+member           category                    published      delta  predicted
+Anna Luna        Data Privacy & Cyber             3.40      +0.00       3.40
+Anna Luna        Mortgage & Housing               4.40      +0.00       4.40
+Tim Scott        Member Business Lending         10.76      +6.24      17.00
+
+cells that move ............................ 1
+cells touched but unchanged (dedup) ........ 2
+members whose archive_leg.json changes ..... 1
+every other (member, category) cell of the 523-member matrix is untouched: the helper
+  proposes rows only for the 3 cells above and nothing else is re-derived.
+members carrying >=1 archive bill: 523 -> 523  (audit_full floor is >=516)
+
+====================================================================================================
+N4-f  EVERY PINNED / RECONCILED COUNT THIS CHANGE MOVES
+====================================================================================================
+quantity                                                              today      after
+frame rows (len(A))                                                   10820      10825
+legislation_routing_audit.json source_rows                            10820      10825
+legislation_routing_audit.json len(rows)                              10820      10825
+legislation_routing_audit.json selected_events                         8123       8126
+summary.dispositions["selected"]                                       8123       8126
+summary.dispositions["duplicate-same-role"]                             133        135
+summary.duplicates["duplicate-same-role"]                               133        135
+summary.effective_categories["Member Business Lending"]                1894       1897
+archive_leg.json members (audit_full floor >=516)                       523        523   (unchanged)
+unmatched archive rows (audit_full cap <=50 and <=1%)                    14         14   (unchanged)
+letter evidence rows (fail-closed floor 296)                            296        296   (unchanged)
+archive workbook rows (leg_evidence_recompute pin 10986)              10181      10181   (unchanged)
+
+ROW CONSERVATION holds: len(rows) == source_rows both before (10820) and after (10825), so
+  audit_full.py:525 and bill_coverage_audit C1 stay green -- every synthesised row also
+  appends exactly one routing row, on every disposition branch.
+DUPLICATE-SELECTED GUARDS hold: live_legislative_pillar.measure() and
+  audit_measurement_layers raise on two SELECTED rows sharing (member, congress, bill,
+  category). The 2 Anna Luna rows arrive after her sentinel sponsor rows and dedup to
+  duplicate-same-role, so no cell gains a second selected row.
+
+====================================================================================================
+N4-g  SUMMARY
+====================================================================================================
+synthesised rows ......................... 5  (3 selected, 2 dedup to duplicate-same-role)
+signed weight reaching the matrix ........ +6.240
+archive_leg.json cells that change ....... 1
+   Tim Scott / Member Business Lending: 10.76 -> 17.00
+F1 measured the same missing weight independently: +6.240
+MATCH: True

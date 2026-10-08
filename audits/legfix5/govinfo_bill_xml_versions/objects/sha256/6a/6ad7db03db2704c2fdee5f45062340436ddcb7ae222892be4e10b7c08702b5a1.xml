@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H083BCD16AB3C45AAB31EFF2A8D8866CD" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 3662 IH: Relief for Defrauded Students Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-07-10</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 3662</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190710">July 10, 2019</action-date><action-desc><sponsor name-id="M001208">Mrs. McBath</sponsor> (for herself, <cosponsor name-id="F000467">Ms. Finkenauer</cosponsor>, <cosponsor name-id="P000618">Ms. Porter</cosponsor>, <cosponsor name-id="A000378">Mrs. Axne</cosponsor>, <cosponsor name-id="D000629">Ms. Davids of Kansas</cosponsor>, and <cosponsor name-id="S001205">Ms. Scanlon</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HED00">Committee on Education and Labor</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Higher Education Act of 1965 to ensure that student borrowers are provided relief from
+			 their student loans in the instance of substantial misrepresentation or
+			 omission by an institution of higher education.</official-title></form>
+	<legis-body id="HA1281980778B4B8DB117B57E8D3B56AB" style="OLC">
+ <section id="HEEDFB19039BA4FD9A06814BDCBA339C4" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Relief for Defrauded Students Act of 2019</short-title></quote>.</text> </section><section id="HC5C9D44077BC4E3AB8F288FB40952FD0"><enum>2.</enum><header>Amendments to terms and conditions of borrower defenses</header><text display-inline="no-display-inline">Section 455(h) of the Higher Education Act of 1965 (<external-xref legal-doc="usc" parsable-cite="usc/20/1087e">20 U.S.C. 1087e(h)</external-xref>) is amended to read as follows:</text>
+			<quoted-block id="H8124051E0C4F464C94F2E3348C29B2E1" style="OLC">
+				<subsection id="HE039673A7C9F46D68D78149F860B0CCC"><enum>(h)</enum><header>Borrower defenses</header>
+ <paragraph id="HB9A6F9F206F54B788D1F5C2F6B6496D8"><enum>(1)</enum><header>In general</header><text>Notwithstanding any other provision of State or Federal law, a defense to repayment of a loan under this part shall include—</text>
+ <subparagraph id="H149FB2FDED0E495CBAC1BEB2DF6E0811"><enum>(A)</enum><text>a substantial misrepresentation under by an institution of higher education described in section 487(c)(3);</text>
+ </subparagraph><subparagraph id="HD5772C4A739B43CB9BA0BDBA02BC2234"><enum>(B)</enum><text>an act or omission of an institution of higher education that would give rise to a cause of action against such institution of higher education under applicable State law; or</text>
+ </subparagraph><subparagraph id="H320B3D7C15114B1DA9C3ECB8D26E2146"><enum>(C)</enum><text>any other act or omission by an institution of higher education that the Secretary specifies in the regulations under paragraph (3).</text>
+						</subparagraph></paragraph><paragraph id="HDBC49C3A74E543C7AC43AB1ECCF15202"><enum>(2)</enum><header>Procedures</header>
+ <subparagraph id="H887B667A38764E5AA44D2AE55059BCBA"><enum>(A)</enum><header>In general</header><text>The Secretary shall, for each borrower who submits to the Secretary an application asserting a defense to repayment of a loan made under this part—</text>
+ <clause id="H6499051D8E364790A8333A23512AFF7E"><enum>(i)</enum><text>provide an expeditious and fair process to consider such application (without regard to whether the application is submitted by an individual borrower, a group of borrowers, or a representative of such individual or group); and</text>
+ </clause><clause id="H02FBCBF7AC234ECBB02D71BBA222FDA4"><enum>(ii)</enum><text>determine the entitlement of the borrower to relief based on all evidence available to the Department.</text>
+ </clause></subparagraph><subparagraph id="HEF2895C3225D4DB5AED9534A02E760E0"><enum>(B)</enum><header>Independent determination</header><text>A determination under subparagraph (A)(ii) with respect to a borrower shall be independent of any action that the Department may take under this Act to recover funds from an institution of higher education for an act or omission related to such determination.</text>
+ </subparagraph><subparagraph id="H6F13E1D4DEB74B8095DC66DAC3467BCF"><enum>(C)</enum><header>Cancellation of debt</header><text>In a case in which the Secretary determines under subparagraph (A)(ii) that the borrower is entitled to relief, the Secretary shall—</text>
+ <clause id="H093E376865804995834BE032F046E748"><enum>(i)</enum><text>cancel any outstanding balance of principal and interest due on each loan made under this part that the borrower received for enrollment at the institution of higher education against which the borrower is asserting the defense to repayment; and</text>
+ </clause><clause id="HB34C2652A9CF42778BA5B0D1AF4D06ED"><enum>(ii)</enum><text>return to the borrower the amount of any payments made on such loans.</text> </clause></subparagraph></paragraph><paragraph id="HCEC62C24B0544B7386586CD42F039C77"><enum>(3)</enum><header>Regulations</header><text>The Secretary shall specify in regulations which acts or omissions of an institution of higher education a borrower may assert as a defense to repayment of a loan made under this part, except that in no event may a borrower recover from the Secretary, in any action arising from or relating to a loan made under this part, an amount in excess of the amount such borrower has repaid on such loan.</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

@@ -1,0 +1,9334 @@
+{
+ "R1": [
+  {
+   "rowid": 65877,
+   "member": "Tom Emmer",
+   "date": "2024-03-06",
+   "show": "cnc",
+   "tag": "FOX (on camera)",
+   "at": 289,
+   "nchars": 346
+  },
+  {
+   "rowid": 66330,
+   "member": "Dan Crenshaw",
+   "date": "2024-03-13",
+   "show": "fmjc",
+   "tag": "FOX (voice-over)",
+   "at": 53,
+   "nchars": 197
+  },
+  {
+   "rowid": 66331,
+   "member": "Ro Khanna",
+   "date": "2024-03-13",
+   "show": "fmjc",
+   "tag": "FOX (voice-over)",
+   "at": 86,
+   "nchars": 280
+  },
+  {
+   "rowid": 66332,
+   "member": "Richard Durbin",
+   "date": "2024-03-13",
+   "show": "fmjc",
+   "tag": "FOX (voice-over)",
+   "at": 147,
+   "nchars": 444
+  },
+  {
+   "rowid": 66346,
+   "member": "Dan Crenshaw",
+   "date": "2024-03-13",
+   "show": "qmb",
+   "tag": "FOX (voice over)",
+   "at": 53,
+   "nchars": 344
+  },
+  {
+   "rowid": 66347,
+   "member": "Ro Khanna",
+   "date": "2024-03-13",
+   "show": "qmb",
+   "tag": "FOX (voice over)",
+   "at": 86,
+   "nchars": 240
+  },
+  {
+   "rowid": 66348,
+   "member": "Richard Durbin",
+   "date": "2024-03-13",
+   "show": "qmb",
+   "tag": "FOX (voice over)",
+   "at": 149,
+   "nchars": 448
+  },
+  {
+   "rowid": 66365,
+   "member": "Dan Crenshaw",
+   "date": "2024-03-14",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 186,
+   "nchars": 758
+  },
+  {
+   "rowid": 66366,
+   "member": "Richard Durbin",
+   "date": "2024-03-14",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 77,
+   "nchars": 391
+  },
+  {
+   "rowid": 66368,
+   "member": "Dan Crenshaw",
+   "date": "2024-03-14",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 180,
+   "nchars": 365
+  },
+  {
+   "rowid": 66369,
+   "member": "Ro Khanna",
+   "date": "2024-03-14",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 167,
+   "nchars": 240
+  },
+  {
+   "rowid": 66370,
+   "member": "Richard Durbin",
+   "date": "2024-03-14",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 77,
+   "nchars": 375
+  },
+  {
+   "rowid": 66374,
+   "member": "Richard Durbin",
+   "date": "2024-03-14",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 77,
+   "nchars": 393
+  },
+  {
+   "rowid": 86852,
+   "member": "Jim Jordan",
+   "date": "2026-01-22",
+   "show": "acd",
+   "tag": "FOX (voice-over)",
+   "at": 68,
+   "nchars": 119
+  },
+  {
+   "rowid": 86853,
+   "member": "Chip Roy",
+   "date": "2026-01-22",
+   "show": "acd",
+   "tag": "FOX (voice-over)",
+   "at": 265,
+   "nchars": 365
+  },
+  {
+   "rowid": 86855,
+   "member": "Joe Neguse",
+   "date": "2026-01-22",
+   "show": "acd",
+   "tag": "FOX (voice-over)",
+   "at": 76,
+   "nchars": 124
+  },
+  {
+   "rowid": 89834,
+   "member": "Cory Mills",
+   "date": "2026-04-15",
+   "show": "ebo",
+   "tag": "FOX (voice-over)",
+   "at": 448,
+   "nchars": 536
+  },
+  {
+   "rowid": 89836,
+   "member": "Mike Johnson",
+   "date": "2026-04-15",
+   "show": "ebo",
+   "tag": "FOX (voice-over)",
+   "at": 160,
+   "nchars": 405
+  },
+  {
+   "rowid": 89869,
+   "member": "Cory Mills",
+   "date": "2026-04-16",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 459,
+   "nchars": 547
+  },
+  {
+   "rowid": 89870,
+   "member": "Mike Johnson",
+   "date": "2026-04-16",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 161,
+   "nchars": 406
+  },
+  {
+   "rowid": 89871,
+   "member": "Jared Moskowitz",
+   "date": "2026-04-16",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 156,
+   "nchars": 204
+  },
+  {
+   "rowid": 89881,
+   "member": "Cory Mills",
+   "date": "2026-04-16",
+   "show": "tsiem",
+   "tag": "FOX (voice-over)",
+   "at": 446,
+   "nchars": 534
+  },
+  {
+   "rowid": 188442,
+   "member": "Nancy Pelosi",
+   "date": "2019-01-04",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 156,
+   "nchars": 563
+  },
+  {
+   "rowid": 188444,
+   "member": "Nancy Pelosi",
+   "date": "2019-01-04",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 96,
+   "nchars": 287
+  },
+  {
+   "rowid": 188633,
+   "member": "Adam Schiff",
+   "date": "2019-01-07",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 194,
+   "nchars": 512
+  },
+  {
+   "rowid": 188635,
+   "member": "Lindsey Graham",
+   "date": "2019-01-07",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 191,
+   "nchars": 322
+  },
+  {
+   "rowid": 188636,
+   "member": "Steny Hoyer",
+   "date": "2019-01-07",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 176,
+   "nchars": 482
+  },
+  {
+   "rowid": 191772,
+   "member": "James Himes",
+   "date": "2019-02-25",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 134,
+   "nchars": 242
+  },
+  {
+   "rowid": 191773,
+   "member": "Adam Schiff",
+   "date": "2019-02-25",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 136,
+   "nchars": 455
+  },
+  {
+   "rowid": 193734,
+   "member": "Richard Neal",
+   "date": "2019-04-04",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 146,
+   "nchars": 365
+  },
+  {
+   "rowid": 195157,
+   "member": "Hakeem Jeffries",
+   "date": "2019-05-03",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 92,
+   "nchars": 922
+  },
+  {
+   "rowid": 195271,
+   "member": "Ted Lieu",
+   "date": "2019-05-07",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 167,
+   "nchars": 684
+  },
+  {
+   "rowid": 195493,
+   "member": "Jerrold Nadler",
+   "date": "2019-05-09",
+   "show": "nwsm",
+   "tag": "FOX (voice over)",
+   "at": 107,
+   "nchars": 319
+  },
+  {
+   "rowid": 195495,
+   "member": "Jim Jordan",
+   "date": "2019-05-09",
+   "show": "nwsm",
+   "tag": "FOX (on camera)",
+   "at": 129,
+   "nchars": 412
+  },
+  {
+   "rowid": 197048,
+   "member": "Bill Cassidy",
+   "date": "2019-06-06",
+   "show": "nday",
+   "tag": "FOX (voice-over)",
+   "at": 94,
+   "nchars": 203
+  },
+  {
+   "rowid": 202141,
+   "member": "Nancy Pelosi",
+   "date": "2019-09-25",
+   "show": "nday",
+   "tag": "FOX (voice-over)",
+   "at": 65,
+   "nchars": 128
+  },
+  {
+   "rowid": 203626,
+   "member": "Jamie Raskin",
+   "date": "2019-10-18",
+   "show": "wrn",
+   "tag": "FOX (voice-over)",
+   "at": 146,
+   "nchars": 1168
+  },
+  {
+   "rowid": 205488,
+   "member": "Michael Turner",
+   "date": "2019-11-18",
+   "show": "wrn",
+   "tag": "FOX (voice-over)",
+   "at": 403,
+   "nchars": 486
+  },
+  {
+   "rowid": 207714,
+   "member": "Nancy Pelosi",
+   "date": "2019-12-26",
+   "show": "ebo",
+   "tag": "FOX(voice-over)",
+   "at": 141,
+   "nchars": 488
+  },
+  {
+   "rowid": 207716,
+   "member": "Debbie Dingell",
+   "date": "2019-12-26",
+   "show": "ebo",
+   "tag": "FOX(voice-over)",
+   "at": 120,
+   "nchars": 288
+  },
+  {
+   "rowid": 208905,
+   "member": "Mazie Hirono",
+   "date": "2020-01-21",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 163,
+   "nchars": 312
+  },
+  {
+   "rowid": 208906,
+   "member": "Charles Schumer",
+   "date": "2020-01-21",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 139,
+   "nchars": 356
+  },
+  {
+   "rowid": 208907,
+   "member": "Marsha Blackburn",
+   "date": "2020-01-21",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 333,
+   "nchars": 647
+  },
+  {
+   "rowid": 209035,
+   "member": "Adam Schiff",
+   "date": "2020-01-23",
+   "show": "nday",
+   "tag": "FOX (voice-over)",
+   "at": 119,
+   "nchars": 298
+  },
+  {
+   "rowid": 209597,
+   "member": "Michael Bennet",
+   "date": "2020-01-31",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 172,
+   "nchars": 704
+  },
+  {
+   "rowid": 209598,
+   "member": "Ted Cruz",
+   "date": "2020-01-31",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 205,
+   "nchars": 675
+  },
+  {
+   "rowid": 213269,
+   "member": "Charles Schumer",
+   "date": "2020-08-10",
+   "show": "qmb",
+   "tag": "FOX (voice over)",
+   "at": 82,
+   "nchars": 398
+  },
+  {
+   "rowid": 216537,
+   "member": "Jamie Raskin",
+   "date": "2021-01-26",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 98,
+   "nchars": 339
+  },
+  {
+   "rowid": 216538,
+   "member": "Madeleine Dean",
+   "date": "2021-01-26",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 121,
+   "nchars": 249
+  },
+  {
+   "rowid": 216540,
+   "member": "Jamie Raskin",
+   "date": "2021-01-26",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 96,
+   "nchars": 336
+  },
+  {
+   "rowid": 216541,
+   "member": "Madeleine Dean",
+   "date": "2021-01-26",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 119,
+   "nchars": 246
+  },
+  {
+   "rowid": 216542,
+   "member": "John Cornyn",
+   "date": "2021-01-26",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 211,
+   "nchars": 631
+  },
+  {
+   "rowid": 216550,
+   "member": "Jamie Raskin",
+   "date": "2021-01-26",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 97,
+   "nchars": 340
+  },
+  {
+   "rowid": 216551,
+   "member": "Madeleine Dean",
+   "date": "2021-01-26",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 122,
+   "nchars": 250
+  },
+  {
+   "rowid": 217014,
+   "member": "Jason Crow",
+   "date": "2021-02-09",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 230,
+   "nchars": 682
+  },
+  {
+   "rowid": 217015,
+   "member": "Charles Schumer",
+   "date": "2021-02-09",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 129,
+   "nchars": 345
+  },
+  {
+   "rowid": 217016,
+   "member": "Tom Cotton",
+   "date": "2021-02-09",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 189,
+   "nchars": 412
+  },
+  {
+   "rowid": 217017,
+   "member": "Amy Klobuchar",
+   "date": "2021-02-09",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 136,
+   "nchars": 353
+  },
+  {
+   "rowid": 217089,
+   "member": "Jamie Raskin",
+   "date": "2021-02-10",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 65,
+   "nchars": 257
+  },
+  {
+   "rowid": 217090,
+   "member": "Joe Neguse",
+   "date": "2021-02-10",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 216,
+   "nchars": 411
+  },
+  {
+   "rowid": 217091,
+   "member": "Bill Cassidy",
+   "date": "2021-02-10",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 84,
+   "nchars": 281
+  },
+  {
+   "rowid": 217096,
+   "member": "Richard Durbin",
+   "date": "2021-02-10",
+   "show": "nday",
+   "tag": "FOX (on camera)",
+   "at": 190,
+   "nchars": 447
+  },
+  {
+   "rowid": 217174,
+   "member": "Jamie Raskin",
+   "date": "2021-02-11",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 135,
+   "nchars": 366
+  },
+  {
+   "rowid": 217175,
+   "member": "Madeleine Dean",
+   "date": "2021-02-11",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 174,
+   "nchars": 359
+  },
+  {
+   "rowid": 217176,
+   "member": "Joe Neguse",
+   "date": "2021-02-11",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 129,
+   "nchars": 226
+  },
+  {
+   "rowid": 217177,
+   "member": "Lindsey Graham",
+   "date": "2021-02-11",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 136,
+   "nchars": 271
+  },
+  {
+   "rowid": 217178,
+   "member": "Lisa Murkowski",
+   "date": "2021-02-11",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 150,
+   "nchars": 325
+  },
+  {
+   "rowid": 217184,
+   "member": "Joaquin Castro",
+   "date": "2021-02-11",
+   "show": "nday",
+   "tag": "FOX (on camera)",
+   "at": 134,
+   "nchars": 706
+  },
+  {
+   "rowid": 217260,
+   "member": "Charles Schumer",
+   "date": "2021-02-12",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 120,
+   "nchars": 448
+  },
+  {
+   "rowid": 217261,
+   "member": "Ted Cruz",
+   "date": "2021-02-12",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 303,
+   "nchars": 396
+  },
+  {
+   "rowid": 217262,
+   "member": "Richard Durbin",
+   "date": "2021-02-12",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 130,
+   "nchars": 247
+  },
+  {
+   "rowid": 217265,
+   "member": "Ted Lieu",
+   "date": "2021-02-12",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 103,
+   "nchars": 214
+  },
+  {
+   "rowid": 217273,
+   "member": "Jamie Raskin",
+   "date": "2021-02-12",
+   "show": "nday",
+   "tag": "FOX (on camera)",
+   "at": 150,
+   "nchars": 654
+  },
+  {
+   "rowid": 217861,
+   "member": "Charles Schumer",
+   "date": "2021-02-25",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 120,
+   "nchars": 196
+  },
+  {
+   "rowid": 222523,
+   "member": "Mary Scanlon",
+   "date": "2021-10-14",
+   "show": "nday",
+   "tag": "FOX (voice-over)",
+   "at": 274,
+   "nchars": 419
+  },
+  {
+   "rowid": 234742,
+   "member": "Warren Davidson",
+   "date": "2023-01-03",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 285,
+   "nchars": 745
+  },
+  {
+   "rowid": 234758,
+   "member": "Warren Davidson",
+   "date": "2023-01-03",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 299,
+   "nchars": 761
+  },
+  {
+   "rowid": 234781,
+   "member": "Warren Davidson",
+   "date": "2023-01-03",
+   "show": "ctw",
+   "tag": "FOX (voice over)",
+   "at": 285,
+   "nchars": 746
+  },
+  {
+   "rowid": 234850,
+   "member": "Chip Roy",
+   "date": "2023-01-04",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 207,
+   "nchars": 454
+  },
+  {
+   "rowid": 234851,
+   "member": "Blake Moore",
+   "date": "2023-01-04",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 115,
+   "nchars": 383
+  },
+  {
+   "rowid": 234888,
+   "member": "Chip Roy",
+   "date": "2023-01-04",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 208,
+   "nchars": 449
+  },
+  {
+   "rowid": 234889,
+   "member": "Blake Moore",
+   "date": "2023-01-04",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 112,
+   "nchars": 389
+  },
+  {
+   "rowid": 234890,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2023-01-04",
+   "show": "ctmo",
+   "tag": "FOX (on camera)",
+   "at": 207,
+   "nchars": 758
+  },
+  {
+   "rowid": 234921,
+   "member": "Chip Roy",
+   "date": "2023-01-04",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 192,
+   "nchars": 848
+  },
+  {
+   "rowid": 234922,
+   "member": "Blake Moore",
+   "date": "2023-01-04",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 117,
+   "nchars": 386
+  },
+  {
+   "rowid": 235090,
+   "member": "Brian Fitzpatrick",
+   "date": "2023-01-05",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 162,
+   "nchars": 342
+  },
+  {
+   "rowid": 235091,
+   "member": "Nancy Pelosi",
+   "date": "2023-01-05",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 121,
+   "nchars": 221
+  },
+  {
+   "rowid": 235092,
+   "member": "Chip Roy",
+   "date": "2023-01-05",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 119,
+   "nchars": 274
+  },
+  {
+   "rowid": 235093,
+   "member": "French Hill",
+   "date": "2023-01-05",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 198,
+   "nchars": 725
+  },
+  {
+   "rowid": 235128,
+   "member": "Brian Fitzpatrick",
+   "date": "2023-01-05",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 140,
+   "nchars": 320
+  },
+  {
+   "rowid": 235129,
+   "member": "Nancy Pelosi",
+   "date": "2023-01-05",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 120,
+   "nchars": 218
+  },
+  {
+   "rowid": 235130,
+   "member": "Chip Roy",
+   "date": "2023-01-05",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 120,
+   "nchars": 270
+  },
+  {
+   "rowid": 235131,
+   "member": "French Hill",
+   "date": "2023-01-05",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 205,
+   "nchars": 730
+  },
+  {
+   "rowid": 238396,
+   "member": "Ilhan Omar",
+   "date": "2023-02-03",
+   "show": "ctmo",
+   "tag": "FOX (voice over)",
+   "at": 86,
+   "nchars": 240
+  },
+  {
+   "rowid": 242264,
+   "member": "Charles Schumer",
+   "date": "2023-05-10",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 142,
+   "nchars": 259
+  },
+  {
+   "rowid": 243010,
+   "member": "Steve Scalise",
+   "date": "2023-05-31",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 97,
+   "nchars": 280
+  },
+  {
+   "rowid": 243011,
+   "member": "Elise Stefanik",
+   "date": "2023-05-31",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 171,
+   "nchars": 273
+  },
+  {
+   "rowid": 243012,
+   "member": "Charles Schumer",
+   "date": "2023-05-31",
+   "show": "ctmo",
+   "tag": "FOX (on camera)",
+   "at": 123,
+   "nchars": 899
+  },
+  {
+   "rowid": 243033,
+   "member": "Elise Stefanik",
+   "date": "2023-05-31",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 171,
+   "nchars": 366
+  },
+  {
+   "rowid": 243034,
+   "member": "Chip Roy",
+   "date": "2023-05-31",
+   "show": "fmjc",
+   "tag": "FOX (voice over)",
+   "at": 138,
+   "nchars": 317
+  },
+  {
+   "rowid": 246053,
+   "member": "Hakeem Jeffries",
+   "date": "2023-09-13",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 145,
+   "nchars": 359
+  },
+  {
+   "rowid": 246060,
+   "member": "Hakeem Jeffries",
+   "date": "2023-09-13",
+   "show": "fmjc",
+   "tag": "FOX (voice-over)",
+   "at": 144,
+   "nchars": 358
+  },
+  {
+   "rowid": 246061,
+   "member": "Daniel Goldman",
+   "date": "2023-09-13",
+   "show": "fmjc",
+   "tag": "FOX (voice-over)",
+   "at": 176,
+   "nchars": 314
+  },
+  {
+   "rowid": 246266,
+   "member": "Mitch McConnell",
+   "date": "2023-09-20",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 184,
+   "nchars": 467
+  },
+  {
+   "rowid": 246267,
+   "member": "Seth Moulton",
+   "date": "2023-09-20",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 171,
+   "nchars": 613
+  },
+  {
+   "rowid": 246268,
+   "member": "Michael Lawler",
+   "date": "2023-09-20",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 229,
+   "nchars": 341
+  },
+  {
+   "rowid": 246270,
+   "member": "Michael McCaul",
+   "date": "2023-09-20",
+   "show": "ctmo",
+   "tag": "FOX (on camera)",
+   "at": 164,
+   "nchars": 470
+  },
+  {
+   "rowid": 246374,
+   "member": "Byron Donalds",
+   "date": "2023-09-21",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 169,
+   "nchars": 640
+  },
+  {
+   "rowid": 246375,
+   "member": "Mitch McConnell",
+   "date": "2023-09-21",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 175,
+   "nchars": 272
+  },
+  {
+   "rowid": 246376,
+   "member": "Byron Donalds",
+   "date": "2023-09-21",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 168,
+   "nchars": 642
+  },
+  {
+   "rowid": 246377,
+   "member": "Scott Perry",
+   "date": "2023-09-21",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 174,
+   "nchars": 357
+  },
+  {
+   "rowid": 246540,
+   "member": "Richard Durbin",
+   "date": "2023-09-25",
+   "show": "cg",
+   "tag": "FOX (on camera)",
+   "at": 163,
+   "nchars": 556
+  },
+  {
+   "rowid": 246623,
+   "member": "Robert Menendez",
+   "date": "2023-09-26",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 140,
+   "nchars": 375
+  },
+  {
+   "rowid": 246624,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2023-09-26",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 133,
+   "nchars": 252
+  },
+  {
+   "rowid": 246625,
+   "member": "Andy Kim",
+   "date": "2023-09-26",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 221,
+   "nchars": 310
+  },
+  {
+   "rowid": 246630,
+   "member": "Nancy Pelosi",
+   "date": "2023-09-26",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 82,
+   "nchars": 509
+  },
+  {
+   "rowid": 246631,
+   "member": "Robert Menendez",
+   "date": "2023-09-26",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 141,
+   "nchars": 588
+  },
+  {
+   "rowid": 247107,
+   "member": "James McGovern",
+   "date": "2023-10-04",
+   "show": "acd",
+   "tag": "FOX (voice over)",
+   "at": 160,
+   "nchars": 233
+  },
+  {
+   "rowid": 247108,
+   "member": "David Joyce",
+   "date": "2023-10-04",
+   "show": "acd",
+   "tag": "FOX (voice over)",
+   "at": 235,
+   "nchars": 416
+  },
+  {
+   "rowid": 247109,
+   "member": "Jim Jordan",
+   "date": "2023-10-04",
+   "show": "acd",
+   "tag": "FOX (voice over)",
+   "at": 95,
+   "nchars": 262
+  },
+  {
+   "rowid": 247110,
+   "member": "Kevin Hern",
+   "date": "2023-10-04",
+   "show": "acd",
+   "tag": "FOX (voice over)",
+   "at": 113,
+   "nchars": 161
+  },
+  {
+   "rowid": 247152,
+   "member": "Austin Scott",
+   "date": "2023-10-04",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 69,
+   "nchars": 246
+  },
+  {
+   "rowid": 247169,
+   "member": "Austin Scott",
+   "date": "2023-10-04",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 69,
+   "nchars": 245
+  },
+  {
+   "rowid": 247235,
+   "member": "Dusty Johnson",
+   "date": "2023-10-05",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 96,
+   "nchars": 212
+  },
+  {
+   "rowid": 247237,
+   "member": "James McGovern",
+   "date": "2023-10-05",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 155,
+   "nchars": 596
+  },
+  {
+   "rowid": 247238,
+   "member": "Chip Roy",
+   "date": "2023-10-05",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 152,
+   "nchars": 315
+  },
+  {
+   "rowid": 247268,
+   "member": "James McGovern",
+   "date": "2023-10-05",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 154,
+   "nchars": 595
+  },
+  {
+   "rowid": 247269,
+   "member": "Chip Roy",
+   "date": "2023-10-05",
+   "show": "ctw",
+   "tag": "FOX (voice-over)",
+   "at": 152,
+   "nchars": 316
+  },
+  {
+   "rowid": 249676,
+   "member": "Michael Guest",
+   "date": "2023-11-17",
+   "show": "ow",
+   "tag": "FOX (voice-over)",
+   "at": 147,
+   "nchars": 525
+  },
+  {
+   "rowid": 251997,
+   "member": "Christopher Murphy",
+   "date": "2024-01-29",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 249,
+   "nchars": 516
+  },
+  {
+   "rowid": 251998,
+   "member": "Nancy Pelosi",
+   "date": "2024-01-29",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 76,
+   "nchars": 224
+  },
+  {
+   "rowid": 252000,
+   "member": "Rick Scott",
+   "date": "2024-01-29",
+   "show": "ctmo",
+   "tag": "FOX (voice-over)",
+   "at": 138,
+   "nchars": 510
+  },
+  {
+   "rowid": 252001,
+   "member": "Michael McCaul",
+   "date": "2024-01-29",
+   "show": "ctmo",
+   "tag": "FOX (on camera)",
+   "at": 349,
+   "nchars": 709
+  },
+  {
+   "rowid": 307025,
+   "member": "Bernie Moreno",
+   "date": "2026-07-29",
+   "show": "ebo",
+   "tag": "FOX (voice-over)",
+   "at": 38,
+   "nchars": 289
+  },
+  {
+   "rowid": 307026,
+   "member": "Rand Paul",
+   "date": "2026-07-29",
+   "show": "ebo",
+   "tag": "FOX (voice-over)",
+   "at": 69,
+   "nchars": 174
+  },
+  {
+   "rowid": 307027,
+   "member": "Josh Hawley",
+   "date": "2026-07-29",
+   "show": "ebo",
+   "tag": "FOX (voice-over)",
+   "at": 61,
+   "nchars": 459
+  },
+  {
+   "rowid": 307104,
+   "member": "Bernie Moreno",
+   "date": "2026-07-30",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 38,
+   "nchars": 289
+  },
+  {
+   "rowid": 307105,
+   "member": "Rand Paul",
+   "date": "2026-07-30",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 69,
+   "nchars": 174
+  },
+  {
+   "rowid": 307106,
+   "member": "Rand Paul",
+   "date": "2026-07-30",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 72,
+   "nchars": 227
+  },
+  {
+   "rowid": 307107,
+   "member": "Josh Hawley",
+   "date": "2026-07-30",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 55,
+   "nchars": 453
+  },
+  {
+   "rowid": 307108,
+   "member": "Rand Paul",
+   "date": "2026-07-30",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 81,
+   "nchars": 267
+  },
+  {
+   "rowid": 307109,
+   "member": "Josh Hawley",
+   "date": "2026-07-30",
+   "show": "cnr",
+   "tag": "FOX (voice-over)",
+   "at": 175,
+   "nchars": 927
+  }
+ ],
+ "R2": [
+  {
+   "rowid": 65890,
+   "member": "Robert Menendez",
+   "date": "2024-03-06",
+   "show": "sitroom",
+   "tag": "SCANNELL (voice-over)",
+   "at": 28,
+   "nchars": 641
+  },
+  {
+   "rowid": 65891,
+   "member": "John Fetterman",
+   "date": "2024-03-06",
+   "show": "sitroom",
+   "tag": "SCANNELL (on camera)",
+   "at": 276,
+   "nchars": 633
+  },
+  {
+   "rowid": 66606,
+   "member": "Nancy Pelosi",
+   "date": "2024-03-27",
+   "show": "sitroom",
+   "tag": "BLITZER (voice-over)",
+   "at": 46,
+   "nchars": 273
+  },
+  {
+   "rowid": 66721,
+   "member": "Christopher Coons",
+   "date": "2024-04-04",
+   "show": "fmjc",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 115,
+   "nchars": 304
+  },
+  {
+   "rowid": 66722,
+   "member": "Elizabeth Warren",
+   "date": "2024-04-04",
+   "show": "fmjc",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 86,
+   "nchars": 243
+  },
+  {
+   "rowid": 66732,
+   "member": "Christopher Coons",
+   "date": "2024-04-05",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 115,
+   "nchars": 303
+  },
+  {
+   "rowid": 66733,
+   "member": "Elizabeth Warren",
+   "date": "2024-04-05",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 86,
+   "nchars": 243
+  },
+  {
+   "rowid": 66736,
+   "member": "Christopher Coons",
+   "date": "2024-04-05",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 115,
+   "nchars": 304
+  },
+  {
+   "rowid": 67273,
+   "member": "Tom Cotton",
+   "date": "2024-04-24",
+   "show": "sitroom",
+   "tag": "PROKUPECZ (on camera)",
+   "at": 161,
+   "nchars": 885
+  },
+  {
+   "rowid": 67279,
+   "member": "Maria Cantwell",
+   "date": "2024-04-25",
+   "show": "cnr",
+   "tag": "YOSHIDA (voice-over)",
+   "at": 203,
+   "nchars": 289
+  },
+  {
+   "rowid": 67280,
+   "member": "Tom Cotton",
+   "date": "2024-04-25",
+   "show": "cnr",
+   "tag": "PROKUPECZ (voice-over)",
+   "at": 161,
+   "nchars": 217
+  },
+  {
+   "rowid": 67383,
+   "member": "James Gallagher",
+   "date": "2024-05-05",
+   "show": "cnr",
+   "tag": "BERNAL (voice over)",
+   "at": 85,
+   "nchars": 885
+  },
+  {
+   "rowid": 67388,
+   "member": "James Gallagher",
+   "date": "2024-05-05",
+   "show": "ctmo",
+   "tag": "BERNAL (voice-over)",
+   "at": 85,
+   "nchars": 297
+  },
+  {
+   "rowid": 67915,
+   "member": "Elise Stefanik",
+   "date": "2024-06-02",
+   "show": "cnr",
+   "tag": "POLANTZ (voice-over)",
+   "at": 81,
+   "nchars": 244
+  },
+  {
+   "rowid": 67918,
+   "member": "Elise Stefanik",
+   "date": "2024-06-02",
+   "show": "cnr",
+   "tag": "POLANTZ (voice over)",
+   "at": 81,
+   "nchars": 244
+  },
+  {
+   "rowid": 67943,
+   "member": "Elise Stefanik",
+   "date": "2024-06-03",
+   "show": "cnr",
+   "tag": "POLANTZ (voice-over)",
+   "at": 81,
+   "nchars": 244
+  },
+  {
+   "rowid": 67988,
+   "member": "Vicente Gonzalez",
+   "date": "2024-06-04",
+   "show": "cg",
+   "tag": "FLORES (voice-over)",
+   "at": 44,
+   "nchars": 437
+  },
+  {
+   "rowid": 68056,
+   "member": "Steve Scalise",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "FLORES (voice-over)",
+   "at": 123,
+   "nchars": 219
+  },
+  {
+   "rowid": 68057,
+   "member": "Pramila Jayapal",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 41,
+   "nchars": 177
+  },
+  {
+   "rowid": 68058,
+   "member": "Pramila Jayapal",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 186,
+   "nchars": 293
+  },
+  {
+   "rowid": 68059,
+   "member": "Ted Cruz",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 209,
+   "nchars": 277
+  },
+  {
+   "rowid": 68061,
+   "member": "Steve Scalise",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "FLORES (voice-over)",
+   "at": 119,
+   "nchars": 223
+  },
+  {
+   "rowid": 68065,
+   "member": "Pramila Jayapal",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 41,
+   "nchars": 178
+  },
+  {
+   "rowid": 68066,
+   "member": "Ted Cruz",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 211,
+   "nchars": 279
+  },
+  {
+   "rowid": 68068,
+   "member": "Steve Scalise",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "FLORES (voice-over)",
+   "at": 122,
+   "nchars": 216
+  },
+  {
+   "rowid": 68069,
+   "member": "Steve Scalise",
+   "date": "2024-06-05",
+   "show": "cnr",
+   "tag": "FLORES (voice-over)",
+   "at": 119,
+   "nchars": 214
+  },
+  {
+   "rowid": 68285,
+   "member": "George Latimer",
+   "date": "2024-06-17",
+   "show": "cg",
+   "tag": "PAZMINO (voice-over)",
+   "at": 57,
+   "nchars": 203
+  },
+  {
+   "rowid": 68287,
+   "member": "George Latimer",
+   "date": "2024-06-17",
+   "show": "cg",
+   "tag": "PAZMINO (voice-over)",
+   "at": 69,
+   "nchars": 202
+  },
+  {
+   "rowid": 68339,
+   "member": "Josh Hawley",
+   "date": "2024-06-19",
+   "show": "cnr",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 74,
+   "nchars": 297
+  },
+  {
+   "rowid": 68340,
+   "member": "Josh Hawley",
+   "date": "2024-06-19",
+   "show": "cnr",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 74,
+   "nchars": 299
+  },
+  {
+   "rowid": 68649,
+   "member": "Jared Huffman",
+   "date": "2024-07-04",
+   "show": "qmb",
+   "tag": "ALVAREZ (voice over)",
+   "at": 147,
+   "nchars": 429
+  },
+  {
+   "rowid": 68653,
+   "member": "Jared Huffman",
+   "date": "2024-07-05",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 147,
+   "nchars": 695
+  },
+  {
+   "rowid": 68654,
+   "member": "Jared Huffman",
+   "date": "2024-07-05",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 147,
+   "nchars": 700
+  },
+  {
+   "rowid": 68944,
+   "member": "Nancy Pelosi",
+   "date": "2024-07-10",
+   "show": "fmjc",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 137,
+   "nchars": 318
+  },
+  {
+   "rowid": 68945,
+   "member": "Michael Bennet",
+   "date": "2024-07-10",
+   "show": "fmjc",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 243,
+   "nchars": 841
+  },
+  {
+   "rowid": 68984,
+   "member": "Nancy Pelosi",
+   "date": "2024-07-11",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 144,
+   "nchars": 325
+  },
+  {
+   "rowid": 68985,
+   "member": "Michael Bennet",
+   "date": "2024-07-11",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 243,
+   "nchars": 840
+  },
+  {
+   "rowid": 68991,
+   "member": "Michael Bennet",
+   "date": "2024-07-11",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 242,
+   "nchars": 840
+  },
+  {
+   "rowid": 69581,
+   "member": "Hakeem Jeffries",
+   "date": "2024-07-23",
+   "show": "fmjc",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 79,
+   "nchars": 357
+  },
+  {
+   "rowid": 69582,
+   "member": "Brad Sherman",
+   "date": "2024-07-23",
+   "show": "fmjc",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 59,
+   "nchars": 308
+  },
+  {
+   "rowid": 69621,
+   "member": "Hakeem Jeffries",
+   "date": "2024-07-24",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 78,
+   "nchars": 380
+  },
+  {
+   "rowid": 69623,
+   "member": "Hakeem Jeffries",
+   "date": "2024-07-24",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 77,
+   "nchars": 378
+  },
+  {
+   "rowid": 70069,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2024-08-20",
+   "show": "cnr",
+   "tag": "BENBROOK (voice-over)",
+   "at": 34,
+   "nchars": 144
+  },
+  {
+   "rowid": 70418,
+   "member": "Christopher Murphy",
+   "date": "2024-09-02",
+   "show": "ws",
+   "tag": "CORNISH (voice-over)",
+   "at": 299,
+   "nchars": 407
+  },
+  {
+   "rowid": 70419,
+   "member": "James Lankford",
+   "date": "2024-09-02",
+   "show": "ws",
+   "tag": "CORNISH (voice-over)",
+   "at": 86,
+   "nchars": 128
+  },
+  {
+   "rowid": 70452,
+   "member": "Christopher Murphy",
+   "date": "2024-09-07",
+   "show": "ws",
+   "tag": "CORNISH (voice-over)",
+   "at": 299,
+   "nchars": 407
+  },
+  {
+   "rowid": 70453,
+   "member": "James Lankford",
+   "date": "2024-09-07",
+   "show": "ws",
+   "tag": "CORNISH (voice-over)",
+   "at": 86,
+   "nchars": 128
+  },
+  {
+   "rowid": 70856,
+   "member": "Ashley Moody",
+   "date": "2024-10-07",
+   "show": "cnr",
+   "tag": "ROMO (voice-over)",
+   "at": 276,
+   "nchars": 538
+  },
+  {
+   "rowid": 70930,
+   "member": "Christopher Murphy",
+   "date": "2024-10-13",
+   "show": "ws",
+   "tag": "CORNISH (voice-over)",
+   "at": 299,
+   "nchars": 407
+  },
+  {
+   "rowid": 70931,
+   "member": "James Lankford",
+   "date": "2024-10-13",
+   "show": "ws",
+   "tag": "CORNISH (voice-over)",
+   "at": 86,
+   "nchars": 128
+  },
+  {
+   "rowid": 71634,
+   "member": "Mike Collins",
+   "date": "2024-11-15",
+   "show": "ctw",
+   "tag": "VALENCIA (voice-over)",
+   "at": 27,
+   "nchars": 108
+  },
+  {
+   "rowid": 71978,
+   "member": "Richard Blumenthal",
+   "date": "2024-11-26",
+   "show": "sitroom",
+   "tag": "MUNTEAN (on camera)",
+   "at": 214,
+   "nchars": 533
+  },
+  {
+   "rowid": 71983,
+   "member": "Richard Blumenthal",
+   "date": "2024-11-27",
+   "show": "cnr",
+   "tag": "MUNTEAN (on camera)",
+   "at": 215,
+   "nchars": 607
+  },
+  {
+   "rowid": 71987,
+   "member": "Mike Flood",
+   "date": "2024-11-28",
+   "show": "cnc",
+   "tag": "CHEN (voice-over)",
+   "at": 283,
+   "nchars": 499
+  },
+  {
+   "rowid": 71994,
+   "member": "Mike Flood",
+   "date": "2024-11-28",
+   "show": "ow",
+   "tag": "CHEN (voice-over)",
+   "at": 289,
+   "nchars": 505
+  },
+  {
+   "rowid": 71995,
+   "member": "Mike Flood",
+   "date": "2024-11-29",
+   "show": "ctw",
+   "tag": "CHEN (voice over)",
+   "at": 289,
+   "nchars": 505
+  },
+  {
+   "rowid": 71997,
+   "member": "Mike Flood",
+   "date": "2024-11-30",
+   "show": "cnr",
+   "tag": "CHEN (voice over)",
+   "at": 289,
+   "nchars": 505
+  },
+  {
+   "rowid": 72090,
+   "member": "Bill Cassidy",
+   "date": "2024-12-03",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 154,
+   "nchars": 301
+  },
+  {
+   "rowid": 72412,
+   "member": "Bernard Sanders",
+   "date": "2024-12-14",
+   "show": "cnr",
+   "tag": "DUERSON (voice over)",
+   "at": 54,
+   "nchars": 138
+  },
+  {
+   "rowid": 72435,
+   "member": "Bernard Sanders",
+   "date": "2024-12-15",
+   "show": "cnr",
+   "tag": "DUERSON (voice-over)",
+   "at": 54,
+   "nchars": 138
+  },
+  {
+   "rowid": 72491,
+   "member": "Charles Schumer",
+   "date": "2024-12-17",
+   "show": "cnr",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 180,
+   "nchars": 603
+  },
+  {
+   "rowid": 72499,
+   "member": "Charles Schumer",
+   "date": "2024-12-17",
+   "show": "cnr",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 180,
+   "nchars": 600
+  },
+  {
+   "rowid": 72501,
+   "member": "Charles Schumer",
+   "date": "2024-12-17",
+   "show": "cnr",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 180,
+   "nchars": 592
+  },
+  {
+   "rowid": 72507,
+   "member": "Charles Schumer",
+   "date": "2024-12-17",
+   "show": "ctmo",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 180,
+   "nchars": 603
+  },
+  {
+   "rowid": 72508,
+   "member": "Charles Schumer",
+   "date": "2024-12-17",
+   "show": "ctw",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 180,
+   "nchars": 596
+  },
+  {
+   "rowid": 72878,
+   "member": "Troy Carter",
+   "date": "2025-01-01",
+   "show": "cnr",
+   "tag": "KEILAR (voice-over)",
+   "at": 391,
+   "nchars": 927
+  },
+  {
+   "rowid": 73622,
+   "member": "Thom Tillis",
+   "date": "2025-01-22",
+   "show": "cnr",
+   "tag": "RIED (voice-over)",
+   "at": 74,
+   "nchars": 200
+  },
+  {
+   "rowid": 73897,
+   "member": "Suhas Subramanyam",
+   "date": "2025-01-30",
+   "show": "acd",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 406,
+   "nchars": 1412
+  },
+  {
+   "rowid": 73969,
+   "member": "Suhas Subramanyam",
+   "date": "2025-01-31",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 124,
+   "nchars": 929
+  },
+  {
+   "rowid": 73976,
+   "member": "Suhas Subramanyam",
+   "date": "2025-01-31",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 124,
+   "nchars": 899
+  },
+  {
+   "rowid": 73994,
+   "member": "Maria Cantwell",
+   "date": "2025-01-31",
+   "show": "fmjc",
+   "tag": "FREEMAN (voice-over)",
+   "at": 383,
+   "nchars": 752
+  },
+  {
+   "rowid": 74002,
+   "member": "Maria Cantwell",
+   "date": "2025-01-31",
+   "show": "qmb",
+   "tag": "FREEMAN (voice over)",
+   "at": 383,
+   "nchars": 736
+  },
+  {
+   "rowid": 74013,
+   "member": "Maria Cantwell",
+   "date": "2025-02-01",
+   "show": "cnr",
+   "tag": "FREEMAN (voice-over)",
+   "at": 392,
+   "nchars": 796
+  },
+  {
+   "rowid": 74971,
+   "member": "Mike Johnson",
+   "date": "2025-03-03",
+   "show": "ist",
+   "tag": "WALSH (voice-over)",
+   "at": 54,
+   "nchars": 870
+  },
+  {
+   "rowid": 75058,
+   "member": "Mike Johnson",
+   "date": "2025-03-05",
+   "show": "cnr",
+   "tag": "BENBROOK (voice-over)",
+   "at": 40,
+   "nchars": 236
+  },
+  {
+   "rowid": 75059,
+   "member": "Elissa Slotkin",
+   "date": "2025-03-05",
+   "show": "cnr",
+   "tag": "BENBROOK (voice-over)",
+   "at": 159,
+   "nchars": 216
+  },
+  {
+   "rowid": 75577,
+   "member": "Eric Schmitt",
+   "date": "2025-03-21",
+   "show": "cnr",
+   "tag": "RIPLEY (voice-over)",
+   "at": 131,
+   "nchars": 1086
+  },
+  {
+   "rowid": 75582,
+   "member": "Mike Flood",
+   "date": "2025-03-21",
+   "show": "esrs",
+   "tag": "FREEMAN (voice-over)",
+   "at": 188,
+   "nchars": 298
+  },
+  {
+   "rowid": 75584,
+   "member": "Mike Flood",
+   "date": "2025-03-21",
+   "show": "ow",
+   "tag": "FREEMAN (voice-over)",
+   "at": 190,
+   "nchars": 300
+  },
+  {
+   "rowid": 76052,
+   "member": "Mike Johnson",
+   "date": "2025-04-02",
+   "show": "cnr",
+   "tag": "HUBBARD (voice-over)",
+   "at": 60,
+   "nchars": 166
+  },
+  {
+   "rowid": 76474,
+   "member": "Chris Van Hollen",
+   "date": "2025-04-16",
+   "show": "cnr",
+   "tag": "HUBBARD (voice over)",
+   "at": 135,
+   "nchars": 344
+  },
+  {
+   "rowid": 76531,
+   "member": "Chris Van Hollen",
+   "date": "2025-04-18",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 143,
+   "nchars": 170
+  },
+  {
+   "rowid": 76735,
+   "member": "Charles Schumer",
+   "date": "2025-04-30",
+   "show": "esrs",
+   "tag": "HUBBARD (voiceover)",
+   "at": 172,
+   "nchars": 235
+  },
+  {
+   "rowid": 77093,
+   "member": "Warren Davidson",
+   "date": "2025-05-20",
+   "show": "cnc",
+   "tag": "BERMAN (on camera)",
+   "at": 39,
+   "nchars": 291
+  },
+  {
+   "rowid": 78085,
+   "member": "Hakeem Jeffries",
+   "date": "2025-06-25",
+   "show": "tbwjs",
+   "tag": "PAZMINO (voice-over)",
+   "at": 78,
+   "nchars": 495
+  },
+  {
+   "rowid": 78119,
+   "member": "Hakeem Jeffries",
+   "date": "2025-06-26",
+   "show": "cnr",
+   "tag": "PAZMINO (voice-over)",
+   "at": 77,
+   "nchars": 564
+  },
+  {
+   "rowid": 78452,
+   "member": "Daniel Goldman",
+   "date": "2025-07-03",
+   "show": "acd",
+   "tag": "GINGRAS (voice over)",
+   "at": 35,
+   "nchars": 381
+  },
+  {
+   "rowid": 78551,
+   "member": "Steve Scalise",
+   "date": "2025-07-04",
+   "show": "cnr",
+   "tag": "YOSHIDA (voice-over)",
+   "at": 119,
+   "nchars": 548
+  },
+  {
+   "rowid": 78552,
+   "member": "Lisa McClain",
+   "date": "2025-07-04",
+   "show": "cnr",
+   "tag": "YOSHIDA (voice-over)",
+   "at": 100,
+   "nchars": 233
+  },
+  {
+   "rowid": 78553,
+   "member": "Hakeem Jeffries",
+   "date": "2025-07-04",
+   "show": "cnr",
+   "tag": "YOSHIDA (voice-over)",
+   "at": 136,
+   "nchars": 770
+  },
+  {
+   "rowid": 78554,
+   "member": "Steve Scalise",
+   "date": "2025-07-04",
+   "show": "cnr",
+   "tag": "YOSHIDA (voice-over)",
+   "at": 119,
+   "nchars": 544
+  },
+  {
+   "rowid": 78555,
+   "member": "Hakeem Jeffries",
+   "date": "2025-07-04",
+   "show": "cnr",
+   "tag": "YOSHIDA (voice-over)",
+   "at": 136,
+   "nchars": 770
+  },
+  {
+   "rowid": 78827,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2025-07-16",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 6,
+   "nchars": 71
+  },
+  {
+   "rowid": 78882,
+   "member": "Mike Johnson",
+   "date": "2025-07-17",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 475,
+   "nchars": 670
+  },
+  {
+   "rowid": 78883,
+   "member": "Mike Johnson",
+   "date": "2025-07-17",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 73,
+   "nchars": 123
+  },
+  {
+   "rowid": 79039,
+   "member": "Tim Burchett",
+   "date": "2025-07-22",
+   "show": "acd",
+   "tag": "YEUNG (voice-over)",
+   "at": 20,
+   "nchars": 277
+  },
+  {
+   "rowid": 79041,
+   "member": "Tim Burchett",
+   "date": "2025-07-22",
+   "show": "ampr",
+   "tag": "YEUNG (voice-over)",
+   "at": 19,
+   "nchars": 283
+  },
+  {
+   "rowid": 79054,
+   "member": "Tim Burchett",
+   "date": "2025-07-22",
+   "show": "cnc",
+   "tag": "YEUNG (voice-over)",
+   "at": 22,
+   "nchars": 288
+  },
+  {
+   "rowid": 79076,
+   "member": "Tim Burchett",
+   "date": "2025-07-22",
+   "show": "qmb",
+   "tag": "YEUNG (voice over)",
+   "at": 22,
+   "nchars": 440
+  },
+  {
+   "rowid": 79107,
+   "member": "Tim Burchett",
+   "date": "2025-07-23",
+   "show": "ctw",
+   "tag": "YEUNG (voice-over)",
+   "at": 20,
+   "nchars": 280
+  },
+  {
+   "rowid": 79115,
+   "member": "Tim Burchett",
+   "date": "2025-07-23",
+   "show": "esrs",
+   "tag": "YEUNG (voiceover)",
+   "at": 23,
+   "nchars": 290
+  },
+  {
+   "rowid": 79427,
+   "member": "Carlos Gimenez",
+   "date": "2025-08-11",
+   "show": "cg",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 117,
+   "nchars": 306
+  },
+  {
+   "rowid": 79440,
+   "member": "Carlos Gimenez",
+   "date": "2025-08-12",
+   "show": "cnc",
+   "tag": "MUNTEAN (voice over)",
+   "at": 126,
+   "nchars": 317
+  },
+  {
+   "rowid": 79443,
+   "member": "Carlos Gimenez",
+   "date": "2025-08-12",
+   "show": "cnc",
+   "tag": "MUNTEAN (voice over)",
+   "at": 126,
+   "nchars": 316
+  },
+  {
+   "rowid": 79450,
+   "member": "Carlos Gimenez",
+   "date": "2025-08-12",
+   "show": "sitroom",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 117,
+   "nchars": 306
+  },
+  {
+   "rowid": 79479,
+   "member": "Carlos Gimenez",
+   "date": "2025-08-16",
+   "show": "cnr",
+   "tag": "MUNTEAN (voice over)",
+   "at": 116,
+   "nchars": 359
+  },
+  {
+   "rowid": 79974,
+   "member": "Jim Jordan",
+   "date": "2025-09-09",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 81,
+   "nchars": 172
+  },
+  {
+   "rowid": 80003,
+   "member": "Mike Johnson",
+   "date": "2025-09-10",
+   "show": "cnr",
+   "tag": "HUBBARD (voice-over)",
+   "at": 130,
+   "nchars": 183
+  },
+  {
+   "rowid": 80113,
+   "member": "Richard Hudson",
+   "date": "2025-09-15",
+   "show": "esrs",
+   "tag": "LAWRENCE (voiceover)",
+   "at": 179,
+   "nchars": 332
+  },
+  {
+   "rowid": 80114,
+   "member": "Bernard Sanders",
+   "date": "2025-09-15",
+   "show": "esrs",
+   "tag": "LAWRENCE (voiceover)",
+   "at": 157,
+   "nchars": 342
+  },
+  {
+   "rowid": 80273,
+   "member": "Elizabeth Warren",
+   "date": "2025-09-18",
+   "show": "acd",
+   "tag": "STELTER (voice over)",
+   "at": 143,
+   "nchars": 545
+  },
+  {
+   "rowid": 80362,
+   "member": "Elizabeth Warren",
+   "date": "2025-09-19",
+   "show": "ow",
+   "tag": "STELTER (voice-over)",
+   "at": 143,
+   "nchars": 560
+  },
+  {
+   "rowid": 80934,
+   "member": "Mike Johnson",
+   "date": "2024-10-13",
+   "show": "this-week",
+   "tag": "VILLARREAL (voice-over)",
+   "at": 80,
+   "nchars": 386
+  },
+  {
+   "rowid": 81045,
+   "member": "Don Bacon",
+   "date": "2025-11-16",
+   "show": "this-week",
+   "tag": "BRUCE (voice over)",
+   "at": 127,
+   "nchars": 211
+  },
+  {
+   "rowid": 81046,
+   "member": "Dave Min",
+   "date": "2025-11-16",
+   "show": "this-week",
+   "tag": "BRUCE (voice over)",
+   "at": 167,
+   "nchars": 1257
+  },
+  {
+   "rowid": 81132,
+   "member": "Richard Blumenthal",
+   "date": "2024-12-15",
+   "show": "this-week",
+   "tag": "BENITEZ (voice over)",
+   "at": 52,
+   "nchars": 209
+  },
+  {
+   "rowid": 81133,
+   "member": "Andy Kim",
+   "date": "2024-12-15",
+   "show": "this-week",
+   "tag": "BENITEZ (voice over)",
+   "at": 70,
+   "nchars": 313
+  },
+  {
+   "rowid": 81230,
+   "member": "Hakeem Jeffries",
+   "date": "2024-12-22",
+   "show": "this-week",
+   "tag": "KARL (voice over)",
+   "at": 43,
+   "nchars": 124
+  },
+  {
+   "rowid": 81231,
+   "member": "John Curtis",
+   "date": "2024-12-22",
+   "show": "this-week",
+   "tag": "KARL (voice over)",
+   "at": 68,
+   "nchars": 200
+  },
+  {
+   "rowid": 81303,
+   "member": "Adam Smith",
+   "date": "2025-12-07",
+   "show": "this-week",
+   "tag": "STEPHANOPOULOS (voice-over)",
+   "at": 81,
+   "nchars": 218
+  },
+  {
+   "rowid": 81305,
+   "member": "Tom Cotton",
+   "date": "2025-12-07",
+   "show": "this-week",
+   "tag": "STEPHANOPOULOS (voice-over)",
+   "at": 47,
+   "nchars": 155
+  },
+  {
+   "rowid": 81306,
+   "member": "James Himes",
+   "date": "2025-12-07",
+   "show": "this-week",
+   "tag": "WANG (voice-over)",
+   "at": 140,
+   "nchars": 485
+  },
+  {
+   "rowid": 81395,
+   "member": "James Clyburn",
+   "date": "2020-02-16",
+   "show": "this-week",
+   "tag": "RADDATZ (voice-over)",
+   "at": 432,
+   "nchars": 569
+  },
+  {
+   "rowid": 81574,
+   "member": "Jamie Raskin",
+   "date": "2026-02-15",
+   "show": "this-week",
+   "tag": "O'BRIEN (voice-over)",
+   "at": 150,
+   "nchars": 278
+  },
+  {
+   "rowid": 81590,
+   "member": "Roger Marshall",
+   "date": "2025-02-02",
+   "show": "this-week",
+   "tag": "O'BRIEN (voice-over)",
+   "at": 40,
+   "nchars": 150
+  },
+  {
+   "rowid": 81598,
+   "member": "Mike Johnson",
+   "date": "2024-02-04",
+   "show": "this-week",
+   "tag": "STEPHANOPOULOS (voice over)",
+   "at": 71,
+   "nchars": 209
+  },
+  {
+   "rowid": 81743,
+   "member": "Nancy Pelosi",
+   "date": "2022-05-01",
+   "show": "this-week",
+   "tag": "STEPHANOPOULOS (voiceover)",
+   "at": 63,
+   "nchars": 208
+  },
+  {
+   "rowid": 81744,
+   "member": "Ted Cruz",
+   "date": "2022-05-01",
+   "show": "this-week",
+   "tag": "STEPHANOPOULOS (voiceover)",
+   "at": 110,
+   "nchars": 243
+  },
+  {
+   "rowid": 81745,
+   "member": "Nancy Pelosi",
+   "date": "2022-05-01",
+   "show": "this-week",
+   "tag": "PANNELL (voiceover)",
+   "at": 152,
+   "nchars": 690
+  },
+  {
+   "rowid": 81772,
+   "member": "Mitch McConnell",
+   "date": "2022-04-03",
+   "show": "this-week",
+   "tag": "STEPHANOPOULOS (voiceover)",
+   "at": 43,
+   "nchars": 82
+  },
+  {
+   "rowid": 81874,
+   "member": "Mitch McConnell",
+   "date": "2022-03-27",
+   "show": "this-week",
+   "tag": "KARL (voiceover)",
+   "at": 65,
+   "nchars": 242
+  },
+  {
+   "rowid": 81875,
+   "member": "Seth Moulton",
+   "date": "2022-03-27",
+   "show": "this-week",
+   "tag": "KARL (voiceover)",
+   "at": 61,
+   "nchars": 272
+  },
+  {
+   "rowid": 81949,
+   "member": "Bernard Sanders",
+   "date": "2025-03-23",
+   "show": "this-week",
+   "tag": "KARL (voice-over)",
+   "at": 113,
+   "nchars": 249
+  },
+  {
+   "rowid": 81950,
+   "member": "Bernard Sanders",
+   "date": "2025-03-23",
+   "show": "this-week",
+   "tag": "KARL (voice-over)",
+   "at": 50,
+   "nchars": 116
+  },
+  {
+   "rowid": 81963,
+   "member": "Bernard Sanders",
+   "date": "2025-03-23",
+   "show": "this-week",
+   "tag": "KARL (voice over)",
+   "at": 698,
+   "nchars": 1125
+  },
+  {
+   "rowid": 81981,
+   "member": "Dan Crenshaw",
+   "date": "2023-03-26",
+   "show": "this-week",
+   "tag": "RADDATZ (voice over)",
+   "at": 289,
+   "nchars": 398
+  },
+  {
+   "rowid": 82018,
+   "member": "Chris Van Hollen",
+   "date": "2025-04-20",
+   "show": "this-week",
+   "tag": "KARL (voice-over)",
+   "at": 93,
+   "nchars": 255
+  },
+  {
+   "rowid": 82019,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2025-04-20",
+   "show": "this-week",
+   "tag": "KARL (voice-over)",
+   "at": 101,
+   "nchars": 236
+  },
+  {
+   "rowid": 82031,
+   "member": "Mike Johnson",
+   "date": "2024-04-21",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 70,
+   "nchars": 347
+  },
+  {
+   "rowid": 82032,
+   "member": "Mike Johnson",
+   "date": "2024-04-21",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 309,
+   "nchars": 434
+  },
+  {
+   "rowid": 82034,
+   "member": "Nancy Pelosi",
+   "date": "2024-04-21",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 32,
+   "nchars": 293
+  },
+  {
+   "rowid": 82036,
+   "member": "Elijah Crane",
+   "date": "2024-04-21",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 141,
+   "nchars": 208
+  },
+  {
+   "rowid": 82038,
+   "member": "Daniel Goldman",
+   "date": "2024-04-21",
+   "show": "this-week",
+   "tag": "WANG (on camera)",
+   "at": 82,
+   "nchars": 503
+  },
+  {
+   "rowid": 82051,
+   "member": "Christopher Murphy",
+   "date": "2026-04-26",
+   "show": "this-week",
+   "tag": "WANG (voice-over)",
+   "at": 309,
+   "nchars": 387
+  },
+  {
+   "rowid": 82189,
+   "member": "Christopher Murphy",
+   "date": "2025-06-29",
+   "show": "this-week",
+   "tag": "BRUCE (voice over)",
+   "at": 103,
+   "nchars": 381
+  },
+  {
+   "rowid": 82197,
+   "member": "Ro Khanna",
+   "date": "2026-06-07",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 146,
+   "nchars": 393
+  },
+  {
+   "rowid": 82198,
+   "member": "Ro Khanna",
+   "date": "2026-06-07",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 352,
+   "nchars": 555
+  },
+  {
+   "rowid": 82199,
+   "member": "Ro Khanna",
+   "date": "2026-06-07",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 119,
+   "nchars": 248
+  },
+  {
+   "rowid": 82203,
+   "member": "John Thune",
+   "date": "2025-07-13",
+   "show": "this-week",
+   "tag": "RADDATZ (voice over)",
+   "at": 108,
+   "nchars": 282
+  },
+  {
+   "rowid": 82205,
+   "member": "Seth Moulton",
+   "date": "2023-07-16",
+   "show": "this-week",
+   "tag": "RESHEF (voice-over)",
+   "at": 191,
+   "nchars": 536
+  },
+  {
+   "rowid": 82218,
+   "member": "Peter Welch",
+   "date": "2024-07-21",
+   "show": "this-week",
+   "tag": "KARL (voice over)",
+   "at": 40,
+   "nchars": 384
+  },
+  {
+   "rowid": 82219,
+   "member": "Elizabeth Warren",
+   "date": "2024-07-21",
+   "show": "this-week",
+   "tag": "KARL (voice over)",
+   "at": 173,
+   "nchars": 1329
+  },
+  {
+   "rowid": 82253,
+   "member": "Cynthia Lummis",
+   "date": "2025-08-03",
+   "show": "this-week",
+   "tag": "KARL (voice over)",
+   "at": 117,
+   "nchars": 778
+  },
+  {
+   "rowid": 82310,
+   "member": "John Cornyn",
+   "date": "2023-09-03",
+   "show": "this-week",
+   "tag": "ZEE (voice-over)",
+   "at": 33,
+   "nchars": 188
+  },
+  {
+   "rowid": 82315,
+   "member": "Margaret Hassan",
+   "date": "2025-09-07",
+   "show": "this-week",
+   "tag": "WANG (voice over)",
+   "at": 44,
+   "nchars": 321
+  },
+  {
+   "rowid": 82397,
+   "member": "Chellie Pingree",
+   "date": "2025-09-20",
+   "show": "cnr",
+   "tag": "WEIR (voice-over)",
+   "at": 82,
+   "nchars": 243
+  },
+  {
+   "rowid": 83061,
+   "member": "Maxine Dexter",
+   "date": "2025-10-07",
+   "show": "acd",
+   "tag": "PROKUPECZ (voice-over)",
+   "at": 36,
+   "nchars": 628
+  },
+  {
+   "rowid": 83115,
+   "member": "Mike Johnson",
+   "date": "2025-10-07",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 114,
+   "nchars": 147
+  },
+  {
+   "rowid": 83152,
+   "member": "Maxine Dexter",
+   "date": "2025-10-08",
+   "show": "ctw",
+   "tag": "PROKUPECZ (voice-over)",
+   "at": 218,
+   "nchars": 355
+  },
+  {
+   "rowid": 83158,
+   "member": "Maxine Dexter",
+   "date": "2025-10-08",
+   "show": "esrs",
+   "tag": "PROKUPECZ (voice-over)",
+   "at": 36,
+   "nchars": 617
+  },
+  {
+   "rowid": 83159,
+   "member": "Richard Durbin",
+   "date": "2025-10-08",
+   "show": "esrs",
+   "tag": "YOSHIDA (voiceover)",
+   "at": 259,
+   "nchars": 461
+  },
+  {
+   "rowid": 83196,
+   "member": "Maxine Dexter",
+   "date": "2025-10-08",
+   "show": "ow",
+   "tag": "PROKUPECZ (voice-over)",
+   "at": 36,
+   "nchars": 260
+  },
+  {
+   "rowid": 83232,
+   "member": "Alex Padilla",
+   "date": "2025-10-09",
+   "show": "ebo",
+   "tag": "MICHAELSON (voice-over)",
+   "at": 51,
+   "nchars": 543
+  },
+  {
+   "rowid": 83335,
+   "member": "Madeleine Dean",
+   "date": "2025-10-15",
+   "show": "cnr",
+   "tag": "YOSHIDA (voice-over)",
+   "at": 269,
+   "nchars": 623
+  },
+  {
+   "rowid": 83365,
+   "member": "Mike Johnson",
+   "date": "2025-10-16",
+   "show": "acd",
+   "tag": "PROKUPECZ (voice over)",
+   "at": 141,
+   "nchars": 208
+  },
+  {
+   "rowid": 83416,
+   "member": "Mike Johnson",
+   "date": "2025-10-16",
+   "show": "cnr",
+   "tag": "BENBROOK (voice-over)",
+   "at": 217,
+   "nchars": 378
+  },
+  {
+   "rowid": 83417,
+   "member": "Hakeem Jeffries",
+   "date": "2025-10-16",
+   "show": "cnr",
+   "tag": "BENBROOK (voice-over)",
+   "at": 261,
+   "nchars": 552
+  },
+  {
+   "rowid": 83462,
+   "member": "Mike Johnson",
+   "date": "2025-10-17",
+   "show": "ctw",
+   "tag": "PROKUPECZ (voice-over)",
+   "at": 148,
+   "nchars": 204
+  },
+  {
+   "rowid": 83495,
+   "member": "Hakeem Jeffries",
+   "date": "2025-10-18",
+   "show": "ctmo",
+   "tag": "HUBBARD (voice over)",
+   "at": 250,
+   "nchars": 509
+  },
+  {
+   "rowid": 83496,
+   "member": "Mike Johnson",
+   "date": "2025-10-18",
+   "show": "ctmo",
+   "tag": "HUBBARD (voice over)",
+   "at": 230,
+   "nchars": 375
+  },
+  {
+   "rowid": 84211,
+   "member": "Nancy Pelosi",
+   "date": "2025-11-07",
+   "show": "tsiem",
+   "tag": "MICHAELSON (voice-over)",
+   "at": 23,
+   "nchars": 438
+  },
+  {
+   "rowid": 84212,
+   "member": "Nancy Pelosi",
+   "date": "2025-11-07",
+   "show": "tsiem",
+   "tag": "MICHAELSON (voice-over)",
+   "at": 80,
+   "nchars": 283
+  },
+  {
+   "rowid": 85754,
+   "member": "Richard Durbin",
+   "date": "2025-12-12",
+   "show": "esrs",
+   "tag": "CAIFA (voice-over)",
+   "at": 135,
+   "nchars": 251
+  },
+  {
+   "rowid": 85755,
+   "member": "Richard Blumenthal",
+   "date": "2025-12-12",
+   "show": "esrs",
+   "tag": "CAIFA (voice-over)",
+   "at": 142,
+   "nchars": 243
+  },
+  {
+   "rowid": 85756,
+   "member": "John Thune",
+   "date": "2025-12-12",
+   "show": "esrs",
+   "tag": "CAIFA (voice-over)",
+   "at": 153,
+   "nchars": 310
+  },
+  {
+   "rowid": 85757,
+   "member": "Bill Cassidy",
+   "date": "2025-12-12",
+   "show": "esrs",
+   "tag": "CAIFA (voice-over)",
+   "at": 131,
+   "nchars": 521
+  },
+  {
+   "rowid": 85780,
+   "member": "Richard Durbin",
+   "date": "2025-12-12",
+   "show": "tsiem",
+   "tag": "CAIFA (voice-over)",
+   "at": 132,
+   "nchars": 248
+  },
+  {
+   "rowid": 85781,
+   "member": "Richard Blumenthal",
+   "date": "2025-12-12",
+   "show": "tsiem",
+   "tag": "CAIFA (voice-over)",
+   "at": 142,
+   "nchars": 243
+  },
+  {
+   "rowid": 85782,
+   "member": "Bill Cassidy",
+   "date": "2025-12-12",
+   "show": "tsiem",
+   "tag": "CAIFA (voice-over)",
+   "at": 132,
+   "nchars": 530
+  },
+  {
+   "rowid": 85924,
+   "member": "Eric Burlison",
+   "date": "2025-12-17",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 223,
+   "nchars": 280
+  },
+  {
+   "rowid": 85925,
+   "member": "Mike Johnson",
+   "date": "2025-12-17",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 38,
+   "nchars": 91
+  },
+  {
+   "rowid": 86108,
+   "member": "Rand Paul",
+   "date": "2025-12-22",
+   "show": "tsiem",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 320,
+   "nchars": 368
+  },
+  {
+   "rowid": 86226,
+   "member": "Bernard Sanders",
+   "date": "2026-01-02",
+   "show": "ow",
+   "tag": "HUBBARD (voice-over)",
+   "at": 112,
+   "nchars": 402
+  },
+  {
+   "rowid": 86337,
+   "member": "Debbie Wasserman Schultz",
+   "date": "2026-01-06",
+   "show": "cnr",
+   "tag": "NEWTON (voice-over)",
+   "at": 287,
+   "nchars": 1120
+  },
+  {
+   "rowid": 86340,
+   "member": "Debbie Wasserman Schultz",
+   "date": "2026-01-06",
+   "show": "cnr",
+   "tag": "NEWTON (voice-over)",
+   "at": 263,
+   "nchars": 1092
+  },
+  {
+   "rowid": 86355,
+   "member": "Debbie Wasserman Schultz",
+   "date": "2026-01-06",
+   "show": "esrs",
+   "tag": "NEWTON (voice-over)",
+   "at": 295,
+   "nchars": 1123
+  },
+  {
+   "rowid": 86367,
+   "member": "Debbie Wasserman Schultz",
+   "date": "2026-01-06",
+   "show": "ow",
+   "tag": "NEWTON (voice-over)",
+   "at": 285,
+   "nchars": 1735
+  },
+  {
+   "rowid": 87127,
+   "member": "Ilhan Omar",
+   "date": "2026-01-28",
+   "show": "cnc",
+   "tag": "SIDNER (on camera)",
+   "at": 424,
+   "nchars": 2562
+  },
+  {
+   "rowid": 87227,
+   "member": "Daniel Goldman",
+   "date": "2026-01-29",
+   "show": "esrs",
+   "tag": "HUBBARD (voice-over)",
+   "at": 239,
+   "nchars": 592
+  },
+  {
+   "rowid": 87228,
+   "member": "Charles Schumer",
+   "date": "2026-01-29",
+   "show": "esrs",
+   "tag": "HUBBARD (voice-over)",
+   "at": 129,
+   "nchars": 237
+  },
+  {
+   "rowid": 87403,
+   "member": "Hakeem Jeffries",
+   "date": "2026-02-04",
+   "show": "esrs",
+   "tag": "HUBBARD (voice-over)",
+   "at": 215,
+   "nchars": 343
+  },
+  {
+   "rowid": 87427,
+   "member": "Hakeem Jeffries",
+   "date": "2026-02-04",
+   "show": "tsiem",
+   "tag": "HUBBARD (voice-over)",
+   "at": 214,
+   "nchars": 341
+  },
+  {
+   "rowid": 87485,
+   "member": "Jon Ossoff",
+   "date": "2026-02-08",
+   "show": "ctmo",
+   "tag": "ROMO (voice-over)",
+   "at": 255,
+   "nchars": 415
+  },
+  {
+   "rowid": 87839,
+   "member": "Pramila Jayapal",
+   "date": "2026-02-12",
+   "show": "tsiem",
+   "tag": "HUBBARD (voice-over)",
+   "at": 174,
+   "nchars": 385
+  },
+  {
+   "rowid": 87840,
+   "member": "Jamie Raskin",
+   "date": "2026-02-12",
+   "show": "tsiem",
+   "tag": "HUBBARD (voice-over)",
+   "at": 69,
+   "nchars": 134
+  },
+  {
+   "rowid": 88175,
+   "member": "Ruben Gallego",
+   "date": "2026-02-25",
+   "show": "ow",
+   "tag": "CAIFA (voice-over)",
+   "at": 57,
+   "nchars": 256
+  },
+  {
+   "rowid": 88657,
+   "member": "Mike Johnson",
+   "date": "2026-03-07",
+   "show": "cnr",
+   "tag": "BASHIR (voice-over)",
+   "at": 28,
+   "nchars": 1805
+  },
+  {
+   "rowid": 88674,
+   "member": "Mike Johnson",
+   "date": "2026-03-07",
+   "show": "cnr",
+   "tag": "BASHIR (voice-over)",
+   "at": 28,
+   "nchars": 314
+  },
+  {
+   "rowid": 88675,
+   "member": "Bradley Schneider",
+   "date": "2026-03-07",
+   "show": "ctmo",
+   "tag": "CAIFA (voice-over)",
+   "at": 99,
+   "nchars": 209
+  },
+  {
+   "rowid": 89134,
+   "member": "Ted Cruz",
+   "date": "2026-03-19",
+   "show": "cnr",
+   "tag": "WATTLES (voice-over)",
+   "at": 76,
+   "nchars": 442
+  },
+  {
+   "rowid": 89184,
+   "member": "Adam Schiff",
+   "date": "2026-03-20",
+   "show": "cnc",
+   "tag": "CAMPBELL (voice-over)",
+   "at": 112,
+   "nchars": 468
+  },
+  {
+   "rowid": 89241,
+   "member": "Adam Schiff",
+   "date": "2026-03-22",
+   "show": "cnr",
+   "tag": "CAMPBELL (voice-over)",
+   "at": 82,
+   "nchars": 438
+  },
+  {
+   "rowid": 89282,
+   "member": "James Lankford",
+   "date": "2026-03-24",
+   "show": "esrs",
+   "tag": "LAWRENCE (voice-over)",
+   "at": 146,
+   "nchars": 257
+  },
+  {
+   "rowid": 89283,
+   "member": "Charles Schumer",
+   "date": "2026-03-24",
+   "show": "esrs",
+   "tag": "LAWRENCE (voice-over)",
+   "at": 99,
+   "nchars": 426
+  },
+  {
+   "rowid": 89318,
+   "member": "Lindsey Graham",
+   "date": "2026-03-25",
+   "show": "ctw",
+   "tag": "HANCOCKS (voice-over)",
+   "at": 37,
+   "nchars": 737
+  },
+  {
+   "rowid": 89345,
+   "member": "Lindsey Graham",
+   "date": "2026-03-25",
+   "show": "ow",
+   "tag": "HANCOCKS (voice-over)",
+   "at": 35,
+   "nchars": 717
+  },
+  {
+   "rowid": 89400,
+   "member": "Lindsey Graham",
+   "date": "2026-03-26",
+   "show": "qmb",
+   "tag": "HANCOCKS (voice over)",
+   "at": 38,
+   "nchars": 720
+  },
+  {
+   "rowid": 89408,
+   "member": "Lindsey Graham",
+   "date": "2026-03-26",
+   "show": "tsiem",
+   "tag": "HANCOCKS (voice-over)",
+   "at": 37,
+   "nchars": 716
+  },
+  {
+   "rowid": 89720,
+   "member": "John Curtis",
+   "date": "2026-04-12",
+   "show": "cnr",
+   "tag": "RIPLEY (voice-over)",
+   "at": 101,
+   "nchars": 822
+  },
+  {
+   "rowid": 89746,
+   "member": "Adam Schiff",
+   "date": "2026-04-13",
+   "show": "ebo",
+   "tag": "MICHAELSON (voice-over)",
+   "at": 48,
+   "nchars": 263
+  },
+  {
+   "rowid": 89754,
+   "member": "Adam Schiff",
+   "date": "2026-04-13",
+   "show": "lcl",
+   "tag": "MICHAELSON (voice-over)",
+   "at": 48,
+   "nchars": 263
+  },
+  {
+   "rowid": 89790,
+   "member": "Thom Tillis",
+   "date": "2026-04-14",
+   "show": "ebo",
+   "tag": "STELTER (voice-over)",
+   "at": 75,
+   "nchars": 110
+  },
+  {
+   "rowid": 89804,
+   "member": "Adam Schiff",
+   "date": "2026-04-14",
+   "show": "ow",
+   "tag": "MICHAELSON (voice-over)",
+   "at": 54,
+   "nchars": 269
+  },
+  {
+   "rowid": 89809,
+   "member": "Adam Schiff",
+   "date": "2026-04-14",
+   "show": "tsiem",
+   "tag": "MICHAELSON (voice-over)",
+   "at": 48,
+   "nchars": 263
+  },
+  {
+   "rowid": 89852,
+   "member": "Thom Tillis",
+   "date": "2026-04-15",
+   "show": "tsiem",
+   "tag": "STELTER (voice-over)",
+   "at": 71,
+   "nchars": 106
+  },
+  {
+   "rowid": 90078,
+   "member": "Christopher Murphy",
+   "date": "2026-04-23",
+   "show": "ebo",
+   "tag": "SCANNELL (voice-over)",
+   "at": 56,
+   "nchars": 340
+  },
+  {
+   "rowid": 90113,
+   "member": "Christopher Murphy",
+   "date": "2026-04-24",
+   "show": "cnr",
+   "tag": "SCANNELL (voice-over)",
+   "at": 56,
+   "nchars": 337
+  },
+  {
+   "rowid": 90114,
+   "member": "Christopher Murphy",
+   "date": "2026-04-24",
+   "show": "cnr",
+   "tag": "SCANNELL (voice-over)",
+   "at": 56,
+   "nchars": 339
+  },
+  {
+   "rowid": 90120,
+   "member": "Christopher Murphy",
+   "date": "2026-04-24",
+   "show": "esrs",
+   "tag": "SCANNELL (voice-over)",
+   "at": 56,
+   "nchars": 340
+  },
+  {
+   "rowid": 90131,
+   "member": "Christopher Murphy",
+   "date": "2026-04-24",
+   "show": "tsiem",
+   "tag": "SCANNELL (voice-over)",
+   "at": 56,
+   "nchars": 340
+  },
+  {
+   "rowid": 90132,
+   "member": "Christopher Murphy",
+   "date": "2026-04-24",
+   "show": "wwkmf",
+   "tag": "SCANNELL (voice-over)",
+   "at": 56,
+   "nchars": 351
+  },
+  {
+   "rowid": 90139,
+   "member": "Christopher Murphy",
+   "date": "2026-04-25",
+   "show": "ctmo",
+   "tag": "SCANNELL (voice-over)",
+   "at": 56,
+   "nchars": 339
+  },
+  {
+   "rowid": 90141,
+   "member": "James Comer",
+   "date": "2026-04-25",
+   "show": "ctmo",
+   "tag": "CHEN (voice over)",
+   "at": 74,
+   "nchars": 311
+  },
+  {
+   "rowid": 90575,
+   "member": "Amy Klobuchar",
+   "date": "2026-05-10",
+   "show": "fzgps",
+   "tag": "ZAKARIA (voice-over)",
+   "at": 36,
+   "nchars": 109
+  },
+  {
+   "rowid": 91305,
+   "member": "Andy Kim",
+   "date": "2026-05-26",
+   "show": "se",
+   "tag": "SLOAN (voiceover)",
+   "at": 109,
+   "nchars": 286
+  },
+  {
+   "rowid": 91306,
+   "member": "Analilia Mejia",
+   "date": "2026-05-26",
+   "show": "se",
+   "tag": "SLOAN (voiceover)",
+   "at": 85,
+   "nchars": 190
+  },
+  {
+   "rowid": 91340,
+   "member": "John Cornyn",
+   "date": "2026-05-27",
+   "show": "se",
+   "tag": "BENYON (voiceover)",
+   "at": 116,
+   "nchars": 395
+  },
+  {
+   "rowid": 91353,
+   "member": "Marie Gluesenkamp Perez",
+   "date": "2026-05-28",
+   "show": "cnr",
+   "tag": "HUBBARD (voice-over)",
+   "at": 72,
+   "nchars": 334
+  },
+  {
+   "rowid": 92216,
+   "member": "Jerry Moran",
+   "date": "2026-06-24",
+   "show": "cnr",
+   "tag": "HUBBARD (voice-over)",
+   "at": 184,
+   "nchars": 420
+  },
+  {
+   "rowid": 92325,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2026-07-01",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 36,
+   "nchars": 92
+  },
+  {
+   "rowid": 99503,
+   "member": "Raphael Warnock",
+   "date": "2020-12-07",
+   "show": "adams-congress-must-give-businesses-incentive-to-stay-shut-in-lockdowns",
+   "tag": "MACCALLUM (on camera)",
+   "at": 377,
+   "nchars": 604
+  },
+  {
+   "rowid": 99663,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2020-01-26",
+   "show": "alan-dershowitz-on-president-trumps-impeachment-defense-strategy-battle-over-witnesses",
+   "tag": "DOOCY (voice over)",
+   "at": 46,
+   "nchars": 130
+  },
+  {
+   "rowid": 100236,
+   "member": "Amy Klobuchar",
+   "date": "2020-12-23",
+   "show": "aoc-dem-leadership-praises-trump-demand-for-revised-covid-bill",
+   "tag": "SPUNT (on camera)",
+   "at": 206,
+   "nchars": 674
+  },
+  {
+   "rowid": 103005,
+   "member": "Bill Cassidy",
+   "date": "2021-01-31",
+   "show": "biden-economic-adviser-on-coronavirus-aid-the-cost-of-inaction-is-extremely-high",
+   "tag": "SPUNT (on camera)",
+   "at": 115,
+   "nchars": 339
+  },
+  {
+   "rowid": 103045,
+   "member": "Lauren Boebert",
+   "date": "2021-01-21",
+   "show": "biden-places-focus-on-covid",
+   "tag": "PERGRAM (voice-over)",
+   "at": 93,
+   "nchars": 440
+  },
+  {
+   "rowid": 103388,
+   "member": "Pramila Jayapal",
+   "date": "2021-04-22",
+   "show": "bipartisan-strategy-in-works-to-split-infrastructure-bill-in-half-to-get-it-through-congress",
+   "tag": "SPUNT (on camera)",
+   "at": 112,
+   "nchars": 328
+  },
+  {
+   "rowid": 103617,
+   "member": "Mitch McConnell",
+   "date": "2021-05-19",
+   "show": "bret-baier-on-biden-pressuring-israel-to-de-escalate-conflict",
+   "tag": "PERGRAM (voice over)",
+   "at": 226,
+   "nchars": 645
+  },
+  {
+   "rowid": 137268,
+   "member": "Mitch McConnell",
+   "date": "2020-12-30",
+   "show": "congress-set-to-override-trump-veto-for-first-time-in-presidency",
+   "tag": "SPUNT (voice over)",
+   "at": 34,
+   "nchars": 694
+  },
+  {
+   "rowid": 138711,
+   "member": "Charles Schumer",
+   "date": "2020-11-18",
+   "show": "costs-are-already-adding-up-for-joe-bidens-presidential-agenda",
+   "tag": "ROBERTS (on camera)",
+   "at": 265,
+   "nchars": 642
+  },
+  {
+   "rowid": 138713,
+   "member": "Lindsey Graham",
+   "date": "2020-11-18",
+   "show": "costs-are-already-adding-up-for-joe-bidens-presidential-agenda",
+   "tag": "SERRIE (on camera)",
+   "at": 141,
+   "nchars": 492
+  },
+  {
+   "rowid": 138715,
+   "member": "Steve Scalise",
+   "date": "2020-11-18",
+   "show": "costs-are-already-adding-up-for-joe-bidens-presidential-agenda",
+   "tag": "LAWRENCE (on camera)",
+   "at": 264,
+   "nchars": 607
+  },
+  {
+   "rowid": 139952,
+   "member": "Jon Ossoff",
+   "date": "2020-12-07",
+   "show": "covid-cases-climb-hospitalizations-spike-as-much-of-california-locks-down",
+   "tag": "SERRIE (on camera)",
+   "at": 93,
+   "nchars": 289
+  },
+  {
+   "rowid": 142540,
+   "member": "Nancy Pelosi",
+   "date": "2020-12-09",
+   "show": "dana-perinos-new-book-everything-will-be-okay-hits-stores-march",
+   "tag": "GUTFELD (on camera)",
+   "at": 112,
+   "nchars": 158
+  },
+  {
+   "rowid": 142542,
+   "member": "Nancy Pelosi",
+   "date": "2020-12-09",
+   "show": "dana-perinos-new-book-everything-will-be-okay-hits-stores-march",
+   "tag": "GUTFELD (on camera)",
+   "at": 144,
+   "nchars": 531
+  },
+  {
+   "rowid": 158223,
+   "member": "Christopher Coons",
+   "date": "2020-11-17",
+   "show": "does-president-trump-have-a-legal-path-to-reelection",
+   "tag": "DOOCY (on camera)",
+   "at": 93,
+   "nchars": 534
+  },
+  {
+   "rowid": 164210,
+   "member": "John Larson",
+   "date": "2021-02-03",
+   "show": "education-secretary-nominee-grilled-on-requirements-to-reopen-schools",
+   "tag": "SPRINGER (on camera)",
+   "at": 157,
+   "nchars": 520
+  },
+  {
+   "rowid": 178045,
+   "member": "Rand Paul",
+   "date": "2020-12-02",
+   "show": "fauci-america-will-reach-herd-immunity-when",
+   "tag": "MACCALLUM (on camera)",
+   "at": 261,
+   "nchars": 363
+  },
+  {
+   "rowid": 184686,
+   "member": "Josh Hawley",
+   "date": "2023-04-02",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice-over)",
+   "at": 38,
+   "nchars": 541
+  },
+  {
+   "rowid": 184692,
+   "member": "Shelley Capito",
+   "date": "2024-04-21",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice over)",
+   "at": 16,
+   "nchars": 166
+  },
+  {
+   "rowid": 184693,
+   "member": "Thom Tillis",
+   "date": "2024-04-21",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice over)",
+   "at": 15,
+   "nchars": 151
+  },
+  {
+   "rowid": 184694,
+   "member": "John Hickenlooper",
+   "date": "2024-04-21",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice over)",
+   "at": 184,
+   "nchars": 581
+  },
+  {
+   "rowid": 184755,
+   "member": "James Clyburn",
+   "date": "2022-01-22",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice-over)",
+   "at": 56,
+   "nchars": 187
+  },
+  {
+   "rowid": 184757,
+   "member": "Steve Scalise",
+   "date": "2022-01-22",
+   "show": "fox-news-sunday",
+   "tag": "TOMLINSON (on camera)",
+   "at": 179,
+   "nchars": 351
+  },
+  {
+   "rowid": 184763,
+   "member": "Pramila Jayapal",
+   "date": "2022-07-17",
+   "show": "fox-news-sunday",
+   "tag": "HASNIE (on camera)",
+   "at": 59,
+   "nchars": 324
+  },
+  {
+   "rowid": 184769,
+   "member": "Zoe Lofgren",
+   "date": "2024-07-21",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice-over)",
+   "at": 101,
+   "nchars": 292
+  },
+  {
+   "rowid": 184811,
+   "member": "Mitch McConnell",
+   "date": "2024-03-17",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice-over)",
+   "at": 88,
+   "nchars": 438
+  },
+  {
+   "rowid": 184826,
+   "member": "John Cornyn",
+   "date": "2022-03-05",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice-over)",
+   "at": 118,
+   "nchars": 530
+  },
+  {
+   "rowid": 184867,
+   "member": "Christopher Murphy",
+   "date": "2023-05-07",
+   "show": "fox-news-sunday",
+   "tag": "TOMLINSON (on camera)",
+   "at": 98,
+   "nchars": 232
+  },
+  {
+   "rowid": 184868,
+   "member": "James Comer",
+   "date": "2023-11-12",
+   "show": "fox-news-sunday",
+   "tag": "TOMLINSON (voice over)",
+   "at": 137,
+   "nchars": 320
+  },
+  {
+   "rowid": 184871,
+   "member": "Nancy Pelosi",
+   "date": "2022-11-20",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice-over)",
+   "at": 78,
+   "nchars": 255
+  },
+  {
+   "rowid": 184896,
+   "member": "Charles Schumer",
+   "date": "2021-08-08",
+   "show": "fox-news-sunday-on",
+   "tag": "DOOCY (voice-over)",
+   "at": 51,
+   "nchars": 161
+  },
+  {
+   "rowid": 184909,
+   "member": "Tim Scott",
+   "date": "2022-02-26",
+   "show": "fox-news-sunday-on",
+   "tag": "BREAM (voice-over)",
+   "at": 13,
+   "nchars": 383
+  },
+  {
+   "rowid": 184946,
+   "member": "Mitch McConnell",
+   "date": "2021-06-20",
+   "show": "fox-news-sunday-on",
+   "tag": "EDSON (on camera)",
+   "at": 73,
+   "nchars": 250
+  },
+  {
+   "rowid": 184970,
+   "member": "David McCormick",
+   "date": "2022-05-15",
+   "show": "fox-news-sunday-on",
+   "tag": "HOFF (voice-over)",
+   "at": 20,
+   "nchars": 144
+  },
+  {
+   "rowid": 184974,
+   "member": "Christopher Murphy",
+   "date": "2022-05-29",
+   "show": "fox-news-sunday-on",
+   "tag": "CORKE (voice over)",
+   "at": 102,
+   "nchars": 314
+  },
+  {
+   "rowid": 184993,
+   "member": "Roger Marshall",
+   "date": "2021-05-30",
+   "show": "fox-news-sunday-on",
+   "tag": "MEREDITH (on camera)",
+   "at": 110,
+   "nchars": 477
+  },
+  {
+   "rowid": 185003,
+   "member": "Pramila Jayapal",
+   "date": "2021-11-07",
+   "show": "fox-news-sunday-on",
+   "tag": "HEMMER (voice-over)",
+   "at": 66,
+   "nchars": 297
+  },
+  {
+   "rowid": 185014,
+   "member": "Bill Cassidy",
+   "date": "2021-10-03",
+   "show": "fox-news-sunday-on",
+   "tag": "SPUNT (on camera)",
+   "at": 146,
+   "nchars": 353
+  },
+  {
+   "rowid": 185058,
+   "member": "Ralph Norman",
+   "date": "2023-09-17",
+   "show": "fox-news-sunday",
+   "tag": "TOMLINSON (on camera)",
+   "at": 39,
+   "nchars": 216
+  },
+  {
+   "rowid": 185062,
+   "member": "Lindsey Graham",
+   "date": "2022-09-18",
+   "show": "fox-news-sunday",
+   "tag": "BREAM (voice-over)",
+   "at": 63,
+   "nchars": 183
+  },
+  {
+   "rowid": 185063,
+   "member": "Charles Schumer",
+   "date": "2022-09-18",
+   "show": "fox-news-sunday",
+   "tag": "TOMLINSON (on camera)",
+   "at": 100,
+   "nchars": 225
+  },
+  {
+   "rowid": 185972,
+   "member": "Bernard Sanders",
+   "date": "2015-11-15",
+   "show": "gov-john-kasich-we-cant-keep-waiting-to-act-on-isis-rep-thornberry-talks-vetting-syrian-refugees-entering-us",
+   "tag": "SHAWN (voice-over)",
+   "at": 106,
+   "nchars": 254
+  },
+  {
+   "rowid": 186901,
+   "member": "Ted Cruz",
+   "date": "2021-02-10",
+   "show": "gutfeld-on-the-hacker-who-tried-to-poison-a-florida-citys-water-supply",
+   "tag": "WATTERS (on camera)",
+   "at": 353,
+   "nchars": 461
+  },
+  {
+   "rowid": 186902,
+   "member": "Nancy Pelosi",
+   "date": "2020-12-07",
+   "show": "gutfeld-on-the-hypocrisy-of-covid-restrictions-on-bars-and-restaurants",
+   "tag": "WATTERS (on camera)",
+   "at": 284,
+   "nchars": 419
+  },
+  {
+   "rowid": 186904,
+   "member": "Nancy Pelosi",
+   "date": "2020-12-08",
+   "show": "gutfeld-on-the-mall-santa-refusing-the-request-for-a-nerf-gun",
+   "tag": "WATTERS (on camera)",
+   "at": 234,
+   "nchars": 345
+  },
+  {
+   "rowid": 186905,
+   "member": "Charles Schumer",
+   "date": "2021-02-03",
+   "show": "gutfeld-on-the-media-hyping-a-left-wing-funded-censorship-study",
+   "tag": "GUTFELD (on camera)",
+   "at": 226,
+   "nchars": 254
+  },
+  {
+   "rowid": 188179,
+   "member": "Lindsey Graham",
+   "date": "2019-01-01",
+   "show": "cnr",
+   "tag": "STARR (voice-over)",
+   "at": 352,
+   "nchars": 409
+  },
+  {
+   "rowid": 188451,
+   "member": "Nancy Pelosi",
+   "date": "2020-11-17",
+   "show": "how-will-a-biden-administration-approach-china",
+   "tag": "MACCALLUM (on camera)",
+   "at": 79,
+   "nchars": 257
+  },
+  {
+   "rowid": 190960,
+   "member": "Mark Warner",
+   "date": "2019-02-10",
+   "show": "csr",
+   "tag": "SEGALL (voice-over)",
+   "at": 62,
+   "nchars": 104
+  },
+  {
+   "rowid": 190962,
+   "member": "John Thune",
+   "date": "2019-02-10",
+   "show": "csr",
+   "tag": "SEGALL (voice-over)",
+   "at": 110,
+   "nchars": 194
+  },
+  {
+   "rowid": 191321,
+   "member": "Ritchie Torres",
+   "date": "2019-02-15",
+   "show": "nday",
+   "tag": "BRIGGS (voice over)",
+   "at": 191,
+   "nchars": 434
+  },
+  {
+   "rowid": 191483,
+   "member": "Cory Booker",
+   "date": "2019-02-18",
+   "show": "es",
+   "tag": "ROMANS(voice over)",
+   "at": 130,
+   "nchars": 202
+  },
+  {
+   "rowid": 191649,
+   "member": "Ro Khanna",
+   "date": "2019-02-20",
+   "show": "nwsm",
+   "tag": "JARRETT (voice over)",
+   "at": 50,
+   "nchars": 538
+  },
+  {
+   "rowid": 191737,
+   "member": "Mark Warner",
+   "date": "2019-02-23",
+   "show": "csr",
+   "tag": "SEGALL (voice-over)",
+   "at": 62,
+   "nchars": 104
+  },
+  {
+   "rowid": 191739,
+   "member": "John Thune",
+   "date": "2019-02-23",
+   "show": "csr",
+   "tag": "SEGALL (voice-over)",
+   "at": 110,
+   "nchars": 194
+  },
+  {
+   "rowid": 192413,
+   "member": "Robert Menendez",
+   "date": "2019-03-09",
+   "show": "cnr",
+   "tag": "BURNETT (voice-over)",
+   "at": 98,
+   "nchars": 288
+  },
+  {
+   "rowid": 193708,
+   "member": "Adam Schiff",
+   "date": "2019-04-03",
+   "show": "nwsm",
+   "tag": "HARTUNG (voice over)",
+   "at": 152,
+   "nchars": 537
+  },
+  {
+   "rowid": 193709,
+   "member": "Mike Rogers",
+   "date": "2019-04-03",
+   "show": "nwsm",
+   "tag": "HARTUNG (voice over)",
+   "at": 168,
+   "nchars": 627
+  },
+  {
+   "rowid": 193820,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2019-04-06",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 44,
+   "nchars": 154
+  },
+  {
+   "rowid": 194196,
+   "member": "Lisa Murkowski",
+   "date": "2019-04-13",
+   "show": "cnr",
+   "tag": "MCLEAN (voice-over)",
+   "at": 142,
+   "nchars": 317
+  },
+  {
+   "rowid": 194448,
+   "member": "Nancy Pelosi",
+   "date": "2019-04-20",
+   "show": "cnr",
+   "tag": "ROBERTSON (voice-over)",
+   "at": 97,
+   "nchars": 402
+  },
+  {
+   "rowid": 194449,
+   "member": "Nancy Pelosi",
+   "date": "2019-04-20",
+   "show": "cnr",
+   "tag": "ROBERTSON (voice-over)",
+   "at": 97,
+   "nchars": 443
+  },
+  {
+   "rowid": 195114,
+   "member": "Jerrold Nadler",
+   "date": "2019-05-02",
+   "show": "nwsm",
+   "tag": "COREN (voice over)",
+   "at": 41,
+   "nchars": 80
+  },
+  {
+   "rowid": 195156,
+   "member": "Nancy Pelosi",
+   "date": "2019-05-03",
+   "show": "nwsm",
+   "tag": "COREN (voice over)",
+   "at": 21,
+   "nchars": 181
+  },
+  {
+   "rowid": 195159,
+   "member": "Jerrold Nadler",
+   "date": "2019-05-03",
+   "show": "nwsm",
+   "tag": "MOOS (voice over)",
+   "at": 57,
+   "nchars": 198
+  },
+  {
+   "rowid": 196765,
+   "member": "Tom Cotton",
+   "date": "2019-06-02",
+   "show": "cnr",
+   "tag": "CHEN (voice-over)",
+   "at": 220,
+   "nchars": 472
+  },
+  {
+   "rowid": 198107,
+   "member": "Nancy Pelosi",
+   "date": "2019-06-26",
+   "show": "wrn",
+   "tag": "ROMO (voice-over)",
+   "at": 100,
+   "nchars": 519
+  },
+  {
+   "rowid": 198224,
+   "member": "Bernard Sanders",
+   "date": "2019-06-29",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 47,
+   "nchars": 119
+  },
+  {
+   "rowid": 198394,
+   "member": "Ayanna Pressley",
+   "date": "2019-07-02",
+   "show": "wrn",
+   "tag": "VALENCIA (voice-over)",
+   "at": 152,
+   "nchars": 336
+  },
+  {
+   "rowid": 198395,
+   "member": "Joaquin Castro",
+   "date": "2019-07-02",
+   "show": "wrn",
+   "tag": "VALENCIA (voice-over)",
+   "at": 240,
+   "nchars": 340
+  },
+  {
+   "rowid": 198458,
+   "member": "Joaquin Castro",
+   "date": "2019-07-04",
+   "show": "cnr",
+   "tag": "VALENCIA (voice-over)",
+   "at": 143,
+   "nchars": 201
+  },
+  {
+   "rowid": 199535,
+   "member": "Bernard Sanders",
+   "date": "2020-11-16",
+   "show": "malliotakis-gops-red-wave-a-referendum-on-socialist-agenda",
+   "tag": "MACCALLUM (on camera)",
+   "at": 431,
+   "nchars": 655
+  },
+  {
+   "rowid": 199769,
+   "member": "Elizabeth Warren",
+   "date": "2019-07-29",
+   "show": "es",
+   "tag": "ROMANS (voice-over)",
+   "at": 103,
+   "nchars": 155
+  },
+  {
+   "rowid": 199770,
+   "member": "Cory Booker",
+   "date": "2019-07-29",
+   "show": "es",
+   "tag": "ROMANS (voice-over)",
+   "at": 86,
+   "nchars": 181
+  },
+  {
+   "rowid": 199782,
+   "member": "Bernard Sanders",
+   "date": "2019-07-30",
+   "show": "ctw",
+   "tag": "MOOS (on camera)",
+   "at": 21,
+   "nchars": 243
+  },
+  {
+   "rowid": 200871,
+   "member": "Andrew Clyde",
+   "date": "2021-08-09",
+   "show": "media-buzz-on-the-cuomo-brothers-covid-vaccine",
+   "tag": "KURTZ (on camera)",
+   "at": 22,
+   "nchars": 182
+  },
+  {
+   "rowid": 201030,
+   "member": "Charles Schumer",
+   "date": "2021-06-20",
+   "show": "mediabuzz-on-clash-over-biden-putin-summit-jon-stewarts-covid-comedy",
+   "tag": "KURTZ (on camera)",
+   "at": 194,
+   "nchars": 639
+  },
+  {
+   "rowid": 201038,
+   "member": "Rashida Tlaib",
+   "date": "2021-05-30",
+   "show": "mediabuzz-on-why-media-dismissed-wuhan-lab-theory-john-oliver-stinging-local-tv",
+   "tag": "KURTZ (on camera)",
+   "at": 103,
+   "nchars": 539
+  },
+  {
+   "rowid": 201041,
+   "member": "Tim Scott",
+   "date": "2021-05-02",
+   "show": "medias-false-giuliani-accusation",
+   "tag": "KURTZ (on camera)",
+   "at": 118,
+   "nchars": 514
+  },
+  {
+   "rowid": 201604,
+   "member": "Dan Sullivan",
+   "date": "2019-09-14",
+   "show": "cnr",
+   "tag": "WEIR (voice-over)",
+   "at": 55,
+   "nchars": 391
+  },
+  {
+   "rowid": 203109,
+   "member": "Lindsey Graham",
+   "date": "2019-10-09",
+   "show": "cnr",
+   "tag": "BOLDUAN (voice-over)",
+   "at": 349,
+   "nchars": 580
+  },
+  {
+   "rowid": 203235,
+   "member": "Brad Sherman",
+   "date": "2019-10-12",
+   "show": "cnr",
+   "tag": "VERCAMMEN (voice-over)",
+   "at": 72,
+   "nchars": 234
+  },
+  {
+   "rowid": 203556,
+   "member": "Amy Klobuchar",
+   "date": "2019-10-17",
+   "show": "cnr",
+   "tag": "MOOS (on camera)",
+   "at": 65,
+   "nchars": 198
+  },
+  {
+   "rowid": 203675,
+   "member": "Nancy Pelosi",
+   "date": "2019-10-20",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 26,
+   "nchars": 717
+  },
+  {
+   "rowid": 203676,
+   "member": "Nancy Pelosi",
+   "date": "2019-10-20",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 92,
+   "nchars": 475
+  },
+  {
+   "rowid": 203677,
+   "member": "Nancy Pelosi",
+   "date": "2019-10-20",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 16,
+   "nchars": 100
+  },
+  {
+   "rowid": 203678,
+   "member": "Nancy Pelosi",
+   "date": "2019-10-20",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 37,
+   "nchars": 65
+  },
+  {
+   "rowid": 203771,
+   "member": "Lindsey Graham",
+   "date": "2019-10-22",
+   "show": "cnr",
+   "tag": "STARR (voice-over)",
+   "at": 69,
+   "nchars": 152
+  },
+  {
+   "rowid": 204536,
+   "member": "Christopher Murphy",
+   "date": "2019-11-03",
+   "show": "ctw",
+   "tag": "ELBAGIR (voice-over)",
+   "at": 159,
+   "nchars": 222
+  },
+  {
+   "rowid": 204850,
+   "member": "Lindsey Graham",
+   "date": "2019-11-08",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 70,
+   "nchars": 218
+  },
+  {
+   "rowid": 205439,
+   "member": "Nancy Pelosi",
+   "date": "2019-11-18",
+   "show": "cnnt",
+   "tag": "SCIUTTO (voice-over)",
+   "at": 25,
+   "nchars": 139
+  },
+  {
+   "rowid": 205440,
+   "member": "Charles Schumer",
+   "date": "2019-11-18",
+   "show": "cnnt",
+   "tag": "SCIUTTO (voice-over)",
+   "at": 147,
+   "nchars": 311
+  },
+  {
+   "rowid": 205479,
+   "member": "Angus King",
+   "date": "2019-11-18",
+   "show": "sitroom",
+   "tag": "SCIUTTO (voice-over)",
+   "at": 159,
+   "nchars": 327
+  },
+  {
+   "rowid": 205480,
+   "member": "Charles Schumer",
+   "date": "2019-11-18",
+   "show": "sitroom",
+   "tag": "SCIUTTO (voice-over)",
+   "at": 147,
+   "nchars": 312
+  },
+  {
+   "rowid": 206050,
+   "member": "Bernard Sanders",
+   "date": "2019-11-30",
+   "show": "cnr",
+   "tag": "REEVE (voice-over)",
+   "at": 48,
+   "nchars": 249
+  },
+  {
+   "rowid": 206178,
+   "member": "Jerrold Nadler",
+   "date": "2019-12-04",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice over)",
+   "at": 186,
+   "nchars": 402
+  },
+  {
+   "rowid": 206370,
+   "member": "Jerrold Nadler",
+   "date": "2019-12-09",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice over)",
+   "at": 79,
+   "nchars": 446
+  },
+  {
+   "rowid": 206692,
+   "member": "John Cornyn",
+   "date": "2019-12-12",
+   "show": "nday",
+   "tag": "KAFANOV (voice-over)",
+   "at": 136,
+   "nchars": 272
+  },
+  {
+   "rowid": 206986,
+   "member": "Nancy Pelosi",
+   "date": "2019-12-16",
+   "show": "wrn",
+   "tag": "RIVERS (voice-over)",
+   "at": 86,
+   "nchars": 687
+  },
+  {
+   "rowid": 207484,
+   "member": "Jim Jordan",
+   "date": "2019-12-22",
+   "show": "cnr",
+   "tag": "MOOS (voice over)",
+   "at": 16,
+   "nchars": 106
+  },
+  {
+   "rowid": 207498,
+   "member": "Jim Jordan",
+   "date": "2019-12-22",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 12,
+   "nchars": 465
+  },
+  {
+   "rowid": 208038,
+   "member": "Lindsey Graham",
+   "date": "2020-01-05",
+   "show": "csr",
+   "tag": "BLITZER (voice over)",
+   "at": 208,
+   "nchars": 304
+  },
+  {
+   "rowid": 208533,
+   "member": "Nancy Pelosi",
+   "date": "2020-01-15",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice over)",
+   "at": 43,
+   "nchars": 1929
+  },
+  {
+   "rowid": 208939,
+   "member": "Mitch McConnell",
+   "date": "2020-01-22",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice over)",
+   "at": 91,
+   "nchars": 453
+  },
+  {
+   "rowid": 209003,
+   "member": "Adam Schiff",
+   "date": "2020-01-23",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice over)",
+   "at": 104,
+   "nchars": 304
+  },
+  {
+   "rowid": 209078,
+   "member": "Mitch McConnell",
+   "date": "2020-01-24",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice-over)",
+   "at": 134,
+   "nchars": 364
+  },
+  {
+   "rowid": 209567,
+   "member": "Rand Paul",
+   "date": "2020-12-01",
+   "show": "parscale-trump-campaign-moved-away-from-my-plan-and-i-dont-know-why",
+   "tag": "MACCALLUM (on camera)",
+   "at": 322,
+   "nchars": 439
+  },
+  {
+   "rowid": 210140,
+   "member": "Bernard Sanders",
+   "date": "2020-02-08",
+   "show": "cnr",
+   "tag": "ROMERO (voice-over)",
+   "at": 128,
+   "nchars": 164
+  },
+  {
+   "rowid": 212808,
+   "member": "Tammy Duckworth",
+   "date": "2020-07-08",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 98,
+   "nchars": 236
+  },
+  {
+   "rowid": 212809,
+   "member": "Tammy Duckworth",
+   "date": "2020-07-08",
+   "show": "cnr",
+   "tag": "AVLON (voice-over)",
+   "at": 414,
+   "nchars": 458
+  },
+  {
+   "rowid": 212813,
+   "member": "Adam Schiff",
+   "date": "2020-07-10",
+   "show": "cnnt",
+   "tag": "ELAM (voice-over)",
+   "at": 14,
+   "nchars": 204
+  },
+  {
+   "rowid": 213514,
+   "member": "Ted Cruz",
+   "date": "2020-08-23",
+   "show": "csr",
+   "tag": "ZAKARIA (voice-over)",
+   "at": 35,
+   "nchars": 152
+  },
+  {
+   "rowid": 213653,
+   "member": "Ted Cruz",
+   "date": "2020-09-06",
+   "show": "csr",
+   "tag": "ZAKARIA (voice-over)",
+   "at": 35,
+   "nchars": 152
+  },
+  {
+   "rowid": 213722,
+   "member": "Jeff Merkley",
+   "date": "2020-09-15",
+   "show": "ebo",
+   "tag": "SAVIDGE (voice over)",
+   "at": 113,
+   "nchars": 442
+  },
+  {
+   "rowid": 213726,
+   "member": "Jeff Merkley",
+   "date": "2020-09-16",
+   "show": "cnr",
+   "tag": "SAVIDGE (voice over)",
+   "at": 113,
+   "nchars": 442
+  },
+  {
+   "rowid": 214604,
+   "member": "Ted Cruz",
+   "date": "2020-11-10",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 35,
+   "nchars": 221
+  },
+  {
+   "rowid": 214779,
+   "member": "Jon Ossoff",
+   "date": "2020-11-16",
+   "show": "ampr",
+   "tag": "AMANPOUR (Voice-over)",
+   "at": 28,
+   "nchars": 204
+  },
+  {
+   "rowid": 214933,
+   "member": "Mike Rogers",
+   "date": "2020-11-30",
+   "show": "nday",
+   "tag": "CAMEROTA (voice-over)",
+   "at": 17,
+   "nchars": 220
+  },
+  {
+   "rowid": 214983,
+   "member": "Mitch McConnell",
+   "date": "2020-12-03",
+   "show": "cnr",
+   "tag": "CAIFA (voice-over)",
+   "at": 111,
+   "nchars": 392
+  },
+  {
+   "rowid": 215022,
+   "member": "Raphael Warnock",
+   "date": "2020-12-07",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 297,
+   "nchars": 629
+  },
+  {
+   "rowid": 215174,
+   "member": "Mitch McConnell",
+   "date": "2020-12-16",
+   "show": "cnr",
+   "tag": "CURNOW (on camera)",
+   "at": 198,
+   "nchars": 553
+  },
+  {
+   "rowid": 215307,
+   "member": "Nancy Pelosi",
+   "date": "2020-12-21",
+   "show": "cnr",
+   "tag": "COREN (on camera)",
+   "at": 159,
+   "nchars": 246
+  },
+  {
+   "rowid": 215311,
+   "member": "Nancy Pelosi",
+   "date": "2020-12-21",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 351,
+   "nchars": 946
+  },
+  {
+   "rowid": 215557,
+   "member": "Nancy Pelosi",
+   "date": "2021-01-04",
+   "show": "cnr",
+   "tag": "CURNOW (on camera)",
+   "at": 374,
+   "nchars": 1401
+  },
+  {
+   "rowid": 215674,
+   "member": "Bill Cassidy",
+   "date": "2021-01-07",
+   "show": "ampr",
+   "tag": "ISAACSON (on camera)",
+   "at": 34,
+   "nchars": 180
+  },
+  {
+   "rowid": 215863,
+   "member": "Nancy Mace",
+   "date": "2021-01-11",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice-over)",
+   "at": 44,
+   "nchars": 519
+  },
+  {
+   "rowid": 215894,
+   "member": "Nancy Pelosi",
+   "date": "2021-01-11",
+   "show": "cnr",
+   "tag": "CURNOW (on camera)",
+   "at": 269,
+   "nchars": 506
+  },
+  {
+   "rowid": 215899,
+   "member": "Hakeem Jeffries",
+   "date": "2021-01-11",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 126,
+   "nchars": 506
+  },
+  {
+   "rowid": 216007,
+   "member": "Jamie Raskin",
+   "date": "2021-01-13",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 99,
+   "nchars": 664
+  },
+  {
+   "rowid": 216092,
+   "member": "Nancy Pelosi",
+   "date": "2021-01-14",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice over)",
+   "at": 98,
+   "nchars": 287
+  },
+  {
+   "rowid": 216114,
+   "member": "Nancy Pelosi",
+   "date": "2021-01-14",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 131,
+   "nchars": 308
+  },
+  {
+   "rowid": 216260,
+   "member": "Amy Klobuchar",
+   "date": "2021-01-18",
+   "show": "cnr",
+   "tag": "CURNOW (on camera)",
+   "at": 219,
+   "nchars": 1290
+  },
+  {
+   "rowid": 216306,
+   "member": "Nancy Pelosi",
+   "date": "2021-01-19",
+   "show": "fmjc",
+   "tag": "STARR (voice over)",
+   "at": 193,
+   "nchars": 1087
+  },
+  {
+   "rowid": 216318,
+   "member": "Lindsey Graham",
+   "date": "2021-01-20",
+   "show": "se",
+   "tag": "HARLOW (on camera)",
+   "at": 343,
+   "nchars": 517
+  },
+  {
+   "rowid": 216319,
+   "member": "Nancy Mace",
+   "date": "2021-01-20",
+   "show": "se",
+   "tag": "HARLOW (on camera)",
+   "at": 272,
+   "nchars": 310
+  },
+  {
+   "rowid": 216376,
+   "member": "Bernard Sanders",
+   "date": "2021-01-22",
+   "show": "cnr",
+   "tag": "MOOS (voice over)",
+   "at": 101,
+   "nchars": 225
+  },
+  {
+   "rowid": 216380,
+   "member": "Bernard Sanders",
+   "date": "2021-01-22",
+   "show": "cnr",
+   "tag": "MOOS (voice over)",
+   "at": 101,
+   "nchars": 228
+  },
+  {
+   "rowid": 216387,
+   "member": "Bernard Sanders",
+   "date": "2021-01-22",
+   "show": "ctw",
+   "tag": "MOOS (voice-over)",
+   "at": 101,
+   "nchars": 225
+  },
+  {
+   "rowid": 216460,
+   "member": "Bernard Sanders",
+   "date": "2021-01-24",
+   "show": "cnr",
+   "tag": "MOOS (voice-over)",
+   "at": 103,
+   "nchars": 230
+  },
+  {
+   "rowid": 216491,
+   "member": "Elizabeth Warren",
+   "date": "2021-01-25",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 901,
+   "nchars": 2518
+  },
+  {
+   "rowid": 216534,
+   "member": "Jamie Raskin",
+   "date": "2021-01-26",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 480,
+   "nchars": 591
+  },
+  {
+   "rowid": 216559,
+   "member": "Rand Paul",
+   "date": "2021-01-26",
+   "show": "nday",
+   "tag": "AVLON (on camera)",
+   "at": 167,
+   "nchars": 565
+  },
+  {
+   "rowid": 216560,
+   "member": "Josh Hawley",
+   "date": "2021-01-26",
+   "show": "nday",
+   "tag": "AVLON (on camera)",
+   "at": 99,
+   "nchars": 1809
+  },
+  {
+   "rowid": 216571,
+   "member": "Adam Schiff",
+   "date": "2021-01-27",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 139,
+   "nchars": 180
+  },
+  {
+   "rowid": 216589,
+   "member": "Rand Paul",
+   "date": "2021-01-27",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 256,
+   "nchars": 728
+  },
+  {
+   "rowid": 217081,
+   "member": "Jamie Raskin",
+   "date": "2021-02-10",
+   "show": "cnr",
+   "tag": "CHURCH (voice-over)",
+   "at": 108,
+   "nchars": 617
+  },
+  {
+   "rowid": 217085,
+   "member": "Joe Neguse",
+   "date": "2021-02-10",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 246,
+   "nchars": 719
+  },
+  {
+   "rowid": 217393,
+   "member": "Charles Schumer",
+   "date": "2021-02-13",
+   "show": "cnr",
+   "tag": "CURNOW (voice-over)",
+   "at": 221,
+   "nchars": 445
+  },
+  {
+   "rowid": 217502,
+   "member": "Nicholas Langworthy",
+   "date": "2021-02-15",
+   "show": "acd",
+   "tag": "GINGRAS (voice-over)",
+   "at": 51,
+   "nchars": 159
+  },
+  {
+   "rowid": 217503,
+   "member": "Nicholas Langworthy",
+   "date": "2021-02-15",
+   "show": "acd",
+   "tag": "GINGRAS (voice-over)",
+   "at": 92,
+   "nchars": 296
+  },
+  {
+   "rowid": 217533,
+   "member": "Amy Klobuchar",
+   "date": "2021-02-15",
+   "show": "cnr",
+   "tag": "CURNOW (on camera)",
+   "at": 674,
+   "nchars": 956
+  },
+  {
+   "rowid": 217652,
+   "member": "Ted Cruz",
+   "date": "2021-02-19",
+   "show": "fmjc",
+   "tag": "CHEN (voice over)",
+   "at": 158,
+   "nchars": 209
+  },
+  {
+   "rowid": 217653,
+   "member": "Joaquin Castro",
+   "date": "2021-02-19",
+   "show": "fmjc",
+   "tag": "CHEN (on camera)",
+   "at": 108,
+   "nchars": 494
+  },
+  {
+   "rowid": 217659,
+   "member": "Joaquin Castro",
+   "date": "2021-02-19",
+   "show": "nday",
+   "tag": "CHEN (on camera)",
+   "at": 97,
+   "nchars": 548
+  },
+  {
+   "rowid": 217677,
+   "member": "Lindsey Graham",
+   "date": "2021-02-21",
+   "show": "cnr",
+   "tag": "SCNEIDER (voice-over)",
+   "at": 80,
+   "nchars": 471
+  },
+  {
+   "rowid": 217682,
+   "member": "Michael McCaul",
+   "date": "2021-02-21",
+   "show": "cnr",
+   "tag": "CHEN (on camera)",
+   "at": 183,
+   "nchars": 612
+  },
+  {
+   "rowid": 217713,
+   "member": "Michael McCaul",
+   "date": "2021-02-22",
+   "show": "cnr",
+   "tag": "CHEN (on camera)",
+   "at": 180,
+   "nchars": 601
+  },
+  {
+   "rowid": 217714,
+   "member": "Michael McCaul",
+   "date": "2021-02-22",
+   "show": "cnr",
+   "tag": "CHEN (on camera)",
+   "at": 183,
+   "nchars": 614
+  },
+  {
+   "rowid": 217718,
+   "member": "Pramila Jayapal",
+   "date": "2021-02-22",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 287,
+   "nchars": 1094
+  },
+  {
+   "rowid": 217895,
+   "member": "Jason Smith",
+   "date": "2021-02-26",
+   "show": "cnr",
+   "tag": "CONWAY (voice-over)",
+   "at": 126,
+   "nchars": 200
+  },
+  {
+   "rowid": 217961,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-03-01",
+   "show": "acd",
+   "tag": "GINGRAS (voice-over)",
+   "at": 122,
+   "nchars": 287
+  },
+  {
+   "rowid": 217991,
+   "member": "Richard Durbin",
+   "date": "2021-03-02",
+   "show": "acd",
+   "tag": "GINGRAS (voice-over)",
+   "at": 219,
+   "nchars": 440
+  },
+  {
+   "rowid": 218080,
+   "member": "Mazie Hirono",
+   "date": "2021-03-03",
+   "show": "cnr",
+   "tag": "WALKER (voice-over)",
+   "at": 38,
+   "nchars": 123
+  },
+  {
+   "rowid": 218108,
+   "member": "Ilhan Omar",
+   "date": "2021-03-04",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice-over)",
+   "at": 100,
+   "nchars": 406
+  },
+  {
+   "rowid": 218210,
+   "member": "Charles Schumer",
+   "date": "2021-03-06",
+   "show": "cnr",
+   "tag": "CURNOW (voice-over)",
+   "at": 77,
+   "nchars": 527
+  },
+  {
+   "rowid": 218335,
+   "member": "Nancy Pelosi",
+   "date": "2021-03-11",
+   "show": "cnr",
+   "tag": "YURKEVICH (voice-over)",
+   "at": 23,
+   "nchars": 91
+  },
+  {
+   "rowid": 218348,
+   "member": "Charles Schumer",
+   "date": "2021-03-11",
+   "show": "qmb",
+   "tag": "QUEST (voice-over)",
+   "at": 215,
+   "nchars": 786
+  },
+  {
+   "rowid": 218532,
+   "member": "Andy Kim",
+   "date": "2021-03-19",
+   "show": "cnr",
+   "tag": "WALKER (voice-over)",
+   "at": 204,
+   "nchars": 383
+  },
+  {
+   "rowid": 218533,
+   "member": "Grace Meng",
+   "date": "2021-03-19",
+   "show": "cnr",
+   "tag": "WALKER (voice-over)",
+   "at": 152,
+   "nchars": 418
+  },
+  {
+   "rowid": 218534,
+   "member": "Chip Roy",
+   "date": "2021-03-19",
+   "show": "cnr",
+   "tag": "WALKER (voice-over)",
+   "at": 283,
+   "nchars": 804
+  },
+  {
+   "rowid": 219035,
+   "member": "Mazie Hirono",
+   "date": "2021-04-23",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice-over)",
+   "at": 118,
+   "nchars": 453
+  },
+  {
+   "rowid": 219037,
+   "member": "Richard Blumenthal",
+   "date": "2021-04-23",
+   "show": "cg",
+   "tag": "MUNTEAN (on camera)",
+   "at": 195,
+   "nchars": 494
+  },
+  {
+   "rowid": 219054,
+   "member": "Richard Blumenthal",
+   "date": "2021-04-24",
+   "show": "cnr",
+   "tag": "MUNTEAN (on camera)",
+   "at": 196,
+   "nchars": 547
+  },
+  {
+   "rowid": 219160,
+   "member": "Ted Cruz",
+   "date": "2021-05-02",
+   "show": "cnr",
+   "tag": "MOOS (voice over)",
+   "at": 56,
+   "nchars": 475
+  },
+  {
+   "rowid": 219192,
+   "member": "Thomas Kean",
+   "date": "2021-05-03",
+   "show": "cnr",
+   "tag": "HANCOCKS (on camera)",
+   "at": 116,
+   "nchars": 167
+  },
+  {
+   "rowid": 219197,
+   "member": "Susan Collins",
+   "date": "2021-05-03",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 384,
+   "nchars": 660
+  },
+  {
+   "rowid": 219286,
+   "member": "Mitch McConnell",
+   "date": "2021-05-07",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 34,
+   "nchars": 163
+  },
+  {
+   "rowid": 219759,
+   "member": "Mitch McConnell",
+   "date": "2021-05-25",
+   "show": "cnnt",
+   "tag": "CAMPBELL (voice-over)",
+   "at": 75,
+   "nchars": 168
+  },
+  {
+   "rowid": 219895,
+   "member": "Michael McCaul",
+   "date": "2021-05-31",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 344,
+   "nchars": 426
+  },
+  {
+   "rowid": 219954,
+   "member": "Angus King",
+   "date": "2021-06-07",
+   "show": "nday",
+   "tag": "KEILAR (on camera)",
+   "at": 152,
+   "nchars": 355
+  },
+  {
+   "rowid": 220003,
+   "member": "Roger Wicker",
+   "date": "2021-06-09",
+   "show": "cnr",
+   "tag": "CURNOW (on camera)",
+   "at": 263,
+   "nchars": 752
+  },
+  {
+   "rowid": 220004,
+   "member": "Gary Peters",
+   "date": "2021-06-09",
+   "show": "cnr",
+   "tag": "CURNOW (on camera)",
+   "at": 480,
+   "nchars": 3594
+  },
+  {
+   "rowid": 220334,
+   "member": "Bernard Sanders",
+   "date": "2021-06-21",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 495,
+   "nchars": 657
+  },
+  {
+   "rowid": 220440,
+   "member": "Debbie Wasserman Schultz",
+   "date": "2021-06-25",
+   "show": "cnr",
+   "tag": "NEWTON (on camera)",
+   "at": 261,
+   "nchars": 656
+  },
+  {
+   "rowid": 220577,
+   "member": "Bernard Sanders",
+   "date": "2021-07-05",
+   "show": "ctw",
+   "tag": "SEBASTIAN (voice over)",
+   "at": 109,
+   "nchars": 362
+  },
+  {
+   "rowid": 220578,
+   "member": "Bernard Sanders",
+   "date": "2021-07-05",
+   "show": "fmjc",
+   "tag": "SEBASTIAN (voice over)",
+   "at": 109,
+   "nchars": 353
+  },
+  {
+   "rowid": 220585,
+   "member": "Lindsey Graham",
+   "date": "2021-07-06",
+   "show": "cnnt",
+   "tag": "COATES (on camera)",
+   "at": 331,
+   "nchars": 508
+  },
+  {
+   "rowid": 220587,
+   "member": "Andrew Clyde",
+   "date": "2021-07-06",
+   "show": "cnnt",
+   "tag": "COATES (on camera)",
+   "at": 130,
+   "nchars": 1028
+  },
+  {
+   "rowid": 220832,
+   "member": "John Kennedy",
+   "date": "2021-07-23",
+   "show": "cnr",
+   "tag": "SEBASTIAN (voice over)",
+   "at": 175,
+   "nchars": 504
+  },
+  {
+   "rowid": 220833,
+   "member": "John Kennedy",
+   "date": "2021-07-23",
+   "show": "cnr",
+   "tag": "SEBASTIAN (voice over)",
+   "at": 173,
+   "nchars": 284
+  },
+  {
+   "rowid": 220834,
+   "member": "John Kennedy",
+   "date": "2021-07-23",
+   "show": "ctw",
+   "tag": "SEBASTIAN (voice-over)",
+   "at": 176,
+   "nchars": 287
+  },
+  {
+   "rowid": 220835,
+   "member": "John Kennedy",
+   "date": "2021-07-23",
+   "show": "fmjc",
+   "tag": "SEBASTIAN (voice over)",
+   "at": 175,
+   "nchars": 553
+  },
+  {
+   "rowid": 220841,
+   "member": "Rand Paul",
+   "date": "2021-07-23",
+   "show": "nday",
+   "tag": "WALKER (voice-over)",
+   "at": 42,
+   "nchars": 186
+  },
+  {
+   "rowid": 221464,
+   "member": "Michael McCaul",
+   "date": "2021-09-06",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 287,
+   "nchars": 902
+  },
+  {
+   "rowid": 221465,
+   "member": "Judy Chu",
+   "date": "2021-09-06",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 513,
+   "nchars": 665
+  },
+  {
+   "rowid": 221483,
+   "member": "Amy Klobuchar",
+   "date": "2021-09-07",
+   "show": "acd",
+   "tag": "KAFANOV (voice-over)",
+   "at": 99,
+   "nchars": 204
+  },
+  {
+   "rowid": 221517,
+   "member": "Amy Klobuchar",
+   "date": "2021-09-08",
+   "show": "cnr",
+   "tag": "KAFANOV (voice-over)",
+   "at": 99,
+   "nchars": 204
+  },
+  {
+   "rowid": 221656,
+   "member": "Richard Durbin",
+   "date": "2021-09-16",
+   "show": "cnr",
+   "tag": "CASAREZ (voice-over)",
+   "at": 64,
+   "nchars": 183
+  },
+  {
+   "rowid": 221657,
+   "member": "Richard Durbin",
+   "date": "2021-09-16",
+   "show": "ctw",
+   "tag": "CASAREZ (voice over)",
+   "at": 64,
+   "nchars": 182
+  },
+  {
+   "rowid": 221674,
+   "member": "Chip Roy",
+   "date": "2021-09-17",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 146,
+   "nchars": 503
+  },
+  {
+   "rowid": 221675,
+   "member": "Troy Nehls",
+   "date": "2021-09-17",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 118,
+   "nchars": 518
+  },
+  {
+   "rowid": 221884,
+   "member": "Nancy Mace",
+   "date": "2021-09-26",
+   "show": "csr",
+   "tag": "CAMEROTA (voice-over)",
+   "at": 30,
+   "nchars": 270
+  },
+  {
+   "rowid": 221924,
+   "member": "Nancy Pelosi",
+   "date": "2021-09-27",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 128,
+   "nchars": 697
+  },
+  {
+   "rowid": 221926,
+   "member": "Zoe Lofgren",
+   "date": "2021-09-27",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 415,
+   "nchars": 537
+  },
+  {
+   "rowid": 222265,
+   "member": "Richard Blumenthal",
+   "date": "2021-10-05",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 244,
+   "nchars": 338
+  },
+  {
+   "rowid": 222283,
+   "member": "Richard Blumenthal",
+   "date": "2021-10-05",
+   "show": "ebo",
+   "tag": "STELTER(voice over)",
+   "at": 245,
+   "nchars": 336
+  },
+  {
+   "rowid": 222314,
+   "member": "Richard Blumenthal",
+   "date": "2021-10-06",
+   "show": "cnr",
+   "tag": "STELTER (voice over)",
+   "at": 245,
+   "nchars": 337
+  },
+  {
+   "rowid": 222753,
+   "member": "Richard Blumenthal",
+   "date": "2021-10-25",
+   "show": "cnr",
+   "tag": "NEWTON (on camera)",
+   "at": 318,
+   "nchars": 497
+  },
+  {
+   "rowid": 222851,
+   "member": "Pramila Jayapal",
+   "date": "2021-10-28",
+   "show": "cnnt",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 33,
+   "nchars": 96
+  },
+  {
+   "rowid": 222931,
+   "member": "Ruben Gallego",
+   "date": "2021-11-01",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 991,
+   "nchars": 1806
+  },
+  {
+   "rowid": 223335,
+   "member": "Elizabeth Warren",
+   "date": "2021-11-22",
+   "show": "qmb",
+   "tag": "NEWTON (voice over)",
+   "at": 159,
+   "nchars": 611
+  },
+  {
+   "rowid": 223345,
+   "member": "Josh Hawley",
+   "date": "2021-11-24",
+   "show": "CPT",
+   "tag": "CUOMO (on camera)",
+   "at": 443,
+   "nchars": 749
+  },
+  {
+   "rowid": 223408,
+   "member": "Lauren Boebert",
+   "date": "2021-11-30",
+   "show": "cnnt",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 135,
+   "nchars": 168
+  },
+  {
+   "rowid": 223701,
+   "member": "Mike Johnson",
+   "date": "2021-12-15",
+   "show": "cnr",
+   "tag": "CAMPBELL (voice-over)",
+   "at": 26,
+   "nchars": 133
+  },
+  {
+   "rowid": 223702,
+   "member": "Mike Johnson",
+   "date": "2021-12-15",
+   "show": "cnr",
+   "tag": "CAMPBELL (voice-over)",
+   "at": 57,
+   "nchars": 160
+  },
+  {
+   "rowid": 223821,
+   "member": "Jim Jordan",
+   "date": "2021-12-22",
+   "show": "cnnt",
+   "tag": "COATES (on camera)",
+   "at": 274,
+   "nchars": 636
+  },
+  {
+   "rowid": 223835,
+   "member": "Jim Jordan",
+   "date": "2021-12-23",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 448,
+   "nchars": 602
+  },
+  {
+   "rowid": 223863,
+   "member": "Ted Cruz",
+   "date": "2021-12-27",
+   "show": "cnnt",
+   "tag": "COATES (on camera)",
+   "at": 155,
+   "nchars": 2668
+  },
+  {
+   "rowid": 223873,
+   "member": "Ron Johnson",
+   "date": "2021-12-28",
+   "show": "cnnt",
+   "tag": "COATES (on camera)",
+   "at": 210,
+   "nchars": 431
+  },
+  {
+   "rowid": 224223,
+   "member": "James Clyburn",
+   "date": "2022-01-17",
+   "show": "ampr",
+   "tag": "AMANPOUR (voice-over)",
+   "at": 62,
+   "nchars": 585
+  },
+  {
+   "rowid": 224245,
+   "member": "Richard Blumenthal",
+   "date": "2022-01-18",
+   "show": "cg",
+   "tag": "CHANCE (voice-over)",
+   "at": 67,
+   "nchars": 154
+  },
+  {
+   "rowid": 224252,
+   "member": "Richard Blumenthal",
+   "date": "2022-01-18",
+   "show": "ebo",
+   "tag": "CHANCE (voice over)",
+   "at": 67,
+   "nchars": 154
+  },
+  {
+   "rowid": 224357,
+   "member": "Christopher Coons",
+   "date": "2022-01-24",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 268,
+   "nchars": 396
+  },
+  {
+   "rowid": 224358,
+   "member": "Joni Ernst",
+   "date": "2022-01-24",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 367,
+   "nchars": 1189
+  },
+  {
+   "rowid": 224560,
+   "member": "Jim Jordan",
+   "date": "2022-02-05",
+   "show": "cnr",
+   "tag": "GRAYER (voice-over)",
+   "at": 129,
+   "nchars": 155
+  },
+  {
+   "rowid": 224592,
+   "member": "Nancy Pelosi",
+   "date": "2022-02-07",
+   "show": "acd",
+   "tag": "BENNETT (voice-over)",
+   "at": 26,
+   "nchars": 384
+  },
+  {
+   "rowid": 224644,
+   "member": "Christopher Smith",
+   "date": "2022-02-09",
+   "show": "cnr",
+   "tag": "WALSH (voice-over)",
+   "at": 81,
+   "nchars": 265
+  },
+  {
+   "rowid": 224646,
+   "member": "Christopher Smith",
+   "date": "2022-02-09",
+   "show": "cnr",
+   "tag": "WALSH (voice-over)",
+   "at": 221,
+   "nchars": 578
+  },
+  {
+   "rowid": 224648,
+   "member": "Christopher Smith",
+   "date": "2022-02-09",
+   "show": "ctw",
+   "tag": "WALSH (voice-over)",
+   "at": 223,
+   "nchars": 581
+  },
+  {
+   "rowid": 224649,
+   "member": "Christopher Smith",
+   "date": "2022-02-09",
+   "show": "ctw",
+   "tag": "WALSH (voice over)",
+   "at": 81,
+   "nchars": 264
+  },
+  {
+   "rowid": 224650,
+   "member": "Christopher Smith",
+   "date": "2022-02-09",
+   "show": "ctw",
+   "tag": "WALSH (on camera)",
+   "at": 70,
+   "nchars": 115
+  },
+  {
+   "rowid": 224651,
+   "member": "Christopher Smith",
+   "date": "2022-02-09",
+   "show": "ctw",
+   "tag": "WALSH (voice over)",
+   "at": 221,
+   "nchars": 579
+  },
+  {
+   "rowid": 224919,
+   "member": "John Garamendi",
+   "date": "2022-03-07",
+   "show": "cnnt",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 86,
+   "nchars": 145
+  },
+  {
+   "rowid": 224926,
+   "member": "John Garamendi",
+   "date": "2022-03-08",
+   "show": "cnr",
+   "tag": "KAFANOV (on camera)",
+   "at": 86,
+   "nchars": 142
+  },
+  {
+   "rowid": 225004,
+   "member": "Mitch McConnell",
+   "date": "2022-03-20",
+   "show": "ndaysun",
+   "tag": "CAIFA (voice-over)",
+   "at": 141,
+   "nchars": 561
+  },
+  {
+   "rowid": 225005,
+   "member": "Richard Durbin",
+   "date": "2022-03-20",
+   "show": "ndaysun",
+   "tag": "CAIFA (voice-over)",
+   "at": 140,
+   "nchars": 282
+  },
+  {
+   "rowid": 225235,
+   "member": "Cory Booker",
+   "date": "2022-03-28",
+   "show": "cnr",
+   "tag": "BROADDUS (on camera)",
+   "at": 109,
+   "nchars": 160
+  },
+  {
+   "rowid": 225239,
+   "member": "Richard Blumenthal",
+   "date": "2022-03-28",
+   "show": "nday",
+   "tag": "BROADDUS (voice-over)",
+   "at": 96,
+   "nchars": 146
+  },
+  {
+   "rowid": 225241,
+   "member": "Josh Hawley",
+   "date": "2022-03-28",
+   "show": "nday",
+   "tag": "BROADDUS (voice-over)",
+   "at": 43,
+   "nchars": 139
+  },
+  {
+   "rowid": 225258,
+   "member": "Grace Meng",
+   "date": "2022-03-29",
+   "show": "nday",
+   "tag": "WALKER (on camera)",
+   "at": 32,
+   "nchars": 56
+  },
+  {
+   "rowid": 225386,
+   "member": "Henry Cuellar",
+   "date": "2022-04-20",
+   "show": "cnr",
+   "tag": "FLORES (on camera)",
+   "at": 20,
+   "nchars": 103
+  },
+  {
+   "rowid": 225432,
+   "member": "Victoria Spartz",
+   "date": "2022-04-25",
+   "show": "ctw",
+   "tag": "RIVERS (voice over)",
+   "at": 150,
+   "nchars": 443
+  },
+  {
+   "rowid": 225736,
+   "member": "Elise Stefanik",
+   "date": "2022-05-14",
+   "show": "cnr",
+   "tag": "BROADDUS (voiceover)",
+   "at": 93,
+   "nchars": 189
+  },
+  {
+   "rowid": 225781,
+   "member": "André Carson",
+   "date": "2022-05-17",
+   "show": "fmjc",
+   "tag": "FISHER (voice over)",
+   "at": 251,
+   "nchars": 650
+  },
+  {
+   "rowid": 225784,
+   "member": "André Carson",
+   "date": "2022-05-17",
+   "show": "nday",
+   "tag": "FISHER (voice-over)",
+   "at": 255,
+   "nchars": 733
+  },
+  {
+   "rowid": 225924,
+   "member": "Christopher Murphy",
+   "date": "2022-05-25",
+   "show": "nday",
+   "tag": "BROADDUS (on camera)",
+   "at": 414,
+   "nchars": 843
+  },
+  {
+   "rowid": 225926,
+   "member": "Christopher Murphy",
+   "date": "2022-05-25",
+   "show": "nday",
+   "tag": "BROADDUS (on camera)",
+   "at": 414,
+   "nchars": 819
+  },
+  {
+   "rowid": 226010,
+   "member": "Joaquin Castro",
+   "date": "2022-05-30",
+   "show": "nday",
+   "tag": "BROADDUS (voice-over)",
+   "at": 250,
+   "nchars": 608
+  },
+  {
+   "rowid": 226060,
+   "member": "Charles Schumer",
+   "date": "2022-06-03",
+   "show": "cg",
+   "tag": "BROADDUS (voice-over)",
+   "at": 61,
+   "nchars": 200
+  },
+  {
+   "rowid": 226094,
+   "member": "Charles Schumer",
+   "date": "2022-06-04",
+   "show": "cnr",
+   "tag": "BROADDUS (voice-over)",
+   "at": 61,
+   "nchars": 200
+  },
+  {
+   "rowid": 226129,
+   "member": "Christopher Murphy",
+   "date": "2022-06-06",
+   "show": "ebo",
+   "tag": "FIELD (on camera)",
+   "at": 118,
+   "nchars": 503
+  },
+  {
+   "rowid": 226250,
+   "member": "Bennie Thompson",
+   "date": "2022-06-10",
+   "show": "ampr",
+   "tag": "NARRATOR (voice-over)",
+   "at": 109,
+   "nchars": 299
+  },
+  {
+   "rowid": 226559,
+   "member": "Adam Schiff",
+   "date": "2022-06-20",
+   "show": "es",
+   "tag": "POLANTZ (on camera)",
+   "at": 515,
+   "nchars": 884
+  },
+  {
+   "rowid": 226697,
+   "member": "Eric Schmitt",
+   "date": "2022-06-24",
+   "show": "cnnt",
+   "tag": "FIELD (voice-over)",
+   "at": 109,
+   "nchars": 270
+  },
+  {
+   "rowid": 226762,
+   "member": "Eric Schmitt",
+   "date": "2022-06-25",
+   "show": "cnr",
+   "tag": "FIELD (voice-over)",
+   "at": 109,
+   "nchars": 270
+  },
+  {
+   "rowid": 226872,
+   "member": "Sylvia Garcia",
+   "date": "2022-07-02",
+   "show": "cnr",
+   "tag": "ROMO (voice-over)",
+   "at": 214,
+   "nchars": 801
+  },
+  {
+   "rowid": 226878,
+   "member": "Vicente Gonzalez",
+   "date": "2022-07-02",
+   "show": "ndaysat",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 156,
+   "nchars": 257
+  },
+  {
+   "rowid": 226919,
+   "member": "Bradley Schneider",
+   "date": "2022-07-06",
+   "show": "ebo",
+   "tag": "BROADDUS (on camera)",
+   "at": 141,
+   "nchars": 455
+  },
+  {
+   "rowid": 226926,
+   "member": "Tammy Duckworth",
+   "date": "2022-07-06",
+   "show": "sitroom",
+   "tag": "CAMPBELL (voice-over)",
+   "at": 106,
+   "nchars": 164
+  },
+  {
+   "rowid": 227192,
+   "member": "Jim Jordan",
+   "date": "2022-07-14",
+   "show": "ebo",
+   "tag": "FIELD (on camera)",
+   "at": 251,
+   "nchars": 942
+  },
+  {
+   "rowid": 227227,
+   "member": "Jim Jordan",
+   "date": "2022-07-15",
+   "show": "cnr",
+   "tag": "FIELD (voice-over)",
+   "at": 259,
+   "nchars": 310
+  },
+  {
+   "rowid": 227726,
+   "member": "Mitch McConnell",
+   "date": "2022-08-02",
+   "show": "sitroom",
+   "tag": "WANG (on camera)",
+   "at": 167,
+   "nchars": 580
+  },
+  {
+   "rowid": 227738,
+   "member": "Nancy Pelosi",
+   "date": "2022-08-03",
+   "show": "cg",
+   "tag": "RIPLEY (voice-over)",
+   "at": 90,
+   "nchars": 407
+  },
+  {
+   "rowid": 227757,
+   "member": "Nancy Pelosi",
+   "date": "2022-08-03",
+   "show": "cnr",
+   "tag": "RIPLEY (voiceover)",
+   "at": 182,
+   "nchars": 749
+  },
+  {
+   "rowid": 227770,
+   "member": "Nancy Pelosi",
+   "date": "2022-08-03",
+   "show": "fmjc",
+   "tag": "RIPLEY (voice over)",
+   "at": 176,
+   "nchars": 723
+  },
+  {
+   "rowid": 227792,
+   "member": "Nancy Pelosi",
+   "date": "2022-08-04",
+   "show": "ctw",
+   "tag": "WANG (voice-over)",
+   "at": 158,
+   "nchars": 382
+  },
+  {
+   "rowid": 227793,
+   "member": "Nancy Pelosi",
+   "date": "2022-08-04",
+   "show": "ctw",
+   "tag": "WANG (voice over)",
+   "at": 158,
+   "nchars": 375
+  },
+  {
+   "rowid": 228437,
+   "member": "Nancy Pelosi",
+   "date": "2022-08-22",
+   "show": "ctw",
+   "tag": "ESSIG (voice over)",
+   "at": 46,
+   "nchars": 626
+  },
+  {
+   "rowid": 228438,
+   "member": "Nancy Pelosi",
+   "date": "2022-08-22",
+   "show": "fmjc",
+   "tag": "ESSI (on camera)",
+   "at": 43,
+   "nchars": 582
+  },
+  {
+   "rowid": 229471,
+   "member": "William Keating",
+   "date": "2022-09-16",
+   "show": "cnr",
+   "tag": "ALVAREZ (voice-over)",
+   "at": 105,
+   "nchars": 700
+  },
+  {
+   "rowid": 229478,
+   "member": "William Keating",
+   "date": "2022-09-16",
+   "show": "es",
+   "tag": "ALVAREZ (voice over)",
+   "at": 93,
+   "nchars": 681
+  },
+  {
+   "rowid": 229586,
+   "member": "Katherine Clark",
+   "date": "2022-09-18",
+   "show": "cnr",
+   "tag": "NEWTON (voice-over)",
+   "at": 67,
+   "nchars": 344
+  },
+  {
+   "rowid": 230944,
+   "member": "Raphael Warnock",
+   "date": "2022-10-04",
+   "show": "acd",
+   "tag": "MCKEND (voice over)",
+   "at": 209,
+   "nchars": 508
+  },
+  {
+   "rowid": 231121,
+   "member": "Raphael Warnock",
+   "date": "2022-10-05",
+   "show": "es",
+   "tag": "MCKEND (voice-over)",
+   "at": 207,
+   "nchars": 528
+  },
+  {
+   "rowid": 231363,
+   "member": "Don Bacon",
+   "date": "2022-10-11",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 89,
+   "nchars": 252
+  },
+  {
+   "rowid": 231364,
+   "member": "Raphael Warnock",
+   "date": "2022-10-11",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 171,
+   "nchars": 310
+  },
+  {
+   "rowid": 231371,
+   "member": "Don Bacon",
+   "date": "2022-10-11",
+   "show": "es",
+   "tag": "MCKEND (voice-over)",
+   "at": 95,
+   "nchars": 254
+  },
+  {
+   "rowid": 231372,
+   "member": "Raphael Warnock",
+   "date": "2022-10-11",
+   "show": "es",
+   "tag": "MCKEND (voice-over)",
+   "at": 167,
+   "nchars": 306
+  },
+  {
+   "rowid": 231393,
+   "member": "Tom Cotton",
+   "date": "2022-10-12",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 81,
+   "nchars": 154
+  },
+  {
+   "rowid": 231485,
+   "member": "Jodey Arrington",
+   "date": "2022-10-13",
+   "show": "cnr",
+   "tag": "ROMO (voice-over)",
+   "at": 110,
+   "nchars": 267
+  },
+  {
+   "rowid": 231524,
+   "member": "Jodey Arrington",
+   "date": "2022-10-13",
+   "show": "es",
+   "tag": "ROMO (voice-over)",
+   "at": 114,
+   "nchars": 271
+  },
+  {
+   "rowid": 231837,
+   "member": "Christopher Coons",
+   "date": "2022-10-15",
+   "show": "cnr",
+   "tag": "BERTRAND (voice over)",
+   "at": 112,
+   "nchars": 339
+  },
+  {
+   "rowid": 231885,
+   "member": "Christopher Coons",
+   "date": "2022-10-15",
+   "show": "ndaysat",
+   "tag": "BERTRAND (voice-over)",
+   "at": 112,
+   "nchars": 339
+  },
+  {
+   "rowid": 231911,
+   "member": "Bernard Sanders",
+   "date": "2022-10-16",
+   "show": "ndaysun",
+   "tag": "ROMERO (voice-over)",
+   "at": 31,
+   "nchars": 488
+  },
+  {
+   "rowid": 231927,
+   "member": "Christopher Coons",
+   "date": "2022-10-17",
+   "show": "cnr",
+   "tag": "BERTRAND (voice-over)",
+   "at": 113,
+   "nchars": 340
+  },
+  {
+   "rowid": 231933,
+   "member": "Bernard Sanders",
+   "date": "2022-10-17",
+   "show": "cnr",
+   "tag": "ROMERO (voice-over)",
+   "at": 31,
+   "nchars": 484
+  },
+  {
+   "rowid": 231938,
+   "member": "Bernard Sanders",
+   "date": "2022-10-17",
+   "show": "cnr",
+   "tag": "ROMERO (voice-over)",
+   "at": 31,
+   "nchars": 494
+  },
+  {
+   "rowid": 231971,
+   "member": "Marsha Blackburn",
+   "date": "2021-02-22",
+   "show": "republicans-blast-dems-massive-covid",
+   "tag": "PERINO (on camera)",
+   "at": 115,
+   "nchars": 226
+  },
+  {
+   "rowid": 231999,
+   "member": "Raphael Warnock",
+   "date": "2022-10-18",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 220,
+   "nchars": 456
+  },
+  {
+   "rowid": 232067,
+   "member": "Raphael Warnock",
+   "date": "2022-10-21",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 158,
+   "nchars": 587
+  },
+  {
+   "rowid": 232727,
+   "member": "Ted Cruz",
+   "date": "2022-11-11",
+   "show": "cnr",
+   "tag": "VALENCIA (voice-over)",
+   "at": 207,
+   "nchars": 541
+  },
+  {
+   "rowid": 233170,
+   "member": "John Garamendi",
+   "date": "2022-11-23",
+   "show": "ctmo",
+   "tag": "GINGRAS (voice-over)",
+   "at": 166,
+   "nchars": 1164
+  },
+  {
+   "rowid": 233285,
+   "member": "Hakeem Jeffries",
+   "date": "2022-11-30",
+   "show": "acd",
+   "tag": "MCKEND (voice-over)",
+   "at": 189,
+   "nchars": 320
+  },
+  {
+   "rowid": 233337,
+   "member": "Hakeem Jeffries",
+   "date": "2022-11-30",
+   "show": "sitroom",
+   "tag": "MCKEND (voice-over)",
+   "at": 182,
+   "nchars": 311
+  },
+  {
+   "rowid": 233351,
+   "member": "Hakeem Jeffries",
+   "date": "2022-12-01",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 185,
+   "nchars": 315
+  },
+  {
+   "rowid": 233369,
+   "member": "Raphael Warnock",
+   "date": "2022-12-02",
+   "show": "acd",
+   "tag": "MCKEND (voice over)",
+   "at": 77,
+   "nchars": 773
+  },
+  {
+   "rowid": 233408,
+   "member": "Raphael Warnock",
+   "date": "2022-12-03",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 77,
+   "nchars": 771
+  },
+  {
+   "rowid": 233432,
+   "member": "Maxwell Frost",
+   "date": "2022-12-05",
+   "show": "cg",
+   "tag": "MCKEND (on camera)",
+   "at": 104,
+   "nchars": 204
+  },
+  {
+   "rowid": 233743,
+   "member": "Christopher Murphy",
+   "date": "2022-12-14",
+   "show": "acd",
+   "tag": "CAMEROTA (voice-over)",
+   "at": 123,
+   "nchars": 210
+  },
+  {
+   "rowid": 234312,
+   "member": "André Carson",
+   "date": "2022-12-24",
+   "show": "cnr",
+   "tag": "FISHER (on camera)",
+   "at": 130,
+   "nchars": 503
+  },
+  {
+   "rowid": 234452,
+   "member": "André Carson",
+   "date": "2022-12-28",
+   "show": "es",
+   "tag": "FISHER (on camera)",
+   "at": 134,
+   "nchars": 521
+  },
+  {
+   "rowid": 234567,
+   "member": "André Carson",
+   "date": "2022-12-31",
+   "show": "cnr",
+   "tag": "FISHER (on camera)",
+   "at": 131,
+   "nchars": 518
+  },
+  {
+   "rowid": 235441,
+   "member": "Bennie Thompson",
+   "date": "2023-01-07",
+   "show": "cnr",
+   "tag": "GINGRAS (voice over)",
+   "at": 42,
+   "nchars": 166
+  },
+  {
+   "rowid": 235442,
+   "member": "Kat Cammack",
+   "date": "2023-01-07",
+   "show": "cnr",
+   "tag": "MOOS (voice over)",
+   "at": 130,
+   "nchars": 170
+  },
+  {
+   "rowid": 235518,
+   "member": "Kat Cammack",
+   "date": "2023-01-07",
+   "show": "ctmo",
+   "tag": "MOOS (voice-over)",
+   "at": 131,
+   "nchars": 171
+  },
+  {
+   "rowid": 236140,
+   "member": "Rick Larsen",
+   "date": "2023-01-11",
+   "show": "cg",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 178,
+   "nchars": 436
+  },
+  {
+   "rowid": 236236,
+   "member": "Jamie Raskin",
+   "date": "2023-01-12",
+   "show": "cnr",
+   "tag": "CHURCH (voiceover)",
+   "at": 241,
+   "nchars": 678
+  },
+  {
+   "rowid": 236524,
+   "member": "Charles Schumer",
+   "date": "2023-01-17",
+   "show": "cg",
+   "tag": "MUNTEAN (on camera)",
+   "at": 106,
+   "nchars": 456
+  },
+  {
+   "rowid": 236633,
+   "member": "Charles Schumer",
+   "date": "2023-01-17",
+   "show": "cton",
+   "tag": "MUNTEAN (on camera)",
+   "at": 108,
+   "nchars": 444
+  },
+  {
+   "rowid": 236647,
+   "member": "Charles Schumer",
+   "date": "2023-01-17",
+   "show": "sitroom",
+   "tag": "MUNTEAN (on camera)",
+   "at": 106,
+   "nchars": 462
+  },
+  {
+   "rowid": 236648,
+   "member": "Mitch McConnell",
+   "date": "2021-02-14",
+   "show": "sen-klobuchar-on-trumps-political-future-he-is-done",
+   "tag": "SPUNT (voice-over)",
+   "at": 95,
+   "nchars": 501
+  },
+  {
+   "rowid": 237259,
+   "member": "Judy Chu",
+   "date": "2023-01-24",
+   "show": "acd",
+   "tag": "CHEN (voice over)",
+   "at": 54,
+   "nchars": 567
+  },
+  {
+   "rowid": 237951,
+   "member": "Elise Stefanik",
+   "date": "2023-01-31",
+   "show": "cton",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 306,
+   "nchars": 376
+  },
+  {
+   "rowid": 238167,
+   "member": "Rand Paul",
+   "date": "2017-07-02",
+   "show": "sen-rand-paul-on-push-to-repeal-then-replace-obamacare",
+   "tag": "ROBERTS (voice-over)",
+   "at": 120,
+   "nchars": 588
+  },
+  {
+   "rowid": 238304,
+   "member": "Darin LaHood",
+   "date": "2023-02-03",
+   "show": "acd",
+   "tag": "SCIUTTO (voice over)",
+   "at": 130,
+   "nchars": 738
+  },
+  {
+   "rowid": 238489,
+   "member": "Darin LaHood",
+   "date": "2023-02-04",
+   "show": "cnr",
+   "tag": "SCIUTTO (voice over)",
+   "at": 135,
+   "nchars": 749
+  },
+  {
+   "rowid": 238633,
+   "member": "Michael Turner",
+   "date": "2023-02-06",
+   "show": "ctmo",
+   "tag": "SUAREZ (voice-over)",
+   "at": 527,
+   "nchars": 903
+  },
+  {
+   "rowid": 239379,
+   "member": "James Himes",
+   "date": "2023-02-13",
+   "show": "ctmo",
+   "tag": "BERTRAND (voice-over)",
+   "at": 315,
+   "nchars": 951
+  },
+  {
+   "rowid": 239416,
+   "member": "James Himes",
+   "date": "2023-02-13",
+   "show": "ctw",
+   "tag": "BERTRAND (voice over)",
+   "at": 312,
+   "nchars": 900
+  },
+  {
+   "rowid": 239502,
+   "member": "Marsha Blackburn",
+   "date": "2023-02-14",
+   "show": "cton",
+   "tag": "KEILAR (voice-over)",
+   "at": 90,
+   "nchars": 268
+  },
+  {
+   "rowid": 239505,
+   "member": "Raja Krishnamoorthi",
+   "date": "2023-02-14",
+   "show": "ctw",
+   "tag": "BERTRAND (voice over)",
+   "at": 280,
+   "nchars": 406
+  },
+  {
+   "rowid": 239645,
+   "member": "Marsha Blackburn",
+   "date": "2023-02-15",
+   "show": "es",
+   "tag": "KEILAR (voice-over)",
+   "at": 89,
+   "nchars": 266
+  },
+  {
+   "rowid": 239783,
+   "member": "Marsha Blackburn",
+   "date": "2023-02-19",
+   "show": "cnr",
+   "tag": "KEILAR (voice-over)",
+   "at": 89,
+   "nchars": 267
+  },
+  {
+   "rowid": 240281,
+   "member": "Michael Bennet",
+   "date": "2023-03-02",
+   "show": "cnr",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 54,
+   "nchars": 208
+  },
+  {
+   "rowid": 240549,
+   "member": "Nancy Pelosi",
+   "date": "2023-03-14",
+   "show": "ctw",
+   "tag": "RIPLEY (voice-over)",
+   "at": 46,
+   "nchars": 348
+  },
+  {
+   "rowid": 240550,
+   "member": "Nancy Pelosi",
+   "date": "2023-03-14",
+   "show": "fmjc",
+   "tag": "RIPLEY (voice over)",
+   "at": 46,
+   "nchars": 348
+  },
+  {
+   "rowid": 240566,
+   "member": "Ted Cruz",
+   "date": "2023-03-15",
+   "show": "cnr",
+   "tag": "MUNTEAN (voiceover)",
+   "at": 79,
+   "nchars": 381
+  },
+  {
+   "rowid": 240578,
+   "member": "Ted Cruz",
+   "date": "2023-03-15",
+   "show": "ctmo",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 79,
+   "nchars": 387
+  },
+  {
+   "rowid": 240721,
+   "member": "Jay Obernolte",
+   "date": "2023-03-23",
+   "show": "cg",
+   "tag": "BERTRAND (voice-over)",
+   "at": 121,
+   "nchars": 411
+  },
+  {
+   "rowid": 240762,
+   "member": "Debbie Dingell",
+   "date": "2023-03-23",
+   "show": "fmjc",
+   "tag": "CHATTERLEY (on camera)",
+   "at": 611,
+   "nchars": 1015
+  },
+  {
+   "rowid": 240770,
+   "member": "Jay Obernolte",
+   "date": "2023-03-23",
+   "show": "qmb",
+   "tag": "BERTRAND (voice over)",
+   "at": 121,
+   "nchars": 409
+  },
+  {
+   "rowid": 240771,
+   "member": "Mark Warner",
+   "date": "2023-03-23",
+   "show": "qmb",
+   "tag": "BERTRAND (on camera)",
+   "at": 174,
+   "nchars": 1047
+  },
+  {
+   "rowid": 240790,
+   "member": "Jay Obernolte",
+   "date": "2023-03-24",
+   "show": "cnr",
+   "tag": "BERTRAND (voice-over)",
+   "at": 121,
+   "nchars": 422
+  },
+  {
+   "rowid": 241390,
+   "member": "Lindsey Graham",
+   "date": "2023-04-08",
+   "show": "cnr",
+   "tag": "HOMLES (voice over)",
+   "at": 132,
+   "nchars": 832
+  },
+  {
+   "rowid": 241422,
+   "member": "Charles Schumer",
+   "date": "2022-02-21",
+   "show": "special-report-on-the-ukraine-border",
+   "tag": "PERGRAM (on camera)",
+   "at": 121,
+   "nchars": 298
+  },
+  {
+   "rowid": 241482,
+   "member": "Jason Smith",
+   "date": "2023-04-11",
+   "show": "cg",
+   "tag": "BROADDUS (on camera)",
+   "at": 333,
+   "nchars": 1000
+  },
+  {
+   "rowid": 241499,
+   "member": "Jason Smith",
+   "date": "2023-04-11",
+   "show": "ebo",
+   "tag": "BROADDUS (on camera)",
+   "at": 146,
+   "nchars": 612
+  },
+  {
+   "rowid": 241526,
+   "member": "Jason Smith",
+   "date": "2023-04-12",
+   "show": "cnr",
+   "tag": "BROADDUS (voice-over)",
+   "at": 145,
+   "nchars": 213
+  },
+  {
+   "rowid": 241528,
+   "member": "Jason Smith",
+   "date": "2023-04-12",
+   "show": "ctmo",
+   "tag": "BROADDUS (on camera)",
+   "at": 145,
+   "nchars": 862
+  },
+  {
+   "rowid": 241935,
+   "member": "Brian Schatz",
+   "date": "2023-04-29",
+   "show": "cnr",
+   "tag": "RODRIGUEZ (voice-over)",
+   "at": 135,
+   "nchars": 337
+  },
+  {
+   "rowid": 241936,
+   "member": "Tom Cotton",
+   "date": "2023-04-29",
+   "show": "cnr",
+   "tag": "RODRIGUEZ (voice-over)",
+   "at": 109,
+   "nchars": 218
+  },
+  {
+   "rowid": 242666,
+   "member": "Ro Khanna",
+   "date": "2023-05-20",
+   "show": "cnr",
+   "tag": "RANEY (voice-over)",
+   "at": 154,
+   "nchars": 499
+  },
+  {
+   "rowid": 242684,
+   "member": "Tim Scott",
+   "date": "2023-05-22",
+   "show": "acd",
+   "tag": "MCKEND (voice-over)",
+   "at": 204,
+   "nchars": 303
+  },
+  {
+   "rowid": 242685,
+   "member": "John Thune",
+   "date": "2023-05-22",
+   "show": "acd",
+   "tag": "MCKEND (voice-over)",
+   "at": 28,
+   "nchars": 93
+  },
+  {
+   "rowid": 242706,
+   "member": "Tim Scott",
+   "date": "2023-05-22",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 108,
+   "nchars": 158
+  },
+  {
+   "rowid": 242734,
+   "member": "Tim Scott",
+   "date": "2023-05-23",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 202,
+   "nchars": 301
+  },
+  {
+   "rowid": 242735,
+   "member": "John Thune",
+   "date": "2023-05-23",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 28,
+   "nchars": 93
+  },
+  {
+   "rowid": 242760,
+   "member": "Pete Aguilar",
+   "date": "2023-05-24",
+   "show": "cnr",
+   "tag": "AGUIRRE (voiceover)",
+   "at": 114,
+   "nchars": 295
+  },
+  {
+   "rowid": 242761,
+   "member": "Pramila Jayapal",
+   "date": "2023-05-24",
+   "show": "cnr",
+   "tag": "AGUIRRE (voiceover)",
+   "at": 145,
+   "nchars": 288
+  },
+  {
+   "rowid": 242762,
+   "member": "Ralph Norman",
+   "date": "2023-05-24",
+   "show": "cnr",
+   "tag": "AGUIRRE (voiceover)",
+   "at": 90,
+   "nchars": 199
+  },
+  {
+   "rowid": 242858,
+   "member": "Lindsey Graham",
+   "date": "2023-05-27",
+   "show": "cnr",
+   "tag": "HARRAK (voice-over)",
+   "at": 350,
+   "nchars": 645
+  },
+  {
+   "rowid": 242958,
+   "member": "Steve Cohen",
+   "date": "2023-05-30",
+   "show": "cg",
+   "tag": "FREEMAN (on camera)",
+   "at": 270,
+   "nchars": 819
+  },
+  {
+   "rowid": 243000,
+   "member": "Steve Cohen",
+   "date": "2023-05-30",
+   "show": "sitroom",
+   "tag": "FREEMAN (on camera)",
+   "at": 270,
+   "nchars": 500
+  },
+  {
+   "rowid": 243008,
+   "member": "Steve Cohen",
+   "date": "2023-05-31",
+   "show": "cnr",
+   "tag": "FREEMAN (voice-over)",
+   "at": 119,
+   "nchars": 1076
+  },
+  {
+   "rowid": 243009,
+   "member": "Steve Cohen",
+   "date": "2023-05-31",
+   "show": "cnr",
+   "tag": "FREEMAN (voice-over)",
+   "at": 261,
+   "nchars": 325
+  },
+  {
+   "rowid": 243163,
+   "member": "Steve Cohen",
+   "date": "2023-06-01",
+   "show": "cnr",
+   "tag": "FREEMAN (voice-over)",
+   "at": 83,
+   "nchars": 265
+  },
+  {
+   "rowid": 243802,
+   "member": "Steve Cohen",
+   "date": "2023-06-17",
+   "show": "cnr",
+   "tag": "FREEMAN (on camera)",
+   "at": 289,
+   "nchars": 698
+  },
+  {
+   "rowid": 243806,
+   "member": "Steve Cohen",
+   "date": "2023-06-17",
+   "show": "cnr",
+   "tag": "FREEMAN (on camera)",
+   "at": 289,
+   "nchars": 698
+  },
+  {
+   "rowid": 243970,
+   "member": "Rand Paul",
+   "date": "2021-04-26",
+   "show": "the-five-analyzes-bidens-first",
+   "tag": "PERINO (on camera)",
+   "at": 351,
+   "nchars": 498
+  },
+  {
+   "rowid": 243971,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-04-26",
+   "show": "the-five-analyzes-bidens-first",
+   "tag": "PERINO (on camera)",
+   "at": 318,
+   "nchars": 477
+  },
+  {
+   "rowid": 243973,
+   "member": "Dan Crenshaw",
+   "date": "2021-12-30",
+   "show": "the-five-bidens-covid-debacle-amazons-alexa-troubles",
+   "tag": "MCENANY (on camera)",
+   "at": 372,
+   "nchars": 1040
+  },
+  {
+   "rowid": 243978,
+   "member": "Ted Cruz",
+   "date": "2022-01-12",
+   "show": "the-five-bidens-voting-rights-speech",
+   "tag": "PIRRO (on camera)",
+   "at": 509,
+   "nchars": 543
+  },
+  {
+   "rowid": 244001,
+   "member": "Josh Hawley",
+   "date": "2021-11-17",
+   "show": "the-five-fbi-doj-whistleblower",
+   "tag": "GUTFELD (on camera)",
+   "at": 278,
+   "nchars": 444
+  },
+  {
+   "rowid": 244006,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-12-20",
+   "show": "the-five-manchin-media-reaction-kamala-harris-disaster-interview",
+   "tag": "PERINO (on camera)",
+   "at": 112,
+   "nchars": 337
+  },
+  {
+   "rowid": 244015,
+   "member": "Nancy Pelosi",
+   "date": "2021-10-13",
+   "show": "the-five-nancy-pelosi-biden-media",
+   "tag": "PIRRO (on camera)",
+   "at": 286,
+   "nchars": 588
+  },
+  {
+   "rowid": 244023,
+   "member": "Dan Sullivan",
+   "date": "2021-04-27",
+   "show": "the-five-on-allegations-john-kerry-shared-details-to-iran-about-israeli-attacks",
+   "tag": "GUTFELD (on camera)",
+   "at": 110,
+   "nchars": 372
+  },
+  {
+   "rowid": 244026,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-08-03",
+   "show": "the-five-on-americans-olympic-metal-protesters-democratic-party",
+   "tag": "PAVLICH (on camera)",
+   "at": 597,
+   "nchars": 660
+  },
+  {
+   "rowid": 244040,
+   "member": "Tom Cotton",
+   "date": "2021-05-19",
+   "show": "the-five-on-biden-waiving-sanctions-on-russian-pipeline",
+   "tag": "GUTFELD (on camera)",
+   "at": 221,
+   "nchars": 629
+  },
+  {
+   "rowid": 244044,
+   "member": "Bernard Sanders",
+   "date": "2021-05-17",
+   "show": "the-five-on-bidens-economy-cdc-mask-guidelines-prince-harry-bashing-first-amendment",
+   "tag": "WATTERS (on camera)",
+   "at": 263,
+   "nchars": 412
+  },
+  {
+   "rowid": 244050,
+   "member": "Steve Scalise",
+   "date": "2021-05-12",
+   "show": "the-five-on-bidens-handling-of-colonial-pipeline-attack-border-crisis",
+   "tag": "GUTFELD (on camera)",
+   "at": 60,
+   "nchars": 1194
+  },
+  {
+   "rowid": 244056,
+   "member": "Nancy Pelosi",
+   "date": "2021-09-29",
+   "show": "the-five-on-bidens-massive-spending-plan-costing-zero-dollars",
+   "tag": "WATTERS (on camera)",
+   "at": 111,
+   "nchars": 174
+  },
+  {
+   "rowid": 244061,
+   "member": "Lindsey Graham",
+   "date": "2021-06-09",
+   "show": "the-five-on-bidens-putin-meeting-new-hunter-biden-scandal",
+   "tag": "PERINO (on camera)",
+   "at": 354,
+   "nchars": 515
+  },
+  {
+   "rowid": 244064,
+   "member": "Ilhan Omar",
+   "date": "2021-06-30",
+   "show": "the-five-on-bill-crosbys-release-from-prison-trumps-visit-to-the-border",
+   "tag": "GUTFELD (on camera)",
+   "at": 324,
+   "nchars": 401
+  },
+  {
+   "rowid": 244079,
+   "member": "Nancy Pelosi",
+   "date": "2021-11-04",
+   "show": "the-five-on-democrats-playing-the-blame-game",
+   "tag": "GUTFELD (on camera)",
+   "at": 348,
+   "nchars": 536
+  },
+  {
+   "rowid": 244080,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-11-04",
+   "show": "the-five-on-democrats-playing-the-blame-game",
+   "tag": "GUTFELD (on camera)",
+   "at": 167,
+   "nchars": 292
+  },
+  {
+   "rowid": 244106,
+   "member": "Kirsten Gillibrand",
+   "date": "2021-08-05",
+   "show": "the-five-on-gov-cuomo-harassment-allegations-eviction-moratorium-for-landlords",
+   "tag": "WATTERS (on camera)",
+   "at": 109,
+   "nchars": 495
+  },
+  {
+   "rowid": 244118,
+   "member": "Maxine Waters",
+   "date": "2021-09-27",
+   "show": "the-five-on-migrants-being-released-into-the-us-kamala-harris-unlikability",
+   "tag": "PERINO (on camera)",
+   "at": 215,
+   "nchars": 496
+  },
+  {
+   "rowid": 244125,
+   "member": "Ted Cruz",
+   "date": "2021-11-04",
+   "show": "the-five-on-minneapolis-voting-not-to-replace-their-police-department",
+   "tag": "WATTERS (on camera)",
+   "at": 132,
+   "nchars": 246
+  },
+  {
+   "rowid": 244137,
+   "member": "Pramila Jayapal",
+   "date": "2021-10-29",
+   "show": "the-five-on-paying-illegal-immigrants-millions",
+   "tag": "PAVLICH (on camera)",
+   "at": 130,
+   "nchars": 378
+  },
+  {
+   "rowid": 244141,
+   "member": "Maxine Waters",
+   "date": "2021-09-22",
+   "show": "the-five-on-reporters-rage-after-biden-snubs-question",
+   "tag": "WATTERS (on camera)",
+   "at": 203,
+   "nchars": 249
+  },
+  {
+   "rowid": 244146,
+   "member": "Lindsey Graham",
+   "date": "2021-08-12",
+   "show": "the-five-on-rise-in-crime",
+   "tag": "KILMEADE (on camera)",
+   "at": 216,
+   "nchars": 529
+  },
+  {
+   "rowid": 244152,
+   "member": "Mark Warner",
+   "date": "2023-07-03",
+   "show": "ctmo",
+   "tag": "YURKEVICH (voice-over)",
+   "at": 26,
+   "nchars": 280
+  },
+  {
+   "rowid": 244157,
+   "member": "Tom Cotton",
+   "date": "2021-06-16",
+   "show": "the-five-on-the-long-awaited-biden-putin-summit",
+   "tag": "WATTERS (on camera)",
+   "at": 327,
+   "nchars": 429
+  },
+  {
+   "rowid": 244163,
+   "member": "Mark Warner",
+   "date": "2023-07-03",
+   "show": "qmb",
+   "tag": "YURKEVICH (voice over)",
+   "at": 26,
+   "nchars": 282
+  },
+  {
+   "rowid": 244208,
+   "member": "Nancy Pelosi",
+   "date": "2022-02-14",
+   "show": "the-five-reacts-to-the-most-recent-hillary-clinton-scandal",
+   "tag": "FORD (on camera)",
+   "at": 341,
+   "nchars": 1332
+  },
+  {
+   "rowid": 244517,
+   "member": "Richard Blumenthal",
+   "date": "2023-07-12",
+   "show": "cnr",
+   "tag": "SCHOLES (voice-over)",
+   "at": 205,
+   "nchars": 923
+  },
+  {
+   "rowid": 244533,
+   "member": "Richard Blumenthal",
+   "date": "2023-07-12",
+   "show": "cnr",
+   "tag": "SCHOLES (voice-over)",
+   "at": 202,
+   "nchars": 930
+  },
+  {
+   "rowid": 244534,
+   "member": "Ron Johnson",
+   "date": "2023-07-12",
+   "show": "cnr",
+   "tag": "SCHOLES (voice-over)",
+   "at": 303,
+   "nchars": 608
+  },
+  {
+   "rowid": 244971,
+   "member": "Elise Stefanik",
+   "date": "2023-07-21",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 107,
+   "nchars": 185
+  },
+  {
+   "rowid": 244972,
+   "member": "Jim Jordan",
+   "date": "2023-07-21",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 26,
+   "nchars": 180
+  },
+  {
+   "rowid": 244973,
+   "member": "Elise Stefanik",
+   "date": "2023-07-21",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 105,
+   "nchars": 182
+  },
+  {
+   "rowid": 245495,
+   "member": "Mazie Hirono",
+   "date": "2023-08-15",
+   "show": "cnr",
+   "tag": "PAZMINO (voice-over)",
+   "at": 125,
+   "nchars": 228
+  },
+  {
+   "rowid": 245529,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 150,
+   "nchars": 369
+  },
+  {
+   "rowid": 245530,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 161,
+   "nchars": 293
+  },
+  {
+   "rowid": 245531,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 265,
+   "nchars": 679
+  },
+  {
+   "rowid": 245532,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 102,
+   "nchars": 162
+  },
+  {
+   "rowid": 245539,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 17,
+   "nchars": 240
+  },
+  {
+   "rowid": 245540,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 156,
+   "nchars": 375
+  },
+  {
+   "rowid": 245541,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 161,
+   "nchars": 293
+  },
+  {
+   "rowid": 245542,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 262,
+   "nchars": 672
+  },
+  {
+   "rowid": 245543,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "ctmo",
+   "tag": "MCKEND (voice-over)",
+   "at": 105,
+   "nchars": 165
+  },
+  {
+   "rowid": 245544,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "ctmo",
+   "tag": "MCKEND (on camera)",
+   "at": 42,
+   "nchars": 137
+  },
+  {
+   "rowid": 245552,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "es",
+   "tag": "MCKEND (voice-over)",
+   "at": 105,
+   "nchars": 176
+  },
+  {
+   "rowid": 245554,
+   "member": "Tim Scott",
+   "date": "2023-08-17",
+   "show": "es",
+   "tag": "MCKEND (on camera)",
+   "at": 179,
+   "nchars": 612
+  },
+  {
+   "rowid": 245793,
+   "member": "Mitch McConnell",
+   "date": "2023-08-30",
+   "show": "cton",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 38,
+   "nchars": 131
+  },
+  {
+   "rowid": 246000,
+   "member": "Edward Markey",
+   "date": "2023-09-12",
+   "show": "cnc",
+   "tag": "MUNTEAN (voiceover)",
+   "at": 102,
+   "nchars": 285
+  },
+  {
+   "rowid": 246021,
+   "member": "Edward Markey",
+   "date": "2023-09-12",
+   "show": "ctmo",
+   "tag": "MUNTEAN (voice-over)",
+   "at": 102,
+   "nchars": 285
+  },
+  {
+   "rowid": 246400,
+   "member": "Robert Menendez",
+   "date": "2023-09-22",
+   "show": "acd",
+   "tag": "SCANNELL (voice over)",
+   "at": 59,
+   "nchars": 223
+  },
+  {
+   "rowid": 246477,
+   "member": "Robert Menendez",
+   "date": "2023-09-23",
+   "show": "cnr",
+   "tag": "SCANNELL (voice-over)",
+   "at": 60,
+   "nchars": 223
+  },
+  {
+   "rowid": 246482,
+   "member": "Robert Menendez",
+   "date": "2023-09-23",
+   "show": "ctmo",
+   "tag": "SCANNELL (voice-over)",
+   "at": 58,
+   "nchars": 221
+  },
+  {
+   "rowid": 246573,
+   "member": "Henry Cuellar",
+   "date": "2023-09-25",
+   "show": "cnr",
+   "tag": "FLORES (voice-over)",
+   "at": 305,
+   "nchars": 706
+  },
+  {
+   "rowid": 246582,
+   "member": "Henry Cuellar",
+   "date": "2023-09-25",
+   "show": "ctmo",
+   "tag": "FLORES (voice-over)",
+   "at": 297,
+   "nchars": 386
+  },
+  {
+   "rowid": 246590,
+   "member": "Henry Cuellar",
+   "date": "2023-09-25",
+   "show": "ctw",
+   "tag": "FLORES (voiceover)",
+   "at": 301,
+   "nchars": 388
+  },
+  {
+   "rowid": 246604,
+   "member": "Henry Cuellar",
+   "date": "2023-09-25",
+   "show": "ist",
+   "tag": "FLORES (voice-over)",
+   "at": 301,
+   "nchars": 390
+  },
+  {
+   "rowid": 246658,
+   "member": "Elizabeth Warren",
+   "date": "2023-09-27",
+   "show": "ctmo",
+   "tag": "HARLOW (voice-over)",
+   "at": 140,
+   "nchars": 224
+  },
+  {
+   "rowid": 246659,
+   "member": "John Kennedy",
+   "date": "2023-09-27",
+   "show": "ctmo",
+   "tag": "HARLOW (voice-over)",
+   "at": 92,
+   "nchars": 178
+  },
+  {
+   "rowid": 246706,
+   "member": "Charles Schumer",
+   "date": "2023-09-28",
+   "show": "cnr",
+   "tag": "LAURENCE (voice-over)",
+   "at": 202,
+   "nchars": 294
+  },
+  {
+   "rowid": 248661,
+   "member": "Mitch McConnell",
+   "date": "2021-01-19",
+   "show": "trump-in-farewell-address-we-did-what-we-came-here-to-do",
+   "tag": "PERGRAM (voice over)",
+   "at": 226,
+   "nchars": 983
+  },
+  {
+   "rowid": 250362,
+   "member": "Lindsey Graham",
+   "date": "2023-12-08",
+   "show": "cnr",
+   "tag": "VALERIO (voice-over)",
+   "at": 82,
+   "nchars": 292
+  },
+  {
+   "rowid": 250363,
+   "member": "Christopher Murphy",
+   "date": "2023-12-08",
+   "show": "cnr",
+   "tag": "VALERIO (voice-over)",
+   "at": 305,
+   "nchars": 521
+  },
+  {
+   "rowid": 250364,
+   "member": "Shelley Capito",
+   "date": "2023-12-08",
+   "show": "cnr",
+   "tag": "VALERIO (voice-over)",
+   "at": 176,
+   "nchars": 225
+  },
+  {
+   "rowid": 250548,
+   "member": "Elizabeth Warren",
+   "date": "2023-12-12",
+   "show": "cnr",
+   "tag": "RIPLEY (voice-over)",
+   "at": 82,
+   "nchars": 277
+  },
+  {
+   "rowid": 250552,
+   "member": "Elizabeth Warren",
+   "date": "2023-12-12",
+   "show": "cnr",
+   "tag": "RIPLEY (voice-over)",
+   "at": 83,
+   "nchars": 277
+  },
+  {
+   "rowid": 250556,
+   "member": "Elizabeth Warren",
+   "date": "2023-12-12",
+   "show": "cnr",
+   "tag": "RIPLEY (voice-over)",
+   "at": 82,
+   "nchars": 276
+  },
+  {
+   "rowid": 250562,
+   "member": "Elizabeth Warren",
+   "date": "2023-12-12",
+   "show": "ctw",
+   "tag": "RIPLEY (voice-over)",
+   "at": 82,
+   "nchars": 276
+  },
+  {
+   "rowid": 250634,
+   "member": "Charles Schumer",
+   "date": "2023-12-13",
+   "show": "cnr",
+   "tag": "CAIFA (voice over)",
+   "at": 132,
+   "nchars": 431
+  },
+  {
+   "rowid": 250636,
+   "member": "Mitch McConnell",
+   "date": "2023-12-13",
+   "show": "cnr",
+   "tag": "CAIFA (voice over)",
+   "at": 97,
+   "nchars": 257
+  },
+  {
+   "rowid": 251024,
+   "member": "Robert Menendez",
+   "date": "2023-12-25",
+   "show": "cnc",
+   "tag": "MCKEND (voice-over)",
+   "at": 136,
+   "nchars": 1145
+  },
+  {
+   "rowid": 251025,
+   "member": "Rashida Tlaib",
+   "date": "2023-12-25",
+   "show": "cnc",
+   "tag": "MCKEND (voice-over)",
+   "at": 102,
+   "nchars": 223
+  },
+  {
+   "rowid": 251026,
+   "member": "Mike Johnson",
+   "date": "2023-12-25",
+   "show": "cnc",
+   "tag": "MCKEND (voice-over)",
+   "at": 69,
+   "nchars": 273
+  },
+  {
+   "rowid": 251034,
+   "member": "Robert Menendez",
+   "date": "2023-12-26",
+   "show": "ctmo",
+   "tag": "MCKEND (voice over)",
+   "at": 137,
+   "nchars": 1147
+  },
+  {
+   "rowid": 251036,
+   "member": "Mike Johnson",
+   "date": "2023-12-26",
+   "show": "ctmo",
+   "tag": "MCKEND (voice over)",
+   "at": 64,
+   "nchars": 232
+  },
+  {
+   "rowid": 251113,
+   "member": "Robert Menendez",
+   "date": "2023-12-30",
+   "show": "ctmo",
+   "tag": "MCKEND (voice over)",
+   "at": 137,
+   "nchars": 1261
+  },
+  {
+   "rowid": 251118,
+   "member": "Robert Menendez",
+   "date": "2023-12-31",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 136,
+   "nchars": 1145
+  },
+  {
+   "rowid": 251120,
+   "member": "Mike Johnson",
+   "date": "2023-12-31",
+   "show": "cnr",
+   "tag": "MCKEND (voice-over)",
+   "at": 69,
+   "nchars": 237
+  },
+  {
+   "rowid": 251639,
+   "member": "Henry Cuellar",
+   "date": "2024-01-17",
+   "show": "ctmo",
+   "tag": "FLORES (voice over)",
+   "at": 177,
+   "nchars": 312
+  },
+  {
+   "rowid": 251706,
+   "member": "Tim Scott",
+   "date": "2024-01-20",
+   "show": "ctmo",
+   "tag": "WALKER (voice-over)",
+   "at": 22,
+   "nchars": 1012
+  },
+  {
+   "rowid": 252326,
+   "member": "Mike Johnson",
+   "date": "2024-02-04",
+   "show": "cnr",
+   "tag": "FLORES (voice over)",
+   "at": 66,
+   "nchars": 279
+  },
+  {
+   "rowid": 252336,
+   "member": "Mike Johnson",
+   "date": "2024-02-04",
+   "show": "ctmo",
+   "tag": "FLORES (voiceover)",
+   "at": 66,
+   "nchars": 278
+  },
+  {
+   "rowid": 252579,
+   "member": "Josh Gottheimer",
+   "date": "2009-10-19",
+   "show": "wheres-the-obama-love-gone",
+   "tag": "GARRETT (On camera)",
+   "at": 111,
+   "nchars": 660
+  },
+  {
+   "rowid": 252749,
+   "member": "Thomas Suozzi",
+   "date": "2024-02-14",
+   "show": "cnr",
+   "tag": "VAUSE (voice-over)",
+   "at": 8,
+   "nchars": 194
+  },
+  {
+   "rowid": 254028,
+   "member": "Young Kim",
+   "date": "2021-05-14",
+   "show": "your-world-on-gas-prices-unemployment-mask-mandates",
+   "tag": "LI (voice-over)",
+   "at": 73,
+   "nchars": 217
+  },
+  {
+   "rowid": 272166,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2020-12-22",
+   "show": "msnow",
+   "tag": "HAAKE (on camera)",
+   "at": 83,
+   "nchars": 250
+  },
+  {
+   "rowid": 272871,
+   "member": "Mitch McConnell",
+   "date": "2021-03-05",
+   "show": "msnow",
+   "tag": "VELSHI (on camera)",
+   "at": 137,
+   "nchars": 776
+  },
+  {
+   "rowid": 274947,
+   "member": "Amy Klobuchar",
+   "date": "2022-01-07",
+   "show": "msnow",
+   "tag": "CAPEHART (on camera)",
+   "at": 235,
+   "nchars": 1577
+  },
+  {
+   "rowid": 274948,
+   "member": "Richard Durbin",
+   "date": "2022-01-07",
+   "show": "msnow",
+   "tag": "CAPEHART (on camera)",
+   "at": 627,
+   "nchars": 848
+  },
+  {
+   "rowid": 275257,
+   "member": "Richard Blumenthal",
+   "date": "2022-02-21",
+   "show": "msnow",
+   "tag": "COSTELLO (on camera)",
+   "at": 146,
+   "nchars": 482
+  },
+  {
+   "rowid": 275953,
+   "member": "James Clyburn",
+   "date": "2022-06-14",
+   "show": "msnow",
+   "tag": "GUTIERREZ (voice-over)",
+   "at": 102,
+   "nchars": 276
+  },
+  {
+   "rowid": 287502,
+   "member": "Debbie Dingell",
+   "date": "2026-07-08",
+   "show": "se",
+   "tag": "LAWRENCE (voice-over)",
+   "at": 90,
+   "nchars": 247
+  },
+  {
+   "rowid": 305166,
+   "member": "Amy Klobuchar",
+   "date": "2026-07-13",
+   "show": "se",
+   "tag": "ZAKARIA (voice-over)",
+   "at": 36,
+   "nchars": 109
+  },
+  {
+   "rowid": 305203,
+   "member": "Angus King",
+   "date": "2026-07-14",
+   "show": "cnr",
+   "tag": "HUBBARD (voice-over)",
+   "at": 156,
+   "nchars": 474
+  },
+  {
+   "rowid": 305217,
+   "member": "Angus King",
+   "date": "2026-07-14",
+   "show": "se",
+   "tag": "HUBBARD (voice-over)",
+   "at": 157,
+   "nchars": 478
+  },
+  {
+   "rowid": 306661,
+   "member": "Adam Schiff",
+   "date": "2026-07-19",
+   "show": "this-week",
+   "tag": "KATERSKY (voice-over)",
+   "at": 156,
+   "nchars": 330
+  },
+  {
+   "rowid": 307247,
+   "member": "Gary Peters",
+   "date": "2026-07-26",
+   "show": "this-week",
+   "tag": "RADDATZ (voice over)",
+   "at": 122,
+   "nchars": 501
+  },
+  {
+   "rowid": 307252,
+   "member": "Susan Collins",
+   "date": "2026-07-26",
+   "show": "this-week",
+   "tag": "O'BRIEN (voice-over)",
+   "at": 104,
+   "nchars": 710
+  },
+  {
+   "rowid": 307630,
+   "member": "Gabe Amo",
+   "date": "2026-08-14",
+   "show": "se",
+   "tag": "RODRIGUEZ (voice-over)",
+   "at": 232,
+   "nchars": 859
+  },
+  {
+   "rowid": 307635,
+   "member": "Gabe Amo",
+   "date": "2026-08-14",
+   "show": "tsiem",
+   "tag": "RODRIGUEZ (voice-over)",
+   "at": 231,
+   "nchars": 856
+  },
+  {
+   "rowid": 307946,
+   "member": "Greg Casar",
+   "date": "2026-08-24",
+   "show": "cg",
+   "tag": "ROMO (on camera)",
+   "at": 126,
+   "nchars": 385
+  },
+  {
+   "rowid": 308271,
+   "member": "Ro Khanna",
+   "date": "2026-02-01",
+   "show": "this-week",
+   "tag": "THOMAS (voice over)",
+   "at": 76,
+   "nchars": 150
+  },
+  {
+   "rowid": 308275,
+   "member": "Mark Warner",
+   "date": "2026-02-08",
+   "show": "this-week",
+   "tag": "KARL (voice-over)",
+   "at": 169,
+   "nchars": 326
+  },
+  {
+   "rowid": 308353,
+   "member": "Ted Cruz",
+   "date": "2026-05-24",
+   "show": "this-week",
+   "tag": "O'BRIEN (voice-over)",
+   "at": 101,
+   "nchars": 494
+  },
+  {
+   "rowid": 308354,
+   "member": "John Thune",
+   "date": "2026-05-24",
+   "show": "this-week",
+   "tag": "O'BRIEN (voice-over)",
+   "at": 138,
+   "nchars": 361
+  },
+  {
+   "rowid": 308356,
+   "member": "Thom Tillis",
+   "date": "2026-05-24",
+   "show": "this-week",
+   "tag": "O'BRIEN (voice-over)",
+   "at": 109,
+   "nchars": 637
+  },
+  {
+   "rowid": 308357,
+   "member": "Joni Ernst",
+   "date": "2026-05-24",
+   "show": "this-week",
+   "tag": "O'BRIEN (voice-over)",
+   "at": 40,
+   "nchars": 416
+  },
+  {
+   "rowid": 308359,
+   "member": "Monica De La Cruz",
+   "date": "2026-05-24",
+   "show": "this-week",
+   "tag": "QUINONES (voice-over)",
+   "at": 258,
+   "nchars": 420
+  },
+  {
+   "rowid": 308366,
+   "member": "Seth Moulton",
+   "date": "2026-08-16",
+   "show": "this-week",
+   "tag": "RADDATZ (voice-over)",
+   "at": 21,
+   "nchars": 366
+  },
+  {
+   "rowid": 308367,
+   "member": "Edward Markey",
+   "date": "2026-08-16",
+   "show": "this-week",
+   "tag": "RADDATZ (voice-over)",
+   "at": 39,
+   "nchars": 195
+  },
+  {
+   "rowid": 308368,
+   "member": "Seth Moulton",
+   "date": "2026-08-16",
+   "show": "this-week",
+   "tag": "RADDATZ (voice-over)",
+   "at": 51,
+   "nchars": 121
+  },
+  {
+   "rowid": 308370,
+   "member": "Seth Moulton",
+   "date": "2026-08-16",
+   "show": "this-week",
+   "tag": "RADDATZ (voice-over)",
+   "at": 46,
+   "nchars": 187
+  },
+  {
+   "rowid": 308527,
+   "member": "Susan Collins",
+   "date": "2026-08-30",
+   "show": "this-week",
+   "tag": "RADDATZ (voice over)",
+   "at": 59,
+   "nchars": 210
+  },
+  {
+   "rowid": 316492,
+   "member": "Michael Lawler",
+   "date": "2026-09-06",
+   "show": "this-week",
+   "tag": "RADDATZ (voice over)",
+   "at": 111,
+   "nchars": 392
+  },
+  {
+   "rowid": 323616,
+   "member": "Robert Garcia",
+   "date": "2026-09-13",
+   "show": "this-week",
+   "tag": "BRUCE (voice-over)",
+   "at": 138,
+   "nchars": 402
+  }
+ ],
+ "R3": [
+  {
+   "rowid": 66618,
+   "member": "Chris Van Hollen",
+   "date": "2024-03-29",
+   "show": "cnr",
+   "tag": "MUNTEAN (on-camera)",
+   "at": 97,
+   "nchars": 677
+  },
+  {
+   "rowid": 67803,
+   "member": "Lauren Boebert",
+   "date": "2024-05-24",
+   "show": "ws",
+   "tag": "O'SULLIVAN (voice-over)",
+   "at": 66,
+   "nchars": 140
+  },
+  {
+   "rowid": 68431,
+   "member": "George Latimer",
+   "date": "2024-06-25",
+   "show": "lcl",
+   "tag": "UNKNOWN (voice-over)",
+   "at": 243,
+   "nchars": 438
+  },
+  {
+   "rowid": 68548,
+   "member": "James Clyburn",
+   "date": "2024-07-02",
+   "show": "cnr",
+   "tag": "LEE (voice-over)",
+   "at": 156,
+   "nchars": 358
+  },
+  {
+   "rowid": 68560,
+   "member": "James Clyburn",
+   "date": "2024-07-02",
+   "show": "fmjc",
+   "tag": "LEE (voice-over)",
+   "at": 56,
+   "nchars": 216
+  },
+  {
+   "rowid": 68606,
+   "member": "Nancy Pelosi",
+   "date": "2024-07-03",
+   "show": "cnr",
+   "tag": "LEE (voice-over)",
+   "at": 222,
+   "nchars": 715
+  },
+  {
+   "rowid": 68892,
+   "member": "Marc Veasey",
+   "date": "2024-07-10",
+   "show": "cnr",
+   "tag": "RAJU (voice-over)",
+   "at": 372,
+   "nchars": 517
+  },
+  {
+   "rowid": 68899,
+   "member": "Marc Veasey",
+   "date": "2024-07-10",
+   "show": "cnr",
+   "tag": "RAJU (voice-over)",
+   "at": 368,
+   "nchars": 515
+  },
+  {
+   "rowid": 68994,
+   "member": "Michael Bennet",
+   "date": "2024-07-11",
+   "show": "cnr",
+   "tag": "TAUSCHE (voice-over)",
+   "at": 254,
+   "nchars": 853
+  },
+  {
+   "rowid": 69517,
+   "member": "Melanie Stansbury",
+   "date": "2024-07-23",
+   "show": "cnr",
+   "tag": "PAULA REID, CNN CHIEF LEGAL AFFAIRS CORRESPONDENT (voice-over)",
+   "at": 126,
+   "nchars": 327
+  },
+  {
+   "rowid": 69540,
+   "member": "James Comer",
+   "date": "2024-07-23",
+   "show": "cnr",
+   "tag": "WILD (voice-over)",
+   "at": 37,
+   "nchars": 204
+  },
+  {
+   "rowid": 69708,
+   "member": "Ted Cruz",
+   "date": "2024-07-27",
+   "show": "cnr",
+   "tag": "FOREMAN (voice-over)",
+   "at": 132,
+   "nchars": 330
+  },
+  {
+   "rowid": 70149,
+   "member": "Lateefah Simon",
+   "date": "2024-08-20",
+   "show": "se",
+   "tag": "GENERAL COUNSEL, CALIFORNIA DEPARTMENT OF JUSTICE (2011- 2015)",
+   "at": 136,
+   "nchars": 326
+  },
+  {
+   "rowid": 70673,
+   "member": "Byron Donalds",
+   "date": "2024-09-20",
+   "show": "fmjc",
+   "tag": "GALLAGHER (voice-over)",
+   "at": 220,
+   "nchars": 350
+  },
+  {
+   "rowid": 70959,
+   "member": "Elissa Slotkin",
+   "date": "2024-10-16",
+   "show": "acd",
+   "tag": "MANU RAJU, CNN CHIEF CONGRESSIONAL CORRESPONDENT (voice-over)",
+   "at": 38,
+   "nchars": 270
+  },
+  {
+   "rowid": 71003,
+   "member": "Bernard Sanders",
+   "date": "2024-10-17",
+   "show": "cnc",
+   "tag": "ZELENY (voice over)",
+   "at": 39,
+   "nchars": 115
+  },
+  {
+   "rowid": 71813,
+   "member": "Marsha Blackburn",
+   "date": "2024-11-21",
+   "show": "cg",
+   "tag": "LAH (on camera)",
+   "at": 104,
+   "nchars": 688
+  },
+  {
+   "rowid": 73623,
+   "member": "Thom Tillis",
+   "date": "2025-01-22",
+   "show": "cnr",
+   "tag": "REID (voice-over)",
+   "at": 85,
+   "nchars": 210
+  },
+  {
+   "rowid": 74117,
+   "member": "Christopher Murphy",
+   "date": "2025-02-05",
+   "show": "cg",
+   "tag": "MARSH (voice-over)",
+   "at": 125,
+   "nchars": 560
+  },
+  {
+   "rowid": 74211,
+   "member": "Donald Beyer",
+   "date": "2025-02-06",
+   "show": "cnr",
+   "tag": "MARSH (on camera)",
+   "at": 246,
+   "nchars": 375
+  },
+  {
+   "rowid": 74226,
+   "member": "Elissa Slotkin",
+   "date": "2025-02-06",
+   "show": "ctmo",
+   "tag": "DONALD TRUMP, PRESIDENT OF THE UNITED STATES (September 4, 2019)",
+   "at": 152,
+   "nchars": 523
+  },
+  {
+   "rowid": 77252,
+   "member": "Mike Johnson",
+   "date": "2025-05-22",
+   "show": "ctmo",
+   "tag": "CROWD (chanting)",
+   "at": 98,
+   "nchars": 135
+  },
+  {
+   "rowid": 80974,
+   "member": "Hakeem Jeffries",
+   "date": "2025-10-26",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 72,
+   "nchars": 200
+  },
+  {
+   "rowid": 81023,
+   "member": "Mike Rounds",
+   "date": "2025-11-09",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 29,
+   "nchars": 232
+  },
+  {
+   "rowid": 81307,
+   "member": "Christopher Coons",
+   "date": "2025-12-07",
+   "show": "this-week",
+   "tag": "WANG (on-camera)",
+   "at": 122,
+   "nchars": 600
+  },
+  {
+   "rowid": 81316,
+   "member": "Jay Obernolte",
+   "date": "2025-12-07",
+   "show": "this-week",
+   "tag": "BRIEN (voice-over)",
+   "at": 186,
+   "nchars": 476
+  },
+  {
+   "rowid": 81318,
+   "member": "Jake Auchincloss",
+   "date": "2025-12-07",
+   "show": "this-week",
+   "tag": "BRIEN (voice-over)",
+   "at": 203,
+   "nchars": 497
+  },
+  {
+   "rowid": 81394,
+   "member": "James Clyburn",
+   "date": "2020-02-16",
+   "show": "this-week",
+   "tag": "RADDATZ (on-camera)",
+   "at": 391,
+   "nchars": 530
+  },
+  {
+   "rowid": 82120,
+   "member": "Christopher Murphy",
+   "date": "2025-06-01",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 150,
+   "nchars": 824
+  },
+  {
+   "rowid": 82245,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2025-03-16",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 96,
+   "nchars": 550
+  },
+  {
+   "rowid": 82246,
+   "member": "Charles Schumer",
+   "date": "2025-03-16",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 85,
+   "nchars": 209
+  },
+  {
+   "rowid": 82249,
+   "member": "Hakeem Jeffries",
+   "date": "2025-03-16",
+   "show": "this-week",
+   "tag": "O'BRIEN (on-camera)",
+   "at": 15,
+   "nchars": 471
+  },
+  {
+   "rowid": 83720,
+   "member": "Robert Wittman",
+   "date": "2025-10-26",
+   "show": "csr",
+   "tag": "GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through text translation)",
+   "at": 94,
+   "nchars": 343
+  },
+  {
+   "rowid": 83752,
+   "member": "David McCormick",
+   "date": "2025-10-26",
+   "show": "ip",
+   "tag": "RAJU (on camera)",
+   "at": 160,
+   "nchars": 1288
+  },
+  {
+   "rowid": 83941,
+   "member": "Robert Wittman",
+   "date": "2025-11-01",
+   "show": "csr",
+   "tag": "GENERAL ADMINISTRATOR, LOUVRE MUSEUM (through text translation)",
+   "at": 83,
+   "nchars": 332
+  },
+  {
+   "rowid": 85561,
+   "member": "Nancy Mace",
+   "date": "2025-12-09",
+   "show": "acd",
+   "tag": "FOREMAN (voice-over)",
+   "at": 116,
+   "nchars": 261
+  },
+  {
+   "rowid": 86222,
+   "member": "Bernard Sanders",
+   "date": "2026-01-02",
+   "show": "ctw",
+   "tag": "HUBBARD (voice over)",
+   "at": 123,
+   "nchars": 413
+  },
+  {
+   "rowid": 86850,
+   "member": "Pramila Jayapal",
+   "date": "2026-01-22",
+   "show": "acd",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)",
+   "at": 95,
+   "nchars": 356
+  },
+  {
+   "rowid": 89833,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2026-04-15",
+   "show": "ebo",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)",
+   "at": 80,
+   "nchars": 1255
+  },
+  {
+   "rowid": 89868,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2026-04-16",
+   "show": "cnr",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)",
+   "at": 80,
+   "nchars": 1254
+  },
+  {
+   "rowid": 89880,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2026-04-16",
+   "show": "tsiem",
+   "tag": "LAUREN FOX, CNN CORRESPONDENT (voice-over)",
+   "at": 80,
+   "nchars": 1253
+  },
+  {
+   "rowid": 91943,
+   "member": "Jim Banks",
+   "date": "2026-06-14",
+   "show": "ip",
+   "tag": "RAJU (on camera)",
+   "at": 165,
+   "nchars": 2009
+  },
+  {
+   "rowid": 92125,
+   "member": "Brian Schatz",
+   "date": "2026-06-21",
+   "show": "ip",
+   "tag": "RAJU (on camera)",
+   "at": 173,
+   "nchars": 897
+  },
+  {
+   "rowid": 97520,
+   "member": "Ilhan Omar",
+   "date": "2019-07-21",
+   "show": "face-the-nation",
+   "tag": "CROWD (in unison)",
+   "at": 21,
+   "nchars": 54
+  },
+  {
+   "rowid": 98378,
+   "member": "Elizabeth Warren",
+   "date": "2020-09-20",
+   "show": "face-the-nation",
+   "tag": "CROWD (in unison)",
+   "at": 71,
+   "nchars": 103
+  },
+  {
+   "rowid": 98379,
+   "member": "Elizabeth Warren",
+   "date": "2020-09-20",
+   "show": "face-the-nation",
+   "tag": "CROWD (in unison)",
+   "at": 19,
+   "nchars": 51
+  },
+  {
+   "rowid": 184709,
+   "member": "Charles Schumer",
+   "date": "2022-08-21",
+   "show": "fox-news-sunday",
+   "tag": "GALLAGHER (voice-over)",
+   "at": 23,
+   "nchars": 117
+  },
+  {
+   "rowid": 192133,
+   "member": "Ilhan Omar",
+   "date": "2019-03-05",
+   "show": "ebo",
+   "tag": "NATIONAL CORRESPONDENT, CNN(off-camera)",
+   "at": 145,
+   "nchars": 407
+  },
+  {
+   "rowid": 192659,
+   "member": "Ilhan Omar",
+   "date": "2019-03-16",
+   "show": "cnr",
+   "tag": "SIDNER (on-camera)",
+   "at": 136,
+   "nchars": 251
+  },
+  {
+   "rowid": 193439,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2019-04-02",
+   "show": "cg",
+   "tag": "CONGRESSIONAL CORRESPONDENT, CNN (voice over)",
+   "at": 56,
+   "nchars": 231
+  },
+  {
+   "rowid": 193812,
+   "member": "James Clyburn",
+   "date": "2019-04-06",
+   "show": "cnr",
+   "tag": "NOBLES (voice-over)",
+   "at": 118,
+   "nchars": 479
+  },
+  {
+   "rowid": 194786,
+   "member": "Elizabeth Warren",
+   "date": "2019-04-27",
+   "show": "cnr",
+   "tag": "DEAN (voice-over)",
+   "at": 126,
+   "nchars": 528
+  },
+  {
+   "rowid": 195413,
+   "member": "Steve Cohen",
+   "date": "2019-05-08",
+   "show": "sitroom",
+   "tag": "MATTINGLY (voice-over)",
+   "at": 114,
+   "nchars": 308
+  },
+  {
+   "rowid": 197221,
+   "member": "Elizabeth Warren",
+   "date": "2019-06-10",
+   "show": "ebo",
+   "tag": "DEAN(voice-over)",
+   "at": 95,
+   "nchars": 439
+  },
+  {
+   "rowid": 197496,
+   "member": "Adam Schiff",
+   "date": "2019-06-13",
+   "show": "sitroom",
+   "tag": "RAJU (voice-over)",
+   "at": 196,
+   "nchars": 635
+  },
+  {
+   "rowid": 197571,
+   "member": "Amy Klobuchar",
+   "date": "2019-06-16",
+   "show": "cnr",
+   "tag": "TAPPER (voice-over)",
+   "at": 37,
+   "nchars": 168
+  },
+  {
+   "rowid": 198590,
+   "member": "Nancy Pelosi",
+   "date": "2019-07-10",
+   "show": "cnr",
+   "tag": "ACOSTA (voice-over)",
+   "at": 109,
+   "nchars": 375
+  },
+  {
+   "rowid": 199253,
+   "member": "Adam Schiff",
+   "date": "2019-07-22",
+   "show": "cnr",
+   "tag": "RAJU (voice-over)",
+   "at": 112,
+   "nchars": 239
+  },
+  {
+   "rowid": 199566,
+   "member": "Raja Krishnamoorthi",
+   "date": "2019-07-26",
+   "show": "cnr",
+   "tag": "SANJAY GUPTA, CNN CHIEF MEDICAL CORRESPONDENT (voice-over)",
+   "at": 36,
+   "nchars": 468
+  },
+  {
+   "rowid": 199669,
+   "member": "Raja Krishnamoorthi",
+   "date": "2019-07-27",
+   "show": "cnr",
+   "tag": "SANJAY GUPTA, CNN CHIEF MEDICAL CORRESPONDENT (voice-over)",
+   "at": 36,
+   "nchars": 467
+  },
+  {
+   "rowid": 200874,
+   "member": "Bernard Sanders",
+   "date": "2019-08-21",
+   "show": "ath",
+   "tag": "GRIFFIN (on camera)",
+   "at": 231,
+   "nchars": 408
+  },
+  {
+   "rowid": 200895,
+   "member": "Bernard Sanders",
+   "date": "2019-08-21",
+   "show": "nday",
+   "tag": "GRIFFIN (on camera)",
+   "at": 231,
+   "nchars": 406
+  },
+  {
+   "rowid": 201050,
+   "member": "Josh Hawley",
+   "date": "2019-08-28",
+   "show": "sitroom",
+   "tag": "HILL (voice-over)",
+   "at": 151,
+   "nchars": 690
+  },
+  {
+   "rowid": 201311,
+   "member": "Lindsey Graham",
+   "date": "2019-09-10",
+   "show": "sitroom",
+   "tag": "ACOSTA (voice-over)",
+   "at": 200,
+   "nchars": 421
+  },
+  {
+   "rowid": 203017,
+   "member": "Jim Jordan",
+   "date": "2019-10-08",
+   "show": "cnr",
+   "tag": "COLLINS (voice-over)",
+   "at": 111,
+   "nchars": 264
+  },
+  {
+   "rowid": 203947,
+   "member": "John Thune",
+   "date": "2019-10-24",
+   "show": "sitroom",
+   "tag": "RAJU (voice-over)",
+   "at": 193,
+   "nchars": 1124
+  },
+  {
+   "rowid": 204464,
+   "member": "Jim Jordan",
+   "date": "2019-11-01",
+   "show": "nday",
+   "tag": "PRESIDENT OF THE UNITED STATES (via phone)",
+   "at": 115,
+   "nchars": 237
+  },
+  {
+   "rowid": 204676,
+   "member": "Chrissy Houlahan",
+   "date": "2019-11-05",
+   "show": "cnr",
+   "tag": "ACOSTA (voice-over)",
+   "at": 179,
+   "nchars": 612
+  },
+  {
+   "rowid": 205959,
+   "member": "Daniel Goldman",
+   "date": "2019-11-27",
+   "show": "es",
+   "tag": "TURKEY (Gobbling)",
+   "at": 25,
+   "nchars": 142
+  },
+  {
+   "rowid": 206144,
+   "member": "Adam Schiff",
+   "date": "2019-12-03",
+   "show": "ebo",
+   "tag": "MURRAY(voice-over)",
+   "at": 128,
+   "nchars": 898
+  },
+  {
+   "rowid": 207171,
+   "member": "Nancy Pelosi",
+   "date": "2019-12-19",
+   "show": "cg",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL REPORTER (voice-over)",
+   "at": 48,
+   "nchars": 195
+  },
+  {
+   "rowid": 207223,
+   "member": "Barry Loudermilk",
+   "date": "2019-12-19",
+   "show": "cnr",
+   "tag": "MARQUARDT (voice-over)",
+   "at": 253,
+   "nchars": 349
+  },
+  {
+   "rowid": 207548,
+   "member": "Amy Klobuchar",
+   "date": "2019-12-23",
+   "show": "cnr",
+   "tag": "KYUNG LAH, CNN SENIOR NATIONAL CORRESPONDENT (voice-over)",
+   "at": 107,
+   "nchars": 274
+  },
+  {
+   "rowid": 207558,
+   "member": "Amy Klobuchar",
+   "date": "2019-12-23",
+   "show": "crn",
+   "tag": "LAH (voice-over)",
+   "at": 94,
+   "nchars": 220
+  },
+  {
+   "rowid": 209262,
+   "member": "Adam Schiff",
+   "date": "2020-01-26",
+   "show": "cnr",
+   "tag": "MURRAY (voice-over)",
+   "at": 256,
+   "nchars": 406
+  },
+  {
+   "rowid": 210744,
+   "member": "Bernard Sanders",
+   "date": "2020-02-17",
+   "show": "cg",
+   "tag": "JEFF ZELENY, CNN SENIOR WASHINGTON CORRESPONDENT (voice-over)",
+   "at": 75,
+   "nchars": 165
+  },
+  {
+   "rowid": 210791,
+   "member": "Bernard Sanders",
+   "date": "2020-02-17",
+   "show": "sitroom",
+   "tag": "ZELENY (voice-over)",
+   "at": 75,
+   "nchars": 123
+  },
+  {
+   "rowid": 210901,
+   "member": "Bernard Sanders",
+   "date": "2020-02-20",
+   "show": "bbn",
+   "tag": "NOBLES (voice-over)",
+   "at": 178,
+   "nchars": 329
+  },
+  {
+   "rowid": 210902,
+   "member": "Amy Klobuchar",
+   "date": "2020-02-20",
+   "show": "bbn",
+   "tag": "NOBLES (voice-over)",
+   "at": 90,
+   "nchars": 300
+  },
+  {
+   "rowid": 212161,
+   "member": "James Justice",
+   "date": "2020-04-28",
+   "show": "cnr",
+   "tag": "NEW JERSEY (voice-over)",
+   "at": 123,
+   "nchars": 326
+  },
+  {
+   "rowid": 212554,
+   "member": "Tim Scott",
+   "date": "2020-06-17",
+   "show": "sitroom",
+   "tag": "ACOSTA (voice-over)",
+   "at": 164,
+   "nchars": 244
+  },
+  {
+   "rowid": 212900,
+   "member": "Ted Cruz",
+   "date": "2020-07-20",
+   "show": "csr",
+   "tag": "ZAKARIA (voice-over)",
+   "at": 50,
+   "nchars": 167
+  },
+  {
+   "rowid": 212956,
+   "member": "Ted Cruz",
+   "date": "2020-07-24",
+   "show": "csr",
+   "tag": "ZAKARIA (voice-over)",
+   "at": 50,
+   "nchars": 167
+  },
+  {
+   "rowid": 213289,
+   "member": "Susan Collins",
+   "date": "2020-08-13",
+   "show": "ebo",
+   "tag": "HOLMES (voice-over)",
+   "at": 60,
+   "nchars": 700
+  },
+  {
+   "rowid": 213747,
+   "member": "James Clyburn",
+   "date": "2020-09-17",
+   "show": "sitroom",
+   "tag": "SCHNEIDER (voice-over)",
+   "at": 223,
+   "nchars": 376
+  },
+  {
+   "rowid": 214283,
+   "member": "Alex Padilla",
+   "date": "2020-10-13",
+   "show": "cnnt",
+   "tag": "BROWN (voice-over)",
+   "at": 160,
+   "nchars": 649
+  },
+  {
+   "rowid": 214935,
+   "member": "Nancy Pelosi",
+   "date": "2020-11-30",
+   "show": "sitroom",
+   "tag": "BLITZER (on-camera)",
+   "at": 56,
+   "nchars": 174
+  },
+  {
+   "rowid": 214943,
+   "member": "Richard Durbin",
+   "date": "2020-12-01",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 120,
+   "nchars": 1267
+  },
+  {
+   "rowid": 215165,
+   "member": "Ron Johnson",
+   "date": "2020-12-16",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 222,
+   "nchars": 643
+  },
+  {
+   "rowid": 215408,
+   "member": "Adam Schiff",
+   "date": "2020-12-29",
+   "show": "cnr",
+   "tag": "SOARES (on camera)",
+   "at": 671,
+   "nchars": 1233
+  },
+  {
+   "rowid": 215801,
+   "member": "Lindsey Graham",
+   "date": "2021-01-09",
+   "show": "cnr",
+   "tag": "ACOSTA (voice-over)",
+   "at": 55,
+   "nchars": 156
+  },
+  {
+   "rowid": 216252,
+   "member": "Lindsey Graham",
+   "date": "2021-01-18",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 156,
+   "nchars": 1754
+  },
+  {
+   "rowid": 216710,
+   "member": "Susan Collins",
+   "date": "2021-02-01",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 291,
+   "nchars": 795
+  },
+  {
+   "rowid": 216814,
+   "member": "Kevin Cramer",
+   "date": "2021-02-03",
+   "show": "cnr",
+   "tag": "RAJU (voice-over)",
+   "at": 81,
+   "nchars": 447
+  },
+  {
+   "rowid": 216945,
+   "member": "Charles Schumer",
+   "date": "2021-02-08",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 169,
+   "nchars": 848
+  },
+  {
+   "rowid": 217536,
+   "member": "Lindsey Graham",
+   "date": "2021-02-15",
+   "show": "cnr",
+   "tag": "SANCHEZ (on camera)",
+   "at": 533,
+   "nchars": 1449
+  },
+  {
+   "rowid": 217666,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-02-20",
+   "show": "cnr",
+   "tag": "JIMENEZ (voice over)",
+   "at": 388,
+   "nchars": 568
+  },
+  {
+   "rowid": 217735,
+   "member": "Jason Crow",
+   "date": "2021-02-23",
+   "show": "acd",
+   "tag": "BERMAN (on-camera)",
+   "at": 1044,
+   "nchars": 1433
+  },
+  {
+   "rowid": 217970,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-03-01",
+   "show": "cnr",
+   "tag": "JONES (on camera)",
+   "at": 133,
+   "nchars": 465
+  },
+  {
+   "rowid": 218259,
+   "member": "Charles Schumer",
+   "date": "2021-03-08",
+   "show": "sitroom",
+   "tag": "GINGRAS (on camera)",
+   "at": 169,
+   "nchars": 453
+  },
+  {
+   "rowid": 218357,
+   "member": "Charles Schumer",
+   "date": "2021-03-12",
+   "show": "cnr",
+   "tag": "QUEST (voice-over)",
+   "at": 106,
+   "nchars": 528
+  },
+  {
+   "rowid": 218431,
+   "member": "Vicente Gonzalez",
+   "date": "2021-03-15",
+   "show": "sitroom",
+   "tag": "COLLINS (voice-over)",
+   "at": 62,
+   "nchars": 202
+  },
+  {
+   "rowid": 218445,
+   "member": "Mitch McConnell",
+   "date": "2021-03-16",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 203,
+   "nchars": 760
+  },
+  {
+   "rowid": 218468,
+   "member": "Judy Chu",
+   "date": "2021-03-17",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 185,
+   "nchars": 1478
+  },
+  {
+   "rowid": 218571,
+   "member": "Mitch McConnell",
+   "date": "2021-03-21",
+   "show": "ip",
+   "tag": "PHILLIP (voice-over)",
+   "at": 98,
+   "nchars": 585
+  },
+  {
+   "rowid": 218597,
+   "member": "Alex Padilla",
+   "date": "2021-03-23",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 420,
+   "nchars": 1032
+  },
+  {
+   "rowid": 218632,
+   "member": "Josh Hawley",
+   "date": "2021-03-24",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 264,
+   "nchars": 979
+  },
+  {
+   "rowid": 219245,
+   "member": "Mitch McConnell",
+   "date": "2021-05-06",
+   "show": "cg",
+   "tag": "COLLINS (voice-over)",
+   "at": 70,
+   "nchars": 225
+  },
+  {
+   "rowid": 219514,
+   "member": "Alexandria Ocasio-Cortez",
+   "date": "2021-05-15",
+   "show": "cnr",
+   "tag": "NOBLES (on camera)",
+   "at": 59,
+   "nchars": 502
+  },
+  {
+   "rowid": 219578,
+   "member": "James McGovern",
+   "date": "2021-05-18",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 166,
+   "nchars": 728
+  },
+  {
+   "rowid": 219973,
+   "member": "Bill Cassidy",
+   "date": "2021-06-08",
+   "show": "ebo",
+   "tag": "WILD (on camera)",
+   "at": 69,
+   "nchars": 668
+  },
+  {
+   "rowid": 219993,
+   "member": "Mitch McConnell",
+   "date": "2021-06-09",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 235,
+   "nchars": 498
+  },
+  {
+   "rowid": 220297,
+   "member": "Peter Welch",
+   "date": "2021-06-20",
+   "show": "csr",
+   "tag": "GRIFFIN (voice-over)",
+   "at": 154,
+   "nchars": 270
+  },
+  {
+   "rowid": 220358,
+   "member": "Charles Schumer",
+   "date": "2021-06-22",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 192,
+   "nchars": 965
+  },
+  {
+   "rowid": 220448,
+   "member": "Peter Welch",
+   "date": "2021-06-25",
+   "show": "csr",
+   "tag": "GRIFFIN (voice-over)",
+   "at": 154,
+   "nchars": 270
+  },
+  {
+   "rowid": 221150,
+   "member": "Elizabeth Warren",
+   "date": "2021-08-09",
+   "show": "acd",
+   "tag": "LAH (voice-over)",
+   "at": 48,
+   "nchars": 110
+  },
+  {
+   "rowid": 221208,
+   "member": "Elizabeth Warren",
+   "date": "2021-08-10",
+   "show": "cnr",
+   "tag": "LAH (voice-over)",
+   "at": 48,
+   "nchars": 110
+  },
+  {
+   "rowid": 221509,
+   "member": "James Clyburn",
+   "date": "2021-09-08",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 237,
+   "nchars": 929
+  },
+  {
+   "rowid": 221673,
+   "member": "Pat Fallon",
+   "date": "2021-09-17",
+   "show": "cnnt",
+   "tag": "STELTER (voice-over)",
+   "at": 102,
+   "nchars": 302
+  },
+  {
+   "rowid": 221689,
+   "member": "Ayanna Pressley",
+   "date": "2021-09-20",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 330,
+   "nchars": 1940
+  },
+  {
+   "rowid": 222894,
+   "member": "Nancy Pelosi",
+   "date": "2021-10-29",
+   "show": "cnr",
+   "tag": "MATTINGLY (on camera)",
+   "at": 213,
+   "nchars": 1082
+  },
+  {
+   "rowid": 223081,
+   "member": "Mitch McConnell",
+   "date": "2021-11-08",
+   "show": "ebo",
+   "tag": "ZELENY(voice over)",
+   "at": 243,
+   "nchars": 547
+  },
+  {
+   "rowid": 223177,
+   "member": "Paul Gosar",
+   "date": "2021-11-16",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 345,
+   "nchars": 697
+  },
+  {
+   "rowid": 223525,
+   "member": "Nancy Pelosi",
+   "date": "2021-12-08",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 153,
+   "nchars": 462
+  },
+  {
+   "rowid": 223703,
+   "member": "Mike Johnson",
+   "date": "2021-12-15",
+   "show": "cnr",
+   "tag": "CAMPBELL (voice-over)",
+   "at": 16,
+   "nchars": 150
+  },
+  {
+   "rowid": 223716,
+   "member": "Nancy Pelosi",
+   "date": "2021-12-16",
+   "show": "cg",
+   "tag": "WILD (voice-over)",
+   "at": 177,
+   "nchars": 626
+  },
+  {
+   "rowid": 224119,
+   "member": "Mike Rounds",
+   "date": "2022-01-11",
+   "show": "cg",
+   "tag": "RAJU (voice-over)",
+   "at": 180,
+   "nchars": 570
+  },
+  {
+   "rowid": 224232,
+   "member": "Michael McCaul",
+   "date": "2022-01-17",
+   "show": "cnr",
+   "tag": "CHURCH (on camera)",
+   "at": 502,
+   "nchars": 878
+  },
+  {
+   "rowid": 224383,
+   "member": "James Clyburn",
+   "date": "2022-01-26",
+   "show": "cnnt",
+   "tag": "LEMON (on camera)",
+   "at": 131,
+   "nchars": 874
+  },
+  {
+   "rowid": 224465,
+   "member": "Pete Sessions",
+   "date": "2022-01-30",
+   "show": "sotu",
+   "tag": "BASH (on camera)",
+   "at": 166,
+   "nchars": 312
+  },
+  {
+   "rowid": 224574,
+   "member": "Jim Jordan",
+   "date": "2022-02-05",
+   "show": "ndaysat",
+   "tag": "GRAYER (voice-over)",
+   "at": 130,
+   "nchars": 156
+  },
+  {
+   "rowid": 224707,
+   "member": "Mitch McConnell",
+   "date": "2022-02-11",
+   "show": "cnr",
+   "tag": "COLLINS (voice-over)",
+   "at": 205,
+   "nchars": 600
+  },
+  {
+   "rowid": 225743,
+   "member": "David McCormick",
+   "date": "2022-05-16",
+   "show": "acd",
+   "tag": "ZELENY (voice-over)",
+   "at": 273,
+   "nchars": 453
+  },
+  {
+   "rowid": 225779,
+   "member": "David McCormick",
+   "date": "2022-05-17",
+   "show": "cnr",
+   "tag": "ZELENY (voice-over)",
+   "at": 260,
+   "nchars": 440
+  },
+  {
+   "rowid": 225977,
+   "member": "Ted Cruz",
+   "date": "2022-05-28",
+   "show": "ndaysat",
+   "tag": "YOUNG (voice-over)",
+   "at": 137,
+   "nchars": 364
+  },
+  {
+   "rowid": 226758,
+   "member": "Ruben Gallego",
+   "date": "2022-06-25",
+   "show": "cnr",
+   "tag": "RAJU (voice-over)",
+   "at": 242,
+   "nchars": 496
+  },
+  {
+   "rowid": 226807,
+   "member": "Ron Johnson",
+   "date": "2022-06-28",
+   "show": "acd",
+   "tag": "THORP (ph)",
+   "at": 28,
+   "nchars": 100
+  },
+  {
+   "rowid": 226817,
+   "member": "Nancy Pelosi",
+   "date": "2016-11-16",
+   "show": "president-elect-trump-reacts-to-reports-criticizing-lack-of-transparency-transition-team-turmoil",
+   "tag": "PERVUM (ph)",
+   "at": 115,
+   "nchars": 208
+  },
+  {
+   "rowid": 227138,
+   "member": "Jamie Raskin",
+   "date": "2022-07-13",
+   "show": "ist",
+   "tag": "SCHNEIDER (voice-over)",
+   "at": 230,
+   "nchars": 447
+  },
+  {
+   "rowid": 227349,
+   "member": "Bill Cassidy",
+   "date": "2022-07-19",
+   "show": "acd",
+   "tag": "RAJU (voice-over)",
+   "at": 53,
+   "nchars": 221
+  },
+  {
+   "rowid": 227542,
+   "member": "Hillary Scholten",
+   "date": "2022-07-26",
+   "show": "acd",
+   "tag": "RAJU (voice-over)",
+   "at": 135,
+   "nchars": 216
+  },
+  {
+   "rowid": 227807,
+   "member": "Amy Klobuchar",
+   "date": "2022-08-05",
+   "show": "acd",
+   "tag": "SCIUTTO (on-camera)",
+   "at": 40,
+   "nchars": 493
+  },
+  {
+   "rowid": 228460,
+   "member": "John Fetterman",
+   "date": "2022-08-24",
+   "show": "cg",
+   "tag": "MCKEND (voice-over)",
+   "at": 15,
+   "nchars": 173
+  },
+  {
+   "rowid": 231461,
+   "member": "Zoe Lofgren",
+   "date": "2022-10-13",
+   "show": "cnr",
+   "tag": "MURRAY (voice-over)",
+   "at": 100,
+   "nchars": 294
+  },
+  {
+   "rowid": 232002,
+   "member": "Adam Schiff",
+   "date": "2022-10-18",
+   "show": "cnr",
+   "tag": "MURRAY (voice-over)",
+   "at": 139,
+   "nchars": 217
+  },
+  {
+   "rowid": 232023,
+   "member": "Ron Johnson",
+   "date": "2022-10-19",
+   "show": "acd",
+   "tag": "RAJU (voice-over)",
+   "at": 47,
+   "nchars": 346
+  },
+  {
+   "rowid": 232421,
+   "member": "Jason Crow",
+   "date": "2022-11-02",
+   "show": "ctmo",
+   "tag": "MIRACLE (on camara)",
+   "at": 289,
+   "nchars": 454
+  },
+  {
+   "rowid": 234649,
+   "member": "James Comer",
+   "date": "2023-01-02",
+   "show": "acd",
+   "tag": "CORRESPONDENT (voice-over)",
+   "at": 77,
+   "nchars": 326
+  },
+  {
+   "rowid": 235227,
+   "member": "Nancy Pelosi",
+   "date": "2023-01-06",
+   "show": "acd",
+   "tag": "CORRESPONDENT (voice-over)",
+   "at": 132,
+   "nchars": 298
+  },
+  {
+   "rowid": 235280,
+   "member": "Jim Jordan",
+   "date": "2023-01-06",
+   "show": "cnr",
+   "tag": "SERFATY (voice-over)",
+   "at": 59,
+   "nchars": 131
+  },
+  {
+   "rowid": 236015,
+   "member": "Kat Cammack",
+   "date": "2023-01-10",
+   "show": "acd",
+   "tag": "FOREMAN (voice-over)",
+   "at": 150,
+   "nchars": 514
+  },
+  {
+   "rowid": 236064,
+   "member": "Byron Donalds",
+   "date": "2023-01-10",
+   "show": "cg",
+   "tag": "MURRAY (voice-over)",
+   "at": 146,
+   "nchars": 297
+  },
+  {
+   "rowid": 238571,
+   "member": "Michael Turner",
+   "date": "2023-02-06",
+   "show": "ampr",
+   "tag": "SUAREZ (voiceover)",
+   "at": 547,
+   "nchars": 923
+  },
+  {
+   "rowid": 238997,
+   "member": "James Comer",
+   "date": "2023-02-09",
+   "show": "es",
+   "tag": "SARA MURRAY, CNN POLITICAL CORRESPONDENT (voice-over)",
+   "at": 36,
+   "nchars": 197
+  },
+  {
+   "rowid": 240613,
+   "member": "Tina Smith",
+   "date": "2023-03-16",
+   "show": "cg",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL REPORTER (voice-over)",
+   "at": 46,
+   "nchars": 209
+  },
+  {
+   "rowid": 240624,
+   "member": "Tina Smith",
+   "date": "2023-03-16",
+   "show": "ctmo",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice over)",
+   "at": 46,
+   "nchars": 214
+  },
+  {
+   "rowid": 240796,
+   "member": "Jay Obernolte",
+   "date": "2023-03-24",
+   "show": "cnr",
+   "tag": "BERTRAND (voice-over)",
+   "at": 120,
+   "nchars": 410
+  },
+  {
+   "rowid": 240797,
+   "member": "Mark Warner",
+   "date": "2023-03-24",
+   "show": "cnr",
+   "tag": "BERTRAND (on-camera)",
+   "at": 178,
+   "nchars": 928
+  },
+  {
+   "rowid": 241389,
+   "member": "James Comer",
+   "date": "2023-04-08",
+   "show": "cnr",
+   "tag": "HOLMES (voice over)",
+   "at": 64,
+   "nchars": 491
+  },
+  {
+   "rowid": 242883,
+   "member": "James Baird",
+   "date": "2023-05-28",
+   "show": "ctmo",
+   "tag": "TAPPER (voiceover)",
+   "at": 147,
+   "nchars": 340
+  },
+  {
+   "rowid": 243032,
+   "member": "Steve Scalise",
+   "date": "2023-05-31",
+   "show": "fmjc",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice over)",
+   "at": 97,
+   "nchars": 320
+  },
+  {
+   "rowid": 243799,
+   "member": "Tim Scott",
+   "date": "2023-06-16",
+   "show": "ip",
+   "tag": "PRESIDENTIAL CANDIDATE (voiceover)",
+   "at": 155,
+   "nchars": 195
+  },
+  {
+   "rowid": 244518,
+   "member": "Ron Johnson",
+   "date": "2023-07-12",
+   "show": "cnr",
+   "tag": "SCHOLES (voice-over)",
+   "at": 315,
+   "nchars": 617
+  },
+  {
+   "rowid": 244989,
+   "member": "James Comer",
+   "date": "2023-07-23",
+   "show": "cnr",
+   "tag": "WILD (voice-over)",
+   "at": 37,
+   "nchars": 204
+  },
+  {
+   "rowid": 246118,
+   "member": "Edward Markey",
+   "date": "2023-09-17",
+   "show": "ctmo",
+   "tag": "MUNTEAN (voiceover)",
+   "at": 113,
+   "nchars": 294
+  },
+  {
+   "rowid": 246668,
+   "member": "Robert Menendez",
+   "date": "2023-09-27",
+   "show": "ow",
+   "tag": "CARROLL (voice-over)",
+   "at": 142,
+   "nchars": 385
+  },
+  {
+   "rowid": 247389,
+   "member": "Jim Jordan",
+   "date": "2023-10-06",
+   "show": "sitroom",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice over)",
+   "at": 120,
+   "nchars": 317
+  },
+  {
+   "rowid": 247829,
+   "member": "Nancy Pelosi",
+   "date": "2007-05-18",
+   "show": "transcript-special-report-with-brit-hume",
+   "tag": "BAIER (on camera)",
+   "at": 131,
+   "nchars": 424
+  },
+  {
+   "rowid": 247997,
+   "member": "Kevin Cramer",
+   "date": "2023-10-18",
+   "show": "cnr",
+   "tag": "RAJU (voice-over)",
+   "at": 578,
+   "nchars": 1084
+  },
+  {
+   "rowid": 248449,
+   "member": "Lindsey Graham",
+   "date": "2015-12-08",
+   "show": "trump-compares-muslim-ban-to-fdrs-policies-of-world-war-ii",
+   "tag": "PRESIDENTIAL CANDIDATE (via phone)",
+   "at": 202,
+   "nchars": 381
+  },
+  {
+   "rowid": 250097,
+   "member": "Mike Johnson",
+   "date": "2023-12-01",
+   "show": "cg",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)",
+   "at": 112,
+   "nchars": 421
+  },
+  {
+   "rowid": 250125,
+   "member": "Mike Johnson",
+   "date": "2023-12-01",
+   "show": "sitroom",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice over)",
+   "at": 112,
+   "nchars": 428
+  },
+  {
+   "rowid": 250136,
+   "member": "Mike Johnson",
+   "date": "2023-12-02",
+   "show": "cnr",
+   "tag": "LAUREN FOX, CNN CONGRESSIONAL CORRESPONDENT (voice-over)",
+   "at": 112,
+   "nchars": 421
+  },
+  {
+   "rowid": 251292,
+   "member": "Mike Johnson",
+   "date": "2024-01-04",
+   "show": "ow",
+   "tag": "LAVANDERA (voice-over)",
+   "at": 106,
+   "nchars": 476
+  },
+  {
+   "rowid": 252705,
+   "member": "Thomas Suozzi",
+   "date": "2024-02-13",
+   "show": "se",
+   "tag": "BASH (voice over)",
+   "at": 102,
+   "nchars": 323
+  },
+  {
+   "rowid": 271840,
+   "member": "Hakeem Jeffries",
+   "date": "2020-09-30",
+   "show": "msnow",
+   "tag": "MUSICIAN (singing)",
+   "at": 82,
+   "nchars": 302
+  },
+  {
+   "rowid": 305288,
+   "member": "Chellie Pingree",
+   "date": "2026-07-15",
+   "show": "cnr",
+   "tag": "CARROLL (voice-over)",
+   "at": 356,
+   "nchars": 1115
+  },
+  {
+   "rowid": 305576,
+   "member": "Susan Collins",
+   "date": "2026-07-12",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 37,
+   "nchars": 122
+  },
+  {
+   "rowid": 308345,
+   "member": "Brian Fitzpatrick",
+   "date": "2026-05-17",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 158,
+   "nchars": 636
+  },
+  {
+   "rowid": 308346,
+   "member": "Elizabeth Warren",
+   "date": "2026-05-17",
+   "show": "this-week",
+   "tag": "BRIEN (voice over)",
+   "at": 103,
+   "nchars": 688
+  }
+ ],
+ "R4": [
+  {
+   "rowid": 144501,
+   "member": "Raphael Warnock",
+   "date": "2025-01-16",
+   "show": "pbs-newshour",
+   "tag": "Treasury Secretary Nominee",
+   "at": 153,
+   "nchars": 287
+  },
+  {
+   "rowid": 151413,
+   "member": "Steven Horsford",
+   "date": "2025-04-09",
+   "show": "pbs-newshour",
+   "tag": "Trade Representative",
+   "at": 101,
+   "nchars": 157
+  },
+  {
+   "rowid": 155292,
+   "member": "Josh Hawley",
+   "date": "2025-05-20",
+   "show": "pbs-newshour",
+   "tag": "Homeland Security Secretary",
+   "at": 85,
+   "nchars": 286
+  },
+  {
+   "rowid": 180228,
+   "member": "John Kennedy",
+   "date": "2026-03-05",
+   "show": "pbs-newshour",
+   "tag": "Homeland Security Secretary",
+   "at": 161,
+   "nchars": 271
+  },
+  {
+   "rowid": 185172,
+   "member": "Jack Reed",
+   "date": "2026-05-19",
+   "show": "pbs-newshour",
+   "tag": "Attorney General",
+   "at": 66,
+   "nchars": 144
+  },
+  {
+   "rowid": 185287,
+   "member": "Thom Tillis",
+   "date": "2026-06-03",
+   "show": "pbs-newshour",
+   "tag": "Treasury Secretary",
+   "at": 89,
+   "nchars": 303
+  },
+  {
+   "rowid": 256066,
+   "member": "John Cornyn",
+   "date": "2020-06-16",
+   "show": "pbs-newshour",
+   "tag": "Attorney General Vanita Gupta",
+   "at": 166,
+   "nchars": 407
+  },
+  {
+   "rowid": 256067,
+   "member": "John Cornyn",
+   "date": "2020-06-16",
+   "show": "pbs-newshour",
+   "tag": "Attorney General Vanita Gupta",
+   "at": 164,
+   "nchars": 439
+  },
+  {
+   "rowid": 256068,
+   "member": "John Cornyn",
+   "date": "2020-06-16",
+   "show": "pbs-newshour",
+   "tag": "Attorney General Vanita Gupta",
+   "at": 62,
+   "nchars": 154
+  },
+  {
+   "rowid": 257777,
+   "member": "Steve Daines",
+   "date": "2022-06-07",
+   "show": "pbs-newshour",
+   "tag": "Treasury Secretary",
+   "at": 240,
+   "nchars": 505
+  },
+  {
+   "rowid": 258150,
+   "member": "Nancy Pelosi",
+   "date": "2022-12-06",
+   "show": "pbs-newshour",
+   "tag": "Capitol Police Chief",
+   "at": 109,
+   "nchars": 201
+  },
+  {
+   "rowid": 258611,
+   "member": "Lindsey Graham",
+   "date": "2023-05-15",
+   "show": "pbs-newshour",
+   "tag": "Deputy Attorney General",
+   "at": 84,
+   "nchars": 220
+  }
+ ]
+}

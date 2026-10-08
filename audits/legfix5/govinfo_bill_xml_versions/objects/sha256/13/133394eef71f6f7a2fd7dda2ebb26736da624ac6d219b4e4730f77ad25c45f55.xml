@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-KEL20045-XGV-9P-FYV"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S3233 IS: Hemophilia SNF Access Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2020-01-28</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>2d Session</session><legis-num>S. 3233</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20200128">January 28, 2020</action-date><action-desc><sponsor name-id="S306">Mr. Menendez</sponsor> (for himself, <cosponsor name-id="S254">Mr. Enzi</cosponsor>, and <cosponsor name-id="S316">Mr. Whitehouse</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend title XVIII of the Social Security Act to improve access to skilled nursing facility
+			 services for hemophilia patients.</official-title></form>
+	<legis-body display-enacting-clause="yes-display-enacting-clause">
+ <section id="idF45E8E05627C44B1880D0CC955FE9923" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Hemophilia SNF Access Act</short-title></quote>.</text> </section><section id="idC27713C83D004F5580ED90310488BABE" section-type="subsequent-section"><enum>2.</enum><header>Improving access to skilled nursing facility services for hemophilia patients</header> <subsection id="id4AA12282178F485C932B9C72939ADC79"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 1888(e)(2)(A)(iii) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395yy">42 U.S.C. 1395yy(e)(2)(A)(iii)</external-xref>) is amended by adding at the end the following:</text>
+				<quoted-block display-inline="no-display-inline" id="id9D58AE02E294496BB0968FFD87A9F51E" style="OLC">
+ <subclause id="idE4B8FF38CDF24DB5BE220439715C3231"><enum>(VI)</enum><text display-inline="yes-display-inline">Blood clotting factors and other medications indicated for the treatment of patients with hemophilia and other bleeding disorders (identified as of January 1, 2020, by HCPCS codes J7170, J7175, J7179, J7180–J7183, J7185–J7203, J7205, J7207, J7209–J7211 (and as subsequently modified by the Secretary)) and the separate payment amount for items and services related to the furnishing of such factors under section 1842(o)(5)(C).</text></subclause><after-quoted-block>.</after-quoted-block></quoted-block>
+ </subsection><subsection id="id693878F2CA154978B4203322CC425BA6"><enum>(b)</enum><header>Effective date</header><text>The amendments made by subsection (a) shall apply to items and services furnished on or after January 1, 2021.</text></subsection></section></legis-body></bill>
+
+

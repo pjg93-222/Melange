@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE resolution PUBLIC "-//US Congress//DTDs/res.dtd//EN" "res.dtd">
+<resolution dms-id="H8B41873AF48645C6BFBE35E45059E8CD" key="H" public-private="public" resolution-stage="Introduced-in-House" resolution-type="house-resolution" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HRES 219 IH: Recognizing the contributions made by the men and women of the Air Force who are responsible for operating and maintaining the Global Positioning System constellation and affirming the importance of continuous availability, accuracy, reliability, and resiliency of the Global Positioning System constellation.</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-03-12</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">IV</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. RES. 219</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190312">March 12, 2019</action-date><action-desc><sponsor name-id="L000565">Mr. Loebsack</sponsor> (for himself and <cosponsor name-id="B001298">Mr. Bacon</cosponsor>) submitted the following resolution; which was referred to the <committee-name committee-id="HAS00">Committee on Armed Services</committee-name></action-desc></action><legis-type>RESOLUTION</legis-type><official-title display="yes">Recognizing the contributions made by the men and women of the Air Force who are responsible for
+			 operating and maintaining the Global Positioning System constellation and
+			 affirming the importance of continuous availability, accuracy,
+			 reliability, and resiliency of the Global Positioning System
+			 constellation.</official-title></form>
+	<preamble>
+ <whereas><text>Whereas the Global Positioning System (referred to in this preamble as <quote>GPS</quote>) offers both military and civilian benefits of positioning, navigation, and timing services;</text> </whereas><whereas><text>Whereas the GPS constellation is managed and operated by the Air Force and consists of more than 30 satellites operating at an altitude of approximately 12,550 miles above the Earth;</text>
+ </whereas><whereas><text>Whereas GPS-enabled precision agriculture has led to input cost savings of $8,200,000,000 and yield increases in grain production in the United States;</text>
+ </whereas><whereas><text>Whereas GPS precision timing allows for accurate record management by major financial institutions, including detailed transaction management for large and small businesses;</text>
+ </whereas><whereas><text>Whereas GPS has proven to be an essential tool in facilitating social and economic activity around the world;</text>
+ </whereas><whereas><text>Whereas consumers overwhelmingly access GPS using a variety of platforms, such as smartphones and a wireless broadband connection;</text>
+ </whereas><whereas><text>Whereas cities leverage GPS applications to support Smart Cities initiatives that will increase service efficiency, resulting in savings in time and money to taxpayers;</text>
+ </whereas><whereas><text>Whereas first responders utilize GPS to enable more timely and accurate disaster response, improve situational awareness as well as for identifying the location of 9–1–1 calls made from wireless phones;</text>
+ </whereas><whereas><text>Whereas the safety of our Nation’s rail systems is improved by implementing GPS-based Positive Train Control (PTC) systems;</text>
+ </whereas><whereas><text>Whereas GPS-enabled applications and services enhance the independence of individuals with visual impairments;</text>
+ </whereas><whereas><text>Whereas marine operations depend on GPS for precise navigation as well as for determining location and measuring speed;</text>
+ </whereas><whereas><text>Whereas the land surveying and mapping sector utilizes GPS to produce data that are more accurate and reliable;</text>
+ </whereas><whereas><text>Whereas GPS-based time synchronization assists power and utility companies in providing efficient power transmission and distribution;</text>
+ </whereas><whereas><text>Whereas smart grid infrastructure is increasingly reliant on GPS for synchronization and system resilience;</text>
+ </whereas><whereas><text>Whereas GPS supports autonomous vehicle development by complementing embedded vehicle sensors to determine precise vehicle location and improving safety;</text>
+ </whereas><whereas><text>Whereas the Federal Aviation Administration relies on GPS to improve all aspects of commercial aviation safety and efficiency, including by providing greater precision and accuracy in all phases of flight, and GPS is also essential for enabling the Next Generation Air Transportation (NEXTGEN) system;</text>
+ </whereas><whereas><text>Whereas the Federal Aviation Administration relies on GPS to improve commercial aviation safety by synchronizing reporting of hazardous weather with 45 Terminal Doppler Weather Radars;</text>
+ </whereas><whereas><text>Whereas GPS-based time synchronization assists power and utility companies in providing efficient power transmission and distribution; and</text>
+ </whereas><whereas><text>Whereas economic contributions by GPS include—</text> <paragraph id="H7E8A76CA1EAD4D7489733CB48D836647"><enum>(1)</enum><text>GPS provides economic benefits valued at $68,700,000,000 or 0.4 percent of the gross domestic product of the United States;</text>
+ </paragraph><paragraph id="HDF006D2312DD46F1AAFB41CB5D98C6AF"><enum>(2)</enum><text>the Department of Homeland Security identifies GPS as essential to 14 of the 16 industries that are classified as part of the Nation’s critical infrastructure;</text>
+ </paragraph><paragraph id="HD0A90FDA13C04A1794AE2C8C4F8298EF"><enum>(3)</enum><text>GPS-enabled precision agriculture is estimated to save farmers 10 to 15 percent in operating costs and purchased inputs and the broad economic benefits of precision agriculture are estimated at $13,700,000,000;</text>
+ </paragraph><paragraph id="HA0F61819FF17458692B531E74F83ED99"><enum>(4)</enum><text>GPS-enabled surveying is estimated to produce $11,600,000,000 in economic impact;</text> </paragraph><paragraph id="H0FB388578F0243319F07F81177ED05D8"><enum>(5)</enum><text>globally, 3,600,000,000 Global Navigation Satellite System devices were in use in 2014, 450,000,000 of which were in North America;</text>
+ </paragraph><paragraph id="H927B12156EFF4820A417939971221884"><enum>(6)</enum><text>geospatial services ecosystem, which are supported by GPS, are estimated to drive $1,600,000,000,000 in revenues and $1,400,000,000,000 in cost savings throughout the United States economy;</text>
+ </paragraph><paragraph id="HD7DE324284DC49CAB1154A079905C80C"><enum>(7)</enum><text>GPS-enabled internet publishing, broadcasting, and search portals accounted for $87,000,000,000 in revenue and supported 181,000 jobs;</text>
+ </paragraph><paragraph id="HF9B159C2709E4F9CA2E29EF8B44094F9"><enum>(8)</enum><text>GPS enables location-based services that will enhance the $950,000,000,000 app economy, supporting 4,700,000 jobs across the United States; and</text>
+ </paragraph><paragraph id="H6A649AD2553D4762944275899371F42D"><enum>(9)</enum><text>GPS has proven to be essential to the foundation of the ridesharing industry accessed on smartphones, valued close to $61,000,000,000: Now, therefore, be it</text></paragraph></whereas></preamble>
+	<resolution-body id="HA9B2B957E0D94A84A2376430988DC58A" style="traditional">
+ <section display-inline="yes-display-inline" id="H5619E23A78A94309BC95BBB444B42958" section-type="undesignated-section"><enum></enum><text>That the House of Representatives—</text> <paragraph id="H234247E2D6F94E21ADC95BD00A3386B2"><enum>(1)</enum><text>recognize the contributions made by the men and women of the Air Force who are responsible for operating and maintaining the Global Positioning System constellation; and</text>
+ </paragraph><paragraph id="H8A291FB89CE947678FA5484B152BE639"><enum>(2)</enum><text>recognize the importance of continuous availability, accuracy, reliability, and resiliency of the Global Positioning System constellation.</text>
+			</paragraph></section></resolution-body></resolution>
+
+

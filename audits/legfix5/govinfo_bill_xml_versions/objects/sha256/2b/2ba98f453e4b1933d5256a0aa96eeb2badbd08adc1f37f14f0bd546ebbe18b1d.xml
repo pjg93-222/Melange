@@ -1,0 +1,269 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-OLL26707-1JH-01-T57"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 S4749 IS: Justice Against Weaponized Bureaucratic Overreach to Networked Expression Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2026-06-11</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>119th CONGRESS</congress><session>2d Session</session><legis-num>S. 4749</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20260611">June 11, 2026</action-date><action-desc><sponsor name-id="S355">Mr. Cruz</sponsor> (for himself and <cosponsor name-id="S247">Mr. Wyden</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSCM00">Committee on Commerce, Science, and Transportation</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Communications Act of 1934 to create a Federal cause of action to address jawboning, and for other purposes.</official-title></form><legis-body><section id="S1" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Justice Against Weaponized Bureaucratic Overreach to Networked Expression Act</short-title></quote> or the <quote><short-title>JAWBONE Act</short-title></quote>.</text></section><section id="idff582da2c6164d38b0a970c36060467e"><enum>2.</enum><header>Findings</header><text display-inline="no-display-inline">Congress finds the following:</text><paragraph id="ide8c9cc6548f24fd0b4afa6d65439ab3c"><enum>(1)</enum><text>Private speech intermediaries, such as broadcasters and interactive computer service providers, as well as providers of speech-enabling artificial intelligence systems, are critical for access to information and individual expression and have a right to independent editorial judgement.</text></paragraph><paragraph id="idb97220ed530e4467bb3e75e15ff9f14a"><enum>(2)</enum><text>Such entities can also serve as chokepoints convenient for the government to target for censorship of disfavored speech and information.</text></paragraph><paragraph id="idcd0f63ceeda745a6b45346f6cda74f78"><enum>(3)</enum><text>Government coercion of such private speech intermediaries and artificial intelligence system providers threatens freedom of speech and open inquiry, particularly for users who have no say in, or knowledge of, how their speech or access to information is affected.</text></paragraph><paragraph id="ida34487de01d248f4a308d905a43dad8c"><enum>(4)</enum><text>At the same time, not all government communication to a private speech platform is coercive. Interactions between the government and websites, for example, may serve lawful enforcement purposes or facilitate legitimate dialogue with the private sector.</text></paragraph><paragraph id="id7d35c60c43634b1b9b5872cd4d4af985"><enum>(5)</enum><text>Members of the public also have an interest under the First Amendment to the Constitution of the United States in hearing what their government has to say. The people of the United States cannot engage with the views of their government unless the government can express those views.</text></paragraph><paragraph id="idc916ab77bfbf44f8904fb42128a1d965"><enum>(6)</enum><text>It is therefore necessary to limit the ability of the government to create, through coercion, a system of speech regulation that evades convenient judicial redress and, consequently, the First Amendment, while maintaining the ability of the government to inform and persuade.</text></paragraph></section><section id="idf973fd917cb94a1b972f0a21b1620650"><enum>3.</enum><header>Federal cause of action for jawboning</header><text display-inline="no-display-inline">Title VII of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/601">47 U.S.C. 601 et seq.</external-xref>) is amended by adding at the end the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="id58eeb198ed9b49898b795dc8e7960a4a"><section id="id2041f243fdee4a4b9102966a88a812e9"> <enum>723.</enum> <header>Prohibition on Federal agency or employee jawboning</header> <subsection id="id910269b95d64489282a7472848628131"> <enum>(a)</enum> <header>Definitions</header> <text>In this section:</text>
+            <paragraph id="iddb938f1875ca485eb5f716fad9ef0043">
+              <enum>(1)</enum>
+              <header>Agency</header>
+ <text>The term <term>agency</term> has the meaning given the term in section 3502 of title 44, United States Code.</text>
+            </paragraph>
+            <paragraph id="id825615b1dab344e9a0a683bffafb4de0">
+              <enum>(2)</enum>
+              <header>Artificial intelligence system</header>
+ <text>The term <term>artificial intelligence system</term> has the meaning given the term <term>artificial intelligence</term> in section 5002 of the National Artificial Intelligence Initiative Act of 2020 (<external-xref legal-doc="usc" parsable-cite="usc/15/9401">15 U.S.C. 9401</external-xref>).</text>
+            </paragraph>
+            <paragraph id="idf89f720ecdb9468894309622853b7649">
+              <enum>(3)</enum>
+              <header>Broadcaster</header>
+ <text>The term <term>broadcaster</term> means—</text> <subparagraph id="id64de7d3fbc694610b1a73a08a68252d0"> <enum>(A)</enum> <text>any licensee, operator, or owner of a broadcast station; and</text>
+              </subparagraph>
+              <subparagraph id="idb5f7587316e0425a9d50b870009323ae">
+                <enum>(B)</enum>
+ <text>any national broadcast network that provides television or radio programming to one or more broadcast stations, including through ownership of, or contractual network affiliation agreements with, those stations.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="id31ee54e1f3184e5bbea08a711f7c983a">
+              <enum>(4)</enum>
+              <header>Coerce</header>
+              <subparagraph id="id2c3dfffe8d004dae9f935e79b67b9983">
+                <enum>(A)</enum>
+                <header>In general</header>
+ <text>The term <term>coerce</term> means to take a harmful, hostile, or unfavorable action, to imply the possibility of taking such action, or to threaten such action.</text>
+              </subparagraph>
+              <subparagraph id="idab6102e0c5784cf4aacd0cc4737d6653">
+                <enum>(B)</enum>
+                <header>Factors</header>
+ <text>Factors relevant to whether an action by an agency, officer, or employee satisfies the definition of <quote>coerce</quote> under subparagraph (A) include—</text>
+                <clause id="id95d6c6e25e834fa5a20fa77f63093c7f">
+                  <enum>(i)</enum>
+ <text>the word choice and tone of any relevant communication from the agency, officer, or employee;</text>
+                </clause>
+                <clause id="idc8064e0b8bf540b783755e620bf9f046">
+                  <enum>(ii)</enum>
+ <text>the existence of any Federal regulatory or enforcement authority over the recipient of any relevant communication from the agency, officer, or employee;</text>
+                </clause>
+                <clause id="id41abcde97af646d68241f82318b30e47">
+                  <enum>(iii)</enum>
+ <text>whether any relevant communication from the agency, officer, or employee referred to adverse consequences to the recipient;</text>
+                </clause>
+                <clause id="ide3b65d55b3664fdca2313a16401229cc">
+                  <enum>(iv)</enum>
+ <text>whether any relevant communication from the agency, officer, or employee was private or public;</text>
+                </clause>
+                <clause id="idbce5fb61bc504248adf34d22102b8283">
+                  <enum>(v)</enum>
+ <text>whether any relevant communication from the agency, officer, or employee included an affirmative disclaimer that the communication lacked legal force;</text>
+                </clause>
+                <clause id="idd429011af45545ee96485e76d0ae50f0">
+                  <enum>(vi)</enum>
+ <text>whether any relevant communication from the agency, officer, or employee included a factual statement without legal force that could be useful to the decision-making of the recipient;</text>
+                </clause>
+                <clause id="id368d8223e29a4c568079902d57b8610b">
+                  <enum>(vii)</enum>
+ <text>whether any relevant communication from the agency, officer, or employee was for the purpose of aiding compliance with existing law; and</text>
+                </clause>
+                <clause id="id4107da99bb55413d866577a1e9f319b2">
+                  <enum>(viii)</enum>
+ <text>whether any relevant communication from the agency, officer, or employee led the recipient to act contrary to its own policies.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="id4141ffc8a6534b4d88620b5eaf9ec153">
+              <enum>(5)</enum>
+              <header>Content action</header>
+ <text>The term <term>content action</term>—</text> <subparagraph id="id0087836ddfa147a39caea7a13d4f3129"> <enum>(A)</enum> <text>with respect to an interactive computer service, means—</text>
+                <clause id="ide6f5487b0f77438fb1aa257c3c7d6792">
+                  <enum>(i)</enum>
+ <text>adding information to, altering information on, or removing information from the interactive computer service, including with respect to a label appended to information;</text>
+                </clause>
+                <clause id="id64b1b283f3cf4ea2a46333407a47fda0">
+                  <enum>(ii)</enum>
+ <text>altering the presentation of information on the interactive computer service, including such presentation by the recommendation system of the interactive computer service;</text>
+                </clause>
+                <clause id="id16ef5d7847f74b168cab5e0454115d2e">
+                  <enum>(iii)</enum>
+ <text>limiting interaction by an information content provider with the interactive computer service, including terminating or suspending an information content provider from the interactive computer service; or</text>
+                </clause>
+                <clause id="id4aa08cde61a740bcb0264b53d055ce27">
+                  <enum>(iv)</enum>
+ <text>altering a policy of the interactive computer service affecting the moderation of information;</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="ide5e208d8ae1746a8865307cfd4584b85">
+                <enum>(B)</enum>
+ <text>with respect to an artificial intelligence system, means—</text> <clause id="idf54f8f05a70e4400982832555d301e1e"> <enum>(i)</enum> <text>adding, altering, or removing information generated or provided by the artificial intelligence system; or</text>
+                </clause>
+                <clause id="id85f364b5ac92495293d3fe6dfd254c33">
+                  <enum>(ii)</enum>
+ <text>limiting interaction by an information content provider with the artificial intelligence system; and</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="id553321b0851141f28ef454c69695befd">
+                <enum>(C)</enum>
+ <text>with respect to a broadcaster, means adding information or programming to, altering information or programming on, or removing information or programming from a broadcast, including before the programming is finalized or while the programming is in an investigative or production phase of development.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="id158549d4d0fa40daa9240372b1a380ee">
+              <enum>(6)</enum>
+              <header>Employee</header>
+ <text>The term <term>employee</term> includes a fellow, contractor, or consultant.</text>
+            </paragraph>
+            <paragraph id="idb118d2be0c534150ba0649ad4c6bef6b">
+              <enum>(7)</enum>
+              <header>Information</header>
+ <text>The term <term>information</term> means lawful expression protected by the First Amendment to the Constitution of the United States.</text>
+            </paragraph>
+            <paragraph id="ida8391a3189464cf9abbdeaa836f76650">
+              <enum>(8)</enum>
+              <header>Information content provider</header>
+ <text>The term <term>information content provider</term> has the meaning given the term in section 230.</text>
+            </paragraph>
+            <paragraph id="id396de71c60cb489fa45884633dd77dc9">
+              <enum>(9)</enum>
+              <header>Interactive computer service</header>
+ <text>The term <term>interactive computer service</term> has the meaning given to the term in section 230.</text>
+            </paragraph>
+            <paragraph id="ida5f2228c6e7e4ef59e2c6b414996e6a8">
+              <enum>(10)</enum>
+              <header>Recommendation system</header>
+ <text>The term <term>recommendation system</term> means a fully or partially automated system used by an interactive computer service to suggest, promote, or rank information provided by an information content provider.</text>
+            </paragraph>
+          </subsection>
+          <subsection id="idfa5dace5733d4a1ea12759c249118b8f">
+            <enum>(b)</enum>
+            <header>Prohibition</header>
+            <paragraph id="id1c86ad954fd243b59c54e9ba868ce017">
+              <enum>(1)</enum>
+              <header>In general</header>
+ <text>Except as provided in paragraph (2), it shall be unlawful for an agency, or an officer or employee of the United States under color or pretense of office or employment, to coerce or attempt to coerce a broadcaster, a provider of an interactive computer service, or a provider of an artificial intelligence system within the United States (including the territories of the United States) for the purpose of, or if a reasonable person would understand the coercion or attempted coercion to be for the purpose of, incentivizing the broadcaster or provider to take a content action.</text>
+            </paragraph>
+            <paragraph id="id0bf4b9e603ef4bd3b77073ffd0bee41d">
+              <enum>(2)</enum>
+              <header>Exceptions</header>
+              <subparagraph commented="no" display-inline="no-display-inline" id="id1094d197090149b09f542f508829783c">
+                <enum>(A)</enum>
+                <header display-inline="yes-display-inline">In general</header>
+ <text>Paragraph (1) shall not apply to—</text> <clause id="id67550b570f6040ec8040c3fa1a812c50"> <enum>(i)</enum> <text>an action that—</text>
+                  <subclause commented="no" display-inline="no-display-inline" id="id7dc9be3704b046799a2159c165f007d1">
+                    <enum>(I)</enum>
+ <text display-inline="yes-display-inline">is taken pursuant to a lawful investigation under, or the enforcement of, Federal or State law; and</text>
+                  </subclause>
+                  <subclause commented="no" display-inline="no-display-inline" id="ida884040391e740c9bcc0d5ca83d710d0">
+                    <enum>(II)</enum>
+ <text display-inline="yes-display-inline">does not violate the First Amendment to the Constitution of the United States;</text>
+                  </subclause>
+                </clause>
+                <clause id="idab3ba7a639a2448284d857a89524a017">
+                  <enum>(ii)</enum>
+ <text>an action or threat to take action authorized by a warrant issued using the procedures described in the Federal Rules of Criminal Procedure (or, in the case of a State court, issued using State warrant procedures) by a court of competent jurisdiction; or</text>
+                </clause>
+                <clause id="idcca816b3d1554cbcb714c60000071aba">
+                  <enum>(iii)</enum>
+ <text>directions from an agency, or an officer or employee of the United States, to a broadcaster, a provider of an interactive computer service, or a provider of an artificial intelligence system to take an action directly relating to the official use of the broadcast station, interactive computer service, or artificial intelligence system, respectively, by the agency, officer, or employee.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="id4ef87ef84fd9434d81be12bc572f919d">
+                <enum>(B)</enum>
+                <header>Burden of establishing exception</header>
+ <text>An agency, officer, or employee against whom a civil action is brought under subsection (c) shall bear the burden of establishing that an exception under subparagraph (A) of this paragraph applies.</text>
+              </subparagraph>
+            </paragraph>
+          </subsection>
+          <subsection id="ide5542c60f0bb414fb5b0d562ad7592b7">
+            <enum>(c)</enum>
+            <header>Private right of action</header>
+            <paragraph id="id2f60ecadd61146888811fa586030858c">
+              <enum>(1)</enum>
+              <header>In general</header>
+ <text>A person aggrieved by a violation of subsection (b), including an information content provider, may bring a civil action against the applicable agency, officer, or employee in an appropriate district court of the United States.</text>
+            </paragraph>
+            <paragraph commented="no" display-inline="no-display-inline" id="id067c57c8b8064c9589c5b21a38d48c72">
+              <enum>(2)</enum>
+              <header>Scope of review</header>
+ <text>In a civil action brought under paragraph (1), to the extent necessary to the decision and when presented, the court shall decide all relevant questions of law and interpret constitutional and statutory provisions.</text>
+            </paragraph>
+            <paragraph id="idbdc5c162ec66453c81a31fcccbfa4a4b">
+              <enum>(3)</enum>
+              <header>Relief</header>
+ <text>In a civil action brought under paragraph (1)—</text> <subparagraph id="idabc4049a0a6a4ed3bebf6a68a6b3fbcd"> <enum>(A)</enum> <text>a person may obtain compensatory damages and the cost of the civil action, including reasonable attorney fees and other litigation costs reasonably incurred;</text>
+              </subparagraph>
+              <subparagraph id="iddde8d679fe884944a7cb2872d46263e7">
+                <enum>(B)</enum>
+ <text>except as provided in subparagraph (C), the court may, in addition to any other relief available at law, grant equitable relief that may be appropriate or necessary to correct a violation of subsection (b); and</text>
+              </subparagraph>
+              <subparagraph id="id92c5ccd0350245e5a852e11f885bdb0f">
+                <enum>(C)</enum>
+ <text>punitive damages may not be awarded.</text> </subparagraph> </paragraph> <paragraph id="id07f9f4fdd88847f29d6c51577421db1f"> <enum>(4)</enum> <header>Pre-trial motion for limited discovery</header> <subparagraph id="id2c445353b4d74d0a98be32914a64766c"> <enum>(A)</enum> <header>Motion</header> <text>If a party to a civil action brought under paragraph (1) moves to dismiss the action under rule 12(b)(6) of the Federal Rules of Civil Procedure or moves to dismiss the action for lack of standing, the party that opposes the motion to dismiss may file a pre-trial motion for limited discovery at the discretion of the court.</text>
+              </subparagraph>
+              <subparagraph id="id8cee6bccd36442c5b48400d7635e0481">
+                <enum>(B)</enum>
+                <header>Limitations on time and scope</header>
+ <text>If the court grants a pre-trial motion for limited discovery filed under subparagraph (A), the court shall enter an order limiting that discovery—</text>
+                <clause id="id50c9dc194cf94a8eaec292a1f94b9e65">
+                  <enum>(i)</enum>
+ <text>to a period of not more than 30 days; and</text> </clause> <clause id="id55cbde452f5c40bc9093ac820ddc0f86"> <enum>(ii)</enum> <text>to evidence that permits the party that did not move to dismiss the action under subparagraph (A) to respond to the merits of the motion to dismiss.</text>
+                </clause>
+              </subparagraph>
+              <subparagraph id="id2a5a142a0cc145c1ada3d7afed540d9c">
+                <enum>(C)</enum>
+                <header>Extension</header>
+                <clause id="idcc7d6342a8eb412a97b01534d0d81d66">
+                  <enum>(i)</enum>
+                  <header>Hearing</header>
+ <text>Upon request, the court may hold a hearing to determine whether to extend discovery, with respect to a motion for limited discovery granted under this paragraph, by not more than 1 additional period of not more than 30 days.</text>
+                </clause>
+                <clause id="id3ec830fb3b174dc2bd75c1cb97cee163">
+                  <enum>(ii)</enum>
+                  <header>Determination</header>
+ <text>The court may extend discovery under clause (i) for good cause shown by the party seeking the extension.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="id1d632262e84a4ea38d1b6999ae0cd01f">
+              <enum>(5)</enum>
+              <header>No immunity from liability for subjective belief of unprotected
+                speech</header>
+ <text>No agency, officer, or employee that is a party to a civil action brought under paragraph (1) shall be immune from liability on the basis of a finding that the agency, officer, or employee had a subjective belief that the information that is the subject of the claim in the civil action was not lawful expression protected by the First Amendment to the Constitution of the United States.</text>
+            </paragraph>
+            <paragraph id="id2c1b5734eb954288b766260e676fdaf4">
+              <enum>(6)</enum>
+              <header>Mandatory defense and indemnification of Federal employees</header>
+              <subparagraph id="id26280d89aa874440876ee5290f1b3124">
+                <enum>(A)</enum>
+                <header>Defense</header>
+ <text>If a civil action is brought under paragraph (1) against an officer or employee of the United States in the individual capacity of that officer or employee, the Department of Justice, if the officer or employee so elects, shall represent the officer or employee.</text>
+              </subparagraph>
+              <subparagraph id="id5dd557d068d443ec8795616547dc0e2f">
+                <enum>(B)</enum>
+                <header>Indemnification</header>
+                <clause commented="no" display-inline="no-display-inline" id="ida610706fdf0c4e909fcfd8a1d0bfc331">
+                  <enum>(i)</enum>
+                  <header>In general</header>
+ <text display-inline="yes-display-inline">If a civil action is brought under paragraph (1) against an officer or employee of the United States in the individual capacity of that officer or employee, the Federal Government shall indemnify the officer or employee for any verdict, judgment, or other monetary award rendered against the officer or employee.</text>
+                </clause>
+                <clause id="id265cdf5e1c7e4dec86ac9fadf936c9b0">
+                  <enum>(ii)</enum>
+                  <header>Exception</header>
+ <text>In a civil action described in clause (i), if the court finds that the officer or employee acted in a willful and wanton manner in incurring liability under this section, clause (i) shall not apply and the court shall order the officer or employee to reimburse the Federal Government the reasonable costs and reasonable attorney fees expended for the defense of the officer or employee.</text>
+                </clause>
+              </subparagraph>
+            </paragraph>
+          </subsection>
+          <subsection id="id4666a54e7047472e8fe474d1458cc712">
+            <enum>(d)</enum>
+            <header>Enforcement by States</header>
+ <text>Any attorney general of a State may bring a civil action in the name of the State, as parens patriae on behalf of natural persons residing in the State, in any district court of the United States having jurisdiction of the defendant to secure relief as provided in this section for injury sustained by those natural persons from a violation of subsection (b).</text>
+          </subsection>
+ </section><after-quoted-block>.</after-quoted-block></quoted-block></section><section id="id1a253c853de140ac8064e8f6e5ab8859"><enum>4.</enum><header>Establishment of standards and guidelines for logging covered communications with broadcasters, providers interactive computer services, and providers of artificial intelligence systems</header><text display-inline="no-display-inline">The National Institute of Standards and Technology Act (<external-xref legal-doc="usc" parsable-cite="usc/15/271">15 U.S.C. 271 et seq.</external-xref>) is amended by adding at the end the following:</text><quoted-block id="id5bfc6c2719bd4269bfbe9c0afa54bcb1" display-inline="no-display-inline" style="OLC"><section id="idba4fc841d0ea4a85875df89999fb7780"><enum>37.</enum><header>Establishment of standards and guidelines for logging covered communications with broadcasters, providers interactive computer services, and providers of artificial intelligence systems</header><subsection id="id5c43065598e145c88f4fb414ccb92cc8"><enum>(a)</enum><header>Definitions</header><text>In this section:</text><paragraph id="id788f15dbec734be08e561ed7a2256eab"><enum>(1)</enum><header>Agency</header><text>The term <term>agency</term> has the meaning given such term in section 3502 of title 44, United States Code.</text></paragraph><paragraph id="idfefe4f3922e44fe5a86f01b4a84b7b3a"><enum>(2)</enum><header>Artificial intelligence system</header><text>The term <term>artificial intelligence system</term> has the meaning given to the term <term>artificial intelligence</term> in section 5002 of the National Artificial Intelligence Initiative Act of 2020 (<external-xref legal-doc="usc" parsable-cite="usc/15/9401">15 U.S.C. 9401</external-xref>).</text></paragraph><paragraph id="id1ea73b600e244c11821fce365c5d873d"><enum>(3)</enum><header>Broadcaster</header><text>The term <term>broadcaster</term> has the meaning given such term in section 723 of the Communications Act of 1934.</text></paragraph><paragraph id="idee4085b29d764698b103d0d1f7782e9e"><enum>(4)</enum><header>Child sexual abuse material</header><text>The term <term>child sexual abuse material</term> means a visual depiction defined in section 2256(8) of title 18, United States Code.</text></paragraph><paragraph id="ida3b819c126ad4b0d9c75b52a3890b9be"><enum>(5)</enum><header>Communication</header><text>The term <term>communication</term> means any transfer, in whole or in part, by wire, oral, or electronic means, of signs, signals, writing, images, sounds, or data of any nature.</text></paragraph><paragraph id="id4a3de4e1a7ec481a9a2246f1e98289f5"><enum>(6)</enum><header>Communication metadata</header><text>The term <term>communication metadata</term> means structural or descriptive information associated with a communication, such as—</text><subparagraph id="idcdf25027f7d24a508fb35a847341816f"><enum>(A)</enum><text>the name of the sender and recipient;</text></subparagraph><subparagraph id="id34d9989df05c4c2f910326f5869d1955"><enum>(B)</enum><text>the employer or institutional affiliation of each person identified in subparagraph (A);</text></subparagraph><subparagraph id="id6a6245ab9cc6421286dab2a363d883b1"><enum>(C)</enum><text>contact information for each person identified in subparagraph (A), such as a telephone number or email address; and</text></subparagraph><subparagraph id="id9bc2c6b50ada4b8caf53e8f4ba53cadd"><enum>(D)</enum><text>the date on which the communication was conveyed.</text></subparagraph></paragraph><paragraph id="id781c126a975d4526a8fd4e6220a69991"><enum>(7)</enum><header>Covered communication</header><text>The term <term>covered communication</term> means the contents of a communication and communication metadata from an officer or employee of the United States under color or pretense of office or employment to a broadcaster, provider of an interactive computer service, or provider of an artificial intelligence system regarding an act or omission by such broadcaster, service, or system with respect to actual or potential expression on or from the broadcaster, service, or system, including any standards, processes, or policies of such broadcaster or provider governing the broadcast, publication, display, or moderation of expression on or from the broadcaster, service, or system, but excluding the contents of communications and communications metadata—</text><subparagraph id="idf867b75b69c44eaf837ecc51217fff2e"><enum>(A)</enum><text>to the extent it consists of classified information, as defined in section 1 of the Classified Information Procedures Act (<external-xref legal-doc="public-law" parsable-cite="pl/96/456">Public Law 96–456</external-xref>), if such information is so properly classified;</text></subparagraph><subparagraph id="id30b72cd46a3a4402980572ed0ef82092"><enum>(B)</enum><text>relating to child sexual abuse material; and</text></subparagraph><subparagraph id="id999793a73a26460fa260b80522067383"><enum>(C)</enum><text>for actions, threats, or directions described in a subparagraph of section 723(b)(2) of the Communications Act of 1934.</text></subparagraph></paragraph><paragraph id="idb0d8ed5118c5430cad11cee6ce472810"><enum>(8)</enum><header>Expression</header><text>The term <term>expression</term> means any speech, text, images, video, or any other information distributed by an information content provider, an interactive computer service, artificial intelligence system, or a broadcaster.</text></paragraph><paragraph id="id49c5ba3858ce49d4a86ed0b0f884abe6"><enum>(9)</enum><header>Information content provider</header><text>The term <term>information content provider</term> has the meaning given to the term in section 230 of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/230">47 U.S.C. 230</external-xref>).</text></paragraph><paragraph id="iddd16dfb5683542f1a5bae638de8c96f8"><enum>(10)</enum><header>Interactive computer service</header><text>The term <term>interactive computer service</term> means an interactive computer service as defined in section 230 of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/230">47 U.S.C. 230</external-xref>).</text></paragraph></subsection><subsection id="id583b17ef661a4308a2af30cf02cb15a2"><enum>(b)</enum><header>Standards and guidelines required</header><paragraph id="idede32745fc294b309d990b794a5133aa"><enum>(1)</enum><header>In general</header><text>Not later than 1 year after the date of the enactment of the <short-title>Justice Against Weaponized Bureaucratic Overreach to Networked Expression Act</short-title>, the Director shall, in consultation with the Secretary of Commerce, the Director of the Office of Science and Technology Policy, the Director of the Office of Management and Budget, and the head of any other agency the Director considers appropriate, develop standards and guidelines to assist agencies in carrying out the requirements of section 701 of the National Science and Technology Policy, Organization, and Priorities Act of 1976, including the collection, retention, and transmission of covered communications through the portal established under such section.</text></paragraph><paragraph id="id11dba0376a7a43f9b48888ebaafec6bd"><enum>(2)</enum><header>Accounting for and adapting for specific needs of agencies</header><text>In developing the standards and guidelines pursuant to paragraph (1), the Director shall account for and, as applicable, adapt such standards and guidelines to the specific needs of each agency.</text></paragraph></subsection><subsection id="id09051adc427847779b9af6a0e87fd9da"><enum>(c)</enum><header>Elements</header><text>The standards and guidelines required by subsection (b) shall include recommendations regarding—</text><paragraph id="id0b9ba1ec7e0a419684bf152b5d9f2dca"><enum>(1)</enum><text>standard taxonomies and labeling of covered communications to be transmitted to the portal described in such subsection;</text></paragraph><paragraph id="idb809a5bcead748ebb377987f7a7ab036"><enum>(2)</enum><text>the collection and logging of communication metadata for each covered communication;</text></paragraph><paragraph id="id167579de62ef4bd895a2412745df32b8"><enum>(3)</enum><text>standard formats to ensure interoperability of covered communications transmitted to such portal;</text></paragraph><paragraph id="idf1d0a36cc241412990047d5fb279eed3"><enum>(4)</enum><text>data security standards and protocols for the collection and transmission of covered communications to such portal; and</text></paragraph><paragraph id="id4c59f9c7f95a499f9f2c137a8c97c903"><enum>(5)</enum><text>audit, management, and monitoring controls for the retention of covered communications by the agency.</text></paragraph></subsection><subsection id="id0506da2838fb428fa41426bebbde1c29"><enum>(d)</enum><header>Biennial updates to the standards and guidelines</header><text>Not less than once every 2 years, the Director shall, in consultation with the Secretary of Commerce, the Director of the Office of Science and Technology Policy, and the Director of the Office of Management and Budget, review the standards and guidelines issued under subsection (b) and may revise and update such standards and guidelines as necessary.</text></subsection><subsection id="id1ceb95e968484547a2545d1ac8394ce1" commented="no" display-inline="no-display-inline"><enum>(e)</enum><header>Submission to the Director of the Office of Science and Technology Policy</header><text>The Director shall submit the standards and guidelines developed under subsection (b), and any revisions made under subsection (d), to the Director of the Office of Science and Technology Policy for purposes of carrying out section 701 of the National Science and Technology Policy, Organization, and Priorities Act of 1976.</text></subsection></section><after-quoted-block>.</after-quoted-block></quoted-block></section><section id="id5ea052fe942e47ae90b1ca914550ba93"><enum>5.</enum><header>Establishment of portal for covered communications with broadcasters, providers of interactive computer services, and providers of artificial intelligence systems</header><text display-inline="no-display-inline">The National Science and Technology Policy, Organization, and Priorities Act of 1976 (<external-xref legal-doc="usc" parsable-cite="usc/42/6611">42 U.S.C. 6611 et seq.</external-xref>) is amended by adding at the end the following:</text><quoted-block id="ida040bca06f9c4af7a5675094b2a843e6" display-inline="no-display-inline" style="OLC"><title id="idab7c72dbe3134044b1863bb4be19c5f0"><enum>VII</enum><header>Communications with broadcasters, providers of interactive computer services, and providers of artificial intelligence systems</header><section id="idab447981a14249cfbc7b6c4e5aaf754e"><enum>701.</enum><header>Portal for covered communications with broadcasters, providers of interactive computer services, and providers of artificial intelligence systems</header><subsection id="idf77242b729f1410f85051aeecc12e97b"><enum>(a)</enum><header>Definitions</header><text>In this section:</text><paragraph id="id7d8628abe2c9479a9b5b4ff329f28358"><enum>(1)</enum><header>Agency</header><text>The term <term>agency</term> has the meaning given such term in section 3502 of title 44, United States Code.</text></paragraph><paragraph id="id3677ace6ec944df6bfce186774a7ee93"><enum>(2)</enum><header>Artificial intelligence system</header><text>The term <term>artificial intelligence system</term> has the meaning given to the term <term>artificial intelligence</term> in section 5002 of the National Artificial Intelligence Initiative Act of 2020 (<external-xref legal-doc="usc" parsable-cite="usc/15/9401">15 U.S.C. 9401</external-xref>).</text></paragraph><paragraph id="ide04325fad91645659559f33093aae2a3"><enum>(3)</enum><header>Broadcaster</header><text>The term <term>broadcaster</term> has the meaning given such term in section 723 of the Communications Act of 1934.</text></paragraph><paragraph id="id3fe5a380c52748a89bdfc8da9a2c2fff"><enum>(4)</enum><header>Communication, communication metadata, covered communication, employee, and expression</header><text>The terms <term>communication</term>, <term>communication metadata</term>, <term>covered communication</term>, <term>employee</term>, and <term>expression</term> have the meanings given such terms in section 37 of the National Institute of Standards and Technology Act.</text></paragraph><paragraph id="id74d3d538e10240068c03006c3a1ed88c"><enum>(5)</enum><header>Content action</header><text>The term <term>content action</term> has the meaning given such term in section 723 of the Communications Act of 1934.</text></paragraph><paragraph id="id4a00d85670b44ab7ad1ce88f509fecb6"><enum>(6)</enum><header>Information content provider and interactive computer service</header><text>The terms <term>information content provider</term> and <term>interactive computer service</term> have the meanings given such terms in section 230 of the Communications Act of 1934 (<external-xref legal-doc="usc" parsable-cite="usc/47/230">47 U.S.C. 230</external-xref>).</text></paragraph><paragraph id="id5b992aac7fd1428db0d546e65232ce4f"><enum>(7)</enum><header>Portal</header><text>The term <term>portal</term> means the covered communications portal established by the Director of the Office of Science and Technology Policy pursuant to subsection (c).</text></paragraph></subsection><subsection id="id5afc9aab548d4ec39286471a508f5b1b"><enum>(b)</enum><header>Adoption of national institute of standards and technology standards and guidelines</header><text>Upon receiving the standards and guidelines from the Director of the National Institute of Standards and Technology pursuant to section 37(e) of the National Institute of Standards and Technology Act, the Director shall, in consultation with the Secretary of Commerce and the Director of the Office of Management and Budget, issue a requirement that the head of each agency—</text><paragraph id="idb0141d69fae64b818369d6230b0457ed"><enum>(1)</enum><text>adopt such standards and guidelines; and</text></paragraph><paragraph id="id8b4bbdf7ac3448ee900a206ccab264c1"><enum>(2)</enum><text>comply with the requirements for transmission of covered communications pursuant to subsection (c).</text></paragraph></subsection><subsection id="id3419565be9574ed184cc574a4c90565c"><enum>(c)</enum><header>Establishment of covered communications portal</header><text>The Director shall, in consultation with the Secretary of Commerce and the Director of the Office of Management and Budget—</text><paragraph id="ida61452b0df6e4fdf835a82ac6bd03c0f"><enum>(1)</enum><text>establish a portal for covered communications; and</text></paragraph><paragraph id="idaed63e8e0a86426591ea24613ca9e39e"><enum>(2)</enum><text>require each head of an agency to transmit to the portal, not less than once every 120 days, new or previously unreported covered communications discovered through reasonable efforts, including employee self-reporting.</text></paragraph></subsection><subsection id="id62e98fa23f1840f4959d9be565730e1e"><enum>(d)</enum><header>Public website for covered communications</header><paragraph id="id2c16a00b738f44548fd227155c3eee09"><enum>(1)</enum><header>In general</header><text>Subject to paragraph (2), the Director of the Office of Science and Technology Policy shall make available on a publicly accessible, searchable website, a detailed description of each covered communication, received by the Director under subsection (c) that—</text><subparagraph id="id17ba8537f23a40e996c48ab408ad1c98"><enum>(A)</enum><text>summarizes the contents of each covered communication; and</text></subparagraph><subparagraph id="id20e29960050548deb816bc95ee7f462a"><enum>(B)</enum><text>identifies all requests, whether implied or express, for content actions included in such covered communications.</text></subparagraph></paragraph><paragraph id="id98b1e8c4993048e49db34b52279783c4"><enum>(2)</enum><header>Availability of sensitive covered communications</header><subparagraph id="id20e515e07d3747eda77f75f5a7a96879"><enum>(A)</enum><header>In general</header><text>The Director may, in consultation with the Director of the Office of Management and Budget and the applicable agency head, redact information contained in a detailed description of a covered communication, as described in paragraph (1), before publication to the public, to the extent that such information falls into an exemption described in a paragraph of section 552(b) of title 5, United States Code (commonly known as the <quote>Freedom of Information Act</quote>), if—</text><clause commented="no" display-inline="no-display-inline" id="idc52bfe7ff2684aab88db00aebdc2bc27"><enum>(i)</enum><text display-inline="yes-display-inline">the description includes markings detailing the specific exemption under which such redactions were made; and</text></clause><clause commented="no" display-inline="no-display-inline" id="idfca2b3c18ee24a17868c35924ef01053"><enum>(ii)</enum><text display-inline="yes-display-inline">such information is unredacted when an exemption is no longer applicable.</text></clause></subparagraph><subparagraph id="id4a19dc61a52947bf9d05027794c6094f"><enum>(B)</enum><header>Availability to Congress</header><text>The full, unredacted record of all covered communications shall be made available to the Chairman and Ranking Member of the Committee on Commerce, Science, and Transportation of the Senate and the Chairman and Ranking Member of the Committee on Energy and Commerce of the House of Representatives at an interval determined appropriate by the Chairmen and Ranking Members each Congress, but not less than once every fiscal year.</text></subparagraph></paragraph></subsection><subsection id="id0d22abad940a46f99597035919ec1087"><enum>(e)</enum><header>Provider complaint process</header><paragraph id="idda6a12b07de940c18dd9da3207068bdf"><enum>(1)</enum><header>In general</header><text>In establishing the publicly accessible, searchable website under subsection (d), the Director shall also establish a process within such website through which the broadcaster, provider of an interactive computer service, or provider of an artificial intelligence system may, without retaliation by the Federal Government, submit a complaint alleging that an officer or employee of the United States has violated section 723(b) of the Communications Act of 1934.</text></paragraph><paragraph id="id45dff142343445149064a88ca7c841d4"><enum>(2)</enum><header>Transmittal of complaint</header><subparagraph id="iddec3dc14613b4848896957baaea5d32f"><enum>(A)</enum><header>Transmittal</header><text>Not later than 15 days after receiving a valid complaint pursuant to paragraph (1) regarding an officer or employee of the United States, the Director shall transmit such complaint to—</text><clause id="id1cf8de3e824640378e8905047ace2822"><enum>(i)</enum><text>the Inspector General of the agency that employs the officer or employee;</text></clause><clause id="id77a132592e9c4697bf587e291143a6f0"><enum>(ii)</enum><text>the Chairman and Ranking Member of the Committee on Commerce, Science, and Transportation of the Senate; and</text></clause><clause id="ide7a77073cb734a1b9f17fb484c2a0ff0"><enum>(iii)</enum><text>the Chairman and Ranking Member of the Committee on Energy and Commerce of the House of Representatives.</text></clause></subparagraph><subparagraph id="id769cf11379ed486cb778228a4419551c"><enum>(B)</enum><header>Validity</header><text>For purposes of this paragraph, a complaint of the broadcaster, provider of an interactive computer service, or provider of an artificial intelligence system is considered valid if the complaint—</text><clause id="iddccd3985fbe84a23b231ae98a25f1377"><enum>(i)</enum><text>is brought by an employee or an authorized person acting on behalf of the broadcaster or provider; and</text></clause><clause id="idc2eb85708e834700aac1a4ac94f69b2c"><enum>(ii)</enum><text>identifies the communication and includes sufficient information to reasonably substantiate an alleged violation of section 723(b) of the Communications Act of 1934.</text></clause></subparagraph></paragraph></subsection><subsection id="id93a583b0e9ea4e8da7fc3355aed1e79a"><enum>(f)</enum><header>Audits for compliance with the national institute of standards and technology standards and guidelines</header><paragraph id="id6b34f554065f4038b39cd77ef910b917"><enum>(1)</enum><header>Audits required</header><text>Not less frequently than once every 2 years, each Inspector General of an agency shall audit the compliance of the agency of the Inspector General with—</text><subparagraph id="ida8803e2be0a347c88c6fc44d6549bd9a"><enum>(A)</enum><text>the standards and guidelines required to be adopted under subsection (b)(1); and</text></subparagraph><subparagraph id="idd48c924a494d48a98098a3cd20573ac1"><enum>(B)</enum><text>the requirements of paragraph (2) of subsection (c) regarding transmittal of covered communications to the portal established under paragraph (1) of such subsection, including a review of whether the agency is properly categorizing a communication as a covered communication for listing in the portal and transmission to Congress and consideration of whether the agency is properly excluding a communication from categorization as a covered communication.</text></subparagraph></paragraph><paragraph id="id9be0aea2be23415eab15483dd6d81755"><enum>(2)</enum><header>Transmittal of findings</header><text>Not later than 7 days after an Inspector General completes an audit under paragraph (1), the Inspector General shall transmit a summary of the findings of the Inspector General with respect to the audit to the following:</text><subparagraph id="id66a8ff4df9194474b6fb20770efec1fa"><enum>(A)</enum><text>The Director.</text></subparagraph><subparagraph id="idb961571120da46efa1a818314653bed5"><enum>(B)</enum><text>The Chairman and Ranking Member of the Committee on Commerce, Science, and Transportation of the Senate.</text></subparagraph><subparagraph id="id2a60e5ffed9947638a3cf54636fb9275" commented="no" display-inline="no-display-inline"><enum>(C)</enum><text>The Chairman and Ranking Member of the Committee on Energy and Commerce of the House of Representatives.</text></subparagraph></paragraph></subsection></section></title><after-quoted-block>.</after-quoted-block></quoted-block></section><section id="iddb0287a971fb49228fd693f7ee27696a"><enum>6.</enum><header>Severability</header><text display-inline="no-display-inline">If any provision of this Act, or any amendment made by this Act, is determined to be unenforceable or invalid, the remaining provisions of this Act and the amendments made by this Act shall not be affected.</text></section></legis-body></bill>
+

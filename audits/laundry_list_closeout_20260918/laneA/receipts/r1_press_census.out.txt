@@ -1,0 +1,130 @@
+﻿python.exe : C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\la
+undry_list_closeout_20260918\laneA\receipts\r1_press_census.py:4: SyntaxWarning: invalid escape sequence '\:'
+At line:3 char:1
++ & $py "$rc\r1_press_census.py" 2>&1 | Tee-Object -FilePath "$rc\r1_pr ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\pgoff\...e sequence '\:':String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  Reproduces the LIVE press ingest chain exactly, without importing anything under fec\:
+====================================================================================================
+R1  PRESS CHANNEL CENSUS   run 2026-09-18T23:29:58
+====================================================================================================
+input  C:\Users\pgoff\OneDrive\Desktop\Draft Systems\cu_press_stance_tone.csv      1080244 bytes  mtime 2026-06-30 18:50:17.864859
+       sha256 6f2f926d08196a12a9c8f59a92b523e6776a8e7b0e6959a29720c4385169d474
+input  data/stance/press_refresh_tone.csv                                     134925 bytes  mtime 2026-09-16 23:44:44.066191
+       sha256 393a983ce6d9c7fa92142a19d88178ac738db097ce0b1daa109e221727afde7a
+
+-- 1. INGEST (fec/press_stream.py:98 load_tone_rows) --
+rows in  cu_press_stance_tone.csv (historical)          :   2388
+rows in  data/stance/press_refresh_tone.csv (supplement):    291
+rows in  TOTAL                                          :   2679
+
+RULE (press_stream.py:111)  if (row.get('source') or '').strip().upper() == 'OFFICIAL_MENTION': continue
+   dropped: base 0, refresh 0, total 0
+RULE (press_stream.py:114)  if not key[0] or key in seen: continue     [not key[0] = empty canonical url]
+   dropped empty-url: base 0, refresh 0, total 0
+   dropped duplicate (url,identity) turn key: base 0, refresh 0, total 0
+ROWS INGESTED (load_tone_rows return)                   :   2679
+   of which historical 2388 / refresh 291
+CLOSES? 2679 in = 2679 ingested + 0 OFFICIAL_MENTION + 0 empty-url + 0 dup-turn  -> YES
+
+-- 2. SCORING (fec/stance/build_media_blend.py press block, LIVE version) --
+press_raw_original.json category keys (the `if c in ORIG` gate) : 20
+api_press_stance.csv url->api_target entries: 2388 | fulltext cache urls: 2675
+press_stance_final.csv stack keys (url,identity): 2679
+press_stance_overrides.json corrections: 23  (.candidate present: False)
+
+rows scored / disposition (my replication):
+   used                     1387
+   neutral-zeroed            816
+   zero-intensity            384
+   no-policy-domain           60
+   unrelated-zeroed           29
+   unresolved-member           3
+   TOTAL                    2679   <- must equal rows ingested
+members with nonzero press signal: 317
+
+routing basis (my replication):
+   title                        1120
+   body-confirms-declared        638
+   no-policy-domain              405
+   target                        350
+   body-general                  166
+
+-- 3. CROSS-CHECK vs the engine-written ledgers --
+press_component_meta.json  tone_rows=2679  articles_used=1387  members_nonzero=317
+press_domain_routing_audit.json rows=2679
+
+disposition                engine       mine    delta
+neutral-zeroed                845        816      -29
+no-policy-domain               60         60        0
+unrelated-zeroed                0         29       29
+unresolved-member               3          3        0
+used                         1387       1387        0
+zero-intensity                384        384        0
+
+routing basis                  engine       mine    delta
+body-confirms-declared            638        638        0
+body-general                      166        166        0
+no-policy-domain                  405        405        0
+target                            350        350        0
+title                            1120       1120        0
+
+input sha256 recorded in press_component_meta.json vs live files NOW:
+   ../Draft Systems/cu_press_stance_tone.csv                    MATCH
+   data/stance/press_refresh_tone.csv                           MATCH
+   press_stance_final.csv                                       MATCH
+   data/stance/interview_stance_final.csv                       MATCH
+   data/stance/interview_stance_final.receipt.json              MATCH
+   data/stance/press_refresh_feed_receipt.json                  MATCH
+
+-- 4. ROUTING / DISPLAY-COLUMN CHECK --
+categories the router produced that press_raw_original.json has no key for (dropped by `_cats=[c for c in _route["categories"] if c in ORIG]`):
+   (none)
+
+effective category -> rows (only `used`+non-used alike, counted on every ingested row):
+   General Credit Union                  630
+   Mortgage Lending & Housing            545
+   Technology & Emerging Issues          313
+   CFPB Issues & Structural Reform       186
+   Fraud Prevention                      163
+   Examination & Supervision             150
+   Interchange                           127
+   CDFI Fund                             110
+   Credit Union Tax Status                91
+   Payments                               76
+   Credit Card & Consumer-Fee Mandates     57
+   CU-Bank Competitive Dynamics           49
+   Member Business Lending                44
+   Data Privacy & Cybersecurity           41
+   Defense Credit Union Issues            20
+   Field of Membership                    18
+   Charter Modernization & Governance     17
+   Credit Union Capital Requirements      11
+   NCUA Budget & Share Insurance Fund      3
+   Telephone Consumer Protection Act       1
+
+declared categories DISCARDED by the router (declared_specific not confirmed):
+   Examination & Supervision             275
+   CU-Bank Competitive Dynamics          217
+   Technology & Emerging Issues          142
+   Fraud Prevention                      136
+   Field of Membership                   126
+   Mortgage Lending & Housing            125
+   Member Business Lending               125
+   Credit Union Tax Status               121
+   CDFI Fund                             119
+   Credit Card & Consumer-Fee Mandates    117
+   CFPB Issues & Structural Reform        97
+   Charter Modernization & Governance     79
+   Interchange                            67
+   Data Privacy & Cybersecurity           59
+   NCUA Budget & Share Insurance Fund     51
+   Defense Credit Union Issues            27
+   Payments                               22
+   Credit Union Capital Requirements       8
+   Telephone Consumer Protection Act       1
+
+wrote per-row census: r1_press_rows.json (2679 rows)
+DONE R1

@@ -1,0 +1,139 @@
+============================================================================================================
+M2  candidate canonicalisers vs LIVE url populations
+============================================================================================================
+tone rows read (pre-dedup, OFFICIAL_MENTION dropped): 2679
+  fulltext press_text_cache.jsonl                                 2481 rows
+  fulltext data\stance\press_text_cache_priority.jsonl              53 rows
+  fulltext data\stance\press_refresh_fulltext.jsonl                291 rows
+  press_stance_final.csv   2679 rows | api_press_stance.csv   2388 rows
+
+------------------------------------------------------------------------------------------------------------
+C1 dup-slug '-0' only
+------------------------------------------------------------------------------------------------------------
+
+  [C1 dup-slug '-0' only] tone turn key (url, identity): legacy distinct keys 2679 -> candidate 2674  (5 newly merged groups)
+      of those: 4 are one of the 12 KNOWN groups, 1 are ADDITIONAL
+      ADDITIONAL MERGE  key=['https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act', 'V000130']
+         Juan Vargas          9/30/2022    https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+            title: House Passes Rep. Vargas’ Credit Union Board Modernization Act
+         Juan Vargas          1/30/2023    https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+            title: House Passes Rep. Vargas’ Credit Union Board Modernization Act
+
+  [C1 dup-slug '-0' only] fulltext cache key (url only): legacy distinct keys 2675 -> candidate 2670  (5 newly merged groups)
+      collisions whose members carry DIFFERENT body text: 5
+      BODY COLLISION  https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571
+      BODY COLLISION  https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380
+      BODY COLLISION  https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+         https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+         https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+      BODY COLLISION  https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111
+      BODY COLLISION  https://americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223
+
+  [C1 dup-slug '-0' only] stack key (url, identity): legacy distinct keys 2679 -> candidate 2674  (5 newly merged groups)
+      collisions whose members carry DIFFERENT (stack_label, tier): 0
+
+      api_press_stance target hits over tone rows: legacy 627 -> candidate 623
+
+------------------------------------------------------------------------------------------------------------
+C2 last-segment slug >=2 hyphens
+------------------------------------------------------------------------------------------------------------
+
+  [C2 last-segment slug >=2 hyphens] tone turn key (url, identity): legacy distinct keys 2679 -> candidate 2672  (7 newly merged groups)
+      of those: 7 are one of the 12 KNOWN groups, 0 are ADDITIONAL
+
+  [C2 last-segment slug >=2 hyphens] fulltext cache key (url only): legacy distinct keys 2675 -> candidate 2670  (5 newly merged groups)
+      collisions whose members carry DIFFERENT body text: 1
+      BODY COLLISION  https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers
+         https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+         https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+
+  [C2 last-segment slug >=2 hyphens] stack key (url, identity): legacy distinct keys 2679 -> candidate 2672  (7 newly merged groups)
+      collisions whose members carry DIFFERENT (stack_label, tier): 0
+
+      api_press_stance target hits over tone rows: legacy 627 -> candidate 93
+
+------------------------------------------------------------------------------------------------------------
+C3 dup-slug + last-segment >=2 hyphens
+------------------------------------------------------------------------------------------------------------
+
+  [C3 dup-slug + last-segment >=2 hyphens] tone turn key (url, identity): legacy distinct keys 2679 -> candidate 2667  (12 newly merged groups)
+      of those: 11 are one of the 12 KNOWN groups, 1 are ADDITIONAL
+      ADDITIONAL MERGE  key=['https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act', 'V000130']
+         Juan Vargas          9/30/2022    https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+            title: House Passes Rep. Vargas’ Credit Union Board Modernization Act
+         Juan Vargas          1/30/2023    https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+            title: House Passes Rep. Vargas’ Credit Union Board Modernization Act
+
+  [C3 dup-slug + last-segment >=2 hyphens] fulltext cache key (url only): legacy distinct keys 2675 -> candidate 2665  (10 newly merged groups)
+      collisions whose members carry DIFFERENT body text: 6
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380
+      BODY COLLISION  https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act
+         https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+         https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111
+      BODY COLLISION  https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers
+         https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+         https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223
+
+  [C3 dup-slug + last-segment >=2 hyphens] stack key (url, identity): legacy distinct keys 2679 -> candidate 2667  (12 newly merged groups)
+      collisions whose members carry DIFFERENT (stack_label, tier): 0
+
+      api_press_stance target hits over tone rows: legacy 627 -> candidate 93
+
+------------------------------------------------------------------------------------------------------------
+C4 dup-slug + last-segment >=3 hyphens
+------------------------------------------------------------------------------------------------------------
+
+  [C4 dup-slug + last-segment >=3 hyphens] tone turn key (url, identity): legacy distinct keys 2679 -> candidate 2668  (11 newly merged groups)
+      of those: 10 are one of the 12 KNOWN groups, 1 are ADDITIONAL
+      ADDITIONAL MERGE  key=['https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act', 'V000130']
+         Juan Vargas          9/30/2022    https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+            title: House Passes Rep. Vargas’ Credit Union Board Modernization Act
+         Juan Vargas          1/30/2023    https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+            title: House Passes Rep. Vargas’ Credit Union Board Modernization Act
+
+  [C4 dup-slug + last-segment >=3 hyphens] fulltext cache key (url only): legacy distinct keys 2675 -> candidate 2665  (10 newly merged groups)
+      collisions whose members carry DIFFERENT body text: 6
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#L000571
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#L000571
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#A000380
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#A000380
+      BODY COLLISION  https://vargas.house.gov/house-passes-rep-vargas-credit-union-board-modernization-act
+         https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act
+         https://vargas.house.gov/media/press-releases/house-passes-rep-vargas-credit-union-board-modernization-act-0
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001111
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001111
+      BODY COLLISION  https://marshall.senate.gov/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers
+         https://www.marshall.senate.gov/newsroom/op-eds/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+         https://www.marshall.senate.gov/newsroom/press-releases/sen-marshall-in-washington-examiner-credit-card-swipe-fees-are-hurting-consumers/
+      BODY COLLISION  https://americascreditunions.org/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election#M001223
+         https://www.americascreditunions.org/news-media/news/leagues-credit-unions-connect-policymakers-congress-returns-home-election-0#M001223
+
+  [C4 dup-slug + last-segment >=3 hyphens] stack key (url, identity): legacy distinct keys 2679 -> candidate 2668  (11 newly merged groups)
+      collisions whose members carry DIFFERENT (stack_label, tier): 0
+
+      api_press_stance target hits over tone rows: legacy 627 -> candidate 101
+
+DONE M2

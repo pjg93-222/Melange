@@ -1,0 +1,35 @@
+[
+ {
+  "char_before": " ",
+  "cut_class": "A_anchored_caps",
+  "cut_tag": "SERFATY (on camera)",
+  "head_tail": "w, people are going to tell you horror stories about all of these things that happened and people's career being blown up over it and he's like, it'll be fine. ",
+  "member": "Katie Britt",
+  "open_curly": 0,
+  "open_straight": true,
+  "removed_head": "SERFATY (on camera): And Sen. Britt typically does not do hallway interviews on Capitol Hill, unlike other senators. So it's notable that the few times that we ",
+  "rowid": 66264
+ },
+ {
+  "char_before": " ",
+  "cut_class": "A_anchored_caps",
+  "cut_tag": "ACOSTA (voice-over)",
+  "head_tail": "It's essentially important that we stop his mistakes. We have striven to have this be nonpolitical, as bipartisan as possible, as unifying as possible.\" ",
+  "member": "Nancy Pelosi",
+  "open_curly": 0,
+  "open_straight": true,
+  "removed_head": "ACOSTA (voice-over): For weeks, the president has claimed his administration was containing the outbreak only to see the pandemic expand rapidly. Late last mont",
+  "rowid": 211968
+ },
+ {
+  "char_before": " ",
+  "cut_class": "A_anchored_caps",
+  "cut_tag": "MURRAY (voice-over)",
+  "head_tail": "and will outnumber the police so they can't be stopped. Their plan is to literally kill people. Please, please take this tip seriously and investigate further. ",
+  "member": "Adam Schiff",
+  "open_curly": 0,
+  "open_straight": true,
+  "removed_head": "MURRAY (voice-over): The committee unveiled never-before-seen footage of House Speaker Nancy Pelosi rushing to safety as protestors breached the Capitol.",
+  "rowid": 231769
+ }
+]

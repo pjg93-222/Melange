@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-EHF21682-00G-6W-DJL"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S2160 IS: Restored, Equitable, Coronavirus Adjusted Lodging Act of 2021</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2021-06-22</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>1st Session</session><legis-num>S. 2160</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20210622">June 22, 2021</action-date><action-desc><sponsor name-id="S347">Mr. Moran</sponsor> (for himself and <cosponsor name-id="S362">Mr. Kaine</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSGA00">Committee on Homeland Security and Governmental Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To prohibit the Administrator of General Services from establishing per diem reimbursements rates for travel within the continental United States (commonly known as <quote>CONUS</quote>) for certain fiscal years below a certain level, and for other purposes.</official-title></form><legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H581754B5228D46B291AA81966E2C31AB"><section section-type="section-one" id="HC136882D4A9A4DB694943917D22D6F1F"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Restored, Equitable, Coronavirus Adjusted Lodging Act of 2021</short-title></quote> or the <quote><short-title>RECAL Act of 2021</short-title></quote>. </text></section><section id="HB10A6F98B8AB47389D2A921B9B99F93F"><enum>2.</enum><header>Continental United States (CONUS) per diem reimbursement rates</header><text display-inline="no-display-inline">Notwithstanding any other provision of law, in establishing the per diem reimbursement rates for fiscal years 2022 and 2023 pursuant to sections 5702 and 5707 of title 5, United States Code, the Administrator of General Services may not establish a lodging allowance rate for any location within the continental United States at a level that is less than the standard rate or non-standard area rate set pursuant to the GSA Per Diem Bulletin FTR 20–01, dated August 8, 2019.</text></section></legis-body></bill> 
+

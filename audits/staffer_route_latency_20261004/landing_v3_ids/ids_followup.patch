@@ -1,0 +1,688 @@
+diff --git a/fec/surfaces/staffer_closeness_routes.py b/fec/surfaces/staffer_closeness_routes.py
+--- a/fec/surfaces/staffer_closeness_routes.py
++++ b/fec/surfaces/staffer_closeness_routes.py
+@@ -556,6 +556,8 @@
+     10**12 of the cheapest tie, the tied route with the fewest steps wins, and the reported cost is the float sum of
+     the returned route's costs from the origin. The ranked alternatives follow the same rule (_next_alternative), so
+     two alternatives inside that width can be listed in an order that differs from their reported costs by rounding.
++    Each spur search of the ranked loop judges that width against its own spur cost, not the whole route's, so two
++    alternatives that tie within the width over the whole route can occasionally be listed out of step order.
+     The rule is documented in staffer_live/README.md as well.
+     """
+     MAX_ROW_CACHES = 3
+diff --git a/fec/surfaces/staffer_live/README.md b/fec/surfaces/staffer_live/README.md
+--- a/fec/surfaces/staffer_live/README.md
++++ b/fec/surfaces/staffer_live/README.md
+@@ -53,7 +53,7 @@
+ 
+ Staffer (`objective=work_time`) uses a bidirectional Dijkstra search over payroll and directory work exposure. `work_sources=directory` is the explicit comparison mode; `payroll_and_directory` is the Staffer default. Detailed dated directory/payroll rows take precedence over trajectory summaries. Trajectories fill uncovered intervals. The index clips exposure to the routing as-of date, retains original future end bounds, and does not infer work before a supplied start. Admin employment is excluded and internship rows can contribute to observed headcount without creating work edges.
+ 
+-Near ties in Staffer routes. The cheapest route wins, and costs equal to 12 significant digits are a tie. A route ties for the cheapest when its exact cost, the real sum of its float hop and terminal costs with no rounding, is within one part in 10^12 (relative 1e-12) of the cheapest route's exact cost. Among tied routes the one with the fewest steps wins, then the one with the lower exact cost, and any remaining tie is broken the same way every time (the smallest person ids, read from the destination end). The reported cost is still the route's hop and terminal costs added as floats in order from the origin. Before this rule, which of two routes that cost the same on paper won depended on how the floating-point sums happened to round, and two searches could pick different routes. Alternative routes under `alternative_strategy=ranked` follow the same rule: the next alternative accepted is, among the pending candidates whose exact cost is within one part in 10^12 of the cheapest pending one, the one with the fewest steps, then the one with the lower exact cost, then the one whose person ids read from the destination end are smallest. Two alternatives inside that width can therefore be listed in an order that differs from their reported costs by rounding; alternatives further apart than that are ranked by cost as before. `distinct` and `independent` choose each route with one such search.
++Near ties in Staffer routes. The cheapest route wins, and costs equal to 12 significant digits are a tie. A route ties for the cheapest when its exact cost, the real sum of its float hop and terminal costs with no rounding, is within one part in 10^12 (relative 1e-12) of the cheapest route's exact cost. Among tied routes the one with the fewest steps wins, then the one with the lower exact cost, and any remaining tie is broken the same way every time (the smallest person ids, read from the destination end). The reported cost is still the route's hop and terminal costs added as floats in order from the origin. Before this rule, which of two routes that cost the same on paper won depended on how the floating-point sums happened to round, and two searches could pick different routes. Alternative routes under `alternative_strategy=ranked` follow the same rule: the next alternative accepted is, among the pending candidates whose exact cost is within one part in 10^12 of the cheapest pending one, the one with the fewest steps, then the one with the lower exact cost, then the one whose person ids read from the destination end are smallest. Two alternatives inside that width can therefore be listed in an order that differs from their reported costs by rounding; alternatives further apart than that are ranked by cost as before. In the ranked list of alternatives, the tie window is judged within each alternative's own search, so two alternatives that tie only over the whole route can occasionally appear out of step order. `distinct` and `independent` choose each route with one such search.
+ 
+ Each shared-workplace exposure integrates the product of both people's concurrent-job allocations divided by observed peer headcount, with a workplace-type multiplier. Recognized shared-employee titles have factors 0.02 in the House, 0.05 in the Senate, and 0.02 when chamber is unknown; these are assumptions. Saturating strength and a 0.8 per-hop factor produce structural route costs. Uncertainty adds costs for unverified present access, age, and workplace concentration. Separate overlap runs contribute recency in proportion to their exposure; a brief return does not refresh a long old overlap. Source evidence and modeled-window labels are restricted to the actual joint intervals. Same-name records are not merged by routing. Member context affects office terminal anchors only, with a 15% maximum bonus; it does not rank person-to-person routes.
+ 
+@@ -69,7 +69,7 @@
+ 
+ Name typeahead (`/api/staffer-search`, `/api/staffer-offices`) and the map projection read one published view (revision, static graph, profile people with their search index, identity aliases, router and office index) and take no service lock, so identity reconciliation, refreshes and route requests no longer queue them. A refresh builds the next view off to the side and publishes it with one assignment, so a reader takes one generation's references together and never pairs one revision with another generation's router or profile index. The view is not a frozen copy of everything behind it: successive views share the static graph and, when a refresh finds the same routing inputs, the same router. Such a refresh reassigns the router's node mapping under the service lock. Every refresh that rebuilds profile structures assigns each person node's `contacts`, outside the lock and before it publishes, on person nodes the previous view also reads, and one that rebuilds the router also adds user-statement hub nodes to the static graph. Each of those is one reference assignment, so a reader gets the old object or the new one, never a half-written one, but one answer can combine the view it took with the next generation's node mapping or contacts. A map snapshot (`/api/staffer-live`) takes its view and every live field it reports (poll metadata, source coverage, identity progress, inventory, sources, errors) in one short lock hold and then projects without the lock; a refresh that rebuilds the router publishes its view and the poll metadata in two successive lock holds, so a snapshot taken between them pairs the new view with the previous poll's metadata. The reconciliation loop reads the reference database before it takes the lock. The 30-second profile refresh keeps what it built when the accepted profile snapshot (content revision, prefix hash, receipt digest) and everything the structures were built from are unchanged; every integrity check on the receipt, the rows and the review assertions still runs on every cycle, and any change, or a forced refresh, rebuilds. A refresh that yields equal node contents leaves the route caches warm; they are emptied only when a label, kind or name status changes. Short typeahead queries use pre-tokenised words and pre-ranked prefix lists, tested to return exactly what the full sort returned.
+ 
+-Typeahead matches pieces of a query only against names, titles, aliases and office names; identifiers (node ids, politico:<uuid>, bare uuids, bioguide ids) match only when the whole query is the identifier, in any case, and that person ranks first.
++Typeahead matches pieces of a query only against names, titles, aliases and office names; identifiers (node ids, politico:<uuid>, bare uuids, bioguide ids) match only when the whole query is the identifier, in any case: a whole person id or uuid puts that person first, and a whole bioguide id lists the staff attached to that member. The record browser's People found list and the map's query filter follow the same rule over the text a person reads (names, source summaries, sources and aliases in the browser; names and source summaries in the map filter): a whole person id or uuid, or a whole member, committee or policy id, in any case, finds the people it names or is attached to, and the browser lists them first, with a person's own id ahead of the people attached to an id.
+ 
+ ## Acquisition exceptions and time
+ 
+diff --git a/fec/surfaces/staffer_live/staffer-inventory-worker.js b/fec/surfaces/staffer_live/staffer-inventory-worker.js
+--- a/fec/surfaces/staffer_live/staffer-inventory-worker.js
++++ b/fec/surfaces/staffer_live/staffer-inventory-worker.js
+@@ -19,20 +19,23 @@
+   }
+   if(!rows.length)bounds={minX:-500,maxX:500,minY:-500,maxY:500};
+ }
+-// An identifier is searched whole, never by its pieces (D-083): column 0, the node id, is not part of the searched text.
+-// A query that is a row's whole id (trimmed, in any case), or the bare uuid of a politico:<uuid> id, finds that row and lists it first.
++// An identifier is searched whole, never by its pieces (D-083): column 0, the node id, and columns 3 to 5, the member, committee and policy ids, are not
++// part of the searched text. A query that is a row's whole id (trimmed, in any case), or the bare uuid of a politico:<uuid> id, finds that row and lists it
++// first; a query that is the whole member, committee or policy id of a row lists that row next, ahead of the rows that match by words.
+ const POLITICO='politico:';
+ const wholeId=(id,want)=>{id=String(id).toLowerCase();return id===want||(id.startsWith(POLITICO)&&id.length>POLITICO.length&&id.slice(POLITICO.length)===want);};
++const wholeCode=(code,want)=>code!==null&&code!==undefined&&String(code).toLowerCase()===want;
+ function filter(){
+   const text=query.text||'',words=text.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
+-  const want=text.trim().toLowerCase(),named=[],others=[];
++  const want=text.trim().toLowerCase(),named=[],attached=[],others=[];
+   for(let i=0;i<rows.length;i++){
+     const r=rows[i];
+     if(want&&wholeId(r[0],want)){named.push(i);continue;}
+-    if(words.length){const tokens=[...r.slice(1,7),r[11]||''].join(' ').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];if(!words.every(w=>tokens.some(token=>token.startsWith(w))))continue;}
++    if(want&&(wholeCode(r[3],want)||wholeCode(r[4],want)||wholeCode(r[5],want))){attached.push(i);continue;}
++    if(words.length){const tokens=[r[1],r[2],r[6],r[11]||''].join(' ').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];if(!words.every(w=>tokens.some(token=>token.startsWith(w))))continue;}
+     others.push(i);
+   }
+-  matches=named.concat(others);
++  matches=named.concat(attached,others);
+ }
+ function page(request){
+   const pages=Math.max(1,Math.ceil(matches.length/50)),number=Math.min(Math.max(0,request.page||0),pages-1);
+diff --git a/fec/surfaces/staffer_live/staffer-live.js b/fec/surfaces/staffer_live/staffer-live.js
+--- a/fec/surfaces/staffer_live/staffer-live.js
++++ b/fec/surfaces/staffer_live/staffer-live.js
+@@ -102,7 +102,11 @@
+   }
+ 
+   function select(id,center=false){id=id?canonicalId(id):null;if(id&&!isPerson(state.nodes.get(id)))return;state.selected=id;if(id){const address=new URL(location.href);address.searchParams.set('person',id);history.replaceState(null,'',address.pathname+address.search);}if(id&&!state.visible.some(n=>n.id===id))rebuild();if(window.StafferExplorer)window.StafferExplorer.selectPerson(id);else if(id)focusNeighborhood(id);else state.focusedZoom=null;draw();detail();results();window.dispatchEvent(new CustomEvent('staffer-select',{detail:{id,node:state.nodes.get(id)}}));if(id&&window.matchMedia?.('(max-width:720px)').matches)$('person-panel').scrollIntoView({block:'start',behavior:'smooth'});}
+-  function matchesQuery(n){const q=state.query.toLowerCase().trim();if(!q)return false;let searchable=state.searchIndex.get(n.id);if(!searchable){searchable=[label(n),n.id,n.source_summary||'',...(n.member_ids||[]),...(n.committee_ids||[]),...(n.policy_ids||[])].join(' ').toLowerCase();state.searchIndex.set(n.id,searchable);}return (String(state.snapshot?.search?.query||'').toLowerCase()===q&&n.is_search_match===true)||q.split(/\s+/).every(token=>searchable.includes(token));}
++  // An identifier is searched whole, never by its pieces (D-083). The words of a query are looked for only in what a person reads, the name and the
++  // source summary. The node id, the bare uuid of a politico:<uuid> id and the member, committee and policy ids match only when the whole query is
++  // that identifier (trimmed, in any case). The server's own search flag is honoured as before.
++  function matchesQuery(n){const q=state.query.toLowerCase().trim();if(!q)return false;let searchable=state.searchIndex.get(n.id);if(!searchable){searchable={words:[n.label||n.name||'',n.source_summary||''].join(' ').toLowerCase(),ids:wholeIds(n)};state.searchIndex.set(n.id,searchable);}return (String(state.snapshot?.search?.query||'').toLowerCase()===q&&n.is_search_match===true)||searchable.ids.includes(q)||q.split(/\s+/).every(token=>searchable.words.includes(token));}
++  function wholeIds(n){const id=String(n.id).toLowerCase(),ids=[id];if(id.startsWith('politico:')&&id.length>9)ids.push(id.slice(9));for(const key of ['member_ids','committee_ids','policy_ids'])for(const value of [].concat(n[key]||[]))if(value!==null&&value!==undefined)ids.push(String(value).toLowerCase());return ids;}
+   function results(){
+     if(window.StafferExplorer)return;
+     const out=$('results');out.replaceChildren();const q=state.query.toLowerCase();
+diff --git a/fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs b/fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs
+new file mode 100644
+--- /dev/null
++++ b/fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs
+@@ -0,0 +1,248 @@
++// D-083 in the record browser, second step: the inventory worker's "People found" search never matches pieces of the member, committee or policy id
++// (row columns 3, 4 and 5) either; the first step took the node id (column 0) out. A query that is the whole id of one of them (trimmed, in any case)
++// lists the rows that hold it, after the row a whole node id names and ahead of the rows that match by words. Columns 1, 2, 6 and 11 (name, summary,
++// source, aliases) are still searched by word prefix, accents folded, all words required.
++// The worker as it was before this step is read from git as the negative control, and nine deliberate bugs of the new filter are each caught.
++const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
++const {execFileSync}=require('node:child_process');
++const REL='fec/surfaces/staffer_live/staffer-inventory-worker.js';
++const ROOT=path.resolve(__dirname,'../../..');
++const source=fs.readFileSync(path.resolve(__dirname,'../../surfaces/staffer_live/staffer-inventory-worker.js'),'utf8');
++
++// The worker as it was before this step (the tip of the route latency branch, 86631c454): column 0 whole-matched, columns 3 to 5 searched by word prefix.
++const BEFORE='86631c454815533798eb1ad81136ddb1a76a23b9';
++function fromGit(rev,rel){
++  try{return execFileSync('git',['-C',ROOT,'show',rev+':'+rel],{encoding:'utf8',stdio:['ignore','pipe','ignore'],maxBuffer:1<<25});}catch(error){return null;}
++}
++const before=fromGit(BEFORE,REL);
++const NO_GIT=before===null?'the pre-change worker (commit '+BEFORE.slice(0,9)+') is not in this checkout':false;
++
++// Columns as the worker reads them: 0 id, 1 label, 2 summary, 3 member, 4 committee, 5 policy, 6 source, 7 pending, 8 kind, 11 aliases.
++const row=(id,label,o={})=>[id,label,o.summary||'',o.member||'',o.committee||'',o.policy||'',o.source||'Quorum',false,'person',false,'unknown',o.aliases||''];
++const UUID_A='3f2a1b4c-5d6e-4f80-9a0b-c1d2e3f4a5b6',UUID_B='9c8d7e6f-0a1b-4c2d-8e3f-4a5b6c7d8e9f',UUID_C='e5f60718-293a-4b4c-9d5e-6f708192a3b4';
++const FIXTURE=[
++  row('politico:'+UUID_A,'Casey Rivera',{summary:'Chief of Staff',member:'A000370',committee:'HSBA',policy:'BANKING'}),      // 0
++  row('politico:'+UUID_B,'Jordan Lee',{summary:'Legislative Director',aliases:'Jordie Lee',member:'A000370'}),            // 1
++  row('politico:'+UUID_C,'Morgan Quill',{member:'S001223',committee:'container:hsag'}),                                  // 2
++  row('hill:person:alex-adams','Alex Adams',{source:'Payroll',committee:'HSBA'}),                                        // 3
++  row('Quorum:Staff-0042','Priya Nair',{policy:'BANKING'}),                                                              // 4
++  row('lda:9917','Pat Orwell',{source:'Lobbying',policy:'TAXATION'}),                                                       // 5
++  row('quorum:77','Élodie Gagné',{member:'a000370x'}),                                                                   // 6: a code that merely begins with a member id
++  row('staff:ada-5','Ada Five',{member:'X000001'}),                                                                      // 7
++  row('person:3f2a1b4c5d6e','Zed Zeta'),                                                                                 // 8
++];
++const ALL=FIXTURE.map((_,i)=>i);
++// A decoy whose label is a whole member id (it matches by words and comes first in row order), and a row whose own id is that member id.
++const RANK_FIXTURE=[
++  row('decoy:1','A000370 Hale'),                                               // 0
++  row('politico:'+UUID_A,'Casey Rivera',{member:'A000370'}),                  // 1
++  row('politico:'+UUID_B,'Jordan Lee',{member:'A000370'}),                    // 2
++  row('A000370','Pat Collision'),                                              // 3: named by its own id, which is also the member id of rows 1 and 2
++  row('hill:person:zed','Zed Zeta',{member:'S001223'}),                        // 4
++];
++// A null among the codes and a number as a code.
++const ODD_FIXTURE=[Object.assign(row('odd:1','Blank Holder'),{3:null,4:null,5:null}),Object.assign(row('odd:2','Seven Holder'),{5:7}),row('odd:3','Plain Person')];
++
++// A worker in its own vm context, loaded with `people`. find(text) returns the row positions the "People found" list holds for that text, across every
++// page, in order. `code` is the worker's source (the current file, a deliberate bug or the one read from git).
++async function worker(people,code=source){
++  const messages=[],pending=[],at=new Map(people.map((r,i)=>[r,i]));
++  const context=vm.createContext({onmessage:null,postMessage:v=>messages.push(v),fetch:()=>new Promise(resolve=>pending.push(resolve))});
++  vm.runInContext(code,context);
++  const send=data=>context.onmessage({data});
++  const loading=send({type:'load',epoch:0,text:'',kind:'person'});
++  pending[0]({ok:true,json:async()=>({ready:true,people,total:people.length,people_total:people.length})});
++  await loading;
++  let epoch=0;
++  const find=async text=>{
++    await send({type:'query',epoch:++epoch,text,kind:'person'});
++    const first=messages.at(-1);assert.equal(first.type,'page');
++    const found=Array.from(first.rows,r=>at.get(r));  // Array.from: rows come from the vm realm, whose Array is not this one
++    for(let n=1;n<first.pages;n++){await send({type:'page',page:n});found.push(...Array.from(messages.at(-1).rows,r=>at.get(r)));}
++    assert.equal(first.total,found.length);
++    return found;
++  };
++  return {find};
++}
++
++const alt=s=>[...s].map((c,i)=>i%2?c.toUpperCase():c.toLowerCase()).join('');
++const variants=id=>[id,id.toUpperCase(),id.toLowerCase(),alt(id),'  '+id+'\t\n',' '+id.toUpperCase()+' '];
++const ownerRows=(people,id)=>people.flatMap((r,i)=>r[0].toLowerCase()===id.toLowerCase()?[i]:[]);
++
++// Pieces of ids that no name, summary, source or alias holds.
++const ID_FRAGMENTS=['po','pol','poli','politico','politico:','politico:3f2a','3f2a','3f2a1b4c','5d6e','4f80','9a0b','c1d2e3f4','9c8d7e6f','e5f60718','hill','hill:person','person','0042','lda','lda:99','9917','3f2a1b4c5d6e'];
++// Pieces of member, committee and policy ids. Before this step each found the rows holding the id.
++const CODE_FRAGMENTS=['a0','a00','a000','a0003','a00037','s001','s0012','x000','x00000','hsb','hs','container','container:hs','hsag','bank','banki','tax','taxa','taxat','axation'];
++// Whole member, committee and policy ids and the rows that hold them (a000370x is another member's id that merely begins with a000370).
++const CODES=[['A000370',[0,1]],['HSBA',[0,3]],['container:hsag',[2]],['BANKING',[0,4]],['TAXATION',[5]],['S001223',[2]],['X000001',[7]],['a000370x',[6]]];
++
++const RULING={
++  async idFragments(find){for(const q of ID_FRAGMENTS)assert.deepEqual(await find(q),[],'a piece of an id must find nothing by way of the id: '+q);},
++  async codeFragments(find){
++    for(const q of CODE_FRAGMENTS)assert.deepEqual(await find(q),[],'a piece of a member, committee or policy id must find nothing by way of it: '+q);
++    // A code is not a word of a longer query either.
++    for(const q of ['A000370 casey','casey A000370','hsba alex','banking priya'])assert.deepEqual(await find(q),[],'a code inside a longer query is not an identifier: '+q);
++  },
++  async wholeIds(find){
++    for(const [i,r] of FIXTURE.entries())for(const q of variants(r[0]))assert.deepEqual((await find(q)).slice(0,1),[i],'the whole id '+JSON.stringify(q)+' must list its row first');
++  },
++  async bareUuids(find){
++    for(const [i,uuid] of [[0,UUID_A],[1,UUID_B],[2,UUID_C]])for(const q of variants(uuid))assert.deepEqual((await find(q)).slice(0,1),[i],'the bare uuid '+JSON.stringify(q)+' must list its row first');
++  },
++  async wholeCodes(find){
++    for(const [code,rows] of CODES)for(const q of variants(code))assert.deepEqual(await find(q),rows,'the whole id '+JSON.stringify(q)+' lists the rows that hold it, in row order');
++  },
++  // Named by id first, then the rows holding the id as a member, committee or policy id, then the rows that match only by words; each in row order.
++  async ranking(find,people=RANK_FIXTURE){
++    assert.deepEqual(ownerRows(people,'A000370'),[3]);
++    for(const q of variants('A000370'))assert.deepEqual(await find(q),[3,1,2,0],'the person named by the id, then the people attached to it, then a row that only says it: '+JSON.stringify(q));
++    assert.deepEqual(await find('S001223'),[4]);
++    assert.deepEqual(await find('hale'),[0],'a word of a name is still a word');
++  },
++  // A null among the codes is skipped, not turned into the word "null"; a number is a code like any other.
++  async oddCodes(find){
++    assert.deepEqual(await find('null'),[],'a null code is not a word');
++    assert.deepEqual(await find('7'),[1],'a number among the codes is an id like any other');
++    assert.deepEqual(await find('Seven Holder'),[1]);
++  },
++  // Nothing else changed: the other columns still search by word prefix, accents folded, all words required, and the empty query lists everyone.
++  async unchanged(find){
++    const cases=[['cas',[0]],['casey riv',[0]],['alex adams',[3]],['ELODIE gagne',[6]],['élodie',[6]],['legislative dir',[1]],['jordie',[1]],
++      ['lobbying',[5]],['payroll',[3]],['quorum',[0,1,2,4,6,7,8]],['casey chief',[0]],['zzz nobody',[]],['',ALL],['   ',ALL],['::',ALL]];
++    for(const [q,want] of cases)assert.deepEqual(await find(q),want,'unchanged: '+JSON.stringify(q));
++  },
++};
++// Each check runs against its own fixture; a worker is loaded per fixture.
++const FIXTURES={ranking:RANK_FIXTURE,oddCodes:ODD_FIXTURE};
++const run=async(name,code=source)=>RULING[name]((await worker(FIXTURES[name]||FIXTURE,code)).find);
++const outcomes=async code=>{
++  const out={};
++  for(const name of Object.keys(RULING)){try{await run(name,code);out[name]='pass';}catch(e){if(!(e instanceof assert.AssertionError))throw e;out[name]='fail';}}
++  return out;
++};
++const ALL_PASS=Object.fromEntries(Object.keys(RULING).map(k=>[k,'pass']));
++
++for(const [name,title] of Object.entries({
++  idFragments:'a piece of a node id finds nothing by way of the id',
++  codeFragments:'a piece of a member, committee or policy id finds nothing by way of it, alone or inside a longer query',
++  wholeIds:'a whole node id finds its row and lists it first, trimmed and in any case',
++  bareUuids:'the bare uuid of a politico id is a whole id too',
++  wholeCodes:'a whole member, committee or policy id lists the rows that hold it, trimmed and in any case',
++  ranking:'the person a whole id names is listed first, then the people attached to it, then the rows that match only by words',
++  oddCodes:'a null code is skipped and a number is a code like any other',
++  unchanged:'every other column searches as before',
++}))test('ruling: '+title,async()=>run(name));
++
++// ---- a seeded world: the new answers equal the ruling written out by brute force, for every 1- and 2-character query, sampled names and pieces of ids and codes
++const tokens=s=>s.normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
++// Brute force, independent of the worker: each row is classified on its own. A row is named by its id (or bare uuid), else attached by a code, else matched by words.
++function expected(people,text){
++  const words=tokens(text),want=text.trim().toLowerCase(),named=[],attached=[],rest=[];
++  people.forEach((r,i)=>{
++    const id=String(r[0]).toLowerCase();
++    if(want&&(id===want||(id.startsWith('politico:')&&id.slice(9)===want))){named.push(i);return;}
++    if(want&&[3,4,5].some(c=>r[c]!==null&&r[c]!==undefined&&String(r[c]).toLowerCase()===want)){attached.push(i);return;}
++    const have=tokens([1,2,6,11].map(c=>r[c]||'').join(' '));
++    if(words.every(w=>have.some(t=>t.startsWith(w))))rest.push(i);
++  });
++  return [...named,...attached,...rest];
++}
++const mulberry32=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
++const hex=(rand,n)=>Array.from({length:n},()=>'0123456789abcdef'[Math.floor(rand()*16)]).join('');
++const uuid=rand=>[8,4,4,4,12].map(n=>hex(rand,n)).join('-');
++function world(rand,count){
++  const pick=list=>list[Math.floor(rand()*list.length)];
++  const words=['Alex','Adams','Élodie','Gagné','Casey','Rivera','Jordan','Lee','Morgan','Quill','Priya','Nair','Pat','Orwell','Zed','Zeta','Beatrice','Hale','Staff','Cole','Porter','Hill','Person'];
++  const members=['A000370','S001223','V000127','M001204','office:2021-hon-hale','a000370x'],committees=['HSBA','SSFI','container:hsag','container:ssfi'],policies=['BANKING','policy:tax','policy:health'];
++  const shapes=[()=>'politico:'+uuid(rand),()=>'hill:person:'+pick(['alex-adams','zed-zeta','pat-orwell','cole-porter'])+'-'+Math.floor(rand()*30),
++    ()=>'quorum:'+Math.floor(rand()*900),()=>'lda:'+Math.floor(rand()*9000),()=>'person:'+hex(rand,12),()=>'Mixed:Case-'+Math.floor(rand()*40),()=>'politico:'+uuid(rand),
++    ()=>pick(members)+'-'+Math.floor(rand()*5)];
++  const people=[];
++  for(let i=0;i<count;i++){
++    // Now and then a name that is a code (and a word): the row matches that code by words and may sit before or after the rows that hold it.
++    people.push(row(pick(shapes)(),rand()<.04?pick([...members,...committees,...policies])+' '+pick(words):pick(words)+' '+pick(words),{
++      summary:rand()<.5?pick(words)+' '+pick(['Director','Counsel','Staff']):'',member:rand()<.4?pick(members):'',committee:rand()<.25?pick(committees):'',policy:rand()<.25?pick(policies):'',
++      source:pick(['Payroll','Politico','Quorum','Lobbying','Payroll|Politico']),aliases:rand()<.3?pick(words)+' '+pick(words):''}));
++  }
++  people.push(people[3].slice());                                                         // two rows with one id
++  people.push(Object.assign(row('own:'+hex(rand,6),'Own Id Holder'),{3:null,4:null,5:null}));
++  people.push(row('A000370','Collision Person'),row('hsba','Collision Committee'),row('banking','Collision Policy'));   // a row named by an id that other rows hold as a code
++  return people;
++}
++function queriesFor(people){
++  const out=new Set(),alphabet='abcdefghijklmnopqrstuvwxyz0123456789:-. ';
++  for(const a of alphabet){out.add(a);for(const b of alphabet)out.add(a+b);}
++  for(const q of ['A0','Po','HS','S0','Ba','TA','  a  ',' po','po ','A000370 casey','casey a000370','HSBA alex','x y z'])out.add(q);
++  for(let i=0;i<people.length;i+=Math.max(1,Math.floor(people.length/70))){
++    const id=people[i][0],label=people[i][1],aliases=people[i][11];
++    for(const v of variants(id))out.add(v);
++    if(id.startsWith('politico:'))for(const v of variants(id.slice(9)))out.add(v);
++    for(let n=1;n<=Math.min(id.length,14);n+=2)out.add(id.slice(0,n));
++    for(let n=2;n<=8;n+=3){out.add(id.slice(-n));out.add(id.slice(5,5+n));}
++    for(const group of id.replace('politico:','').split(/[-:]/))for(let n=2;n<=Math.min(group.length,9);n+=2)out.add(group.slice(0,n));
++    for(const code of [people[i][3],people[i][4],people[i][5]].filter(Boolean)){
++      for(const v of variants(code))out.add(v);
++      for(let n=1;n<code.length;n++){out.add(code.slice(0,n));out.add(code.slice(n));}
++    }
++    out.add(label);out.add(label.toUpperCase());out.add(label.split(' ')[0].slice(0,3));if(aliases)out.add(aliases);
++  }
++  return [...out];
++}
++test('over a seeded world the new answers equal the ruling, for every 1- and 2-character query, sampled names and pieces of ids and codes',async t=>{
++  const people=world(mulberry32(20261003),120),queries=queriesFor(people);
++  const now=await worker(people);
++  let nonEmpty=0,wholeCodeQueries=0,codeFragmentQueries=0;
++  const codes=new Set(people.flatMap(r=>[r[3],r[4],r[5]]).filter(c=>c!==null&&c!==undefined&&c!=='').map(c=>String(c).toLowerCase()));
++  for(const q of queries){
++    const got=await now.find(q),want=expected(people,q);
++    assert.deepEqual(got,want,'ruling: '+JSON.stringify(q));
++    if(got.length&&got.length<people.length)nonEmpty++;
++    const w=q.trim().toLowerCase();
++    if(codes.has(w))wholeCodeQueries++;
++    // A strict piece of a code that no row's words reach: the previous worker found rows through the code, this one finds none.
++    else if(w&&!got.length&&[...codes].some(c=>c.includes(w)))codeFragmentQueries++;
++  }
++  const seen={queries:queries.length,nonEmpty,wholeCodeQueries,codeFragmentQueries};
++  assert.ok(seen.queries>2500&&seen.wholeCodeQueries>50&&seen.codeFragmentQueries>100,'the world must exercise the ruling: '+JSON.stringify(seen));
++  t.diagnostic('seeded world: '+people.length+' rows, '+JSON.stringify(seen));
++});
++
++// ---- negative controls
++test('negative control: the previous worker fails the checks that are this step and passes the others',{skip:NO_GIT},async()=>{
++  const old=await outcomes(before);
++  assert.deepEqual(old,{idFragments:'pass',codeFragments:'fail',wholeIds:'pass',bareUuids:'pass',wholeCodes:'fail',ranking:'fail',oddCodes:'pass',unchanged:'pass'},
++    'the previous worker searched columns 3 to 5 by word prefix: '+JSON.stringify(old));
++  assert.deepEqual(await outcomes(source),ALL_PASS);
++});
++test('negative control: the previous worker differs from the ruling over the seeded world',{skip:NO_GIT},async t=>{
++  const people=world(mulberry32(20261003),120),queries=queriesFor(people),old=await worker(people,before);
++  let differ=0,spurious=0,missing=0,reordered=0;
++  for(const q of queries){
++    const got=await old.find(q),want=expected(people,q),have=new Set(got),wanted=new Set(want);
++    for(const i of got)if(!wanted.has(i))spurious++;
++    for(const i of want)if(!have.has(i))missing++;
++    if(got.join()!==want.join())differ++;
++    if(got.length===want.length&&got.join()!==want.join()&&[...got].sort().join()===[...want].sort().join())reordered++;
++  }
++  assert.ok(differ>200&&spurious>500,'the previous worker must answer differently: '+JSON.stringify({differ,spurious,missing,reordered}));
++  assert.equal(missing,0,'the previous worker found everything the ruling finds (a whole code is a word prefix of itself): it only found too much');
++  t.diagnostic('previous worker over the same world: '+JSON.stringify({queries:queries.length,differ,spurious,missing,reordered}));
++});
++const TOKENS="[r[1],r[2],r[6],r[11]||'']";
++const ATTACHED='if(want&&(wholeCode(r[3],want)||wholeCode(r[4],want)||wholeCode(r[5],want))){attached.push(i);continue;}';
++const BUGS=[
++  ['the codes are searched by their pieces again',TOKENS,"[r[1],r[2],r[3],r[4],r[5],r[6],r[11]||'']",['codeFragments']],
++  ['no whole-code match',ATTACHED,'',['wholeCodes','ranking']],
++  ['a case-sensitive code','String(code).toLowerCase()===want','String(code)===want',['wholeCodes']],
++  ['only the member id is matched whole','||wholeCode(r[4],want)||wholeCode(r[5],want)','',['wholeCodes']],
++  ['the attached rows after the rest','matches=named.concat(attached,others)','matches=named.concat(others,attached)',['ranking']],
++  ['the attached rows before the row named by the id','matches=named.concat(attached,others)','matches=attached.concat(named,others)',['ranking']],
++  ['an untrimmed query','want=text.trim().toLowerCase()','want=text.toLowerCase()',['wholeCodes','wholeIds']],
++  ['a null code becomes the word null','code!==null&&code!==undefined&&','',['oddCodes']],
++  ['the column-0 handling is dropped','if(want&&wholeId(r[0],want)){named.push(i);continue;}','',['wholeIds','bareUuids']],
++];
++for(const [name,find,replace,caught] of BUGS)test('negative control: '+name+' is caught by '+caught.join(' and '),async()=>{
++  assert.equal(source.split(find).length-1,1,'the worker source must hold the text to break exactly once: '+find);
++  const got=await outcomes(source.replace(find,()=>replace));
++  for(const check of caught)assert.equal(got[check],'fail',check+' must catch this bug: '+JSON.stringify(got));
++});
+diff --git a/fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs b/fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs
+--- a/fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs
++++ b/fec/tests/surfaces/test_staffer_inventory_worker_ids.cjs
+@@ -1,6 +1,7 @@
+ // D-083 in the record browser: the inventory worker's "People found" search never matches pieces of a node id (row column 0).
+ // A query that is a row's whole id (trimmed, in any case; for a politico:<uuid> id also its bare uuid) still finds that row and lists it first.
+ // The previous search is embedded verbatim as a negative control, and seven deliberate bugs of the new one are each caught.
++// Columns 3 to 5 (member, committee and policy id) were taken out of the searched text in the next step: see test_staffer_inventory_worker_codes.cjs.
+ const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+ const source=fs.readFileSync(path.resolve(__dirname,'../../surfaces/staffer_live/staffer-inventory-worker.js'),'utf8');
+ 
+@@ -82,7 +83,7 @@
+   async ranking(find){
+     assert.deepEqual(await find('staff:ada-5'),[10,0],'the id row comes before a row that matches only by words, though it is later in row order');
+   },
+-  // Nothing but column 0 changed: every other column still searches by word prefix, accents folded, all words required.
++  // Nothing but column 0 changed in this step: the other columns still search by word prefix, accents folded, all words required.
+   async unchanged(find){
+     const cases=[['cas',[1]],['casey riv',[1]],['alex adams',[4]],['ELODIE gagne',[8]],['élodie',[8]],['legislative dir',[2]],['jordie',[2]],
+       ['lobbying',[6,9]],['quorum',[0,1,2,3,5,8,10]],['casey chief',[1]],['zzz nobody',[]],['',ALL],['   ',ALL],['::',ALL]];
+@@ -103,17 +104,18 @@
+ 
+ // ---- a seeded world: the new answers equal the ruling written out, and the previous filter equals the previous rules
+ const tokens=s=>s.normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
+-// Brute force, independent of the worker. idColumn=true is the old rule (column 0 searched with the rest); false is the ruling.
+-// Columns 3, 4 and 5 hold the member, committee and policy ids: this change leaves them searched as they were.
++// Brute force, independent of the worker. idColumn=true is the old rule (column 0 searched with the rest, and columns 3 to 5 by word prefix); false is the ruling:
++// column 0 and the member, committee and policy ids of columns 3 to 5 match only whole (the rows a whole code names follow the row a whole id names).
+ function expected(people,text,{idColumn}){
+-  const words=tokens(text),want=text.trim().toLowerCase(),named=[],rest=[];
++  const words=tokens(text),want=text.trim().toLowerCase(),named=[],attached=[],rest=[];
+   people.forEach((r,i)=>{
+     const id=String(r[0]).toLowerCase();
+     if(!idColumn&&want&&(id===want||(id.startsWith('politico:')&&id.slice(9)===want))){named.push(i);return;}
+-    const have=tokens((idColumn?[0,1,2,3,4,5,6,11]:[1,2,3,4,5,6,11]).map(c=>r[c]||'').join(' '));
++    if(!idColumn&&want&&[3,4,5].some(c=>String(r[c]||'').toLowerCase()===want)){attached.push(i);return;}
++    const have=tokens((idColumn?[0,1,2,3,4,5,6,11]:[1,2,6,11]).map(c=>r[c]||'').join(' '));
+     if(words.every(w=>have.some(t=>t.startsWith(w))))rest.push(i);
+   });
+-  return [...named,...rest];
++  return [...named,...attached,...rest];
+ }
+ const mulberry32=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+ const hex=(rand,n)=>Array.from({length:n},()=>'0123456789abcdef'[Math.floor(rand()*16)]).join('');
+@@ -170,12 +172,12 @@
+   assert.deepEqual(await outcomes((await worker(FIXTURE)).find),{fragments:'pass',wholeIds:'pass',bareUuids:'pass',ranking:'pass',unchanged:'pass'});
+ });
+ const BUGS=[
+-  ['the id is searched with the rest again','r.slice(1,7)','r.slice(0,7)',['fragments']],
++  ['the id is searched with the rest again',"[r[1],r[2],r[6],r[11]||'']","[r[0],r[1],r[2],r[6],r[11]||'']",['fragments']],
+   ['no whole-id match','if(want&&wholeId(r[0],want)){named.push(i);continue;}','',['wholeIds','bareUuids']],
+   ['a case-sensitive id','id=String(id).toLowerCase();','id=String(id);',['wholeIds']],
+   ['an untrimmed query','want=text.trim().toLowerCase()','want=text.toLowerCase()',['wholeIds']],
+   ['no bare uuid','||(id.startsWith(POLITICO)&&id.length>POLITICO.length&&id.slice(POLITICO.length)===want)','',['bareUuids']],
+-  ['the whole-id rows after the rest','matches=named.concat(others)','matches=others.concat(named)',['wholeIds','ranking']],
++  ['the whole-id rows after the rest','matches=named.concat(attached,others)','matches=others.concat(attached,named)',['wholeIds','ranking']],
+   ['the whole-id rows in row order','named.push(i);continue;','others.push(i);continue;',['wholeIds','ranking']],
+ ];
+ for(const [name,find,replace,caught] of BUGS)test('negative control: '+name+' is caught by '+caught.join(' and '),async()=>{
+diff --git a/fec/tests/surfaces/test_staffer_live_query_ids.cjs b/fec/tests/surfaces/test_staffer_live_query_ids.cjs
+new file mode 100644
+--- /dev/null
++++ b/fec/tests/surfaces/test_staffer_live_query_ids.cjs
+@@ -0,0 +1,290 @@
++// D-083 in the map's query filter: matchesQuery() in staffer-live.js (the page's query filter and the legacy result list) never matches pieces of an
++// identifier. The words of a query are looked for only in what a person reads (the name and the source summary). The node id, the bare uuid of a
++// politico:<uuid> id and the member, committee and policy ids match only when the whole query is that identifier (trimmed, in any case).
++// The real page code runs in a vm over a small fake DOM, so both callers (rebuild() and results()) are exercised as well as the predicate. The
++// code as it was before the change is read from git as the negative control, and eleven deliberate bugs of the new code are each caught.
++const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
++const {execFileSync}=require('node:child_process');
++const REL='fec/surfaces/staffer_live/staffer-live.js';
++const ROOT=path.resolve(__dirname,'../../..');
++const source=fs.readFileSync(path.resolve(__dirname,'../../surfaces/staffer_live/staffer-live.js'),'utf8');
++
++// The file as it was before the follow-up (the tip of the route latency branch, 86631c454): D-083 had not reached this function.
++const BEFORE='86631c454815533798eb1ad81136ddb1a76a23b9';
++function fromGit(rev,rel){
++  try{return execFileSync('git',['-C',ROOT,'show',rev+':'+rel],{encoding:'utf8',stdio:['ignore','pipe','ignore'],maxBuffer:1<<25});}catch(error){return null;}
++}
++const before=fromGit(BEFORE,REL);
++const NO_GIT=before===null?'the pre-change file (commit '+BEFORE.slice(0,9)+') is not in this checkout':false;
++
++// ---- the page, with a fake DOM. Nothing is drawn (requestAnimationFrame never fires) and nothing is fetched (the first request never answers).
++function page(code){
++  const elements=new Map();
++  const ctx=new Proxy({},{get:(target,key)=>key in target?target[key]:()=>({width:0}),set:(target,key,value)=>{target[key]=value;return true;}});
++  const element=id=>({id,children:[],textContent:'',className:'',hidden:false,disabled:false,title:'',value:'',style:{},dataset:{},
++    append(...nodes){this.children.push(...nodes);},replaceChildren(...nodes){this.children=nodes;this.textContent='';},
++    addEventListener(){},setPointerCapture(){},setAttribute(){},scrollIntoView(){},getContext:()=>ctx,
++    getBoundingClientRect:()=>({left:0,top:0,right:1000,bottom:700,width:1000,height:700})});
++  const document={getElementById:id=>{if(!elements.has(id))elements.set(id,element(id));return elements.get(id);},createElement:tag=>element(tag)};
++  const window={dispatchEvent(){},devicePixelRatio:1};
++  const context=vm.createContext({document,window,history:{replaceState(){}},location:{href:'http://localhost/staffer-live/',origin:'http://localhost'},
++    fetch:()=>new Promise(()=>{}),setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,requestAnimationFrame:()=>0,performance:{now:()=>0},
++    ResizeObserver:class{observe(){}},CustomEvent:class{constructor(type,init){this.type=type;this.detail=init&&init.detail;}},URL,AbortController});
++  // The closure's own functions and state, exported by one line added before the page starts itself.
++  const exported=code.replace(/^(\s*setLayers\(defaults\);refresh\(\);setInterval\(poll,30000\);)/m,'  window.__test={matchesQuery,results,rebuild,state};\n$1');
++  assert.notEqual(exported,code,'the page must end by starting itself, so the export line has a place to go');
++  vm.runInContext(exported,context);
++  const t=window.__test;
++  const load=(nodes,{edges=[]}={})=>{t.state.nodes.clear();for(const n of nodes)t.state.nodes.set(n.id,n);t.state.edges=edges;t.state.searchIndex.clear();};
++  // The page's own predicate over every node, in node order, for the query exactly as given (untrimmed: matchesQuery trims it itself).
++  const find=q=>{t.state.query=q;return Array.from(t.state.nodes.values()).filter(n=>t.matchesQuery(n)).map(n=>n.id);};
++  // The legacy result list (results()): the label of every listed button, first page, and the count in its title.
++  const listed=q=>{
++    t.state.query=q.trim();t.state.resultPage=0;t.results();
++    const out=document.getElementById('results').children.filter(b=>b.className!=='empty').map(b=>b.textContent);
++    return {labels:out,count:Number(/\((\d+)\)/.exec(document.getElementById('results-title').textContent)[1])};
++  };
++  // The map's bounded sample (rebuild()): with one enabled edge between two people no query reaches, the others are visible only if the query matches them.
++  const visible=q=>{t.state.query=q.trim();t.rebuild();return Array.from(t.state.visible,n=>n.id).filter(id=>!id.startsWith('edge:')).sort();};
++  return {t,find,listed,visible,load,document,window};
++}
++
++// ---- a hand-written world: every expectation below is written out by hand
++const UUID_A='3f2a1b4c-5d6e-4f80-9a0b-c1d2e3f4a5b6',UUID_B='9c8d7e6f-0a1b-4c2d-8e3f-4a5b6c7d8e9f',UUID_C='e5f60718-293a-4b4c-9d5e-6f708192a3b4';
++const person=(id,label,o={})=>({id,kind:'person',label,source_summary:o.summary,member_ids:o.member||[],committee_ids:o.committee||[],policy_ids:o.policy||[]});
++const FIXTURE=[
++  person('decoy:1','Staff Ada 5'),                                                                                                                       // 0
++  person('politico:'+UUID_A,'Casey Rivera',{summary:'Chief of Staff · House Ways Means · last seen 2024-05-01',member:['A000370'],committee:['HSBA'],policy:['BANKING']}), // 1
++  person('politico:'+UUID_B,'Jordan Lee',{summary:'Legislative Director · Office of Rep. Hale',member:['A000370']}),                                    // 2
++  person('politico:'+UUID_C,'Morgan Quill',{member:['S001223'],committee:['container:hsag']}),                                                          // 3
++  person('hill:person:alex-adams','Alex Adams',{committee:['HSBA']}),                                                                                   // 4
++  person('Quorum:Staff-0042','Priya Nair',{policy:['BANKING','policy:tax']}),                                                                           // 5
++  person('lda:9917','Pat Orwell'),                                                                                                                      // 6
++  {id:'person:3f2a1b4c5d6e',kind:'person',name:'Zed Zeta',member_ids:[],committee_ids:[],policy_ids:[]},                                                // 7: a name and no label
++  {id:'quorum:77',kind:'person',member_ids:[],committee_ids:[],policy_ids:[]},                                                                          // 8: neither: the page's label() falls back to the id
++  person('staff:ada-5','Ada Five',{member:[null,'X000001'],policy:[7]}),                                                                                // 9: a null and a number among the ids
++];
++const ids=list=>list.map(i=>FIXTURE[i].id);
++// Two people joined by one enabled edge and named by nothing a query can reach: in the map's sample they are always visible, every other person only if the query matches.
++const EDGE_NODES=['edge:a','edge:b'].map(id=>({id,kind:'person',label:'',member_ids:[],committee_ids:[],policy_ids:[]}));
++const alt=s=>[...s].map((c,i)=>i%2?c.toUpperCase():c.toLowerCase()).join('');
++const variants=id=>[id,id.toUpperCase(),id.toLowerCase(),alt(id),'  '+id+'\t\n',' '+id.toUpperCase()+' '];
++
++// Pieces of identifiers that no name or summary holds: before the ruling each found nodes through the id, now none does.
++// Among them are the part after a prefix other than politico: (3f2a1b4c5d6e, staff-0042): only a politico:<uuid> id has a bare form.
++const ID_FRAGMENTS=['po','pol','poli','politico','politico:','politico:3f2a','3f2a','3f2a1b4c','5d6e','4f80','9a0b','c1d2e3f4','9c8d7e6f','e5f60718','hill','hill:person','person',
++  'person:lda','0042','lda','lda:99','9917','quorum:7','77','3f2a1b4c5d6e','3F2A1B4C5D6E','person:3f2a1b4c','staff-0042'];
++// Pieces of member, committee and policy ids, and strings that merely contain a whole one.
++const CODE_FRAGMENTS=['a0','a00','a000','a0003','a000370x','s001','s0012','x000','x00000','hsb','hs','container','container:hs','hsag','bank','banki','polic','policy','policy:','tax','null','undefined'];
++// Whole identifiers of the three kinds and the nodes that hold them.
++const CODES=[['A000370',[1,2]],['HSBA',[1,4]],['container:hsag',[3]],['BANKING',[1,5]],['policy:tax',[5]],['S001223',[3]],['X000001',[9]]];
++
++const RULING={
++  async idFragments(p){for(const q of ID_FRAGMENTS)assert.deepEqual(p.find(q),[],'a piece of an id must find nothing by way of the id: '+q);},
++  async codeFragments(p){for(const q of CODE_FRAGMENTS)assert.deepEqual(p.find(q),[],'a piece of a member, committee or policy id must find nothing by way of it: '+q);},
++  async wholeIds(p){for(const n of FIXTURE)for(const q of variants(n.id))assert.deepEqual(p.find(q),[n.id],'the whole id '+JSON.stringify(q)+' must find its node');},
++  async bareUuids(p){
++    for(const [n,uuid] of [[1,UUID_A],[2,UUID_B],[3,UUID_C]])for(const q of variants(uuid))assert.deepEqual(p.find(q),[FIXTURE[n].id],'the bare uuid '+JSON.stringify(q)+' must find its node');
++  },
++  async wholeCodes(p){for(const [code,nodes] of CODES)for(const q of variants(code))assert.deepEqual(p.find(q),ids(nodes),'the whole id '+JSON.stringify(q)+' finds the nodes attached to it');},
++  // The words of a query still match names and summaries, anywhere in them, in any case, all words required.
++  async text(p){
++    const cases=[['casey',[1]],['CASEY riv',[1]],['rivera casey',[1]],['sey',[1]],['alex adams',[4]],['chief of staff',[1]],['ways means',[1]],['seen 2024',[1]],['legislative',[2]],['office of rep',[2]],
++      ['zed',[7]],['ZETA',[7]],['ada',[0,4,9]],['ada five',[9]],['casey chief',[1]],['casey nobody',[]],['zzz',[]],['   ',[]],['',[]]];
++    for(const [q,want] of cases)assert.deepEqual(p.find(q),ids(want),'unchanged: '+JSON.stringify(q));
++  },
++  // A node with neither a label nor a name is named by its id for display only: the id is not text to search by pieces, but the whole id still finds it.
++  async labelFallback(p){
++    for(const q of ['quorum','77','quorum:7','uorum:77'])assert.deepEqual(p.find(q),[],'a node without a label is not searched by pieces of its id: '+q);
++    assert.deepEqual(p.find('QUORUM:77'),[ 'quorum:77']);
++  },
++  // The server's own flag is honoured when the answer was for this very query.
++  async flag(p){
++    p.t.state.snapshot={search:{query:'Elsewhere'}};FIXTURE[6].is_search_match=true;FIXTURE[7].is_search_match=false;
++    try{
++      assert.deepEqual(p.find('elsewhere'),['lda:9917'],'a flagged node matches the query the server answered');
++      assert.deepEqual(p.find('  ELSEWHERE '),['lda:9917'],'... in any case and trimmed');
++      assert.deepEqual(p.find('elsewhere again'),[],'... but not another query');
++      p.t.state.snapshot=null;
++      assert.deepEqual(p.find('elsewhere'),[],'... and not when no answer is held');
++    }finally{p.t.state.snapshot=null;delete FIXTURE[6].is_search_match;delete FIXTURE[7].is_search_match;}
++  },
++  // A null among the ids is skipped, not turned into the word "null"; a number is an id like any other.
++  async oddIds(p){
++    for(const q of ['null','undefined','nan'])assert.deepEqual(p.find(q),[],'a null among the ids is not a word: '+q);
++    assert.deepEqual(p.find('7'),ids([9]),'a number among the ids is an id like any other');
++  },
++  // Both callers: the legacy list shows exactly the matching people in node order, the map's sample holds exactly the matching people.
++  async callers(p){
++    const fixed=[['politico',[]],['3f2a',[]],[UUID_A,[1]],[UUID_B.toUpperCase(),[2]],['casey',[1]],['A000370',[1,2]],['a00',[]],['hsb',[]],['  hsba ',[1,4]],['banking',[1,5]],['zed zeta',[7]],['quorum:77',[8]],['quorum',[]],['ada',[0,4,9]]];
++    p.load(FIXTURE.concat(EDGE_NODES),{edges:[{source:'edge:a',target:'edge:b',layer:'co_tenure'}]});
++    p.t.state.snapshot=null;
++    for(const [q,want] of fixed){
++      const names=want.map(i=>FIXTURE[i].label||FIXTURE[i].name||FIXTURE[i].id);
++      const shown=p.listed(q);
++      assert.deepEqual(shown.labels,names,'the legacy list for '+JSON.stringify(q));assert.equal(shown.count,want.length);
++      assert.deepEqual(p.visible(q),ids(want).slice().sort(),'the map sample for '+JSON.stringify(q));
++    }
++    p.load(FIXTURE);
++  },
++};
++const newPage=code=>{const p=page(code);p.load(FIXTURE);return p;};
++const outcomes=async p=>{
++  const out={};
++  for(const [name,check] of Object.entries(RULING)){try{await check(p);out[name]='pass';}catch(e){if(!(e instanceof assert.AssertionError))throw e;out[name]='fail';}}
++  return out;
++};
++const ALL_PASS=Object.fromEntries(Object.keys(RULING).map(k=>[k,'pass']));
++
++for(const name of Object.keys(RULING))test('ruling: '+{
++  idFragments:'a piece of a node id, a politico id or a uuid finds nothing by way of the id',
++  codeFragments:'a piece of a member, committee or policy id finds nothing by way of it',
++  wholeIds:'a whole node id finds its node, trimmed and in any case',
++  bareUuids:'the bare uuid of a politico id is a whole id, and no other prefix has a bare form',
++  wholeCodes:'a whole member, committee or policy id finds the nodes attached to it, trimmed and in any case',
++  text:'names and summaries are still searched by pieces, in any case, all words required',
++  labelFallback:'a node without a label is not searched by pieces of the id its label falls back to',
++  flag:'the server flag is honoured for the query it answered and for no other',
++  oddIds:'a null among the ids is skipped and a number is an id like any other',
++  callers:'the legacy list and the map sample follow the same rule',
++}[name],async()=>RULING[name](newPage(source)));
++
++// ---- a seeded world: every answer equals the ruling written out by brute force, for every 1- and 2-character query and sampled names and pieces of ids
++const mulberry32=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
++const hex=(rand,n)=>Array.from({length:n},()=>'0123456789abcdef'[Math.floor(rand()*16)]).join('');
++const uuid=rand=>[8,4,4,4,12].map(n=>hex(rand,n)).join('-');
++function world(rand,count){
++  const pick=list=>list[Math.floor(rand()*list.length)];
++  const given=['Alex','Casey','Jordan','Morgan','Priya','Pat','Zed','Beatrice','Cole','Élodie','Sam','Dana','Ruth'],family=['Adams','Rivera','Lee','Quill','Nair','Orwell','Zeta','Hale','Porter','Gagné','Stone','Marsh','Ode'];
++  const orgs=['House Ways Means','Senate Banking','Office of Rep. Hale','Quorum Strategies LLC','Acme Lobbying Group','Committee on Finance'];
++  const shapes=[()=>'politico:'+uuid(rand),()=>'politico:'+uuid(rand),()=>'hill:person:'+pick(['alex-adams','zed-zeta','pat-orwell'])+'-'+Math.floor(rand()*40),
++    ()=>'person:lda:lobbyist:'+Math.floor(rand()*9000),()=>'quorum:'+Math.floor(rand()*900),()=>'person:'+hex(rand,12),()=>'Mixed:Case-'+Math.floor(rand()*40)];
++  const seen=new Set(),nodes=[];
++  while(nodes.length<count){
++    const id=pick(shapes)();if(seen.has(id))continue;seen.add(id);
++    const name=pick(given)+' '+pick(family),n={id,kind:'person',member_ids:[],committee_ids:[],policy_ids:[]};
++    const style=rand();
++    if(style<.08)n.name=name;else if(style>=.13)n.label=name;                         // 5%: neither a label nor a name
++    if(rand()<.5)n.source_summary=pick(['Director','Counsel','Chief of Staff'])+' · '+pick(orgs)+' · last reported 20'+(10+Math.floor(rand()*15))+'-0'+(1+Math.floor(rand()*9))+'-15';
++    if(rand()<.4)n.member_ids.push(pick(['A000370','S001223','V000127','M001204']));
++    if(rand()<.1)n.member_ids.push(pick(['A000370','S001223','V000127','M001204']));
++    if(rand()<.2)n.committee_ids.push(pick(['HSBA','SSFI','container:hsag','container:ssfi']));
++    if(rand()<.2)n.policy_ids.push(pick(['BANKING','policy:tax','policy:health',3]));
++    if(rand()<.03)n.member_ids.unshift(null);
++    nodes.push(n);
++  }
++  // A decoy whose label is another person's id: it is found by its text, the person by the whole id.
++  nodes[7].label=nodes[3].id;
++  return nodes;
++}
++function queriesFor(nodes){
++  const out=new Set(),alphabet='abcdefghijklmnopqrstuvwxyz0123456789:-. ';
++  for(const a of alphabet){out.add(a);for(const b of alphabet)out.add(a+b);}
++  for(const q of ['A0','Po','HS','S0','Ba','TA','  a  ',' po','po '])out.add(q);
++  for(let i=0;i<nodes.length;i+=Math.max(1,Math.floor(nodes.length/70))){
++    const n=nodes[i],id=n.id,text=n.label||n.name||'';
++    for(const v of variants(id))out.add(v);
++    if(id.startsWith('politico:'))for(const v of variants(id.slice(9)))out.add(v);
++    for(let k=1;k<=Math.min(id.length,14);k+=2)out.add(id.slice(0,k));
++    for(let k=2;k<=8;k+=3){out.add(id.slice(-k));out.add(id.slice(5,5+k));}
++    for(const group of id.replace('politico:','').split(/[-:]/))for(let k=2;k<=Math.min(group.length,9);k+=2)out.add(group.slice(0,k));
++    for(const code of [...n.member_ids,...n.committee_ids,...n.policy_ids].filter(c=>c!==null)){
++      for(const v of variants(String(code)))out.add(v);
++      for(let k=1;k<String(code).length;k++){out.add(String(code).slice(0,k));out.add(String(code).slice(k));}
++    }
++    out.add(text);out.add(text.toUpperCase());out.add(text.split(' ')[0].slice(0,3));out.add(text.split(' ').reverse().join(' '));
++    if(n.source_summary){out.add(n.source_summary.split(' · ')[1]);out.add(n.source_summary.split(' · ')[0].toLowerCase());}
++  }
++  return [...out];
++}
++// Brute force, independent of the page: a node matches when the whole trimmed query is one of its identifiers, or every word of the query occurs in its text.
++function ruled(nodes){
++  return nodes.map(n=>{
++    const identifiers=new Set([String(n.id)]);
++    const bare=/^politico:(.+)$/i.exec(String(n.id));if(bare)identifiers.add(bare[1]);
++    for(const key of ['member_ids','committee_ids','policy_ids'])for(const v of n[key])if(v!==null&&v!==undefined)identifiers.add(String(v));
++    return {id:n.id,identifiers:[...identifiers].map(s=>s.toLowerCase()),text:((n.label||n.name||'')+' '+(n.source_summary||'')).toLowerCase()};
++  });
++}
++const matches=(entry,query)=>{
++  const q=query.trim().toLowerCase();
++  if(!q)return false;
++  if(entry.identifiers.some(i=>i===q))return true;
++  return q.split(/\s+/).every(word=>entry.text.indexOf(word)>=0);
++};
++test('over a seeded world every answer equals the ruling, for every 1- and 2-character query, sampled names and pieces of ids',async t=>{
++  const nodes=world(mulberry32(20261003),120),queries=queriesFor(nodes),entries=ruled(nodes);
++  const p=page(source);p.load(nodes);
++  let hits=0,wholeIdHits=0,fragmentsThatWouldHaveHit=0;
++  for(const q of queries){
++    const got=p.find(q),want=entries.filter(e=>matches(e,q)).map(e=>e.id);
++    assert.deepEqual(got,want,'ruling: '+JSON.stringify(q));
++    hits+=want.length;
++    if(entries.some(e=>e.identifiers.includes(q.trim().toLowerCase())))wholeIdHits++;
++    // What the previous text would have matched through an id or a code (a substring of one) and the ruling does not.
++    if(q.trim()&&!want.length&&entries.some(e=>e.identifiers.some(i=>i.includes(q.trim().toLowerCase()))))fragmentsThatWouldHaveHit++;
++  }
++  // The world must be able to tell the ruling from the old search: fragments of identifiers that now find nothing, whole identifiers that still find nodes.
++  const seen={queries:queries.length,hits,wholeIdHits,fragmentsThatWouldHaveHit};
++  assert.ok(seen.queries>2500&&seen.wholeIdHits>400&&seen.fragmentsThatWouldHaveHit>300,'the world must exercise the ruling: '+JSON.stringify(seen));
++  // The two callers agree with the predicate on a sample (the page itself, over this world with an edge no query reaches).
++  p.load(nodes.concat(EDGE_NODES),{edges:[{source:'edge:a',target:'edge:b',layer:'co_tenure'}]});
++  let sampled=0;
++  for(const q of queries.filter((_,i)=>i%9===0)){
++    const want=entries.filter(e=>matches(e,q)).map(e=>e.id),shown=p.listed(q);
++    if(!q.trim())continue;
++    assert.equal(shown.count,want.length,'legacy list count: '+JSON.stringify(q));
++    assert.deepEqual(p.visible(q),want.slice().sort(),'map sample: '+JSON.stringify(q));
++    sampled++;
++  }
++  assert.ok(sampled>150,'a sample of '+sampled+' queries went through both callers');
++  t.diagnostic('seeded world: '+nodes.length+' nodes, '+JSON.stringify({...seen,predicateCalls:queries.length*nodes.length,callerQueries:sampled}));
++});
++test('the cache holds one entry per node and survives a second pass',async()=>{
++  const p=newPage(source);
++  p.find('casey');p.find('hsba');
++  assert.equal(p.t.state.searchIndex.size,FIXTURE.length,'one cached entry per node');
++  assert.deepEqual(p.find('casey'),ids([1]));assert.deepEqual(p.find('HSBA'),ids([1,4]));
++  p.t.state.searchIndex.delete('politico:'+UUID_A);
++  assert.deepEqual(p.find('casey'),ids([1]),'a deleted entry is rebuilt (the page deletes one when it learns more about a person)');
++});
++
++// ---- negative controls
++test('negative control: the previous code fails the checks that are the ruling and passes the others',{skip:NO_GIT},async()=>{
++  const old=await outcomes(newPage(before));
++  assert.deepEqual(old,{idFragments:'fail',codeFragments:'fail',wholeIds:'pass',bareUuids:'pass',wholeCodes:'pass',text:'pass',labelFallback:'fail',flag:'pass',oddIds:'fail',callers:'fail'},
++    'the previous matchesQuery searched the id, the label that falls back to it and the codes by pieces: '+JSON.stringify(old));
++  assert.deepEqual(await outcomes(newPage(source)),ALL_PASS);
++});
++test('negative control: the previous code differs from the ruling over the seeded world',{skip:NO_GIT},async t=>{
++  const nodes=world(mulberry32(20261003),120),queries=queriesFor(nodes),entries=ruled(nodes);
++  const p=page(before);p.load(nodes);
++  let differ=0,spurious=0,missing=0;
++  for(const q of queries){
++    const got=new Set(p.find(q)),want=new Set(entries.filter(e=>matches(e,q)).map(e=>e.id));
++    for(const id of got)if(!want.has(id))spurious++;
++    for(const id of want)if(!got.has(id))missing++;
++    if(got.size!==want.size||[...got].some(id=>!want.has(id)))differ++;
++  }
++  assert.ok(differ>300&&spurious>1000,'the previous code must answer differently: '+JSON.stringify({differ,spurious,missing}));
++  assert.equal(missing,0,'the previous code found everything the ruling finds (a whole id contains itself): it only found too much');
++  t.diagnostic('previous code over the same world: '+JSON.stringify({queries:queries.length,differ,spurious,missing}));
++});
++const BUGS=[
++  ['the id is searched by its pieces again',"words:[n.label||n.name||'',n.source_summary||'']","words:[n.label||n.name||'',n.id,n.source_summary||'']",['idFragments','callers']],
++  ['the label falls back to the id again',"words:[n.label||n.name||'',","words:[n.label||n.name||n.id,",['labelFallback']],
++  ['the member, committee and policy ids are searched by their pieces again',"words:[n.label||n.name||'',n.source_summary||'']","words:[n.label||n.name||'',n.source_summary||'',...(n.member_ids||[]),...(n.committee_ids||[]),...(n.policy_ids||[])]",['codeFragments','callers']],
++  ['no whole-id match','||searchable.ids.includes(q)','',['wholeIds','bareUuids','wholeCodes','callers']],
++  ['a case-sensitive id','const id=String(n.id).toLowerCase(),ids=[id];','const id=String(n.id),ids=[id];',['wholeIds']],
++  ['ids are matched by substring','searchable.ids.includes(q)','searchable.ids.some(i=>i.includes(q))',['idFragments','codeFragments','callers']],
++  ['an untrimmed query','const q=state.query.toLowerCase().trim();','const q=state.query.toLowerCase();',['wholeIds','wholeCodes']],
++  ['no bare uuid',"if(id.startsWith('politico:')&&id.length>9)ids.push(id.slice(9));",'',['bareUuids']],
++  ['the member, committee and policy ids are not whole-matched',"for(const key of ['member_ids','committee_ids','policy_ids'])",'for(const key of [])',['wholeCodes']],
++  ['a null among the ids becomes the word null','if(value!==null&&value!==undefined)','',['oddIds']],
++  ['the server flag is dropped',"(String(state.snapshot?.search?.query||'').toLowerCase()===q&&n.is_search_match===true)||",'',['flag']],
++];
++for(const [name,find,replace,caught] of BUGS)test('negative control: '+name+' is caught by '+caught.join(' and '),async()=>{
++  assert.equal(source.split(find).length-1,1,'the page source must hold the text to break exactly once: '+find);
++  const got=await outcomes(newPage(source.replace(find,()=>replace)));
++  for(const check of caught)assert.equal(got[check],'fail',check+' must catch this bug: '+JSON.stringify(got));
++});

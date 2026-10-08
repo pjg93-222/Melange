@@ -623,6 +623,9 @@ def postflight(bundle, preflight_report):
         'data/members/big5_traits.json','data/members/big5_v2.json','category_stance.json','communication_style.json',
         'coop_v2_candidate.json','dashboard_data.json','data/money/electoral_history.json',
         'data/money/electoral_plays.json','data/stance/interview_antagonism.json','data/network/kb_benchmark.json',
+        # COMPET_MULT (Paul 2026-10-05): the competitiveness multiplier artifact (promoted path and .candidate) shapes the desk ROI when the dial is ON;
+        # hashed under either dial position, like the other declared inputs (an undeclared one that IS read breaks the same-input check).
+        'data/money/competitiveness_c.json','data/money/competitiveness_c.json.candidate',
         'bill_repository_live.json',
         # Verified sentinel membership rows and their durable Excel ledger are
         # direct legislation inputs.  Without these hashes, a legitimate new
@@ -717,6 +720,11 @@ def postflight(bundle, preflight_report):
     source_state['env:DESK_MEDIA_STANCE']=os.environ.get('DESK_MEDIA_STANCE','1')
     # N1a: which press corpus the desk read is the largest single determinant of its press rows.
     source_state['env:DESK_PRESS_SOURCE']=os.environ.get('DESK_PRESS_SOURCE','engine')
+    # COMPET_MULT: the dial and its artifact override are inputs to the bundle's ROI column (unset or '' == ON, the default since 2026-10-06).
+    source_state['env:COMPET_MULT']=os.environ.get('COMPET_MULT','1') or '1'
+    source_state['env:COMPET_SRC']=os.environ.get('COMPET_SRC','')
+    if os.environ.get('OPTIMIZE_RESULT_PATH'):    # desk plan source override (make_member_desk.py): the allocation columns come from THIS file when set
+        source_state['optimize_result.json']=_file_sha(os.environ['OPTIMIZE_RESULT_PATH'])
     input_hash=_sha(source_state); state_path=_op('data/engine/dashboard_integrity_state.json')
     os.makedirs(os.path.dirname(state_path), exist_ok=True)
     prior=json.load(open(state_path,encoding='utf-8')) if os.path.exists(state_path) else None

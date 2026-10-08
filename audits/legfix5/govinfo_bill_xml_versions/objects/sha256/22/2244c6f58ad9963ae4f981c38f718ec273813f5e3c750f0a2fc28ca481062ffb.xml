@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" stage-count="1" star-print="no-star-print"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S1422 IS:  Strengthening the Medicare Trust Fund Act</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-05-13</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>116th CONGRESS</congress><session>1st Session</session><legis-num>S. 1422</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20190513">May 13, 2019</action-date><action-desc><sponsor name-id="S309">Mr. Casey</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSFI00">Committee on Finance</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To transfer revenues from the net investment income tax to the Federal Hospital Insurance Trust
+ Fund.</official-title></form><legis-body><section id="idB4F9C5F9C05648D3A4E1FB1A5B760560" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title> Strengthening the Medicare Trust Fund Act</short-title></quote>.</text></section><section id="id15D06EB37F5844CA9B455F3314218A57" section-type="subsequent-section"><enum>2.</enum><header>Transfer of net investment income tax revenues to the Federal Hospital Insurance Trust Fund</header><text display-inline="no-display-inline">Section 1817(a) of the Social Security Act (<external-xref legal-doc="usc" parsable-cite="usc/42/1395i">42 U.S.C. 1395i(a)</external-xref>) is amended by striking <quote>and</quote> at the end of paragraph (1), by striking the period at the end of paragraph (2) and inserting <quote>; and</quote>, and by inserting after paragraph (2) the following new paragraph:</text><quoted-block display-inline="no-display-inline" id="id78dac6e32d934e738f9b803ae6d3ae23" style="OLC"><paragraph id="id6980eb221ce344b6ab2e67ac4e58a64e"><enum>(3)</enum><text>the taxes imposed by <external-xref legal-doc="usc" parsable-cite="usc/26/1411">section 1411</external-xref> of the Internal Revenue Code of 1986 for any taxable year beginning after December 31, 2018, as determined by the Secretary of the Treasury or the Secretary's delegate based on tax returns under subtitle F of such Code.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill>
+
+

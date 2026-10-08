@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="HB9E9C40838C84D8C858D40189CB11866" public-private="public" key="H" bill-type="olc" stage-count="1"> 
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 4502 EH: Modernizing the Acquisition of Cybersecurity Experts Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">I</distribution-code> 
+<congress display="yes">118th CONGRESS</congress><session display="yes">1st Session</session> 
+<legis-num display="yes">H. R. 4502</legis-num> 
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber> 
+<legis-type>AN ACT</legis-type> 
+<official-title display="yes">To amend title 5, United States Code, to limit the use of educational requirements or qualifications in evaluating candidates for certain cybersecurity positions in the competitive service, and for other purposes.</official-title> 
+</form> 
+<legis-body id="H77C9E7BE81754D318C2B24EC8E68712A" style="OLC"> 
+<section id="HB4244021D49A4344B8B3A4B2B426597E" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Modernizing the Acquisition of Cybersecurity Experts Act of 2023</short-title></quote>.</text></section> <section id="H5544AAEC44D6457A87753D2275B6E47B"><enum>2.</enum><header>Educational requirements for competitive service cybersecurity positions</header><text display-inline="no-display-inline">Section 3308 of title 5, United States Code, is amended—</text> 
+<paragraph id="H9E61CE71874B40FEB96838A644E2AA9B"><enum>(1)</enum><text>by striking <quote>The Office of Personnel Management</quote> and inserting <quote>(a) <header-in-text level="subsection" style="USC">In general.—</header-in-text>Consistent with subsection (b), the Office of Personnel Management </quote>; and</text></paragraph> <paragraph id="H2891535FAD584635928947A212344256"><enum>(2)</enum><text>by adding at the end the following:</text> 
+<quoted-block style="USC" id="H8D5FD9BF63994B87BE9F9B46D10B6E9C" display-inline="no-display-inline"> 
+<subsection id="H5CB1D665403D4A22982CD789391B4D32"><enum>(b)</enum><header>Education requirements for cybersecurity positions</header> 
+<paragraph id="HF95184A6586B4E758B42F5AFB68409BD"><enum>(1)</enum><header>In general</header><text>With respect to any covered position—</text> <subparagraph id="H182B4A3459B646968BFDBA641DAD11E5"><enum>(A)</enum><text display-inline="yes-display-inline">an agency may prescribe a minimum educational requirement for employment in such a position only if a minimum education qualification is required by law to perform the duties of the position in the State or locality where the duties of the position are to be performed; and</text></subparagraph> 
+<subparagraph id="H005B030CCF80478AB1F7E2FE8F0CA571"><enum>(B)</enum><text display-inline="yes-display-inline">an agency may consider education in determining a candidate’s satisfaction of any other minimum qualification only if the candidate’s education directly reflects the competencies necessary to satisfy that qualification and perform the duties of the position.</text></subparagraph></paragraph> <paragraph id="HBA5FE0F9092B4BBE9920DCDD09AC8EA9"><enum>(2)</enum><header>Publication</header><text display-inline="yes-display-inline">Not later than one year after the date of the enactment of the <short-title>Modernizing the Acquisition of Cybersecurity Experts Act of 2023</short-title> and annually thereafter, the Office of Personnel Management shall publish on the Office’s website—</text> 
+<subparagraph id="HC3BE42B8ECA64538979BA215CB8EE68A"><enum>(A)</enum><text display-inline="yes-display-inline">any changes made to minimum qualifications standards concerning education for covered positions; and</text></subparagraph> <subparagraph id="H9A62179C7D0C4EDCAE190149CA7D8835"><enum>(B)</enum><text display-inline="yes-display-inline">aggregate data indicating the level of educational attainment, sorted by position classification, of all accessions to covered positions. </text></subparagraph></paragraph> 
+<paragraph id="HDC8AF0166300478ABD5AB852B46F612B"><enum>(3)</enum><header>Covered position defined</header><text display-inline="yes-display-inline">In this subsection, the term <quote>covered position</quote> means—</text> <subparagraph id="H4267C971724E4076AEBD5E080EA85618"><enum>(A)</enum><text>any position in the competitive service classified under the GS–2210 information technology management series, or any successor series; and</text></subparagraph> 
+<subparagraph id="H6DB2CF942407442FB87F3AAC8BBFE1C3"><enum>(B)</enum><text display-inline="yes-display-inline">any other position in the competitive service designated as “cybersecurity” under the National Initiative for Cybersecurity Education (NICE) Cybersecurity Workforce Framework (NIST Special Publication 800–181), or successor framework.</text></subparagraph></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></section> </legis-body> <attestation><attestation-group><attestation-date date="20231002" legis-day="20231002" chamber="House">Passed the House of Representatives October 2, 2023.</attestation-date><attestor display="no">Cheryl L. Johnson,</attestor><role>Clerk.</role></attestation-group></attestation> <endorsement display="yes"></endorsement> </bill> 
+

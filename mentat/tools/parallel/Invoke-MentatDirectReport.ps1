@@ -2,22 +2,16 @@
 param(
   [Parameter(Mandatory = $true)][string]$Industry,
   [Parameter(Mandatory = $true)][string]$DatabasePath,
-  [string]$OutputDirectory = '',
+  [Parameter(Mandatory = $true)][string]$OutputDirectory,
   [Parameter(Mandatory = $true)][string]$LogPath,
   [ValidateSet('','2021-2022','2023-2024','2025-2026')]
   [string]$CycleLabel = '',
-  [ValidateRange(0,10000)]
-  [int]$CrossReferenceMaxRequests = 100,
-  [switch]$CrossReferenceOffline,
   [string]$RLibraryPath = 'C:\Users\pgoff\AppData\Local\R\win-library\4.6'
 )
 
 $ErrorActionPreference = 'Stop'
 $parallelRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $toolsRoot = Split-Path -Parent $parallelRoot
-Import-Module (Join-Path $toolsRoot 'report_directory.psm1') -Force
-$OutputDirectory = Resolve-MentatReportDirectory -ProjectRoot (Split-Path -Parent $toolsRoot) -OutputDirectory $OutputDirectory
-$env:MENTAT_REPORT_DIRECTORY = $OutputDirectory
 $generator = Join-Path $toolsRoot 'generate_industry_report.ps1'
 foreach ($path in @($DatabasePath, $RLibraryPath, $generator)) {
   if (-not (Test-Path -LiteralPath $path)) {
@@ -53,10 +47,8 @@ $generatorArguments = @{
   Industry = $Industry
   DatabasePath = $DatabasePath
   OutputDirectory = $OutputDirectory
-  CrossReferenceMaxRequests = $CrossReferenceMaxRequests
 }
 if ($CycleLabel) { $generatorArguments.CycleLabel = $CycleLabel }
-if ($CrossReferenceOffline) { $generatorArguments.CrossReferenceOffline = $true }
 & $generator @generatorArguments 2>&1 | Tee-Object -LiteralPath $LogPath
 if ($LASTEXITCODE -ne 0) {
   throw "Direct report generator exited with code $LASTEXITCODE."

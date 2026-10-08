@@ -1,0 +1,42 @@
+BEFORE/AFTER on the 17 suites that reference media_rules / press_stream / make_member_desk.
+Both arms are a 'git -c core.autocrlf=false archive HEAD fec' export; arm_mine additionally carries
+ONLY my six files. Identical verdicts = my change is verdict-neutral on the whole affected surface.
+(The failures present in BOTH arms are the export's absent data plane, not regressions.)
+
+===================== arm_base_1
+  test_dashboard_integrity_demographic_potential.py        Ran 18 tests   OK
+  test_press_baseline_fold.py                              Ran 21 tests   OK
+  test_dashboard_adjustments.py                            Ran 11 tests   FAILED (errors=1)
+  test_dashboard_legislative_workbench.py                  Ran 17 tests   OK
+  test_effectiveness_integration.py                        Ran 13 tests   FAILED (failures=1, errors=1)
+  test_personal_display_dedupe.py                          Ran 6 tests    OK
+  test_primacy_tier.py                                     Ran 85 tests   82 passed, 3 failed
+  test_audit_completion_20260716.py                        Ran 35 tests   FAILED (failures=1, errors=6)
+  test_bug_report_regressions.py                           Ran 59 tests   FAILED (failures=6, errors=8)
+  test_legislation_sidecar_downstream_isolation.py         Ran 1 test     OK
+  test_coalition_recommender.py                            Ran 23 tests   OK
+  test_descriptive_contract_and_surfaces.py                Ran 10 tests   OK
+  test_channel_gold_queues.py                              Ran 15 tests   FAILED (failures=1, errors=1)
+  test_crosspost_scoring.py                                Ran 25 tests   OK (skipped=10)
+  test_desk_membership_source.py                           Ran 21 tests   OK
+  test_desk_responsiveness_dial.py                         Ran 17 tests   OK (skipped=1)
+  test_member_desk_honors.py                               Ran 11 tests   OK
+
+===================== arm_mine_2
+  test_dashboard_integrity_demographic_potential.py        Ran 18 tests   OK
+  test_press_baseline_fold.py                              Ran 21 tests   OK
+  test_dashboard_adjustments.py                            Ran 11 tests   FAILED (errors=1)
+  test_dashboard_legislative_workbench.py                  Ran 17 tests   OK
+  test_effectiveness_integration.py                        Ran 13 tests   FAILED (failures=1, errors=1)
+  test_personal_display_dedupe.py                          Ran 6 tests    OK
+  test_primacy_tier.py                                     Ran 85 tests   82 passed, 3 failed
+  test_audit_completion_20260716.py                        Ran 35 tests   FAILED (failures=1, errors=6)
+  test_bug_report_regressions.py                           Ran 59 tests   FAILED (failures=6, errors=8)
+  test_legislation_sidecar_downstream_isolation.py         Ran 1 test     OK
+  test_coalition_recommender.py                            Ran 23 tests   OK
+  test_descriptive_contract_and_surfaces.py                Ran 10 tests   OK
+  test_channel_gold_queues.py                              Ran 15 tests   FAILED (failures=1, errors=1)
+  test_crosspost_scoring.py                                Ran 25 tests   OK (skipped=10)
+  test_desk_membership_source.py                           Ran 21 tests   OK
+  test_desk_responsiveness_dial.py                         Ran 17 tests   OK (skipped=1)
+  test_member_desk_honors.py                               Ran 11 tests   OK

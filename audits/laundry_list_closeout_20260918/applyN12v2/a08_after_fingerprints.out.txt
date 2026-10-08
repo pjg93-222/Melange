@@ -1,0 +1,46 @@
+﻿BEFORE (recorded in a01_before.json)
+  social_media.db bytes=481439744 sha256=0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee
+
+A. AFTER --apply, as it stands (WAL not yet checkpointed by me)
+  social_media.db bytes=500842496 sha256=31f6545448b13c70f555c8b7a13a8134a5e39ac4c6e638b7653518feb8df7dfa
+  pre-ckpt social_media.db          500842496
+  pre-ckpt social_media.db-wal      0
+  pre-ckpt social_media.db-shm      32768
+  interview_rows                   153576
+  interview_words                  12156955
+  ledger_rows                      5477
+  ledger_unrestored                5477
+  probe_identical_to_backup        True
+  rows_text_differs_from_backup    5477
+  speeches_rows                    270489
+
+B. PRAGMA wal_checkpoint(TRUNCATE)
+  returned (busy, log_frames, checkpointed_frames) = (0, 0, 0)
+  busy=0  -> the checkpoint ran
+
+C. AFTER the checkpoint
+  social_media.db bytes=500842496 sha256=31f6545448b13c70f555c8b7a13a8134a5e39ac4c6e638b7653518feb8df7dfa
+  post-ckpt social_media.db          500842496
+  post-ckpt social_media.db-wal      None
+  post-ckpt social_media.db-shm      None
+  interview_rows                   153576
+  interview_words                  12156955
+  ledger_rows                      5477
+  ledger_unrestored                5477
+  probe_identical_to_backup        True
+  rows_text_differs_from_backup    5477
+  speeches_rows                    270489
+  logical state identical across the checkpoint: True
+  db file changed by the checkpoint: False
+
+D. interview extract + press meta -- this lane never wrote them
+  interviews_cu.csv              UNCHANGED  bytes=23202 sha256=9a23720580f682bf28dee8940bee8d6b0e325119089690f0ce7d6b1a30188cf5
+  interviews_cu.receipt.json     UNCHANGED  bytes=808 sha256=3cdc071522e1763836c42f8d40f4b55cf26e1eed901a6ebafc52cfb23fb58d6c
+  press_component_meta.json      UNCHANGED  bytes=9652 sha256=5356d7db745785d5e9cb024413f2ec9c338fd86e83e9b560a9a97ae6754fa1e7
+
+backup still intact: C:\Users\pgoff\OneDrive\Desktop\Melange Systems\backups\social_media.PRE-TURNSPLIT-20260919.db
+  bytes=481439744 sha256=0150199fb56194cca23cc763dd1a6c97094af3ab7527dee081480fc30a29f2ee
+  equals the BEFORE fingerprint of the live database: True
+
+wrote C:\Users\pgoff\OneDrive\Desktop\Melange Systems\.claude\worktrees\unfinished-work-handoff-a3bbad\audits\laundry_list_closeout_20260918\applyN12v2\a08_after.json
+VERDICT: AFTER STATE CONSISTENT

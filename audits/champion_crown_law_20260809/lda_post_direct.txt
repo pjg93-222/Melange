@@ -1,0 +1,432 @@
+ERROR: missing identity client.id crosswalk: C:\Users\pgoff\AppData\Local\Temp\tmp0mxgjecr\id_crosswalk.json
+  OK   test_bill_regex_formal_variants
+  OK   test_bill_regex_boundaries_multi_and_unparsed
+  OK   test_dotless_bare_s_sba_lookbehind_wins_over_context
+  OK   test_dotless_bare_s_us_census_lookbehind_wins_over_context
+  OK   test_dotless_bare_s_bank_of_america_5300_and_1160
+  OK   test_dotless_and_dotted_s_in_same_activity_both_resolve
+  OK   test_dotless_bare_s_without_formal_context_is_rejected
+  OK   test_dotless_bare_s_over_range_and_absent_is_rejected
+  OK   test_dotless_bare_s_recovery_and_rejection_receipts
+  OK   test_bill_number_runs_into_title_six_verbatim_citations
+  OK   test_run_into_title_keeps_thousands_separator_protection
+  OK   test_run_into_title_keeps_six_digit_boundary_protection
+  OK   test_run_into_title_keeps_existing_hyphen_behavior
+  OK   test_runs_into_title_recovery_receipt_bucket
+  OK   test_sponsor_map_synthetic_billstatus
+  OK   test_multi_congress_same_number_resolution
+  OK   test_title_normalization_guard_ambiguity_boundary_and_longest
+  OK   test_stale_citation_original_congress_and_strict_generous
+  OK   test_multi_suffix_stale_citations_forward_binding
+  OK   test_distinct_bill_dyad_counting
+  OK   test_title_union_with_formal_is_distinct
+  OK   test_per_activity_scope_congress_and_contradiction
+  OK   test_sponsorless_intersection_receipt
+  OK   test_cross_comparison_arithmetic
+  OK   test_collector_manifest_idempotency
+  OK   test_collector_schema_identity_and_resume_validation
+  OK   test_collector_timeout_redirect_and_transient_retries
+  OK   test_incremental_manifest_writer
+  OK   test_year_partitioned_resume_paths
+  OK   test_sweep_page_validation
+  OK   test_worklist_filing_year_validation
+  OK   test_strict_uuid_and_pinned_lob_scope
+  OK   test_worklist_boolean_normalization
+  OK   test_bridge3_member_blocked_two_cycle_joint_move
+  OK   test_bridge3_fractional_ranks_and_singleton_party_cell
+  OK   test_bridge3_committee_snapshot_parser
+  OK   test_bridge3_sweep_ingestion_duplicate_and_wrong_year
+  OK   test_bridge3_client_attribution_and_near_miss_receipt
+  OK   test_bridge3_stable_client_id_harvest_and_collision
+  OK   test_bridge3_all_year_id_harvest_matches_unseen_sweep_name
+  OK   test_bridge3_id_harvest_plausibility_guard_rejects_cross_attribution
+lda rebuild: 2021:g0/s0 | receipts C:\Users\pgoff\AppData\Local\Temp\tmppnidcjh2\Melange\lda_rebuild\derived\rebuild_receipts.json
+  OK   test_legacy_2021_build_does_not_consult_identity_harvest_loader
+  OK   test_bridge3_zero_match_org_has_per_year_coverage_gap_receipt
+  OK   test_bridge3_first_word_title_index_matches_naive
+  OK   test_bridge3_xhat_battery_construction_sanity
+  OK   test_round4b_y_distinct_directional_bill_construction
+  OK   test_round4b_congestion_x_stratum_field_mapping
+  OK   test_round4b_entry_and_void_exact_boundaries
+  OK   test_round4b_battery_never_loads_real_y
+  OK   test_quarterly_period_vocabulary_and_unknown
+  OK   test_quarterly_aggregation_distinctness
+  OK   test_position_calibration_join_and_three_class_collapse
+  OK   test_position_dataset_accepts_their_five_label_vocabulary
+  OK   test_position_dataset_unknown_label_names_row
+  OK   test_position_three_class_collapse_both_directions
+  OK   test_position_agreement_primary_and_restricted_secondary_n
+  OK   test_position_prompt_exactness
+  OK   test_position_jsonl_and_flat_csv_round_trip
+  OK   test_position_fewshot_prompt_pinned_order_and_label_mapping
+  OK   test_position_fewshot_selection_excludes_calibration_pairs
+  OK   test_position_fewshot_shortfall_receipt_and_cache_reuse
+  OK   test_position_reply_parsing_and_unparseable_receipt
+  OK   test_position_content_hash_resume_behavior
+  OK   test_position_title_only_official_allows_empty_short
+  OK   test_position_title_display_fallback_receipted
+  OK   test_position_title_zero_items_raises
+  OK   test_position_title_both_preserves_short_and_prefers_introduced
+  OK   test_position_absent_billstatus_key_skipped_with_samples
+  OK   test_position_present_billstatus_key_without_titles_still_raises
+  OK   test_position_present_billstatus_key_with_titles_unchanged
+  OK   test_association_name_normalizer_fixed_cases
+  OK   test_association_set_directional_threshold_rule
+  OK   test_association_crosswalk_is_exact_only_and_receipts_near_name
+  OK   test_association_global_id_matches_despite_name_mismatch
+  OK   test_association_id_and_name_channels_have_union_semantics
+  OK   test_association_client_scoped_id_never_attributes_identity
+  OK   test_association_main_fails_loud_without_id_crosswalk
+  OK   test_association_work_item_determinism_and_schema_mirror
+  OK   test_association_id_guard_rejects_ufcw_for_sound_banking
+  OK   test_association_id_guard_accepts_nafcu_rename
+  OK   test_association_id_guard_accepts_nonempty_subset
+  OK   test_association_id_guard_rejects_shared_stopwords_only
+  OK   test_association_id_rejection_receipt_carries_both_token_sets
+  OK   test_lobby_champions_structural_controls_bite
+  OK   test_lobby_champions_zero_fills_roster_member
+  OK   test_lobby_champions_under_min_links_receipted
+  OK   test_lobby_champions_rank_deficiency_receipted
+  OK   test_lobby_champions_csv_determinism
+  OK   test_lobby_champions_sector_mean_is_genuine_leave_one_out
+  OK   test_lobby_champions_single_org_sector_fields_are_null_not_zero
+  OK   test_attention_vs_stance_bioguide_join_survives_display_name_difference
+  OK   test_attention_vs_stance_known_member_enters_worked_adversaries_cell
+  OK   test_attention_vs_stance_json_and_csv_are_deterministic
+  OK   test_lobby_forecast_no_leakage_by_construction
+  OK   test_lobby_forecast_persistence_reproduces_82_percent_carryover
+  OK   test_lobby_forecast_churn_subset_excludes_persistent_dyad
+  OK   test_lobby_forecast_temporal_split_never_trains_on_t_plus_1
+  OK   test_lobby_forecast_rank_deficiency_is_reported
+  OK   test_lobby_forecast_determinism
+  OK   test_lobby_forecast_coverage_guard_rejects_mixed_basis
+  OK   test_lobby_forecast_schiff_transition_does_not_break_seniority
+  OK   test_lobby_forecast_mid_congress_move_prefers_senate_with_receipt
+  OK   test_lobby_forecast_icpsr_difference_prefers_other_congress_match
+  OK   test_lobby_forecast_same_chamber_conflicting_state_still_raises
+  OK   test_lobby_forecast_committee_congress_keys_normalize_to_int
+  OK   test_lobby_forecast_committee_error_names_only_genuine_missing
+  OK   test_lobby_forecast_allow_missing_committee_drops_split_feature
+  OK   test_lobby_forecast_missing_committee_without_flag_still_raises
+  OK   test_lobby_forecast_churn_headline_names_winning_popularity_baseline
+  OK   test_lobby_forecast_persistence_churn_is_annotated_structurally_zero
+  OK   test_lobby_forecast_overall_verdict_counts_losses_and_leads_with_failure
+  OK   test_cosponsor_forecast_no_leakage_and_sponsor_excluded
+  OK   test_cosponsor_forecast_prior_features_never_read_target_congress
+  OK   test_cosponsor_forecast_three_baselines_known_structure
+  OK   test_cosponsor_forecast_headline_names_best_baseline_and_loss
+  OK   test_cosponsor_forecast_rank_deficiency_detected_not_silent
+  OK   test_cosponsor_forecast_output_determinism
+  OK   test_cosponsor_forecast_voteview_universe_includes_cheney_fixture
+  OK   test_cosponsor_forecast_streamed_normal_equations_match_direct_solve
+  OK   test_cosponsor_forecast_streamed_auc_matches_direct_fixture
+  OK   test_cosponsor_forecast_gram_rank_deficiency_detected
+  OK   test_cosponsor_forecast_campbell_switch_carries_forward_identity
+  OK   test_cosponsor_forecast_final_congress_switch_uses_higher_icpsr
+  OK   test_cosponsor_forecast_out_of_scope_voteview_conflict_is_not_validated
+  OK   test_cosponsor_forecast_in_scope_state_conflict_still_raises
+  OK   test_cosponsor_forecast_same_chamber_only_excludes_and_drops_constant
+  OK   test_cosponsor_forecast_candidate_configurations_have_correct_base_rates
+  OK   test_cosponsor_forecast_penalized_standard_errors_finite_positive
+  OK   test_cosponsor_forecast_policy_area_coefficients_carry_bill_counts
+  OK   test_sector_spend_amendment_supersession_latest_dt_and_receipt
+  OK   test_sector_spend_registration_types_excluded_and_receipted
+  OK   test_sector_spend_components_support_exact_total
+  OK   test_sector_spend_cuna_nafcu_dba_variants_one_family
+  OK   test_sector_spend_individual_excluded_and_reported_separately
+  OK   test_sector_spend_2026_is_partial_year
+  OK   test_sector_spend_output_determinism
+  OK   test_org_mentions_paywall_strip_removes_stub_but_keeps_real_prefix_mention
+  OK   test_org_mentions_strict_block_rejects_generic_qualifier_and_verb_use
+  OK   test_org_mentions_strict_family_aliases_cannot_mutually_corroborate
+  OK   test_org_mentions_strict_tier_b_requires_second_same_org_alias
+  OK   test_org_mentions_slash_alias_keeps_full_name_without_minting_bare_state
+  OK   test_org_mentions_slash_alias_readmits_coined_token_but_not_strategy
+  OK   test_org_mentions_source_pattern_cannot_self_qualify_tier_b_alias
+  OK   test_org_mentions_tier_b_accepts_same_sector_org_in_same_sentence
+  OK   test_org_mentions_authority_dedup_prefers_entity_and_unions_aliases
+  OK   test_org_mentions_coinbase_family_counts_document_once_in_one_row
+  OK   test_org_mentions_press_dates_normalize_and_undated_rows_are_receipted
+  OK   test_org_mentions_bluesky_verified_only_and_unverified_receipt
+  OK   test_org_mentions_schema_receipts_and_channels_are_never_summed
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqnvm730d\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqnvm730d\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqnvm730d\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqnvm730d\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqnvm730d\lobby-screen.html (92,945 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8dh4un4d\lobby-network.html (122,543 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8dh4un4d\lobby-champions.html (104,022 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8dh4un4d\lobby-forecast.html (95,113 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8dh4un4d\lobby-bills.html (96,483 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8dh4un4d\lobby-screen.html (93,065 bytes)
+  OK   test_org_mentions_surface_renders_landing_company_and_absent_states
+  OK   test_champions_v2_veto_never_reaches_champions_and_routes_to_threats
+  OK   test_champions_v2_corroborated_opposed_sponsor_is_opposition_leadership
+  OK   test_champions_v2_crowned_opposition_leader_routes_to_mixed_and_receipts
+  OK   test_champions_v2_crowned_low_opposition_is_omitted_uniformly
+  OK   test_champions_v2_identical_noncrown_profile_still_routes_to_threats
+  OK   test_champions_v2_assert_boards_rejects_tier_one_threat
+  OK   test_champions_v2_receipts_champion_exclusivity_rule_and_sector_lists
+  OK   test_champions_v2_non_cu_components_are_empty_and_receipted_as_two
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqgzflz90\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqgzflz90\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqgzflz90\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqgzflz90\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpqgzflz90\lobby-screen.html (92,945 bytes)
+  OK   test_champions_v2_page_headline_panels_and_unsigned_demotion_are_explicit
+  OK   test_efficiency_layers_contest_arithmetic_is_exact
+  OK   test_efficiency_layers_threat_member_is_adversary_and_never_ranked
+  OK   test_efficiency_layers_headroom_rewards_active_under_lobbied_member
+  OK   test_efficiency_layers_missing_pricing_is_omitted_and_receipted
+  OK   test_efficiency_surface_percentiles_are_tie_aware_from_zero_to_one_hundred
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdeh3lk8h\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdeh3lk8h\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdeh3lk8h\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdeh3lk8h\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdeh3lk8h\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_total_is_exact_component_sum_with_precision_note
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3pejfiuy\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3pejfiuy\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3pejfiuy\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3pejfiuy\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3pejfiuy\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_null_sector_score_renders_em_dash
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpwywhjrgr\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpwywhjrgr\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpwywhjrgr\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpwywhjrgr\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpwywhjrgr\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_marks_2026_partial_year
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0uw_uje\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0uw_uje\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0uw_uje\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0uw_uje\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0uw_uje\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_is_self_contained
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4y529c94\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4y529c94\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4y529c94\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4y529c94\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp4y529c94\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_is_not_a_one_way_trap
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_8kzwovl\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_8kzwovl\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_8kzwovl\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_8kzwovl\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_8kzwovl\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_member_names_carry_the_member_desk_address
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp0h3o_rnm\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp0h3o_rnm\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp0h3o_rnm\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp0h3o_rnm\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp0h3o_rnm\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_contains_required_honesty_language
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpye12f488\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpye12f488\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpye12f488\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpye12f488\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpye12f488\lobby-screen.html (92,945 bytes)
+  OK   test_industry_family_adversarial_dyad_renders_badge_note_and_receipt
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-screen.html (92,945 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-screen.html (92,945 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpfjjtwl46\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_is_byte_deterministic
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8qw2gry1\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8qw2gry1\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8qw2gry1\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8qw2gry1\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp8qw2gry1\lobby-screen.html (92,945 bytes)
+  OK   test_industry_page_family_forecast_titles_search_and_number_only_fallback
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3ielfaio\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3ielfaio\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3ielfaio\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3ielfaio\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3ielfaio\lobby-screen.html (92,945 bytes)
+  OK   test_champions_page_suppresses_tier_zero_and_keeps_real_tier_labels
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpph6pbxqk\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpph6pbxqk\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpph6pbxqk\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpph6pbxqk\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpph6pbxqk\lobby-screen.html (92,945 bytes)
+  OK   test_industry_title_cells_ellipsis_in_both_skins_and_keep_hover_titles
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpb0g98zjj\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpb0g98zjj\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpb0g98zjj\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpb0g98zjj\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpb0g98zjj\lobby-screen.html (92,945 bytes)
+  OK   test_champions_board_has_four_columns_and_other_boards_keep_six
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp5c5fe48h\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp5c5fe48h\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp5c5fe48h\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp5c5fe48h\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp5c5fe48h\lobby-screen.html (92,945 bytes)
+  OK   test_bill_marking_state_options_are_data_driven_and_congress_aware
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp38ayaaeg\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp38ayaaeg\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp38ayaaeg\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp38ayaaeg\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp38ayaaeg\lobby-screen.html (92,945 bytes)
+  OK   test_industry_methodology_notes_fold_without_losing_honesty_text
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpp75_8_01\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpp75_8_01\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpp75_8_01\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpp75_8_01\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpp75_8_01\lobby-screen.html (92,945 bytes)
+  OK   test_company_picker_is_searchable_grouped_and_populated
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpnadjo2ld\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpnadjo2ld\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpnadjo2ld\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpnadjo2ld\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpnadjo2ld\lobby-screen.html (92,945 bytes)
+  OK   test_company_view_payload_renders_fixture_bills_members_and_forecast_links
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpug22djp8\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpug22djp8\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpug22djp8\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpug22djp8\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpug22djp8\lobby-screen.html (92,945 bytes)
+  OK   test_company_links_use_hash_deep_links_and_forecast_restores_bill_hash
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxjia2o8i\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxjia2o8i\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxjia2o8i\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxjia2o8i\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxjia2o8i\lobby-screen.html (92,945 bytes)
+  OK   test_company_with_bills_and_no_member_attention_has_explicit_empty_states
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpbbjtkd9b\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpbbjtkd9b\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpbbjtkd9b\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpbbjtkd9b\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpbbjtkd9b\lobby-screen.html (92,945 bytes)
+  OK   test_industry_landing_preserves_make_combined_fold_contract
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpne2u7csy\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpne2u7csy\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpne2u7csy\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpne2u7csy\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpne2u7csy\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_unmarked_bill_renders_em_dash_not_zero_or_blank
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpt3pty3bl\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpt3pty3bl\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpt3pty3bl\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpt3pty3bl\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpt3pty3bl\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_multiple_organizations_are_all_in_expansion_payload
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdjpm21f9\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdjpm21f9\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdjpm21f9\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdjpm21f9\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpdjpm21f9\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_marking_overlay_joins_on_canonical_parts_not_display_string
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpjft2kh09\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpjft2kh09\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpjft2kh09\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpjft2kh09\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpjft2kh09\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_has_zero_remote_asset_references
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpmqtgnfp9\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpmqtgnfp9\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpmqtgnfp9\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpmqtgnfp9\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpmqtgnfp9\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_preserves_every_required_honesty_string
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxo7dh8jv\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxo7dh8jv\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxo7dh8jv\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxo7dh8jv\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpxo7dh8jv\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_manifest_count_and_complete_link_receipt_are_exact
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-screen.html (92,945 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-screen.html (92,945 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp69c64l90\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_is_byte_deterministic
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3m5l8npv\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3m5l8npv\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3m5l8npv\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3m5l8npv\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp3m5l8npv\lobby-screen.html (92,945 bytes)
+  OK   test_bill_view_direction_zero_is_neutral_and_counted_as_marked
+  OK   test_fullscope_org_set_is_four_source_union_without_duplicates
+  OK   test_fullscope_corpus_basis_is_shared_and_not_legacy
+  OK   test_fullscope_mode_never_selects_legacy_output_paths
+  OK   test_fullscope_zero_match_is_a_per_year_coverage_gap
+  OK   test_fullscope_quarterly_union_is_annual_with_repeat_excess
+  OK   test_fullscope_name_pattern_adds_missing_state_league_to_roster
+  OK   test_contest_screen_orders_by_residual_and_excludes_zero_shared
+  OK   test_financial_other_discovery_surfaces_only_unrostered_finance_filers
+  OK   test_fintech_guard_excludes_token_collisions_keeps_real_families
+  OK   test_fullscope_classification_rows_obey_bank_guard
+  OK   test_fullscope_sector_channel_adds_sweep_native_sector_org
+  OK   test_bill_index_keeps_one_row_per_bill_and_organization
+  OK   test_bill_index_canonical_keys_match_repository_convention
+  OK   test_bill_index_preserves_strict_and_generous_channel_per_row
+  OK   test_bill_repository_join_receipts_unjoinable_keys_on_both_sides
+  OK   test_bill_index_and_repository_join_are_deterministic
+  OK   test_member_congress_panel_scopes_attention_to_bill_congress
+  OK   test_member_congress_panel_directional_role_counts_are_exact
+  OK   test_member_congress_panel_keeps_117_committee_cell_empty
+  OK   test_member_congress_panel_spine_excludes_orphan_membership
+  OK   test_member_name_bioname_is_rendered_forename_first
+  OK   test_member_name_resolver_names_departed_member_and_marks_them_former
+  OK   test_member_name_resolver_sitting_member_carries_no_former_flag
+  OK   test_member_name_resolver_unknown_bioguide_degrades_visibly
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_nmdddn6\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_nmdddn6\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_nmdddn6\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_nmdddn6\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmp_nmdddn6\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_departed_member_is_named_not_rendered_as_a_bioguide
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0xn72r4\lobby-network.html (121,384 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0xn72r4\lobby-champions.html (103,902 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0xn72r4\lobby-forecast.html (94,993 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0xn72r4\lobby-bills.html (96,363 bytes)
+industry HTML: C:\Users\pgoff\AppData\Local\Temp\tmpe0xn72r4\lobby-screen.html (92,945 bytes)
+  OK   test_industry_html_unresolvable_bioguide_is_marked_never_silent
+  OK   test_lobby_champions_blank_roster_name_never_emits_a_bare_bioguide
+  OK   test_attention_vs_stance_member_display_never_returns_a_bare_bioguide
+forecast ledger: froze 2 vintages | scored 0: none | cosponsor_join 2025Q4: no new information has arrived; dyad_persistence 2025Q4: resolution year 2026 is not present
+forecast ledger: froze 0 vintages | scored 0: none | freeze exists: cosponsor_join 2025Q4; freeze exists: dyad_persistence 2025Q4; cosponsor_join 2025Q4: no new information has arrived; dyad_persistence 2025Q4: resolution year 2026 is not present
+  OK   test_forecast_ledger_freeze_is_byte_idempotent
+forecast ledger: froze 2 vintages | scored 0: none | cosponsor_join 2025Q4: no new information has arrived; dyad_persistence 2025Q4: resolution year 2026 is not present
+forecast ledger: froze 0 vintages | scored 1: cosponsor_join 2025Q4 Brier .417 (n=3) | freeze exists: cosponsor_join 2025Q4; freeze exists: dyad_persistence 2025Q4; dyad_persistence 2025Q4: resolution year 2026 is not present
+forecast ledger: froze 0 vintages | scored 0: none | freeze exists: cosponsor_join 2025Q4; freeze exists: dyad_persistence 2025Q4; dyad_persistence 2025Q4: resolution year 2026 is not present
+  OK   test_forecast_ledger_brier_and_once_only_append_are_exact
+forecast ledger: froze 2 vintages | scored 0: none | cosponsor_join 2025Q4: no new information has arrived; dyad_persistence 2025Q4: resolution year 2026 is not present
+  OK   test_forecast_ledger_refuses_unchanged_resolution_source
+forecast ledger: froze 2 vintages | scored 0: none | cosponsor_join 2025Q4: no new information has arrived; dyad_persistence 2025Q4: partial-year guard: 2026 is not older than newest year 2026
+  OK   test_forecast_ledger_never_scores_newest_partial_dyad_year
+  OK   test_lobby_posture_adversarial_override_requires_opposition_and_floor
+  OK   test_org_stance_dyad_signs_csv_exact_counts_and_receipt
+  OK   test_org_stance_priors_laplace_arithmetic_exact
+  OK   test_org_stance_sign_ladder_kim_precedes_eligible_prior
+  OK   test_org_stance_prior_floor_requires_count_and_directional_rate
+  OK   test_org_stance_pair_classifier_and_majority_ties
+  OK   test_org_stance_historical_never_computes_from_five_class
+  OK   test_redistricting_county_weights_and_branch_conservation
+  OK   test_redistricting_state_file_precedence
+  OK   test_redistricting_continuing_member_join
+  OK   test_redistricting_drop_receipt_honesty
+  OK   test_redistricting_symmetric_identical_boundaries_zero_delta
+  OK   test_redistricting_cd119_loader_layout
+lda rebuild tests: 237 passed, 0 failed

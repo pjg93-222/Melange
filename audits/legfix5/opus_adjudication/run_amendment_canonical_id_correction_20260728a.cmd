@@ -1,0 +1,3 @@
+@echo off
+cd /d "C:\Users\pgoff\OneDrive\Desktop\Melange Systems"
+"C:\Users\pgoff\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\bin\claude.exe" -p --resume 723d7bf0-315b-4b68-a846-e585cfcf27a8 --output-format stream-json --verbose --model claude-opus-5 --effort max --permission-mode auto --disallowedTools WebFetch,WebSearch < "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\audits\legfix5\opus_adjudication\amendment_canonical_id_correction_prompt_20260728a.txt" > "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\audits\legfix5\opus_adjudication\opus5-amendment-canonical-id-correction-20260728a.stdout.jsonl" 2> "C:\Users\pgoff\OneDrive\Desktop\Melange Systems\audits\legfix5\opus_adjudication\opus5-amendment-canonical-id-correction-20260728a.stderr.log"

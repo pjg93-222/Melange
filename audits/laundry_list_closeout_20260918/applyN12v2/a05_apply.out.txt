@@ -1,0 +1,13 @@
+﻿{
+ "already_migrated": 0,
+ "chars_removed": 2094338,
+ "rows_after": 270489,
+ "rows_deleted": 0,
+ "rows_inserted": 0,
+ "rows_skipped": 807,
+ "rows_truncated": 5477,
+ "skipped_credit_union_stance_channel_row": 19,
+ "skipped_kept_text_under_min_turn_words": 674,
+ "skipped_label_or_gold_record_points_here": 114,
+ "words_removed": 346500
+}

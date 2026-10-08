@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-type="olc" bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public" slc-id="S1-SIL22526-VKY-5M-RKJ"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>117 S3954 IS: To amend the Federal Reserve Act to prohibit the Federal reserve banks from offering certain products or services directly to an individual, and for other purposes.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2022-03-30</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">II</distribution-code><congress>117th CONGRESS</congress><session>2d Session</session><legis-num>S. 3954</legis-num><current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber><action><action-date date="20220330">March 30, 2022</action-date><action-desc><sponsor name-id="S355">Mr. Cruz</sponsor> (for himself, <cosponsor name-id="S397">Mr. Braun</cosponsor>, and <cosponsor name-id="S153">Mr. Grassley</cosponsor>) introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSBK00">Committee on Banking, Housing, and Urban Affairs</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title>To amend the Federal Reserve Act to prohibit the Federal reserve banks from offering certain products or services directly to an individual, and for other purposes.</official-title></form><legis-body style="OLC" display-enacting-clause="yes-display-enacting-clause" id="H9CE4675D5A4449EF9CA1DCF9A973D47F"><section section-type="section-one" id="HAF48EEB779FB46A6B1086552734A74FA"><enum>1.</enum><header>Prohibition on Federal reserve banks relating to certain products or services for individuals</header><text display-inline="no-display-inline">Section 13 of the Federal Reserve Act is amended by adding after the 14th undesignated paragraph (<external-xref legal-doc="usc" parsable-cite="usc/12/347d">12 U.S.C. 347d</external-xref>) the following:</text><quoted-block style="OLC" display-inline="no-display-inline" id="id79ba7afdd64942378c69d7f907d05369"><paragraph id="ide95552d13a6e4a2bbf84d347c5930a1d"><enum/><text>No Federal reserve bank may offer products or services directly to an individual, maintain an account on behalf of an individual, or issue a central bank digital currency directly to an individual.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section></legis-body></bill> 
+

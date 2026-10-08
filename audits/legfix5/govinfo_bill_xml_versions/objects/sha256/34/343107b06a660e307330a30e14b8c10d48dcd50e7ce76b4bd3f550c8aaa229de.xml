@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-Senate" dms-id="A1" public-private="public">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 S2359 IS: To amend the Food and Nutrition Act of 2008 to require consideration of the assets of a household for broad-based categorical eligibility for the supplemental nutrition assistance program.</dc:title>
+<dc:publisher>U.S. Senate</dc:publisher>
+<dc:date>2019-07-31</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+		<distribution-code display="yes">II</distribution-code>
+		<congress>116th CONGRESS</congress><session>1st Session</session>
+		<legis-num>S. 2359</legis-num>
+		<current-chamber>IN THE SENATE OF THE UNITED STATES</current-chamber>
+		<action>
+			<action-date date="20190731">July 31, 2019</action-date>
+			<action-desc><sponsor name-id="S389">Mr. Kennedy</sponsor> introduced the following bill; which was read twice and referred to the <committee-name committee-id="SSAF00">Committee on Agriculture, Nutrition, and Forestry</committee-name></action-desc>
+		</action>
+		<legis-type>A BILL</legis-type>
+		<official-title>To amend the Food and Nutrition Act of 2008 to require consideration of the assets of a household
+			 for broad-based categorical eligibility for the supplemental nutrition
+			 assistance program.</official-title>
+	</form>
+	<legis-body>
+		<section id="id99EE049CC9444550ADF77EBE4BAFE137" section-type="section-one"><enum>1.</enum><header>Assets as income for categorical eligibility for the supplemental nutrition assistance program</header>
+ <subsection id="idB2A2C1A709594DEF8428497BDF835D51"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 5(a) of the Food and Nutrition Act of 2008 (<external-xref legal-doc="usc" parsable-cite="usc/7/2014">7 U.S.C. 2014(a)</external-xref>) is amended—</text> <paragraph id="id3B0B819BE57C4C68B19DDA218880A566"><enum>(1)</enum><text>in the fourth sentence, by striking <quote>Assistance</quote> and inserting the following:</text>
+					<quoted-block display-inline="no-display-inline" id="id9281797E7222446CB39F3F39E577A603" style="OLC">
+ <paragraph id="id939C5CBE2CFF435F916E150A6193F5BA"><enum>(4)</enum><header>Availability of assistance</header><text>Assistance</text></paragraph><after-quoted-block>;</after-quoted-block></quoted-block> </paragraph><paragraph id="id6BCCB5E03E1C455597851EEE6A72B9CC"><enum>(2)</enum><text>in the third sentence, by striking <quote>Except</quote> and inserting the following:</text>
+					<quoted-block display-inline="no-display-inline" id="idB582DEA7FD1F48389FBEF34E8FA5B3D0" style="OLC">
+ <paragraph id="id095C7C81CCDA473D933DF5C73B57B035"><enum>(3)</enum><header>General assistance programs</header><text>Except</text></paragraph><after-quoted-block>;</after-quoted-block></quoted-block> </paragraph><paragraph id="id3E03BC847D464E9DB03973CD19BA11EA"><enum>(3)</enum><text>in the second sentence—</text>
+ <subparagraph id="id108E20F180404815873F8C6E16BD55B2"><enum>(A)</enum><text>by striking <quote>Notwithstanding</quote> and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="idC46B641887F2447F8F976D7242966A2C" style="OLC"> <paragraph id="id82FC48AB2ED74DBA8CB531A22FB244D1"><enum>(2)</enum><header>Categorical eligibility</header> <subparagraph id="id524C87185E3D4F2E9A2A82AF6F5FDBBF"><enum>(A)</enum><header>In general</header><text>Subject to subparagraph (B), and notwithstanding</text></subparagraph></paragraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </subparagraph><subparagraph id="id70D33D8088914406A53C6397B0BC43D9"><enum>(B)</enum><text>by adding at the end the following:</text> <quoted-block display-inline="no-display-inline" id="id58438EAF941C4EA98B95E5FB09E9C82C" style="OLC"> <subparagraph id="id3EA901ED7ED840D3A6687FBCF53C16A3"><enum>(B)</enum><header>Consideration of assets</header> <clause id="id609439C4FAD7418BBBF135A3F03BB172"><enum>(i)</enum><header>Definition of nonincome asset</header><text>In this subparagraph, the term <quote>nonincome asset</quote> means available cash (including in a savings account or checking account), a stock, a savings bond, a mutual fund, a pension fund, and a real estate holding (other than a primary home).</text>
+ </clause><clause id="idE6E27A57EFF7450BB6DC949C23834B0A"><enum>(ii)</enum><header>Consideration of assets</header><text>A household described in subparagraph (A) shall not be eligible to participate in the supplemental nutrition assistance program if the total nonincome assets of the household are valued at not less than—</text>
+ <subclause id="id4A6A7FD0A5D147DA8D685519423B7C46"><enum>(I)</enum><text>$2,250; or</text> </subclause><subclause id="id8EA4B67D40C74A2B9BA066ED78FF611C"><enum>(II)</enum><text>in the case of a household that includes an elderly or disabled member, $3,500.</text></subclause></clause></subparagraph><after-quoted-block>; and</after-quoted-block></quoted-block>
+ </subparagraph></paragraph><paragraph id="id3C62514731D7497D88AA0599F4F0FB35"><enum>(4)</enum><text>by striking <quote>(a) Participation</quote> and inserting the following:</text> <quoted-block display-inline="no-display-inline" id="id3E905F6A9D3F41C491EDECBCE9164430" style="OLC"> <subsection id="id080BF8BEC6FB4D59BB955D7EFD8E6DA6"><enum>(a)</enum><header>In general</header> <paragraph id="idB0C60C9AD356409FA0B64954922CFD0B"><enum>(1)</enum><header>Eligible households</header><text>Participation</text></paragraph></subsection><after-quoted-block>.</after-quoted-block></quoted-block>
+				</paragraph></subsection><subsection id="id6ECA3E55559F450C9386EBF18DBC6C06"><enum>(b)</enum><header>Conforming amendments</header>
+ <paragraph id="id65712388E00743C4BFD1D719B3EF9597"><enum>(1)</enum><text>Section 11(i)(2) of the Food and Nutrition Act of 2008 (<external-xref legal-doc="usc" parsable-cite="usc/7/2020">7 U.S.C. 2020(i)(2)</external-xref>) is amended by striking <quote>the second sentence of section 5(a)</quote> and inserting <quote>section 5(a)(2)</quote>.</text> </paragraph><paragraph id="id4EA8E3CEC9034901A95BBB0DFC5E312A"><enum>(2)</enum><text>Section 17(b)(1)(B)(iv)(III)(bb) of the Food and Nutrition Act of 2008 (7 U.S.C 2026(b)(1)(B)(iv)(III)(bb)) is amended by striking <quote>the last sentence of section 5(a)</quote> and inserting <quote>section 5(a)(4)</quote>.</text>
+				</paragraph></subsection></section></legis-body>
+</bill>
+
+

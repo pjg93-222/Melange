@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="H7AFC865F799B4AA3A388DF3255FC87C9" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8948 IH: Home Energy Affordability Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-05-20</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8948</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260520">May 20, 2026</action-date><action-desc><sponsor name-id="V000138">Mr. Vindman</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HIF00">Committee on Energy and Commerce</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To amend the Public Utility Regulatory Policies Act of 1978 to require States to consider measures that limit the amount of retail utility rate increases an electric utility can request to once every 365 days.</official-title></form><legis-body id="HFF884C27496942F6868850153CEAF01A" style="OLC"> 
+<section id="HD73870E127F342CD9ABD139104142748" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Home Energy Affordability Act</short-title></quote>.</text></section> <section id="HC4FB2CD170D44CCF9A7772D65A01C027" section-type="subsequent-section"><enum>2.</enum><header>Consideration of measures to cap retail utility rate increases to once a year</header><text display-inline="no-display-inline">Section 111(d) of the Public Utility Regulatory Policies Act of 1978 (<external-xref legal-doc="usc" parsable-cite="usc/16/2621">16 U.S.C. 2621(d)</external-xref>) is amended by adding at the end the following:</text> 
+<quoted-block style="OLC" id="H7CEE7B89211641799D0B785D48E50F03" display-inline="no-display-inline"> 
+<paragraph id="HAC18E7BE4F5B42A2AC6B0D793C475AAE"><enum>(22)</enum><header>Cap on retail utility rate increases to once a year</header><text display-inline="yes-display-inline">A State regulated electric utility may only file a request to increase a rate with the State regulatory authority once every 365 days.</text></paragraph><after-quoted-block>.</after-quoted-block></quoted-block></section> </legis-body></bill>
+

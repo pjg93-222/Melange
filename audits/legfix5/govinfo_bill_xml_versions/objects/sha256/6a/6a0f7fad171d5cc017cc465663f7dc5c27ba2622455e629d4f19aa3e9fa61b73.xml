@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" bill-type="olc" dms-id="H817FC3F8F6B947A39700FB9521EEAD19" key="H" public-private="public"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>116 HR 2380 IH: Fannie Mae and Freddie Mac Lobbying Regulation Act of 2019</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2019-04-29</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">116th CONGRESS</congress><session display="yes">1st Session</session><legis-num display="yes">H. R. 2380</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20190429">April 29, 2019</action-date><action-desc><sponsor name-id="V000081">Ms. Velázquez</sponsor> (for herself, <cosponsor name-id="L000583">Mr. Loudermilk</cosponsor>, <cosponsor name-id="F000454">Mr. Foster</cosponsor>, and <cosponsor name-id="H001074">Mr. Hollingsworth</cosponsor>) introduced the following bill; which was referred to the <committee-name committee-id="HBA00">Committee on Financial Services</committee-name></action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To regulate lobbying by Fannie Mae and Freddie Mac, and for other purposes.</official-title></form>
+	<legis-body id="HD19095AFBFD344E18945233C17B7AED0" style="OLC">
+ <section id="H4363EE6585EC49FF9612901E047DDE32" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Fannie Mae and Freddie Mac Lobbying Regulation Act of 2019</short-title></quote>.</text> </section><section id="H4D88E4BA61F54EE4BC0306F8381285A5"><enum>2.</enum><header>Limitations on lobbying activity by Fannie Mae and Freddie Mac</header><text display-inline="no-display-inline">Part 3 of subtitle A of the Federal Housing Enterprises Financial Safety and Soundness Act of 1992 (<external-xref legal-doc="usc" parsable-cite="usc/12/4601">12 U.S.C. 4601</external-xref> et seq.) is amended by adding at the end the following new section:</text>
+			<quoted-block id="H696629F5CFF54CF797EB85850624BAAC" style="OLC">
+ <section id="HF57C6D47E0DA40BF946A7413B40DF364"><enum>1357.</enum><header>Limitations on lobbying activity by enterprises</header><text display-inline="no-display-inline">During any period in which an enterprise is in conservatorship or receivership pursuant to section 1367, such enterprise may not engage in any activity that would result in such enterprise being a client for purposes of section 3(2) of the Lobbying Disclosure Act of 1995 (<external-xref legal-doc="usc" parsable-cite="usc/2/1602">2 U.S.C. 1602(2)</external-xref>).</text></section><after-quoted-block>.</after-quoted-block></quoted-block>
+		</section></legis-body></bill>
+
+

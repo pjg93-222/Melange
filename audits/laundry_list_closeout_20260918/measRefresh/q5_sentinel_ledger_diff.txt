@@ -1,0 +1,33 @@
+BEFORE ledger = backups\Sentinel Bill Ledger.PRE-20260919T194638Z.xlsx (mtime 2026-09-17 00:42:55)
+AFTER  ledger = Sentinel Bill Ledger.xlsx (mtime 2026-09-19 15:47:29)
+  rows before/after: 18887 / 18910 (+23)
+  columns identical: True
+  verified+eligible membership rows (build_archive_legislative.sentinel_scoring_mask): 268 -> 290 (+22)
+  verified scoring keys ADDED  : 20
+     + ('H.R.4167', '119', 'Marilyn Strickland', 'cosponsor')
+     + ('H.R.4936', '119', 'Adelita Grijalva', 'cosponsor')
+     + ('H.R.5689', '119', 'Jahana Hayes', 'cosponsor')
+     + ('H.R.7035', '119', 'Tony Wied', 'cosponsor')
+     + ('H.R.987', '119', 'Andy Biggs', 'cosponsor')
+     + ('H.R.987', '119', 'Brad Knott', 'cosponsor')
+     + ('H.R.987', '119', 'Gregory Murphy', 'cosponsor')
+     + ('H.R.987', '119', 'John Carter', 'cosponsor')
+     + ('H.R.987', '119', 'John Rose', 'cosponsor')
+     + ('H.R.987', '119', 'Julie Fedorchak', 'cosponsor')
+     + ('H.R.987', '119', 'Lisa McClain', 'cosponsor')
+     + ('H.R.987', '119', 'Michael Rulli', 'cosponsor')
+     + ('H.R.987', '119', 'Morgan Griffith', 'cosponsor')
+     + ('H.R.987', '119', 'Ryan Zinke', 'cosponsor')
+     + ('H.R.987', '119', 'Thomas Tiffany', 'cosponsor')
+     + ('H.R.987', '119', 'Tim Moore', 'cosponsor')
+     + ('H.R.987', '119', 'Warren Davidson', 'cosponsor')
+     + ('H.R.987', '119', 'Zachary Nunn', 'cosponsor')
+     + ('S.2019', '119', 'Deb Fischer', 'cosponsor')
+     + ('S.401', '119', 'Todd Young', 'cosponsor')
+  verified scoring keys REMOVED: 0
+  Review Status      before={'included_unreviewed_candidate': 13915, 'excluded_false_positive': 2905, 'held_visible_non_scoring': 1156, 'tracked': 473, 'verified': 268, 'included_scoring_ready': 60, 'automated_exclude_non_scoring': 54, 'automated_hold_non_scoring': 38, 'pending review': 13, 'included_membership_only_non_scoring': 5}
+  Review Status      after ={'included_unreviewed_candidate': 13915, 'excluded_false_positive': 2905, 'held_visible_non_scoring': 1156, 'tracked': 473, 'verified': 291, 'included_scoring_ready': 60, 'automated_exclude_non_scoring': 54, 'automated_hold_non_scoring': 38, 'pending review': 13, 'included_membership_only_non_scoring': 5}
+  Record Type        before={'discovery candidate': 18133, 'bill': 473, 'membership': 281}
+  Record Type        after ={'discovery candidate': 18133, 'bill': 473, 'membership': 304}
+  Scoring Eligible   before={'false': 18619, 'true': 268}
+  Scoring Eligible   after ={'false': 18620, 'true': 290}

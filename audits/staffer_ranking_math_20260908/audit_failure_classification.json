@@ -1,0 +1,149 @@
+{
+  "audit_result": {
+    "passed": 554,
+    "failed": 15
+  },
+  "status": "CLASSIFIED_LIVE_CUTOVER_PASS_GLOBAL_AUDIT_NOT_PASS",
+  "checked_at": "2026-09-08T06:21:15.223111+00:00",
+  "failures": [
+    {
+      "check": "email delivery packages are current, hash-bound, and within the attachment budget",
+      "classification": "PRE_EXISTING_DELIVERY_PACKAGE_MISMATCH",
+      "evidence": [
+        {
+          "name": "cu-member-desk.html",
+          "package_expected_sha256": "6eca1fdcbb5ca02883baa7bf7878b5211ef517f3cec9bada2699c782330ed2f1",
+          "pre_cutover_sha256": "b54c0773cbd92746726a5b649fea15d4e8bab454c63501326faf2df1841f20d1",
+          "backup": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\rollout_backups\\cu-member-desk.html.before"
+        },
+        {
+          "name": "Moneyball_Email.html",
+          "package_expected_sha256": "494dd6daf12f84abc4a57128dbd463c073f5964fad63b467508289a8e1bc5ceb",
+          "pre_cutover_sha256": "92a112c9705d80d8d70d8e837eaa510621901e19e2773c8ec7217f51919e1bb4",
+          "backup": "C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\audits\\staffer_ranking_math_20260908\\rollout_backups\\Moneyball_Email.html.before"
+        }
+      ]
+    },
+    {
+      "check": "A2b repo.data_legislation sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b repo.data_legislation sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['bank_anchor_reconciliation.json sha256: manifest=1b3bfa0de3d40f67... / disk=aa3fa12d78211a8b...']"
+      }
+    },
+    {
+      "check": "A2b repo.data_lobbying sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b repo.data_lobbying sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['_audit_tmp_optimize.json size: manifest=4134 bytes / disk=4135 bytes']"
+      }
+    },
+    {
+      "check": "A2b repo.data_members sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b repo.data_members sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 2 disagree :: ['member_narrative_evidence_v4.json size: manifest=7595671 bytes / disk=8256668 bytes', 'member_narratives_v3_descriptive_receipt.json sha256: manifest=7ec3a09980284ce3... / disk=564b6ee0e1420a45...']"
+      }
+    },
+    {
+      "check": "A2b repo.data_money sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b repo.data_money sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 2 disagree :: ['Moneyball_email.zip size: manifest=14200183 bytes / disk=14180827 bytes', 'budget_frontier_electoral.json size: manifest=84977 bytes / disk=84979 bytes']"
+      }
+    },
+    {
+      "check": "A2b repo.data_engine sentinels unchanged",
+      "classification": "PRE_EXISTING_MANIFEST_MISMATCH_PLUS_INTENDED_V8_PUBLICATION",
+      "evidence": {
+        "manifest_section_bytes": 4400802,
+        "pre_cutover_section_bytes": 4989264,
+        "v8_section_bytes": 5393487,
+        "release_validation": "live_cutover_validation.json"
+      }
+    },
+    {
+      "check": "A2b repo.outputs sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b repo.outputs sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['email_package/EMAIL_PACKAGE_MANIFEST.json sha256: manifest=8f31430c7f963829... / disk=9c8dea460cac851f...']"
+      }
+    },
+    {
+      "check": "A2b repo.fec_code sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b repo.fec_code sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 4 sentinel(s) recorded / disk: 1 disagree :: ['audit/build_system_manifest.py size: manifest=115111 bytes / disk=129433 bytes']"
+      }
+    },
+    {
+      "check": "A2b repo.git sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b repo.git sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 3 sentinel(s) recorded / disk: 2 disagree :: ['objects/pack/pack-d1922fb787c71fc0269e907e9f96f28b73044cf5.pack: manifest recorded it at 3245205287 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.git\\\\objects\\\\pack\\\\pack-d1922fb787c71fc0269e907e9f96f28b73044cf5.pack', 'objects/pack/pack-9972c648b9c1aee96cee9aa6041de35e165d9331.pack: manifest recorded it at 1202595060 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\OneDrive\\\\Desktop\\\\Melange Systems\\\\.git\\\\objects\\\\pack\\\\pack-9972c648b9c1aee96cee9aa6041de35e165d9331.pack']"
+      }
+    },
+    {
+      "check": "A1 repo.rescue_dir still exists",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A1 repo.rescue_dir still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\backups\\offbox_rescue_20260826 / disk: os.path.exists says ABSENT"
+      }
+    },
+    {
+      "check": "A1 repo.rescue_manifest_a still exists",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A1 repo.rescue_manifest_a still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\backups\\offbox_rescue_20260826\\RESCUE_MANIFEST.json / disk: os.path.exists says ABSENT"
+      }
+    },
+    {
+      "check": "A1 repo.rescue_manifest_b still exists",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A1 repo.rescue_manifest_b still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\backups\\offbox_rescue_20260826\\RESCUE_MANIFEST_PHASE_B.json / disk: os.path.exists says ABSENT"
+      }
+    },
+    {
+      "check": "A1 repo.rescue_manifest_c still exists",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A1 repo.rescue_manifest_c still exists :: manifest(2026-09-06T22:18:02.018505+00:00): declared PRESENT at C:\\Users\\pgoff\\OneDrive\\Desktop\\Melange Systems\\backups\\offbox_rescue_20260826\\RESCUE_MANIFEST_PHASE_C.json / disk: os.path.exists says ABSENT"
+      }
+    },
+    {
+      "check": "A2b mirror.melange sentinels unchanged",
+      "classification": "OUTSIDE_V8_CUTOVER_HISTORICAL_MANIFEST_DISAGREEMENT",
+      "evidence": {
+        "note": "This task did not edit the differing files or remove these paths; the dated manifest records different sizes/hashes or absent rescue/git-pack artifacts. No pre-cutover content snapshot is claimed for unbacked files.",
+        "detail": "FAIL  A2b mirror.melange sentinels unchanged :: manifest(2026-09-06T22:18:02.018505+00:00): 3 sentinel(s) recorded / disk: 2 disagree :: ['objects/pack/pack-cbf44144eba629576a4ffda2e43f3709fbd4aa4c.pack: manifest recorded it at 25818629 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\GitMirrors\\\\melange-systems.git\\\\objects\\\\pack\\\\pack-cbf44144eba629576a4ffda2e43f3709fbd4aa4c.pack', 'objects/pack/pack-d6c44ee726ae55bc9bc47a0046c688a8763fe8f7.pack: manifest recorded it at 2700240 bytes / disk: not a file at C:\\\\Users\\\\pgoff\\\\GitMirrors\\\\melange-systems.git\\\\objects\\\\pack\\\\pack-d6c44ee726ae55bc9bc47a0046c688a8763fe8f7.pack']"
+      }
+    },
+    {
+      "check": "A3 repo.combined_html is not older than its input repo.desk_html",
+      "classification": "LEGACY_FILENAME_CHECK_SUPERSEDED_BY_AUTHORIZED_LIVE_TARGET",
+      "evidence": {
+        "locked_file": "Moneyball.html",
+        "authorized_live_target": "Moneyball_Redesign.html",
+        "launcher": "fec/surfaces/start_staffer_live.ps1",
+        "runtime_selection": "audits/staffer_live_runtime/server.json",
+        "http_and_island_validation": "live_cutover_validation.json",
+        "owner_task": "01a07f52-a2a0-73f2-8a34-70046bdb7289",
+        "owner_direction": "Use Moneyball_Redesign.html because Carbonite holds canonical write/delete access; preserve deployment artifacts and global manifests."
+      }
+    }
+  ],
+  "in_scope_resolution": "v8 source/data receipts and live HTTP validation pass; committed launcher fallback explicitly selects the authorized rebuilt redesign artifact. Existing global manifests and email delivery packages remain separate operational work.",
+  "documentation_command_failure": "Initial report update aborted before writing because default Windows cp1252 could not decode recovered UTF-8 Markdown; repeated using explicit UTF-8."
+}

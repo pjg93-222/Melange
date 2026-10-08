@@ -1,0 +1,165 @@
+{
+ "detector": "P2-A",
+ "drawn_zero_support": [
+  {
+   "a": "Adam Schiff",
+   "b": "Nancy Pelosi",
+   "n_scored": 4,
+   "pos": 0,
+   "neg": 0,
+   "tone": null
+  },
+  {
+   "a": "Alexandria Ocasio-Cortez",
+   "b": "Lindsey Graham",
+   "n_scored": 4,
+   "pos": 0,
+   "neg": 0,
+   "tone": null
+  },
+  {
+   "a": "Paul Gosar",
+   "b": "David Joyce",
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 0,
+   "tone": null
+  },
+  {
+   "a": "Ted Cruz",
+   "b": "Daniel Goldman",
+   "n_scored": 2,
+   "pos": 0,
+   "neg": 0,
+   "tone": null
+  }
+ ],
+ "drawn_below_two": [
+  {
+   "a": "Adam Schiff",
+   "b": "Mark Warner",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Adam Schiff",
+   "b": "Nancy Pelosi",
+   "n_scored": 4,
+   "remaining": 0
+  },
+  {
+   "a": "Adam Schiff",
+   "b": "Rick Scott",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Alexandria Ocasio-Cortez",
+   "b": "Lindsey Graham",
+   "n_scored": 4,
+   "remaining": 0
+  },
+  {
+   "a": "Amy Klobuchar",
+   "b": "Michael Bennet",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Christopher Murphy",
+   "b": "Lindsey Graham",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Chuck Grassley",
+   "b": "Patty Murray",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Elizabeth Warren",
+   "b": "Mark Warner",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Ilhan Omar",
+   "b": "Lindsey Graham",
+   "n_scored": 3,
+   "remaining": 1
+  },
+  {
+   "a": "Jim Jordan",
+   "b": "Bennie Thompson",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Jim Jordan",
+   "b": "Tom Cotton",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Lindsey Graham",
+   "b": "Bennie Thompson",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Paul Gosar",
+   "b": "David Joyce",
+   "n_scored": 2,
+   "remaining": 0
+  },
+  {
+   "a": "Rand Paul",
+   "b": "Tim Kaine",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Rick Scott",
+   "b": "John Fetterman",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Ritchie Torres",
+   "b": "Daniel Goldman",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Ruben Gallego",
+   "b": "Richard Blumenthal",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Ted Cruz",
+   "b": "Daniel Goldman",
+   "n_scored": 2,
+   "remaining": 0
+  },
+  {
+   "a": "Ted Cruz",
+   "b": "Josh Hawley",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Ted Cruz",
+   "b": "Patty Murray",
+   "n_scored": 2,
+   "remaining": 1
+  },
+  {
+   "a": "Zoe Lofgren",
+   "b": "Richard Durbin",
+   "n_scored": 3,
+   "remaining": 1
+  }
+ ]
+}

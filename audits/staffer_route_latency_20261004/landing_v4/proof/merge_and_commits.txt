@@ -1,0 +1,98 @@
+# The integration branch claude/staffer-route-v4-20261003 (worktree C:\Users\pgoff\Melange-wt\route-core), created from 1c66a85ba (claude/staffer-unreachable-hint-20261003), with
+# claude/staffer-coldpath-20261003 (c6c6c1c58) and claude/staffer-search-committee-names-20261003 (6a198d600) merged in. All three descend from f23a40aee, the content LIVE holds.
+
+## git log --graph from f23a40aee to the tip
+* 79ef9f1b7 Pin that the publish also drops the replaced router's name index, and that a search asks for its work index once
+* 0cb0593b1 Release the replaced router's work state at every publish, collect once before the prewarm builds, and drop the name index with a replaced nodes mapping
+* 7ce88cc52 Count only the pairs the base commit priced between people who overlapped, and assert that the explanation prices exactly those
+* 453718ddc Say only what the search knows in the left-out line and in the no-work-records message
+* 5d4a9bd0a Do not say staff were left out of a search that never ran because the origin is not covered
+* fb3f874c2 Make the lost-cheapest-route HTTP test wait for the search to end instead of expecting to see it queued or searching
+* 20aefec50 Let the base-commit comparisons of the hint tests ignore the new pairs_scored counter and count pair_row where pairs are priced
+*   7bf774055 Merge the committee-name search restoration into the v4 branch
+|\  
+| * 6a198d600 Search committee names again: the name inside a committee id is text a person reads
+*   2303ef79b Merge the Staffer cold-path speed work into the unreachable-hint branch
+|\  
+| * c6c6c1c58 Move the work-index helpers in staffer_closeness_routes.py away from the spot the unreachable hint inserts at
+| * 8b01cdec2 Drop an unused import from the prewarm test
+| * 0a8730d0c Add a cold-path mode to the closeness benchmark
+| * a0823b524 Build each work index once for all callers and prewarm the work index and the people index after every router publish
+| * d37c811bd Skip pairs with no day together before pair arithmetic and price the rest with a row-only pair
+| * 36b47676c Keep the payroll people on the work index and index same-name contacts once per nodes mapping
+* 1c66a85ba Search an office to its covered staff and report who was left out
+* a9db5fd5f Say why a Staffer search found no route, and offer Ecosystem
+
+## the merges were conflict-free: `git merge-tree --write-tree --name-only` of each merge before it was made printed a tree id and no conflicted file name (rc 0)
+   hint + coldpath      : tree 7dfbb1cf12539e8d7f3b9356aadcd43c5dce5986, no conflict
+   (hint + coldpath) + committee names: tree 1cd8733b6e46f69326ceed9b89a8938712591988, no conflict
+   The staffer_live README was edited by all three branches in different paragraphs (the unreachable hint extends the state-model paragraph, the cold path adds the prewarm paragraph, the
+   committee-name restoration rewrites the identifier paragraph), so git merged it without a conflict and every sentence of all three is where its own branch put it. Present in the tip's README:
+   is answered only when the origin is not covered                                                                          yes (1)
+   there is no line in an `insufficient_work_coverage` answer whose origin is the person without coverage                   yes (1)
+   a background prewarm builds the Staffer work index                                                                       yes (1)
+   pairs_scored                                                                                                             yes (1)
+   committee name is searched like any other name                                                                           yes (1)
+   the tie window is judged within each alternative                                                                         yes (1)
+   a whole bioguide id lists the staff attached to that member                                                              yes (1)
+   lack the payroll or staffer-roster coverage this model requires and were left out                                        yes (1)
+   the staff this search could use                                                                                          yes (1)
+   the milliseconds of the one garbage collection that precedes its first build (`gc_ms`)                                   yes (1)
+   dropped when the service installs a different mapping on the same router                                                 yes (1)
+
+## git diff --stat f23a40aee..tip
+ fec/staffer_network/closeness_math.py              |  64 ++
+ fec/surfaces/staffer_closeness_routes.py           | 223 ++++++-
+ fec/surfaces/staffer_distinct_routes.py            |  39 +-
+ fec/surfaces/staffer_live/README.md                |   6 +-
+ .../staffer_live/staffer-inventory-worker.js       |  17 +-
+ fec/surfaces/staffer_live/staffer-live.js          |  11 +-
+ fec/surfaces/staffer_live/staffer-route.js         |  25 +-
+ fec/surfaces/staffer_live_service.py               | 150 ++++-
+ fec/surfaces/staffer_routing.py                    |  53 +-
+ fec/surfaces/staffer_work_sources.py               |  10 +
+ .../test_staffer_closeness_bidirectional.py        | 200 +++++-
+ .../surfaces/staffer_unreachable_hint_contract.cjs | 119 ++++
+ fec/tests/surfaces/test_staffer_contact_group.py   | 222 +++++++
+ .../test_staffer_inventory_worker_codes.cjs        |   2 +
+ ...st_staffer_inventory_worker_committee_names.cjs | 314 ++++++++++
+ fec/tests/surfaces/test_staffer_left_out_staff.cjs | 320 ++++++++++
+ .../test_staffer_live_query_committee_names.cjs    | 330 ++++++++++
+ fec/tests/surfaces/test_staffer_live_query_ids.cjs |   2 +
+ .../surfaces/test_staffer_office_covered_staff.py  | 678 ++++++++++++++++++++
+ fec/tests/surfaces/test_staffer_payroll_people.py  |  78 +++
+ fec/tests/surfaces/test_staffer_prewarm.py         | 685 +++++++++++++++++++++
+ fec/tests/surfaces/test_staffer_route_jobs.py      |  12 +-
+ fec/tests/surfaces/test_staffer_route_models.cjs   |   4 +-
+ fec/tests/surfaces/test_staffer_row_equality.py    | 528 ++++++++++++++++
+ .../surfaces/test_staffer_unreachable_hint.cjs     | 283 +++++++++
+ .../surfaces/test_staffer_unreachable_hint.py      | 558 +++++++++++++++++
+ 26 files changed, 4879 insertions(+), 54 deletions(-)
+
+## git diff --name-status f23a40aee..tip
+M	fec/staffer_network/closeness_math.py
+M	fec/surfaces/staffer_closeness_routes.py
+M	fec/surfaces/staffer_distinct_routes.py
+M	fec/surfaces/staffer_live/README.md
+M	fec/surfaces/staffer_live/staffer-inventory-worker.js
+M	fec/surfaces/staffer_live/staffer-live.js
+M	fec/surfaces/staffer_live/staffer-route.js
+M	fec/surfaces/staffer_live_service.py
+M	fec/surfaces/staffer_routing.py
+M	fec/surfaces/staffer_work_sources.py
+M	fec/surfaces/test_staffer_closeness_bidirectional.py
+A	fec/tests/surfaces/staffer_unreachable_hint_contract.cjs
+A	fec/tests/surfaces/test_staffer_contact_group.py
+M	fec/tests/surfaces/test_staffer_inventory_worker_codes.cjs
+A	fec/tests/surfaces/test_staffer_inventory_worker_committee_names.cjs
+A	fec/tests/surfaces/test_staffer_left_out_staff.cjs
+A	fec/tests/surfaces/test_staffer_live_query_committee_names.cjs
+M	fec/tests/surfaces/test_staffer_live_query_ids.cjs
+A	fec/tests/surfaces/test_staffer_office_covered_staff.py
+A	fec/tests/surfaces/test_staffer_payroll_people.py
+A	fec/tests/surfaces/test_staffer_prewarm.py
+M	fec/tests/surfaces/test_staffer_route_jobs.py
+M	fec/tests/surfaces/test_staffer_route_models.cjs
+A	fec/tests/surfaces/test_staffer_row_equality.py
+A	fec/tests/surfaces/test_staffer_unreachable_hint.cjs
+A	fec/tests/surfaces/test_staffer_unreachable_hint.py

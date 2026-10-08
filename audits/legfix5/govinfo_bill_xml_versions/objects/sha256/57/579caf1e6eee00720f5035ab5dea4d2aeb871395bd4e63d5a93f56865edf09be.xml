@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Introduced-in-House" dms-id="HEAD24A44A6F54DEC80B6FB5A48215CEF" public-private="public" key="H" bill-type="olc"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>119 HR 8332 IH: Special Operations Forces Concealed Carry Act</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date>2026-04-16</dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="yes">I</distribution-code><congress display="yes">119th CONGRESS</congress><session display="yes">2d Session</session><legis-num display="yes">H. R. 8332</legis-num><current-chamber>IN THE HOUSE OF REPRESENTATIVES</current-chamber><action display="yes"><action-date date="20260416">April 16, 2026</action-date><action-desc><sponsor name-id="H001101">Mr. Harrigan</sponsor> introduced the following bill; which was referred to the <committee-name committee-id="HJU00">Committee on the Judiciary</committee-name>, and in addition to the Committees on <committee-name committee-id="HAS00">Armed Services</committee-name>, and <committee-name committee-id="HVR00">Veterans' Affairs</committee-name>, for a period to be subsequently determined by the Speaker, in each case for consideration of such provisions as fall within the jurisdiction of the committee concerned</action-desc></action><legis-type>A BILL</legis-type><official-title display="yes">To provide concealed carry privileges to qualified special operators.</official-title></form><legis-body id="H6ECF95E66B704A9F974668F7B683D0B1" style="OLC"> 
+<section id="H6FF45DE2B1CB4D0EA502E6EFC502AAE3" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Special Operations Forces Concealed Carry Act</short-title></quote>.</text></section> <section id="H1254BF8C74B241918B540A25F8645A11"><enum>2.</enum><header>Findings</header> <text display-inline="no-display-inline">Congress finds the following:</text> 
+<paragraph id="H6E7B49E898AB4C5BB9686B28FD5E1279"><enum>(1)</enum><text>Highly trained special operations personnel who achieved Expert level military marksmanship qualifications have demonstrated proficiency with firearms and a commitment to public service.</text></paragraph> <paragraph id="H1FE08640F07243B6B8087B638FBF6490"><enum>(2)</enum><text>Their service should be recognized without undermining existing safeguards on firearm possession in sensitive places.</text></paragraph></section> 
+<section id="HC96C32D6CDC54625957BE468A4C44A33"><enum>3.</enum><header>Qualified special operator authority</header> 
+<subsection id="HA4AB499BC5B440DAA9C30239FEF10AA6"><enum>(a)</enum><header>In general</header><text display-inline="yes-display-inline">Section 926C of title 18, United States Code, is amended—</text> <paragraph id="H77FEC563024B4917BACCBADAB9CC68AC"><enum>(1)</enum><text>by inserting <quote>or a qualified special operator</quote> after <quote>qualified retired law enforcement officer</quote>; and</text></paragraph> 
+<paragraph id="HA50E56BEE3B34CF5AB6F53DDEDA84A90"><enum>(2)</enum><text>by inserting <quote>or, in the case of such a qualified special operator, the identification required by subsection (g)</quote> after <quote>the identification required by subsection (d)</quote>.</text> </paragraph></subsection> <subsection id="H23B1D55E6B1943578A0AFABC1FD8690B"><enum>(b)</enum><header>Special Rules for qualified special operators; definitions</header><text>Section 926C of title 18, United States Code, is amended by adding at the end the following:</text> 
+<quoted-block id="H637A8ABDB81F443C96116AF797292772" style="OLC"> 
+<subsection id="H8BC773E756164FF895F5F1B2813F4EF0"><enum>(g)</enum><header>Special rules for qualified special operators</header> 
+<paragraph id="H3A537F6BD42E44FF8E88663585AE8E6C"><enum>(1)</enum><header>No annual certification</header><text display-inline="yes-display-inline">An individual authorized to carry under this section as a qualified special operator shall not be subject to the annual firearms qualification requirement of subsection (d)(2)(B).</text></paragraph> <paragraph id="H65699ED830C24B93B91AA736FF1FAC8F"><enum>(2)</enum><header>Permanent qualification</header> <subparagraph id="H15D3070691D340819901CB27D769409A"><enum>(A)</enum><header>In general</header><text>The authority under this section is permanent, contingent on—</text> 
+<clause id="H8C521DBAA9F7434D85BECDE0535AB1D9"><enum>(i)</enum><text>maintaining honorable discharge status, as applicable;</text></clause> <clause id="H23F01881776449A9BE915EB777953FD7"><enum>(ii)</enum><text>maintaining status as a qualified special operator; and</text></clause> 
+<clause id="HFB42D36D56D74402BF8980457B1A9F2C"><enum>(iii)</enum><text>eligibility under Federal law to possess a firearm.</text></clause></subparagraph> <subparagraph id="H353E6431DAD74FA4B940CFBC898C759E"><enum>(B)</enum><header>Immediate termination</header><text>The authority under this section shall terminate immediately if the individual fails to meet the criteria under subparagraph (A).</text></subparagraph> 
+<subparagraph id="HD66990AC3C02475E808589EFD7C981E6"><enum>(C)</enum><header>Rule of construction</header><text display-inline="yes-display-inline">Nothing in this subsection exempts a qualified special operator from any Federal firearm restriction.</text></subparagraph> <subparagraph id="HEA4265C88D6249E28D39E8BE864BA021"><enum>(D)</enum><header>No separate certification</header><text>No separate certification of firearms training is required for a qualified special operator.</text></subparagraph></paragraph> 
+<paragraph id="HA8F0D86A3CFE4E89AFE1A0113BC97EF7"><enum>(3)</enum><header>Identification for qualified veterans</header> 
+<subparagraph id="H55351284ECDF47E4AB8C49EA8706EA9E"><enum>(A)</enum><header>In general</header><text>To be authorized to carry a concealed firearm under this section, a qualified special operator shall carry proof of identity and qualification. Acceptable forms of identification include the following:</text> <clause id="H3BE95B7252FA41DAB93DCA85C4D842D3"><enum>(i)</enum><text>A photographic identification issued by the Department of Defense or the Department of Veterans Affairs that—</text> 
+<subclause id="HEA43C847030B45C6934803A22188C58E"><enum>(I)</enum><text>identifies the individual as a qualified special operator, and</text></subclause> <subclause id="H318B69AC5F4A4A0199BE3897C73C317D"><enum>(II)</enum><text>confirms the individual’s status as such.</text></subclause></clause> 
+<clause id="H767C620BA07242E5AF5A34D87590B8F5"><enum>(ii)</enum><text>A valid government issued photographic identification and official documentation of service confirming the individual’s honorable discharge and status as a qualified special operator.</text></clause></subparagraph> <subparagraph id="H6E9B99AA08BA43A7B0F547CDE0901B3D"><enum>(B)</enum><header>Law enforcement request</header><text display-inline="yes-display-inline">An individual authorized to carry as a qualified special operator under this section shall present the identification described in this subsection upon request by law enforcement.</text></subparagraph> </paragraph></subsection> 
+<subsection id="H5DB4E7A2F9E94EC69E7FDBE0E1B27E64">
+            <enum>(h)</enum>
+            <header>Qualified special operator</header>
+ <text display-inline="yes-display-inline">For purposes of this section, the term <quote>qualified special operator</quote> means a current or former military service member with a most recent paygrade of E5–E9, W1–W5 or O1–O10 with a DD–214 or military service record that confirms service in one or more of the following roles:</text>
+            <paragraph id="H7FE5A50B930D48C4A1182DCBB8C7F385">
+              <enum>(1)</enum>
+ <text display-inline="yes-display-inline">Service in the United States Army Special Forces as—</text>
+              <subparagraph id="HA66B4784E19D4EE19F5BF8C10D0BBB63">
+                <enum>(A)</enum>
+ <text>a Special Forces detachment commander;</text> </subparagraph> <subparagraph id="H5873D289146E485D816CE94986A0E998"> <enum>(B)</enum> <text>a Special Forces detachment warrant officer;</text>
+              </subparagraph>
+              <subparagraph id="H0FD19D51AA4E4CC79E19FD7D60DCE982">
+                <enum>(C)</enum>
+ <text>a Special Forces weapons sergeant;</text> </subparagraph> <subparagraph id="H15070CAC09B14597BF8C6EE7AC06E531"> <enum>(D)</enum> <text>an Special Forces engineer sergeant;</text>
+              </subparagraph>
+              <subparagraph id="HA4BBEB3537F74B97A84AAD18DF39CB01">
+                <enum>(E)</enum>
+ <text>a Special Forces medical sergeant;</text> </subparagraph> <subparagraph id="H2C4CCABFF8504B268D86CA9981DCA72E"> <enum>(F)</enum> <text>a Special Forces communications sergeant;</text>
+              </subparagraph>
+              <subparagraph id="HA92F0683257C474DBCC20C98CB8DABC8">
+                <enum>(G)</enum>
+ <text>a Special Forces intelligence sergeant; or</text> </subparagraph> <subparagraph id="HA38B431DA1614A36842FB18530A5C721"> <enum>(H)</enum> <text>a Special Forces operations sergeant.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H3FF831DC102D4528AF6898D30429ED35">
+              <enum>(2)</enum>
+ <text display-inline="yes-display-inline">Service in the United States Army 75th Ranger Regiment as—</text>
+              <subparagraph id="HEAD16EAFF2A44F39BB0205D67054294B">
+                <enum>(A)</enum>
+ <text>an infantry officer;</text> </subparagraph> <subparagraph id="H837DA833B06A488B913B4020DE55F6B5"> <enum>(B)</enum> <text>an infantryman;</text>
+              </subparagraph>
+              <subparagraph id="HDB27B77136F84083BA4EDE86EFCD824F">
+                <enum>(C)</enum>
+ <text>an indirect fire infantryman;</text> </subparagraph> <subparagraph id="HB20AC01E809544B08085DF556FDE3637"> <enum>(D)</enum> <text>an infantry senior sergeant; or</text>
+              </subparagraph>
+              <subparagraph id="HC3B321D55E194B0180D32AC2D3EF4CE5">
+                <enum>(E)</enum>
+ <text>a combat medic specialist.</text> </subparagraph> </paragraph> <paragraph id="H5666D77CC9254A21B89B98481B299687"> <enum>(3)</enum> <text display-inline="yes-display-inline">Service in the United States Navy SEALs as—</text>
+              <subparagraph id="H8596FC8619644B21AB28FEE57DAFE3B4">
+                <enum>(A)</enum>
+ <text>an officer qualified in special warfare; or</text> </subparagraph> <subparagraph id="HB08EACD0E8064BBDBF983ED84B36FE09"> <enum>(B)</enum> <text>an enlisted member who served as a special warfare operator.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="HFB9D4B8BF40F4FE08573031A97A4B716">
+              <enum>(4)</enum>
+ <text display-inline="yes-display-inline">Service in the United States Marine Corps as—</text>
+              <subparagraph id="HF499B6EBC91B49A78979D1329282EE72">
+                <enum>(A)</enum>
+ <text>a scout sniper;</text> </subparagraph> <subparagraph id="HB5491F4DB682437DB6D9F5EBD68B9C52"> <enum>(B)</enum> <text>a reconnaissance marine;</text>
+              </subparagraph>
+              <subparagraph id="H189D1AACB828400FA2A29F209F19224B">
+                <enum>(C)</enum>
+ <text>a sniper qualified reconnaissance marine;</text> </subparagraph> <subparagraph id="HF95D5CCA51564C829BD7AC649FE62C1F"> <enum>(D)</enum> <text>a parachute and combatant diver qualified reconnaissance marine;</text>
+              </subparagraph>
+              <subparagraph id="H56165892CEEC43AFA7972E7DFD790BDD">
+                <enum>(E)</enum>
+ <text>a special operations officer; or</text> </subparagraph> <subparagraph id="H22DDDC7B501244A59777C102F1A129EF"> <enum>(F)</enum> <text>a critical skills operator.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H14DD019489304613A0CA4182CD9A03EF">
+              <enum>(5)</enum>
+ <text display-inline="yes-display-inline">Service in the United States Air Force as—</text>
+              <subparagraph id="H3466D1A635BD429EA78F38AB2F1CC0D3">
+                <enum>(A)</enum>
+ <text display-inline="yes-display-inline">a member who served in combat control;</text>
+              </subparagraph>
+              <subparagraph id="H6D093711F3BE43F9B3CBA5FCB07B233D">
+                <enum>(B)</enum>
+ <text>a member who served in pararescue;</text> </subparagraph> <subparagraph id="H669625E1F1574025B6F207BE7815DB39"> <enum>(C)</enum> <text>a member who served in special reconnaissance;</text>
+              </subparagraph>
+              <subparagraph id="H0B8DCE40246641B2BCD858C7A596BDEE">
+                <enum>(D)</enum>
+ <text>a member who served as a tactical air control party airman; or</text> </subparagraph> <subparagraph id="HA59FAAA59FEA4302832069A417FFB26D"> <enum>(E)</enum> <text>a member who served as a special operations weather technician.</text>
+              </subparagraph>
+            </paragraph>
+            <paragraph id="H476A3F42B5C44B31A74611894335A0C1">
+              <enum>(6)</enum>
+ <text display-inline="yes-display-inline">Service in the U.S. Army 1st Special Forces Operational Detachment Delta with enlisted skill qualification identifier <quote>T</quote>.</text>
+            </paragraph>
+          </subsection> 
+<quoted-block-continuation-text quoted-block-continuation-text-level="subsection"> </quoted-block-continuation-text> <after-quoted-block>.</after-quoted-block></quoted-block></subsection> 
+<subsection id="H18689277BB544173A5C80127C7A49787"><enum>(c)</enum><header>Conforming amendments</header> 
+<paragraph id="HDB82DE9BB56C46A895034168194F0368">
+          <enum>(1)</enum>
+          <header>Section heading</header>
+ <text>Section 926C of title 18, United States Code, is amended by inserting <quote>and qualified special operators</quote> after <quote>officers</quote> in the section heading.</text>
+        </paragraph> 
+<paragraph id="H0B0E6E4850BF4B0CB3AB748151F7B8BD"><enum>(2)</enum><header>Table of sections</header><text>The table of sections for <external-xref legal-doc="usc-chapter" parsable-cite="usc-chapter/18/44">chapter 44</external-xref> of title 18, United States Code, is amended by amending the item relating to section 926C to read as follows:</text> <quoted-block style="USC" id="H8060C3F5070B48F880149051C60DC144" display-inline="no-display-inline"> <toc regeneration="no-regeneration"> <toc-entry level="section">926C. Carrying of concealed firearms by qualified retired law enforcement officers and qualified special operators.</toc-entry></toc><after-quoted-block>.</after-quoted-block></quoted-block></paragraph></subsection></section> <section id="HCF2DEFCA519E4232AF1874B7F5897B4B"><enum>4.</enum><header>Implementation and authority</header> <subsection id="HABDFD7AB2FC244FDA552F54A6FA45B8A"><enum>(a)</enum><header>Issuance of identification to veterans</header> <paragraph id="HB18CCEABFFAF4EDCBFEAE0F96795CB59"> <enum>(1)</enum> <header>Identification program</header> <text>Beginning not later than 180 days after the date of enactment of this Act, the Secretary of Defense and the Secretary of Veterans Affairs shall jointly implement a program to issue the photographic identification described in section 926C of title 18, United States Code, to any individual who meets the criteria of a qualified special operator.</text>
+        </paragraph> 
+<paragraph id="H10092B916730468A975338A8CB95B4AD"><enum>(2)</enum><header>Verification</header><text display-inline="yes-display-inline">The Secretary of Defense and the Secretary of Veterans Affairs shall ensure that the application process uses the records of each Department to verify honorable discharge and status as a qualified special operator.</text></paragraph></subsection> <subsection id="H2C1BAAD03A274A079D0E887366D46DBB"><enum>(b)</enum><header>Acceptance of proof documents</header> <paragraph id="H5157C7049515498693393AD59F27C283"> <enum>(1)</enum> <header>Alternate proof</header> <text>Prior to the expiration of the 180-day period described in subsection (a), the Secretary of Defense and Secretary of Veterans Affairs shall recognize valid service documentation as sufficient proof under section 926C of title 18, United States Code.</text>
+        </paragraph> 
+<paragraph id="H04E96D04B9D44A85A956D8FF5B7EE3B9"><enum>(2)</enum><header>Guidance</header><text>Not later than 90 days after the date of enactment of this Act, the Attorney General shall provide guidance to law enforcement agencies nationwide to ensure acceptance of the requisite official documentation as proof of authority to carry under Federal law until such time as the photographic identification of the Department of Defense of the Department of Veterans Affairs, as applicable, is made available.</text></paragraph></subsection> <subsection id="HB9203F2DE5264A69A97ABA4E20B1B754"> <enum>(c)</enum> <header>Regulations</header> <text>The Secretary of Defense and the Secretary of Veterans Affairs are authorized to promulgate regulations and guidance to carry out this Act, and the amendments made by this Act, including the form and process for issuing photographic identification cards, any application procedures, consistent with section 926C of title 18, United States Code, and communication with Federal, State, and local law enforcement agencies regarding implementation.</text>
+      </subsection></section> 
+<section id="HB922C096C75343008B8E955110899832"><enum>5.</enum><header>Effective date</header><text display-inline="no-display-inline">A qualified special operator may exercise the authority to carry a firearm under section 926C of title 18, United States Code, with the valid service documentation described in section 4(b)(1).</text></section> <section id="H8B7A730D2A41481A94F4C6BCC0A3A19C"><enum>6.</enum><header>Severability</header><text display-inline="no-display-inline">If any provision of this Act, or any amendments made by it, or the application thereof to any person or circumstance, is held invalid or unconstitutional, the remainder of the Act and its amendments, and their application to other persons or circumstances, shall not be affected.</text></section> 
+<section id="HAAA3561709CF444BA62D24B1F1530BAF"><enum>7.</enum><header>No private right of action</header> 
+<subsection id="HF5D747B14E5A4F78BBA638154DF3145D"><enum>(a)</enum><header>Rule of construction</header><text display-inline="yes-display-inline">Nothing in this Act or the amendments made by this Act shall be construed to create any private right of action or legal claim, including an action or claim against any government agency, officer, or private entity for failure to implement or comply with its terms.</text></subsection> <subsection id="H51800AF8040F4242BB03E09E0CA2A7ED"> <enum>(b)</enum> <header>Existing remedies</header> <text>Any remedy for noncompliance or violation of section 926C of title 18, United States Code, shall be limited to the existing remedies provided under such section or other applicable law.</text>
+      </subsection></section> 
+</legis-body></bill>
+

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="billres.xsl"?>
+<!DOCTYPE bill PUBLIC "-//US Congress//DTDs/bill.dtd//EN" "bill.dtd">
+<bill bill-stage="Engrossed-in-House" dms-id="H6175756075FF4A269FF72E8E59A92948" public-private="public" key="H" bill-type="olc" stage-count="1">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dublinCore>
+<dc:title>118 HR 1726 EH: Continued Rapid Ohia Death Response Act of 2023</dc:title>
+<dc:publisher>U.S. House of Representatives</dc:publisher>
+<dc:date></dc:date>
+<dc:format>text/xml</dc:format>
+<dc:language>EN</dc:language>
+<dc:rights>Pursuant to Title 17 Section 105 of the United States Code, this file is not subject to copyright protection and is in the public domain.</dc:rights>
+</dublinCore>
+</metadata>
+<form>
+<distribution-code display="no">IB</distribution-code>
+<congress display="yes">118th CONGRESS</congress><session display="yes">2d Session</session>
+<legis-num display="yes">H. R. 1726</legis-num>
+<current-chamber display="no">IN THE HOUSE OF REPRESENTATIVES</current-chamber>
+<legis-type>AN ACT</legis-type>
+<official-title display="yes">To require the Secretary of the Interior to partner and collaborate with the Secretary of Agriculture and the State of Hawaii to address Rapid Ohia Death, and for other purposes.</official-title>
+</form>
+<legis-body display-enacting-clause="yes-display-enacting-clause" style="OLC" id="HB35D01666EE346F290B9A19FCE80CC2B">
+<section id="H8362E16298CE421A858EB3A5FB43493D" section-type="section-one"><enum>1.</enum><header>Short title</header><text display-inline="no-display-inline">This Act may be cited as the <quote><short-title>Continued Rapid Ohia Death Response Act of 2023</short-title></quote>.</text></section> <section id="HB8BC5E8E7A964599B9AB71178EA94CC0"><enum>2.</enum><header>Definitions</header><text display-inline="no-display-inline">In this Act:</text>
+<paragraph id="HB8832037F7B1494F880C56FAB667E465"><enum>(1)</enum><header>Rapid Ohia death</header><text>The term <quote>Rapid Ohia Death</quote> means the disease caused by the fungal pathogen known as Ceratocystis fimbriata that affects the tree of the species Metrosideros polymorpha. </text></paragraph> <paragraph id="HF6A93FB827EB49E6BE7B864C8DBC2BBC"><enum>(2)</enum><header>State</header><text>The term <quote>State</quote> means the State of Hawaii.</text></paragraph></section>
+<section id="H2DC268D66D4F4E74A9D9630417DBAA70"><enum>3.</enum><header>Collaboration</header><text display-inline="no-display-inline">The Secretary of the Interior shall partner and collaborate with the Secretary of Agriculture and the State to address Rapid Ohia Death.</text></section> <section id="H5CF6E059573B46C88EF4429C54378AE4"><enum>4.</enum><header>Sustained efforts</header> <subsection id="H9A5F0DDA160F4123B38D06818171DB23"><enum>(a)</enum><header>Transmission</header><text display-inline="yes-display-inline">The Secretary of the Interior, acting through the Director of the United States Geological Survey, and the Chief of the Forest Service, acting through the Forest Service Institute of Pacific Islands Forestry, shall continue to conduct research on Rapid Ohia Death vectors and transmission.</text></subsection>
+<subsection id="H2D28EEC545B3474C8633E8B97764A71A"><enum>(b)</enum><header>Ungulate management</header><text display-inline="yes-display-inline">The Secretary of the Interior, acting through the Director of the United States Fish and Wildlife Service, shall continue to partner with the Secretary of Agriculture, the State, and with local stakeholders to manage ungulates in Rapid Ohia Death control areas on Federal, State, and private land, with the consent of private landowners.</text></subsection> <subsection id="H6CD7B2A028D74AC4A045184C37298774"><enum>(c)</enum><header>Restoration and research</header><text display-inline="yes-display-inline">The Secretary of Agriculture, acting through the Chief of the Forest Service, shall continue to provide—</text>
+<paragraph id="H0B565684DDAD4C73AC08F5BBFF4444CE"><enum>(1)</enum><text display-inline="yes-display-inline">financial assistance, including through agreements with the Secretary of the Interior—</text> <subparagraph id="H8957BD64BB0C494A9E667760A97A009B"><enum>(A)</enum><text>to prevent the spread of Rapid Ohia Death; and</text></subparagraph>
+<subparagraph id="H03F73C3DBEC94A328889D2D0D424B52C"><enum>(B)</enum><text display-inline="yes-display-inline">to restore the native forests of the State; and</text></subparagraph></paragraph> <paragraph id="H2FAECF6EB2C24646B9A4E5812FBEC279"><enum>(2)</enum><text display-inline="yes-display-inline">staff and necessary infrastructure funding to the Institute of Pacific Islands Forestry to conduct research on Rapid Ohia Death.</text></paragraph></subsection></section>
+</legis-body><attestation><attestation-group><attestation-date date="20240924" chamber="House">Passed the House of Representatives September 24, 2024.</attestation-date><attestor display="no">Kevin F. McCumber,</attestor><role>Clerk.</role></attestation-group></attestation>
+<endorsement display="yes"></endorsement>
+</bill> 
+
+

@@ -1,0 +1,53 @@
+test_the_billstatus_routing_rule_is_unchanged (__main__.DeskWiring.test_the_billstatus_routing_rule_is_unchanged) ... ok
+test_the_desk_walks_the_helper_not_the_sheet_generator (__main__.DeskWiring.test_the_desk_walks_the_helper_not_the_sheet_generator) ... ok
+test_the_dial_is_catalogued (__main__.DeskWiring.test_the_dial_is_catalogued) ... ok
+test_the_helper_is_given_the_sheet_rows_and_the_sheet_header_index (__main__.DeskWiring.test_the_helper_is_given_the_sheet_rows_and_the_sheet_header_index) ... ok
+test_the_reconciliation_terms_still_come_from_the_same_counters (__main__.DeskWiring.test_the_reconciliation_terms_still_come_from_the_same_counters)
+dashboard_integrity reconciles press_source_rows against these three. ... ok
+test_the_sheet_accessor_is_unchanged (__main__.DeskWiring.test_the_sheet_accessor_is_unchanged) ... ok
+test_the_source_split_reaches_the_media_audit (__main__.DeskWiring.test_the_source_split_reaches_the_media_audit) ... ok
+test_the_tone_inputs_are_declared_desk_inputs (__main__.DeskWiring.test_the_tone_inputs_are_declared_desk_inputs) ... ok
+test_an_empty_value_means_unset_like_every_other_dial (__main__.DialFailsClosed.test_an_empty_value_means_unset_like_every_other_dial)
+(os.environ.get(...) or default) is the shipped pattern -- DESK_MEMBERSHIP_SOURCE, ... ok
+test_an_unrecognised_argument_fails_closed_too (__main__.DialFailsClosed.test_an_unrecognised_argument_fails_closed_too) ... ok
+test_an_unrecognised_value_fails_at_import (__main__.DialFailsClosed.test_an_unrecognised_value_fails_at_import) ... ok
+test_both_positions_are_named_in_the_error (__main__.DialFailsClosed.test_both_positions_are_named_in_the_error) ... ok
+test_the_default_is_the_new_behaviour (__main__.DialFailsClosed.test_the_default_is_the_new_behaviour) ... ok
+test_the_sheet_position_is_reachable_from_the_environment (__main__.DialFailsClosed.test_the_sheet_position_is_reachable_from_the_environment) ... ok
+test_a_datetime_is_passed_through (__main__.EngineDateMapping.test_a_datetime_is_passed_through) ... ok
+test_a_us_date_becomes_the_shape_fdate_reads (__main__.EngineDateMapping.test_a_us_date_becomes_the_shape_fdate_reads) ... ok
+test_an_iso_date_is_untouched (__main__.EngineDateMapping.test_an_iso_date_is_untouched) ... ok
+test_an_unparseable_date_is_left_exactly_as_it_is (__main__.EngineDateMapping.test_an_unparseable_date_is_left_exactly_as_it_is)
+'NA' must stay non-numeric so fdate() blanks it and PDATE can recover it. ... ok
+test_the_normalisation_is_counted (__main__.EngineDateMapping.test_the_normalisation_is_counted) ... ok
+test_every_engine_row_read_is_accounted_for (__main__.LedgerCloses.test_every_engine_row_read_is_accounted_for) ... ok
+test_sheet_only_rows_are_disclosed_not_just_kept (__main__.LedgerCloses.test_sheet_only_rows_are_disclosed_not_just_kept)
+Two sheet keys (Britt's aliased pair is ONE key, Welch's release is the other); ... ok
+test_the_a5_ingest_ledger_is_carried_through (__main__.LedgerCloses.test_the_a5_ingest_ledger_is_carried_through)
+The press census chains: tone rows read -> returned -> added here. ... ok
+test_the_schema_and_dial_are_recorded (__main__.LedgerCloses.test_the_schema_and_dial_are_recorded) ... ok
+test_the_sheet_terms_account_for_every_sheet_row (__main__.LedgerCloses.test_the_sheet_terms_account_for_every_sheet_row) ... ok
+test_the_walked_total_is_the_row_count_the_desk_will_census (__main__.LedgerCloses.test_the_walked_total_is_the_row_count_the_desk_will_census) ... ok
+test_the_engine_stream_is_never_read (__main__.SheetDialIsTodaysPath.test_the_engine_stream_is_never_read) ... ok
+test_the_iterable_is_handed_back_unchanged (__main__.SheetDialIsTodaysPath.test_the_iterable_is_handed_back_unchanged) ... ok
+test_the_sheet_ledger_claims_no_engine_rows (__main__.SheetDialIsTodaysPath.test_the_sheet_ledger_claims_no_engine_rows) ... ok
+test_a_billstatus_row_is_kept_and_never_matched (__main__.UnionRowSet.test_a_billstatus_row_is_kept_and_never_matched) ... ok
+test_a_column_the_csv_lacks_stays_empty_and_is_never_invented (__main__.UnionRowSet.test_a_column_the_csv_lacks_stays_empty_and_is_never_invented) ... ok
+test_a_row_the_sheet_already_carries_is_not_appended_twice (__main__.UnionRowSet.test_a_row_the_sheet_already_carries_is_not_appended_twice) ... ok
+test_an_appended_row_is_sheet_shaped (__main__.UnionRowSet.test_an_appended_row_is_sheet_shaped) ... ok
+test_an_engine_row_with_no_url_is_dropped_before_the_desk_sees_it (__main__.UnionRowSet.test_an_engine_row_with_no_url_is_dropped_before_the_desk_sees_it)
+press_stream drops these too; a row with no url has no release identity. ... ok
+test_every_sheet_row_is_still_walked_in_order (__main__.UnionRowSet.test_every_sheet_row_is_still_walked_in_order) ... ok
+test_identity_is_per_member (__main__.UnionRowSet.test_identity_is_per_member) ... ok
+test_no_sheet_row_is_removed (__main__.UnionRowSet.test_no_sheet_row_is_removed) ... ok
+test_the_engine_only_row_is_appended (__main__.UnionRowSet.test_the_engine_only_row_is_appended) ... ok
+test_the_overlap_renders_from_the_SHEET_bytes (__main__.UnionRowSet.test_the_overlap_renders_from_the_SHEET_bytes)
+The measured reason: the CSV would relabel this row's stance oppose->support. ... ok
+test_the_release_key_matches_across_url_forms (__main__.UnionRowSet.test_the_release_key_matches_across_url_forms)
+A5's release identity is what makes the alias pair one key, not two. ... ok
+test_the_same_release_for_another_member_is_a_new_row (__main__.UnionRowSet.test_the_same_release_for_another_member_is_a_new_row) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 0.015s
+
+OK
